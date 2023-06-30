@@ -73,7 +73,7 @@ H5VL__native_token_cmp(void H5_ATTR_UNUSED *obj, const H5O_token_t *token1, cons
     assert(token1);
     assert(token2);
 
-    *cmp_value = HDmemcmp(token1, token2, sizeof(H5O_token_t));
+    *cmp_value = memcmp(token1, token2, sizeof(H5O_token_t));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_token_cmp() */

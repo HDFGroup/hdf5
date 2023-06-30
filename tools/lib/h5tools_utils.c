@@ -187,7 +187,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     H5TOOLS_START_DEBUG(" - h_list:%s", h_list);
     /* count how many integers do we have */
     for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit(*ptr)) {
             if (!last_digit)
                 /* the last read character wasn't a digit */
                 size_count++;
@@ -205,15 +205,15 @@ parse_hsize_list(const char *h_list, subset_d *d)
     H5TOOLS_DEBUG("Number integers to read=%ld", size_count);
 
     /* allocate an array for the integers in the list */
-    if ((p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t))) == NULL)
+    if ((p_list = (hsize_t *)calloc(size_count, sizeof(hsize_t))) == NULL)
         H5TOOLS_INFO("Unable to allocate space for subset data");
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
+            p_list[i++] = (hsize_t)strtoull(ptr, NULL, 0);
 
-            while (HDisdigit(*ptr))
+            while (isdigit(*ptr))
                 /* scroll to end of integer */
                 ptr++;
         }
@@ -247,7 +247,7 @@ parse_subset_params(const char *dset)
     if ((brace = HDstrrchr(q_dset, '[')) != NULL) {
         *brace++ = '\0';
 
-        s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
+        s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
         parse_hsize_list(brace, &s->start);
 
         while (*brace && *brace != ';')
@@ -337,9 +337,6 @@ parse_subset_params(const char *dset)
  *                 NOTE: `cpy_out` string is malloc'd by function,
  *                       and should be freed when done.
  *
- * Programmer: Jacob Smith
- *             2017-11-10
- *
  *****************************************************************************
  */
 herr_t
@@ -383,7 +380,7 @@ parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char *
 
     /* create list
      */
-    elems = (char **)HDmalloc(sizeof(char *) * (init_slots + 1));
+    elems = (char **)malloc(sizeof(char *) * (init_slots + 1));
     if (elems == NULL) {
         ret_value = FAIL;
         goto done;
@@ -391,8 +388,8 @@ parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char *
 
     /* create destination string
      */
-    start++;                                                  /* advance past opening paren '(' */
-    cpy = (char *)HDmalloc(sizeof(char) * (HDstrlen(start))); /* no +1; less '(' */
+    start++;                                                /* advance past opening paren '(' */
+    cpy = (char *)malloc(sizeof(char) * (HDstrlen(start))); /* no +1; less '(' */
     if (cpy == NULL) {
         ret_value = FAIL;
         goto done;
@@ -509,7 +506,7 @@ indentation(unsigned x)
     }
     else {
         fprintf(rawerrorstream, "error: the indentation exceeds the number of cols.\n");
-        HDexit(1);
+        exit(1);
     }
 }
 
@@ -541,12 +538,12 @@ print_version(const char *progname)
 static void
 init_table(hid_t fid, table_t **tbl)
 {
-    table_t *table = (table_t *)HDmalloc(sizeof(table_t));
+    table_t *table = (table_t *)malloc(sizeof(table_t));
 
     table->fid   = fid;
     table->size  = 20;
     table->nobjs = 0;
-    table->objs  = (obj_t *)HDmalloc(table->size * sizeof(obj_t));
+    table->objs  = (obj_t *)malloc(table->size * sizeof(obj_t));
 
     *tbl = table;
 }
@@ -568,10 +565,10 @@ free_table(table_t *table)
     /* Free the names for the objects in the table */
     for (u = 0; u < table->nobjs; u++)
         if (table->objs[u].objname)
-            HDfree(table->objs[u].objname);
+            free(table->objs[u].objname);
 
-    HDfree(table->objs);
-    HDfree(table);
+    free(table->objs);
+    free(table);
 }
 
 #ifdef H5DUMP_DEBUG
@@ -701,7 +698,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
                     add_obj(info->type_table, &oinfo->token, name, TRUE);
                 else {
                     /* Use latest version of name */
-                    HDfree(found_obj->objname);
+                    free(found_obj->objname);
                     found_obj->objname = HDstrdup(name);
 
                     /* Mark named datatype as having valid name */
@@ -780,14 +777,14 @@ add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool
     /* See if we need to make table larger */
     if (table->nobjs == table->size) {
         table->size *= 2;
-        table->objs = (struct obj_t *)HDrealloc(table->objs, table->size * sizeof(table->objs[0]));
+        table->objs = (struct obj_t *)realloc(table->objs, table->size * sizeof(table->objs[0]));
     } /* end if */
 
     /* Increment number of objects in table */
     u = table->nobjs++;
 
     /* Set information about object */
-    HDmemcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
+    memcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
     table->objs[u].objname   = HDstrdup(objname);
     table->objs[u].recorded  = record;
     table->objs[u].displayed = 0;
@@ -870,7 +867,7 @@ H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t
         H5TOOLS_GOTO_DONE(2);
 
     /* trg_path must be freed out of this function when finished using */
-    if ((link_info->trg_path = (char *)HDcalloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
+    if ((link_info->trg_path = (char *)calloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
         if (link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to allocate buffer for <%s>\n", linkpath);
         H5TOOLS_GOTO_DONE(FAIL);
@@ -930,7 +927,7 @@ H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t
         } /* end if */
 
         /* set target obj type to return */
-        HDmemcpy(&link_info->obj_token, &trg_oinfo.token, sizeof(H5O_token_t));
+        memcpy(&link_info->obj_token, &trg_oinfo.token, sizeof(H5O_token_t));
         link_info->trg_type = trg_oinfo.type;
         link_info->fileno   = trg_oinfo.fileno;
     } /* end if */
@@ -999,7 +996,7 @@ h5tools_getenv_update_hyperslab_bufsize(void)
     /* check if environment variable is set for the hyperslab buffer size */
     if (NULL != (env_str = HDgetenv("H5TOOLS_BUFSIZE"))) {
         errno                = 0;
-        hyperslab_bufsize_mb = HDstrtol(env_str, (char **)NULL, 10);
+        hyperslab_bufsize_mb = strtol(env_str, (char **)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
             H5TOOLS_GOTO_ERROR(FAIL, "hyperslab buffer size failed");
 
@@ -1053,9 +1050,9 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t
 
 done:
     if (s3cred)
-        HDfree(s3cred);
+        free(s3cred);
     if (s3cred_src)
-        HDfree(s3cred_src);
+        free(s3cred_src);
 
     return ret_value;
 }
@@ -1116,9 +1113,6 @@ done:
  *             * region, id, and optional key provided
  *                 * (&fa, {"...", "...", ""})
  *                 * (&fa, {"...", "...", "..."})
- *
- * Programmer: Jacob Smith
- *             2017-11-13
  *
  *----------------------------------------------------------------------------
  */
@@ -1186,7 +1180,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
+            memcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
             if (show_progress) {
                 printf("  aws_region set\n");
             }
@@ -1198,7 +1192,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
+            memcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
             if (show_progress) {
                 printf("  secret_id set\n");
             }
@@ -1210,7 +1204,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
+            memcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
             if (show_progress) {
                 printf("  secret_key set\n");
             }
@@ -1283,7 +1277,7 @@ h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t
         HDstrncpy(fapl_config_out->user_name, (const char *)props[3], HDstrlen(props[3]));
     }
     if (HDstrncmp(props[4], "", 1)) {
-        k = HDstrtoul((const char *)props[4], NULL, 0);
+        k = strtoul((const char *)props[4], NULL, 0);
         if (errno == ERANGE)
             H5TOOLS_GOTO_ERROR(FAIL, "supposed buffersize number wasn't");
         fapl_config_out->stream_buffer_size = (int32_t)k;
@@ -1291,9 +1285,9 @@ h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t
 
 done:
     if (props)
-        HDfree(props);
+        free(props);
     if (props_src)
-        HDfree(props_src);
+        free(props_src);
 
     return ret_value;
 }

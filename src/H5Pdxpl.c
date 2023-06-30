@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pdxpl.c
- *			March 16 1998
- *			Robb Matzke
  *
  * Purpose:		Data transfer property list class routines
  *
@@ -306,8 +304,6 @@ static const hbool_t                 H5D_def_modify_write_buf_g      = H5D_XFER_
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -494,9 +490,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -531,9 +524,6 @@ H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -564,9 +554,6 @@ H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -614,9 +601,6 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -656,9 +640,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -687,9 +668,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -721,9 +699,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Monday, August 6, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -794,9 +769,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Monday, August 6, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -842,10 +814,6 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -872,10 +840,6 @@ done:
  *              associated parse tree.
  *
  * Return: Success: SUCCEED, Failure: FAIL
- *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -904,9 +868,6 @@ done:
  *
  * Return: positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
  *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -963,10 +924,6 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -991,9 +948,6 @@ done:
  * Purpose:	Sets data transform expression.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Leon Arber
- *              Monday, March 07, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1056,9 +1010,6 @@ done:
  *  If a zero is returned for the name's length, then there is no name
  *  associated with the ID.
  *
- * Programmer:	Leon Arber
- *              August 27, 2004
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1117,9 +1068,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, March 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1159,9 +1107,6 @@ done:
  * Return:	Success:	Buffer size.
  *
  *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Monday, March 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1209,9 +1154,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Tuesday, March 17, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1245,9 +1187,6 @@ done:
  * Return:	Success:	TRUE or FALSE
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Tuesday, March 17, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1286,9 +1225,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1326,9 +1262,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 H5Z_EDC_t
@@ -1360,9 +1293,6 @@ done:
  *              if certain filter fails.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              Jan 14, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1400,9 +1330,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              April 15, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1438,9 +1365,6 @@ done:
  *              if there's exception during datatype conversion.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              April 15, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1479,9 +1403,6 @@ done:
  *				the non-null arguments.
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Monday, September 28, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1530,9 +1451,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, September 28, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1580,9 +1498,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1623,9 +1538,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1656,9 +1568,6 @@ done:
  * Purpose:	The inverse of H5Pset_vlen_mem_manager()
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1709,9 +1618,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 9, 2001
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1745,9 +1651,6 @@ done:
  * Purpose:	Reads values previously set with H5Pset_hyper_vector_size().
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 9, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1783,9 +1686,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1820,9 +1720,6 @@ H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1853,9 +1750,6 @@ H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1892,9 +1786,6 @@ H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1926,9 +1817,6 @@ H5P__dxfr_mpio_collective_opt_dec(const void **_pp, void *_value)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1965,9 +1853,6 @@ H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1997,9 +1882,6 @@ H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
  * Purpose:	Retrieves the chunked io optimization scheme that library chose
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jacob Gruber
- *              Wednesday, May 4, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2034,9 +1916,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jacob Gruber
- *              Wednesday, May 4, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2068,8 +1947,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jonathan Kim
- *              Aug 3, 2012
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2109,9 +1986,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2146,9 +2020,6 @@ H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2176,9 +2047,6 @@ H5P__dxfr_edc_dec(const void **_pp, void *_value)
  * Purpose:     Creates a copy of the dataset I/O selection.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -2217,9 +2085,6 @@ done:
  *
  * Return:      positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
  *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
- *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -2276,9 +2141,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2306,9 +2168,6 @@ done:
  *
  * Return:      Success:	Non-negative
  *		        Failure:	Negative
- *
- * Programmer:  Vailin Choi
- *              Feb 2023
  *
  *-------------------------------------------------------------------------
  */
@@ -2344,9 +2203,6 @@ H5P__dxfr_selection_io_mode_enc(const void *value, void **_pp, size_t *size)
  *
  * Return:      Success:	Non-negative
  *		        Failure:	Negative
- *
- * Programmer:  Vailin Choi
- *              Feb 2023
  *
  *-------------------------------------------------------------------------
  */
@@ -2389,9 +2245,6 @@ H5P__dxfr_selection_io_mode_dec(const void **_pp, void *_value)
  *              their use.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Saturday, January 30, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -2510,9 +2363,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Vailin Choi
- *              March 5, 2023
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2551,9 +2401,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Vailin Choi
- *              March 5, 2023
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2585,8 +2432,6 @@ done:
  *
  * Return:	    Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi
- *              April 17, 2023
  *-------------------------------------------------------------------------
  */
 herr_t

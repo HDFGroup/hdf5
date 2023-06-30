@@ -125,13 +125,13 @@ test_one_dataset_io(void)
         data_size *= dims[i];
     data_size *= sizeof(int);
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
-    if (NULL == (read_buf = HDmalloc(data_size))) {
+    if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
@@ -364,17 +364,17 @@ test_one_dataset_io(void)
         TEST_ERROR;
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -395,11 +395,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Sclose(mspace_id);
         H5Dclose(dset_id);
@@ -483,13 +483,13 @@ test_multi_dataset_io(void)
     data_size *= sizeof(int);
     data_size *= MULTI_DATASET_IO_TEST_NDSETS;
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
-    if (NULL == (read_buf = HDmalloc(data_size))) {
+    if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
@@ -687,17 +687,17 @@ test_multi_dataset_io(void)
         TEST_ERROR;
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -718,11 +718,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Sclose(mspace_id);
         for (i = 0; i < MULTI_DATASET_IO_TEST_NDSETS; i++)
@@ -805,13 +805,13 @@ test_multi_file_dataset_io(void)
     data_size *= sizeof(int);
     data_size *= MULTI_FILE_DATASET_IO_TEST_NFILES;
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
-    if (NULL == (read_buf = HDmalloc(data_size))) {
+    if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
@@ -1111,17 +1111,17 @@ test_multi_file_dataset_io(void)
         TEST_ERROR;
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -1142,11 +1142,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Sclose(mspace_id);
         for (i = 0; i < MULTI_FILE_DATASET_IO_TEST_NFILES; i++) {
@@ -1228,13 +1228,13 @@ test_multi_file_grp_dset_io(void)
     data_size *= sizeof(int);
     data_size *= MULTI_FILE_GRP_DSET_IO_TEST_NFILES;
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
-    if (NULL == (read_buf = HDmalloc(data_size))) {
+    if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
@@ -1527,17 +1527,17 @@ test_multi_file_grp_dset_io(void)
         TEST_ERROR;
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -1558,11 +1558,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Sclose(mspace_id);
         H5Dclose(dset_id);
@@ -1633,13 +1633,13 @@ test_set_extent(void)
     if (generate_random_parallel_dimensions(SET_EXTENT_TEST_SPACE_RANK, &dims) < 0)
         TEST_ERROR;
 
-    if (NULL == (maxdims = HDmalloc(SET_EXTENT_TEST_SPACE_RANK * sizeof(hsize_t)))) {
+    if (NULL == (maxdims = malloc(SET_EXTENT_TEST_SPACE_RANK * sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate max dataspace dimension buffer\n");
         TEST_ERROR;
     }
 
-    if (NULL == (cdims = HDmalloc(SET_EXTENT_TEST_SPACE_RANK * sizeof(hsize_t)))) {
+    if (NULL == (cdims = malloc(SET_EXTENT_TEST_SPACE_RANK * sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate chunk dimension buffer\n");
         TEST_ERROR;
@@ -1685,13 +1685,13 @@ test_set_extent(void)
     data_size *= sizeof(int);
     data_size *= SET_EXTENT_TEST_NUM_EXTENDS;
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
-    if (NULL == (read_buf = HDmalloc(data_size))) {
+    if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
@@ -1844,27 +1844,27 @@ test_set_extent(void)
         FAIL_PUTS_ERROR("    dataspaces are not equal\n");
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (cdims) {
-        HDfree(cdims);
+        free(cdims);
         cdims = NULL;
     }
 
     if (maxdims) {
-        HDfree(maxdims);
+        free(maxdims);
         maxdims = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -1897,15 +1897,15 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (cdims)
-            HDfree(cdims);
+            free(cdims);
         if (maxdims)
-            HDfree(maxdims);
+            free(maxdims);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Sclose(mspace_id);
         H5Sclose(space_id_out);
@@ -2045,7 +2045,7 @@ test_attribute_exists(void)
         TEST_ERROR;
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -2060,7 +2060,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Dclose(dset_id);
@@ -2150,13 +2150,13 @@ test_attribute_io(void)
         data_size *= dims[i];
     data_size *= sizeof(int);
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for attribute write\n");
         TEST_ERROR;
     }
 
-    if (NULL == (read_buf = HDmalloc(data_size))) {
+    if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for attribute read\n");
         TEST_ERROR;
@@ -2240,17 +2240,17 @@ test_attribute_io(void)
         TEST_ERROR;
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -2265,11 +2265,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Dclose(dset_id);
@@ -2348,13 +2348,13 @@ test_attribute_io_tconv(void)
         data_size *= dims[i];
     data_size *= sizeof(int);
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for attribute write\n");
         TEST_ERROR;
     }
 
-    if (NULL == (read_buf = HDmalloc(data_size))) {
+    if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for attribute read\n");
         TEST_ERROR;
@@ -2433,17 +2433,17 @@ test_attribute_io_tconv(void)
         TEST_ERROR;
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -2460,11 +2460,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Dclose(dset_id);
@@ -2577,19 +2577,19 @@ test_attribute_io_compound(void)
         data_size *= dims[i];
     data_size *= sizeof(tattr_cmpd_t);
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for attribute write\n");
         TEST_ERROR;
     }
 
-    if (NULL == (read_buf = HDmalloc(data_size))) {
+    if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for attribute read\n");
         TEST_ERROR;
     }
 
-    if (NULL == (fbuf = HDmalloc(data_size))) {
+    if (NULL == (fbuf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for attribute read verification\n");
         TEST_ERROR;
@@ -2835,22 +2835,22 @@ test_attribute_io_compound(void)
         TEST_ERROR;
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (fbuf) {
-        HDfree(fbuf);
+        free(fbuf);
         fbuf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -2867,13 +2867,13 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (fbuf)
-            HDfree(fbuf);
+            free(fbuf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Tclose(mtype_id);
         H5Tclose(ftype_id);
@@ -3457,7 +3457,7 @@ test_ocopy_orefresh(void)
         TEST_ERROR;
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -3474,7 +3474,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(space_id);
         H5Dclose(dset_id);
         H5Gclose(parent_group_id);

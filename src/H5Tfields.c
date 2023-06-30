@@ -35,9 +35,6 @@
  *
  * Errors:
  *
- * Programmer:	Robb Matzke
- *		Monday, December  8, 1997
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -72,9 +69,6 @@ done:
  *		Failure:	Negative
  *
  * Errors:
- *
- * Programmer:  Raymond Lu
- *	        October 8, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -111,9 +105,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 char *
@@ -148,9 +139,6 @@ done:
  *				caller is responsible for freeing the string.
  *
  *		Failure:	NULL
- *
- * Programmer:	Raymond Lu
- *              October 9, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -205,9 +193,6 @@ done:
  *
  * Return:      Success:        index of the member if exists.
  *              Failure:        -1.
- *
- * Programmer:  Raymond Lu
- *              Thursday, April 4, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -269,9 +254,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -326,8 +308,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
             assert(size <= sizeof(tbuf));
             for (i = (nmembs - 1), swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (j * size),
-                                 (uint8_t *)dt->shared->u.enumer.value + ((j + 1) * size), size) > 0) {
+                    if (memcmp((uint8_t *)dt->shared->u.enumer.value + (j * size),
+                               (uint8_t *)dt->shared->u.enumer.value + ((j + 1) * size), size) > 0) {
                         /* Swap names */
                         char *tmp                        = dt->shared->u.enumer.name[j];
                         dt->shared->u.enumer.name[j]     = dt->shared->u.enumer.name[j + 1];
@@ -354,8 +336,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < (nmembs - 1); i++)
-                assert(HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (i * size),
-                                (uint8_t *)dt->shared->u.enumer.value + ((i + 1) * size), size) < 0);
+                assert(memcmp((uint8_t *)dt->shared->u.enumer.value + (i * size),
+                              (uint8_t *)dt->shared->u.enumer.value + ((i + 1) * size), size) < 0);
 #endif
         } /* end if */
     }     /* end else */
@@ -373,9 +355,6 @@ H5T__sort_value(const H5T_t *dt, int *map)
  * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Monday, January  4, 1999
  *
  *-------------------------------------------------------------------------
  */

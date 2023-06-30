@@ -205,7 +205,6 @@ static off_t squareo(off_t);
  * Purpose:     Start things up. Initialize MPI and then call the test looping
  *              function.
  * Return:      EXIT_SUCCESS or EXIT_FAILURE
- * Programmer:  Bill Wendling, 30. October 2001
  */
 int
 main(int argc, char *argv[])
@@ -260,7 +259,7 @@ main(int argc, char *argv[])
     }
 
     if (opts->output_file) {
-        if ((output = HDfopen(opts->output_file, "w")) == NULL) {
+        if ((output = fopen(opts->output_file, "w")) == NULL) {
             fprintf(stderr, "%s: cannot open output file\n", progname);
             perror(opts->output_file);
             goto finish;
@@ -301,7 +300,6 @@ squareo(off_t x)
  *              this out.
  *
  * Return:      Nothing
- * Programmer:  Bill Wendling, 30. October 2001
  */
 static void
 run_test_loop(struct options *opts)
@@ -395,7 +393,6 @@ run_test_loop(struct options *opts)
  * Function:    run_test
  * Purpose:     Inner loop call to actually run the I/O test.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 18. December 2001
  */
 static int
 run_test(iotype iot, parameters parms, struct options *opts)
@@ -710,7 +707,6 @@ run_test(iotype iot, parameters parms, struct options *opts)
  * Function:    output_all_info
  * Purpose:
  * Return:      Nothing
- * Programmer:  Bill Wendling, 29. January 2002
  */
 static void
 output_all_info(minmax *mm, int count, int indent_level)
@@ -732,7 +728,6 @@ output_all_info(minmax *mm, int count, int indent_level)
  * Purpose:     Process environment variables setting to set up MPI Info
  *              object.
  * Return:      0 if all is fine; otherwise non-zero.
- * Programmer:  Albert Cheng, 2002/05/21.
  */
 int
 h5_set_info_object(void)
@@ -763,7 +758,7 @@ h5_set_info_object(void)
             /* copy key/value pair into temporary buffer */
             len     = strcspn(valp, ";");
             next    = &valp[len];
-            key_val = (char *)HDcalloc(1, len + 1);
+            key_val = (char *)calloc(1, len + 1);
 
             /* increment the next pointer past the terminating semicolon */
             if (*next == ';')
@@ -811,10 +806,10 @@ h5_set_info_object(void)
             }
 
             valp = next;
-            HDfree(key_val);
+            free(key_val);
         } while (next && *next);
 
-        HDfree(envp);
+        free(envp);
     }
 
     return ret_value;
@@ -824,7 +819,6 @@ h5_set_info_object(void)
  * Function:    h5_dump_info_object
  * Purpose:     Display content of an MPI Info object
  * Return:      void
- * Programmer:  Albert Cheng 2002/05/21
  */
 void
 h5_dump_info_object(MPI_Info info)
@@ -853,7 +847,6 @@ h5_dump_info_object(MPI_Info info)
  * Function:    get_minmax
  * Purpose:     Gather all the min, max and total of val.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 21. December 2001
  */
 static void
 get_minmax(minmax *mm, double val)
@@ -873,7 +866,6 @@ get_minmax(minmax *mm, double val)
  * Purpose:     Accumulate the minimum, maximum, and average of the times
  *              across all processes.
  * Return:      TOTAL_MM - the total of all of these.
- * Programmer:  Bill Wendling, 21. December 2001
  */
 static minmax
 accumulate_minmax_stuff(minmax *mm, int count)
@@ -907,7 +899,6 @@ accumulate_minmax_stuff(minmax *mm, int count)
  *              is a global variable.
  * Return:      SUCCESS on success.
  *              FAIL otherwise.
- * Programmer:  Bill Wendling, 19. December 2001
  */
 static int
 create_comm_world(int num_procs, int *doing_pio)
@@ -965,7 +956,6 @@ error_done:
  *              pio_comm_g global variable.
  * Return:      SUCCESS on success.
  *              FAIL otherwise.
- * Programmer:  Bill Wendling, 19. December 2001
  */
 static int
 destroy_comm_world(void)
@@ -984,7 +974,6 @@ destroy_comm_world(void)
  * Purpose:     Print information about the time & bandwidth for a given
  *                  minmax & # of iterations.
  * Return:      Nothing
- * Programmer:  Quincey Koziol, 9. May 2002
  */
 static void
 output_results(const struct options *opts, const char *name, minmax *table, int table_size, off_t data_size)
@@ -1047,7 +1036,6 @@ output_times(const struct options *opts, const char *name, minmax *table, int ta
  * Function:    output_report
  * Purpose:     Print a line of the report. Only do so if I'm the 0 process.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 19. December 2001
  */
 static void
 output_report(const char *fmt, ...)
@@ -1072,7 +1060,6 @@ output_report(const char *fmt, ...)
  * Purpose:     Print spaces to indent a new line of text for pretty printing
  *              things.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 29. October 2001
  */
 static void
 print_indent(int indent)
@@ -1245,7 +1232,6 @@ report_parameters(struct options *opts)
  * Purpose:     Parse the command line options and return a STRUCT OPTIONS
  *              structure which will need to be freed by the calling function.
  * Return:      Pointer to an OPTIONS structure
- * Programmer:  Bill Wendling, 31. October 2001
  */
 static struct options *
 parse_command_line(int argc, const char *const *argv)
@@ -1289,7 +1275,7 @@ parse_command_line(int argc, const char *const *argv)
                     char buf[10];
                     int  i;
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1306,7 +1292,7 @@ parse_command_line(int argc, const char *const *argv)
                     }
                     else {
                         fprintf(stderr, "pio_perf: invalid --api option %s\n", buf);
-                        HDexit(EXIT_FAILURE);
+                        exit(EXIT_FAILURE);
                     }
 
                     if (*end == '\0')
@@ -1342,19 +1328,19 @@ parse_command_line(int argc, const char *const *argv)
                     char buf[10];
                     int  i;
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    if (HDstrlen(buf) > 1 || HDisdigit(buf[0])) {
+                    if (HDstrlen(buf) > 1 || isdigit(buf[0])) {
                         size_t j;
 
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)
                             if (!isdigit(buf[j])) {
                                 fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                exit(EXIT_FAILURE);
                             }
 
                         pio_debug_level = atoi(buf);
@@ -1380,7 +1366,7 @@ parse_command_line(int argc, const char *const *argv)
                                 break;
                             default:
                                 fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                exit(EXIT_FAILURE);
                         }
                     }
 
@@ -1396,13 +1382,13 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->num_bpp = parse_size_directive(H5_optarg);
                 break;
             case 'F':
-                cl_opts->num_files = HDatoi(H5_optarg);
+                cl_opts->num_files = atoi(H5_optarg);
                 break;
             case 'g':
                 cl_opts->dim2d = 1;
                 break;
             case 'i':
-                cl_opts->num_iters = HDatoi(H5_optarg);
+                cl_opts->num_iters = atoi(H5_optarg);
                 break;
             case 'I':
                 cl_opts->interleaved = 1;
@@ -1411,10 +1397,10 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->output_file = H5_optarg;
                 break;
             case 'p':
-                cl_opts->min_num_procs = HDatoi(H5_optarg);
+                cl_opts->min_num_procs = atoi(H5_optarg);
                 break;
             case 'P':
-                cl_opts->max_num_procs = HDatoi(H5_optarg);
+                cl_opts->max_num_procs = atoi(H5_optarg);
                 break;
             case 'T':
                 cl_opts->h5_threshold = parse_size_directive(H5_optarg);
@@ -1432,7 +1418,7 @@ parse_command_line(int argc, const char *const *argv)
             case '?':
             default:
                 usage(progname);
-                HDfree(cl_opts);
+                free(cl_opts);
                 return NULL;
         }
     }
@@ -1495,7 +1481,6 @@ parse_command_line(int argc, const char *const *argv)
  * Return:      The size as a off_t because this is related to file size.
  *              If an unknown size indicator is used, then the program will
  *              exit with EXIT_FAILURE as the return value.
- * Programmer:  Bill Wendling, 18. December 2001
  */
 static off_t
 parse_size_directive(const char *size)
@@ -1503,7 +1488,7 @@ parse_size_directive(const char *size)
     off_t s;
     char *endptr;
 
-    s = HDstrtol(size, &endptr, 10);
+    s = strtol(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -1524,7 +1509,7 @@ parse_size_directive(const char *size)
                 break;
             default:
                 fprintf(stderr, "Illegal size specifier '%c'\n", *endptr);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
     }
 
@@ -1535,7 +1520,6 @@ parse_size_directive(const char *size)
  * Function:    usage
  * Purpose:     Print a usage message and then exit.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 31. October 2001
  */
 static void
 usage(const char *prog)
@@ -1675,7 +1659,6 @@ usage(const char *prog)
  * Purpose:     Dummy main() function for if HDF5 was configured without
  *              parallel stuff.
  * Return:      EXIT_SUCCESS
- * Programmer:  Bill Wendling, 14. November 2001
  */
 int
 main(void)

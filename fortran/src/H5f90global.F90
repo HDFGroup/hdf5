@@ -18,9 +18,6 @@
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! AUTHOR
-!  Elena Pourmal
-!
 !*****
 
 MODULE H5GLOBAL

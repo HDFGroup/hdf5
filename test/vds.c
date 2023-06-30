@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              Monday, February 16, 2015
- *
  * Purpose:     Tests datasets with virtual layout.
  */
 #include "h5test.h"
@@ -164,9 +161,9 @@ vds_select_equal(hid_t space1, hid_t space2)
 
             /* Allocate point lists.  Do not return directly after
              * allocating, to make sure buffers are freed. */
-            if (NULL == (buf1 = (hsize_t *)HDmalloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
+            if (NULL == (buf1 = (hsize_t *)malloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
                 TEST_ERROR;
-            if (NULL == (buf2 = (hsize_t *)HDmalloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
+            if (NULL == (buf2 = (hsize_t *)malloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
                 TEST_ERROR;
 
             /* Get and compare point lists */
@@ -181,9 +178,9 @@ vds_select_equal(hid_t space1, hid_t space2)
                 }
 
             /* Free buffers */
-            HDfree(buf1);
+            free(buf1);
             buf1 = NULL;
-            HDfree(buf2);
+            free(buf2);
             buf2 = NULL;
         } /* end block */
 
@@ -214,10 +211,10 @@ vds_select_equal(hid_t space1, hid_t space2)
             /* Allocate block lists.  Do not return directly after
              * allocating, to make sure buffers are freed. */
             if (NULL ==
-                (buf1 = (hsize_t *)HDmalloc((size_t)2 * (size_t)rank1 * (size_t)nblocks1 * sizeof(*buf1))))
+                (buf1 = (hsize_t *)malloc((size_t)2 * (size_t)rank1 * (size_t)nblocks1 * sizeof(*buf1))))
                 TEST_ERROR;
             if (NULL ==
-                (buf2 = (hsize_t *)HDmalloc((size_t)2 * (size_t)rank1 * (size_t)nblocks1 * sizeof(*buf2))))
+                (buf2 = (hsize_t *)malloc((size_t)2 * (size_t)rank1 * (size_t)nblocks1 * sizeof(*buf2))))
                 TEST_ERROR;
 
             /* Get and compare block lists */
@@ -232,9 +229,9 @@ vds_select_equal(hid_t space1, hid_t space2)
                 }
 
             /* Free buffers */
-            HDfree(buf1);
+            free(buf1);
             buf1 = NULL;
-            HDfree(buf2);
+            free(buf2);
             buf2 = NULL;
         } /* end block */
 
@@ -250,9 +247,9 @@ vds_select_equal(hid_t space1, hid_t space2)
 
 error:
     if (buf1)
-        HDfree(buf1);
+        free(buf1);
     if (buf2)
-        HDfree(buf2);
+        free(buf2);
 
     return -1;
 } /* end vds_select_equal() */
@@ -470,7 +467,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl, hid_t *ex
         /* Encode property list to plist_buf */
         if (H5Pencode2(dcpl, NULL, &plist_buf_size, fapl) < 0)
             TEST_ERROR;
-        if (NULL == (plist_buf = HDmalloc(plist_buf_size)))
+        if (NULL == (plist_buf = malloc(plist_buf_size)))
             TEST_ERROR;
         if (H5Pencode2(dcpl, plist_buf, &plist_buf_size, fapl) < 0)
             TEST_ERROR;
@@ -480,7 +477,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl, hid_t *ex
             TEST_ERROR;
 
         /* Free plist_buf */
-        HDfree(plist_buf);
+        free(plist_buf);
         plist_buf = NULL;
     }
     else {
@@ -512,7 +509,7 @@ error:
     }
     H5E_END_TRY
     if (plist_buf)
-        HDfree(plist_buf);
+        free(plist_buf);
 
     return -1;
 } /* end test_api_get_ex_dcpl() */
@@ -1207,15 +1204,15 @@ test_vds_prefix_first(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     TESTING_2_SUPPRESSED("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection");
 
-    if ((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilename = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilename_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((vfilename = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilenamepct = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilenamepct_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
 
     h5_fixname(FILENAME[0], vds_fapl, vfilename, FILENAME_BUF_SIZE);
@@ -1334,7 +1331,7 @@ test_vds_prefix_first(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -1372,7 +1369,7 @@ test_vds_prefix_first(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data directly from source dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -1408,11 +1405,11 @@ test_vds_prefix_first(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
     dcpl = -1;
 
-    HDfree(srcfilename);
-    HDfree(srcfilename_map);
-    HDfree(vfilename);
-    HDfree(srcfilenamepct);
-    HDfree(srcfilenamepct_map);
+    free(srcfilename);
+    free(srcfilename_map);
+    free(vfilename);
+    free(srcfilenamepct);
+    free(srcfilenamepct_map);
 
     PASSED_SUPPRESSED();
     return 0;
@@ -1439,11 +1436,11 @@ error:
     if (HDsetenv("HDF5_VDS_PREFIX", "", 1) < 0)
         TEST_ERROR_SUPPRESSED;
 
-    HDfree(srcfilename);
-    HDfree(srcfilename_map);
-    HDfree(vfilename);
-    HDfree(srcfilenamepct);
-    HDfree(srcfilenamepct_map);
+    free(srcfilename);
+    free(srcfilename_map);
+    free(vfilename);
+    free(srcfilenamepct);
+    free(srcfilenamepct_map);
 
     return 1;
 } /* end test_vds_prefix */
@@ -1494,17 +1491,17 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     TESTING_2_SUPPRESSED("basic virtual dataset I/O");
 
-    if ((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilename = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilename_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((vfilename = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((vfilename2 = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((vfilename2 = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilenamepct = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilenamepct_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
 
     h5_fixname(FILENAME[0], vds_fapl, vfilename, FILENAME_BUF_SIZE);
@@ -1605,7 +1602,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -1634,7 +1631,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data directly from source dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -1777,7 +1774,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -1808,7 +1805,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data directly from source datasets */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
     if (H5Dread(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
@@ -1871,7 +1868,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Read data through copied virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -1949,7 +1946,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
             TEST_ERROR_SUPPRESSED;
 
         /* Read data through copied virtual dataset */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
         if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
             TEST_ERROR_SUPPRESSED;
 
@@ -2119,7 +2116,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -2150,7 +2147,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data directly from source datasets */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     offset[1] = -3;
     if (H5Soffset_simple(vspace[0], offset) < 0)
         TEST_ERROR_SUPPRESSED;
@@ -2304,7 +2301,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read first source dataset through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, vspace[0], vspace[0], H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -2315,7 +2312,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
                 TEST_ERROR_SUPPRESSED;
 
     /* Read second source dataset through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, vspace[1], vspace[1], H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -2355,7 +2352,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     }
 
     /* Read data directly from source datasets */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
     if (H5Dread(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
@@ -2538,7 +2535,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset by hyperslab */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read first slice */
     if (H5Dread(vdset, H5T_NATIVE_INT, vspace[0], srcspace[0], H5P_DEFAULT, rbuf[0]) < 0)
@@ -2618,7 +2615,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data directly from source datasets */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read first dataset */
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, srcspace[0], srcspace[0], H5P_DEFAULT, rbuf[0]) < 0)
@@ -2843,7 +2840,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset by hyperslab */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read first stripe pattern */
     if (H5Dread(vdset, H5T_NATIVE_INT, memspace, srcspace[0], H5P_DEFAULT, rbuf[0]) < 0)
@@ -2914,7 +2911,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data directly from source datasets */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read first dataset */
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, memspace, srcspace[0], H5P_DEFAULT, rbuf[0]) < 0)
@@ -3169,7 +3166,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -3181,7 +3178,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset by hyperslab */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select stripe */
     start[0] = 0;
@@ -3200,7 +3197,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Update erbuf */
-    HDmemset(erbuf, 0, sizeof(erbuf));
+    memset(erbuf, 0, sizeof(erbuf));
     for (i = 0; i < 9; i++)
         for (j = 0; j < 3; j++)
             erbuf[i][j] = fill;
@@ -3222,7 +3219,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
                 TEST_ERROR_SUPPRESSED;
 
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select stripe */
     start[0] = 0;
@@ -3276,7 +3273,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
                 TEST_ERROR_SUPPRESSED;
 
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select stripe */
     start[0] = 0;
@@ -3401,7 +3398,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Update erbuf */
-    HDmemset(erbuf, 0, sizeof(erbuf));
+    memset(erbuf, 0, sizeof(erbuf));
     erbuf[0][0]  = buf[0][0];
     erbuf[0][1]  = buf[0][1];
     erbuf[0][8]  = buf[0][2];
@@ -3552,7 +3549,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read dataset */
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
@@ -3685,7 +3682,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Reset erbuf */
-    HDmemset(erbuf[0], 0, sizeof(rbuf));
+    memset(erbuf[0], 0, sizeof(rbuf));
 
     /* Populate write buffer */
     for (i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
@@ -3785,7 +3782,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, memspace, vspace[0], H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -3918,7 +3915,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Reset erbuf */
-    HDmemset(erbuf[0], 0, sizeof(rbuf));
+    memset(erbuf[0], 0, sizeof(rbuf));
 
     /* Populate write buffer */
     for (i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
@@ -4042,7 +4039,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -4179,7 +4176,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Initialize erbuf */
-    HDmemset(erbuf[0], 0, sizeof(rbuf));
+    memset(erbuf[0], 0, sizeof(rbuf));
     for (i = 0; i < 10; i++)
         for (j = 0; j < 24; j += 6) {
             erbuf[i][j]     = -1;
@@ -4294,7 +4291,7 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, memspace, vspace[0], H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR_SUPPRESSED;
 
@@ -4340,12 +4337,12 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
     dcpl = -1;
 
-    HDfree(srcfilename);
-    HDfree(srcfilename_map);
-    HDfree(vfilename);
-    HDfree(vfilename2);
-    HDfree(srcfilenamepct);
-    HDfree(srcfilenamepct_map);
+    free(srcfilename);
+    free(srcfilename_map);
+    free(vfilename);
+    free(vfilename2);
+    free(srcfilenamepct);
+    free(srcfilenamepct_map);
 
     PASSED_SUPPRESSED();
     return 0;
@@ -4369,12 +4366,12 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(srcfilename);
-    HDfree(srcfilename_map);
-    HDfree(vfilename);
-    HDfree(vfilename2);
-    HDfree(srcfilenamepct);
-    HDfree(srcfilenamepct_map);
+    free(srcfilename);
+    free(srcfilename_map);
+    free(vfilename);
+    free(vfilename2);
+    free(srcfilenamepct);
+    free(srcfilenamepct_map);
 
     return 1;
 } /* end test_basic_io() */
@@ -4614,7 +4611,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -4690,7 +4687,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read data */
     if (H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
@@ -4796,7 +4793,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[1] = 0;
@@ -4866,7 +4863,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[1] = 0;
@@ -4980,7 +4977,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[1] = 0;
@@ -4998,7 +4995,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
                 TEST_ERROR_SUPPRESSED;
 
     /* Now just read middle 2 rows */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     start[0] = 4;
     count[0] = 2;
     count[1] = 20;
@@ -5034,7 +5031,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         start[0] = 0;
@@ -5060,7 +5057,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         start[0] = 0;
@@ -5090,7 +5087,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         start[0] = 0;
@@ -5156,7 +5153,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -5195,7 +5192,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         start[1] = 0;
@@ -5225,7 +5222,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         start[0] = 0;
@@ -5255,7 +5252,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         start[0] = 0;
@@ -5482,7 +5479,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -5545,7 +5542,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read data */
     if (H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
@@ -5656,7 +5653,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -5724,7 +5721,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -5837,7 +5834,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -5854,7 +5851,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
                 TEST_ERROR_SUPPRESSED;
 
     /* Now just read middle 2 rows */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     start[0] = 4;
     count[0] = 2;
     count[1] = 20;
@@ -5923,7 +5920,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -6203,7 +6200,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -6266,7 +6263,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read data */
     if (H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
@@ -6371,7 +6368,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -6442,7 +6439,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -6558,7 +6555,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -6621,7 +6618,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -6735,7 +6732,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -6794,7 +6791,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -6816,7 +6813,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         }
 
     /* Now just read middle 2 rows */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     start[0] = 4;
     count[0] = 2;
     count[1] = 19;
@@ -7051,7 +7048,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -7116,7 +7113,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Read data */
     if (H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
@@ -7221,7 +7218,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -7286,7 +7283,7 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -7435,21 +7432,21 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     TESTING_2_SUPPRESSED("virtual dataset I/O with printf source");
 
-    if ((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilename = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilename_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilename2 = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilename2 = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilename2_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilename2_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((vfilename = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((printf_srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((printf_srcfilename_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilenamepct = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
-    if ((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+    if ((srcfilenamepct_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
         TEST_ERROR_SUPPRESSED;
 
     h5_fixname(FILENAME[0], vds_fapl, vfilename, FILENAME_BUF_SIZE);
@@ -7678,7 +7675,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -7774,7 +7771,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -7800,7 +7797,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     for (start[1] = (hsize_t)0; start[1] < (hsize_t)5; start[1]++)
         for (count[1] = (hsize_t)1; count[1] < (hsize_t)11; count[1]++) {
             /* Reset rbuf */
-            HDmemset(rbuf[0], 0, sizeof(rbuf));
+            memset(rbuf[0], 0, sizeof(rbuf));
 
             /* Select hyperslab in memory space */
             if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
@@ -8186,7 +8183,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -8261,7 +8258,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -8330,7 +8327,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -8399,7 +8396,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -8468,7 +8465,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -8531,7 +8528,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -8754,7 +8751,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -8851,7 +8848,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -9064,7 +9061,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -9161,7 +9158,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -9430,7 +9427,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -9529,7 +9526,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -9593,7 +9590,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -9692,7 +9689,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -9756,7 +9753,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -9820,7 +9817,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10111,7 +10108,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10175,7 +10172,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10278,7 +10275,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10341,7 +10338,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10441,7 +10438,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10478,7 +10475,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10507,7 +10504,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10535,7 +10532,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10599,7 +10596,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10636,7 +10633,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10665,7 +10662,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10693,7 +10690,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
         /* Read data through virtual dataset */
         /* Reset rbuf */
-        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        memset(rbuf[0], 0, sizeof(rbuf));
 
         /* Select hyperslab in memory space */
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10932,7 +10929,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -10995,7 +10992,7 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
@@ -11058,14 +11055,14 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
     memspace = -1;
 
-    HDfree(srcfilename);
-    HDfree(srcfilename_map);
-    HDfree(srcfilename2);
-    HDfree(srcfilename2_map);
-    HDfree(vfilename);
-    HDfree(printf_srcfilename_map);
-    HDfree(srcfilenamepct);
-    HDfree(srcfilenamepct_map);
+    free(srcfilename);
+    free(srcfilename_map);
+    free(srcfilename2);
+    free(srcfilename2_map);
+    free(vfilename);
+    free(printf_srcfilename_map);
+    free(srcfilenamepct);
+    free(srcfilenamepct_map);
 
     PASSED_SUPPRESSED();
     return 0;
@@ -11089,14 +11086,14 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(srcfilename);
-    HDfree(srcfilename_map);
-    HDfree(srcfilename2);
-    HDfree(srcfilename2_map);
-    HDfree(vfilename);
-    HDfree(printf_srcfilename_map);
-    HDfree(srcfilenamepct);
-    HDfree(srcfilenamepct_map);
+    free(srcfilename);
+    free(srcfilename_map);
+    free(srcfilename2);
+    free(srcfilename2_map);
+    free(vfilename);
+    free(printf_srcfilename_map);
+    free(srcfilenamepct);
+    free(srcfilenamepct_map);
 
     return 1;
 } /* end test_printf() */
@@ -11386,7 +11383,7 @@ test_all(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -11494,7 +11491,7 @@ test_all(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -11599,7 +11596,7 @@ test_all(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -11716,7 +11713,7 @@ test_all(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -11821,7 +11818,7 @@ test_all(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -11939,7 +11936,7 @@ test_all(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -12044,7 +12041,7 @@ test_all(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 
     /* Read data through virtual dataset */
     /* Reset rbuf */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
 
     /* Select hyperslab in memory space */
     start[0] = 0;
@@ -12325,7 +12322,7 @@ main(void)
      */
     if (driver_is_parallel || !HDstrcmp(env_h5_drvr, "splitter")) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));

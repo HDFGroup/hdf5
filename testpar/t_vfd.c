@@ -10,9 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *
- *              This file is a catchall for parallel VFD tests.
+/*
+ *      This file is a catchall for parallel VFD tests.
  */
 
 #include "testphdf5.h"
@@ -114,9 +113,6 @@ static unsigned vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/25/26
- *
  *-------------------------------------------------------------------------
  */
 
@@ -141,11 +137,11 @@ alloc_and_init_file_images(int mpi_size)
         buf_len  = INTS_PER_RANK * mpi_size;
         buf_size = sizeof(int32_t) * (size_t)INTS_PER_RANK * (size_t)mpi_size;
 
-        increasing_fi_buf = (int32_t *)HDmalloc(buf_size);
-        decreasing_fi_buf = (int32_t *)HDmalloc(buf_size);
-        negative_fi_buf   = (int32_t *)HDmalloc(buf_size);
-        zero_fi_buf       = (int32_t *)HDmalloc(buf_size);
-        read_fi_buf       = (int32_t *)HDmalloc(buf_size);
+        increasing_fi_buf = (int32_t *)malloc(buf_size);
+        decreasing_fi_buf = (int32_t *)malloc(buf_size);
+        negative_fi_buf   = (int32_t *)malloc(buf_size);
+        zero_fi_buf       = (int32_t *)malloc(buf_size);
+        read_fi_buf       = (int32_t *)malloc(buf_size);
 
         if ((!increasing_fi_buf) || (!decreasing_fi_buf) || (!negative_fi_buf) || (!zero_fi_buf) ||
             (!read_fi_buf)) {
@@ -192,9 +188,6 @@ alloc_and_init_file_images(int mpi_size)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/25/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -203,31 +196,31 @@ free_file_images(void)
 {
     if (increasing_fi_buf) {
 
-        HDfree(increasing_fi_buf);
+        free(increasing_fi_buf);
         increasing_fi_buf = NULL;
     }
 
     if (decreasing_fi_buf) {
 
-        HDfree(decreasing_fi_buf);
+        free(decreasing_fi_buf);
         decreasing_fi_buf = NULL;
     }
 
     if (negative_fi_buf) {
 
-        HDfree(negative_fi_buf);
+        free(negative_fi_buf);
         negative_fi_buf = NULL;
     }
 
     if (zero_fi_buf) {
 
-        HDfree(zero_fi_buf);
+        free(zero_fi_buf);
         zero_fi_buf = NULL;
     }
 
     if (read_fi_buf) {
 
-        HDfree(read_fi_buf);
+        free(read_fi_buf);
         read_fi_buf = NULL;
     }
 
@@ -249,9 +242,6 @@ free_file_images(void)
  *              "fixed" file name into file_name on exit.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/25/26
  *
  *-------------------------------------------------------------------------
  */
@@ -354,8 +344,8 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
             }
 
-            HDmemset(&ioc_config, 0, sizeof(ioc_config));
-            HDmemset(&subfiling_conf, 0, sizeof(subfiling_conf));
+            memset(&ioc_config, 0, sizeof(ioc_config));
+            memset(&subfiling_conf, 0, sizeof(subfiling_conf));
 
             /* Get subfiling VFD defaults */
             if ((pass) && (H5Pget_fapl_subfiling(fapl_id, &subfiling_conf) == FAIL)) {
@@ -520,9 +510,6 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/25/26
- *
  *-------------------------------------------------------------------------
  */
 
@@ -638,9 +625,6 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
  *              7) On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/26/21
  *
  *-------------------------------------------------------------------------
  */
@@ -871,9 +855,6 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *              11) On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/26/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1171,9 +1152,6 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *               9) On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/26/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1527,9 +1505,6 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *               9) On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/26/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1959,9 +1934,6 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
  *
- * Programmer:  John Mainzer
- *              3/26/21
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2201,9 +2173,6 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
  *
- * Programmer:  John Mainzer
- *              3/26/21
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2389,9 +2358,6 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *              5) Close the test file.  On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/28/21
  *
  *-------------------------------------------------------------------------
  */
@@ -2641,9 +2607,6 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *              5) Close the test file.  On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/31/21
  *
  *-------------------------------------------------------------------------
  */
@@ -2904,9 +2867,6 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *              5) Close the test file.  On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/31/21
  *
  *-------------------------------------------------------------------------
  */
@@ -3205,9 +3165,6 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *              7) Close the test file.  On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/31/21
  *
  *-------------------------------------------------------------------------
  */
@@ -3645,9 +3602,6 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
  *
- * Programmer:  John Mainzer
- *              3/26/21
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3902,9 +3856,6 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
  *
- * Programmer:  John Mainzer
- *              10/10/21
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4122,9 +4073,6 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  * Return:      Success: 0
  *
  *              Failure: 1
- *
- * Programmer:  John Mainzer
- *              3/2621/
  *
  *-------------------------------------------------------------------------
  */

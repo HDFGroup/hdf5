@@ -441,7 +441,7 @@ H5VL_native_addr_to_token(void *obj, H5I_type_t obj_type, haddr_t addr, H5O_toke
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "couldn't get length of haddr_t from VOL object")
 
     /* Ensure that token is initialized */
-    HDmemset(token, 0, sizeof(H5O_token_t));
+    memset(token, 0, sizeof(H5O_token_t));
 
     /* Encode token */
     p = (uint8_t *)token;

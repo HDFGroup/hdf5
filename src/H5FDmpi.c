@@ -11,11 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Friday, January 30, 2004
- *
  * Purpose:	Common routines for all MPI-based VFL drivers.
- *
  */
 
 #include "H5private.h"   /* Generic Functions			*/
@@ -36,9 +32,6 @@
  * Return:	Success:	The rank (non-negative)
  *
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, January 30, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -79,9 +72,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Friday, January 30, 2004
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -121,9 +111,6 @@ done:
  * Return:	Success:	The communicator (non-negative)
  *
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, January 30, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -166,9 +153,6 @@ done:
  *
  *              Failure:	HADDR_UNDEF
  *
- * Programmer:  Unknown
- *              January 30, 1998
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -195,9 +179,6 @@ H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off)
  *				the converted value.
  *
  * 		Failure:	Negative, MPI_OFF is undefined.
- *
- * Programmer:  Unknown
- *              January 30, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -229,9 +210,6 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
  * Return:	Success:	Non-negative
  *
  *              Failure:	Negative
- *
- * Programmer:	Houjun Tang
- *              May 19, 2022
  *
  *-------------------------------------------------------------------------
  */
@@ -278,9 +256,6 @@ done:
  * Return:	Success:	0
  *		Failure:	-1
  *
- * Programmer:	rky
- *              19981207
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -298,7 +273,7 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
     assert(H5FD_MPIO == file->pub.driver_id);
 
     /* Portably initialize MPI status variable */
-    HDmemset(&rcvstat, 0, sizeof(MPI_Status));
+    memset(&rcvstat, 0, sizeof(MPI_Status));
 
     /* p0 has no left neighbor; all other procs wait for msg */
     if (file->mpi_rank != 0) {
@@ -328,9 +303,6 @@ done:
  *
  * Return:	Success:	0
  *		Failure:	-1
- *
- * Programmer:	rky
- *              19981207
  *
  *-------------------------------------------------------------------------
  */

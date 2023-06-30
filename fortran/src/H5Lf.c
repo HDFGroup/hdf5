@@ -41,11 +41,6 @@
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -99,9 +94,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 29, 2008
  * SOURCE
  */
 
@@ -171,11 +163,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -239,11 +226,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -303,11 +285,6 @@ done:
  * RETURNS
  *  Returns a positive value if the link class has been registered
  *  and zero if it is unregistered. Otherwise returns a negative value
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -358,9 +335,6 @@ h5lis_registered_c(int_f *link_cls_id)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
  * SOURCE
  */
 int_f
@@ -416,9 +390,6 @@ done:
  *  size        - The size of the link name on success
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 10, 2008
  * SOURCE
  */
 int_f
@@ -486,11 +457,6 @@ done:
 /*  * */
 /*  * RETURNS */
 /*  *     0 on success, -1 on failure */
-/*  * AUTHOR */
-/*  *  M. Scot Breitenfeld */
-/*  *              March 3, 2008 */
-/*  * HISTORY */
-/*  * N/A */
 /*  * SOURCE */
 /* *\/ */
 /* int_f */
@@ -550,11 +516,6 @@ done:
 /*  * */
 /*  * RETURNS */
 /*  *     0 on success, -1 on failure */
-/*  * AUTHOR */
-/*  *  M. Scot Breitenfeld */
-/*  *              February 3, 2008 */
-/*  * HISTORY */
-/*  * */
 /*  * SOURCE */
 /* *\/ */
 
@@ -650,9 +611,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 11, 2008
  * SOURCE
  */
 int_f
@@ -705,9 +663,6 @@ done:
  *
  * RETURNS
  *  >0 on success, 0< on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  August 18, 2008
  * SOURCE
  */
 int_f

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Ftest.c
- *			Jan  3 2007
- *			Quincey Koziol
  *
  * Purpose:		File testing routines.
  *
@@ -79,9 +77,6 @@
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Jan  3, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -123,9 +118,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Neil Fortner
- *	        Mar  31, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -164,9 +156,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Jun 10, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -196,9 +185,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Jul 10, 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -226,9 +212,6 @@ done:
  * Purpose:     Check if two file IDs refer to the same underlying file.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Oct 13, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -264,9 +247,6 @@ done:
  *              with setnev(3).
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Dana Robinson
- *              Summer 2020
  *
  *-------------------------------------------------------------------------
  */

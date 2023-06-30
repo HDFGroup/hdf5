@@ -99,7 +99,7 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
             HDstrncpy(opts->ip, argv[i] + 5, MSHS_IP_STR_SIZE);
         }
         else if (!HDstrncmp(argv[i], "--port=", 7)) {
-            opts->portno = HDatoi(argv[i] + 7);
+            opts->portno = atoi(argv[i] + 7);
         }
         else {
             printf("Unrecognized option: '%s'\n", argv[i]);
@@ -146,7 +146,7 @@ send_shutdown(struct mshs_opts *opts)
     target_addr.sin_family      = AF_INET;
     target_addr.sin_port        = htons((uint16_t)opts->portno);
     target_addr.sin_addr.s_addr = inet_addr(opts->ip);
-    HDmemset(target_addr.sin_zero, 0, sizeof(target_addr.sin_zero));
+    memset(target_addr.sin_zero, 0, sizeof(target_addr.sin_zero));
 
     if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
         printf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
@@ -184,20 +184,20 @@ main(int argc, char **argv)
 
     if (parse_args(argc, argv, &opts) < 0) {
         printf("Unable to parse arguments\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (opts.help) {
         usage();
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (send_shutdown(&opts) < 0) {
         printf("Unable to send shutdown command\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 } /* end main() */
 
 #else /* H5_HAVE_MIRROR_VFD */
@@ -207,7 +207,7 @@ int
 main(void)
 {
     printf("Mirror VFD not built -- unable to perform shutdown.\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 #endif /* H5_HAVE_MIRROR_VFD */

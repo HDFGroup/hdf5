@@ -205,7 +205,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Emit informational message */
     if (verbose)
@@ -214,7 +214,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
     /* Allocate space for 'common' datasets, if any */
     if (ncommon > 0) {
         /* Allocate array to hold pointers to symbols for common datasets */
-        if (NULL == (sym_com = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * ncommon)))
+        if (NULL == (sym_com = (symbol_info_t **)malloc(sizeof(symbol_info_t *) * ncommon)))
             return -1;
 
         /* Open the common datasets */
@@ -235,7 +235,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
     /* Allocate space for 'random' datasets, if any */
     if (nrandom > 0) {
         /* Allocate array to hold pointers to symbols for random datasets */
-        if (NULL == (sym_rand = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * nrandom)))
+        if (NULL == (sym_rand = (symbol_info_t **)malloc(sizeof(symbol_info_t *) * nrandom)))
             return -1;
 
         /* Determine the random datasets */
@@ -291,7 +291,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
                 /* Check common dataset */
                 if (check_dataset(fid, verbose, sym_com[v]->name, &record, mem_sid) < 0)
                     return -1;
-                HDmemset(&record, 0, sizeof(record));
+                memset(&record, 0, sizeof(record));
             } /* end for */
         }     /* end if */
 
@@ -306,7 +306,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
                 /* Check random dataset */
                 if (check_dataset(fid, verbose, sym_rand[v]->name, &record, mem_sid) < 0)
                     return -1;
-                HDmemset(&record, 0, sizeof(record));
+                memset(&record, 0, sizeof(record));
             } /* end for */
         }     /* end if */
 
@@ -340,13 +340,13 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
     /* Close 'random' datasets, if any */
     if (nrandom > 0) {
         /* Release array holding dataset ID's for random datasets */
-        HDfree(sym_rand);
+        free(sym_rand);
     } /* end if */
 
     /* Close 'common' datasets, if any */
     if (ncommon > 0) {
         /* Release array holding dataset ID's for common datasets */
-        HDfree(sym_com);
+        free(sym_com);
     } /* end if */
 
     return 0;
@@ -366,7 +366,7 @@ usage(void)
     printf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
     printf("and will generate a random seed (no -r given).\n");
     printf("\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 int
@@ -392,7 +392,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* # of common symbols to poll */
                     case 'h':
-                        ncommon = HDatoi(argv[u + 1]);
+                        ncommon = atoi(argv[u + 1]);
                         if (ncommon < 0)
                             usage();
                         u += 2;
@@ -400,7 +400,7 @@ main(int argc, char *argv[])
 
                     /* # of random symbols to poll */
                     case 'l':
-                        nrandom = HDatoi(argv[u + 1]);
+                        nrandom = atoi(argv[u + 1]);
                         if (nrandom < 0)
                             usage();
                         u += 2;
@@ -415,7 +415,7 @@ main(int argc, char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = 1;
-                        temp     = HDatoi(argv[u + 1]);
+                        temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();
                         else
@@ -425,7 +425,7 @@ main(int argc, char *argv[])
 
                     /* # of seconds between polling */
                     case 's':
-                        poll_time = HDatoi(argv[u + 1]);
+                        poll_time = atoi(argv[u + 1]);
                         if (poll_time < 0)
                             usage();
                         u += 2;
@@ -438,7 +438,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to append */
-                nseconds = HDatol(argv[u]);
+                nseconds = atol(argv[u]);
                 if (nseconds <= 0)
                     usage();
 
@@ -477,7 +477,7 @@ main(int argc, char *argv[])
     /* Generate dataset names */
     if (generate_symbols() < 0) {
         fprintf(stderr, "Error generating symbol names!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Create datatype for creating datasets */
@@ -488,7 +488,7 @@ main(int argc, char *argv[])
     if (read_records(FILENAME, verbose, (unsigned long)nseconds, (unsigned)poll_time, (unsigned)ncommon,
                      (unsigned)nrandom) < 0) {
         fprintf(stderr, "Error reading records from datasets!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -498,7 +498,7 @@ main(int argc, char *argv[])
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
         fprintf(stderr, "Error releasing symbols!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -508,7 +508,7 @@ main(int argc, char *argv[])
     /* Close objects created */
     if (H5Tclose(symbol_tid) < 0) {
         fprintf(stderr, "Error closing symbol datatype!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

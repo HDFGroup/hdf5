@@ -192,7 +192,7 @@ static void
 leave(int ret)
 {
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -207,7 +207,7 @@ leave(int ret)
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
+    fflush(stdout);
     fprintf(stdout, "usage: %s [OPTIONS] file\n", prog);
     fprintf(stdout, "\n");
     fprintf(stdout, "      ERROR\n");
@@ -255,9 +255,6 @@ usage(const char *prog)
  *
  * Return: >0 on success, 0 on failure
  *
- * Programmer: Quincey Koziol
- *              Monday, August 22, 2005
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_CONST static unsigned
@@ -283,9 +280,6 @@ ceil_log10(unsigned long x)
  *
  *          Failure: -1
  *
- * Programmer:    Quincey Koziol
- *                Tuesday, July 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -306,7 +300,7 @@ attribute_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *na
     /* Add attribute count to proper bin */
     bin = ceil_log10((unsigned long)oi->num_attrs);
     if ((bin + 1) > iter->attr_nbins) {
-        iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
+        iter->attr_bins = (unsigned long *)realloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
         assert(iter->attr_bins);
 
         /* Initialize counts for intermediate bins */
@@ -330,9 +324,6 @@ attribute_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *na
  *
  * Return:  Success: 0
  *          Failure: -1
- *
- * Programmer: Quincey Koziol
- *             Tuesday, August 16, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -367,7 +358,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_nat
     if ((bin + 1) > iter->group_nbins) {
         /* Allocate more storage for info about dataset's datatype */
         if ((iter->group_bins =
-                 (unsigned long *)HDrealloc(iter->group_bins, (bin + 1) * sizeof(unsigned long))) == NULL)
+                 (unsigned long *)realloc(iter->group_bins, (bin + 1) * sizeof(unsigned long))) == NULL)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
         /* Initialize counts for intermediate bins */
@@ -400,9 +391,6 @@ done:
  *
  * Return:  Success: 0
  *          Failure: -1
- *
- * Programmer:    Quincey Koziol
- *                Tuesday, August 16, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -502,8 +490,8 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         bin = ceil_log10((unsigned long)dims[0]);
         if ((bin + 1) > iter->dset_dim_nbins) {
             /* Allocate more storage for info about dataset's datatype */
-            if ((iter->dset_dim_bins = (unsigned long *)HDrealloc(iter->dset_dim_bins,
-                                                                  (bin + 1) * sizeof(unsigned long))) == NULL)
+            if ((iter->dset_dim_bins = (unsigned long *)realloc(iter->dset_dim_bins,
+                                                                (bin + 1) * sizeof(unsigned long))) == NULL)
                 H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
             /* Initialize counts for intermediate bins */
@@ -541,7 +529,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         iter->dset_ntypes++;
 
         /* Allocate more storage for info about dataset's datatype */
-        if ((iter->dset_type_info = (dtype_info_t *)HDrealloc(
+        if ((iter->dset_type_info = (dtype_info_t *)realloc(
                  iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t))) == NULL)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
@@ -595,8 +583,6 @@ done:
  * Return:  Success: 0
  *          Failure: -1
  *
- * Programmer:    Vailin Choi; July 7th, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -625,9 +611,6 @@ done:
  *
  * Return: Success: 0
  *       Failure: -1
- *
- * Programmer: Quincey Koziol
- *             Tuesday, November 6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -686,9 +669,6 @@ done:
  * Return:  Success: 0
  *          Failure: -1
  *
- * Programmer: Quincey Koziol
- *             Tuesday, November 6, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -723,8 +703,6 @@ lnk_stats(const char H5_ATTR_UNUSED *path, const H5L_info2_t *li, void *_iter)
  * Return: Success: 0
  *       Failure: -1
  *
- * Programmer:  Vailin Choi; July 7th, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -738,7 +716,7 @@ freespace_stats(hid_t fid, iter_t *iter)
     if ((nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, 0, NULL)) < 0)
         return (FAIL);
     else if (nsects) {
-        if (NULL == (sect_info = (H5F_sect_info_t *)HDcalloc((size_t)nsects, sizeof(H5F_sect_info_t))))
+        if (NULL == (sect_info = (H5F_sect_info_t *)calloc((size_t)nsects, sizeof(H5F_sect_info_t))))
             return (FAIL);
         nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, (size_t)nsects, sect_info);
         assert(nsects);
@@ -754,7 +732,7 @@ freespace_stats(hid_t fid, iter_t *iter)
         bin = ceil_log10((unsigned long)sect_info[u].size);
         if (bin >= iter->sect_nbins) {
             /* Allocate more storage for section info */
-            iter->sect_bins = (unsigned long *)HDrealloc(iter->sect_bins, (bin + 1) * sizeof(unsigned long));
+            iter->sect_bins = (unsigned long *)realloc(iter->sect_bins, (bin + 1) * sizeof(unsigned long));
             assert(iter->sect_bins);
 
             /* Initialize counts for intermediate bins */
@@ -770,7 +748,7 @@ freespace_stats(hid_t fid, iter_t *iter)
     } /* end for */
 
     if (sect_info)
-        HDfree(sect_info);
+        free(sect_info);
 
     return 0;
 } /* end freespace_stats() */
@@ -794,12 +772,12 @@ hand_free(struct handler_t *hand)
 
         for (u = 0; u < hand->obj_count; u++)
             if (hand->obj[u]) {
-                HDfree(hand->obj[u]);
+                free(hand->obj[u]);
                 hand->obj[u] = NULL;
             } /* end if */
         hand->obj_count = 0;
-        HDfree(hand->obj);
-        HDfree(hand);
+        free(hand->obj);
+        free(hand);
     } /* end if */
 } /* end hand_free() */
 
@@ -811,9 +789,6 @@ hand_free(struct handler_t *hand)
  * Return: Success: 0
  *
  * Failure: -1
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -841,7 +816,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'E':
                 if (H5_optarg != NULL)
-                    enable_error_stack = HDatoi(H5_optarg);
+                    enable_error_stack = atoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
@@ -868,7 +843,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'l':
                 if (H5_optarg) {
-                    sgroups_threshold = HDatoi(H5_optarg);
+                    sgroups_threshold = atoi(H5_optarg);
                     if (sgroups_threshold < 1) {
                         error_msg("Invalid threshold for small groups\n");
                         goto error;
@@ -891,7 +866,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'm':
                 if (H5_optarg) {
-                    sdsets_threshold = HDatoi(H5_optarg);
+                    sdsets_threshold = atoi(H5_optarg);
                     if (sdsets_threshold < 1) {
                         error_msg("Invalid threshold for small datasets\n");
                         goto error;
@@ -914,7 +889,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'a':
                 if (H5_optarg) {
-                    sattrs_threshold = HDatoi(H5_optarg);
+                    sattrs_threshold = atoi(H5_optarg);
                     if (sattrs_threshold < 1) {
                         error_msg("Invalid threshold for small # of attributes\n");
                         goto error;
@@ -940,14 +915,14 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
                 display_object = TRUE;
 
                 /* Allocate space to hold the command line info */
-                if (NULL == (hand = (struct handler_t *)HDcalloc((size_t)1, sizeof(struct handler_t)))) {
+                if (NULL == (hand = (struct handler_t *)calloc((size_t)1, sizeof(struct handler_t)))) {
                     error_msg("unable to allocate memory for object struct\n");
                     goto error;
                 } /* end if */
 
                 /* Allocate space to hold the object strings */
                 hand->obj_count = (size_t)argc;
-                if (NULL == (hand->obj = (char **)HDcalloc((size_t)argc, sizeof(char *)))) {
+                if (NULL == (hand->obj = (char **)calloc((size_t)argc, sizeof(char *)))) {
                     error_msg("unable to allocate memory for object array\n");
                     goto error;
                 } /* end if */
@@ -1031,49 +1006,49 @@ iter_free(iter_t *iter)
 
     /* Clear array of bins for group counts */
     if (iter->group_bins) {
-        HDfree(iter->group_bins);
+        free(iter->group_bins);
         iter->group_bins = NULL;
     } /* end if */
 
     /* Clear array for tracking small groups */
     if (iter->num_small_groups) {
-        HDfree(iter->num_small_groups);
+        free(iter->num_small_groups);
         iter->num_small_groups = NULL;
     } /* end if */
 
     /* Clear array of bins for attribute counts */
     if (iter->attr_bins) {
-        HDfree(iter->attr_bins);
+        free(iter->attr_bins);
         iter->attr_bins = NULL;
     } /* end if */
 
     /* Clear array for tracking small attributes */
     if (iter->num_small_attrs) {
-        HDfree(iter->num_small_attrs);
+        free(iter->num_small_attrs);
         iter->num_small_attrs = NULL;
     } /* end if */
 
     /* Clear dataset datatype information found */
     if (iter->dset_type_info) {
-        HDfree(iter->dset_type_info);
+        free(iter->dset_type_info);
         iter->dset_type_info = NULL;
     } /* end if */
 
     /* Clear array of bins for dataset dimensions */
     if (iter->dset_dim_bins) {
-        HDfree(iter->dset_dim_bins);
+        free(iter->dset_dim_bins);
         iter->dset_dim_bins = NULL;
     } /* end if */
 
     /* Clear array of tracking 1-D small datasets */
     if (iter->small_dset_dims) {
-        HDfree(iter->small_dset_dims);
+        free(iter->small_dset_dims);
         iter->small_dset_dims = NULL;
     } /* end if */
 
     /* Clear array of bins for free-space section sizes */
     if (iter->sect_bins) {
-        HDfree(iter->sect_bins);
+        free(iter->sect_bins);
         iter->sect_bins = NULL;
     } /* end if */
 } /* end iter_free() */
@@ -1086,9 +1061,6 @@ iter_free(iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1115,9 +1087,6 @@ print_file_info(const iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1172,9 +1141,6 @@ print_file_metadata(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1221,8 +1187,6 @@ print_group_info(const iter_t *iter)
  * Return:  Success: 0
  *          Failure: Never fails
  *
- * Programmer: Vailin Choi; October 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1246,9 +1210,6 @@ print_group_metadata(const iter_t *iter)
  *
  * Return:  Success: 0
  *          Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1336,8 +1297,6 @@ print_dataset_info(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer:  Vailin Choi; October 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1362,8 +1321,6 @@ print_dset_metadata(const iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Vailin Choi; October 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1402,9 +1359,6 @@ print_dset_dtype_meta(const iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Vailin Choi
- *             July 12, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1451,8 +1405,6 @@ print_attr_info(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Vailin Choi; July 7th, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1498,8 +1450,6 @@ print_freespace_info(const iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Vailin Choi; August 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1555,9 +1505,6 @@ print_storage_summary(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1611,9 +1558,6 @@ print_file_statistics(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Elena Pourmal
- *             Thursday, August 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1630,9 +1574,6 @@ print_object_statistics(const char *name)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Thursday, August 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1665,7 +1606,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    HDmemset(&iter, 0, sizeof(iter));
+    memset(&iter, 0, sizeof(iter));
 
     if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
@@ -1732,10 +1673,9 @@ main(int argc, char *argv[])
             iter.free_hdr              = finfo.free.meta_size;
         } /* end else */
 
-        iter.num_small_groups = (unsigned long *)HDcalloc((size_t)sgroups_threshold, sizeof(unsigned long));
-        iter.num_small_attrs =
-            (unsigned long *)HDcalloc((size_t)(sattrs_threshold + 1), sizeof(unsigned long));
-        iter.small_dset_dims = (unsigned long *)HDcalloc((size_t)sdsets_threshold, sizeof(unsigned long));
+        iter.num_small_groups = (unsigned long *)calloc((size_t)sgroups_threshold, sizeof(unsigned long));
+        iter.num_small_attrs = (unsigned long *)calloc((size_t)(sattrs_threshold + 1), sizeof(unsigned long));
+        iter.small_dset_dims = (unsigned long *)calloc((size_t)sdsets_threshold, sizeof(unsigned long));
 
         if (iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
             error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");

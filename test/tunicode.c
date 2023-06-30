@@ -180,7 +180,7 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     cmpbuf[2 * small_len - 1] = '\0';
     HDstrcpy(&cmpbuf[2 * small_len], new_string);
 
-    VERIFY(HDmemcmp(buf, cmpbuf, 2 * big_len), 0, "HDmemcmp");
+    VERIFY(memcmp(buf, cmpbuf, 2 * big_len), 0, "memcmp");
 
     /* Now convert from smaller datatype to bigger datatype.  This should
      * leave our buffer looking like: "abc\0\0\0\0\0abc\0\0\0\0\0" */
@@ -188,12 +188,12 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* First fill the buffer with NULLs */
-    HDmemset(cmpbuf, '\0', (size_t)LONG_BUF_SIZE);
+    memset(cmpbuf, '\0', (size_t)LONG_BUF_SIZE);
     /* Copy in the characters */
     HDstrncpy(cmpbuf, new_string, small_len - 1);
     HDstrncpy(&cmpbuf[big_len], new_string, small_len - 1);
 
-    VERIFY(HDmemcmp(buf, cmpbuf, 2 * big_len), 0, "HDmemcmp");
+    VERIFY(memcmp(buf, cmpbuf, 2 * big_len), 0, "memcmp");
 
     ret = H5Tclose(src_type);
     CHECK(ret, FAIL, "H5Tclose");
@@ -240,7 +240,7 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     HDstrncpy(&cmpbuf[small_len], new_string, small_len);
     HDstrncpy(&cmpbuf[2 * small_len], new_string, big_len);
 
-    VERIFY(HDmemcmp(buf, cmpbuf, 2 * big_len), 0, "HDmemcmp");
+    VERIFY(memcmp(buf, cmpbuf, 2 * big_len), 0, "memcmp");
 
     /* Now convert from smaller datatype to bigger datatype.  This should
      * leave our buffer looking like: "abcd\0\0\0\0abcd\0\0\0\0" */
@@ -248,12 +248,12 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* First fill the buffer with NULLs */
-    HDmemset(cmpbuf, '\0', (size_t)LONG_BUF_SIZE);
+    memset(cmpbuf, '\0', (size_t)LONG_BUF_SIZE);
     /* Copy in the characters */
     HDstrncpy(cmpbuf, new_string, small_len);
     HDstrncpy(&cmpbuf[big_len], new_string, small_len);
 
-    VERIFY(HDmemcmp(buf, cmpbuf, 2 * big_len), 0, "HDmemcmp");
+    VERIFY(memcmp(buf, cmpbuf, 2 * big_len), 0, "memcmp");
 
     ret = H5Tclose(src_type);
     CHECK(ret, FAIL, "H5Tclose");
@@ -285,7 +285,7 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     HDstrncpy(&cmpbuf[small_len], new_string, small_len);
     HDstrncpy(&cmpbuf[2 * small_len], new_string, big_len);
 
-    VERIFY(HDmemcmp(buf, cmpbuf, 2 * big_len), 0, "HDmemcmp");
+    VERIFY(memcmp(buf, cmpbuf, 2 * big_len), 0, "memcmp");
 
     /* Now convert from smaller datatype to bigger datatype.  This should
      * leave our buffer looking like: "abcd    abcd    " */
@@ -293,12 +293,12 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* First fill the buffer with spaces */
-    HDmemset(cmpbuf, ' ', (size_t)LONG_BUF_SIZE);
+    memset(cmpbuf, ' ', (size_t)LONG_BUF_SIZE);
     /* Copy in the characters */
     HDstrncpy(cmpbuf, new_string, small_len);
     HDstrncpy(&cmpbuf[big_len], new_string, small_len);
 
-    VERIFY(HDmemcmp(buf, cmpbuf, 2 * big_len), 0, "HDmemcmp");
+    VERIFY(memcmp(buf, cmpbuf, 2 * big_len), 0, "memcmp");
 
     ret = H5Tclose(src_type);
     CHECK(ret, FAIL, "H5Tclose");
@@ -585,7 +585,7 @@ test_compound(hid_t fid, const char *string)
     herr_t  ret;
 
     /* Initialize compound data */
-    HDmemset(&s1, 0, sizeof(s1_t)); /* To make purify happy */
+    memset(&s1, 0, sizeof(s1_t)); /* To make purify happy */
     s1.a = COMP_INT_VAL;
     s1.c = COMP_DOUBLE_VAL;
     s1.b = COMP_FLOAT_VAL;
@@ -810,7 +810,7 @@ test_unicode(void)
     /* Create a random string with length NUM_CHARS */
     HDsrandom((unsigned)HDtime(NULL));
 
-    HDmemset(test_string, 0, sizeof(test_string));
+    memset(test_string, 0, sizeof(test_string));
     for (x = 0; x < NUM_CHARS; x++) {
         /* We need to avoid unprintable characters (codes 0-31) and the
          * . and / characters, since they aren't allowed in path names.

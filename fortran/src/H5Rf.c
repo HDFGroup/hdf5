@@ -36,11 +36,6 @@
  *  ref  - reference to the dataset region
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, December 1, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -86,10 +81,6 @@ done:
  *  ref       - reference to the dataset region
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 20, 2008
- *
  * SOURCE
  */
 int_f
@@ -130,11 +121,6 @@ h5rcreate_ptr_c(void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *re
  *  ref_obj_id - Identifier of referenced object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 20, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -167,11 +153,6 @@ h5rdereference_ptr_c(hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_o
  *  space_id - dereferenced  dataset dataspace identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, December 1, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -210,11 +191,6 @@ done:
  *  space_id - dereferenced  dataset dataspace identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  August 4, 2012
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -250,11 +226,6 @@ done:
  *  obj_type - type of dereferenced object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, December 1, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -295,11 +266,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 20, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -357,10 +323,6 @@ h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  December 17, 2008
- *
  * SOURCE
  */
 int_f

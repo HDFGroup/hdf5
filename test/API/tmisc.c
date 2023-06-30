@@ -345,11 +345,6 @@ typedef struct {
  * Return:  1:  decode+encode is enabled
  *    0:  only decode is enabled
  *              -1: other
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -496,8 +491,8 @@ test_misc2_write_attribute(void)
     char        *string_att1 = HDstrdup("string attribute in file one");
     char        *string_att2 = HDstrdup("string attribute in file two");
 
-    HDmemset(&data, 0, sizeof(data));
-    HDmemset(&data_check, 0, sizeof(data_check));
+    memset(&data, 0, sizeof(data));
+    memset(&data_check, 0, sizeof(data_check));
 
     type = misc2_create_type();
 
@@ -568,8 +563,8 @@ test_misc2_write_attribute(void)
     ret = H5Fclose(file2);
     CHECK(ret, FAIL, "H5Fclose");
 
-    HDfree(string_att1);
-    HDfree(string_att2);
+    free(string_att1);
+    free(string_att2);
 }
 
 static void
@@ -782,7 +777,7 @@ create_struct3(void)
     misc5_struct3_hndl *str3hndl; /* New 'struct3' created */
     herr_t              ret;      /* For error checking */
 
-    str3hndl = (misc5_struct3_hndl *)HDmalloc(sizeof(misc5_struct3_hndl));
+    str3hndl = (misc5_struct3_hndl *)malloc(sizeof(misc5_struct3_hndl));
     CHECK_PTR(str3hndl, "malloc");
 
     str3hndl->st3h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct3));
@@ -808,7 +803,7 @@ delete_struct3(misc5_struct3_hndl *str3hndl)
     ret = H5Tclose(str3hndl->st3h_base);
     CHECK(ret, FAIL, "H5Tclose");
 
-    HDfree(str3hndl);
+    free(str3hndl);
 }
 
 static void
@@ -825,8 +820,8 @@ create_struct2(void)
     misc5_struct2_hndl *str2hndl; /* New 'struct2' created */
     herr_t              ret;      /* For error checking */
 
-    str2hndl = (misc5_struct2_hndl *)HDmalloc(sizeof(misc5_struct2_hndl));
-    CHECK_PTR(str2hndl, "HDmalloc");
+    str2hndl = (misc5_struct2_hndl *)malloc(sizeof(misc5_struct2_hndl));
+    CHECK_PTR(str2hndl, "malloc");
 
     str2hndl->st2h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct2));
     CHECK(str2hndl->st2h_base, FAIL, "H5Tcreate");
@@ -860,7 +855,7 @@ delete_struct2(misc5_struct2_hndl *str2hndl)
     H5Tclose(str2hndl->st2h_base);
     CHECK(ret, FAIL, "H5Tclose");
 
-    HDfree(str2hndl);
+    free(str2hndl);
 }
 
 static void
@@ -871,8 +866,8 @@ set_struct2(misc5_struct2 *buf)
     buf->st2_el1     = MISC5_DBGELVAL2;
     buf->st2_el2.len = MISC5_DBGNELM3;
 
-    buf->st2_el2.p = HDmalloc((buf->st2_el2.len) * sizeof(misc5_struct3));
-    CHECK_PTR(buf->st2_el2.p, "HDmalloc");
+    buf->st2_el2.p = malloc((buf->st2_el2.len) * sizeof(misc5_struct3));
+    CHECK_PTR(buf->st2_el2.p, "malloc");
 
     for (i = 0; i < (buf->st2_el2.len); i++)
         set_struct3(&(((misc5_struct3 *)(buf->st2_el2.p))[i]));
@@ -881,7 +876,7 @@ set_struct2(misc5_struct2 *buf)
 static void
 clear_struct2(misc5_struct2 *buf)
 {
-    HDfree(buf->st2_el2.p);
+    free(buf->st2_el2.p);
 }
 
 /*********************** struct1 ***********************/
@@ -892,8 +887,8 @@ create_struct1(void)
     misc5_struct1_hndl *str1hndl; /* New 'struct1' created */
     herr_t              ret;      /* For error checking */
 
-    str1hndl = (misc5_struct1_hndl *)HDmalloc(sizeof(misc5_struct1_hndl));
-    CHECK_PTR(str1hndl, "HDmalloc");
+    str1hndl = (misc5_struct1_hndl *)malloc(sizeof(misc5_struct1_hndl));
+    CHECK_PTR(str1hndl, "malloc");
 
     str1hndl->st1h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct1));
     CHECK(str1hndl->st1h_base, FAIL, "H5Tcreate");
@@ -927,7 +922,7 @@ delete_struct1(misc5_struct1_hndl *str1hndl)
     ret = H5Tclose(str1hndl->st1h_base);
     CHECK(ret, FAIL, "H5Tclose");
 
-    HDfree(str1hndl);
+    free(str1hndl);
 }
 
 static void
@@ -938,8 +933,8 @@ set_struct1(misc5_struct1 *buf)
     buf->st1_el1     = MISC5_DBGELVAL1;
     buf->st1_el2.len = MISC5_DBGNELM2;
 
-    buf->st1_el2.p = HDmalloc((buf->st1_el2.len) * sizeof(misc5_struct2));
-    CHECK_PTR(buf->st1_el2.p, "HDmalloc");
+    buf->st1_el2.p = malloc((buf->st1_el2.len) * sizeof(misc5_struct2));
+    CHECK_PTR(buf->st1_el2.p, "malloc");
 
     for (i = 0; i < (buf->st1_el2.len); i++)
         set_struct2(&(((misc5_struct2 *)(buf->st1_el2.p))[i]));
@@ -952,7 +947,7 @@ clear_struct1(misc5_struct1 *buf)
 
     for (i = 0; i < buf->st1_el2.len; i++)
         clear_struct2(&(((misc5_struct2 *)(buf->st1_el2.p))[i]));
-    HDfree(buf->st1_el2.p);
+    free(buf->st1_el2.p);
 }
 
 static void
@@ -989,8 +984,8 @@ test_misc5(void)
 
     /* Create the variable-length buffer */
     buf.len = MISC5_DBGNELM1;
-    buf.p   = HDmalloc((buf.len) * sizeof(misc5_struct1));
-    CHECK_PTR(buf.p, "HDmalloc");
+    buf.p   = malloc((buf.len) * sizeof(misc5_struct1));
+    CHECK_PTR(buf.p, "malloc");
 
     /* Create the top-level VL information */
     for (i = 0; i < MISC5_DBGNELM1; i++)
@@ -1005,7 +1000,7 @@ test_misc5(void)
         clear_struct1(&(((misc5_struct1 *)(buf.p))[j]));
 
     /* Free the variable-length buffer */
-    HDfree(buf.p);
+    free(buf.p);
 
     /* Close dataset */
     ret = H5Dclose(dataset_id);
@@ -1323,11 +1318,11 @@ test_misc8(void)
     MESSAGE(5, ("Testing dataset storage sizes\n"));
 
     /* Allocate space for the data to write & read */
-    wdata = (int *)HDmalloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
-    CHECK_PTR(wdata, "HDmalloc");
+    wdata = (int *)malloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
+    CHECK_PTR(wdata, "malloc");
 #ifdef VERIFY_DATA
-    rdata = (int *)HDmalloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
-    CHECK_PTR(rdata, "HDmalloc");
+    rdata = (int *)malloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
+    CHECK_PTR(rdata, "malloc");
 #endif /* VERIFY_DATA */
 
     /* Initialize values */
@@ -1794,9 +1789,9 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free the read & write buffers */
-    HDfree(wdata);
+    free(wdata);
 #ifdef VERIFY_DATA
-    HDfree(rdata);
+    free(rdata);
 #endif /* VERIFY_DATA */
 } /* end test_misc8() */
 #endif
@@ -2264,8 +2259,8 @@ misc13_verify_dataset(hid_t loc_id, const char *name, const unsigned *data)
     herr_t    ret;              /* Generic return value */
 
     /* Create a data buffer for the dataset read */
-    read_data = (unsigned *)HDcalloc(MISC13_DIM1, sizeof(unsigned));
-    CHECK_PTR(read_data, "HDcalloc");
+    read_data = (unsigned *)calloc(MISC13_DIM1, sizeof(unsigned));
+    CHECK_PTR(read_data, "calloc");
 
     /* Open the contiguous dataset in the root group */
     dsid = H5Dopen2(loc_id, name, H5P_DEFAULT);
@@ -2284,7 +2279,7 @@ misc13_verify_dataset(hid_t loc_id, const char *name, const unsigned *data)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Free the dataset read buffer */
-    HDfree(read_data);
+    free(read_data);
 
 } /* end misc13_verify_dataset() */
 
@@ -2390,48 +2385,48 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     int    ret;               /* Generic status value */
 
     /* Allocate space for the user block */
-    user_block = HDcalloc(size, (size_t)1);
-    CHECK_PTR(user_block, "HDcalloc");
+    user_block = calloc(size, (size_t)1);
+    CHECK_PTR(user_block, "calloc");
 
     /* Copy in the user block data */
-    HDmemcpy(user_block, str, HDstrlen(str));
+    memcpy(user_block, str, HDstrlen(str));
 
     /* Open the new file */
-    new_fp = HDfopen(new_name, "wb");
-    CHECK_PTR(new_fp, "HDfopen");
+    new_fp = fopen(new_name, "wb");
+    CHECK_PTR(new_fp, "fopen");
 
     /* Write the user block to the new file */
-    written = HDfwrite(user_block, (size_t)1, size, new_fp);
-    VERIFY(written, size, "HDfwrite");
+    written = fwrite(user_block, (size_t)1, size, new_fp);
+    VERIFY(written, size, "fwrite");
 
     /* Open the old file */
-    old_fp = HDfopen(old_name, "rb");
-    CHECK_PTR(old_fp, "HDfopen");
+    old_fp = fopen(old_name, "rb");
+    CHECK_PTR(old_fp, "fopen");
 
     /* Allocate space for the copy buffer */
-    copy_buf = HDmalloc((size_t)MISC13_COPY_BUF_SIZE);
-    CHECK_PTR(copy_buf, "HDmalloc");
+    copy_buf = malloc((size_t)MISC13_COPY_BUF_SIZE);
+    CHECK_PTR(copy_buf, "malloc");
 
     /* Copy data from the old file to the new file */
-    while ((read_in = HDfread(copy_buf, (size_t)1, (size_t)MISC13_COPY_BUF_SIZE, old_fp)) > 0) {
+    while ((read_in = fread(copy_buf, (size_t)1, (size_t)MISC13_COPY_BUF_SIZE, old_fp)) > 0) {
         /* Write the data to the new file */
-        written = HDfwrite(copy_buf, (size_t)1, read_in, new_fp);
-        VERIFY(written, read_in, "HDfwrite");
+        written = fwrite(copy_buf, (size_t)1, read_in, new_fp);
+        VERIFY(written, read_in, "fwrite");
     }
 
     /* Close the old file */
-    ret = HDfclose(old_fp);
-    VERIFY(ret, 0, "HDfclose");
+    ret = fclose(old_fp);
+    VERIFY(ret, 0, "fclose");
 
     /* Close the new file */
-    ret = HDfclose(new_fp);
-    VERIFY(ret, 0, "HDfclose");
+    ret = fclose(new_fp);
+    VERIFY(ret, 0, "fclose");
 
     /* Free the copy buffer */
-    HDfree(copy_buf);
+    free(copy_buf);
 
     /* Free the user block */
-    HDfree(user_block);
+    free(user_block);
 
 } /* end misc13_insert_user_block() */
 
@@ -2559,8 +2554,8 @@ test_misc13(void)
     hbool_t   check_for_new_dataset; /* Whether to check for the post-userblock-creation dataset */
 
     /* Create a data buffer for the datasets */
-    data = (unsigned *)HDcalloc(MISC13_DIM1, sizeof(unsigned));
-    CHECK_PTR(data, "HDcalloc");
+    data = (unsigned *)calloc(MISC13_DIM1, sizeof(unsigned));
+    CHECK_PTR(data, "calloc");
 
     /* Initialize data to write */
     misc13_init_data(data);
@@ -2590,7 +2585,7 @@ test_misc13(void)
     misc13_verify_file(MISC13_FILE_2, data, userblock_size, check_for_new_dataset);
 
     /* Free the dataset buffer */
-    HDfree(data);
+    free(data);
 
 } /* end test_misc13() */
 #endif
@@ -2888,15 +2883,15 @@ test_misc16(void)
     hsize_t dims[] = {MISC16_SPACE_DIM};
     int     i;
 
-    HDmemset(wdata, 0, sizeof(wdata));
-    HDmemset(rdata, 0, sizeof(rdata));
+    memset(wdata, 0, sizeof(wdata));
+    memset(rdata, 0, sizeof(rdata));
 
     /* Initialize the data */
     /* (Note that these are supposed to stress the code, so are a little weird) */
-    HDmemcpy(wdata[0], "1234567", MISC16_STR_SIZE);
-    HDmemcpy(wdata[1], "1234567\0", MISC16_STR_SIZE);
-    HDmemcpy(wdata[2], "12345678", MISC16_STR_SIZE);
-    HDmemcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC16_STR_SIZE);
+    memcpy(wdata[0], "1234567", MISC16_STR_SIZE);
+    memcpy(wdata[1], "1234567\0", MISC16_STR_SIZE);
+    memcpy(wdata[2], "12345678", MISC16_STR_SIZE);
+    memcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC16_STR_SIZE);
 
     /* Create the file */
     file = H5Fcreate(MISC16_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2979,15 +2974,15 @@ test_misc17(void)
     hsize_t dims[] = {MISC17_SPACE_DIM1, MISC17_SPACE_DIM2};
     int     i;
 
-    HDmemset(wdata, 0, sizeof(wdata));
-    HDmemset(rdata, 0, sizeof(rdata));
+    memset(wdata, 0, sizeof(wdata));
+    memset(rdata, 0, sizeof(rdata));
 
     /* Initialize the data */
     /* (Note that these are supposed to stress the code, so are a little weird) */
-    HDmemcpy(wdata[0], "1234567", MISC17_SPACE_DIM2);
-    HDmemcpy(wdata[1], "1234567\0", MISC17_SPACE_DIM2);
-    HDmemcpy(wdata[2], "12345678", MISC17_SPACE_DIM2);
-    HDmemcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC17_SPACE_DIM2);
+    memcpy(wdata[0], "1234567", MISC17_SPACE_DIM2);
+    memcpy(wdata[1], "1234567\0", MISC17_SPACE_DIM2);
+    memcpy(wdata[2], "12345678", MISC17_SPACE_DIM2);
+    memcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC17_SPACE_DIM2);
 
     /* Create the file */
     file = H5Fcreate(MISC17_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -3718,7 +3713,7 @@ test_misc19(void)
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5FDunregister");
 
-    HDfree(vfd_cls);
+    free(vfd_cls);
 
     /* Check H5I operations on virtual object connectors */
 
@@ -3758,7 +3753,7 @@ test_misc19(void)
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5VLunregister_connector");
 
-    HDfree(vol_cls);
+    free(vol_cls);
 #endif
 } /* end test_misc19() */
 
@@ -3968,8 +3963,8 @@ test_misc21(void)
     MESSAGE(5, ("Testing late allocation time w/chunks & filters\n"));
 
     /* Allocate space for the buffer */
-    buf = (char *)HDcalloc(MISC21_SPACE_DIM0 * MISC21_SPACE_DIM1, 1);
-    CHECK(buf, NULL, "HDcalloc");
+    buf = (char *)calloc(MISC21_SPACE_DIM0 * MISC21_SPACE_DIM1, 1);
+    CHECK(buf, NULL, "calloc");
 
     /* Create the file */
     fid = H5Fcreate(MISC21_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -4009,7 +4004,7 @@ test_misc21(void)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    HDfree(buf);
+    free(buf);
 } /* end test_misc21() */
 
 /****************************************************************
@@ -4053,8 +4048,8 @@ test_misc22(void)
     MESSAGE(5, ("Testing datatypes with SZIP filter\n"));
 
     /* Allocate space for the buffer */
-    buf = (char *)HDcalloc(MISC22_SPACE_DIM0 * MISC22_SPACE_DIM1, 8);
-    CHECK(buf, NULL, "HDcalloc");
+    buf = (char *)calloc(MISC22_SPACE_DIM0 * MISC22_SPACE_DIM1, 8);
+    CHECK(buf, NULL, "calloc");
 
     /* Create the file */
     fid = H5Fcreate(MISC22_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -4160,7 +4155,7 @@ test_misc22(void)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    HDfree(buf);
+    free(buf);
 } /* end test_misc22() */
 #endif /* H5_HAVE_FILTER_SZIP */
 
@@ -6302,8 +6297,6 @@ test_misc(void)
  *
  * Return:    none
  *
- * Programmer:    Albert Cheng
- *              July 2, 1998
  *-------------------------------------------------------------------------
  */
 void

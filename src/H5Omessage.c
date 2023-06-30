@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Omessage.c
- *			Dec  3 2006
- *			Quincey Koziol
  *
  * Purpose:		Object header message routines.
  *
@@ -92,9 +90,6 @@ static herr_t H5O__copy_mesg(H5F_t *f, H5O_t *oh, size_t idx, const H5O_msg_clas
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Dec  1 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -137,9 +132,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Dec 31 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -177,9 +169,6 @@ done:
  * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Dec  8 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -227,9 +216,6 @@ done:
  * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -281,9 +267,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Dec  6 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -326,9 +309,6 @@ done:
  * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -427,9 +407,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *		Aug  6 1997
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -477,9 +454,6 @@ done:
  *				after calling H5O_msg_reset().
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -533,9 +507,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -568,9 +539,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -589,7 +557,7 @@ H5O__msg_reset_real(const H5O_msg_class_t *type, void *native)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "reset method failed")
         } /* end if */
         else
-            HDmemset(native, 0, type->native_size);
+            memset(native, 0, type->native_size);
     } /* end if */
 
 done:
@@ -605,9 +573,6 @@ done:
  * Return:	Success:	NULL
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -637,9 +602,6 @@ H5O_msg_free(unsigned type_id, void *mesg)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, Sep  6, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -664,9 +626,6 @@ H5O__msg_free_mesg(H5O_mesg_t *mesg)
  *
  * Return:	Success:	NULL
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -698,9 +657,6 @@ H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
  * Return:	Success:	Ptr to the new message
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -735,9 +691,6 @@ done:
  * Return:	Success:	Number of messages of specified type.
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Tuesday, April 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -784,9 +737,6 @@ done:
  *
  *		Failure:	(can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, February  6, 2007
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -821,9 +771,6 @@ H5O__msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type)
  *		Failure:	FAIL if the existence of the message could
  *				not be determined due to some error such as
  *				not being able to read the object header.
- *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -867,9 +814,6 @@ done:
  *				not be determined due to some error such as
  *				not being able to read the object header.
  *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -908,9 +852,6 @@ done:
  *		object header into a single larger free area.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Aug 28 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -958,9 +899,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  6 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1005,9 +943,6 @@ done:
  *              or all messages if the sequence number is H5O_ALL (-1).
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1071,9 +1006,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Aug 28 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1125,9 +1057,6 @@ done:
  * Return:	Returns a negative value if something is wrong, the return
  *      value of the last operator if it was non-zero, or zero if all
  *      object headers were processed.
- *
- * Programmer:	Quincey Koziol
- *		Nov 19 2004
  *
  * Description:
  *      This function iterates over the object headers of an object
@@ -1188,9 +1117,6 @@ done:
  * Return:	Returns a negative value if something is wrong, the return
  *      value of the last operator if it was non-zero, or zero if all
  *      object headers were processed.
- *
- * Programmer:	Quincey Koziol
- *		Sep  6 2005
  *
  * Description:
  *      This function iterates over the object headers of an object
@@ -1286,9 +1212,6 @@ done:
  *
  * Return:	Size of message on success, 0 on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 13 2003
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -1325,9 +1248,6 @@ done:
  *              creation of a new object header.
  *
  * Return:	Size of message on success, 0 on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1386,9 +1306,6 @@ done:
  *
  * Return:	Size of message on success, 0 on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar  7 2007
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -1436,9 +1353,6 @@ done:
  * Return:      Object can be shared:        TRUE
  *              Object cannot be shared:    FALSE
  *
- * Programmer:  James Laird
- *              January 12 2007
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1482,9 +1396,6 @@ H5O_msg_can_share(unsigned type_id, const void *mesg)
  * Return:      Object can be shared:        TRUE
  *              Object cannot be shared:    FALSE
  *
- * Programmer:  Quincey Koziol
- *              March 15 2007
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1517,9 +1428,6 @@ H5O_msg_can_share_in_ohdr(unsigned type_id)
  *
  * Return:      Object is shared:        TRUE
  *              Object is not shared:    FALSE
- *
- * Programmer:  James Laird
- *              April 5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1560,9 +1468,6 @@ H5O_msg_is_shared(unsigned type_id, const void *mesg)
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	James Laird
- *		November 1 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1610,9 +1515,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	James Laird
- *		Oct 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1627,7 +1529,7 @@ H5O_msg_reset_share(unsigned H5_ATTR_NDEBUG_UNUSED type_id, void *mesg)
     assert(mesg);
 
     /* Reset the shared component in the message to zero. */
-    HDmemset((H5O_shared_t *)mesg, 0, sizeof(H5O_shared_t));
+    memset((H5O_shared_t *)mesg, 0, sizeof(H5O_shared_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_msg_reset_share() */
@@ -1639,9 +1541,6 @@ H5O_msg_reset_share(unsigned H5_ATTR_NDEBUG_UNUSED type_id, void *mesg)
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:  Quincey Koziol
- *              March 15 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1683,9 +1582,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Raymond Lu
- *		July 13, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1719,9 +1615,6 @@ done:
  * Return:	Success:        Pointer to object(data type or space)
  *
  *		Failure:	NULL
- *
- * Programmer:	Raymond Lu
- *		July 14, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1761,9 +1654,6 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  Peter Cao
- *              June 4, 2005
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1801,9 +1691,6 @@ done:
  *
  * Return:	Success:	Index of message
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, September  3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1866,9 +1753,6 @@ done:
  *              native message info
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, September  3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1943,9 +1827,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  James Laird
- *              December 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1978,9 +1859,6 @@ done:
  *              space used for anything referred to in the object header message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		September 26 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2017,9 +1895,6 @@ done:
  * Purpose:	Flushes a message for an object header.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		May 14 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2117,9 +1992,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 21 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2161,8 +2033,6 @@ done:
  * Purpose:	Queries a message's message flags in the object header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin; Jan 2013
  *
  *-------------------------------------------------------------------------
  */

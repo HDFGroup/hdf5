@@ -49,7 +49,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},    {"i", requir
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
+    fflush(stdout);
     fprintf(stdout, "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n", prog);
     fprintf(stdout, "\n");
     fprintf(stdout, "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");
@@ -89,7 +89,7 @@ leave(int ret)
 {
     h5tools_close();
 
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -330,11 +330,11 @@ main(int argc, char *argv[])
 
 done:
     if (ub_file)
-        HDfree(ub_file);
+        free(ub_file);
     if (input_file)
-        HDfree(input_file);
+        free(input_file);
     if (output_file)
-        HDfree(output_file);
+        free(output_file);
 
     if (plist >= 0)
         H5Pclose(plist);
@@ -395,7 +395,7 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
         res = HDfstat(infid, &sbuf);
         if (res < 0) {
             error_msg("Can't stat file \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         } /* end if */
 
         howmuch = (ssize_t)sbuf.st_size;
@@ -432,12 +432,12 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
 
         if (nchars <= 0) {
             error_msg("Read error \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         } /* end if */
 
         if (HDwrite(outfid, buf, (unsigned)nchars) < 0) {
             error_msg("Write error \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
 
         tot += nchars;

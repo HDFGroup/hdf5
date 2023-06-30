@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Gname.c
- *			Sep 12 2005
- *			Quincey Koziol
  *
  * Purpose:		Functions for handling group hierarchy paths.
  *
@@ -106,9 +104,6 @@ static int         H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
  *
  *		Failure:	Ptr to the null terminator of NAME.
  *
- * Programmer:	Robb Matzke
- *		Aug 11 1997
- *
  *-------------------------------------------------------------------------
  */
 const char *
@@ -134,9 +129,6 @@ H5G__component(const char *name, size_t *size_p)
  *
  * Return:	Success:	Ptr to normalized name.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Saturday, August 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -197,9 +189,6 @@ done:
  * Return: TRUE for valid prefix, FALSE for not a valid prefix, FAIL
  *              on error
  *
- * Programmer: Quincey Koziol
- *
- * Date: September 24, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -261,10 +250,6 @@ done:
  *
  * Return: Pointer to reference counted string on success, NULL on error
  *
- * Programmer: Quincey Koziol
- *
- * Date: August 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 static H5RS_str_t *
@@ -297,9 +282,6 @@ done:
  * Return:	Success:	Non-NULL, combined path
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, October 11, 2005
- *
  *-------------------------------------------------------------------------
  */
 H5RS_str_t *
@@ -331,9 +313,6 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, September 12, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -361,9 +340,6 @@ H5G__name_init(H5G_name_t *name, const char *path)
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Pedro Vicente
- *              Thursday, August 22, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -406,9 +382,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, September 12, 2005
  *
  * Notes:       'depth' parameter determines how much of the group entry
  *              structure we want to copy.  The depths are:
@@ -462,9 +435,6 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
 
  * Return:	Success:	Non-negative, length of name
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, December 13, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -522,9 +492,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, September 12, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -536,7 +503,7 @@ H5G_name_reset(H5G_name_t *name)
     assert(name);
 
     /* Clear the group hier. name to an empty state */
-    HDmemset(name, 0, sizeof(H5G_name_t));
+    memset(name, 0, sizeof(H5G_name_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_name_reset() */
@@ -547,10 +514,6 @@ H5G_name_reset(H5G_name_t *name)
  * Purpose:	Free the 'ID to name' buffers.
  *
  * Return:	Success
- *
- * Programmer: Pedro Vicente
- *
- * Date: August 22, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -582,9 +545,6 @@ H5G_name_free(H5G_name_t *name)
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, December 13, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -673,10 +633,6 @@ done:
  * Purpose: H5I_iterate callback function to replace group entry names
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: June 5, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -932,10 +888,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: June 11, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1071,9 +1023,6 @@ done:
  * 	            0 if not correct object
  * 	            negative on failure.
  *
- * Programmer:	Quincey Koziol
- *              November 4 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1149,9 +1098,6 @@ done:
  *
  *              Failure:    -1
  *
- * Programmer:	Quincey Koziol
- *		November 4 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1165,7 +1111,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
     herr_t          ret_value = SUCCEED; /* Return value             */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
 
     FUNC_ENTER_NOAPI(FAIL)
 

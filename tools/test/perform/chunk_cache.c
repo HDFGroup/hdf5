@@ -134,7 +134,7 @@ create_dset1(hid_t file)
     H5Dclose(dataset);
     H5Pclose(dcpl);
     H5Sclose(dataspace);
-    HDfree(data);
+    free(data);
     return 0;
 
 error:
@@ -145,7 +145,7 @@ error:
         H5Sclose(dataspace);
     }
     H5E_END_TRY
-    HDfree(data);
+    free(data);
 
     return 1;
 }
@@ -198,7 +198,7 @@ create_dset2(hid_t file)
     H5Dclose(dataset);
     H5Pclose(dcpl);
     H5Sclose(dataspace);
-    HDfree(data);
+    free(data);
 
     return 0;
 
@@ -210,7 +210,7 @@ error:
         H5Sclose(dataspace);
     }
     H5E_END_TRY
-    HDfree(data);
+    free(data);
 
     return 1;
 }

@@ -73,10 +73,6 @@ static char *test_argv0 = NULL;
  * Return:      Success: 0
  *
  *              Failure: 1
- *
- * Programmer:  Richard Warren
- *              10/1/17
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -162,7 +158,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     /* setup data to write */
     if (pass) {
-        if ((data_slice = (float *)HDmalloc(COUNT * sizeof(float))) == NULL) {
+        if ((data_slice = (float *)malloc(COUNT * sizeof(float))) == NULL) {
             pass         = FALSE;
             failure_mssg = "malloc of data_slice failed.\n";
         }
@@ -439,7 +435,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     /* free data_slice if it has been allocated */
     if (data_slice != NULL) {
-        HDfree(data_slice);
+        free(data_slice);
         data_slice = NULL;
     }
 
@@ -477,10 +473,6 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
  * Return:      Success: 0
  *
  *              Failure: 1
- *
- * Programmer:  Richard Warren
- *              10/1/17
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -536,7 +528,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
     /* allocate space for the data_slice array */
     if (pass) {
-        if ((data_slice = (float *)HDmalloc(COUNT * sizeof(float))) == NULL) {
+        if ((data_slice = (float *)malloc(COUNT * sizeof(float))) == NULL) {
             pass         = FALSE;
             failure_mssg = "malloc of data_slice failed.\n";
         }
@@ -670,7 +662,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
     /* free data_slice if it has been allocated */
     if (data_slice != NULL) {
-        HDfree(data_slice);
+        free(data_slice);
         data_slice = NULL;
     }
 
@@ -710,7 +702,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
             failure_mssg = "H5Tclose failed.\n";
         };
 
-        if ((data_slice = (float *)HDmalloc((size_t)dset_size * filetype_size)) == NULL) {
+        if ((data_slice = (float *)malloc((size_t)dset_size * filetype_size)) == NULL) {
             pass         = FALSE;
             failure_mssg = "malloc of data_slice failed.\n";
         }
@@ -861,7 +853,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
         /* free data_slice if it has been allocated */
         if (data_slice != NULL) {
-            HDfree(data_slice);
+            free(data_slice);
             data_slice = NULL;
         }
 
@@ -869,7 +861,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
          * Read an H5S_ALL filespace into a hyperslab defined memory space
          */
 
-        if ((data_slice = (float *)HDmalloc((size_t)(dset_size * 2) * filetype_size)) == NULL) {
+        if ((data_slice = (float *)malloc((size_t)(dset_size * 2) * filetype_size)) == NULL) {
             pass         = FALSE;
             failure_mssg = "malloc of data_slice failed.\n";
         }
@@ -958,7 +950,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
         /* free data_slice if it has been allocated */
         if (data_slice != NULL) {
-            HDfree(data_slice);
+            free(data_slice);
             data_slice = NULL;
         }
 
@@ -1049,9 +1041,6 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
  *
  * Return:      Success: 0
  *              Failure: 1
- *
- * Programmer:  Richard Warren
- *              10/1/17
  *-------------------------------------------------------------------------
  */
 
@@ -1078,17 +1067,17 @@ main(int argc, char **argv)
 
     if ((MPI_Init(&argc, &argv)) != MPI_SUCCESS) {
         fprintf(stderr, "FATAL: Unable to initialize MPI\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if ((MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank)) != MPI_SUCCESS) {
         fprintf(stderr, "FATAL: MPI_Comm_rank returned an error\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if ((MPI_Comm_size(MPI_COMM_WORLD, &mpi_size)) != MPI_SUCCESS) {
         fprintf(stderr, "FATAL: MPI_Comm_size returned an error\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     H5open();
@@ -1122,7 +1111,7 @@ main(int argc, char **argv)
     if ((MPI_Comm_split(MPI_COMM_WORLD, which_group, 0, &group_comm)) != MPI_SUCCESS) {
 
         fprintf(stderr, "FATAL: MPI_Comm_split returned an error\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* ------  Generate all files ------ */

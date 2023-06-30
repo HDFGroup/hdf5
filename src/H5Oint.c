@@ -209,8 +209,6 @@ H5O_init(void)
  * Return:  Success:    Non-negative
  *          Failure:    Negative
  *
- * Programmer:  Vailin Choi; December 2017
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -259,9 +257,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Aug  5 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -302,9 +297,6 @@ done:
  *
  * Return:     Success: Pointer to the newly-crated header object.
  *             Failure: NULL
- *
- * Programmer: Jacob Smith
- *             2018 August 17
  *
  *-----------------------------------------------------------------------------
  */
@@ -367,9 +359,6 @@ done:
  *
  * Return:     Success: SUCCEED (0) (non-negative value)
  *             Failure: FAIL (-1) (negative value)
- *
- * Programmer: Jacob Smith
- *             2018 August 17
  *
  *-----------------------------------------------------------------------------
  */
@@ -547,15 +536,6 @@ done:
  *        entry OBJ_ENT.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Monday, January     5, 1998
- *
- * Modification:
- *              Raymond Lu
- *              5 November 2007
- *              Turn off the holding file variable if it's on.  When it's
- *              needed, the caller will turn it on again.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -590,9 +570,6 @@ H5O_open(H5O_loc_t *loc)
  *
  * Return:      Success:    Pointer to object data
  *              Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *        March  5 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -640,9 +617,6 @@ done:
  *
  * Return:      Success:    Pointer to object data
  *              Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *        December 28, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -692,9 +666,6 @@ done:
  * Return:      Success:    Pointer to object data
  *              Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        December 28, 2017
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -734,9 +705,6 @@ done:
  * Return:      Success:    Pointer to object data
  *              Failure:    NULL
  *
- * Programmer:    James Laird
- *        July 25 2006
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -768,9 +736,6 @@ done:
  * Purpose:    Closes an object header that was previously open.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Monday, January     5, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -834,9 +799,6 @@ done:
  * Return:      Success:    New link count
  *
  *              Failure:    -1
- *
- * Programmer:    Robb Matzke
- *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -950,9 +912,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Aug  5 1997
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -997,9 +956,6 @@ done:
  *                              object.
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        Dec 31 2002
- *
  *-------------------------------------------------------------------------
  */
 H5O_t *
@@ -1038,7 +994,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
     udata.common.f                = loc->file;
     udata.common.file_intent      = file_intent;
     udata.common.merged_null_msgs = 0;
-    HDmemset(&cont_msg_info, 0, sizeof(cont_msg_info));
+    memset(&cont_msg_info, 0, sizeof(cont_msg_info));
     udata.common.cont_msg_info = &cont_msg_info;
     udata.common.addr          = loc->addr;
 
@@ -1189,9 +1145,6 @@ done:
  *                              object.
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        Jul 13 2008
- *
  *-------------------------------------------------------------------------
  */
 H5O_t *
@@ -1234,9 +1187,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        Jul 13 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1267,9 +1217,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1321,9 +1268,6 @@ done:
  *        modification time message with the current time.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Monday, July 27, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1419,9 +1363,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Monday, July 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1462,9 +1403,6 @@ done:
  * Purpose:    Create a "bogus" message unless one already exists.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, January 21, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1533,9 +1471,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Mar 19 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1594,9 +1529,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Mar 19 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1634,9 +1566,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *              Wednesday, November  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1669,9 +1598,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1709,9 +1635,6 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
  * Return:      Success:    An object class
  *              Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Monday, November  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 const H5O_obj_class_t *
@@ -1744,9 +1667,6 @@ done:
  *
  * Return:    Success:    An object class
  *        Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1786,9 +1706,6 @@ done:
  *
  * Return:    Success:    Pointer to H5O_loc_t
  *        Failure:    NULL
- *
- * Programmer:    James Laird
- *        July 25 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1849,9 +1766,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Monday, September 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1863,7 +1777,7 @@ H5O_loc_reset(H5O_loc_t *loc)
     assert(loc);
 
     /* Clear the object location to an empty state */
-    HDmemset(loc, 0, sizeof(H5O_loc_t));
+    memset(loc, 0, sizeof(H5O_loc_t));
     loc->addr = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1876,9 +1790,6 @@ H5O_loc_reset(H5O_loc_t *loc)
  *
  * Return:    Success:    Non-negative
  *            Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1912,9 +1823,6 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
  * Return:    Success:    Non-negative
  *            Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *	        January 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1944,9 +1852,6 @@ H5O_loc_copy_shallow(H5O_loc_t *dst, H5O_loc_t *src)
  *
  * Return:    Success:    Non-negative
  *            Failure:    Negative
- *
- * Programmer:	David Young
- *	        January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -1980,9 +1885,6 @@ H5O_loc_copy_deep(H5O_loc_t *dst, const H5O_loc_t *src)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    James Laird
- *              Wednesday, August 16, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2012,9 +1914,6 @@ H5O_loc_hold_file(H5O_loc_t *loc)
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    James Laird
- *              Wednesday, August 16, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2050,9 +1949,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        September 22 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2068,7 +1964,7 @@ H5O_get_hdr_info(const H5O_loc_t *loc, H5O_hdr_info_t *hdr)
     assert(hdr);
 
     /* Reset the object header info structure */
-    HDmemset(hdr, 0, sizeof(*hdr));
+    memset(hdr, 0, sizeof(*hdr));
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2092,9 +1988,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *        September 22 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -2172,9 +2065,6 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              November 21 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2282,9 +2172,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              November 21 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2309,7 +2196,7 @@ H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fie
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object class")
 
     /* Reset the object info structure */
-    HDmemset(oinfo, 0, sizeof(*oinfo));
+    memset(oinfo, 0, sizeof(*oinfo));
 
     /* Get the information for the object header, if requested */
     if (fields & H5O_NATIVE_INFO_HDR)
@@ -2343,9 +2230,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *        November 28 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2402,9 +2286,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        March 11 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2440,9 +2321,6 @@ done:
  *
  * Return:    Success:    Pointer to object opened
  *        Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *        April 9 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2491,9 +2369,6 @@ done:
  * Return:    Success:    Valid haddr_t
  *        Failure:    HADDR_UNDEF
  *
- * Programmer:    Quincey Koziol
- *        March 15 2007
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -2510,9 +2385,6 @@ H5O_get_oh_addr(const H5O_t *oh)
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_flags
- *
- * Programmer:  Jacob Smith
- *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2531,9 +2403,6 @@ H5O_get_oh_flags(const H5O_t *oh)
  *              caller has verified that accessing this variable is appropriate
  *              to the header in question.
  *
- * Programmer:  Jacob Smith
- *              2018 August 17
- *
  *-------------------------------------------------------------------------
  */
 time_t
@@ -2547,9 +2416,6 @@ H5O_get_oh_mtime(const H5O_t *oh)
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_version
- *
- * Programmer:  Jacob Smith
- *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2569,9 +2435,6 @@ H5O_get_oh_version(const H5O_t *oh)
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *        November  4 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2613,9 +2476,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *            Nov 25, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2635,9 +2495,6 @@ H5O__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSE
  *
  * Return:    Success:        Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *            Nov 25, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2748,9 +2605,6 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:    Quincey Koziol
- *              November 24 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2771,7 +2625,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     FUNC_ENTER_PACKAGE
 
     /* Portably initialize user data struct to zeros */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
 
     /* Check args */
     assert(loc);
@@ -2880,9 +2734,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Jul 13 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2913,9 +2764,6 @@ done:
  * Purpose:    Decrements the reference count on an object header
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -2949,9 +2797,6 @@ done:
  *              object location information.
  *
  * Return:     Non-negative on success/Negative on failure
- *
- * Programmer: Quincey Koziol
- *             Oct 08 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2990,9 +2835,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        July 24 2016
- *
  *-------------------------------------------------------------------------
  */
 H5AC_proxy_entry_t *
@@ -3012,9 +2854,6 @@ H5O_get_proxy(const H5O_t *oh)
  * Purpose:    Destroys an object header.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Jan 15 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -3088,7 +2927,7 @@ H5O__reset_info2(H5O_info2_t *oinfo)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset the passed-in info struct */
-    HDmemset(oinfo, 0, sizeof(H5O_info2_t));
+    memset(oinfo, 0, sizeof(H5O_info2_t));
     oinfo->type  = H5O_TYPE_UNKNOWN;
     oinfo->token = H5O_TOKEN_UNDEF;
 

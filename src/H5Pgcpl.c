@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pgcpl.c
- *			August 29 2006
- *			Quincey Koziol
  *
  * Purpose:		Group creation property list class routines
  *
@@ -110,8 +108,6 @@ static const H5O_linfo_t H5G_def_linfo_g = H5G_CRT_LINK_INFO_DEF;  /* Default li
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -144,8 +140,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 29, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -185,8 +179,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 29, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -230,8 +222,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 29, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -284,8 +274,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 29, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -334,8 +322,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September  6, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -386,8 +372,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September  6, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -428,8 +412,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 12, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -474,8 +456,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 12, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -520,9 +500,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -556,9 +533,6 @@ H5P__gcrt_group_info_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -571,7 +545,7 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Set property to default value */
-    HDmemset(ginfo, 0, sizeof(H5O_ginfo_t));
+    memset(ginfo, 0, sizeof(H5O_ginfo_t));
     *ginfo = H5G_def_ginfo_g;
 
     UINT32DECODE(*pp, ginfo->lheap_size_hint);
@@ -604,9 +578,6 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -646,9 +617,6 @@ H5P__gcrt_link_info_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -667,7 +635,7 @@ H5P__gcrt_link_info_dec(const void **_pp, void *_value)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
 
     /* Set property to default value */
-    HDmemset(linfo, 0, sizeof(H5O_linfo_t));
+    memset(linfo, 0, sizeof(H5O_linfo_t));
     *linfo = H5G_def_linfo_g;
 
     H5_DECODE_UNSIGNED(*pp, crt_order_flags);

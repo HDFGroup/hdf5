@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi
- *              February 2015
- *
  * Purpose: This test opens a file created by the t_pshutdown program
  * and makes sure the objects created are there.
  */
@@ -74,8 +71,8 @@ main(int argc, char **argv)
     VRFY(dims[1] == (hsize_t)(COL_FACTOR * mpi_size), "Wrong dataset dimensions");
 
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(dims[0] * dims[1] * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(dims[0] * dims[1] * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
 
     /* Each process takes a slabs of rows. */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -116,7 +113,7 @@ main(int argc, char **argv)
 
     /* release data buffers */
     if (data_array)
-        HDfree(data_array);
+        free(data_array);
 
     nerrors += GetTestNumErrs();
 

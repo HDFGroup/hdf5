@@ -71,9 +71,6 @@ static herr_t H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequen
  *
  * Return:	Negative on error, non-negative on success
  *
- * Programmer:	James Laird
- *              Monday, January 8, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -90,7 +87,7 @@ H5SM__compare_cb(const void *obj, size_t obj_len, void *_udata)
         udata->ret = -1;
     else
         /* Sizes are the same.  Return result of memcmp */
-        udata->ret = HDmemcmp(udata->key->encoding, obj, obj_len);
+        udata->ret = memcmp(udata->key->encoding, obj, obj_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM__compare_cb() */
@@ -105,9 +102,6 @@ H5SM__compare_cb(const void *obj, size_t obj_len, void *_udata)
  *              1 if this is the message we're searching for (with memcmp
  *                      result returned in udata)
  *              negative on error
- *
- * Programmer:	James Laird
- *              Wednesday, February 7, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -146,7 +140,7 @@ H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
                                 "unable to encode object header message")
 
             assert(udata->key->encoding_size <= mesg->raw_size);
-            udata->ret = HDmemcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);
+            udata->ret = memcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);
         } /* end else */
 
         /* Indicate that we found the message we were looking for */
@@ -167,9 +161,6 @@ done:
  * Return:	0 if rec1 == rec2
  *              Negative if rec1 < rec2
  *              Positive if rec1 > rec2
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -270,9 +261,6 @@ done:
  * Return:	Non-negative on success
  *              Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -312,9 +300,6 @@ H5SM__message_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
  *
  * Return:	Non-negative on success
  *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
  *
  *-------------------------------------------------------------------------
  */

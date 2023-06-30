@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFspace.c
- *			May  2 2006
- *			Quincey Koziol
  *
  * Purpose:		Space allocation routines for fractal heaps.
  *
@@ -78,9 +76,6 @@
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		May  2 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -139,9 +134,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		May 15 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -181,9 +173,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		May  2 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -229,9 +218,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Feb 24 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -273,9 +259,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Feb 23 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -309,9 +292,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		Feb 24 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -362,9 +342,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Feb 24 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -398,9 +375,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		August 14 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -442,9 +416,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		July 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -477,9 +448,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		May  2 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -528,9 +496,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -561,9 +526,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		July 10 2006
  *
  *-------------------------------------------------------------------------
  */

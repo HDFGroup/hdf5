@@ -749,9 +749,6 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
  * Return:    Success: Non-negative
  *        Failure: Negative
  *
- * Programmer:  Xiaowen Wu
- *              Friday, February 4, 2005
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -800,9 +797,6 @@ done:
  *
  * Return:    Success: id number of integer type
  *        Failure: 0
- *
- * Programmer:    Xiaowen Wu
- *              Wednesday, April 13, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -874,9 +868,6 @@ done:
  * Return:    Success: Non-negative
  *        Failure: Negative
  *
- * Programmer:  Xiaowen Wu
- *              Monday, March 7, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -925,9 +916,6 @@ done:
  * Return:    Success: Non-negative
  *        Failure: Negative
  *
- * Programmer:    Xiaowen Wu
- *              Friday, February 4, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -959,7 +947,7 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Initialize the parameters to a known state */
-    HDmemset(cd_values, 0, sizeof(cd_values));
+    memset(cd_values, 0, sizeof(cd_values));
 
     /* Get the filter's current parameters */
     if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SCALEOFFSET, &flags, &cd_nelmts, cd_values, (size_t)0,
@@ -1102,9 +1090,6 @@ done:
  *
  * Return:    Success: Size of buffer filtered
  *        Failure: 0
- *
- * Programmer:    Xiaowen Wu
- *              Monday, February 7, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1349,7 +1334,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         /* (Looks like an error in the original determination of how many
          *      bytes would be needed for parameters. - QAK, 2010/08/19)
          */
-        HDmemset(outbuf + 13, 0, (size_t)8);
+        memset(outbuf + 13, 0, (size_t)8);
 
         /* special case: minbits equal to full precision */
         if (minbits == p.size * 8) {

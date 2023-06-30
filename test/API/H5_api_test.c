@@ -286,7 +286,7 @@ main(int argc, char **argv)
     }
 
 done:
-    HDfree(vol_connector_string_copy);
+    free(vol_connector_string_copy);
 
     if (default_con_id >= 0 && H5VLclose(default_con_id) < 0) {
         fprintf(stderr, "Unable to close VOL connector ID\n");
@@ -309,5 +309,5 @@ done:
     MPI_Finalize();
 #endif
 
-    HDexit(((err_occurred || n_tests_failed_g > 0) ? EXIT_FAILURE : EXIT_SUCCESS));
+    exit(((err_occurred || n_tests_failed_g > 0) ? EXIT_FAILURE : EXIT_SUCCESS));
 }

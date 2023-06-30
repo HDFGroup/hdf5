@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EA.c
- *			Jun 17 2008
- *			Quincey Koziol
  *
  * Purpose:		Implements an "extensible array" for storing elements
  *                      in an array whose high bounds can extend and shrink.
@@ -107,9 +105,6 @@ H5FL_BLK_DEFINE_STATIC(ea_native_elmt);
  * Return:	Pointer to earray wrapper success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 10 2016
- *
  *-------------------------------------------------------------------------
  */
 static H5EA_t *
@@ -172,9 +167,6 @@ done:
  * Return:	Pointer to earray wrapper on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Jun 17 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_t *
@@ -221,9 +213,6 @@ done:
  * Return:	Pointer to array wrapper on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 28 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_t *
@@ -261,9 +250,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 21 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -287,9 +273,6 @@ H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts)
  * Purpose:	Query the address of the array
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -316,9 +299,6 @@ H5EA_get_addr(const H5EA_t *ea, haddr_t *addr)
  *              given element in the array.
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -659,9 +639,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -724,9 +701,6 @@ done:
  * Purpose:	Get an element of an extensible array
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -791,9 +765,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May 27 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -837,9 +808,6 @@ done:
  * Purpose:	Close an extensible array
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -940,9 +908,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 28 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -990,8 +955,6 @@ done:
  *		(copied and modified from FA_iterate() in H5FA.c)
  *
  * Return:      H5_ITER_CONT/H5_ITER_ERROR
- *
- * Programmer:  Vailin Choi; Feb 2015
  *
  *-------------------------------------------------------------------------
  */

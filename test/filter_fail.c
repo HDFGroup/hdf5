@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              7 September 2010
- *
  * Purpose:     Make sure dataset, file, and library can close properly when a
  *              mandatory filter fails.
  */
@@ -49,9 +46,6 @@ const H5Z_class2_t H5Z_FAIL_TEST[1] = {{
  *
  * Return:	Success:	Data chunk size
  *		Failure:	0
- *
- * Programmer:	Raymond Lu
- *              7 September 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -93,9 +87,6 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned 
  * Return:
  *              Success:         0
  *              Failure:         -1
- *
- * Programmer:  Raymond Lu
- *              25 August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -229,9 +220,6 @@ error:
  *              Success:         0
  *              Failure:         -1
  *
- * Programmer:  Raymond Lu
- *              25 August 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -269,7 +257,7 @@ test_filter_read(char *file_name, hid_t my_fapl)
         TEST_ERROR;
 
     /* Read the chunks */
-    HDmemset(rbuf, 0, DIM * sizeof(int));
+    memset(rbuf, 0, DIM * sizeof(int));
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR;
 
@@ -296,8 +284,8 @@ test_filter_read(char *file_name, hid_t my_fapl)
     if ((sid = H5Dget_space(dataset)) < 0)
         TEST_ERROR;
 
-    HDmemset(hs_offset, 0, sizeof(hs_offset));
-    HDmemset(hs_size, 0, sizeof(hs_size));
+    memset(hs_offset, 0, sizeof(hs_offset));
+    memset(hs_size, 0, sizeof(hs_size));
     hs_size[0] = DIM / 2;
 
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, stride, hs_size, NULL) < 0)
@@ -307,12 +295,12 @@ test_filter_read(char *file_name, hid_t my_fapl)
     if ((mspace = H5Screate_simple(1, dims, NULL)) < 0)
         TEST_ERROR;
 
-    HDmemset(zero, 0, sizeof zero);
+    memset(zero, 0, sizeof zero);
 
     if (H5Sselect_hyperslab(mspace, H5S_SELECT_SET, zero, stride, &nelmts, NULL) < 0)
         TEST_ERROR;
 
-    HDmemset(rbuf, 0, DIM * sizeof(int));
+    memset(rbuf, 0, DIM * sizeof(int));
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR;
 
@@ -367,9 +355,6 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Raymond Lu
- *              25 August 2010
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -416,11 +401,11 @@ main(void)
     if (nerrors)
         TEST_ERROR;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 } /* end main() */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Ddeprec.c
- *		April 5 2007
- *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5D interface.  These
  *              functions are here for compatibility purposes and may be
@@ -94,9 +92,6 @@
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Robb Matzke
- *		Wednesday, December  3, 1997
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -166,9 +161,6 @@ done:
  * Return:      Success:    A new dataset ID
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -223,9 +215,6 @@ done:
  * Note:        Deprecated in favor of H5Dset_extent
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Friday, January 30, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -311,9 +300,6 @@ done:
  *      correct allocation/free methods for the VL data in the buffer.
  *
  * Return:  Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, June 10, 1999
  *
  *-------------------------------------------------------------------------
  */

@@ -56,8 +56,6 @@
  *         o The Reader will see all new data written by Writer.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Created: Albert Cheng, 2013/5/28 */
-
 #include "h5test.h"
 
 /* This test uses many POSIX things that are not available on
@@ -78,7 +76,7 @@ int
 setup_parameters(int argc, char *const argv[], options_t *opts)
 {
     /* use case defaults */
-    HDmemset(opts, 0, sizeof(options_t));
+    memset(opts, 0, sizeof(options_t));
     opts->chunksize   = Chunksize_DFT;
     opts->use_swmr    = TRUE; /* use swmr open */
     opts->iterations  = 1;
@@ -185,17 +183,17 @@ main(int argc, char *argv[])
             printf("%d: launch reader process\n", mypid);
             if ((UC_opts.fapl_id = h5_fileaccess()) < 0) {
                 fprintf(stderr, "can't create read FAPL\n");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             if (read_uc_file(send_wait, &UC_opts) < 0) {
                 fprintf(stderr, "read_uc_file encountered error\n");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             if (H5Pclose(UC_opts.fapl_id) < 0) {
                 fprintf(stderr, "can't close read FAPL\n");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
     }
 

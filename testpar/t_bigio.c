@@ -474,7 +474,7 @@ dataset_big_write(void)
     B_DATATYPE *wdata;
 
     /* allocate memory for data buffer */
-    wdata = (B_DATATYPE *)HDmalloc(bigcount * sizeof(B_DATATYPE));
+    wdata = (B_DATATYPE *)malloc(bigcount * sizeof(B_DATATYPE));
     VRFY_G((wdata != NULL), "wdata malloc succeeded");
 
     /* setup file access template */
@@ -697,7 +697,7 @@ dataset_big_write(void)
 
     num_points = bigcount;
 
-    coords = (hsize_t *)HDmalloc(num_points * RANK * sizeof(hsize_t));
+    coords = (hsize_t *)malloc(num_points * RANK * sizeof(hsize_t));
     VRFY_G((coords != NULL), "coords malloc succeeded");
 
     set_coords(start, count, stride, block, num_points, coords, IN_ORDER);
@@ -746,7 +746,7 @@ dataset_big_write(void)
     ret = H5Dclose(dataset);
     VRFY_G((ret >= 0), "H5Dclose1 succeeded");
 
-    HDfree(wdata);
+    free(wdata);
     H5Fclose(fid);
 }
 
@@ -779,12 +779,12 @@ dataset_big_read(void)
     herr_t      ret; /* Generic return value */
 
     /* allocate memory for data buffer */
-    rdata = (B_DATATYPE *)HDmalloc(bigcount * sizeof(B_DATATYPE));
+    rdata = (B_DATATYPE *)malloc(bigcount * sizeof(B_DATATYPE));
     VRFY_G((rdata != NULL), "rdata malloc succeeded");
-    wdata = (B_DATATYPE *)HDmalloc(bigcount * sizeof(B_DATATYPE));
+    wdata = (B_DATATYPE *)malloc(bigcount * sizeof(B_DATATYPE));
     VRFY_G((wdata != NULL), "wdata malloc succeeded");
 
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
 
     /* setup file access template */
     acc_tpl = H5Pcreate(H5P_FILE_ACCESS);
@@ -864,7 +864,7 @@ dataset_big_read(void)
 
     if (mpi_rank_g == 0)
         printf("\nRead Testing Dataset2 by ROW\n");
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
     dataset = H5Dopen2(fid, DATASET2, H5P_DEFAULT);
     VRFY_G((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -927,7 +927,7 @@ dataset_big_read(void)
 
     if (mpi_rank_g == 0)
         printf("\nRead Testing Dataset3 read select ALL proc 0, NONE others\n");
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
     dataset = H5Dopen2(fid, DATASET3, H5P_DEFAULT);
     VRFY_G((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -1017,7 +1017,7 @@ dataset_big_read(void)
 
     num_points = bigcount;
 
-    coords = (hsize_t *)HDmalloc(num_points * RANK * sizeof(hsize_t));
+    coords = (hsize_t *)malloc(num_points * RANK * sizeof(hsize_t));
     VRFY_G((coords != NULL), "coords malloc succeeded");
 
     set_coords(start, count, stride, block, num_points, coords, IN_ORDER);
@@ -1028,7 +1028,7 @@ dataset_big_read(void)
     VRFY_G((ret >= 0), "H5Sselect_elements succeeded");
 
     if (coords)
-        HDfree(coords);
+        free(coords);
 
     /* create a memory dataspace */
     /* Warning: H5Screate_simple requires an array of hsize_t elements
@@ -1065,8 +1065,8 @@ dataset_big_read(void)
     ret = H5Dclose(dataset);
     VRFY_G((ret >= 0), "H5Dclose1 succeeded");
 
-    HDfree(wdata);
-    HDfree(rdata);
+    free(wdata);
+    free(rdata);
 
     wdata = NULL;
     rdata = NULL;
@@ -1093,9 +1093,9 @@ dataset_big_read(void)
 
     /* release data buffers */
     if (rdata)
-        HDfree(rdata);
+        free(rdata);
     if (wdata)
-        HDfree(wdata);
+        free(wdata);
 
 } /* dataset_large_readAll */
 
@@ -1150,7 +1150,7 @@ single_rank_independent_io(void)
         VRFY_G((ret >= 0), "H5Dwrite succeeded");
 
         /* Wipe buffer */
-        HDmemset(data, 0, dims[0] * sizeof(int));
+        memset(data, 0, dims[0] * sizeof(int));
 
         /* Read data back */
         ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, H5P_DEFAULT, data);
@@ -1238,9 +1238,6 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1289,9 +1286,6 @@ coll_chunk1(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1339,9 +1333,6 @@ coll_chunk2(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1397,9 +1388,6 @@ coll_chunk3(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1443,7 +1431,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     dims[1] = space_dim2;
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY_G((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* set up dimensions of the slab this process accesses */
@@ -1451,7 +1439,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 
     /* set up the coords array selection */
     num_points = block[0] * block[1] * count[0] * count[1];
-    coords     = (hsize_t *)HDmalloc(num_points * RANK * sizeof(hsize_t));
+    coords     = (hsize_t *)malloc(num_points * RANK * sizeof(hsize_t));
     VRFY_G((coords != NULL), "coords malloc succeeded");
     point_set(start, count, stride, block, num_points, coords, mode);
 
@@ -1710,16 +1698,16 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     VRFY_G((status >= 0), "");
 
     if (data_array1)
-        HDfree(data_array1);
+        free(data_array1);
 
     /* Use collective read to verify the correctness of collective write. */
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY_G((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* allocate memory for data buffer */
-    data_origin1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_origin1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY_G((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     acc_plist = create_faccess_plist(comm, info, facc_type);
@@ -1842,11 +1830,11 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 
     /* release data buffers */
     if (coords)
-        HDfree(coords);
+        free(coords);
     if (data_array1)
-        HDfree(data_array1);
+        free(data_array1);
     if (data_origin1)
-        HDfree(data_origin1);
+        free(data_origin1);
 }
 
 int

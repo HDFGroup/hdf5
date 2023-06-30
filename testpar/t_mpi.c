@@ -70,7 +70,7 @@ test_mpio_overlap_writes(char *filename)
     }
 
     bufsize = 4093; /* use some prime number for size */
-    if (NULL == (buf = HDmalloc((size_t)bufsize))) {
+    if (NULL == (buf = malloc((size_t)bufsize))) {
         if (MAINPROCESS)
             printf("couldn't allocate buffer\n");
         return 1;
@@ -166,7 +166,7 @@ test_mpio_overlap_writes(char *filename)
     mrc = MPI_Barrier(MPI_COMM_WORLD);
     VRFY((mrc == MPI_SUCCESS), "Sync before leaving test");
 
-    HDfree(buf);
+    free(buf);
 
     return (nerrs);
 }
@@ -282,7 +282,7 @@ test_mpio_gb_file(char *filename)
                "because MPI_Offset cannot support it\n");
     }
     else {
-        buf = (char *)HDmalloc(MB);
+        buf = (char *)malloc(MB);
         VRFY((buf != NULL), "malloc succeed");
 
         /* open a new file. Remove it first in case it exists. */
@@ -399,7 +399,7 @@ test_mpio_gb_file(char *filename)
 
 finish:
     if (buf)
-        HDfree(buf);
+        free(buf);
     return (nerrs);
 }
 
@@ -455,7 +455,7 @@ test_mpio_1wMr(char *filename, int special_request)
     /* show the hostname so that we can tell where the processes are running */
     if (VERBOSE_DEF) {
 #ifdef H5_HAVE_GETHOSTNAME
-        if (HDgethostname(hostname, sizeof(hostname)) < 0) {
+        if (gethostname(hostname, sizeof(hostname)) < 0) {
             printf("gethostname failed\n");
             hostname[0] = '\0';
         }

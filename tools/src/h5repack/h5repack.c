@@ -71,7 +71,7 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
 {
     int k, n;
 
-    HDmemset(options, 0, sizeof(pack_opt_t));
+    memset(options, 0, sizeof(pack_opt_t));
     options->min_comp   = 0;
     options->verbose    = verbose;
     options->latest     = latest;
@@ -132,7 +132,7 @@ h5repack_addfilter(const char *str, pack_opt_t *options)
         n = options->n_filter_g++; /* increase # of global filters */
         if (options->n_filter_g > H5_REPACK_MAX_NFILTERS) {
             error_msg("maximum number of filters exceeded for <%s>\n", str);
-            HDfree(obj_list);
+            free(obj_list);
             return -1;
         }
 
@@ -141,7 +141,7 @@ h5repack_addfilter(const char *str, pack_opt_t *options)
     else
         options_add_filter(obj_list, n_objs, filter, options->op_tbl);
 
-    HDfree(obj_list);
+    free(obj_list);
     return 0;
 } /* end h5repack_addfilter() */
 
@@ -195,7 +195,7 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
         if (options->all_layout == 0)
             ret_value = options_add_layout(obj_list, n_objs, &pack, options->op_tbl);
 
-        HDfree(obj_list);
+        free(obj_list);
         ret_value = 0;
     } /* end if obj_list exists */
 
@@ -253,13 +253,13 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
         for (i = 0; i < travt->nobjs; i++) {
             if (travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE) {
                 /* Push onto the stack */
-                if (NULL == (dt = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
+                if (NULL == (dt = (named_dt_t *)malloc(sizeof(named_dt_t))))
                     H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "buffer allocation failed failed");
                 dt->next         = *named_dt_head_p;
                 *named_dt_head_p = dt;
 
                 /* Update the token/address and id */
-                HDmemcpy(&dt->obj_token, &travt->objs[i].obj_token, sizeof(H5O_token_t));
+                memcpy(&dt->obj_token, &travt->objs[i].obj_token, sizeof(H5O_token_t));
                 dt->id_out = H5I_INVALID_HID;
 
                 /* Check if this type is the one requested */
@@ -276,13 +276,13 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
      */
     if (!dt_ret) {
         /* Push the new datatype onto the stack */
-        if (NULL == (dt_ret = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
+        if (NULL == (dt_ret = (named_dt_t *)malloc(sizeof(named_dt_t))))
             H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "buffer allocation failed failed");
         dt_ret->next     = *named_dt_head_p;
         *named_dt_head_p = dt_ret;
 
         /* Update the token/address and id */
-        HDmemcpy(&dt_ret->obj_token, &oinfo.token, sizeof(H5O_token_t));
+        memcpy(&dt_ret->obj_token, &oinfo.token, sizeof(H5O_token_t));
         dt_ret->id_out = H5I_INVALID_HID;
     } /* end if requested datatype not found */
 
@@ -330,7 +330,7 @@ named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err)
         if (H5Tclose(dt->id_out) < 0 && !ignore_err)
             H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
         dt = dt->next;
-        HDfree(*named_dt_head_p);
+        free(*named_dt_head_p);
         *named_dt_head_p = dt;
     }
 
@@ -481,9 +481,9 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
              *-----------------------------------------------------------------
              */
 
-            buf = (void *)HDmalloc((size_t)(nelmts * msize));
+            buf = (void *)malloc((size_t)(nelmts * msize));
             if (buf == NULL) {
-                H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
+                H5TOOLS_GOTO_ERROR((-1), "malloc failed");
             } /* end if */
             if (options->verbose == 2) {
                 H5_timer_init(&timer);
@@ -526,7 +526,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             if (TRUE == h5tools_detect_vlen(wtype_id))
                 H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
 
-            HDfree(buf);
+            free(buf);
             buf = NULL;
         } /*H5T_REFERENCE*/
 
@@ -566,7 +566,7 @@ done:
                 H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
 
             /* Free buf */
-            HDfree(buf);
+            free(buf);
         }
 
         H5Aclose(attr_out);
@@ -854,7 +854,7 @@ check_objects(const char *fname, pack_opt_t *options)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
                         if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
-                        HDmemset(dims, 0, sizeof dims);
+                        memset(dims, 0, sizeof dims);
                         if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
                         for (j = 0; j < rank; j++)

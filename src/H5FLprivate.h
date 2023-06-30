@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5FLprivate.h
- *			Mar 23 2000
- *			Quincey Koziol
  *
  * Purpose:		Private non-prototype header.
  *

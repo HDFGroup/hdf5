@@ -76,7 +76,6 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
 /*
  * Function:    error
  * Purpose:     Display error message and exit.
- * Programmer:  Bill Wendling, 05. June 2002
  */
 static void
 error(const char *fmt, ...)
@@ -90,21 +89,20 @@ error(const char *fmt, ...)
     H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     fprintf(stderr, "\n");
     va_end(ap);
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 /*
  * Function:    cleanup
  * Purpose:     Cleanup the output file.
  * Returns:     Nothing
- * Programmer:  Bill Wendling, 06. June 2002
  */
 static void
 cleanup(void)
 {
     if (!HDgetenv(HDF5_NOCLEANUP))
         HDunlink(filename);
-    HDfree(filename);
+    free(filename);
 }
 
 static void
@@ -117,7 +115,7 @@ write_file(Bytef *source, uLongf sourceLen)
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
     destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1)) + 12;
-    dest    = (Bytef *)HDmalloc(destLen);
+    dest    = (Bytef *)malloc(destLen);
 
     if (!dest)
         error("out of memory");
@@ -151,7 +149,7 @@ write_file(Bytef *source, uLongf sourceLen)
         d_ptr += rc;
     }
 
-    HDfree(dest);
+    free(dest);
 }
 
 /*
@@ -161,7 +159,6 @@ write_file(Bytef *source, uLongf sourceLen)
  *              Z_MEM_ERROR     - not enough memory
  *              Z_BUF_ERROR     - not enough room in the output buffer
  *              Z_STREAM_ERROR  - level parameter is invalid
- * Programmer:  Bill Wendling, 05. June 2002
  */
 static void
 compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
@@ -194,7 +191,6 @@ compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceL
  * Purpose:     Create a new file who's name doesn't conflict with
  *              pre-existing files.
  * Returns:     Nothing
- * Programmer:  Bill Wendling, 06. June 2002
  */
 #define ZIP_PERF_FILE "zip_perf.data"
 static void
@@ -211,9 +207,9 @@ get_unique_name(void)
 
     if (prefix)
         /* 2 = 1 for '/' + 1 for null terminator */
-        filename = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
+        filename = (char *)malloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
     else
-        filename = (char *)HDmalloc(HDstrlen(ZIP_PERF_FILE) + 1);
+        filename = (char *)malloc(HDstrlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
@@ -230,7 +226,6 @@ get_unique_name(void)
  * Function:    usage
  * Purpose:     Print a usage message and then exit.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 05. June 2002
  */
 static void
 usage(void)
@@ -258,7 +253,7 @@ usage(void)
     fprintf(stdout, "\n");
     fprintf(stdout, "      Example: 37M = 37 Megabytes = %d bytes\n", 37 * ONE_MB);
     fprintf(stdout, "\n");
-    HDfflush(stdout);
+    fflush(stdout);
 }
 
 /*
@@ -272,7 +267,6 @@ usage(void)
  * Return:      The size as a size_t because this is related to buffer size.
  *              If an unknown size indicator is used, then the program will
  *              exit with EXIT_FAILURE as the return value.
- * Programmer:  Bill Wendling, 05. June 2002
  */
 static unsigned long
 parse_size_directive(const char *size)
@@ -280,7 +274,7 @@ parse_size_directive(const char *size)
     unsigned long s;
     char         *endptr;
 
-    s = HDstrtoul(size, &endptr, 10);
+    s = strtoul(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -348,7 +342,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     if (compress_percent) {
         size_t s = (size_t)((src_len * (uLongf)compress_percent) / 100);
 
-        HDmemset(src, '\0', s);
+        memset(src, '\0', s);
     }
 }
 
@@ -364,7 +358,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
         unsigned long i, iters;
 
         iters = file_size / src_len;
-        src   = (Bytef *)HDcalloc(1, sizeof(Bytef) * src_len);
+        src   = (Bytef *)calloc(1, sizeof(Bytef) * src_len);
 
         if (!src) {
             cleanup();
@@ -452,7 +446,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
         fprintf(stdout, "\tCompression Time: %gs\n", compression_time);
 
         HDunlink(filename);
-        HDfree(src);
+        free(src);
     }
 }
 
@@ -460,7 +454,6 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
  * Function:    main
  * Purpose:     Run the program
  * Return:      EXIT_SUCCESS or EXIT_FAILURE
- * Programmer:  Bill Wendling, 05. June 2002
  */
 int
 main(int argc, char *argv[])
@@ -495,7 +488,7 @@ main(int argc, char *argv[])
                 min_buf_size = parse_size_directive(H5_optarg);
                 break;
             case 'c':
-                compress_percent = (int)HDstrtol(H5_optarg, NULL, 10);
+                compress_percent = (int)strtol(H5_optarg, NULL, 10);
 
                 if (compress_percent < 0)
                     compress_percent = 0;
@@ -547,7 +540,6 @@ main(int argc, char *argv[])
  * Purpose:     Dummy main() function for if HDF5 was configured without
  *              zlib stuff.
  * Return:      EXIT_SUCCESS
- * Programmer:  Bill Wendling, 10. June 2002
  */
 int
 main(void)

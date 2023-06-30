@@ -31,7 +31,6 @@ namespace H5 {
 //--------------------------------------------------------------------------
 // Function:    ArrayType default constructor
 ///\brief       Default constructor: Creates a stub ArrayType
-// Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::ArrayType() : DataType()
 {
@@ -42,7 +41,6 @@ ArrayType::ArrayType() : DataType()
 ///\brief       Creates an ArrayType object using an existing id.
 ///\param       existing_id - IN: Id of an existing datatype
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const hid_t existing_id) : DataType(existing_id)
 {
@@ -51,7 +49,6 @@ ArrayType::ArrayType(const hid_t existing_id) : DataType(existing_id)
 //--------------------------------------------------------------------------
 // Function:    ArrayType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
-// Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const ArrayType &original) : DataType(original)
 {
@@ -65,7 +62,6 @@ ArrayType::ArrayType(const ArrayType &original) : DataType(original)
 ///\param       ndims     - IN: Rank of the array, [0..H5S_MAX_RANK]
 ///\param       dims      - IN: Size of each array dimension
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const DataType &base_type, int ndims, const hsize_t *dims) : DataType()
 {
@@ -88,7 +84,6 @@ ArrayType::ArrayType(const DataType &base_type, int ndims, const hsize_t *dims) 
 ///\param       loc        - IN: Location of the type
 ///\param       dtype_name - IN: Array type name
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Dec 2016
 // Description
 //              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openArrayType(const char*) to
@@ -107,7 +102,6 @@ ArrayType::ArrayType(const H5Location &loc, const char *dtype_name) : DataType()
 ///\param       loc        - IN: Location of the type
 ///\param       dtype_name - IN: Array type name
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Dec 2016
 // Description
 //              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openArrayType(const H5std_string&)
@@ -128,7 +122,6 @@ ArrayType::ArrayType(const H5Location &loc, const H5std_string &dtype_name) : Da
 // Description
 //              Closes the id on the lhs object first with setId, then copies
 //              each data member from the rhs object. (Issue HDFFV-9562)
-// Programmer   Binh-Minh Ribler - Mar 2016
 //--------------------------------------------------------------------------
 ArrayType &
 ArrayType::operator=(const ArrayType &rhs)
@@ -153,7 +146,6 @@ ArrayType::operator=(const ArrayType &rhs)
 ///             binary object description of this type.
 ///
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
 DataType *
 ArrayType::decode() const
@@ -175,7 +167,6 @@ ArrayType::decode() const
 ///\brief       Returns the number of dimensions for an array datatype.
 ///\return      Number of dimensions
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 int
 ArrayType::getArrayNDims() const
@@ -195,7 +186,6 @@ ArrayType::getArrayNDims() const
 ///\param       dims - OUT: Sizes of dimensions
 ///\return      Number of dimensions
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 int
 ArrayType::getArrayDims(hsize_t *dims) const
@@ -212,7 +202,6 @@ ArrayType::getArrayDims(hsize_t *dims) const
 //--------------------------------------------------------------------------
 // Function:    ArrayType destructor
 ///\brief       Properly terminates access to this array datatype.
-// Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::~ArrayType()
 {

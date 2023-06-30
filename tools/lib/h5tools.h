@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, July 23, 1998
- *
  * Purpose:     Support functions for the various tools.
  */
 #ifndef H5TOOLS_H
@@ -33,7 +30,7 @@
 /* Stream macros */
 #define FLUSHSTREAM(S)                                                                                       \
     if (S != NULL)                                                                                           \
-    HDfflush(S)
+    fflush(S)
 #define PRINTSTREAM(S, F, ...)                                                                               \
     if (S != NULL)                                                                                           \
     fprintf(S, F, __VA_ARGS__)

@@ -169,7 +169,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
     /* Currently fill values do not work because they can bump the dataspace
      * message to the second object header chunk.  We should enable the fillval
      * here when this is fixed.  -NAF 8/11/11 */
-    HDmemset(&fillval, 0, sizeof(fillval));
+    memset(&fillval, 0, sizeof(fillval));
     fillval.rec_id = (uint64_t)ULLONG_MAX;
     if (H5Pset_fill_value(dcpl, tid, &fillval) < 0)
         return -1;
@@ -253,7 +253,7 @@ usage(void)
     printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
     printf("seed (no -r given).\n");
     printf("\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end usage() */
 
 int
@@ -276,7 +276,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* Compress dataset chunks */
                     case 'c':
-                        comp_level = HDatoi(argv[u + 1]);
+                        comp_level = atoi(argv[u + 1]);
                         if (comp_level < -1 || comp_level > 9)
                             usage();
                         u += 2;
@@ -293,7 +293,7 @@ main(int argc, char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;
-                        temp     = HDatoi(argv[u + 1]);
+                        temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();
                         else
@@ -347,7 +347,7 @@ main(int argc, char *argv[])
     /* Generate file skeleton */
     if (gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
         fprintf(stderr, "Error generating skeleton file!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

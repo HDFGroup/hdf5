@@ -148,9 +148,6 @@ static herr_t H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg,
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec  4 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -193,9 +190,6 @@ done:
  * Purpose:     Create a new attribute in the object header.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Friday, December  8, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -389,9 +383,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -433,9 +424,6 @@ done:
  * Purpose:     Open an existing attribute in an object header.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Monday, December 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -533,9 +521,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec 18 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -565,9 +550,6 @@ done:
  *              an index.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Monday, December 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -637,9 +619,6 @@ done:
  * Return:      TRUE:	found the already opened object
  *              FALSE:  didn't find the opened object
  *              FAIL:	function failed.
- *
- * Programmer:	Raymond Lu
- *		23 June 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -715,9 +694,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Jan  2 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -787,9 +763,6 @@ done:
  *              attribute stored compactly.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Dec  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -870,9 +843,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, December  4, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -945,9 +915,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec  5 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -989,9 +956,6 @@ H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
  *              Something for later...
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Dec  5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1115,9 +1079,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, December  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1200,9 +1161,6 @@ done:
  * Purpose:     Internal routine to iterate over attributes for an object.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, December  5, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1287,9 +1245,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, December  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1322,19 +1277,14 @@ done:
  *
  * Purpose:     Check for reverting from dense to compact attribute storage
  *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, February 14, 2007
- *
- * Modification:Raymond Lu
- *              24 June 2008
  *              When converting storage from dense to compact, if found
  *              the attribute is already opened, use the opened message
  *              to insert.  If not, still use the message in the attribute
  *              table. This will guarantee that the attribute message is
  *              shared between the object in metadata cache and the opened
  *              object.
+ *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1451,9 +1401,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1496,9 +1443,6 @@ done:
  * Purpose:     Delete an attribute on an object.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Monday, December 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1577,9 +1521,6 @@ done:
  *              an index.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, February 14, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1668,9 +1609,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  9, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1722,9 +1660,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1758,9 +1693,6 @@ H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/, unsig
  * Purpose:     Determine if an attribute with a particular name exists on an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Monday, December 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1824,9 +1756,6 @@ done:
  * Purpose:     For 1.8 attribute, returns storage amount for btree and fractal heap
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              June 19, 2007
  *
  *-------------------------------------------------------------------------
  */

@@ -13,9 +13,6 @@
 /*
  * This verifies if the storage space allocation methods are compatible between
  * serial and parallel modes.
- *
- * Created by: Christian Chilan and Albert Cheng
- * Date: 2006/05/25
  */
 
 #include "hdf5.h"
@@ -115,7 +112,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
         VRFY((dataset >= 0), "");
 
         if (write_pattern == sec_last) {
-            HDmemset(buffer, 100, CHUNK_SIZE);
+            memset(buffer, 100, CHUNK_SIZE);
 
             count[0]  = 1;
             stride[0] = 1;
@@ -241,7 +238,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
         /* all chunks are written by all the processes in an interleaved way*/
         case write_all:
 
-            HDmemset(buffer, mpi_rank + 1, CHUNK_SIZE);
+            memset(buffer, mpi_rank + 1, CHUNK_SIZE);
             count[0]  = 1;
             stride[0] = 1;
             block[0]  = chunk_dims[0];
@@ -375,7 +372,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
     block[0]  = chunk_dims[0];
     for (i = 0; i < nchunks; i++) {
         /* reset buffer values */
-        HDmemset(buffer, -1, CHUNK_SIZE);
+        memset(buffer, -1, CHUNK_SIZE);
 
         offset[0] = (hsize_t)i * chunk_dims[0];
 

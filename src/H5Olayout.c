@@ -779,11 +779,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Wednesday, October  8, 1997
- *
  * Note:
- *      Quincey Koziol, 2004-5-21
  *      We write out version 3 messages by default now.
  *
  *-------------------------------------------------------------------------
@@ -819,7 +815,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 if (mesg->storage.u.compact.buf)
                     H5MM_memcpy(p, mesg->storage.u.compact.buf, mesg->storage.u.compact.size);
                 else
-                    HDmemset(p, 0, mesg->storage.u.compact.size);
+                    memset(p, 0, mesg->storage.u.compact.size);
                 p += mesg->storage.u.compact.size;
             } /* end if */
             break;
@@ -941,9 +937,6 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  Robb Matzke
- *              Wednesday, October  8, 1997
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1028,9 +1021,6 @@ done:
  *
  *              Failure:        0
  *
- * Programmer:  Robb Matzke
- *              Wednesday, October  8, 1997
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -1059,9 +1049,6 @@ H5O__layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
  *              the message itself.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Friday, September 13, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1098,9 +1085,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Saturday, March 11, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1126,9 +1110,6 @@ H5O__layout_free(void *_mesg)
  * Purpose:     Free file space referenced by message
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, March 19, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1188,8 +1169,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Vailin Choi; Dec 2017
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1223,9 +1202,6 @@ done:
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
- *
- * Programmer:  Peter Cao
- *              July 23, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1330,9 +1306,6 @@ done:
  * Purpose:     Prints debugging info for a message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Wednesday, October  8, 1997
  *
  *-------------------------------------------------------------------------
  */

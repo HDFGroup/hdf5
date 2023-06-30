@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Centry.c
- *              May 8 2023
- *              Quincey Koziol
  *
  * Purpose:     Routines which operate on cache entries.
  *
@@ -81,9 +79,6 @@ static herr_t H5C__serialize_ring(H5F_t *f, H5C_ring_t ring);
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *        an attempt to flush a protected item.
- *
- *
- * Programmer:  John Mainzer, 10/7/04
  *
  *-------------------------------------------------------------------------
  */
@@ -336,9 +331,6 @@ done:
  * Return:      Non-negative on success/Negative on failure or if there was
  *              an attempt to flush a protected item.
  *
- *
- * Programmer:  John Mainzer, 11/18/04
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -417,8 +409,6 @@ done:
  *        buffer.
  *
  * Return:      SUCCEED on success/FAIL on failure.
- *
- * Programmer:  John Mainzer, 11/22/04
  *
  *-------------------------------------------------------------------------
  */
@@ -503,8 +493,6 @@ done:
  *        we have to make space in the cache.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 11/22/04
  *
  *-------------------------------------------------------------------------
  */
@@ -683,8 +671,6 @@ done:
  *
  * Return:      SUCCEED on success/FAIL on failure.
  *
- * Programmer:  John Mainzer, 11/19/04
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -737,8 +723,6 @@ done:
  *              as inactive.
  *
  * Return:      SUCCEED on success/FAIL on failure.
- *
- * Programmer:  John Mainzer, 11/22/04
  *
  *-------------------------------------------------------------------------
  */
@@ -801,8 +785,6 @@ done:
  *        cache_ptr->resize_ctl.epochs_before_eviction.
  *
  * Return:      SUCCEED on success/FAIL on failure.
- *
- * Programmer:  John Mainzer, 11/19/04
  *
  *-------------------------------------------------------------------------
  */
@@ -868,8 +850,6 @@ done:
  *              the full cache hit rate statistics, and exit.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 12/31/07
  *
  *-------------------------------------------------------------------------
  */
@@ -1002,9 +982,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *        a request to flush all items and something was protected.
- *
- * Programmer:  John Mainzer
- *        3/24/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1149,9 +1126,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *              a request to flush all items and something was protected.
- *
- * Programmer:  John Mainzer
- *              9/1/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1592,9 +1566,6 @@ done:
  * Return:      Non-negative on success/Negative on failure or if there was
  *              a request to flush all items and something was protected.
  *
- * Programmer:  John Mainzer
- *              9/1/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1851,8 +1822,6 @@ done:
  *        Observe that this function cannot occasion a read.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/14/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2140,9 +2109,6 @@ done:
  * Return:      Non-negative on success/Negative on failure or if there was
  *        a request to flush all items and something was protected.
  *
- * Programmer:  John Mainzer
- *        7/22/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2314,9 +2280,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *              a request to flush all items and something was protected.
- *
- * Programmer:  John Mainzer
- *              9/11/15
  *
  *-------------------------------------------------------------------------
  */

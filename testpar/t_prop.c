@@ -35,7 +35,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         ret = H5Pencode2(orig_pl, NULL, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
-        sbuf = (uint8_t *)HDmalloc(buf_size);
+        sbuf = (uint8_t *)malloc(buf_size);
 
         ret = H5Pencode2(orig_pl, sbuf, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
@@ -53,7 +53,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
 
         MPI_Recv(&recv_size, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
         buf_size = (size_t)recv_size;
-        rbuf     = (uint8_t *)HDmalloc(buf_size);
+        rbuf     = (uint8_t *)malloc(buf_size);
         MPI_Recv(rbuf, recv_size, MPI_BYTE, 0, 124, MPI_COMM_WORLD, &status);
 
         pl = H5Pdecode(rbuf);
@@ -65,7 +65,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         VRFY((ret >= 0), "H5Pclose succeeded");
 
         if (NULL != rbuf)
-            HDfree(rbuf);
+            free(rbuf);
     } /* end if */
 
     if (0 == mpi_rank) {
@@ -80,7 +80,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
     }
 
     if (NULL != sbuf)
-        HDfree(sbuf);
+        free(sbuf);
 
     MPI_Barrier(MPI_COMM_WORLD);
     return 0;

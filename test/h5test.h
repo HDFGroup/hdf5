@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, November 20, 1998
- *
  * Purpose:     Test support stuff.
  */
 #ifndef H5TEST_H
@@ -105,36 +102,36 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 #define TESTING(WHAT)                                                                                        \
     do {                                                                                                     \
         printf("Testing %-62s", WHAT);                                                                       \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
         n_tests_run_g++;                                                                                     \
     } while (0)
 #define TESTING_2(WHAT)                                                                                      \
     do {                                                                                                     \
         printf("  Testing %-60s", WHAT);                                                                     \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
         n_tests_run_g++;                                                                                     \
     } while (0)
 #define PASSED()                                                                                             \
     do {                                                                                                     \
         HDputs(" PASSED");                                                                                   \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
         n_tests_passed_g++;                                                                                  \
     } while (0)
 #define H5_FAILED()                                                                                          \
     do {                                                                                                     \
         HDputs("*FAILED*");                                                                                  \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
         n_tests_failed_g++;                                                                                  \
     } while (0)
 #define H5_WARNING()                                                                                         \
     do {                                                                                                     \
         HDputs("*WARNING*");                                                                                 \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #define SKIPPED()                                                                                            \
     do {                                                                                                     \
         HDputs(" -SKIP-");                                                                                   \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
         n_tests_skipped_g++;                                                                                 \
     } while (0)
 #define PUTS_ERROR(s)                                                                                        \
@@ -176,7 +173,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
     do {                                                                                                     \
         printf("Testing %-62s", WHAT);                                                                       \
         HDputs("");                                                                                          \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 
 /*
@@ -266,7 +263,7 @@ extern "C" {
  * an equivalent non-const pointer around) is far messier.
  */
 #ifndef h5_free_const
-#define h5_free_const(mem) HDfree((void *)(uintptr_t)mem)
+#define h5_free_const(mem) free((void *)(uintptr_t)mem)
 #endif
 
 /* Generally useful testing routines */

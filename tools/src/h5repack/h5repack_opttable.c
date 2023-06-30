@@ -104,7 +104,7 @@ aux_inctable(pack_opttbl_t *table, unsigned n_objs)
     int      ret_value = 0;
 
     table->size += n_objs;
-    table->objs = (pack_info_t *)HDrealloc(table->objs, table->size * sizeof(pack_info_t));
+    table->objs = (pack_info_t *)realloc(table->objs, table->size * sizeof(pack_info_t));
     if (table->objs == NULL) {
         H5TOOLS_INFO("not enough memory for options table");
         ret_value = -1;
@@ -132,14 +132,14 @@ options_table_init(pack_opttbl_t **tbl)
     pack_opttbl_t *table;
     int            ret_value = 0;
 
-    if (NULL == (table = (pack_opttbl_t *)HDmalloc(sizeof(pack_opttbl_t)))) {
+    if (NULL == (table = (pack_opttbl_t *)malloc(sizeof(pack_opttbl_t)))) {
         H5TOOLS_GOTO_ERROR((-1), "not enough memory for options table");
     }
 
     table->size   = 30;
     table->nelems = 0;
-    if (NULL == (table->objs = (pack_info_t *)HDmalloc(table->size * sizeof(pack_info_t)))) {
-        HDfree(table);
+    if (NULL == (table->objs = (pack_info_t *)malloc(table->size * sizeof(pack_info_t)))) {
+        free(table);
         H5TOOLS_GOTO_ERROR((-1), "not enough memory for options table");
     }
 
@@ -163,8 +163,8 @@ done:
 int
 options_table_free(pack_opttbl_t *table)
 {
-    HDfree(table->objs);
-    HDfree(table);
+    free(table->objs);
+    free(table);
     return 0;
 }
 
@@ -200,7 +200,7 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
                     /* already chunk info inserted for this one; exit */
                     if (table->objs[i].chunk.rank > 0) {
                         H5TOOLS_INFO("chunk information already inserted for <%s>\n", obj_list[j].obj);
-                        HDexit(EXIT_FAILURE);
+                        exit(EXIT_FAILURE);
                     }
                     /* insert the layout info */
                     else {

@@ -11,10 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Vailin Choi; Feb 2015
- */
-
-/*
  * We include the private header file so we can get to the uniform
  * programming environment it declares.
  * HDF5 API functions (except for H5G_basename())
@@ -178,7 +174,7 @@ leave(int ret)
 {
     h5tools_close();
 
-    HDexit(ret);
+    exit(ret);
 } /* leave() */
 
 /*-------------------------------------------------------------------------
@@ -453,9 +449,9 @@ done:
     } /* end if */
 
     if (fname_g)
-        HDfree(fname_g);
+        free(fname_g);
     if (dname_g)
-        HDfree(dname_g);
+        free(dname_g);
 
     leave(h5tools_getstatus());
 

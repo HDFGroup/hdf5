@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFdblock.c
- *			Apr 10 2006
- *			Quincey Koziol
  *
  * Purpose:		Direct block routines for fractal heaps.
  *
@@ -75,9 +73,6 @@ H5FL_DEFINE(H5HF_direct_t);
  *
  * Return:	Pointer to new direct block on success, NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 27 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -104,7 +99,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fractal heap direct block")
 
     /* Reset the metadata cache info for the heap header */
-    HDmemset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common heap information */
     dblock->hdr = hdr;
@@ -134,7 +129,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     /* XXX: Change to using free-list factories */
     if ((dblock->blk = H5FL_BLK_MALLOC(direct_block, dblock->size)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(dblock->blk, 0, dblock->size);
+    memset(dblock->blk, 0, dblock->size);
 
     dblock->write_buf  = NULL;
     dblock->write_size = 0;
@@ -208,9 +203,6 @@ done:
  *              caller.
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		May 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -321,9 +313,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Mar 13 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -420,9 +409,6 @@ done:
  *
  * Return:	Pointer to direct block on success, NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Apr 17 2006
- *
  *-------------------------------------------------------------------------
  */
 H5HF_direct_t *
@@ -500,9 +486,6 @@ done:
  * Purpose:	Locate a direct block in a managed heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		May  8 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -609,9 +592,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -671,9 +651,6 @@ done:
  * Purpose:	Destroys a fractal heap direct block in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
  */

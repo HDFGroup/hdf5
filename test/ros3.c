@@ -19,9 +19,6 @@
  *     at the VFL (virtual file layer) level.
  *
  *     Demonstrates basic use cases and fapl/dxpl interaction.
- *
- * Programmer: Jacob Smith
- *             2017-10-11
  */
 
 #include "h5test.h"
@@ -72,9 +69,6 @@
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *****************************************************************************/
 
 /*----------------------------------------------------------------------------
@@ -98,9 +92,6 @@
  *     Similar to `H5_FAILED(); AT();` from h5test.h
  *
  *     *FAILED* at somefile.c:12 in function_name()...
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -127,9 +118,6 @@
  *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
  *     similar to `TEST_ERROR` in h5test.h
  *
- * Programmer: Jacob Smith
- *             2017-10-23
- *
  *----------------------------------------------------------------------------
  */
 #define FAIL_IF(condition)                                                                                   \
@@ -154,9 +142,6 @@
  *     `FAIL_UNLESS( 5 == my_op() )`
  *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
  *         (see JSVERIFY)
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -187,9 +172,6 @@
  *     *FAILED* at myfile.c:488 in somefunc()...
  *       ! Expected 425
  *       ! Actual   3
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -233,9 +215,6 @@ jserr_long(long expected, long actual, const char *reason)
  *     !!! Actual:
  *     not what I expected at all
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 static inline void
@@ -268,9 +247,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(expected, actual, reason)                                                                   \
@@ -289,9 +265,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     If equal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -312,9 +285,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
@@ -332,8 +302,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(actual, expected, reason)                                                                   \
@@ -345,8 +313,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(actual, expected, reason)                                                               \
@@ -358,8 +324,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
@@ -423,9 +387,6 @@ H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, FALSE, "", "", "
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             2017-10-23
  *
  *---------------------------------------------------------------------------
  */
@@ -561,7 +522,7 @@ test_fapl_config_validation(void)
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -650,9 +611,6 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  John Mainzer
- *              7/12/17
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -724,9 +682,6 @@ error:
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             1027-11-03
  *
  *---------------------------------------------------------------------------
  */
@@ -842,7 +797,7 @@ test_vfd_open(void)
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -955,9 +910,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-08
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -985,14 +937,14 @@ test_eof_eoa(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1078,9 +1030,6 @@ error:
  *     Demonstrate a not-obvious constraint by the library, preventing
  *     file read before EoA is set
  *
- * Programmer: Jacob Smith
- *             2018-01-26
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -1096,14 +1045,14 @@ test_H5FDread_without_eoa_set_fails(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1177,9 +1126,6 @@ error:
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             2017-11-06
  *
  *---------------------------------------------------------------------------
  */
@@ -1270,14 +1216,14 @@ test_read(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1384,9 +1330,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-06
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1414,7 +1357,7 @@ test_noops_and_autofails(void)
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1502,9 +1445,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-06
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1534,14 +1474,14 @@ test_cmp(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1630,9 +1570,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-07
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1658,14 +1595,14 @@ test_H5F_integration(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1712,7 +1649,7 @@ error:
      * CLEANUP *
      ***********/
     printf("\nerror!");
-    HDfflush(stdout);
+    fflush(stdout);
 
     if (fapl_id >= 0) {
         H5E_BEGIN_TRY
@@ -1738,9 +1675,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: 1
- *
- * Programmer:  Jacob Smith
- *              2017-10-23
  *
  *-------------------------------------------------------------------------
  */

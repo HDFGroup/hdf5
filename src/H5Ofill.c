@@ -403,9 +403,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Feb 26, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -499,9 +496,6 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -532,9 +526,6 @@ H5O__fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
  *
  * Return:    Success:    Ptr to _DEST
  *            Failure:    NULL
- *
- * Programmer:  Raymond Lu
- *              Feb 26, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -652,9 +643,6 @@ done:
  * Return:    Success:    Message data size in bytes w/o alignment.
  *          Failure:    0
  *
- * Programmer:  Raymond Lu
- *              Feb 26, 2002
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -699,9 +687,6 @@ H5O__fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
  * Return:      Success:        Message data size in bytes w/o alignment.
  *              Failure:        0
  *
- * Programmer:  Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -722,9 +707,6 @@ H5O__fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
  * Purpose:    Resets dynamic fill value fields
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Monday, January 22, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -788,9 +770,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -820,9 +799,6 @@ H5O__fill_reset(void *_fill)
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Thursday, December 5, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -845,8 +821,6 @@ H5O__fill_free(void *fill)
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Vailin Choi; Dec 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -878,9 +852,6 @@ done:
  * Purpose:    Prints debugging info for the message.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -981,9 +952,6 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream, int in
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1076,8 +1044,6 @@ done:
  * Purpose:     Set the version to encode a fill value with.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */

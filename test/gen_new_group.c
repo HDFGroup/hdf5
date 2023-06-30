@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Oct 24, 2005
- *
  * Purpose:     This program is run to generate an HDF5 data file with both
  *              empty and compact groups.
  *

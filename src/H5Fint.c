@@ -3071,8 +3071,6 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; December 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3213,7 +3211,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_le
         tmp_size = H5F_SUPER_STATUS_FLAGS_SIZE(file->shared->sblock->super_vers);
 
         /* Clear "status_flags" */
-        HDmemset((uint8_t *)buf_ptr + tmp, 0, tmp_size);
+        memset((uint8_t *)buf_ptr + tmp, 0, tmp_size);
     } /* end if */
 
     /* Set *image_len = to EOA */
@@ -3245,7 +3243,7 @@ H5F__get_info(H5F_t *f, H5F_info2_t *finfo)
     assert(finfo);
 
     /* Reset file info struct */
-    HDmemset(finfo, 0, sizeof(*finfo));
+    memset(finfo, 0, sizeof(*finfo));
 
     /* Get the size of the superblock and any superblock extensions */
     if (H5F__super_size(f, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
@@ -3338,7 +3336,7 @@ H5F_set_retries(H5F_t *f)
     assert(f);
 
     /* Initialize the tracking for metadata read retries */
-    HDmemset(f->shared->retries, 0, sizeof(f->shared->retries));
+    memset(f->shared->retries, 0, sizeof(f->shared->retries));
 
     /* Initialize the # of bins for retries */
     f->shared->retries_nbins = 0;
@@ -3526,7 +3524,7 @@ H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info)
     info->nbins = file->shared->retries_nbins;
 
     /* Initialize the array of "retries" */
-    HDmemset(info->retries, 0, sizeof(info->retries));
+    memset(info->retries, 0, sizeof(info->retries));
 
     /* Return if there are no bins -- no retries */
     if (!info->nbins)

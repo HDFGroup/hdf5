@@ -184,11 +184,11 @@ H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     if (H5_IS_BUFFER_OVERFLOW(p, 16, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     for (int i = 0; i < 14; i++)
-        if (!HDisdigit(p[i]))
+        if (!isdigit(p[i]))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
 
     /* Convert YYYYMMDDhhmmss UTC to a time_t. */
-    HDmemset(&tm, 0, sizeof tm);
+    memset(&tm, 0, sizeof tm);
     tm.tm_year  = (p[0] - '0') * 1000 + (p[1] - '0') * 100 + (p[2] - '0') * 10 + (p[3] - '0') - 1900;
     tm.tm_mon   = (p[4] - '0') * 10 + (p[5] - '0') - 1;
     tm.tm_mday  = (p[6] - '0') * 10 + (p[7] - '0');
@@ -217,9 +217,6 @@ done:
  * Purpose:	Encodes a new modification time message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jan  3 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -257,9 +254,6 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -293,9 +287,6 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
  * Return:	Success:	Ptr to _DEST
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -335,9 +326,6 @@ done:
  *
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *		Jan  3 2002
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -365,9 +353,6 @@ H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disabl
  *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
- *		Jul 14 1998
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -390,9 +375,6 @@ H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, March 30, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -413,9 +395,6 @@ H5O__mtime_free(void *mesg)
  * Purpose:	Prints debugging info for the message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -88,9 +88,6 @@ H5FL_DEFINE(H5D_copy_file_ud_t);
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 21, 2005
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -115,9 +112,6 @@ done:
  *		object header from file to file.
  *
  * Return:	<none>
- *
- * Programmer:	Quincey Koziol
- *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -161,9 +155,6 @@ H5O__dset_free_copy_file_udata(void *_udata)
  *		Failure:	FAIL if the existence of certain messages
  *				cannot be determined.
  *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -199,9 +190,6 @@ done:
  *
  * Return:	Success:	Open object identifier
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -263,9 +251,6 @@ done:
  * Return:	Success:	Pointer to the dataset data structure
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, April 11, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -312,9 +297,6 @@ done:
  * Return:	Success:	Pointer to object header location
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static H5O_loc_t *
@@ -345,9 +327,6 @@ done:
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi
- *              July 11, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -399,7 +378,7 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
 
     if (exists && H5D__efl_is_space_alloc(&layout.storage)) {
         /* Start with clean EFL info */
-        HDmemset(&efl, 0, sizeof(efl));
+        memset(&efl, 0, sizeof(efl));
 
         /* Get External File List message from the object header */
         if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_EFL_ID, &efl))
@@ -428,9 +407,6 @@ done:
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi
- *              February 2012
  *
  *-------------------------------------------------------------------------
  */

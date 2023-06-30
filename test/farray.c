@@ -116,7 +116,7 @@ static herr_t
 init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(*cparam));
+    memset(cparam, 0, sizeof(*cparam));
 
     cparam->cls                       = H5FA_CLS_TEST;
     cparam->raw_elmt_size             = ELMT_SIZE;
@@ -320,7 +320,7 @@ create_array(H5F_t *f, const H5FA_create_t *cparam, H5FA_t **fa, haddr_t *fa_add
         TEST_ERROR;
 
     /* Check array stats */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = FA_HDR_SIZE;
     state.nelmts   = cparam->nelmts;
     if (check_stats(*fa, &state))
@@ -348,7 +348,7 @@ verify_cparam(const H5FA_t *fa, const H5FA_create_t *cparam)
     H5FA_create_t test_cparam; /* Creation parameters for array */
 
     /* Retrieve creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5FA_create_t));
+    memset(&test_cparam, 0, sizeof(H5FA_create_t));
     if (H5FA__get_cparam_test(fa, &test_cparam) < 0)
         FAIL_STACK_ERROR;
 
@@ -437,7 +437,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         H5FA_create_t test_cparam; /* Creation parameters for array */
 
         /* Set invalid element size */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.raw_elmt_size = 0;
         H5E_BEGIN_TRY
         {
@@ -454,7 +454,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid max. # of elements bits */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = 0;
         H5E_BEGIN_TRY
         {
@@ -471,7 +471,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid max. # of elements */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.nelmts = 0;
         H5E_BEGIN_TRY
         {
@@ -713,9 +713,6 @@ error:
  *
  * Return:	Success:	0
  *		Failure:	1
- *
- * Programmer:	Quincey Koziol
- *              Friday, December 18, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -982,7 +979,7 @@ fiter_fw_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_para
     fiter_fw_t *fiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_fw_t *)HDmalloc(sizeof(fiter_fw_t));
+    fiter = (fiter_fw_t *)malloc(sizeof(fiter_fw_t));
     assert(fiter);
 
     /* Initialize the element iteration object */
@@ -1034,7 +1031,7 @@ fiter_term(void *fiter)
     assert(fiter);
 
     /* Free iteration object */
-    HDfree(fiter);
+    free(fiter);
 
     return (0);
 } /* end fiter_term() */
@@ -1068,7 +1065,7 @@ fiter_rv_init(const H5FA_create_t *cparam, const farray_test_param_t H5_ATTR_UNU
     fiter_rv_t *fiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_rv_t *)HDmalloc(sizeof(fiter_rv_t));
+    fiter = (fiter_rv_t *)malloc(sizeof(fiter_rv_t));
     assert(fiter);
 
     /* Initialize reverse iteration info */
@@ -1134,11 +1131,11 @@ fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_rnd_t *)HDmalloc(sizeof(fiter_rnd_t));
+    fiter = (fiter_rnd_t *)malloc(sizeof(fiter_rnd_t));
     assert(fiter);
 
     /* Allocate space for the array of shuffled indices */
-    fiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
+    fiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
     assert(fiter->idx);
 
     /* Initialize reverse iteration info */
@@ -1209,10 +1206,10 @@ fiter_rnd_term(void *_fiter)
     assert(fiter->idx);
 
     /* Free shuffled index array */
-    HDfree(fiter->idx);
+    free(fiter->idx);
 
     /* Free iteration object */
-    HDfree(fiter);
+    free(fiter);
 
     return (0);
 } /* end fiter_rnd_term() */
@@ -1248,7 +1245,7 @@ fiter_cyc_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     fiter_cyc_t *fiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_cyc_t *)HDmalloc(sizeof(fiter_cyc_t));
+    fiter = (fiter_cyc_t *)malloc(sizeof(fiter_cyc_t));
     assert(fiter);
 
     /* Initialize reverse iteration info */
@@ -1302,8 +1299,6 @@ static const farray_iter_t fa_iter_cyc = {
  *
  * Return:	Success:	0
  *		Failure:	1
- *
- * Programmer:  Vailin Choi; 6th August, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1385,7 +1380,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
         TEST_ERROR;
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size  = FA_HDR_SIZE;
     state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
@@ -1456,7 +1451,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
     } /* end for */
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
     if (check_stats(fa, &state))
         TEST_ERROR;
@@ -1540,7 +1535,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
         TEST_ERROR;
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size  = FA_HDR_SIZE;
     state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
@@ -1565,7 +1560,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
         FAIL_STACK_ERROR;
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
     if (check_stats(fa, &state))
         TEST_ERROR;
@@ -1676,7 +1671,7 @@ main(void)
     for (curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; curr_test++) {
 
         /* Initialize the testing parameters */
-        HDmemset(&tparam, 0, sizeof(tparam));
+        memset(&tparam, 0, sizeof(tparam));
         tparam.nelmts = TEST_NELMTS;
 
         /* Set appropriate testing parameters for each test */
@@ -1792,7 +1787,7 @@ main(void)
     /* Clean up file used */
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("*** TESTS FAILED ***");
@@ -1806,5 +1801,5 @@ error:
     if (api_ctx_pushed)
         H5CX_pop(FALSE);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

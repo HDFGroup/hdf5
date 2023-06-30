@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAiblock.c
- *			Sep  9 2008
- *			Quincey Koziol
  *
  * Purpose:		Index block routines for extensible arrays.
  *
@@ -85,9 +83,6 @@ H5FL_SEQ_DEFINE_STATIC(haddr_t);
  *
  * Return:	Non-NULL pointer to index block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_iblock_t *
@@ -155,9 +150,6 @@ done:
  * Purpose:	Creates a new extensible array index block in the file
  *
  * Return:	Valid file address on success/HADDR_UNDEF on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -273,9 +265,6 @@ done:
  *
  * Return:	Non-NULL pointer to index block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_iblock_t *
@@ -332,9 +321,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -363,9 +349,6 @@ done:
  * Purpose:	Delete index block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -450,9 +433,6 @@ done:
  * Purpose:	Destroys an extensible array index block in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */

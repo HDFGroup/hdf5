@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Odbg.c
- *			Nov 17 2006
- *			Quincey Koziol
  *
  * Purpose:		Object header debugging routines.
  *
@@ -74,9 +72,6 @@
  *
  * Return:      SUCCEED (Doesn't fail, just crashes)
  *
- * Programmer:	Quincey Koziol
- *		Oct 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -117,7 +112,7 @@ H5O__assert(const H5O_t *oh)
         /* Version specific checks */
         if (oh->version > H5O_VERSION_1) {
             /* Make certain that the magic number is correct for each chunk */
-            assert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
+            assert(!memcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
 
             /* Check for valid gap size */
             assert(oh->chunk[u].gap < (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
@@ -228,9 +223,6 @@ H5O__assert(const H5O_t *oh)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 13 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -266,9 +258,6 @@ done:
  * Purpose:     Prints debugging info about an object header.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Robb Matzke
- *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -500,9 +489,6 @@ done:
  * Purpose:	Prints debugging info about an object header.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */

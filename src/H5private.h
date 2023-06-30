@@ -614,32 +614,8 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
 #endif
-#ifndef HDalarm
-#define HDalarm(N) alarm(N)
-#endif
 #ifndef HDasctime
 #define HDasctime(T) asctime(T)
-#endif
-#ifndef HDasprintf
-#define HDasprintf asprintf /*varargs*/
-#endif
-#ifndef HDatexit
-#define HDatexit(F) atexit(F)
-#endif
-#ifndef HDatof
-#define HDatof(S) atof(S)
-#endif
-#ifndef HDatoi
-#define HDatoi(S) atoi(S)
-#endif
-#ifndef HDatol
-#define HDatol(S) atol(S)
-#endif
-#ifndef HDatoll
-#define HDatoll(S) atoll(S)
-#endif
-#ifndef HDcalloc
-#define HDcalloc(N, Z) calloc(N, Z)
 #endif
 #ifndef HDceil
 #define HDceil(X) ceil(X)
@@ -649,9 +625,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDclock
 #define HDclock() clock()
-#endif
-#ifndef HDclock_gettime
-#define HDclock_gettime(CID, TS) clock_gettime(CID, TS)
 #endif
 #ifndef HDclose
 #define HDclose(F) close(F)
@@ -668,12 +641,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDdifftime
 #define HDdifftime(X, Y) difftime(X, Y)
 #endif
-#ifndef HDexit
-#define HDexit(N) exit(N)
-#endif
-#ifndef HD_exit
-#define HD_exit(N) _exit(N)
-#endif
 #ifndef HDfabs
 #define HDfabs(X) fabs(X)
 #endif
@@ -683,23 +650,8 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDfabsl
 #define HDfabsl(X) fabsl(X)
 #endif
-#ifndef HDfclose
-#define HDfclose(F) fclose(F)
-#endif
-#ifndef HDfcntl
-#define HDfcntl(F, C, ...) fcntl(F, C, __VA_ARGS__)
-#endif
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
-#endif
-#ifndef HDfeof
-#define HDfeof(F) feof(F)
-#endif
-#ifndef HDferror
-#define HDferror(F) ferror(F)
-#endif
-#ifndef HDfflush
-#define HDfflush(F) fflush(F)
 #endif
 #ifndef HDfgetc
 #define HDfgetc(F) fgetc(F)
@@ -739,20 +691,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfloor
 #define HDfloor(X) floor(X)
 #endif
-#ifndef HDfopen
-#define HDfopen(S, M) fopen(S, M)
-#endif
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
 #endif
 #ifndef HDfputs
 #define HDfputs(S, F) fputs(S, F)
-#endif
-#ifndef HDfread
-#define HDfread(M, Z, N, F) fread(M, Z, N, F)
-#endif
-#ifndef HDfree
-#define HDfree(M) free(M)
 #endif
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
@@ -778,9 +721,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDftruncate
 #define HDftruncate(F, L) ftruncate(F, L)
 #endif
-#ifndef HDfwrite
-#define HDfwrite(M, Z, N, F) fwrite(M, Z, N, F)
-#endif
 #ifndef HDgetc
 #define HDgetc(F) getc(F)
 #endif
@@ -799,14 +739,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgetenv
 #define HDgetenv(S) getenv(S)
 #endif
-#ifndef HDgethostname
-#define HDgethostname(N, L) gethostname(N, L)
-#endif
 #ifndef HDgetpid
 #define HDgetpid() getpid()
-#endif
-#ifndef HDgetrusage
-#define HDgetrusage(X, S) getrusage(X, S)
 #endif
 
 /* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
@@ -820,44 +754,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgmtime
 #define HDgmtime(T) gmtime(T)
 #endif
-#ifndef HDisalnum
-#define HDisalnum(C) isalnum((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisalpha
-#define HDisalpha(C) isalpha((int)(C)) /* Cast for Solaris warning */
-#endif
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
 #endif
-#ifndef HDiscntrl
-#define HDiscntrl(C) iscntrl((int)(C)) /* Cast for solaris warning */
-#endif
-#ifndef HDisdigit
-#define HDisdigit(C) isdigit((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisgraph
-#define HDisgraph(C) isgraph((int)(C)) /* Cast for Solaris warning*/
-#endif
-#ifndef HDislower
-#define HDislower(C) islower((int)(C)) /* Cast for Solaris warning */
-#endif
 #ifndef HDisnan
 #define HDisnan(X) isnan(X)
-#endif
-#ifndef HDisprint
-#define HDisprint(C) isprint((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDispunct
-#define HDispunct(C) ispunct((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisspace
-#define HDisspace(C) isspace((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisupper
-#define HDisupper(C) isupper((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisxdigit
-#define HDisxdigit(C) isxdigit((int)(C)) /* Cast for Solaris warning */
 #endif
 #ifndef HDlabs
 #define HDlabs(X) labs(X)
@@ -900,24 +801,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDlstat
 #define HDlstat(S, B) lstat(S, B)
-#endif
-#ifndef HDmalloc
-#define HDmalloc(Z) malloc(Z)
-#endif
-#ifndef HDposix_memalign
-#define HDposix_memalign(P, A, Z) posix_memalign(P, A, Z)
-#endif
-#ifndef HDmemcmp
-#define HDmemcmp(X, Y, Z) memcmp(X, Y, Z)
-#endif
-#ifndef HDmemcpy
-#define HDmemcpy(X, Y, Z) memcpy(X, Y, Z)
-#endif
-#ifndef HDmemmove
-#define HDmemmove(X, Y, Z) memmove((char *)(X), (const char *)(Y), Z)
-#endif
-#ifndef HDmemset
-#define HDmemset(X, C, Z) memset(X, C, Z)
 #endif
 #ifndef HDmkdir
 #define HDmkdir(S, M) mkdir(S, M)
@@ -1003,9 +886,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDreaddir
 #define HDreaddir(D) readdir(D)
-#endif
-#ifndef HDrealloc
-#define HDrealloc(M, Z) realloc(M, Z)
 #endif
 #ifndef HDrealpath
 #define HDrealpath(F1, F2) realpath(F1, F2)
@@ -1131,9 +1011,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrstr
 #define HDstrstr(X, Y) strstr(X, Y)
 #endif
-#ifndef HDstrtod
-#define HDstrtod(S, R) strtod(S, R)
-#endif
 #ifndef HDstrtok
 #define HDstrtok(X, Y) strtok(X, Y)
 #endif
@@ -1158,6 +1035,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDsymlink
 #define HDsymlink(F1, F2) symlink(F1, F2)
 #endif
+
 #ifndef HDtime
 #define HDtime(T) time(T)
 #endif
@@ -1306,8 +1184,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define H5_DIR_SEPC              '\\'
 #define H5_DIR_SEPS              "\\"
 #define H5_CHECK_DELIMITER(SS)   ((SS == H5_DIR_SEPC) || (SS == H5_DIR_SLASH_SEPC))
-#define H5_CHECK_ABSOLUTE(NAME)  ((HDisalpha(NAME[0])) && (NAME[1] == ':') && (H5_CHECK_DELIMITER(NAME[2])))
-#define H5_CHECK_ABS_DRIVE(NAME) ((HDisalpha(NAME[0])) && (NAME[1] == ':'))
+#define H5_CHECK_ABSOLUTE(NAME)  ((isalpha(NAME[0])) && (NAME[1] == ':') && (H5_CHECK_DELIMITER(NAME[2])))
+#define H5_CHECK_ABS_DRIVE(NAME) ((isalpha(NAME[0])) && (NAME[1] == ':'))
 #define H5_CHECK_ABS_PATH(NAME)  (H5_CHECK_DELIMITER(NAME[0]))
 
 #define H5_GET_LAST_DELIMITER(NAME, ptr)                                                                     \
@@ -1545,34 +1423,34 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
  *        Handles H5XY_.
  */
 #define H5_IS_API(S)                                                                                         \
-    ('_' != ((const char *)S)[2]                  /* underscore at position 2     */                         \
-     && '_' != ((const char *)S)[3]               /* underscore at position 3     */                         \
-     && !(                                        /* NOT              */                                     \
-          ((const char *)S)[4]                    /* pos 4 exists     */                                     \
-          && (HDisupper(S[3]) || HDisdigit(S[3])) /* pos 3 dig | uc   */                                     \
-          && '_' == ((const char *)S)[4]          /* pos 4 underscore */                                     \
+    ('_' != ((const char *)S)[2]              /* underscore at position 2     */                             \
+     && '_' != ((const char *)S)[3]           /* underscore at position 3     */                             \
+     && !(                                    /* NOT              */                                         \
+          ((const char *)S)[4]                /* pos 4 exists     */                                         \
+          && (isupper(S[3]) || isdigit(S[3])) /* pos 3 dig | uc   */                                         \
+          && '_' == ((const char *)S)[4]      /* pos 4 underscore */                                         \
           ))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a public API function */
 #define H5_IS_PUB(S)                                                                                         \
-    (((HDisdigit(S[1]) || HDisupper(S[1])) && HDislower(S[2])) ||                                            \
-     ((HDisdigit(S[2]) || HDisupper(S[2])) && HDislower(S[3])) ||                                            \
-     (!S[4] || ((HDisdigit(S[3]) || HDisupper(S[3])) && HDislower(S[4]))))
+    (((isdigit(S[1]) || isupper(S[1])) && islower(S[2])) ||                                                  \
+     ((isdigit(S[2]) || isupper(S[2])) && islower(S[3])) ||                                                  \
+     (!S[4] || ((isdigit(S[3]) || isupper(S[3])) && islower(S[4]))))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a private library function */
 #define H5_IS_PRIV(S)                                                                                        \
-    (((HDisdigit(S[1]) || HDisupper(S[1])) && '_' == S[2] && HDislower(S[3])) ||                             \
-     ((HDisdigit(S[2]) || HDisupper(S[2])) && '_' == S[3] && HDislower(S[4])) ||                             \
-     ((HDisdigit(S[3]) || HDisupper(S[3])) && '_' == S[4] && HDislower(S[5])))
+    (((isdigit(S[1]) || isupper(S[1])) && '_' == S[2] && islower(S[3])) ||                                   \
+     ((isdigit(S[2]) || isupper(S[2])) && '_' == S[3] && islower(S[4])) ||                                   \
+     ((isdigit(S[3]) || isupper(S[3])) && '_' == S[4] && islower(S[5])))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a package private function */
 #define H5_IS_PKG(S)                                                                                         \
-    (((HDisdigit(S[1]) || HDisupper(S[1])) && '_' == S[2] && '_' == S[3] && HDislower(S[4])) ||              \
-     ((HDisdigit(S[2]) || HDisupper(S[2])) && '_' == S[3] && '_' == S[4] && HDislower(S[5])) ||              \
-     ((HDisdigit(S[3]) || HDisupper(S[3])) && '_' == S[4] && '_' == S[5] && HDislower(S[6])))
+    (((isdigit(S[1]) || isupper(S[1])) && '_' == S[2] && '_' == S[3] && islower(S[4])) ||                    \
+     ((isdigit(S[2]) || isupper(S[2])) && '_' == S[3] && '_' == S[4] && islower(S[5])) ||                    \
+     ((isdigit(S[3]) || isupper(S[3])) && '_' == S[4] && '_' == S[5] && islower(S[6])))
 
 /* global library version information string */
 extern char H5_lib_vers_info_g[];

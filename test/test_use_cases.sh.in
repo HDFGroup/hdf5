@@ -12,10 +12,6 @@
 #
 # Tests the use cases of swmr features.
 #
-# Created:
-#   Albert Cheng, 2013/06/01.
-# Modified:
-#
 
 # This is work in progress.
 # For now, it shows how to run the test cases programs. It only verifies the

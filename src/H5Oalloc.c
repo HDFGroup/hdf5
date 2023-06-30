@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Oalloc.c
- *			Nov 17 2006
- *			Quincey Koziol
  *
  * Purpose:		Object header allocation routines.
  *
@@ -92,9 +90,6 @@ H5FL_EXTERN(H5O_cont_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Oct 17 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -154,9 +149,9 @@ H5O__add_gap(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t *oh, unsigned chunkno, hbool_
                 oh->mesg[u].raw -= new_gap_size;
 
         /* Slide raw message info forward in chunk image */
-        HDmemmove(new_gap_loc, new_gap_loc + new_gap_size,
-                  (size_t)((oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh))) -
-                           (new_gap_loc + new_gap_size)));
+        memmove(new_gap_loc, new_gap_loc + new_gap_size,
+                (size_t)((oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh))) -
+                         (new_gap_loc + new_gap_size)));
 
         /* Add existing gap size to new gap size */
         new_gap_size += oh->chunk[chunkno].gap;
@@ -184,7 +179,7 @@ H5O__add_gap(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t *oh, unsigned chunkno, hbool_
 
             /* Zero out new null message's raw data */
             if (null_msg->raw_size)
-                HDmemset(null_msg->raw, 0, null_msg->raw_size);
+                memset(null_msg->raw, 0, null_msg->raw_size);
 
             /* Mark message as dirty */
             null_msg->dirty = TRUE;
@@ -216,9 +211,6 @@ done:
  *              locking -QAK)
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Oct 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -273,10 +265,10 @@ H5O__eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg, uint8_t *g
         /* Slide raw message info in chunk image */
         if (null_before_gap)
             /* Slide messages down */
-            HDmemmove(move_start + gap_size, move_start, (size_t)(move_end - move_start));
+            memmove(move_start + gap_size, move_start, (size_t)(move_end - move_start));
         else {
             /* Slide messages up */
-            HDmemmove(move_start - gap_size, move_start, (size_t)(move_end - move_start));
+            memmove(move_start - gap_size, move_start, (size_t)(move_end - move_start));
 
             /* Adjust start of null message */
             mesg->raw -= gap_size;
@@ -284,14 +276,14 @@ H5O__eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg, uint8_t *g
     }
     else if (move_end == move_start && !null_before_gap) {
         /* Slide null message up */
-        HDmemmove(move_start - gap_size, move_start, mesg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
+        memmove(move_start - gap_size, move_start, mesg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
 
         /* Adjust start of null message */
         mesg->raw -= gap_size;
     } /* end if */
 
     /* Zero out addition to null message */
-    HDmemset(mesg->raw + mesg->raw_size, 0, gap_size);
+    memset(mesg->raw + mesg->raw_size, 0, gap_size);
 
     /* Adjust size of null message */
     mesg->raw_size += gap_size;
@@ -313,9 +305,6 @@ H5O__eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg, uint8_t *g
  * Purpose:     Allocate room for a new message from a null message
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 22 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -423,9 +412,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 21 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -454,7 +440,7 @@ H5O__alloc_msgs(H5O_t *oh, size_t min_alloc)
     oh->mesg         = new_mesg;
 
     /* Set new object header info to zeros */
-    HDmemset(&oh->mesg[old_alloc], 0, (oh->alloc_nmesgs - old_alloc) * sizeof(H5O_mesg_t));
+    memset(&oh->mesg[old_alloc], 0, (oh->alloc_nmesgs - old_alloc) * sizeof(H5O_mesg_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -483,8 +469,6 @@ done:
  *				is undefined.
  *
  *		FAIL:		Some internal error has been detected.
- *
- * Programmer:  John Mainzer -- 8/16/05
  *
  *-------------------------------------------------------------------------
  */
@@ -631,13 +615,13 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size, size
     oh->chunk[chunkno].gap = 0;
 
     /* Wipe new space for chunk */
-    HDmemset(oh->chunk[chunkno].image + old_size, 0, oh->chunk[chunkno].size - old_size);
+    memset(oh->chunk[chunkno].image + old_size, 0, oh->chunk[chunkno].size - old_size);
 
     /* Move chunk 0 data up if the size flags changed */
     if (adjust_size_flags)
-        HDmemmove(oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh),
-                  oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh) - extra_prfx_size,
-                  old_size - (size_t)H5O_SIZEOF_HDR(oh) + extra_prfx_size);
+        memmove(oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh),
+                oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh) - extra_prfx_size,
+                old_size - (size_t)H5O_SIZEOF_HDR(oh) + extra_prfx_size);
 
     /* Spin through existing messages, adjusting them */
     for (u = 0; u < oh->nmesgs; u++) {
@@ -708,9 +692,6 @@ done:
  *                              ID or size fields.
  *
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Oct 21 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -858,9 +839,6 @@ H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size_t *size, H5O_
  *
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Oct 21 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -962,7 +940,7 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null, const H5O_
                     if (curr_msg->type->id == H5O_NULL_ID) {
                         /* Delete the null message */
                         if (u < oh->nmesgs - 1)
-                            HDmemmove(curr_msg, curr_msg + 1, ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
+                            memmove(curr_msg, curr_msg + 1, ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
                         oh->nmesgs--;
                     } /* end if */
                     else {
@@ -1058,8 +1036,8 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null, const H5O_
 
                 /* Remove null message from list of messages */
                 if (found_msg->null_msgno < (oh->nmesgs - 1))
-                    HDmemmove(old_null_msg, old_null_msg + 1,
-                              ((oh->nmesgs - 1) - found_msg->null_msgno) * sizeof(H5O_mesg_t));
+                    memmove(old_null_msg, old_null_msg + 1,
+                            ((oh->nmesgs - 1) - found_msg->null_msgno) * sizeof(H5O_mesg_t));
 
                 /* Decrement # of messages */
                 /* (Don't bother reducing size of message array for now -QAK) */
@@ -1139,9 +1117,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Robb Matzke
- *              Aug  7 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1187,9 +1162,6 @@ done:
  *              to allocate.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Oct 21 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1260,9 +1232,6 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
  * Purpose:     Allocate enough space in the object header for this message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1344,9 +1313,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 22 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1381,7 +1347,7 @@ H5O__release_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg, hbool_t adj_link)
     mesg->type = H5O_MSG_NULL;
     assert(mesg->raw + mesg->raw_size <= (oh->chunk[mesg->chunkno].image + oh->chunk[mesg->chunkno].size) -
                                              (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[mesg->chunkno].gap));
-    HDmemset(mesg->raw, 0, mesg->raw_size);
+    memset(mesg->raw, 0, mesg->raw_size);
 
     /* Clear message flags */
     mesg->flags = 0;
@@ -1415,9 +1381,6 @@ done:
  *
  * Return:      Success:        non-negative (TRUE/FALSE)
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi
- *		Feb. 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1535,8 +1498,8 @@ H5O__move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
                 /* Release any information/memory for continuation message */
                 H5O__msg_free_mesg(cont_msg);
                 if (cont_u < (oh->nmesgs - 1))
-                    HDmemmove(&oh->mesg[cont_u], &oh->mesg[cont_u + 1],
-                              ((oh->nmesgs - 1) - cont_u) * sizeof(H5O_mesg_t));
+                    memmove(&oh->mesg[cont_u], &oh->mesg[cont_u + 1],
+                            ((oh->nmesgs - 1) - cont_u) * sizeof(H5O_mesg_t));
                 oh->nmesgs--;
             } /* end else */
 
@@ -1553,8 +1516,8 @@ H5O__move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
 
                         /* Remove from message list */
                         if (v < (oh->nmesgs - 1))
-                            HDmemmove(&oh->mesg[v], &oh->mesg[v + 1],
-                                      ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
+                            memmove(&oh->mesg[v], &oh->mesg[v + 1],
+                                    ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
                         oh->nmesgs--;
                     } /* end if */
                 }     /* end if */
@@ -1584,9 +1547,6 @@ done:
  * Purpose:     Move messages toward first chunk
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1646,9 +1606,9 @@ H5O__move_msgs_forward(H5F_t *f, H5O_t *oh)
                                                 "unable to load object header chunk")
 
                                 /* Copy raw data for non-null message to new location */
-                                HDmemmove(curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
-                                          nonnull_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
-                                          nonnull_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
+                                memmove(curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
+                                        nonnull_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
+                                        nonnull_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
 
                                 /* Adjust non-null message's offset in chunk */
                                 nonnull_msg->raw = curr_msg->raw;
@@ -1960,9 +1920,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 10 2005
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -2052,8 +2009,8 @@ H5O__merge_null(H5F_t *f, H5O_t *oh)
 
                             /* Remove second message from list of messages */
                             if (v < (oh->nmesgs - 1))
-                                HDmemmove(&oh->mesg[v], &oh->mesg[v + 1],
-                                          ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
+                                memmove(&oh->mesg[v], &oh->mesg[v + 1],
+                                        ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
 
                             /* Decrement # of messages */
                             /* (Don't bother reducing size of message array for now -QAK) */
@@ -2107,9 +2064,6 @@ done:
  *              from the object header.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2194,8 +2148,8 @@ H5O__remove_empty_chunks(H5F_t *f, H5O_t *oh)
 
                 /* Remove chunk from list of chunks */
                 if (null_msg->chunkno < (oh->nchunks - 1)) {
-                    HDmemmove(&oh->chunk[null_msg->chunkno], &oh->chunk[null_msg->chunkno + 1],
-                              ((oh->nchunks - 1) - null_msg->chunkno) * sizeof(H5O_chunk_t));
+                    memmove(&oh->chunk[null_msg->chunkno], &oh->chunk[null_msg->chunkno + 1],
+                            ((oh->nchunks - 1) - null_msg->chunkno) * sizeof(H5O_chunk_t));
 
                     /* Adjust chunk number for any chunk proxies that are in the cache */
                     for (u = null_msg->chunkno; u < (oh->nchunks - 1); u++) {
@@ -2228,8 +2182,8 @@ H5O__remove_empty_chunks(H5F_t *f, H5O_t *oh)
 
                 /* Remove null message from list of messages */
                 if (null_msg_no < (oh->nmesgs - 1))
-                    HDmemmove(&oh->mesg[null_msg_no], &oh->mesg[null_msg_no + 1],
-                              ((oh->nmesgs - 1) - null_msg_no) * sizeof(H5O_mesg_t));
+                    memmove(&oh->mesg[null_msg_no], &oh->mesg[null_msg_no + 1],
+                            ((oh->nmesgs - 1) - null_msg_no) * sizeof(H5O_mesg_t));
 
                 /* Decrement # of messages */
                 /* (Don't bother reducing size of message array for now -QAK) */
@@ -2296,9 +2250,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct  4 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2355,9 +2306,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Neil Fortner
- *		Oct 20 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2406,8 +2354,8 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
                 uint8_t    *src = curr_msg->raw + curr_msg->raw_size; /* Source location */
 
                 /* Slide down the raw data */
-                HDmemmove(curr_msg->raw - sizeof_msghdr, src,
-                          (size_t)(old_image + new_size - sizeof_chksum - src));
+                memmove(curr_msg->raw - sizeof_msghdr, src,
+                        (size_t)(old_image + new_size - sizeof_chksum - src));
 
                 /* Update the raw data pointers for messages after this one */
                 for (v = 0, curr_msg2 = &oh->mesg[0]; v < oh->nmesgs; v++, curr_msg2++)
@@ -2423,7 +2371,7 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
 
             /* Remove the deleted null message from list of messages */
             if (u < (oh->nmesgs - 1))
-                HDmemmove(&oh->mesg[u], &oh->mesg[u + 1], ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
+                memmove(&oh->mesg[u], &oh->mesg[u + 1], ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
 
             /* Decrement # of messages */
             /* (Don't bother reducing size of message array for now) */
@@ -2482,9 +2430,9 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
         oh->flags |= new_size_flags;
 
         /* Slide chunk 0 data down */
-        HDmemmove(chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum,
-                  chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum + less_prfx_size,
-                  new_size - (size_t)H5O_SIZEOF_HDR(oh));
+        memmove(chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum,
+                chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum + less_prfx_size,
+                new_size - (size_t)H5O_SIZEOF_HDR(oh));
 
         /* Adjust chunk size */
         new_size -= less_prfx_size;

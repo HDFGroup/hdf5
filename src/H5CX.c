@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, February 19, 2018
- *
  * Purpose:
  *      Keep a set of "psuedo-global" information for an API call.  This
  *      general corresponds to the DXPL for the call, along with cached
@@ -491,7 +488,7 @@ H5CX_init(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Reset the "default DXPL cache" information */
-    HDmemset(&H5CX_def_dxpl_cache, 0, sizeof(H5CX_dxpl_cache_t));
+    memset(&H5CX_def_dxpl_cache, 0, sizeof(H5CX_dxpl_cache_t));
 
     /* Get the default DXPL cache information */
 
@@ -588,7 +585,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve modify write buffer property")
 
     /* Reset the "default LCPL cache" information */
-    HDmemset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
+    memset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
 
     /* Get the default LCPL cache information */
 
@@ -605,7 +602,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve intermediate group creation flag")
 
     /* Reset the "default LAPL cache" information */
-    HDmemset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
+    memset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
 
     /* Get the default LAPL cache information */
 
@@ -618,7 +615,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve number of soft / UD links to traverse")
 
     /* Reset the "default DCPL cache" information */
-    HDmemset(&H5CX_def_dcpl_cache, 0, sizeof(H5CX_dcpl_cache_t));
+    memset(&H5CX_def_dcpl_cache, 0, sizeof(H5CX_dcpl_cache_t));
 
     /* Get the default DCPL cache information */
 
@@ -635,7 +632,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve object header flags")
 
     /* Reset the "default DAPL cache" information */
-    HDmemset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
+    memset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
 
     /* Get the default DAPL cache information */
 
@@ -652,7 +649,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve prefix for VDS")
 
     /* Reset the "default FAPL cache" information */
-    HDmemset(&H5CX_def_fapl_cache, 0, sizeof(H5CX_fapl_cache_t));
+    memset(&H5CX_def_fapl_cache, 0, sizeof(H5CX_fapl_cache_t));
 
     /* Get the default FAPL cache information */
 
@@ -679,9 +676,6 @@ done:
  *                affect other interfaces; zero otherwise.
  *            Failure:    Negative.
  *
- * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -696,8 +690,8 @@ H5CX_term_package(void)
     cnode = H5CX__pop_common(FALSE);
 
     /* Free the context node */
-    /* (Allocated with HDmalloc() in H5CX_push_special() ) */
-    HDfree(cnode);
+    /* (Allocated with malloc() in H5CX_push_special() ) */
+    free(cnode);
 
 #ifndef H5_HAVE_THREADSAFE
     H5CX_head_g = NULL;
@@ -716,9 +710,6 @@ H5CX_term_package(void)
  * Return:	Success: Non-NULL pointer to head pointer of API context stack for thread
  *		Failure: NULL
  *
- * Programmer:	Quincey Koziol
- *              March 12, 2018
- *
  *-------------------------------------------------------------------------
  */
 static H5CX_node_t **
@@ -736,10 +727,10 @@ H5CX__get_context(void)
         /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
         ctx = (H5CX_node_t **)LocalAlloc(LPTR, sizeof(H5CX_node_t *));
 #else
-        /* Use HDmalloc here since this has to match the HDfree in the
+        /* Use malloc here since this has to match the free in the
          * destructor and we want to avoid the codestack there.
          */
-        ctx = (H5CX_node_t **)HDmalloc(sizeof(H5CX_node_t *));
+        ctx = (H5CX_node_t **)malloc(sizeof(H5CX_node_t *));
 #endif /* H5_HAVE_WIN_THREADS */
         assert(ctx);
 
@@ -764,9 +755,6 @@ H5CX__get_context(void)
  * Purpose:     Internal routine to push a context for an API call.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -806,9 +794,6 @@ H5CX__push_common(H5CX_node_t *cnode)
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 19, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -839,9 +824,6 @@ done:
  *
  * Return:      <none>
  *
- * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -852,7 +834,7 @@ H5CX_push_special(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Allocate & clear API context node, without using library API routines */
-    cnode = (H5CX_node_t *)HDcalloc(1, sizeof(H5CX_node_t));
+    cnode = (H5CX_node_t *)calloc(1, sizeof(H5CX_node_t));
     assert(cnode);
 
     /* Set context info */
@@ -872,9 +854,6 @@ H5CX_push_special(void)
  *		API context state to VOL connectors.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              January 8, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1013,9 +992,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              January 9, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1072,9 +1048,6 @@ H5CX_restore_state(const H5CX_state_t *api_state)
  * Purpose:     Free a previously retrievedAPI context state
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              January 9, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1139,9 +1112,6 @@ done:
  *
  * Return:      TRUE / FALSE (can't fail)
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1169,9 +1139,6 @@ H5CX_is_def_dxpl(void)
  *
  * Return:      <none>
  *
- * Programmer:  Quincey Koziol
- *              March 8, 2018
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1197,9 +1164,6 @@ H5CX_set_dxpl(hid_t dxpl_id)
  * Purpose:     Sets the DCPL for the current API call context.
  *
  * Return:      <none>
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1227,9 +1191,6 @@ H5CX_set_dcpl(hid_t dcpl_id)
  *              When "f" is NULL, the low/high bounds are set to latest format.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Vailin Choi
- *              March 27, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1263,9 +1224,6 @@ H5CX_set_libver_bounds(H5F_t *f)
  *
  * Return:      <none>
  *
- * Programmer:  Chris Hogan
- *              October 28, 2019
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1291,9 +1249,6 @@ H5CX_set_lcpl(hid_t lcpl_id)
  * Purpose:     Sets the LAPL for the current API call context.
  *
  * Return:      <none>
- *
- * Programmer:  Quincey Koziol
- *              March 10, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1321,9 +1276,6 @@ H5CX_set_lapl(hid_t lapl_id)
  *              setting up collective operations.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 19, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1448,9 +1400,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 8, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1505,9 +1454,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 14, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1537,9 +1483,6 @@ H5CX_set_vol_wrap_ctx(void *vol_wrap_ctx)
  * Purpose:     Sets the VOL connector ID & info for an operation.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              January 3, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1571,9 +1514,6 @@ H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 20, 2018
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1601,9 +1541,6 @@ H5CX_get_dxpl(void)
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 10, 2018
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1630,9 +1567,6 @@ H5CX_get_lapl(void)
  * Purpose:     Retrieves the VOL object wrapping context for an operation.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              October 14, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1675,9 +1609,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              January 3, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1698,7 +1629,7 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
         /* Get the value */
         H5MM_memcpy(vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
     else
-        HDmemset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
+        memset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_connector_prop() */
@@ -1709,9 +1640,6 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
  * Purpose:     Retrieves the object tag for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 20, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1739,9 +1667,6 @@ H5CX_get_tag(void)
  * Purpose:     Retrieves the metadata cache ring for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1772,9 +1697,6 @@ H5CX_get_ring(void)
  *
  * Return:      TRUE / FALSE on success / <can't fail>
  *
- * Programmer:  Quincey Koziol
- *              Februrary 23, 2018
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1803,9 +1725,6 @@ H5CX_get_coll_metadata_read(void)
  * Note:	This is only a shallow copy, the datatypes are not duplicated.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1837,9 +1756,6 @@ H5CX_get_mpi_coll_datatypes(MPI_Datatype *btype, MPI_Datatype *ftype)
  *
  * Return:      TRUE / FALSE on success / <can't fail>
  *
- * Programmer:  Quincey Koziol
- *              March 17, 2018
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1868,9 +1784,6 @@ H5CX_get_mpi_file_flushing(void)
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  M. Breitenfeld
- *              December 31, 2018
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1898,9 +1811,6 @@ H5CX_get_mpio_rank0_bcast(void)
  * Purpose:     Retrieves the B-tree split ratios for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 23, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1935,9 +1845,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1969,9 +1876,6 @@ done:
  * Purpose:     Retrieves the temporary buffer pointer for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2005,9 +1909,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2040,9 +1941,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2074,9 +1972,6 @@ done:
  * Purpose:     Retrieves the hyperslab vector size for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2112,9 +2007,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2147,9 +2039,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2181,9 +2070,6 @@ done:
  * Purpose:     Retrieves the local cause for breaking collective I/O for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2218,9 +2104,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2253,9 +2136,6 @@ done:
  * Purpose:     Retrieves the collective chunk optimization mode for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2290,9 +2170,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2325,9 +2202,6 @@ done:
  * Purpose:     Retrieves the collective chunk optimization ratio for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2363,9 +2237,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2398,9 +2269,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2432,9 +2300,6 @@ done:
  * Purpose:     Retrieves the I/O filter callback function for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2490,9 +2355,6 @@ done:
  * Purpose:     Retrieves the VL datatype alloc info for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 5, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2556,9 +2418,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 8, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2590,9 +2449,6 @@ done:
  * Purpose:     Retrieves the selection I/O mode for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Vailin Choi
- *              March 5, 2023
  *
  *-------------------------------------------------------------------------
  */
@@ -2627,9 +2483,6 @@ done:
  *              for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Vailin Choi
- *              April 15, 2023
  *
  *-------------------------------------------------------------------------
  */
@@ -2696,9 +2549,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Gerd Heber
- *              October 21, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2730,9 +2580,6 @@ done:
  * Purpose:     Retrieves the create intermediate group flag for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Gerd Heber
- *              October 21, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -2767,9 +2614,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 10, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2801,9 +2645,6 @@ done:
  * Purpose:     Retrieves the low/high bounds for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Vailin Choi
- *              March 27, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -2841,9 +2682,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2876,9 +2714,6 @@ done:
  * Purpose:     Retrieves the prefix for external file
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Raymond Lu
- *              March 6, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -2935,9 +2770,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Raymond Lu
- *              March 6, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2993,9 +2825,6 @@ done:
  *
  * Return:      <none>
  *
- * Programmer:  Quincey Koziol
- *              Februrary 20, 2018
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -3020,9 +2849,6 @@ H5CX_set_tag(haddr_t tag)
  * Purpose:     Sets the metadata cache ring for the current API call context.
  *
  * Return:      <none>
- *
- * Programmer:  Quincey Koziol
- *              Februrary 20, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3051,9 +2877,6 @@ H5CX_set_ring(H5AC_ring_t ring)
  *
  * Return:      <none>
  *
- * Programmer:  Quincey Koziol
- *              Februrary 23, 2018
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -3080,9 +2903,6 @@ H5CX_set_coll_metadata_read(hbool_t cmdr)
  * Note:	This is only a shallow copy, the datatypes are not duplicated.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3112,9 +2932,6 @@ H5CX_set_mpi_coll_datatypes(MPI_Datatype btype, MPI_Datatype ftype)
  * Purpose:     Sets the parallel transfer mode for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3146,9 +2963,6 @@ H5CX_set_io_xfer_mode(H5FD_mpio_xfer_t io_xfer_mode)
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3179,9 +2993,6 @@ H5CX_set_mpio_coll_opt(H5FD_mpio_collective_opt_t mpio_coll_opt)
  *
  * Return:      <none>
  *
- * Programmer:  Quincey Koziol
- *              March 170 2018
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -3208,9 +3019,6 @@ H5CX_set_mpi_file_flushing(hbool_t flushing)
  *
  * Return:      <none>
  *
- * Programmer:  M. Breitenfeld
- *              December 31, 2018
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -3236,9 +3044,6 @@ H5CX_set_mpio_rank0_bcast(hbool_t rank0_bcast)
  * Purpose:     Sets the VL datatype alloc info for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3273,9 +3078,6 @@ H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 10, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3308,9 +3110,6 @@ H5CX_set_nlinks(size_t nlinks)
  *
  * Return:      <none>
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -3339,9 +3138,6 @@ H5CX_set_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t mpio_actual_chun
  *
  * Return:      <none>
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -3369,9 +3165,6 @@ H5CX_set_mpio_actual_io_mode(H5D_mpio_actual_io_mode_t mpio_actual_io_mode)
  * Purpose:     Sets the local reason for breaking collective I/O for the current API call context.
  *
  * Return:      <none>
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3403,9 +3196,6 @@ H5CX_set_mpio_local_no_coll_cause(uint32_t mpio_local_no_coll_cause)
  * Purpose:     Sets the global reason for breaking collective I/O for the current API call context.
  *
  * Return:      <none>
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3442,9 +3232,6 @@ H5CX_set_mpio_global_no_coll_cause(uint32_t mpio_global_no_coll_cause)
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3475,9 +3262,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3507,9 +3291,6 @@ done:
  * Note:        Only sets value if property set in DXPL
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3542,9 +3323,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3575,9 +3353,6 @@ done:
  * Note:        Only sets value if property set in DXPL
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3610,9 +3385,6 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3642,9 +3414,6 @@ done:
  * Note:        Only sets value if property set in DXPL
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              January 2, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -3677,9 +3446,6 @@ done:
  *
  * Return:      <none>
  *
- * Programmer:  Vailin Choi
- *              April 15, 2023
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -3710,9 +3476,6 @@ H5CX_set_no_selection_io_cause(uint32_t no_selection_io_cause)
  * Purpose:     Retrieves the object header flags for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Chris Hogan
- *              November 15, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -3745,9 +3508,6 @@ done:
  * Purpose:     Common code for popping the context for an API call.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3797,9 +3557,6 @@ done:
  * Purpose:     Pops the context for an API call.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 19, 2018
  *
  *-------------------------------------------------------------------------
  */

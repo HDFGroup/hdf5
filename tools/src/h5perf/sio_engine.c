@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Author: Christian Chilan, April 2008
- */
-
 #include "hdf5.h"
 
 #include <errno.h>
@@ -122,7 +118,6 @@ static hid_t    h5dxpl          = H5I_INVALID_HID; /* Dataset transfer property 
  * Function:        do_sio
  * Purpose:         SIO Engine where IO are executed.
  * Return:          results
- * Programmer:      Christian Chilan, April, 2008
  */
 void
 do_sio(parameters param, results *res)
@@ -144,7 +139,7 @@ do_sio(parameters param, results *res)
     /* IO type */
     iot = param.io_type;
 
-    if (NULL == (fname = HDcalloc(FILENAME_MAX, sizeof(char))))
+    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
         GOTOERROR(FAIL);
 
     switch (iot) {
@@ -268,8 +263,8 @@ done:
     }
 
     /* release generic resources */
-    HDfree(buffer);
-    HDfree(fname);
+    free(buffer);
+    free(fname);
 
     res->ret_code = ret_code;
 }
@@ -281,7 +276,6 @@ done:
  *              doing. Also, place in the /tmp/{$USER,$LOGIN} directory if
  *              USER or LOGIN are specified in the environment.
  * Return:      Pointer to filename or NULL
- * Programmer:  Bill Wendling, 21. November 2001
  */
 static char *
 sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size, parameters *param)
@@ -401,7 +395,6 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  * Function:        do_write
  * Purpose:         Write the required amount of data to the file.
  * Return:          SUCCESS or FAIL
- * Programmer:      Christian Chilan, April, 2008
  */
 static herr_t
 do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
@@ -615,7 +608,6 @@ done:
  * Function:        dset_write
  * Purpose:         Write buffer into the dataset.
  * Return:          SUCCESS or FAIL
- * Programmer:      Christian Chilan, April, 2008
  */
 static herr_t
 dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
@@ -697,7 +689,6 @@ done:
  * Function:        posix_buffer_write
  * Purpose:         Write buffer into the POSIX file considering contiguity.
  * Return:          SUCCESS or FAIL
- * Programmer:      Christian Chilan, April, 2008
  */
 
 static herr_t
@@ -757,7 +748,6 @@ done:
  * Function:        do_read
  * Purpose:         Read the required amount of data to the file.
  * Return:          SUCCESS or FAIL
- * Programmer:      Christian Chilan, April, 2008
  */
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
@@ -934,7 +924,6 @@ done:
  * Function:        dset_read
  * Purpose:         Read buffer into the dataset.
  * Return:          SUCCESS or FAIL
- * Programmer:      Christian Chilan, April, 2008
  */
 
 static herr_t
@@ -995,7 +984,6 @@ done:
  * Function:        posix_buffer_read
  * Purpose:         Read buffer into the POSIX file considering contiguity.
  * Return:          SUCCESS or FAIL
- * Programmer:      Christian Chilan, April, 2008
  */
 
 static herr_t
@@ -1049,7 +1037,6 @@ done:
  * Function:    do_fopen
  * Purpose:     Open the specified file.
  * Return:      SUCCESS or FAIL
- * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
  */
 static herr_t
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
@@ -1117,7 +1104,6 @@ done:
  * Function:    set_vfd
  * Purpose:     Sets file driver.
  * Return:      SUCCESS or FAIL
- * Programmer:  Christian Chilan, April, 2008
  */
 
 hid_t
@@ -1162,14 +1148,14 @@ set_vfd(parameters *param)
             char arr[H5FD_MEM_NTYPES][1024];
         } *sv = NULL;
 
-        HDmemset(memb_map, 0, sizeof memb_map);
-        HDmemset(memb_fapl, 0, sizeof memb_fapl);
-        HDmemset(memb_name, 0, sizeof memb_name);
-        HDmemset(memb_addr, 0, sizeof memb_addr);
+        memset(memb_map, 0, sizeof memb_map);
+        memset(memb_fapl, 0, sizeof memb_fapl);
+        memset(memb_name, 0, sizeof memb_name);
+        memset(memb_addr, 0, sizeof memb_addr);
 
         assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
-        if (NULL == (sv = HDcalloc(1, sizeof(*sv))))
+        if (NULL == (sv = calloc(1, sizeof(*sv))))
             return -1;
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
@@ -1179,18 +1165,18 @@ set_vfd(parameters *param)
         }
 
         if (H5Pset_fapl_multi(my_fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0) {
-            HDfree(sv);
+            free(sv);
             return -1;
         }
 
-        HDfree(sv);
+        free(sv);
     }
     else if (vfd == family) {
         hsize_t fam_size = 1 * 1024 * 1024; /*100 MB*/
 
         /* Family of files, each 1MB and using the default driver */
         /* if ((val=HDstrtok(NULL, " \t\n\r")))
-            fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024); */
+            fam_size = (hsize_t)(strtod(val, NULL) * 1024*1024); */
         if (H5Pset_fapl_family(my_fapl, fam_size, H5P_DEFAULT) < 0)
             return -1;
     }
@@ -1214,7 +1200,6 @@ set_vfd(parameters *param)
  * Function:    do_fclose
  * Purpose:     Close the specified file descriptor.
  * Return:      SUCCESS or FAIL
- * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
  */
 static herr_t
 do_fclose(iotype iot, file_descr *fd /*out*/)
@@ -1260,7 +1245,6 @@ done:
  * Function:    do_cleanupfile
  * Purpose:     Cleanup temporary file unless HDF5_NOCLEANUP is set.
  * Return:      void
- * Programmer:  Albert Cheng 2001/12/12
  */
 static void
 do_cleanupfile(iotype iot, char *filename)
@@ -1271,7 +1255,7 @@ do_cleanupfile(iotype iot, char *filename)
     hid_t  driver;
 
     temp_sz = (4096 + sizeof("-?.h5")) * sizeof(char);
-    if (NULL == (temp = HDcalloc(1, temp_sz)))
+    if (NULL == (temp = calloc(1, temp_sz)))
         goto done;
 
     if (clean_file_g == -1)
@@ -1332,5 +1316,5 @@ do_cleanupfile(iotype iot, char *filename)
     }
 
 done:
-    HDfree(temp);
+    free(temp);
 }

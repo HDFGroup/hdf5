@@ -14,9 +14,6 @@
  * Read-Only S3 Virtual File Driver (VFD)
  *
  * Purpose:    Unit tests for the S3 Communications (s3comms) module.
- *
- * Programmer: Jacob Smith
- *             2017-10-11
  */
 
 #include "h5test.h"
@@ -62,9 +59,6 @@
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *****************************************************************************/
 
 /*----------------------------------------------------------------------------
@@ -88,9 +82,6 @@
  *     Similar to `H5_FAILED(); AT();` from h5test.h
  *
  *     *FAILED* at somefile.c:12 in function_name()...
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -117,9 +108,6 @@
  *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
  *     similar to `TEST_ERROR` in h5test.h
  *
- * Programmer: Jacob Smith
- *             2017-10-23
- *
  *----------------------------------------------------------------------------
  */
 #define FAIL_IF(condition)                                                                                   \
@@ -144,9 +132,6 @@
  *     `FAIL_UNLESS( 5 == my_op() )`
  *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
  *         (see JSVERIFY)
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -175,9 +160,6 @@
  *     *FAILED* at myfile.c:488 in somefunc()...
  *       ! Expected 425
  *       ! Actual   3
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -221,9 +203,6 @@ jserr_long(long expected, long actual, const char *reason)
  *     !!! Actual:
  *     not what I expected at all
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 static inline void
@@ -258,9 +237,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(expected, actual, reason)                                                                   \
@@ -282,9 +258,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(expected, actual, reason)                                                               \
@@ -305,9 +278,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
@@ -325,8 +295,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(actual, expected, reason)                                                                   \
@@ -340,8 +308,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(actual, expected, reason)                                                               \
@@ -354,8 +320,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
@@ -395,9 +359,6 @@ static hbool_t s3_test_bucket_defined                   = FALSE;
  *
  *     Demonstrate that the macro `S3COMMS_FORMAT_CREDENTIAL`
  *     performs as expected.
- *
- * Programmer: Jacob Smith
- *             2017-09-19
  *
  *----------------------------------------------------------------------------
  */
@@ -440,9 +401,6 @@ error:
  *     Elided / not yet implemented:
  *         Query strings
  *         request "body"
- *
- * Programmer: Jacob Smith
- *             2017-10-04
  *
  *---------------------------------------------------------------------------
  */
@@ -613,9 +571,6 @@ error:
  *     Success:  0
  *     Failure: -1
  *
- * Programmer: Jacob Smith
- *             2017-09-14
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -690,9 +645,6 @@ error:
  * Purpose:
  *
  *     Define and verify behavior of `H5FD_s3comms_hrb_init_request()`
- *
- * Programmer: Jacob Smith
- *             2017-09-20
  *
  *---------------------------------------------------------------------------
  */
@@ -812,9 +764,6 @@ error:
  * Purpose:
  *
  *     Test operations on hrb_node_t structure
- *
- * Programmer: Jacob Smith
- *             2017-09-22
  *
  *---------------------------------------------------------------------------
  */
@@ -1203,9 +1152,6 @@ error:
  *
  *     Define and verify behavior of `H5FD_s3comms_HMAC_SHA256()`
  *
- * Programmer: Jacob Smith
- *             2017-09-19
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -1271,7 +1217,7 @@ test_HMAC_SHA256(void)
             dest = NULL;
         }
         else {
-            dest = (char *)HDmalloc(sizeof(char) * cases[i].dest_size);
+            dest = (char *)malloc(sizeof(char) * cases[i].dest_size);
             assert(dest != NULL);
         }
 
@@ -1284,7 +1230,7 @@ test_HMAC_SHA256(void)
             if (0 != HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp))) {
                 /* print out how wrong things are, and then fail
                  */
-                dest = (char *)HDrealloc(dest, cases[i].dest_size + 1);
+                dest = (char *)realloc(dest, cases[i].dest_size + 1);
                 assert(dest != NULL);
                 dest[cases[i].dest_size] = 0;
                 fprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
@@ -1296,14 +1242,14 @@ test_HMAC_SHA256(void)
             JSVERIFY(0, HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp)), NULL);
 #endif /* VERBOSE */
         }
-        HDfree(dest);
+        free(dest);
     }
 
     PASSED();
     return 0;
 
 error:
-    HDfree(dest);
+    free(dest);
     return -1;
 
 } /* end test_HMAC_SHA256() */
@@ -1315,9 +1261,6 @@ error:
  * Purpose:
  *
  *     Define and verify behavior of `H5FD_s3comms_nlowercase()`
- *
- * Programmer: Jacob Smith
- *             2017-19-18
  *
  *----------------------------------------------------------------------------
  */
@@ -1365,13 +1308,13 @@ test_nlowercase(void)
     TESTING("nlowercase");
 
     for (i = 0; i < n_cases; i++) {
-        dest = (char *)HDmalloc(sizeof(char) * 16);
+        dest = (char *)malloc(sizeof(char) * 16);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_nlowercase(dest, cases[i].in, cases[i].len), cases[i].in)
         if (cases[i].len > 0) {
             JSVERIFY(0, HDstrncmp(dest, cases[i].exp, cases[i].len), NULL)
         }
-        HDfree(dest);
+        free(dest);
     } /* end for each testcase */
 
     JSVERIFY(FAIL, H5FD_s3comms_nlowercase(NULL, cases[0].in, cases[0].len), "null destination should fail")
@@ -1380,7 +1323,7 @@ test_nlowercase(void)
     return 0;
 
 error:
-    HDfree(dest);
+    free(dest);
     return -1;
 
 } /* end test_nlowercase() */
@@ -1388,9 +1331,6 @@ error:
 /*---------------------------------------------------------------------------
  *
  * Function: test_parse_url()
- *
- * Programmer: Jacob Smith
- *             2017-11-??
  *
  *---------------------------------------------------------------------------
  */
@@ -1693,9 +1633,6 @@ error:
  *     Success:  0
  *     Failure: -1
  *
- * Programmer: Jacob Smith
- *             2017-09-14
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -1776,7 +1713,7 @@ test_s3r_get_filesize(void)
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1806,8 +1743,6 @@ error:
 /*---------------------------------------------------------------------------
  * Function: test_s3r_open()
  *
- * Programmer: Jacob Smith 2018-01-??
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -1834,13 +1769,13 @@ test_s3r_open(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -2009,9 +1944,6 @@ error:
  *
  *     Shows most basic curl iteration.
  *
- * Programmer: Jacob Smith
- *             2017-10-06
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -2038,7 +1970,7 @@ test_s3r_read(void)
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -2174,9 +2106,6 @@ error:
  *
  *     More test cases would be a very good idea.
  *
- * Programmer: Jacob Smith
- *             2017-09-18
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -2216,7 +2145,7 @@ test_signing_key(void)
     TESTING("signing_key");
 
     for (i = 0; i < ncases; i++) {
-        key = (unsigned char *)HDmalloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
+        key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
         assert(key != NULL);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when),
@@ -2225,7 +2154,7 @@ test_signing_key(void)
         JSVERIFY(0, HDstrncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH),
                  (const char *)cases[i].exp)
 
-        HDfree(key);
+        free(key);
         key = NULL;
     }
 
@@ -2233,7 +2162,7 @@ test_signing_key(void)
      * ERROR CASES *
      ***************/
 
-    key = (unsigned char *)HDmalloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
+    key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
     assert(key != NULL);
 
     JSVERIFY(FAIL, H5FD_s3comms_signing_key(NULL, cases[0].secret_key, cases[0].region, cases[0].when),
@@ -2248,7 +2177,7 @@ test_signing_key(void)
     JSVERIFY(FAIL, H5FD_s3comms_signing_key(key, cases[0].secret_key, cases[0].region, NULL),
              "time string cannot be NULL")
 
-    HDfree(key);
+    free(key);
     key = NULL;
 
     PASSED();
@@ -2256,7 +2185,7 @@ test_signing_key(void)
 
 error:
     if (key != NULL) {
-        HDfree(key);
+        free(key);
     }
 
     return -1;
@@ -2278,9 +2207,6 @@ error:
  *
  *     Success:  0
  *     Failure: -1
- *
- * Programmer: Jacob Smith
- *             2017-09-13
  *
  *---------------------------------------------------------------------------
  */
@@ -2331,9 +2257,6 @@ error:
  * Purpose:
  *
  *     Define and verify behavior of `H5FD_s3comms_trim()`.
- *
- * Programmer: Jacob Smith
- *             2017-09-14
  *
  *----------------------------------------------------------------------------
  */
@@ -2397,7 +2320,7 @@ test_trim(void)
 
     for (i = 0; i < n_cases; i++) {
         assert(str == NULL);
-        str = (char *)HDmalloc(sizeof(char) * cases[i].in_len);
+        str = (char *)malloc(sizeof(char) * cases[i].in_len);
         assert(str != NULL);
         HDstrncpy(str, cases[i].in, cases[i].in_len);
 
@@ -2406,7 +2329,7 @@ test_trim(void)
         if (dest_len > 0) {
             JSVERIFY(0, HDstrncmp(cases[i].exp, dest, dest_len), cases[i].exp)
         }
-        HDfree(str);
+        free(str);
         str = NULL;
     } /* end for each testcase */
 
@@ -2415,11 +2338,11 @@ test_trim(void)
     JSVERIFY(0, dest_len, "trimming NULL string writes 0 characters")
 
     assert(str == NULL);
-    str = (char *)HDmalloc(sizeof(char *) * 11);
+    str = (char *)malloc(sizeof(char *) * 11);
     assert(str != NULL);
-    HDmemcpy(str, "some text ", 11); /* string with null terminator */
+    memcpy(str, "some text ", 11); /* string with null terminator */
     JSVERIFY(FAIL, H5FD_s3comms_trim(NULL, str, 10, &dest_len), "destination for trim cannot be NULL");
-    HDfree(str);
+    free(str);
     str = NULL;
 
     PASSED();
@@ -2427,7 +2350,7 @@ test_trim(void)
 
 error:
     if (str != NULL) {
-        HDfree(str);
+        free(str);
     }
     return -1;
 
@@ -2440,9 +2363,6 @@ error:
  * Purpose:
  *
  *     Define and verify behavior of `H5FD_s3comms_uriencode()`.
- *
- * Programmer: Jacob Smith
- *             2017-09-14
  *
  *----------------------------------------------------------------------------
  */
@@ -2511,7 +2431,7 @@ test_uriencode(void)
 
     for (i = 0; i < ncases; i++) {
         str_len = cases[i].s_len;
-        dest    = (char *)HDmalloc(sizeof(char) * str_len * 3 + 1);
+        dest    = (char *)malloc(sizeof(char) * str_len * 3 + 1);
         FAIL_IF(dest == NULL)
 
         JSVERIFY(SUCCEED,
@@ -2520,7 +2440,7 @@ test_uriencode(void)
         JSVERIFY(HDstrlen(cases[i].expected), dest_written, NULL)
         JSVERIFY(0, HDstrncmp(dest, cases[i].expected, dest_written), cases[i].expected);
 
-        HDfree(dest);
+        free(dest);
         dest = NULL;
     } /* end for each testcase */
 
@@ -2528,7 +2448,7 @@ test_uriencode(void)
      * ERROR CASES *
      ***************/
 
-    dest = (char *)HDmalloc(sizeof(char) * 15);
+    dest = (char *)malloc(sizeof(char) * 15);
     assert(dest != NULL);
 
     JSVERIFY(FAIL, H5FD_s3comms_uriencode(NULL, "word$", 5, FALSE, &dest_written),
@@ -2536,7 +2456,7 @@ test_uriencode(void)
     JSVERIFY(FAIL, H5FD_s3comms_uriencode(dest, NULL, 5, FALSE, &dest_written),
              "source string cannot be NULL");
 
-    HDfree(dest);
+    free(dest);
     dest = NULL;
 
     PASSED();
@@ -2544,7 +2464,7 @@ test_uriencode(void)
 
 error:
     if (dest != NULL) {
-        HDfree(dest);
+        free(dest);
     }
     return -1;
 
@@ -2563,9 +2483,6 @@ error:
  *
  *     Success: 0
  *     Failure: 1
- *
- * Programmer:  Jacob Smith
- *              2017-10-12
  *
  *-------------------------------------------------------------------------
  */

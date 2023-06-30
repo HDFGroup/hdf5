@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Robb Matzke
- *             Friday, September 19, 1997
- */
-
 /****************/
 /* Module Setup */
 /****************/
@@ -71,9 +66,6 @@
  *
  *              Failure:        Negative
  *
- * Programmer:  Robb Matzke
- *              Jul 18 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -110,9 +102,6 @@ done:
  *                              following the symbol table entry.
  *
  *              Failure:        Negative
- *
- * Programmer:  Robb Matzke
- *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -190,9 +179,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Robb Matzke
- *              Jul 18 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -227,9 +213,6 @@ done:
  *                              after the symbol table entry.
  *
  *              Failure:        Negative
- *
- * Programmer:  Robb Matzke
- *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -283,7 +266,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 
     /* fill with zero */
     if (*pp < p_ret)
-        HDmemset(*pp, 0, (size_t)(p_ret - *pp));
+        memset(*pp, 0, (size_t)(p_ret - *pp));
     *pp = p_ret;
 
 done:
@@ -297,9 +280,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Pedro Vicente
- *              ???day, August ??, 2002
  *
  * Notes:       'depth' parameter determines how much of the group entry
  *              structure we want to copy.  The values are:
@@ -345,9 +325,6 @@ H5G__ent_copy(H5G_entry_t *dst, H5G_entry_t *src, H5_copy_depth_t depth)
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              ?day, August ??, 2005
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -359,7 +336,7 @@ H5G__ent_reset(H5G_entry_t *ent)
     assert(ent);
 
     /* Clear the symbol table entry to an empty state */
-    HDmemset(ent, 0, sizeof(H5G_entry_t));
+    memset(ent, 0, sizeof(H5G_entry_t));
     ent->header = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI_VOID
@@ -372,9 +349,6 @@ H5G__ent_reset(H5G_entry_t *ent)
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:  Quincey Koziol
- *              Sep 20 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -509,9 +483,6 @@ done:
  * Purpose:     Prints debugging information about a symbol table entry.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Aug 29 1997
  *
  *-------------------------------------------------------------------------
  */

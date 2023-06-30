@@ -122,8 +122,6 @@ struct hs_dr_pio_test_vars_t {
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/9/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -209,28 +207,28 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     tv_ptr->block_ptr  = &(tv_ptr->block[PAR_SS_DR_MAX_RANK - tv_ptr->large_rank]);
 
     /* Allocate buffers */
-    tv_ptr->small_ds_buf_0 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
+    tv_ptr->small_ds_buf_0 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
     VRFY((tv_ptr->small_ds_buf_0 != NULL), "malloc of small_ds_buf_0 succeeded");
 
-    tv_ptr->small_ds_buf_1 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
+    tv_ptr->small_ds_buf_1 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
     VRFY((tv_ptr->small_ds_buf_1 != NULL), "malloc of small_ds_buf_1 succeeded");
 
-    tv_ptr->small_ds_buf_2 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
+    tv_ptr->small_ds_buf_2 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
     VRFY((tv_ptr->small_ds_buf_2 != NULL), "malloc of small_ds_buf_2 succeeded");
 
-    tv_ptr->small_ds_slice_buf = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
+    tv_ptr->small_ds_slice_buf = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
     VRFY((tv_ptr->small_ds_slice_buf != NULL), "malloc of small_ds_slice_buf succeeded");
 
-    tv_ptr->large_ds_buf_0 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
+    tv_ptr->large_ds_buf_0 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
     VRFY((tv_ptr->large_ds_buf_0 != NULL), "malloc of large_ds_buf_0 succeeded");
 
-    tv_ptr->large_ds_buf_1 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
+    tv_ptr->large_ds_buf_1 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
     VRFY((tv_ptr->large_ds_buf_1 != NULL), "malloc of large_ds_buf_1 succeeded");
 
-    tv_ptr->large_ds_buf_2 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
+    tv_ptr->large_ds_buf_2 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
     VRFY((tv_ptr->large_ds_buf_2 != NULL), "malloc of large_ds_buf_2 succeeded");
 
-    tv_ptr->large_ds_slice_buf = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->large_ds_slice_size);
+    tv_ptr->large_ds_slice_buf = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->large_ds_slice_size);
     VRFY((tv_ptr->large_ds_slice_buf != NULL), "malloc of large_ds_slice_buf succeeded");
 
     /* initialize the buffers */
@@ -238,18 +236,18 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     ptr_0 = tv_ptr->small_ds_buf_0;
     for (i = 0; i < (int)(tv_ptr->small_ds_size); i++)
         *ptr_0++ = (uint32_t)i;
-    HDmemset(tv_ptr->small_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->small_ds_size);
-    HDmemset(tv_ptr->small_ds_buf_2, 0, sizeof(uint32_t) * tv_ptr->small_ds_size);
+    memset(tv_ptr->small_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->small_ds_size);
+    memset(tv_ptr->small_ds_buf_2, 0, sizeof(uint32_t) * tv_ptr->small_ds_size);
 
-    HDmemset(tv_ptr->small_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
+    memset(tv_ptr->small_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
 
     ptr_0 = tv_ptr->large_ds_buf_0;
     for (i = 0; i < (int)(tv_ptr->large_ds_size); i++)
         *ptr_0++ = (uint32_t)i;
-    HDmemset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
-    HDmemset(tv_ptr->large_ds_buf_2, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
+    memset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
+    memset(tv_ptr->large_ds_buf_2, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
 
-    HDmemset(tv_ptr->large_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->large_ds_slice_size);
+    memset(tv_ptr->large_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->large_ds_slice_size);
 
     filename = filenames[0]; /* (const char *)GetTestParameters(); */
     assert(filename != NULL);
@@ -574,8 +572,6 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
  *
  * Return:    void
  *
- * Programmer:    JRM -- 9/18/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -657,22 +653,22 @@ hs_dr_pio_test__takedown(struct hs_dr_pio_test_vars_t *tv_ptr)
     /* Free memory buffers */
 
     if (tv_ptr->small_ds_buf_0 != NULL)
-        HDfree(tv_ptr->small_ds_buf_0);
+        free(tv_ptr->small_ds_buf_0);
     if (tv_ptr->small_ds_buf_1 != NULL)
-        HDfree(tv_ptr->small_ds_buf_1);
+        free(tv_ptr->small_ds_buf_1);
     if (tv_ptr->small_ds_buf_2 != NULL)
-        HDfree(tv_ptr->small_ds_buf_2);
+        free(tv_ptr->small_ds_buf_2);
     if (tv_ptr->small_ds_slice_buf != NULL)
-        HDfree(tv_ptr->small_ds_slice_buf);
+        free(tv_ptr->small_ds_slice_buf);
 
     if (tv_ptr->large_ds_buf_0 != NULL)
-        HDfree(tv_ptr->large_ds_buf_0);
+        free(tv_ptr->large_ds_buf_0);
     if (tv_ptr->large_ds_buf_1 != NULL)
-        HDfree(tv_ptr->large_ds_buf_1);
+        free(tv_ptr->large_ds_buf_1);
     if (tv_ptr->large_ds_buf_2 != NULL)
-        HDfree(tv_ptr->large_ds_buf_2);
+        free(tv_ptr->large_ds_buf_2);
     if (tv_ptr->large_ds_slice_buf != NULL)
-        HDfree(tv_ptr->large_ds_slice_buf);
+        free(tv_ptr->large_ds_slice_buf);
 
     return;
 
@@ -694,8 +690,6 @@ hs_dr_pio_test__takedown(struct hs_dr_pio_test_vars_t *tv_ptr)
  *        returns true on the memory and file selections.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 9/10/11
  *
  *-------------------------------------------------------------------------
  */
@@ -744,7 +738,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
     }
 
     /* zero out the buffer we will be reading into */
-    HDmemset(tv_ptr->small_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
+    memset(tv_ptr->small_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
 
 #if CONTIG_HS_DR_PIO_TEST__D2M_L2S__DEBUG
     fprintf(stdout, "%s reading slices from big cube on disk into small cube slice.\n", fcnName);
@@ -905,8 +899,6 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/10/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -959,7 +951,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 #endif /* CONTIG_HS_DR_PIO_TEST__D2M_S2L__DEBUG */
 
     /* zero out the in memory large ds */
-    HDmemset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
+    memset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
 
     /* set up start, stride, count, and block -- note that we will
      * change start[] so as to read slices of the large cube.
@@ -1152,8 +1144,6 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/10/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1230,7 +1220,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
     }
 
     /* zero out the in memory small ds */
-    HDmemset(tv_ptr->small_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->small_ds_size);
+    memset(tv_ptr->small_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->small_ds_size);
 
 #if CONTIG_HS_DR_PIO_TEST__M2D_L2S__DEBUG
     fprintf(stdout, "%s writing slices from big ds to slices of small ds on disk.\n", fcnName);
@@ -1430,8 +1420,6 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/10/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1505,7 +1493,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
     }
 
     /* zero out the in memory large ds */
-    HDmemset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
+    memset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
 
 #if CONTIG_HS_DR_PIO_TEST__M2D_S2L__DEBUG
     fprintf(stdout, "%s writing process slices of small ds to slices of large ds on disk.\n", fcnName);
@@ -1706,8 +1694,6 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 9/18/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1895,8 +1881,6 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
  *        the parallel case.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 9/18/09
  *
  *-------------------------------------------------------------------------
  */
@@ -2550,8 +2534,6 @@ return (good_data);
  *
  * Return:    void
  *
- * Programmer:    JRM -- 9/15/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2596,7 +2578,7 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                                        sel_start);
 
     /* zero out the buffer we will be reading into */
-    HDmemset(tv_ptr->small_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
+    memset(tv_ptr->small_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
 
 #if CHECKER_BOARD_HS_DR_PIO_TEST__D2M_L2S__DEBUG
     fprintf(stdout, "%s:%d: initial small_ds_slice_buf = ", fcnName, tv_ptr->mpi_rank);
@@ -2785,8 +2767,6 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/15/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2830,7 +2810,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 #endif /* CHECKER_BOARD_HS_DR_PIO_TEST__D2M_S2L__DEBUG */
 
     /* zero out the buffer we will be reading into */
-    HDmemset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
+    memset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
 
     /* set up start, stride, count, and block -- note that we will
      * change start[] so as to read the slice of the small data set
@@ -3070,8 +3050,6 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/15/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3156,7 +3134,7 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
     }
 
     /* zero out the in memory small ds */
-    HDmemset(tv_ptr->small_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->small_ds_size);
+    memset(tv_ptr->small_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->small_ds_size);
 
 #if CHECKER_BOARD_HS_DR_PIO_TEST__M2D_L2S__DEBUG
     fprintf(stdout,
@@ -3367,8 +3345,6 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/15/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3455,7 +3431,7 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
     }
 
     /* zero out the in memory large ds */
-    HDmemset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
+    memset(tv_ptr->large_ds_buf_1, 0, sizeof(uint32_t) * tv_ptr->large_ds_size);
 
 #if CHECKER_BOARD_HS_DR_PIO_TEST__M2D_S2L__DEBUG
     fprintf(stdout,
@@ -3650,8 +3626,6 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 10/10/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3825,8 +3799,6 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
  *        the parallel case.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 9/18/09
  *
  *-------------------------------------------------------------------------
  */
@@ -4362,9 +4334,9 @@ main(int argc, char **argv)
     }
 
 #if 0
-    HDmemset(filenames, 0, sizeof(filenames));
+    memset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
-        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+        if (NULL == (filenames[i] = malloc(PATH_MAX))) {
             printf("couldn't allocate filename array\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
@@ -4495,7 +4467,7 @@ main(int argc, char **argv)
 
 #if 0
     for (int i = 0; i < NFILENAME; i++) {
-        HDfree(filenames[i]);
+        free(filenames[i]);
         filenames[i] = NULL;
     }
 #endif

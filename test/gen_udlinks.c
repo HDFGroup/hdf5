@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  James Laird
- *              Tuesday, June 6, 2006
- *
  *  This program creates HDF5 files with user-defined links.  These files
  *  should be created on a little-endian and a big-endian machine.
  *  They will be named according to the platform and should

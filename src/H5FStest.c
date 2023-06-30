@@ -65,9 +65,6 @@
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              August 25th, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -95,9 +92,6 @@ H5FS__get_cparam_test(const H5FS_t *frsp, H5FS_create_t *cparam)
  *              similar to H5HF_cmp_cparam_test()
  *
  * Return:      A value like strcmp()
- *
- * Programmer:  Vailin Choi
- *              August 25th, 2008
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAcache.c
- *			Aug 26 2008
- *			Quincey Koziol
  *
  * Purpose:		Implement extensible array metadata cache methods.
  *
@@ -215,9 +213,6 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 16, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -246,8 +241,6 @@ H5EA__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -281,9 +274,6 @@ H5EA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              July 16, 2013
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -313,7 +303,7 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     hdr->addr = udata->addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -407,9 +397,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 16, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -435,9 +422,6 @@ H5EA__cache_hdr_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 16, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -506,9 +490,6 @@ H5EA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *              11/30/15
  *
  *-------------------------------------------------------------------------
  */
@@ -588,9 +569,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 16, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -618,9 +596,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -636,7 +611,7 @@ H5EA__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
     assert(image_len);
 
     /* Set up fake index block for computing size on disk */
-    HDmemset(&iblock, 0, sizeof(iblock));
+    memset(&iblock, 0, sizeof(iblock));
     iblock.hdr         = (H5EA_hdr_t *)hdr;
     iblock.nsblks      = H5EA_SBLK_FIRST_IDX(hdr->cparam.sup_blk_min_data_ptrs);
     iblock.ndblk_addrs = 2 * ((size_t)hdr->cparam.sup_blk_min_data_ptrs - 1);
@@ -656,8 +631,6 @@ H5EA__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -691,9 +664,6 @@ H5EA__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -722,7 +692,7 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     iblock->addr = hdr->idx_blk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array index block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -798,9 +768,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -826,9 +793,6 @@ H5EA__cache_iblock_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -913,9 +877,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -989,9 +950,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1019,9 +977,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1041,7 +996,7 @@ H5EA__cache_sblock_get_initial_load_size(void *_udata, size_t *image_len)
 
     /* Set up fake super block for computing size on disk */
     /* (Note: extracted from H5EA__sblock_alloc) */
-    HDmemset(&sblock, 0, sizeof(sblock));
+    memset(&sblock, 0, sizeof(sblock));
     sblock.hdr         = udata->hdr;
     sblock.ndblks      = udata->hdr->sblk_info[udata->sblk_idx].ndblks;
     sblock.dblk_nelmts = udata->hdr->sblk_info[udata->sblk_idx].dblk_nelmts;
@@ -1077,8 +1032,6 @@ H5EA__cache_sblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
  *
- * Programmer:	Vailin Choi; Aug 2015
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -1111,9 +1064,6 @@ H5EA__cache_sblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1145,7 +1095,7 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     sblock->addr = udata->sblk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array super block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1215,9 +1165,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1243,9 +1190,6 @@ H5EA__cache_sblock_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1316,9 +1260,6 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1414,9 +1355,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1444,9 +1382,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1465,7 +1400,7 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
 
     /* Set up fake data block for computing size on disk */
     /* (Note: extracted from H5EA__dblock_alloc) */
-    HDmemset(&dblock, 0, sizeof(dblock));
+    memset(&dblock, 0, sizeof(dblock));
 
     /* need to set:
      *
@@ -1503,8 +1438,6 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
  *
- * Programmer:	Vailin Choi; Aug 2015
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -1536,9 +1469,6 @@ H5EA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1574,7 +1504,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     dblock->addr = udata->dblk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array data block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1641,9 +1571,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1672,9 +1599,6 @@ H5EA__cache_dblock_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1742,9 +1666,6 @@ done:
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1839,9 +1760,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1886,9 +1804,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              12/5/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1914,9 +1829,6 @@ H5EA__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1946,8 +1858,6 @@ H5EA__cache_dblk_page_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1980,9 +1890,6 @@ H5EA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2054,9 +1961,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2082,9 +1986,6 @@ H5EA__cache_dblk_page_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2134,9 +2035,6 @@ done:
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -2231,9 +2129,6 @@ done:
  *              structure
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */

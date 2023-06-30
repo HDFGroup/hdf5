@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Tdeprec.c
- *		April 5 2007
- *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5T interface.  These
  *              functions are here for compatibility purposes and may be
@@ -89,9 +87,6 @@ H5FL_EXTERN(H5VL_object_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, June  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -153,9 +148,6 @@ done:
  * Return:	Success:	Object ID of the named datatype.
  *
  *		Failure:	H5I_INVALID_HID
- *
- * Programmer:	Robb Matzke
- *              Monday, June  1, 1998
  *
  *-------------------------------------------------------------------------
  */

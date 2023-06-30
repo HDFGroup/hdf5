@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5C.c
- *              June 1 2004
- *              John Mainzer
  *
  * Purpose:     Functions in this file implement a generic cache for
  *              things which exist on disk, and which may be
@@ -116,9 +114,6 @@ H5FL_DEFINE_STATIC(H5C_t);
  *
  * Return:      Success:        Pointer to the new instance.
  *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -307,7 +302,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->epoch_marker_ringbuf_size  = 0;
 
     /* Initialize all epoch marker entries' fields to zero/FALSE/NULL */
-    HDmemset(cache_ptr->epoch_markers, 0, sizeof(cache_ptr->epoch_markers));
+    memset(cache_ptr->epoch_markers, 0, sizeof(cache_ptr->epoch_markers));
 
     /* Set non-zero/FALSE/NULL fields for epoch markers */
     for (i = 0; i < H5C__MAX_EPOCH_MARKERS; i++) {
@@ -388,9 +383,6 @@ done:
  *        entries in the cache at this point.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              7/3/15
  *
  *-------------------------------------------------------------------------
  */
@@ -479,9 +471,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *        6/2/04
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -565,9 +554,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *        Dec 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -609,9 +595,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *        a request to flush all items and an entry was protected.
- *
- * Programmer:  John Mainzer
- *        6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -751,9 +734,6 @@ done:
  * Return:      Non-negative on success/Negative on failure or if
  *        write is not permitted.
  *
- * Programmer:  John Mainzer
- *        9/16/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -794,8 +774,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer, 10/5/04
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -828,9 +806,6 @@ done:
  *        stats.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *        10/8/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1019,9 +994,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *              7/27/07
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1100,9 +1072,6 @@ done:
  *              3) set cache_ptr->slist_enabled = FALSE.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              5/1/20
  *
  *-------------------------------------------------------------------------
  */
@@ -1192,9 +1161,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              10/15/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1248,9 +1214,6 @@ done:
  *        and flag an error and return FAIL otherwise.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              3/23/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1388,9 +1351,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Vailin Choi
- *        January 2014
  *
  *-------------------------------------------------------------------------
  */

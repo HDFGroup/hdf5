@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              Thursday, July  15, 2010
- *
  * Purpose:     Creates a file with non-default sizes of lengths and addresses.
  *              This is used to make sure that the local heap code is able to
  *              handle this case correctly, even when the heap prefix and data
@@ -32,9 +29,6 @@
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  Neil Fortner
- *              Thursday, July  15, 2010
  *
  *-------------------------------------------------------------------------
  */

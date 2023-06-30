@@ -145,9 +145,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	James Laird
- *		July 14 2006
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -273,9 +270,6 @@ done:
  * Return:	Success:	An open object identifier
  *		Failure:	H5I_INVALID_HID
  *
- * Programmer:	Quincey Koziol
- *		November 20 2006
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -351,9 +345,6 @@ done:
  *
  * Return:      Success:    An open object identifier
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Dana Robinson
- *              Winter 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -646,9 +637,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Mike McGreevy
- *              May 19, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -752,9 +740,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Mike McGreevy
- *              July 28, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -828,9 +813,6 @@ done:
  *		group ID.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, December 13, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -932,9 +914,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	James Laird
- *		July 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -987,9 +966,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	James Laird
- *		July 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1034,9 +1010,6 @@ done:
  *
  * Return:      Success:    TRUE/FALSE
  *              Failure:    FAIL
- *
- * Programmer:	Quincey Koziol
- *		February  2 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1094,9 +1067,6 @@ done:
  * Purpose:     Retrieve information about an object.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1192,9 +1162,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1266,9 +1233,6 @@ done:
  * Return:      Success:	Non-negative
  *              Failure:	Negative
  *
- * Programmer:	Dana Robinson
- *              Fall 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1332,9 +1296,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1384,9 +1345,6 @@ done:
  * Purpose:     Retrieve native file format information about an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1450,9 +1408,6 @@ done:
  *
  * Return:      Success:	Non-negative
  *              Failure:	Negative
- *
- * Programmer:	Dana Robinson
- *              Fall 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1525,9 +1480,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		August 30 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1579,9 +1531,6 @@ done:
  * Note:        Deprecated in favor of using attributes on objects
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		August 30 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1640,9 +1589,6 @@ done:
  *
  *              Failure:    -1
  *
- * Programmer:	Quincey Koziol
- *		August 30 2007
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1695,9 +1641,6 @@ done:
  *                          comment.
  *
  *              Failure:    -1
- *
- * Programmer:	Quincey Koziol
- *		August 30 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1781,9 +1724,6 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:	Quincey Koziol
- *              November 25 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1862,9 +1802,6 @@ done:
  *              Failure:    Negative if something goes wrong within the
  *                          library, or the negative value returned by one
  *                          of the operators.
- *
- * Programmer:	Quincey Koziol
- *              November 24 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1988,9 +1925,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  James Laird
- *              July 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2105,9 +2039,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Vailin Choi
- *              January 2014
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2177,9 +2108,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Vailin Choi
- *              January 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -2255,9 +2183,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Vailin Choi
- *              January 2014
  *
  *-------------------------------------------------------------------------
  */

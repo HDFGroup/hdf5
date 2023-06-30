@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, March 31, 1998
- *
  * Purpose:     Tests the global heap.  The global heap is the set of all
  *              collections but the collections are not related to one
  *              another by anything that appears in the file format.
@@ -59,9 +56,6 @@ static const char *FILENAME[] = {"gheap1", "gheap2", "gheap3", "gheap4", "gheapo
  *
  *              Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Tuesday, March 31, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -81,7 +75,7 @@ test_1(hid_t fapl)
     TESTING("monotonically increasing lengths");
 
     /* Allocate buffer for H5HG_t */
-    if (NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+    if (NULL == (obj = (H5HG_t *)malloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
         goto error;
 
     /* Open a clean file */
@@ -101,7 +95,7 @@ test_1(hid_t fapl)
      */
     for (u = 0; u < GHEAP_TEST_NOBJS; u++) {
         size = u + 1;
-        HDmemset(out, (int)('A' + u % 26), size);
+        memset(out, (int)('A' + u % 26), size);
         H5Eclear2(H5E_DEFAULT);
         status = H5HG_insert(f, size, out, obj + u);
         if (status < 0) {
@@ -121,14 +115,14 @@ test_1(hid_t fapl)
      */
     for (u = 0; u < GHEAP_TEST_NOBJS; u++) {
         size = u + 1;
-        HDmemset(out, (int)('A' + u % 26), size);
+        memset(out, (int)('A' + u % 26), size);
         H5Eclear2(H5E_DEFAULT);
         if (NULL == H5HG_read(f, obj + u, in, NULL)) {
             H5_FAILED();
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (HDmemcmp(in, out, size) != 0) {
+        else if (memcmp(in, out, size) != 0) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;
@@ -136,7 +130,7 @@ test_1(hid_t fapl)
     }
 
     /* Release buffer */
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     if (H5Fclose(file) < 0)
@@ -154,7 +148,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 }
 
@@ -167,9 +161,6 @@ error:
  * Return:      Success:    0
  *
  *              Failure:     number of errors
- *
- * Programmer:  Robb Matzke
- *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -189,7 +180,7 @@ test_2(hid_t fapl)
     TESTING("monotonically decreasing lengths");
 
     /* Allocate buffer for H5HG_t */
-    if (NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+    if (NULL == (obj = (H5HG_t *)malloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
         goto error;
 
     /* Open a clean file */
@@ -207,7 +198,7 @@ test_2(hid_t fapl)
      */
     for (u = 0; u < GHEAP_TEST_NOBJS; u++) {
         size = GHEAP_TEST_NOBJS - u;
-        HDmemset(out, (int)('A' + u % 26), size);
+        memset(out, (int)('A' + u % 26), size);
         H5Eclear2(H5E_DEFAULT);
         if (H5HG_insert(f, size, out, obj + u) < 0) {
             H5_FAILED();
@@ -221,14 +212,14 @@ test_2(hid_t fapl)
      */
     for (u = 0; u < GHEAP_TEST_NOBJS; u++) {
         size = GHEAP_TEST_NOBJS - u;
-        HDmemset(out, (int)('A' + u % 26), size);
+        memset(out, (int)('A' + u % 26), size);
         H5Eclear2(H5E_DEFAULT);
         if (NULL == H5HG_read(f, obj + u, in, NULL)) {
             H5_FAILED();
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (HDmemcmp(in, out, size) != 0) {
+        else if (memcmp(in, out, size) != 0) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;
@@ -236,7 +227,7 @@ test_2(hid_t fapl)
     }
 
     /* Release buffer */
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     if (H5Fclose(file) < 0)
@@ -254,7 +245,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 }
 
@@ -267,9 +258,6 @@ error:
  * Return:      Success:    0
  *
  *              Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -289,7 +277,7 @@ test_3(hid_t fapl)
     TESTING("complete object removal");
 
     /* Allocate buffer for H5HG_t */
-    if (NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+    if (NULL == (obj = (H5HG_t *)malloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
         goto error;
 
     /* Open a clean file */
@@ -305,7 +293,7 @@ test_3(hid_t fapl)
     /* Create some stuff */
     for (u = 0; u < GHEAP_TEST_NOBJS; u++) {
         size = u % 30 + 100;
-        HDmemset(out, (int)('A' + u % 26), size);
+        memset(out, (int)('A' + u % 26), size);
         H5Eclear2(H5E_DEFAULT);
         status = H5HG_insert(f, size, out, obj + u);
         if (status < 0) {
@@ -326,7 +314,7 @@ test_3(hid_t fapl)
     }
 
     /* Release buffer */
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     if (H5Fclose(file) < 0)
@@ -344,7 +332,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 }
 
@@ -358,9 +346,6 @@ error:
  * Return:      Success:    0
  *
  *              Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -380,7 +365,7 @@ test_4(hid_t fapl)
     TESTING("partial object removal");
 
     /* Allocate buffer for H5HG_t */
-    if (NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+    if (NULL == (obj = (H5HG_t *)malloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
         goto error;
 
     /* Open a clean file */
@@ -396,7 +381,7 @@ test_4(hid_t fapl)
     for (u = 0; u < GHEAP_TEST_NOBJS; u++) {
         /* Insert */
         size = u % 30 + 100;
-        HDmemset(out, (int)('A' + u % 26), size);
+        memset(out, (int)('A' + u % 26), size);
         H5Eclear2(H5E_DEFAULT);
         status = H5HG_insert(f, size, out, obj + u);
         if (status < 0) {
@@ -417,12 +402,12 @@ test_4(hid_t fapl)
                 HDputs("    Unable to remove object");
                 nerrors++;
             }
-            HDmemset(obj + u - 1, 0, sizeof *obj);
+            memset(obj + u - 1, 0, sizeof *obj);
         }
     }
 
     /* Release buffer */
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     if (H5Fclose(file) < 0)
@@ -440,7 +425,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 }
 
@@ -455,9 +440,6 @@ error:
  * Return:      Success:    0
  *
  *              Failure:    number of errors
- *
- * Programmer:    Neil Fortner
- *              Monday, October 26, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -474,7 +456,7 @@ test_ooo_indices(hid_t fapl)
 
     TESTING("out of order indices");
 
-    if (NULL == (obj = (H5HG_t *)HDmalloc(2000 * sizeof(*obj))))
+    if (NULL == (obj = (H5HG_t *)malloc(2000 * sizeof(*obj))))
         goto error;
 
     /* Open a clean file */
@@ -546,7 +528,7 @@ test_ooo_indices(hid_t fapl)
         goto error;
     if (nerrors)
         goto error;
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     PASSED();
@@ -559,7 +541,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 } /* end test_ooo_indices */
 
@@ -608,7 +590,7 @@ main(void)
     api_ctx_pushed = FALSE;
 
     h5_cleanup(FILENAME, fapl_id);
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     H5E_BEGIN_TRY
@@ -621,5 +603,5 @@ error:
         H5CX_pop(FALSE);
 
     HDputs("*** TESTS FAILED ***");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

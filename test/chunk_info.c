@@ -13,9 +13,6 @@
  *
  * Purpose:     Tests chunk query API functions
  *
- * Modification:
- *              Many tests were added for HDFFV-10677. -BMR, August 2019
- *
  * Test structure:
  *          main()
  *              test_basic_query()
@@ -332,7 +329,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
     hsize_t  ii, jj;                                       /* Array indices */
     int      n;
 
-    HDmemset(&read_buf, 0, sizeof(read_buf));
+    memset(&read_buf, 0, sizeof(read_buf));
 
     /* Initialize the array of chunk data for all NUM_CHUNKS chunks, this is
        the same as the written data and will be used to verify the read data */
@@ -354,7 +351,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
                 TEST_ERROR;
 
             /* Verify that read chunk is the same as the corresponding written one */
-            if (HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
+            if (memcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
                 fprintf(stderr,
                         "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
                         offset[0], offset[1]);
@@ -564,7 +561,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate input (compressed) buffer */
-    inbuf = HDcalloc(1, z_dst_nbytes);
+    inbuf = calloc(1, z_dst_nbytes);
 
     /* zlib-friendly alias for the input buffer */
     z_dst = (Bytef *)inbuf;
@@ -590,9 +587,9 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     }
 #else
     /* Allocate input (non-compressed) buffer */
-    if (NULL == (inbuf = HDcalloc(1, CHK_SIZE)))
+    if (NULL == (inbuf = calloc(1, CHK_SIZE)))
         TEST_ERROR;
-    HDmemcpy(inbuf, direct_buf, CHK_SIZE);
+    memcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
     /* Write only NUM_CHUNKS_WRITTEN chunks at the following logical coords:
@@ -609,7 +606,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
     /* Free the input buffer */
     if (inbuf)
-        HDfree(inbuf);
+        free(inbuf);
 
     if (H5Fflush(dset, H5F_SCOPE_LOCAL) < 0)
         TEST_ERROR;
@@ -2121,7 +2118,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
         TEST_ERROR;
 
     /* Read the raw chunk back with H5Dread_chunk */
-    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    memset(&read_direct_buf, 0, sizeof(read_direct_buf));
     if (H5Dread_chunk(dset, H5P_DEFAULT, offset, &read_flt_msk, read_direct_buf) < 0)
         TEST_ERROR;
     if (read_flt_msk != flt_msk)
@@ -2197,9 +2194,6 @@ error:
  * Purpose:     Tests functions related to chunk information
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Binh-Minh Ribler
- *              November 5, 2018
  *
  *-------------------------------------------------------------------------
  */

@@ -99,15 +99,6 @@ TestErrPrintf(const char *format, ...)
  *
  * Return:  pointer to a string containing the value of the environment variable
  *     NULL if the variable doesn't exist in task 'root's environment.
- *
- * Programmer:  Leon Arber
- *              4/4/05
- *
- * Modifications:
- *    Use original getenv if MPI is not initialized. This happens
- *    one uses the PHDF5 library to build a serial nature code.
- *    Albert 2006/04/07
- *
  *-------------------------------------------------------------------------
  */
 char *
@@ -146,16 +137,16 @@ getenv_all(MPI_Comm comm, int root, const char *name)
             MPI_Bcast(&len, 1, MPI_INT, root, comm);
             if (len >= 0) {
                 if (env == NULL)
-                    env = (char *)HDmalloc((size_t)len + 1);
+                    env = (char *)malloc((size_t)len + 1);
                 else if (HDstrlen(env) < (size_t)len)
-                    env = (char *)HDrealloc(env, (size_t)len + 1);
+                    env = (char *)realloc(env, (size_t)len + 1);
 
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
                 env[len] = '\0';
             }
             else {
                 if (env)
-                    HDfree(env);
+                    free(env);
                 env = NULL;
             }
         }
@@ -166,7 +157,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     else {
         /* use original getenv */
         if (env)
-            HDfree(env);
+            free(env);
         env = HDgetenv(name);
     } /* end if */
 
@@ -184,9 +175,6 @@ getenv_all(MPI_Comm comm, int root, const char *name)
  *
  * Return:      Success:    A file access property list
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Robb Matzke
- *              Thursday, November 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -218,9 +206,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              November 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -290,7 +275,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     if (!base_name || !fullname || size < 1)
         return NULL;
 
-    HDmemset(fullname, 0, size);
+    memset(fullname, 0, size);
 
     /* Determine if driver is set by environment variable. If it is,
      * only generate a suffix if fixing the filename for the superblock
@@ -722,10 +707,10 @@ main(int argc, char *argv[])
     /* No need to print anything since PerformTests() already does. */
     if (nerrors /* GetTestNumErrs() */ > 0) {
         printf("** HDF5 tests failed with %d errors **\n", nerrors);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     else {
         printf("** HDF5 tests ran successfully **\n");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 } /* end main() */

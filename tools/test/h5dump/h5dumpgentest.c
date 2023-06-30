@@ -470,13 +470,13 @@ gent_dataset(void)
     int      i, j;
 
     /* Set up data arrays */
-    dset1_data = (int *)HDcalloc(10 * 20, sizeof(int));
-    dset1      = (int **)HDcalloc(10, sizeof(dset1_data));
+    dset1_data = (int *)calloc(10 * 20, sizeof(int));
+    dset1      = (int **)calloc(10, sizeof(dset1_data));
     for (i = 0; i < 10; i++)
         dset1[i] = dset1_data + (i * 20);
 
-    dset2_data = (double *)HDcalloc(30 * 20, sizeof(double));
-    dset2      = (double **)HDcalloc(30, sizeof(dset2_data));
+    dset2_data = (double *)calloc(30 * 20, sizeof(double));
+    dset2      = (double **)calloc(30, sizeof(dset2_data));
     for (i = 0; i < 30; i++)
         dset2[i] = dset2_data + (i * 20);
 
@@ -512,10 +512,10 @@ gent_dataset(void)
     H5Dclose(dataset);
     H5Fclose(fid);
 
-    HDfree(dset1);
-    HDfree(dset1_data);
-    HDfree(dset2);
-    HDfree(dset2_data);
+    free(dset1);
+    free(dset1_data);
+    free(dset2);
+    free(dset2_data);
 }
 
 static void
@@ -659,8 +659,6 @@ gent_softlink(void)
  * Return:
  *    SUCCEED
  *    FAIL
- * Programmer: Jonathan Kim
- * Date: May 26, 2010
  *-------------------------------------------------------------------------*/
 #define NX 4
 #define NY 2
@@ -1808,8 +1806,8 @@ gent_str(void)
     hsize_t      mdims[2];
 
     /* Set up data array */
-    comp1_data = (compound_t *)HDcalloc(3 * 6, sizeof(compound_t));
-    comp1      = (compound_t **)HDcalloc(3, sizeof(comp1_data));
+    comp1_data = (compound_t *)calloc(3 * 6, sizeof(compound_t));
+    comp1      = (compound_t **)calloc(3, sizeof(comp1_data));
     for (i = 0; i < 3; i++)
         comp1[i] = comp1_data + (i * 6);
 
@@ -1909,8 +1907,8 @@ gent_str(void)
 
     H5Fclose(fid);
 
-    HDfree(comp1);
-    HDfree(comp1_data);
+    free(comp1);
+    free(comp1_data);
 }
 
 /*
@@ -2126,9 +2124,9 @@ gent_objref(void)
     uint64_t    supports_comments = 0;
 
     /* Allocate write & read buffers */
-    wbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
-    rbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
-    tbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    wbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    rbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    tbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE16, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2211,9 +2209,9 @@ gent_objref(void)
     H5Fclose(fid1);
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(tbuf);
+    free(wbuf);
+    free(rbuf);
+    free(tbuf);
 }
 
 static void
@@ -2240,10 +2238,10 @@ gent_datareg(void)
     int      i;                                           /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf  = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf  = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
+    dwbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    drbuf = (uint8_t *)calloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
 
     /* Create file */
     fid1 = H5Fcreate(FILE17, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2331,10 +2329,10 @@ gent_datareg(void)
     H5Fclose(fid1);
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(dwbuf);
-    HDfree(drbuf);
+    free(wbuf);
+    free(rbuf);
+    free(dwbuf);
+    free(drbuf);
 }
 
 static void
@@ -2364,10 +2362,10 @@ gent_attrreg(void)
     int              i;                                   /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf  = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf  = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
+    dwbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    drbuf = (uint8_t *)calloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
 
     /* Create file */
     fid1 = H5Fcreate(FILE64, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2464,10 +2462,10 @@ gent_attrreg(void)
     H5Fclose(fid1);
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(dwbuf);
-    HDfree(drbuf);
+    free(wbuf);
+    free(rbuf);
+    free(dwbuf);
+    free(drbuf);
 }
 
 /*taken from Elena's compound test file*/
@@ -2695,7 +2693,7 @@ gent_vldatatypes(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         int j;
 
-        wdata[i].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+        wdata[i].p   = malloc((size_t)(i + 1) * sizeof(int));
         wdata[i].len = (size_t)(i + 1);
 
         for (j = 0; j < i + 1; j++)
@@ -2722,7 +2720,7 @@ gent_vldatatypes(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         int j;
 
-        wdata[i].p   = HDmalloc((size_t)(i + 1) * sizeof(float));
+        wdata[i].p   = malloc((size_t)(i + 1) * sizeof(float));
         wdata[i].len = (size_t)(i + 1);
 
         for (j = 0; j < i + 1; j++)
@@ -2746,7 +2744,7 @@ gent_vldatatypes(void)
     assert(ret >= 0);
 
     /* Allocate and initialize a scalar VL dataset to write */
-    adata.p   = HDmalloc(37 * sizeof(int));
+    adata.p   = malloc(37 * sizeof(int));
     adata.len = 37;
 
     for (i = 0; i < 37; i++)
@@ -2786,14 +2784,14 @@ gent_vldatatypes2(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p = (hvl_t *)HDmalloc((i + 1) * sizeof(hvl_t));
+        wdata[i].p = (hvl_t *)malloc((i + 1) * sizeof(hvl_t));
         if (wdata[i].p == NULL) {
             printf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + 1;
         for (t1 = (hvl_t *)wdata[i].p, j = 0; j < (i + 1); j++, t1++) {
-            t1->p = (unsigned *)HDmalloc((j + 1) * sizeof(unsigned));
+            t1->p = (unsigned *)malloc((j + 1) * sizeof(unsigned));
             if (t1->p == NULL) {
                 printf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return;
@@ -2861,7 +2859,7 @@ gent_vldatatypes3(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         wdata[i].i     = (int)(i * 10);
         wdata[i].f     = (float)((float)(i * 20) / 3.0F);
-        wdata[i].v.p   = HDmalloc((size_t)(i + 1) * sizeof(unsigned int));
+        wdata[i].v.p   = malloc((size_t)(i + 1) * sizeof(unsigned int));
         wdata[i].v.len = (size_t)(i + 1);
         for (j = 0; j < (i + 1); j++)
             ((unsigned int *)wdata[i].v.p)[j] = i * 10 + j;
@@ -2929,7 +2927,7 @@ gent_vldatatypes4(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + 1) * sizeof(s1));
+        wdata[i].p   = malloc((i + 1) * sizeof(s1));
         wdata[i].len = i + 1;
         for (j = 0; j < (i + 1); j++) {
             ((s1 *)wdata[i].p)[j].i = (int)(i * 10 + j);
@@ -3000,7 +2998,7 @@ gent_vldatatypes5(void)
         } /* end if */
         else {
             wdata[i].len = (size_t)(i + 5);
-            wdata[i].p   = HDmalloc(sizeof(unsigned) * (size_t)(i + 5));
+            wdata[i].p   = malloc(sizeof(unsigned) * (size_t)(i + 5));
             for (j = 0; j < i + 5; j++)
                 ((unsigned *)wdata[i].p)[j] = (unsigned)(j * 2);
         } /* end else */
@@ -3079,8 +3077,8 @@ gent_array1_big(void)
     block[0]  = 1;
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    wdata = (int *)HDmalloc(sizeof(int) * (size_t)(SPACE_ARRAY1BIG_DIM * ARRAY1BIG_DIM));
+    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    wdata = (int *)malloc(sizeof(int) * (size_t)(SPACE_ARRAY1BIG_DIM * ARRAY1BIG_DIM));
 
     /* Allocate and initialize array data to write */
     for (i = 0; i < SPACE_ARRAY1BIG_DIM; i++)
@@ -3137,8 +3135,8 @@ gent_array1_big(void)
     assert(ret >= 0);
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(wdata);
+    free(wbuf);
+    free(wdata);
 }
 
 static void
@@ -3447,7 +3445,7 @@ gent_array6(void)
     /* Initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
-            wdata[i][j].p   = HDmalloc((size_t)(i + j + 1) * sizeof(unsigned int));
+            wdata[i][j].p   = malloc((size_t)(i + j + 1) * sizeof(unsigned int));
             wdata[i][j].len = (size_t)(i + j + 1);
             for (k = 0; k < (i + j + 1); k++)
                 ((unsigned int *)wdata[i][j].p)[k] = (unsigned)(i * 100 + j * 10 + k);
@@ -3509,7 +3507,7 @@ gent_array7(void)
     /* Initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
-            wdata[i][j].p   = HDmalloc((size_t)(i + j + 1) * (sizeof(unsigned int) * ARRAY1_DIM1));
+            wdata[i][j].p   = malloc((size_t)(i + j + 1) * (sizeof(unsigned int) * ARRAY1_DIM1));
             wdata[i][j].len = (size_t)(i + j + 1);
             for (k = 0; k < (i + j + 1); k++)
                 for (l = 0; l < ARRAY1_DIM1; l++)
@@ -3577,7 +3575,7 @@ gent_array8(void)
     unsigned int                 i;
 
     /* Allocate data buffer */
-    wdata = (int *)HDmalloc(F64_DIM1 * sizeof(int));
+    wdata = (int *)malloc(F64_DIM1 * sizeof(int));
     assert(wdata);
 
     /*
@@ -3624,7 +3622,7 @@ gent_array8(void)
     assert(status >= 0);
     status = H5Fclose(file);
     assert(status >= 0);
-    HDfree(wdata);
+    free(wdata);
 }
 
 static void
@@ -3869,17 +3867,17 @@ gent_multi(void)
     char       *sv_data = NULL;
     haddr_t     memb_addr[H5FD_MEM_NTYPES];
 
-    sv_data = (char *)HDcalloc(H5FD_MEM_NTYPES * 1024, sizeof(char));
-    sv      = (char **)HDcalloc(H5FD_MEM_NTYPES, sizeof(sv_data));
+    sv_data = (char *)calloc(H5FD_MEM_NTYPES * 1024, sizeof(char));
+    sv      = (char **)calloc(H5FD_MEM_NTYPES, sizeof(sv_data));
     for (i = 0; i < H5FD_MEM_NTYPES; i++)
         sv[i] = sv_data + (i * 1024);
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 
-    HDmemset(memb_map, 0, sizeof memb_map);
-    HDmemset(memb_fapl, 0, sizeof memb_fapl);
-    HDmemset(memb_name, 0, sizeof memb_name);
-    HDmemset(memb_addr, 0, sizeof memb_addr);
+    memset(memb_map, 0, sizeof memb_map);
+    memset(memb_fapl, 0, sizeof memb_fapl);
+    memset(memb_name, 0, sizeof memb_name);
+    memset(memb_addr, 0, sizeof memb_addr);
 
     assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
@@ -3914,8 +3912,8 @@ gent_multi(void)
     H5Fclose(fid);
     H5Pclose(fapl);
 
-    HDfree(sv);
-    HDfree(sv_data);
+    free(sv);
+    free(sv_data);
 }
 
 static void
@@ -4025,10 +4023,6 @@ gent_char(void)
  * Purpose: write attributes in LOC_ID (dataset, group, named datatype)
  *
  * Return: void
- *
- * Programmer: Pedro Vicente
- *
- * Date: May 28, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -4157,10 +4151,10 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -4266,7 +4260,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         for (j = 0; j < 2; j++) {
             int l;
 
-            buf52[i][j].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((size_t)(i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 ((int *)buf52[i][j].p)[l] = n++;
@@ -4396,7 +4390,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
             for (k = 0; k < 2; k++) {
                 int l;
 
-                buf53[i][j][k].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((size_t)(i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++)
                     ((int *)buf53[i][j][k].p)[l] = n++;
@@ -4452,10 +4446,6 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  * Purpose: write datasets in LOC_ID
  *
  * Return: void
- *
- * Programmer: Pedro Vicente
- *
- * Date: May 28, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -4586,10 +4576,10 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -4695,7 +4685,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         for (j = 0; j < 2; j++) {
             int l;
 
-            buf52[i][j].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((size_t)(i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 ((int *)buf52[i][j].p)[l] = n++;
@@ -4832,7 +4822,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
             for (k = 0; k < 2; k++) {
                 int l;
 
-                buf53[i][j][k].p   = HDmalloc(((size_t)i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc(((size_t)i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++)
                     ((int *)buf53[i][j][k].p)[l] = n++;
@@ -4888,10 +4878,6 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  * Purpose: generate all datatype attributes
  *
  * Return: void
- *
- * Programmer: Pedro Vicente
- *
- * Date: May 19, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -4958,10 +4944,6 @@ gent_attr_all(void)
  *
  * Purpose: utility function to write an attribute
  *
- * Programmer: Pedro Vicente
- *
- * Date: May 19, 2003
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4995,10 +4977,6 @@ write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name, hid_t t
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
  * Return:
- *
- * Programmer: Pedro Vicente
- *
- * Date: May 27, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6022,10 +6000,10 @@ gent_fvalues(void)
      *-------------------------------------------------------------------------
      */
     buf3[0].len           = 1;
-    buf3[0].p             = HDmalloc(1 * sizeof(int));
+    buf3[0].p             = malloc(1 * sizeof(int));
     ((int *)buf3[0].p)[0] = 1;
     buf3[1].len           = 2;
-    buf3[1].p             = HDmalloc(2 * sizeof(int));
+    buf3[1].p             = malloc(2 * sizeof(int));
     ((int *)buf3[1].p)[0] = 2;
     ((int *)buf3[1].p)[1] = 3;
 
@@ -6276,7 +6254,7 @@ gent_longlinks(void)
     assert(gid >= 0);
 
     /* Construct very long file name */
-    objname = (char *)HDmalloc((size_t)(F51_MAX_NAME_LEN + 1));
+    objname = (char *)malloc((size_t)(F51_MAX_NAME_LEN + 1));
     assert(objname);
     for (u = 0; u < F51_MAX_NAME_LEN; u++)
         objname[u] = 'a';
@@ -6299,7 +6277,7 @@ gent_longlinks(void)
     assert(H5Fclose(fid) >= 0);
 
     /* Release memory */
-    HDfree(objname);
+    free(objname);
 }
 
 /*-------------------------------------------------------------------------
@@ -6520,7 +6498,7 @@ gent_bigdims(void)
     if ((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0)
         goto out;
 
-    buf = (char *)HDmalloc((unsigned)(nelmts * size));
+    buf = (char *)malloc((unsigned)(nelmts * size));
 
     for (i = 0, c = 0; i < nelmts; i++, c++) {
         buf[i] = c;
@@ -6531,7 +6509,7 @@ gent_bigdims(void)
     if (H5Dwrite(did, H5T_NATIVE_SCHAR, m_sid, f_sid, H5P_DEFAULT, buf) < 0)
         goto out;
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     /* close */
@@ -6586,7 +6564,7 @@ gent_hyperslab(void)
     int     i;
     int H5_ATTR_NDEBUG_UNUSED ret;
 
-    buf = (double *)HDmalloc(32 * 4097 * sizeof(double));
+    buf = (double *)malloc(32 * 4097 * sizeof(double));
     for (i = 0; i < 32 * 4097; i++)
         buf[i] = 1;
 
@@ -6599,7 +6577,7 @@ gent_hyperslab(void)
     ret = H5Fclose(fid);
     assert(ret >= 0);
 
-    HDfree(buf);
+    free(buf);
 }
 
 /*-------------------------------------------------------------------------
@@ -7255,8 +7233,6 @@ gent_dataset_idx(void)
  *   Four more datasets of 1, 2, 4 and 8 bytes of signed int types are created.
  *   Fill them with raw data such that no bit will be all zero in a dataset.
  *   A dummy dataset of double type is created for failure test.
- * Created:  Albert Cheng, 2010/5/10.
- * Modified: Allen Byrne, 2011/1/5 Use file to test Signed/Unsigned datatypes
  *-------------------------------------------------------------------------
  */
 static void
@@ -7479,15 +7455,15 @@ gent_packedbits(void)
     H5Dclose(dataset);
     H5Fclose(fid);
 
-    HDfree(dsetu8);
-    HDfree(dsetu16);
-    HDfree(dsetu32);
-    HDfree(dsetu64);
-    HDfree(dset8);
-    HDfree(dset16);
-    HDfree(dset32);
-    HDfree(dset64);
-    HDfree(dsetdbl);
+    free(dsetu8);
+    free(dsetu16);
+    free(dsetu32);
+    free(dsetu64);
+    free(dset8);
+    free(dset16);
+    free(dset32);
+    free(dset64);
+    free(dsetdbl);
 }
 
 /*-------------------------------------------------------------------------
@@ -7733,15 +7709,15 @@ gent_attr_intsize(void)
     H5Gclose(root);
     H5Fclose(fid);
 
-    HDfree(dsetu8);
-    HDfree(dsetu16);
-    HDfree(dsetu32);
-    HDfree(dsetu64);
-    HDfree(dset8);
-    HDfree(dset16);
-    HDfree(dset32);
-    HDfree(dset64);
-    HDfree(dsetdbl);
+    free(dsetu8);
+    free(dsetu16);
+    free(dsetu32);
+    free(dsetu64);
+    free(dset8);
+    free(dset16);
+    free(dset32);
+    free(dset64);
+    free(dsetdbl);
 }
 
 static void
@@ -7925,7 +7901,7 @@ gent_compound_intsizes(void)
     int m, n, o; /* Array init loop vars     */
 
     /* Allocate buffer */
-    Array1 = (Array1Struct *)HDmalloc(sizeof(Array1Struct) * F70_LENGTH);
+    Array1 = (Array1Struct *)malloc(sizeof(Array1Struct) * F70_LENGTH);
     assert(Array1);
 
     /* Initialize the data in the arrays/datastructure                */
@@ -8159,7 +8135,7 @@ gent_compound_intsizes(void)
     status = H5Fclose(fid);
     assert(status >= 0);
 
-    HDfree(Array1);
+    free(Array1);
 }
 
 static void
@@ -8208,7 +8184,7 @@ gent_compound_attr_intsizes(void)
 
     int m, n, o; /* Array init loop vars     */
 
-    Array1 = (Array1Struct *)HDcalloc(F70_LENGTH, sizeof(Array1Struct));
+    Array1 = (Array1Struct *)calloc(F70_LENGTH, sizeof(Array1Struct));
 
     /* Initialize the data in the arrays/datastructure                */
     for (m = 0; m < F70_LENGTH; m++) {
@@ -8451,7 +8427,7 @@ gent_compound_attr_intsizes(void)
     status = H5Fclose(fid);
     assert(status >= 0);
 
-    HDfree(Array1);
+    free(Array1);
 }
 
 static void
@@ -8854,15 +8830,15 @@ gent_intscalars(void)
     H5Dclose(dataset);
     H5Fclose(fid);
 
-    HDfree(dsetu8);
-    HDfree(dsetu16);
-    HDfree(dsetu32);
-    HDfree(dsetu64);
-    HDfree(dset8);
-    HDfree(dset16);
-    HDfree(dset32);
-    HDfree(dset64);
-    HDfree(dsetdbl);
+    free(dsetu8);
+    free(dsetu16);
+    free(dsetu32);
+    free(dsetu64);
+    free(dset8);
+    free(dset16);
+    free(dset32);
+    free(dset64);
+    free(dsetdbl);
 }
 
 /*-------------------------------------------------------------------------
@@ -9118,15 +9094,15 @@ gent_attr_intscalars(void)
     H5Gclose(root);
     H5Fclose(fid);
 
-    HDfree(dsetu8);
-    HDfree(dsetu16);
-    HDfree(dsetu32);
-    HDfree(dsetu64);
-    HDfree(dset8);
-    HDfree(dset16);
-    HDfree(dset32);
-    HDfree(dset64);
-    HDfree(dsetdbl);
+    free(dsetu8);
+    free(dsetu16);
+    free(dsetu32);
+    free(dsetu64);
+    free(dset8);
+    free(dset16);
+    free(dset32);
+    free(dset64);
+    free(dsetdbl);
 }
 
 /*-------------------------------------------------------------------------
@@ -9229,7 +9205,7 @@ gent_compound_int_array(void)
     int m, n; /* Array init loop vars     */
 
     /* Allocate buffer */
-    Cmpd1 = (Cmpd1Struct *)HDmalloc(sizeof(Cmpd1Struct) * F76_LENGTH);
+    Cmpd1 = (Cmpd1Struct *)malloc(sizeof(Cmpd1Struct) * F76_LENGTH);
     assert(Cmpd1);
 
     /* Initialize the data in the arrays/datastructure                */
@@ -9437,7 +9413,7 @@ gent_compound_int_array(void)
     status = H5Fclose(fid);
     assert(status >= 0);
 
-    HDfree(Cmpd1);
+    free(Cmpd1);
 }
 
 static void
@@ -9487,9 +9463,9 @@ gent_compound_ints(void)
     int m; /* Array init loop vars     */
 
     /* Allocate buffers */
-    Cmpd1 = (Cmpd1Struct *)HDmalloc(sizeof(Cmpd1Struct) * F77_LENGTH);
+    Cmpd1 = (Cmpd1Struct *)malloc(sizeof(Cmpd1Struct) * F77_LENGTH);
     assert(Cmpd1);
-    Cmpd2 = (Cmpd2Struct *)HDmalloc(sizeof(Cmpd2Struct) * F77_LENGTH);
+    Cmpd2 = (Cmpd2Struct *)malloc(sizeof(Cmpd2Struct) * F77_LENGTH);
     assert(Cmpd2);
 
     /* Initialize the data in the arrays/datastructure                */
@@ -9669,8 +9645,8 @@ gent_compound_ints(void)
     status = H5Fclose(fid);
     assert(status >= 0);
 
-    HDfree(Cmpd1);
-    HDfree(Cmpd2);
+    free(Cmpd1);
+    free(Cmpd2);
 }
 
 /*-------------------------------------------------------------------------
@@ -9958,15 +9934,15 @@ gent_intattrscalars(void)
     H5Dclose(dataset);
     H5Fclose(fid);
 
-    HDfree(dsetu8);
-    HDfree(dsetu16);
-    HDfree(dsetu32);
-    HDfree(dsetu64);
-    HDfree(dset8);
-    HDfree(dset16);
-    HDfree(dset32);
-    HDfree(dset64);
-    HDfree(dsetdbl);
+    free(dsetu8);
+    free(dsetu16);
+    free(dsetu32);
+    free(dsetu64);
+    free(dset8);
+    free(dset16);
+    free(dset32);
+    free(dset64);
+    free(dsetdbl);
 }
 
 /*-------------------------------------------------------------------------
@@ -10049,15 +10025,15 @@ gent_intsattrs(void)
     dset64  = malloc(sizeof(*dset64));
     dsetdbl = malloc(sizeof(*dsetdbl));
 
-    asetu8  = HDcalloc(F66_XDIM * F66_YDIM8, sizeof(uint8_t));
-    asetu16 = HDcalloc(F66_XDIM * F66_YDIM16, sizeof(uint16_t));
-    asetu32 = HDcalloc(F66_XDIM * F66_YDIM32, sizeof(uint32_t));
-    asetu64 = HDcalloc(F66_XDIM * F66_YDIM64, sizeof(uint64_t));
-    aset8   = HDcalloc(F66_XDIM * F66_YDIM8, sizeof(int8_t));
-    aset16  = HDcalloc(F66_XDIM * F66_YDIM16, sizeof(int16_t));
-    aset32  = HDcalloc(F66_XDIM * F66_YDIM32, sizeof(int32_t));
-    aset64  = HDcalloc(F66_XDIM * F66_YDIM64, sizeof(int64_t));
-    asetdbl = HDcalloc(F66_XDIM * F66_YDIM8, sizeof(double));
+    asetu8  = calloc(F66_XDIM * F66_YDIM8, sizeof(uint8_t));
+    asetu16 = calloc(F66_XDIM * F66_YDIM16, sizeof(uint16_t));
+    asetu32 = calloc(F66_XDIM * F66_YDIM32, sizeof(uint32_t));
+    asetu64 = calloc(F66_XDIM * F66_YDIM64, sizeof(uint64_t));
+    aset8   = calloc(F66_XDIM * F66_YDIM8, sizeof(int8_t));
+    aset16  = calloc(F66_XDIM * F66_YDIM16, sizeof(int16_t));
+    aset32  = calloc(F66_XDIM * F66_YDIM32, sizeof(int32_t));
+    aset64  = calloc(F66_XDIM * F66_YDIM64, sizeof(int64_t));
+    asetdbl = calloc(F66_XDIM * F66_YDIM8, sizeof(double));
 
     fid = H5Fcreate(FILE79, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -10309,25 +10285,25 @@ gent_intsattrs(void)
     H5Dclose(dataset);
     H5Fclose(fid);
 
-    HDfree(dsetu8);
-    HDfree(dsetu16);
-    HDfree(dsetu32);
-    HDfree(dsetu64);
-    HDfree(dset8);
-    HDfree(dset16);
-    HDfree(dset32);
-    HDfree(dset64);
-    HDfree(dsetdbl);
+    free(dsetu8);
+    free(dsetu16);
+    free(dsetu32);
+    free(dsetu64);
+    free(dset8);
+    free(dset16);
+    free(dset32);
+    free(dset64);
+    free(dsetdbl);
 
-    HDfree(asetu8);
-    HDfree(asetu16);
-    HDfree(asetu32);
-    HDfree(asetu64);
-    HDfree(aset8);
-    HDfree(aset16);
-    HDfree(aset32);
-    HDfree(aset64);
-    HDfree(asetdbl);
+    free(asetu8);
+    free(asetu16);
+    free(asetu32);
+    free(asetu64);
+    free(aset8);
+    free(aset16);
+    free(aset32);
+    free(aset64);
+    free(asetdbl);
 }
 
 /*-------------------------------------------------------------------------
@@ -10374,9 +10350,9 @@ gent_floatsattrs(void)
     dset64  = malloc(sizeof(*dset64));
     dset128 = malloc(sizeof(*dset128));
 
-    aset32  = HDcalloc(F89_XDIM * F89_YDIM32, sizeof(float));
-    aset64  = HDcalloc(F89_XDIM * F89_YDIM64, sizeof(double));
-    aset128 = HDcalloc(F89_XDIM * F89_YDIM128, sizeof(long double));
+    aset32  = calloc(F89_XDIM * F89_YDIM32, sizeof(float));
+    aset64  = calloc(F89_XDIM * F89_YDIM64, sizeof(double));
+    aset128 = calloc(F89_XDIM * F89_YDIM128, sizeof(long double));
 
     fid = H5Fcreate(FILE89, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -10473,13 +10449,13 @@ gent_floatsattrs(void)
 error:
     H5Fclose(fid);
 
-    HDfree(dset32);
-    HDfree(dset64);
-    HDfree(dset128);
+    free(dset32);
+    free(dset64);
+    free(dset128);
 
-    HDfree(aset32);
-    HDfree(aset64);
-    HDfree(aset128);
+    free(aset32);
+    free(aset64);
+    free(aset128);
 }
 
 static void
@@ -10754,7 +10730,7 @@ gent_compound_complex2(void)
     hsize_t  nelmts = F82_DIM32;
 
     /* Allocate buffer */
-    buf = (compound *)HDmalloc(sizeof(compound) * F82_DIM32);
+    buf = (compound *)malloc(sizeof(compound) * F82_DIM32);
     assert(buf);
 
     file = H5Fcreate(FILE82, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -11010,7 +10986,7 @@ gent_compound_complex2(void)
     */
     H5Fclose(file);
 
-    HDfree(buf);
+    free(buf);
 }
 
 /*-------------------------------------------------------------------------
@@ -11367,17 +11343,17 @@ onion_filepaths_init(const char *basename)
 {
     struct onion_filepaths *paths = NULL;
 
-    if (NULL == (paths = HDcalloc(1, sizeof(struct onion_filepaths))))
+    if (NULL == (paths = calloc(1, sizeof(struct onion_filepaths))))
         goto error;
 
     if (NULL == (paths->canon = HDstrdup(basename)))
         goto error;
 
-    if (NULL == (paths->onion = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+    if (NULL == (paths->onion = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
     HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
-    if (NULL == (paths->recovery = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+    if (NULL == (paths->recovery = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
     HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
@@ -11385,10 +11361,10 @@ onion_filepaths_init(const char *basename)
 
 error:
     if (paths != NULL) {
-        HDfree(paths->canon);
-        HDfree(paths->onion);
-        HDfree(paths->recovery);
-        HDfree(paths);
+        free(paths->canon);
+        free(paths->onion);
+        free(paths->recovery);
+        free(paths);
     }
     return NULL;
 }
@@ -11397,10 +11373,10 @@ static void
 onion_filepaths_destroy(struct onion_filepaths *s)
 {
     if (s) {
-        HDfree(s->canon);
-        HDfree(s->onion);
-        HDfree(s->recovery);
-        HDfree(s);
+        free(s->canon);
+        free(s->onion);
+        free(s->recovery);
+        free(s);
     }
 }
 

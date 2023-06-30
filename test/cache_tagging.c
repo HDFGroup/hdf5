@@ -10,11 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Mike McGreevy
- *              January 25, 2010
- *
+/*
  *              This file contains tests for metadata tagging.
  */
+
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
 #define H5F_TESTING
 #include "H5Fpkg.h"
@@ -108,9 +107,6 @@ static unsigned check_invalid_tag_application(void);
  *
  * Return:      void
  *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -143,9 +139,6 @@ error:
  *              in the cache.
  *
  * Return:      0 on Success, -1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -192,9 +185,6 @@ error:
  *
  * Return:      0 on Success, -1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -236,9 +226,6 @@ error:
  *              to the same state as just after a flush call.
  *
  * Return:      0 on Success, -1 on Failure
- *
- * Programmer:  Quincey Koziol
- *              July 13, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -283,9 +270,6 @@ error:
  *              checked.
  *
  * Return:      0 on Success, -1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -370,9 +354,6 @@ error:
  *
  * Return:      0 on Success; 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -402,9 +383,6 @@ error:
  *
  * Return:      0 on Success; 1 on Failure
  *
- * Programmer:  Quincey Koziol
- *              July 10, 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -431,9 +409,6 @@ error:
  *              during file creation.
  *
  * Return:      0 on Success; 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -535,9 +510,6 @@ error:
  *              during file open.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -665,9 +637,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -787,9 +756,6 @@ error:
  *              during multiple group creation.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -939,9 +905,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1078,9 +1041,6 @@ error:
  *              during various dense attribute manipulations.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1312,9 +1272,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1440,9 +1397,6 @@ error:
  *              during attribute creation.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1605,9 +1559,6 @@ error:
  *              during attribute open.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1773,9 +1724,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1810,7 +1758,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
         TEST_ERROR;
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -1967,14 +1915,14 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_rename_tags */
 
@@ -1985,9 +1933,6 @@ error:
  *              during attribute deletion.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2023,7 +1968,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
         TEST_ERROR;
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2159,14 +2104,14 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_delete_tags */
 
@@ -2177,9 +2122,6 @@ error:
  *              during dataset creation.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2337,9 +2279,6 @@ error:
  *              during dataset creation.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2504,9 +2443,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2656,9 +2592,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2690,7 +2623,7 @@ check_dataset_write_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2803,14 +2736,14 @@ check_dataset_write_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_write_tags */
 
@@ -2821,9 +2754,6 @@ error:
  *              during attribute write.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2854,7 +2784,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2990,14 +2920,14 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_write_tags */
 
@@ -3008,9 +2938,6 @@ error:
  *              during dataset read.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3043,7 +2970,7 @@ check_dataset_read_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3152,14 +3079,14 @@ check_dataset_read_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_read_tags */
 
@@ -3170,9 +3097,6 @@ error:
  *              during dataset size retrieval.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3206,7 +3130,7 @@ check_dataset_size_retrieval(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3315,14 +3239,14 @@ check_dataset_size_retrieval(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_size_retrieval */
 
@@ -3333,9 +3257,6 @@ error:
  *              during dataset extension.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3370,7 +3291,7 @@ check_dataset_extend_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3479,14 +3400,14 @@ check_dataset_extend_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_extend_tags */
 
@@ -3497,9 +3418,6 @@ error:
  *              during object information retrieval.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3632,9 +3550,6 @@ error:
  *              during object copy.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3781,9 +3696,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3817,7 +3729,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3950,14 +3862,14 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_link_removal_tags */
 
@@ -3968,9 +3880,6 @@ error:
  *              during link name retrieval.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -4006,7 +3915,7 @@ check_link_getname_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -4129,14 +4038,14 @@ check_link_getname_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_link_getname_tags */
 
@@ -4147,9 +4056,6 @@ error:
  *              during external link creation.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -4272,9 +4178,6 @@ error:
  *              during external link open.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -4446,9 +4349,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              May 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4554,9 +4454,6 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Mike McGreevy
- *              January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -4575,7 +4472,7 @@ main(void)
     /* Only run with sec2/default driver */
     if (!h5_using_default_driver(NULL)) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* ========== */

@@ -42,12 +42,6 @@ static void coll_chunktest(const char *filename, int chunk_factor, int select_fa
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -109,12 +103,6 @@ coll_chunk1(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -176,12 +164,6 @@ coll_chunk2(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -246,12 +228,6 @@ coll_chunk3(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -314,12 +290,6 @@ coll_chunk4(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -384,12 +354,6 @@ coll_chunk5(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -452,12 +416,6 @@ coll_chunk6(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -520,12 +478,6 @@ coll_chunk7(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -588,12 +540,6 @@ coll_chunk8(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -656,12 +602,6 @@ coll_chunk9(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -727,18 +667,6 @@ coll_chunk10(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Modifications:
- *   Remove invalid temporary property checkings for API_LINK_HARD and
- *   API_LINK_TRUE cases.
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -789,7 +717,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     dims[1] = SPACE_DIM2;
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* set up dimensions of the slab this process accesses */
@@ -797,7 +725,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 
     /* set up the coords array selection */
     num_points = block[0] * block[1] * count[0] * count[1];
-    coords     = (hsize_t *)HDmalloc(num_points * RANK * sizeof(hsize_t));
+    coords     = (hsize_t *)malloc(num_points * RANK * sizeof(hsize_t));
     VRFY((coords != NULL), "coords malloc succeeded");
     point_set(start, count, stride, block, num_points, coords, mode);
 
@@ -1054,16 +982,16 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     VRFY((status >= 0), "");
 
     if (data_array1)
-        HDfree(data_array1);
+        free(data_array1);
 
     /* Use collective read to verify the correctness of collective write. */
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* allocate memory for data buffer */
-    data_origin1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_origin1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     acc_plist = create_faccess_plist(comm, info, facc_type);
@@ -1182,11 +1110,11 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 
     /* release data buffers */
     if (coords)
-        HDfree(coords);
+        free(coords);
     if (data_array1)
-        HDfree(data_array1);
+        free(data_array1);
     if (data_origin1)
-        HDfree(data_origin1);
+        free(data_origin1);
 }
 
 /* Set up the selection */

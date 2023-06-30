@@ -71,9 +71,6 @@ H5CS_t H5CS_stack_g[1];
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              February 6, 2003
- *
  *-------------------------------------------------------------------------
  */
 static H5CS_t *
@@ -90,8 +87,8 @@ H5CS__get_stack(void)
         fstack = (H5CS_t *)LocalAlloc(
             LPTR, sizeof(H5CS_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
 #else
-        fstack = (H5CS_t *)HDmalloc(
-            sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
+        fstack =
+            (H5CS_t *)malloc(sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
 #endif /* H5_HAVE_WIN_THREADS */
         assert(fstack);
 
@@ -117,9 +114,6 @@ H5CS__get_stack(void)
  * Purpose:	Prints a function stack.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, February 6, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -160,9 +154,6 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, February 6, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -183,7 +174,7 @@ H5CS_push(const char *func_name)
         size_t na = MAX((fstack->nalloc * 2), H5CS_MIN_NSLOTS);
 
         /* Don't use H5MM_realloc here */
-        const char **x = (const char **)HDrealloc(fstack->rec, na * sizeof(const char *));
+        const char **x = (const char **)realloc(fstack->rec, na * sizeof(const char *));
 
         /* (Avoid returning an error from this routine, currently -QAK) */
         assert(x);
@@ -204,9 +195,6 @@ H5CS_push(const char *func_name)
  * Purpose:	Pops a record off function stack for the current thread.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Thursday, February 6, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -235,9 +223,6 @@ H5CS_pop(void)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, August 9, 2005
- *
  *-------------------------------------------------------------------------
  */
 H5CS_t *
@@ -256,14 +241,14 @@ H5CS_copy_stack(void)
 
     /* Allocate a new stack */
     /* (Don't use library allocate code, since this code stack supports it) */
-    if (NULL == (new_stack = HDcalloc(1, sizeof(H5CS_t))))
+    if (NULL == (new_stack = calloc(1, sizeof(H5CS_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack")
-    if (NULL == (new_stack->rec = HDcalloc(old_stack->nused, sizeof(const char *))))
+    if (NULL == (new_stack->rec = calloc(old_stack->nused, sizeof(const char *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack records")
 
     /* Copy pointers on old stack to new one */
     /* (Strings don't need to be duplicated, they are statically allocated) */
-    HDmemcpy(new_stack->rec, old_stack->rec, sizeof(char *) * old_stack->nused);
+    memcpy(new_stack->rec, old_stack->rec, sizeof(char *) * old_stack->nused);
     new_stack->nused = new_stack->nalloc = old_stack->nused;
 
     /* Set the return value */
@@ -279,9 +264,6 @@ done:
  * Purpose:	Closes and frees a copy of a stack
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, August 9, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -301,11 +283,11 @@ H5CS_close_stack(H5CS_t *stack)
      * and are not allocated, so there's no need to free them.
      */
     if (stack->rec) {
-        HDfree(stack->rec);
+        free(stack->rec);
         stack->rec = NULL;
     } /* end if */
     if (stack)
-        HDfree(stack);
+        free(stack);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED)
 } /* end H5CS_close_stack() */

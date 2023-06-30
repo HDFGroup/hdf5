@@ -49,7 +49,7 @@
         fprintf(stdout, " # %s(): ", __func__);                                                              \
         fprintf(stdout, __VA_ARGS__);                                                                        \
         fprintf(stdout, "\n");                                                                               \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define H5T_REF_LOG_DEBUG(...)                                                                               \
@@ -303,7 +303,7 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get container info")
 
                 /* Retrieve min encode size (when references have no vlen part) */
-                HDmemset(&fixed_ref, 0, sizeof(fixed_ref));
+                memset(&fixed_ref, 0, sizeof(fixed_ref));
                 fixed_ref.type       = (int8_t)H5R_OBJECT2;
                 fixed_ref.token_size = (uint8_t)cont_info.token_size;
                 if (H5R__encode(NULL, &fixed_ref, NULL, &ref_encode_size, 0) < 0)
@@ -370,7 +370,7 @@ H5T__ref_mem_isnull(const H5VL_object_t H5_ATTR_UNUSED *src_file, const void *sr
     assert(src_buf);
     assert(isnull);
 
-    *isnull = (0 == HDmemcmp(src_buf, zeros, H5T_REF_MEM_SIZE)) ? TRUE : FALSE;
+    *isnull = (0 == memcmp(src_buf, zeros, H5T_REF_MEM_SIZE)) ? TRUE : FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__ref_mem_isnull() */
@@ -392,7 +392,7 @@ H5T__ref_mem_setnull(H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, H5_A
     FUNC_ENTER_PACKAGE_NOERR
     H5T_REF_LOG_DEBUG("");
 
-    HDmemset(dst_buf, 0, H5T_REF_MEM_SIZE);
+    memset(dst_buf, 0, H5T_REF_MEM_SIZE);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__ref_mem_setnull() */
@@ -682,7 +682,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
 
     /* Make sure reference buffer is correctly initialized */
-    HDmemset(&tmp_ref, 0, sizeof(tmp_ref));
+    memset(&tmp_ref, 0, sizeof(tmp_ref));
 
     switch (src_type) {
         case H5R_OBJECT1: {
@@ -737,7 +737,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     } /* end if */
 
     /* Set output info */
-    HDmemcpy(dst_ref, &tmp_ref, sizeof(tmp_ref));
+    memcpy(dst_ref, &tmp_ref, sizeof(tmp_ref));
 
 done:
     if ((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
@@ -840,7 +840,7 @@ H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
     } /* end if */
 
     /* Copy header manually so that it does not get encoded into the blob */
-    HDmemset(q, 0, H5R_ENCODE_HEADER_SIZE);
+    memset(q, 0, H5R_ENCODE_HEADER_SIZE);
     q += H5R_ENCODE_HEADER_SIZE;
 
     /* Set the size */

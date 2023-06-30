@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  * Purpose: The POSIX unbuffered file driver using only the HDF5 public
  *          API and with a few optimizations: the lseek() call is made
  *          only when the current file position is unknown or needs to be
@@ -196,9 +193,6 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
  * Return:      Success:    The driver ID for the sec2 driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -234,9 +228,6 @@ H5FD_sec2_init(void)
  *
  * Returns:     SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -258,9 +249,6 @@ H5FD__sec2_term(void)
  *              specific properties.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Thursday, February 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -291,9 +279,6 @@ done:
  *                          public fields will be initialized by the
  *                          caller, which is always H5FD_open().
  *              Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -421,9 +406,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL, file not closed.
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -457,9 +439,6 @@ done:
  * Return:      Success:    A value like strcmp()
  *              Failure:    never fails (arguments were checked by the
  *                          caller).
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -498,9 +477,9 @@ H5FD__sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
      */
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
         HGOTO_DONE(-1)
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
         HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
     if (f1->inode < f2->inode)
@@ -520,9 +499,6 @@ done:
  *              (listed in H5FDpublic.h)
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Friday, August 25, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -570,9 +546,6 @@ H5FD__sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
  *
  * Return:      The end-of-address marker.
  *
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -593,9 +566,6 @@ H5FD__sec2_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *              to tell the driver where the end of the HDF5 data is located.
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -621,9 +591,6 @@ H5FD__sec2_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
  * Return:      End of file address, the first address past the end of the
  *              "file", either the filesystem file or the HDF5 file.
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -642,9 +609,6 @@ H5FD__sec2_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Purpose:        Returns the file handle of sec2 file driver.
  *
  * Returns:        SUCCEED/FAIL
- *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -675,9 +639,6 @@ done:
  * Return:      Success:    SUCCEED. Result is stored in caller-supplied
  *                          buffer BUF.
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -749,7 +710,7 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
         if (0 == bytes_read) {
             /* end of file but not end of format address space */
-            HDmemset(buf, 0, size);
+            memset(buf, 0, size);
             break;
         } /* end if */
 
@@ -783,9 +744,6 @@ done:
  *              DXPL_ID.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -888,9 +846,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -958,8 +913,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -998,8 +951,6 @@ done:
  * Purpose:     To remove the existing lock on the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */

@@ -26,9 +26,6 @@
  * Temporary files generated:
  *   ttsafe_cancel.h5
  *
- * Created: May 15 2000
- * Programmer: Chee Wai LEE
- *
  ********************************************************************/
 #include "ttsafe.h"
 
@@ -135,7 +132,7 @@ tts_cancel_thread(void H5_ATTR_UNUSED *arg)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* If thread is cancelled, make cleanup call */
-    cleanup_structure            = (cancel_cleanup_t *)HDmalloc(sizeof(cancel_cleanup_t));
+    cleanup_structure            = (cancel_cleanup_t *)malloc(sizeof(cancel_cleanup_t));
     cleanup_structure->dataset   = dataset;
     cleanup_structure->datatype  = datatype;
     cleanup_structure->dataspace = dataspace;

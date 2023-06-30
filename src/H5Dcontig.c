@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: 	Quincey Koziol
- *	       	Thursday, September 28, 2000
- *
  * Purpose:
  *      Contiguous dataset I/O functions. These routines are similar to
  *      the H5D_chunk_* routines and really only an abstract way of dealing
@@ -150,9 +147,6 @@ H5FL_EXTERN(H5D_piece_info_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		April 19, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -180,9 +174,6 @@ done:
  * Purpose:	Write fill values to a contiguously stored dataset.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		August 22, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -346,9 +337,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		March 20, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -376,9 +364,6 @@ done:
  * Purpose:	Constructs new contiguous layout information for dataset
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, May 22, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -452,9 +437,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, August 28, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -522,9 +504,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -550,9 +529,6 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, March 6, 2016
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -573,7 +549,6 @@ H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jonathan Kim
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -742,9 +717,6 @@ H5D__contig_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
  *
  * Return:    TRUE/FALSE/FAIL
  *
- * Programmer:    Neil Fortner
- *        3 August 2021
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -803,9 +775,6 @@ done:
  * Purpose:	Read from a contiguous dataset.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		Thursday, April 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -880,9 +849,6 @@ done:
  * Purpose:	Write to a contiguous dataset.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		Thursday, April 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -960,9 +926,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, September 28, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -994,9 +957,6 @@ done:
  * Purpose:	Callback operator for H5D__contig_readvv() with sieve buffer.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 30, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1162,9 +1122,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 30, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1193,9 +1150,6 @@ done:
  *              sequence lengths are in bytes.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, May 3, 2001
  *
  * Notes:
  *      Offsets in the sequences must be monotonically increasing
@@ -1263,9 +1217,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 30, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1316,7 +1267,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
 
             /* Clear memory */
             if (dset_contig->sieve_size > len)
-                HDmemset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
+                memset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
 
             /* Determine the new sieve buffer size & location */
             dset_contig->sieve_loc = addr;
@@ -1401,8 +1352,8 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                     /* Prepend to existing sieve buffer */
                     if ((addr + len) == sieve_start) {
                         /* Move existing sieve information to correct location */
-                        HDmemmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
-                                  dset_contig->sieve_size);
+                        memmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
+                                dset_contig->sieve_size);
 
                         /* Copy in new information (must be first in sieve buffer) */
                         H5MM_memcpy(dset_contig->sieve_buf, buf, len);
@@ -1480,9 +1431,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 30, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1512,9 +1460,6 @@ done:
  *              sequence lengths are in bytes.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, May 2, 2003
  *
  * Notes:
  *      Offsets in the sequences must be monotonically increasing
@@ -1582,9 +1527,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1640,9 +1582,6 @@ done:
  * Purpose:	Copy contiguous storage raw data from SRC file to DST file.
  *
  * Return:	Non-negative on success, negative on failure.
- *
- * Programmer:  Quincey Koziol
- *	        Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1859,7 +1798,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             H5MM_memcpy(reclaim_buf, buf, mem_nbytes);
 
             /* Set background buffer to all zeros */
-            HDmemset(bkg, 0, buf_size);
+            memset(bkg, 0, buf_size);
 
             /* Convert from memory to destination file */
             if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
@@ -1881,7 +1820,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             } /* end if */
             else
                 /* Reset value to zero */
-                HDmemset(buf, 0, src_nbytes);
+                memset(buf, 0, src_nbytes);
         } /* end if */
 
         /* Write raw data to destination file */

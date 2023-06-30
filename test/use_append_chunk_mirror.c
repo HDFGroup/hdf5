@@ -86,8 +86,6 @@
  *         o The Reader will see all new data written by Writer.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Created: Jacob Smith, 2019 */
-
 #include "use.h"
 
 /* This test uses many POSIX things that are not available on
@@ -118,7 +116,7 @@ int
 setup_parameters(int argc, char *const argv[], options_t *opts)
 {
     /* use case defaults */
-    HDmemset(opts, 0, sizeof(options_t));
+    memset(opts, 0, sizeof(options_t));
     opts->chunksize   = Chunksize_DFT;
     opts->use_swmr    = TRUE;
     opts->iterations  = 1;
@@ -173,7 +171,7 @@ main(int argc, char *argv[])
     mirr_fa.handshake_port = SERVER_PORT;
     HDstrncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
 
-    if (NULL == (split_fa = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
+    if (NULL == (split_fa = calloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
         fprintf(stderr, "can't allocate memory for splitter config\n");
         Hgoto_error(1);
     }
@@ -279,10 +277,10 @@ main(int argc, char *argv[])
             UC_opts.fapl_id = H5P_DEFAULT;
             if (read_uc_file(send_wait, &UC_opts) < 0) {
                 fprintf(stderr, "read_uc_file encountered error (%d)\n", mypid);
-                HDexit(1);
+                exit(1);
             }
 
-            HDexit(0);
+            exit(0);
         }
     }
 
@@ -373,7 +371,7 @@ main(int argc, char *argv[])
     }
 
 done:
-    HDfree(split_fa);
+    free(split_fa);
 
     if (ret_value != 0) {
         printf("Error(s) encountered\n");

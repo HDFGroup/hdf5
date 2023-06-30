@@ -79,9 +79,6 @@ H5FL_SEQ_EXTERN(hsize_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, June 20, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -115,7 +112,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    HDmemcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_WRITE;
     tmp_dset_info.buf.cvp  = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
@@ -183,9 +180,6 @@ done:
  * Return:	Success:	Number of elements copied.
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, June 24, 2002
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -219,7 +213,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    HDmemcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_READ;
     tmp_dset_info.buf.vp   = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
@@ -280,9 +274,6 @@ done:
  *		according to SPACE.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 8, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -366,9 +357,6 @@ done:
  * Return:	Success:	Number of elements copied.
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, June 24, 2002
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -445,9 +433,6 @@ done:
  * Purpose:	Perform scatter/gather ead from a contiguous [piece of a] dataset.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -590,9 +575,6 @@ done:
  * Purpose:	Perform scatter/gather write to a contiguous [piece of a] dataset.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -794,7 +776,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             /* Create block memory space */
             if (NULL ==
                 (tmp_mem_spaces[i] = H5S_create_simple(1, &io_info->sel_pieces[i]->piece_points, NULL))) {
-                HDmemset(&tmp_mem_spaces[i], 0, (io_info->pieces_added - i) * sizeof(tmp_mem_spaces[0]));
+                memset(&tmp_mem_spaces[i], 0, (io_info->pieces_added - i) * sizeof(tmp_mem_spaces[0]));
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
             }
 
@@ -1310,9 +1292,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		11 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1390,7 +1369,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
 
             /* Copy the data into the right place. */
             for (i = 0; i < curr_nelmts; i++) {
-                HDmemmove(xubuf, xdbuf, copy_size);
+                memmove(xubuf, xdbuf, copy_size);
 
                 /* Update pointers */
                 xdbuf += src_stride;
@@ -1440,9 +1419,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		11 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1466,7 +1442,7 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, uint8_t
     xsbuf = tconv_buf;
     xdbuf = tconv_buf;
     for (i = 0; i < nelmts; i++) {
-        HDmemmove(xdbuf, xsbuf, dst_stride);
+        memmove(xdbuf, xsbuf, dst_stride);
 
         /* Update pointers */
         xsbuf += src_stride;

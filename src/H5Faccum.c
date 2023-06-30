@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Faccum.c
- *                      Jan 10 2008
- *                      Quincey Koziol
  *
  * Purpose:             File metadata "accumulator" routines.  (Used to
  *                      cache small metadata I/Os and group them into a
@@ -93,9 +91,6 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Jan 10 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -152,7 +147,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
                     accum->alloc_size = new_alloc_size;
 
                     /* Clear the memory */
-                    HDmemset(accum->buf + accum->size, 0, (accum->alloc_size - accum->size));
+                    memset(accum->buf + accum->size, 0, (accum->alloc_size - accum->size));
                 } /* end if */
 
                 /* Read the part before the metadata accumulator */
@@ -161,7 +156,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
                     H5_CHECKED_ASSIGN(amount_before, size_t, (accum->loc - addr), hsize_t);
 
                     /* Make room for the metadata to read in */
-                    HDmemmove(accum->buf + amount_before, accum->buf, accum->size);
+                    memmove(accum->buf + amount_before, accum->buf, accum->size);
 
                     /* Adjust dirty region tracking info, if present */
                     if (accum->dirty)
@@ -262,9 +257,6 @@ done:
  * Purpose:	Adjust accumulator size, if necessary
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jun 11 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -368,7 +360,7 @@ H5F__accum_adjust(H5F_meta_accum_t *accum, H5FD_t *file, H5F_accum_adjust_t adju
             /* When appending, need to adjust location of accumulator */
             if (H5F_ACCUM_APPEND == adjust) {
                 /* Move remnant of accumulator down */
-                HDmemmove(accum->buf, (accum->buf + shrink_size), remnant_size);
+                memmove(accum->buf, (accum->buf + shrink_size), remnant_size);
 
                 /* Adjust accumulator's location */
                 accum->loc += shrink_size;
@@ -388,7 +380,7 @@ H5F__accum_adjust(H5F_meta_accum_t *accum, H5FD_t *file, H5F_accum_adjust_t adju
             accum->alloc_size = new_size;
 
             /* Clear the memory */
-            HDmemset(accum->buf + accum->size, 0, (accum->alloc_size - (accum->size + size)));
+            memset(accum->buf + accum->size, 0, (accum->alloc_size - (accum->size + size)));
         } /* end if */
     }     /* end if */
 
@@ -403,9 +395,6 @@ done:
  *              a file from a buffer.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jan 10 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -445,7 +434,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                         HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
 
                     /* Move the existing metadata to the proper location */
-                    HDmemmove(accum->buf + size, accum->buf, accum->size);
+                    memmove(accum->buf + size, accum->buf, accum->size);
 
                     /* Copy the new metadata at the front */
                     H5MM_memcpy(accum->buf, buf, size);
@@ -535,7 +524,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                         H5_CHECKED_ASSIGN(old_offset, size_t, (addr + size) - accum->loc, hsize_t);
 
                         /* Move the existing metadata to the proper location */
-                        HDmemmove(accum->buf + size, accum->buf + old_offset, (accum->size - old_offset));
+                        memmove(accum->buf + size, accum->buf + old_offset, (accum->size - old_offset));
 
                         /* Copy the new metadata at the front */
                         H5MM_memcpy(accum->buf, buf, size);
@@ -618,7 +607,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                             accum->alloc_size = new_alloc_size;
 
                             /* Clear the memory */
-                            HDmemset(accum->buf + size, 0, (accum->alloc_size - size));
+                            memset(accum->buf + size, 0, (accum->alloc_size - size));
                         } /* end if */
 
                         /* Copy the new metadata to the buffer */
@@ -665,7 +654,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
 
                         /* Clear the memory */
                         clear_size = MAX(accum->size, size);
-                        HDmemset(accum->buf + clear_size, 0, (accum->alloc_size - clear_size));
+                        memset(accum->buf + clear_size, 0, (accum->alloc_size - clear_size));
                     } /* end if */
                     else {
                         /* Check if we should shrink the accumulator buffer */
@@ -715,7 +704,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     accum->alloc_size = new_size;
 
                     /* Clear the memory */
-                    HDmemset(accum->buf + size, 0, (accum->alloc_size - size));
+                    memset(accum->buf + size, 0, (accum->alloc_size - size));
                 } /* end if */
 
                 /* Update the metadata accumulator information */
@@ -782,7 +771,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                         /* Trim bottom of accumulator off */
                         accum->loc += overlap_size;
                         accum->size -= overlap_size;
-                        HDmemmove(accum->buf, accum->buf + overlap_size, accum->size);
+                        memmove(accum->buf, accum->buf + overlap_size, accum->size);
                     }      /* end if */
                     else { /* Access covers whole accumulator */
                         /* Reset accumulator, but don't flush */
@@ -844,9 +833,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Jan 10 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -895,7 +881,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                 new_accum_size = accum->size - overlap_size;
 
                 /* Move the accumulator buffer information to eliminate the freed block */
-                HDmemmove(accum->buf, accum->buf + overlap_size, new_accum_size);
+                memmove(accum->buf, accum->buf + overlap_size, new_accum_size);
 
                 /* Adjust the accumulator information */
                 accum->loc += overlap_size;
@@ -1010,9 +996,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Jan 10 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1051,9 +1034,6 @@ done:
  * Purpose:	Reset the metadata accumulator for the file
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jan 10 2008
  *
  *-------------------------------------------------------------------------
  */

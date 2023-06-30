@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
  * Purpose:     Tests the datatype interface (H5T)
  */
 
@@ -140,8 +137,6 @@ static int    opaque_funcs(void);
  *
  * Return:      void
  *
- * Programmer:  Robb Matzke
- *              Monday, November 16, 1998
  *-------------------------------------------------------------------------
  */
 static void
@@ -173,8 +168,6 @@ reset_hdf5(void)
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 static int
@@ -293,8 +286,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 static int
@@ -337,9 +328,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 30, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -562,8 +550,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke
- *              Wednesday, January  7, 1998
  *-------------------------------------------------------------------------
  */
 static int
@@ -749,8 +735,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, June 17, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -777,11 +761,11 @@ test_compound_2(void)
         FAIL_STACK_ERROR;
 
     /* Sizes should be the same, but be careful just in case */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = (unsigned char *)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = (unsigned char *)malloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = (unsigned char *)malloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
@@ -794,7 +778,7 @@ test_compound_2(void)
         s_ptr->d    = i * 8 + 6;
         s_ptr->e    = i * 8 + 7;
     }
-    HDmemcpy(buf, orig, nelmts * sizeof(struct st));
+    memcpy(buf, orig, nelmts * sizeof(struct st));
 
     /* Build hdf5 datatypes */
     array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, &four);
@@ -839,9 +823,9 @@ test_compound_2(void)
     }
 
     /* Release resources */
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
     CHECK_NMEMBS(nmembs, st, dt);
 
     PASSED();
@@ -854,9 +838,9 @@ test_compound_2(void)
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -876,8 +860,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, June 17, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -904,11 +886,11 @@ test_compound_3(void)
         FAIL_STACK_ERROR;
 
     /* Initialize */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = (unsigned char *)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = (unsigned char *)malloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = (unsigned char *)malloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
@@ -921,7 +903,7 @@ test_compound_3(void)
         s_ptr->d    = i * 8 + 6;
         s_ptr->e    = i * 8 + 7;
     }
-    HDmemcpy(buf, orig, nelmts * sizeof(struct st));
+    memcpy(buf, orig, nelmts * sizeof(struct st));
 
     /* Build hdf5 datatypes */
     array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, &four);
@@ -963,9 +945,9 @@ test_compound_3(void)
     }
 
     /* Release resources */
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
     CHECK_NMEMBS(nmembs, st, dt);
 
     PASSED();
@@ -977,9 +959,9 @@ test_compound_3(void)
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -999,8 +981,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, June 17, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -1031,11 +1011,11 @@ test_compound_4(void)
         FAIL_STACK_ERROR;
 
     /* Sizes should be the same, but be careful just in case */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = (unsigned char *)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = (unsigned char *)malloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = (unsigned char *)malloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
@@ -1048,7 +1028,7 @@ test_compound_4(void)
         s_ptr->d    = (i * 8 + 6) & 0x7fff;
         s_ptr->e    = i * 8 + 7;
     }
-    HDmemcpy(buf, orig, nelmts * sizeof(struct st));
+    memcpy(buf, orig, nelmts * sizeof(struct st));
 
     /* Build hdf5 datatypes */
     array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, &four);
@@ -1093,9 +1073,9 @@ test_compound_4(void)
     }
 
     /* Release resources */
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
     CHECK_NMEMBS(nmembs, st, dt);
 
     PASSED();
@@ -1107,9 +1087,9 @@ test_compound_4(void)
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -1130,8 +1110,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, June 17, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -1155,15 +1133,15 @@ test_compound_5(void)
     src_type_t src[2] = {{"one", 102, {104, 105, 106, 107}}, {"two", 202, {204, 205, 206, 207}}};
 
     dst_type_t *dst;
-    void       *buf    = HDcalloc((size_t)2, sizeof(dst_type_t));
-    void       *bkg    = HDcalloc((size_t)2, sizeof(dst_type_t));
+    void       *buf    = calloc((size_t)2, sizeof(dst_type_t));
+    void       *bkg    = calloc((size_t)2, sizeof(dst_type_t));
     int         retval = 1;
 
     TESTING("optimized struct converter");
 
     if (!buf || !bkg) {
-        HDfree(buf);
-        HDfree(bkg);
+        free(buf);
+        free(bkg);
         return 1;
     }
 
@@ -1192,7 +1170,7 @@ test_compound_5(void)
     H5Tinsert(dst_type, "coll_ids", HOFFSET(dst_type_t, coll_ids), int_array);
 
     /* Convert data */
-    HDmemcpy(buf, src, sizeof(src));
+    memcpy(buf, src, sizeof(src));
     H5Tconvert(src_type, dst_type, (size_t)2, buf, bkg, H5P_DEFAULT);
     dst = (dst_type_t *)buf;
 
@@ -1204,7 +1182,7 @@ test_compound_5(void)
     H5Tclose(int_array);
 
     /* Check results */
-    if (HDmemcmp(src[1].name, dst[1].name, sizeof(src[1].name)) != 0 || src[1].tdim != dst[1].tdim ||
+    if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) != 0 || src[1].tdim != dst[1].tdim ||
         src[1].coll_ids[0] != dst[1].coll_ids[0] || src[1].coll_ids[1] != dst[1].coll_ids[1] ||
         src[1].coll_ids[2] != dst[1].coll_ids[2] || src[1].coll_ids[3] != dst[1].coll_ids[3]) {
         H5_FAILED();
@@ -1215,8 +1193,8 @@ test_compound_5(void)
     }
 
     /* Free memory buffers */
-    HDfree(buf);
-    HDfree(bkg);
+    free(buf);
+    free(bkg);
     return retval;
 }
 
@@ -1230,8 +1208,6 @@ test_compound_5(void)
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, December 13, 2000
  *-------------------------------------------------------------------------
  */
 static int
@@ -1259,18 +1235,18 @@ test_compound_6(void)
         FAIL_STACK_ERROR;
 
     /* Sizes should be the same, but be careful just in case */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = (unsigned char *)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = (unsigned char *)malloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = (unsigned char *)malloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr    = ((struct st *)((void *)orig)) + i;
         s_ptr->b = (int16_t)((i * 8 + 1) & 0x7fff);
         s_ptr->d = (int16_t)((i * 8 + 6) & 0x7fff);
     }
-    HDmemcpy(buf, orig, nelmts * sizeof(struct st));
+    memcpy(buf, orig, nelmts * sizeof(struct st));
 
     /* Build hdf5 datatypes */
     if ((st = H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
@@ -1307,9 +1283,9 @@ test_compound_6(void)
     }
 
     /* Release resources */
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
     CHECK_NMEMBS(nmembs, st, dt);
 
     PASSED();
@@ -1338,9 +1314,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, December 18, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1482,9 +1455,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Robb Matzke
- *              Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1752,8 +1722,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Wednesday, June 9, 2004
  *-------------------------------------------------------------------------
  */
 static int
@@ -1947,7 +1915,7 @@ test_compound_9(void)
 
     rdata.i1 = rdata.i2 = 0;
     if (rdata.str)
-        HDfree(rdata.str);
+        free(rdata.str);
 
     if (H5Dread(dset_id, dup_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED();
@@ -1972,7 +1940,7 @@ test_compound_9(void)
     rdata.str = NULL;
 
     if (rdata.str)
-        HDfree(rdata.str);
+        free(rdata.str);
 
     if (H5Dclose(dset_id) < 0)
         goto error;
@@ -2000,9 +1968,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Tuesday, June 15, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -2213,9 +2178,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Saturday, August 7, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2285,11 +2247,11 @@ test_compound_11(void)
         TEST_ERROR;
 
     /* Allocate buffers */
-    if ((buf = HDmalloc(sizeof(big_t) * NTESTELEM)) == NULL)
+    if ((buf = malloc(sizeof(big_t) * NTESTELEM)) == NULL)
         TEST_ERROR;
-    if ((buf_orig = HDmalloc(sizeof(big_t) * NTESTELEM)) == NULL)
+    if ((buf_orig = malloc(sizeof(big_t) * NTESTELEM)) == NULL)
         TEST_ERROR;
-    if ((bkg = HDmalloc(sizeof(big_t) * NTESTELEM)) == NULL)
+    if ((bkg = malloc(sizeof(big_t) * NTESTELEM)) == NULL)
         TEST_ERROR;
 
     /* Initialize buffer */
@@ -2299,14 +2261,14 @@ test_compound_11(void)
         ((big_t *)buf)[u].d3 = (double)u * 3.5;
         ((big_t *)buf)[u].i1 = (int)(u * 3);
         ((big_t *)buf)[u].i2 = (int)(u * 5);
-        ((big_t *)buf)[u].s1 = (char *)HDmalloc((size_t)32);
+        ((big_t *)buf)[u].s1 = (char *)malloc((size_t)32);
         if (!((big_t *)buf)[u].s1)
             TEST_ERROR;
         HDsnprintf(((big_t *)buf)[u].s1, 32, "%u", (unsigned)u);
     } /* end for */
 
     /* Make copy of buffer before conversion */
-    HDmemcpy(buf_orig, buf, sizeof(big_t) * NTESTELEM);
+    memcpy(buf_orig, buf, sizeof(big_t) * NTESTELEM);
 
     dim[0] = NTESTELEM;
     if ((space_id = H5Screate_simple(1, dim, NULL)) < 0) {
@@ -2373,7 +2335,7 @@ test_compound_11(void)
         TEST_ERROR;
 
     /* Recover the original buffer information */
-    HDmemcpy(buf, buf_orig, sizeof(big_t) * NTESTELEM);
+    memcpy(buf, buf_orig, sizeof(big_t) * NTESTELEM);
 
     /* Convert buffer from 'big' to 'little' struct */
     if (H5Tconvert(big_tid, little_tid, (size_t)NTESTELEM, buf, bkg, H5P_DEFAULT) < 0)
@@ -2414,7 +2376,7 @@ test_compound_11(void)
         TEST_ERROR;
 
     /* Recover the original buffer information */
-    HDmemcpy(buf, buf_orig, sizeof(big_t) * NTESTELEM);
+    memcpy(buf, buf_orig, sizeof(big_t) * NTESTELEM);
 
     /* Convert buffer from 'big' to 'little' struct */
     if (H5Tconvert(big_tid, little_tid, (size_t)NTESTELEM, buf, bkg, H5P_DEFAULT) < 0)
@@ -2452,7 +2414,7 @@ test_compound_11(void)
 
     /* Free everything */
     for (u = 0; u < NTESTELEM; u++)
-        HDfree(((big_t *)buf_orig)[u].s1);
+        free(((big_t *)buf_orig)[u].s1);
     if (H5Sclose(space_id) < 0)
         TEST_ERROR;
     if (H5Tclose(opaq_dst_tid) < 0)
@@ -2475,11 +2437,11 @@ test_compound_11(void)
 
 error:
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (buf_orig)
-        HDfree(buf_orig);
+        free(buf_orig);
     if (bkg)
-        HDfree(bkg);
+        free(bkg);
     return retval;
 }
 
@@ -2493,9 +2455,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Wednesday, September 29, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -2590,9 +2549,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, March 13, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2612,7 +2568,7 @@ test_compound_13(void)
     TESTING("compound datatypes of boundary size with latest format");
 
     /* Create some phony data. */
-    HDmemset(&data_out, 0, sizeof(data_out));
+    memset(&data_out, 0, sizeof(data_out));
     for (u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
         data_out.x[u] = (unsigned char)u;
     data_out.y = 99.99F;
@@ -2723,9 +2679,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Monday, August 25, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -3093,12 +3046,12 @@ test_compound_14(void)
 
     rdata1.c1 = rdata1.c2 = 0;
     if (rdata1.str)
-        HDfree(rdata1.str);
+        free(rdata1.str);
 
     rdata2.c1 = rdata2.c2 = 0;
     rdata2.l1 = rdata2.l2 = rdata2.l3 = rdata2.l4 = 0;
     if (rdata2.str) {
-        HDfree(rdata2.str);
+        free(rdata2.str);
         rdata2.str = NULL;
     } /* end if */
 
@@ -3177,9 +3130,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Friday, September 19, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -3351,9 +3301,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Ray Lu
- *              14 July 2022
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3477,9 +3424,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Friday, October 3, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3588,9 +3532,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Tuesday, January 13, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -3742,9 +3683,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 14, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3892,9 +3830,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Thursday, April 4, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -4140,9 +4075,6 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Thursday, June  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4294,9 +4226,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Monday, June  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4589,9 +4518,6 @@ error:
  * Return:    Success:    New type
  *        Failure:    -1
  *
- * Programmer:    Robb Matzke
- *              Monday, August 10, 1998
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -4616,9 +4542,6 @@ mkstr(size_t len, H5T_str_t strpad)
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Raymond Lu
- *              19 May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -4702,9 +4625,6 @@ error:
  * Return:    Success:    0
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Monday, August 10, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4724,24 +4644,24 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)5, H5T_STR_NULLTERM)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
-    HDmemcpy(buf, "abcdefghi\0abcdefghi\0", (size_t)20);
+    memcpy(buf, "abcdefghi\0abcdefghi\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0abcd\0abcdefghi\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcd\0abcd\0abcdefghi\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Truncated C-string test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Extended C-string test failed");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4755,24 +4675,24 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)5, H5T_STR_NULLPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
-    HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
+    memcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Truncated C buffer test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Extended C buffer test failed");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4786,24 +4706,24 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)5, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
-    HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
+    memcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Truncated Fortran-string test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde     abcde     ", (size_t)20) != 0) {
+    if (memcmp(buf, "abcde     abcde     ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Extended Fortran-string test failed");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4820,12 +4740,12 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)10, H5T_STR_NULLTERM)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
-    HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
+    memcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Non-terminated string test 1");
         goto error;
@@ -4833,23 +4753,23 @@ test_conv_str_1(void)
     H5Tclose(dst_type);
     if ((dst_type = mkstr((size_t)5, H5T_STR_NULLTERM)) < 0)
         goto error;
-    HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
+    memcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0abcd\0abcdefghij", (size_t)20) != 0) {
+    if (memcmp(buf, "abcd\0abcd\0abcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Non-terminated string test 2");
         goto error;
     }
-    HDmemcpy(buf, "abcdeabcdexxxxxxxxxx", (size_t)20);
+    memcpy(buf, "abcdeabcdexxxxxxxxxx", (size_t)20);
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Non-terminated string test 2");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4863,19 +4783,19 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)10, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
-    HDmemcpy(buf, "abcdefghi\0abcdefghi\0", (size_t)20);
+    memcpy(buf, "abcdefghi\0abcdefghi\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghi abcdefghi ", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdefghi abcdefghi ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C string to Fortran test 1");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghi\0abcdefghi\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdefghi\0abcdefghi\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C string test 1");
         goto error;
@@ -4884,17 +4804,17 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)5, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    HDmemcpy(buf, "abcdefgh\0\0abcdefgh\0\0", (size_t)20);
+    memcpy(buf, "abcdefgh\0\0abcdefgh\0\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C string to Fortran test 2");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C string test 2");
         goto error;
@@ -4907,22 +4827,22 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)10, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    HDmemcpy(buf, "abcd\0abcd\0xxxxxxxxxx", (size_t)20);
+    memcpy(buf, "abcd\0abcd\0xxxxxxxxxx", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
+    if (memcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C string to Fortran test 3");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
+    if (memcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C string test 3");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4936,19 +4856,19 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)10, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
-    HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
+    memcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C buffer to Fortran test 1");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C buffer test 1");
         goto error;
@@ -4957,17 +4877,17 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)5, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    HDmemcpy(buf, "abcdefgh\0\0abcdefgh\0\0", (size_t)20);
+    memcpy(buf, "abcdefgh\0\0abcdefgh\0\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C buffer to Fortran test 2");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
+    if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C buffer test 2");
         goto error;
@@ -4980,17 +4900,17 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)10, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    HDmemcpy(buf, "abcd\0abcd\0xxxxxxxxxx", (size_t)20);
+    memcpy(buf, "abcd\0abcd\0xxxxxxxxxx", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
+    if (memcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    C buffer to Fortran test 3");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
-    if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
+    if (memcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
         H5_FAILED();
         HDputs("    Fortran to C buffer test 3");
         goto error;
@@ -4999,7 +4919,7 @@ test_conv_str_1(void)
         goto error;
     if (H5Tclose(dst_type) < 0)
         goto error;
-    HDfree(buf);
+    free(buf);
 
     PASSED();
 
@@ -5018,7 +4938,7 @@ error:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -5035,9 +4955,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Monday, August 10, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5058,7 +4975,7 @@ test_conv_str_2(void)
         goto error;
     if ((f_type = mkstr((size_t)8, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc(nelmts, (size_t)8)))
+    if (NULL == (buf = (char *)calloc(nelmts, (size_t)8)))
         goto error;
     for (i = 0; i < nelmts; i++) {
         nchars = (size_t)(HDrand() % 8);
@@ -5071,7 +4988,7 @@ test_conv_str_2(void)
     /* Do the conversions */
     HDsnprintf(s, sizeof(s), "Testing random string conversion speed");
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
     if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -5089,7 +5006,7 @@ error:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -5107,9 +5024,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Raymond Lu
- *              Tuesday, April 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5135,7 +5049,7 @@ test_conv_str_3(void)
      */
     if ((type = mkstr((size_t)8, H5T_STR_NULLPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc(nelmts, (size_t)8)))
+    if (NULL == (buf = (char *)calloc(nelmts, (size_t)8)))
         FAIL_PUTS_ERROR("Allocation failed.");
     for (i = 0; i < nelmts; i++) {
         nchars = (size_t)(HDrand() % 8);
@@ -5226,7 +5140,7 @@ error:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (tag)
         H5free_memory(tag); /* Technically allocated by API call */
 
@@ -5246,9 +5160,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, January  5, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -5277,7 +5188,7 @@ test_conv_enum_1(void)
     } /* end for */
 
     /* Initialize the buffer */
-    if (NULL == (buf = (int *)HDmalloc(nelmts * MAX(H5Tget_size(t1), H5Tget_size(t2)))))
+    if (NULL == (buf = (int *)malloc(nelmts * MAX(H5Tget_size(t1), H5Tget_size(t2)))))
         goto error;
     for (u = 0; u < nelmts; u++)
         buf[u] = HDrand() % 26;
@@ -5285,14 +5196,14 @@ test_conv_enum_1(void)
     /* Conversions */
     HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N)");
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
     if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();
 
     HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
     if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();
@@ -5308,7 +5219,7 @@ error:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -5327,7 +5238,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke, LLNL, 2003-06-09
  *-------------------------------------------------------------------------
  */
 static int
@@ -5357,7 +5267,7 @@ test_conv_enum_2(void)
         H5Tenum_insert(dsttype, mname[i], &i);
 
     /* Source data */
-    data = (int *)HDmalloc(NTESTELEM * sizeof(int));
+    data = (int *)malloc(NTESTELEM * sizeof(int));
     for (i = 0; i < NTESTELEM; i++) {
         ((char *)data)[i * 3 + 2] = (char)(i % 8);
         ((char *)data)[i * 3 + 0] = 0;
@@ -5378,7 +5288,7 @@ test_conv_enum_2(void)
     }
 
     /* Cleanup */
-    HDfree(data);
+    free(data);
     H5Tclose(srctype);
     H5Tclose(dsttype);
     H5Tclose(oddsize);
@@ -5401,8 +5311,6 @@ test_conv_enum_2(void)
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, May 20, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -5498,8 +5406,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Raymond Lu
- *              Wednesday, April 5, 2006
  *-------------------------------------------------------------------------
  */
 static int
@@ -5644,8 +5550,6 @@ error:
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Robb Matzke
- *              Friday, June  4, 1999
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5667,8 +5571,6 @@ convert_opaque(hid_t H5_ATTR_UNUSED st, hid_t H5_ATTR_UNUSED dt, H5T_cdata_t *cd
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Raymond Lu
- *              June 2, 2004
  *-------------------------------------------------------------------------
  */
 static int
@@ -5705,8 +5607,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, May 20, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -5783,9 +5683,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 14, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5800,9 +5697,9 @@ opaque_long(void)
         TEST_ERROR;
 
     /* Create long tag */
-    if (NULL == (long_tag = (char *)HDmalloc((size_t)(16384 + 1))))
+    if (NULL == (long_tag = (char *)malloc((size_t)(16384 + 1))))
         TEST_ERROR;
-    HDmemset(long_tag, 'a', (size_t)16384);
+    memset(long_tag, 'a', (size_t)16384);
     long_tag[16384] = '\0';
 
     /* Set opaque type's tag */
@@ -5819,7 +5716,7 @@ opaque_long(void)
         TEST_ERROR;
 
     /* Release memory for tag */
-    HDfree(long_tag);
+    free(long_tag);
 
     return 0;
 
@@ -5827,7 +5724,7 @@ error:
     if (dt > 0)
         H5Tclose(dt);
     if (long_tag)
-        HDfree(long_tag);
+        free(long_tag);
     H5_FAILED();
     return 1;
 }
@@ -5841,8 +5738,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Raymond Lu
- *              Wednesday, April 5, 2006
  *-------------------------------------------------------------------------
  */
 static int
@@ -6104,7 +5999,7 @@ test_encode(void)
     }
 
     if (cmpd_buf_size > 0)
-        cmpd_buf = (unsigned char *)HDcalloc((size_t)1, cmpd_buf_size);
+        cmpd_buf = (unsigned char *)calloc((size_t)1, cmpd_buf_size);
 
     /* Try decoding an incorrect (empty) buffer (should fail) */
     H5E_BEGIN_TRY
@@ -6155,7 +6050,7 @@ test_encode(void)
     }
 
     if (enum_buf_size > 0)
-        enum_buf = (unsigned char *)HDcalloc((size_t)1, enum_buf_size);
+        enum_buf = (unsigned char *)calloc((size_t)1, enum_buf_size);
 
     if (H5Tencode(tid2, enum_buf, &enum_buf_size) < 0) {
         H5_FAILED();
@@ -6197,7 +6092,7 @@ test_encode(void)
     }
 
     if (vlstr_buf_size > 0)
-        vlstr_buf = (unsigned char *)HDcalloc((size_t)1, vlstr_buf_size);
+        vlstr_buf = (unsigned char *)calloc((size_t)1, vlstr_buf_size);
 
     if (H5Tencode(tid3, vlstr_buf, &vlstr_buf_size) < 0) {
         H5_FAILED();
@@ -6244,7 +6139,7 @@ test_encode(void)
         printf("Can't close datatype\n");
         goto error;
     }
-    HDfree(cmpd_buf);
+    free(cmpd_buf);
     cmpd_buf_size = 0;
 
     /* Commit enumeration datatype and close it */
@@ -6263,7 +6158,7 @@ test_encode(void)
         printf("Can't close datatype\n");
         goto error;
     }
-    HDfree(enum_buf);
+    free(enum_buf);
     enum_buf_size = 0;
 
     /* Commit enumeration datatype and close it */
@@ -6282,7 +6177,7 @@ test_encode(void)
         printf("Can't close datatype\n");
         goto error;
     }
-    HDfree(vlstr_buf);
+    free(vlstr_buf);
     vlstr_buf_size = 0;
 
     /* Open the dataytpe for query */
@@ -6305,7 +6200,7 @@ test_encode(void)
     }
 
     if (cmpd_buf_size > 0)
-        cmpd_buf = (unsigned char *)HDcalloc((size_t)1, cmpd_buf_size);
+        cmpd_buf = (unsigned char *)calloc((size_t)1, cmpd_buf_size);
 
     if (H5Tencode(tid1, cmpd_buf, &cmpd_buf_size) < 0) {
         H5_FAILED();
@@ -6344,7 +6239,7 @@ test_encode(void)
     }
 
     if (enum_buf_size > 0)
-        enum_buf = (unsigned char *)HDcalloc((size_t)1, enum_buf_size);
+        enum_buf = (unsigned char *)calloc((size_t)1, enum_buf_size);
 
     if (H5Tencode(tid2, enum_buf, &enum_buf_size) < 0) {
         H5_FAILED();
@@ -6386,7 +6281,7 @@ test_encode(void)
     }
 
     if (vlstr_buf_size > 0)
-        vlstr_buf = (unsigned char *)HDcalloc((size_t)1, vlstr_buf_size);
+        vlstr_buf = (unsigned char *)calloc((size_t)1, vlstr_buf_size);
 
     if (H5Tencode(tid3, vlstr_buf, &vlstr_buf_size) < 0) {
         H5_FAILED();
@@ -6400,7 +6295,7 @@ test_encode(void)
         printf("Can't decode VL string type\n");
         goto error;
     }
-    HDfree(vlstr_buf);
+    free(vlstr_buf);
 
     /* Verify that the datatype was copied exactly */
     if (H5Tequal(decoded_tid3, tid3) <= 0) {
@@ -6519,8 +6414,8 @@ test_encode(void)
         goto error;
     }
 
-    HDfree(cmpd_buf);
-    HDfree(enum_buf);
+    free(cmpd_buf);
+    free(enum_buf);
 
     PASSED();
     return 0;
@@ -6548,9 +6443,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              October 2, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -6767,9 +6659,6 @@ conv_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
  *
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              August 18, 2005
- *
  * Notes: This routine is pretty specific to 4 byte integers and 4 byte
  *              floats and I can't think of a particularly good way to
  *              make it portable to other architectures, but further
@@ -6807,7 +6696,7 @@ test_int_float_except(void)
         TEST_ERROR;
 
     /* Convert buffer */
-    HDmemset(&e, 0, sizeof(except_info_t));
+    memset(&e, 0, sizeof(except_info_t));
     if (H5Tconvert(H5T_NATIVE_FLOAT, H5T_NATIVE_INT, (size_t)CONVERT_SIZE, buf, NULL, dxpl) < 0)
         TEST_ERROR;
 
@@ -6831,7 +6720,7 @@ test_int_float_except(void)
         TEST_ERROR;
 
     /* Convert buffer */
-    HDmemset(&e, 0, sizeof(except_info_t));
+    memset(&e, 0, sizeof(except_info_t));
     if (H5Tconvert(H5T_NATIVE_INT, H5T_NATIVE_FLOAT, (size_t)CONVERT_SIZE, buf, NULL, dxpl) < 0)
         TEST_ERROR;
 
@@ -6857,7 +6746,7 @@ test_int_float_except(void)
     /* Work on second buffer */
 
     /* Convert second buffer */
-    HDmemset(&e, 0, sizeof(except_info_t));
+    memset(&e, 0, sizeof(except_info_t));
     if (H5Tconvert(H5T_NATIVE_INT, H5T_NATIVE_FLOAT, (size_t)CONVERT_SIZE, buf2, NULL, dxpl) < 0)
         TEST_ERROR;
 
@@ -6881,7 +6770,7 @@ test_int_float_except(void)
         TEST_ERROR;
 
     /* Convert buffer */
-    HDmemset(&e, 0, sizeof(except_info_t));
+    memset(&e, 0, sizeof(except_info_t));
     if (H5Tconvert(H5T_NATIVE_FLOAT, H5T_NATIVE_INT, (size_t)CONVERT_SIZE, buf2, NULL, dxpl) < 0)
         TEST_ERROR;
 
@@ -6934,9 +6823,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              January 23, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -7168,9 +7054,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              18 August 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7336,8 +7219,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Neil Fortner
- *              Thursday, June 4, 2009
  *-------------------------------------------------------------------------
  */
 static int
@@ -7706,9 +7587,6 @@ create_del_obj_named_test_file(const char *filename, hid_t fapl, H5F_libver_t lo
  * Return:    Success:    0
  *        Failure:    number of errors
  *
- * Programmer:    Quincey Koziol
- *              Monday, July 18, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7825,9 +7703,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Quincey Koziol
- *              Thursday, July 28, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -8027,9 +7902,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, September 27, 2007
- *
  *-------------------------------------------------------------------------
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -8199,8 +8071,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Raymond Lu
- *              10 November 2011
  *-------------------------------------------------------------------------
  */
 static int
@@ -8871,8 +8741,6 @@ error:
  *
  *              Failure:
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 int
@@ -8890,7 +8758,7 @@ main(void)
 
     if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0) {
         printf("Can't check if driver is parallel-enabled\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (ALIGNMENT)
@@ -8963,7 +8831,7 @@ main(void)
 
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     printf("All datatype tests passed.\n");

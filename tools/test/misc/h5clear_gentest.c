@@ -48,8 +48,6 @@ const char *FILENAME_ENHANCE[] = {
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:    Vailin Choi; March 2017
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -124,7 +122,7 @@ gen_cache_image_file(const char *fname)
     if (H5Fclose(fid) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -140,7 +138,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return 1;
 } /* gen_cache_image_file() */
@@ -166,8 +164,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:    Vailin Choi; March 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -365,8 +361,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Vailin Choi; July 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -600,10 +594,10 @@ main(void)
     fflush(stderr);
 
     /* Not going through library closing by calling _exit(0) with success */
-    HD_exit(0);
+    _exit(0);
 
 error:
 
     /* Exit with failure */
-    HD_exit(1);
+    _exit(1);
 }

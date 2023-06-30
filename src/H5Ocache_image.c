@@ -132,9 +132,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              6/22/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -165,9 +162,6 @@ H5O__mdci_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              6/22/15
  *
  *-------------------------------------------------------------------------
  */
@@ -206,9 +200,6 @@ done:
  *
  *              Failure:        zero
  *
- * Programmer:  John Mainzer
- *              6/22/15
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -235,9 +226,6 @@ H5O__mdci_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              6/22/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -258,9 +246,6 @@ H5O__mdci_free(void *mesg)
  * Purpose:     Free file space referenced by message
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, March 19, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -308,9 +293,6 @@ done:
  * Purpose:     Prints debugging info.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              6/22/15
  *
  *-------------------------------------------------------------------------
  */

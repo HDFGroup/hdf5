@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Jan-Willem Blokland
- *              December 1, 2020
- *
  * Purpose:     Test writing compounded attribute followed by
  *              writing data with a data transform function.
  */
@@ -47,7 +44,7 @@ main(void)
     att_t      *atts_res    = NULL;
 
     /* Compound datatype */
-    if (NULL == (atts = HDmalloc(sizeof(att_t))))
+    if (NULL == (atts = malloc(sizeof(att_t))))
         TEST_ERROR;
     HDstrcpy(atts[0].name, "Name");
     HDstrcpy(atts[0].unit, "Unit");
@@ -96,9 +93,9 @@ main(void)
         FAIL_STACK_ERROR;
     }
 
-    if (NULL == (data = HDmalloc(LENGTH * sizeof(int))))
+    if (NULL == (data = malloc(LENGTH * sizeof(int))))
         TEST_ERROR;
-    if (NULL == (data_res = HDmalloc(LENGTH * sizeof(int))))
+    if (NULL == (data_res = malloc(LENGTH * sizeof(int))))
         TEST_ERROR;
     for (unsigned i = 0; i < LENGTH; i++) {
         data[i]     = 10;
@@ -110,7 +107,7 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Read attribute */
-    if (NULL == (atts_res = HDmalloc(sizeof(att_t))))
+    if (NULL == (atts_res = malloc(sizeof(att_t))))
         TEST_ERROR;
     if (H5Aread(att_attr_id, att_dtyp_id, atts_res) < 0)
         FAIL_STACK_ERROR;
@@ -130,10 +127,10 @@ main(void)
         if (data[idx] != data_res[idx])
             TEST_ERROR;
 
-    HDfree(atts);
-    HDfree(atts_res);
-    HDfree(data);
-    HDfree(data_res);
+    free(atts);
+    free(atts_res);
+    free(data);
+    free(data_res);
 
     /* Close all identifiers. */
     if (H5Pclose(dxpl_id) < 0)
@@ -170,13 +167,13 @@ error:
     H5E_END_TRY
 
     if (atts)
-        HDfree(atts);
+        free(atts);
     if (atts_res)
-        HDfree(atts_res);
+        free(atts_res);
     if (data)
-        HDfree(data);
+        free(data);
     if (data_res)
-        HDfree(data_res);
+        free(data_res);
 
     return 1;
 }

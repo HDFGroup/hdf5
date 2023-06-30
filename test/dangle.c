@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, May 13, 2003
- *
  * Purpose:    Test dangling IDs
  */
 #include "h5test.h"
@@ -35,9 +32,6 @@ static const char *FILENAME[] = {"dangle", NULL};
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -133,9 +127,6 @@ error:
  * Return:    Success:    zero
  *        Failure:    non-zero
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -225,9 +216,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -322,9 +310,6 @@ error:
  * Return:    Success:    zero
  *        Failure:    non-zero
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -406,9 +391,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Wednesday, June 18, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -514,9 +496,6 @@ error:
  * Return:    Success:    zero
  *        Failure:    non-zero
  *
- * Programmer:    Quincey Koziol
- *              Friday, October 29, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -598,7 +577,7 @@ test_dangle_force(void)
         TEST_ERROR;
 
     /* Allocate the array of object IDs */
-    if (NULL == (objs = (hid_t *)HDcalloc((size_t)count, sizeof(hid_t))))
+    if (NULL == (objs = (hid_t *)calloc((size_t)count, sizeof(hid_t))))
         TEST_ERROR;
 
     /* Get the list of open IDs */
@@ -620,14 +599,14 @@ test_dangle_force(void)
     HDremove(filename);
 
     /* Release object ID array */
-    HDfree(objs);
+    free(objs);
 
     PASSED();
     return 0;
 
 error:
     if (objs)
-        HDfree(objs);
+        free(objs);
     return 1;
 }
 
@@ -638,9 +617,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
  *
  *-------------------------------------------------------------------------
  */

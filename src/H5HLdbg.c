@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Wednesday, July 9, 2003
- *
+/*
  * Purpose:     Local Heap object debugging functions.
  */
 
@@ -37,9 +35,6 @@
  * Purpose:     Prints debugging information about a heap.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Aug  1 1997
  *
  *-------------------------------------------------------------------------
  */

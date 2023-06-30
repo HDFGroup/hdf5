@@ -1205,8 +1205,8 @@ test_get_obj_ids(void)
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, (NGROUPS + NDSETS + 1), "H5Fget_obj_count");
 
-    oid_list = (hid_t *)HDcalloc((size_t)oid_list_size, sizeof(hid_t));
-    CHECK_PTR(oid_list, "HDcalloc");
+    oid_list = (hid_t *)calloc((size_t)oid_list_size, sizeof(hid_t));
+    CHECK_PTR(oid_list, "calloc");
 
     /* Call the public function H5F_get_obj_ids to use H5F__get_objects.  User reported having problem here.
      * that the returned size (ret_count) from H5Fget_obj_ids is one greater than the size passed in
@@ -1246,7 +1246,7 @@ test_get_obj_ids(void)
     H5Sclose(filespace);
     H5Fclose(fid);
 
-    HDfree(oid_list);
+    free(oid_list);
 
     /* Reopen the file to check whether H5Fget_obj_count and H5Fget_obj_ids still works
      * when the file is closed first */
@@ -1268,8 +1268,8 @@ test_get_obj_ids(void)
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, NDSETS, "H5Fget_obj_count");
 
-    oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
-    CHECK_PTR(oid_list, "HDcalloc");
+    oid_list = (hid_t *)calloc((size_t)oid_count, sizeof(hid_t));
+    CHECK_PTR(oid_list, "calloc");
 
     /* Get the list of all opened objects */
     ret_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
@@ -1284,7 +1284,7 @@ test_get_obj_ids(void)
     }
     H5E_END_TRY;
 
-    HDfree(oid_list);
+    free(oid_list);
 }
 
 /****************************************************************
@@ -1503,7 +1503,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1, hid_t gid2,
     if (oid_count > 0) {
         hid_t *oid_list;
 
-        oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
+        oid_list = (hid_t *)calloc((size_t)oid_count, sizeof(hid_t));
         if (oid_list != NULL) {
             int i;
 
@@ -1553,7 +1553,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1, hid_t gid2,
                 } /* end switch */
             }     /* end for */
 
-            HDfree(oid_list);
+            free(oid_list);
         } /* end if */
     }     /* end if */
 
@@ -2795,7 +2795,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(tid1, FAIL, "H5Tcopy");
 
     /* Second file's dataset read */
-    HDmemset(buffer, 0, sizeof(char *) * 5);
+    memset(buffer, 0, sizeof(char *) * 5);
     ret = H5Dread(did2, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
     ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, buffer);
@@ -2810,7 +2810,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* First file's dataset read */
-    HDmemset(buffer, 0, sizeof(char *) * 5);
+    memset(buffer, 0, sizeof(char *) * 5);
     ret = H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
     ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, buffer);
@@ -3181,19 +3181,19 @@ cal_chksum(const char *file, uint32_t *chksum)
     CHECK(fdes, FAIL, "HDfstat");
 
     /* Allocate space for the file data */
-    file_data = HDmalloc((size_t)sb.st_size);
-    CHECK_PTR(file_data, "HDmalloc");
+    file_data = malloc((size_t)sb.st_size);
+    CHECK_PTR(file_data, "malloc");
 
     if (file_data) {
         /* Read file's data into memory */
         bytes_read = HDread(fdes, file_data, (size_t)sb.st_size);
-        CHECK(bytes_read == sb.st_size, FALSE, "HDmalloc");
+        CHECK(bytes_read == sb.st_size, FALSE, "malloc");
 
         /* Calculate checksum */
         *chksum = H5_checksum_lookup3(file_data, sizeof(file_data), 0);
 
         /* Free memory */
-        HDfree(file_data);
+        free(file_data);
     }
 
     /* Close the file */
@@ -3212,8 +3212,6 @@ cal_chksum(const char *file, uint32_t *chksum)
 **    Due to the implementation of file locking (status_flags in
 **    the superblock is used), this test is changed to use checksum
 **    instead of timestamp to verify the file is not changed.
-**
-**  Programmer: Vailin Choi; July 2013
 **
 *****************************************************************/
 static void
@@ -3259,9 +3257,6 @@ test_rw_noupdate(void)
 **
 **  test_userblock_alignment_helper1(): helper routine for
 **      test_userblock_alignment() test, to handle common testing
-**
-**  Programmer: Quincey Koziol
-**              Septmber 10, 2009
 **
 *****************************************************************/
 static int
@@ -3320,9 +3315,6 @@ test_userblock_alignment_helper1(hid_t fcpl, hid_t fapl)
 **
 **  test_userblock_alignment_helper2(): helper routine for
 **      test_userblock_alignment() test, to handle common testing
-**
-**  Programmer: Quincey Koziol
-**              Septmber 10, 2009
 **
 *****************************************************************/
 static int
@@ -3389,9 +3381,6 @@ test_userblock_alignment_helper2(hid_t fapl, hbool_t open_rw)
 **  test_userblock_alignment(): low-level file test routine.
 **      This test checks to ensure that files with both a userblock and a
 **      object [allocation] alignment size set interact properly.
-**
-**  Programmer: Quincey Koziol
-**              Septmber 8, 2009
 **
 *****************************************************************/
 static void
@@ -3612,8 +3601,6 @@ test_userblock_alignment(const char *env_h5_drvr)
 **      alignment interact properly:
 **        -- alignment via H5Pset_alignment
 **        -- alignment via paged aggregation
-**
-**  Programmer: Vailin Choi; March 2013
 **
 *****************************************************************/
 static void
@@ -4408,7 +4395,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 
     assert(split);
 
-    HDmemset(memb_name, 0, sizeof memb_name);
+    memset(memb_name, 0, sizeof memb_name);
 
     /* Get current split settings */
     if (H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
@@ -4432,7 +4419,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 
     /* Free memb_name */
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-        HDfree(memb_name[mt]);
+        free(memb_name[mt]);
 
     return 0;
 
@@ -4756,7 +4743,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         VERIFY(nsects, FAIL, "H5Fget_free_sections");
 
         /* Retrieve and verify free space info for all the sections */
-        HDmemset(all_sect_info, 0, sizeof(all_sect_info));
+        memset(all_sect_info, 0, sizeof(all_sect_info));
         nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)nall, all_sect_info);
         VERIFY(nsects, nall, "H5Fget_free_sections");
 
@@ -4769,7 +4756,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         last_size = all_sect_info[nall - 1].size;
 
         /* Retrieve and verify free space info for -1 sections */
-        HDmemset(sect_info, 0, sizeof(sect_info));
+        memset(sect_info, 0, sizeof(sect_info));
         nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)(nall - 1), sect_info);
         VERIFY(nsects, nall, "H5Fget_free_sections");
 
@@ -4783,7 +4770,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         VERIFY(((hsize_t)free_space - last_size), total, "H5Fget_free_sections");
 
         /* Retrieve and verify free-space info for +1 sections */
-        HDmemset(sect_info, 0, sizeof(sect_info));
+        memset(sect_info, 0, sizeof(sect_info));
         nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)(nall + 1), sect_info);
         VERIFY(nsects, nall, "H5Fget_free_sections");
 
@@ -4798,7 +4785,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         VERIFY(sect_info[nall].size, 0, "H5Fget_free_sections");
         VERIFY(free_space, total, "H5Fget_free_sections");
 
-        HDmemset(meta_sect_info, 0, sizeof(meta_sect_info));
+        memset(meta_sect_info, 0, sizeof(meta_sect_info));
         if (multi_vfd) {
             hssize_t ntmp;
 
@@ -4831,7 +4818,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         CHECK(nraw, FAIL, "H5Fget_free_sections");
 
         /* Retrieve and verify free-space sections for raw data */
-        HDmemset(raw_sect_info, 0, sizeof(raw_sect_info));
+        memset(raw_sect_info, 0, sizeof(raw_sect_info));
         nsects = H5Fget_free_sections(file, H5FD_MEM_DRAW, (size_t)nraw, raw_sect_info);
         VERIFY(nsects, nraw, "H5Fget_free_sections");
 
@@ -8222,9 +8209,6 @@ test_file(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Albert Cheng
- *              July 2, 1998
  *
  *-------------------------------------------------------------------------
  */

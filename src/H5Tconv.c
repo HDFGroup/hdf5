@@ -1121,9 +1121,6 @@ H5FL_BLK_DEFINE_STATIC(ref_seq);
  *
  * Return:     Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Wednesday, January 14, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1165,9 +1162,6 @@ done:
  * Note:    This is a soft conversion function.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Friday, January 25, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1575,9 +1569,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Tuesday, January 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1670,9 +1661,6 @@ done:
  * Purpose:    Convert from one bitfield to any other bitfield.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Thursday, May 20, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1919,9 +1907,6 @@ done:
  *
  * Return:    The result of H5MM_xfree(priv) (NULL)
  *
- * Programmer:    Neil Fortner
- *        Wednesday, October 1, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5T_conv_struct_t *
@@ -1991,9 +1976,6 @@ H5T__conv_struct_free(H5T_conv_struct_t *priv)
  *              places in the buffer.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Monday, January 26, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2170,9 +2152,6 @@ done:
  * Return:      A pointer to the subset info struct in p.  Points directly
  *              into the structure.
  *
- * Programmer:    Raymond Lu
- *        8 June 2007
- *
  *-------------------------------------------------------------------------
  */
 H5T_subset_info_t *
@@ -2210,9 +2189,6 @@ H5T__conv_struct_subset(const H5T_cdata_t *cdata)
  *          Copy BKG to BUF
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Thursday, January 22, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2331,11 +2307,11 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                                         xbuf + src_memb->offset, xbkg + dst_memb->offset) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
-                        HDmemmove(xbuf + offset, xbuf + src_memb->offset, dst_memb->size);
+                        memmove(xbuf + offset, xbuf + src_memb->offset, dst_memb->size);
                         offset += dst_memb->size;
                     } /* end if */
                     else {
-                        HDmemmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
+                        memmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
                         offset += src_memb->size;
                     } /* end else */
                 }     /* end for */
@@ -2365,7 +2341,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                     } /* end if */
                     else
                         offset -= dst_memb->size;
-                    HDmemmove(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
+                    memmove(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
                 } /* end for */
                 assert(0 == offset);
 
@@ -2385,7 +2361,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
              * buffer.
              */
             for (xbuf = buf, xbkg = bkg, elmtno = 0; elmtno < nelmts; elmtno++) {
-                HDmemmove(xbuf, xbkg, dst->shared->size);
+                memmove(xbuf, xbkg, dst->shared->size);
                 xbuf += buf_stride ? buf_stride : dst->shared->size;
                 xbkg += bkg_delta;
             } /* end for */
@@ -2437,9 +2413,6 @@ done:
  *              places in the buffer.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Thursday, January 22, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2579,7 +2552,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                 copy_size = priv->subset_info.copy_size;
 
                 for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                    HDmemmove(xbkg, xbuf, copy_size);
+                    memmove(xbkg, xbuf, copy_size);
 
                     /* Update pointers */
                     xbuf += buf_stride;
@@ -2609,14 +2582,14 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbkg, xbuf, dst_memb->size);
+                            memmove(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
                             xbkg += bkg_stride;
                         } /* end for */
                     }     /* end if */
                     else {
                         for (xbuf = buf, elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
+                            memmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
                             xbuf += buf_stride;
                         } /* end for */
                         offset += src_memb->size;
@@ -2646,7 +2619,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbkg, xbuf, dst_memb->size);
+                            memmove(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
                             xbkg += bkg_stride;
                         } /* end for */
@@ -2659,7 +2632,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
 
             /* Move background buffer into result buffer */
             for (xbuf = buf, xbkg = bkg, elmtno = 0; elmtno < nelmts; elmtno++) {
-                HDmemmove(xbuf, xbkg, dst->shared->size);
+                memmove(xbuf, xbkg, dst->shared->size);
                 xbuf += buf_stride;
                 xbkg += bkg_stride;
             } /* end for */
@@ -2682,9 +2655,6 @@ done:
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *              Monday, January  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -2826,8 +2796,6 @@ done:
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *              Monday, January  4, 1999
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2947,7 +2915,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                                           cb_struct.user_data);
 
                         if (except_ret == H5T_CONV_UNHANDLED)
-                            HDmemset(d, 0xff, dst->shared->size);
+                            memset(d, 0xff, dst->shared->size);
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                         "can't handle conversion exception")
@@ -2967,8 +2935,8 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
 
                     while (lt < rt) {
                         md  = (lt + rt) / 2;
-                        cmp = HDmemcmp(s, (uint8_t *)src->shared->u.enumer.value + (md * src->shared->size),
-                                       src->shared->size);
+                        cmp = memcmp(s, (uint8_t *)src->shared->u.enumer.value + (md * src->shared->size),
+                                     src->shared->size);
                         if (cmp < 0)
                             rt = md;
                         else if (cmp > 0)
@@ -2984,7 +2952,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                                           cb_struct.user_data);
 
                         if (except_ret == H5T_CONV_UNHANDLED)
-                            HDmemset(d, 0xff, dst->shared->size);
+                            memset(d, 0xff, dst->shared->size);
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                         "can't handle conversion exception")
@@ -3022,8 +2990,6 @@ done:
  *
  *            Failure:    negative
  *
- * Programmer:    Raymond Lu
- *              12 October 2012
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3111,9 +3077,6 @@ done:
  *                7. Store (heap ID or pointer) and length in main dst buffer
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Wednesday, May 26, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -3355,7 +3318,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 if (NULL == (conv_buf = H5FL_BLK_REALLOC(vlen_seq, conv_buf, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                                 "memory allocation failed for type conversion")
-                                HDmemset(conv_buf, 0, conv_buf_size);
+                                memset(conv_buf, 0, conv_buf_size);
                             } /* end else-if */
 
                             /* Read in VL sequence */
@@ -3373,7 +3336,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 if (NULL == (tmp_buf = H5FL_BLK_REALLOC(vlen_seq, tmp_buf, tmp_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                                 "memory allocation failed for type conversion")
-                                HDmemset(tmp_buf, 0, tmp_buf_size);
+                                memset(tmp_buf, 0, tmp_buf_size);
                             } /* end if */
 
                             /* If we are writing and there is a nested VL type, read
@@ -3395,7 +3358,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                             (tmp_buf = H5FL_BLK_REALLOC(vlen_seq, tmp_buf, tmp_buf_size)))
                                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                                         "memory allocation failed for type conversion")
-                                        HDmemset(tmp_buf, 0, tmp_buf_size);
+                                        memset(tmp_buf, 0, tmp_buf_size);
                                     } /* end if */
 
                                     /* Read in background VL sequence */
@@ -3407,8 +3370,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
 
                                 /* If the sequence gets shorter, pad out the original sequence with zeros */
                                 if (bg_seq_len < seq_len)
-                                    HDmemset((uint8_t *)tmp_buf + dst_base_size * bg_seq_len, 0,
-                                             (seq_len - bg_seq_len) * dst_base_size);
+                                    memset((uint8_t *)tmp_buf + dst_base_size * bg_seq_len, 0,
+                                           (seq_len - bg_seq_len) * dst_base_size);
                             } /* end if */
 
                             /* Convert VL sequence */
@@ -3487,9 +3450,6 @@ done:
  *        This is a soft conversion function.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Monday, November 6, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -3602,7 +3562,7 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
             /* Perform the actual conversion */
             for (elmtno = 0; elmtno < nelmts; elmtno++) {
                 /* Copy the source array into the correct location for the destination */
-                HDmemmove(dp, sp, src->shared->size);
+                memmove(dp, sp, src->shared->size);
 
                 /* Convert array */
                 if (H5T_convert(tpath, tsrc_id, tdst_id, src->shared->u.array.nelem, (size_t)0, bkg_stride,
@@ -3792,7 +3752,7 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             if (NULL == (conv_buf = H5FL_BLK_REALLOC(ref_seq, conv_buf, conv_buf_size)))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                             "memory allocation failed for type conversion")
-                            HDmemset(conv_buf, 0, conv_buf_size);
+                            memset(conv_buf, 0, conv_buf_size);
                         } /* end if */
 
                         if (dst_copy && (src->shared->u.atomic.u.r.loc == H5T_LOC_DISK))
@@ -3851,9 +3811,6 @@ done:
  *        particularly fast.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Wednesday, June 10, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4289,9 +4246,6 @@ done:
  *        particularly fast!
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Tuesday, June 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4876,9 +4830,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Friday, August    7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5121,9 +5072,6 @@ done:
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5141,9 +5089,6 @@ H5T__conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5163,9 +5108,6 @@ H5T__conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5183,9 +5125,6 @@ H5T__conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5205,9 +5144,6 @@ H5T__conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5225,9 +5161,6 @@ H5T__conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5247,9 +5180,6 @@ H5T__conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5267,9 +5197,6 @@ H5T__conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5289,9 +5216,6 @@ H5T__conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5309,9 +5233,6 @@ H5T__conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5331,9 +5252,6 @@ H5T__conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5351,9 +5269,6 @@ H5T__conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5373,9 +5288,6 @@ H5T__conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5393,9 +5305,6 @@ H5T__conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5415,9 +5324,6 @@ H5T__conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5435,9 +5341,6 @@ H5T__conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5457,9 +5360,6 @@ H5T__conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5477,9 +5377,6 @@ H5T__conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5499,9 +5396,6 @@ H5T__conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5519,9 +5413,6 @@ H5T__conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5541,9 +5432,6 @@ H5T__conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5561,9 +5449,6 @@ H5T__conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5583,9 +5468,6 @@ H5T__conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5603,9 +5485,6 @@ H5T__conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5625,9 +5504,6 @@ H5T__conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5645,9 +5521,6 @@ H5T__conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5667,9 +5540,6 @@ H5T__conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5687,9 +5557,6 @@ H5T__conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5709,9 +5576,6 @@ H5T__conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5729,9 +5593,6 @@ H5T__conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5751,9 +5612,6 @@ H5T__conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5771,9 +5629,6 @@ H5T__conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5793,9 +5648,6 @@ H5T__conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5813,9 +5665,6 @@ H5T__conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5835,9 +5684,6 @@ H5T__conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5855,9 +5701,6 @@ H5T__conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5877,9 +5720,6 @@ H5T__conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5897,9 +5737,6 @@ H5T__conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5919,9 +5756,6 @@ H5T__conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5939,9 +5773,6 @@ H5T__conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5961,9 +5792,6 @@ H5T__conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5981,9 +5809,6 @@ H5T__conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6003,9 +5828,6 @@ H5T__conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6023,9 +5845,6 @@ H5T__conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6045,9 +5864,6 @@ H5T__conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6065,9 +5881,6 @@ H5T__conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6087,9 +5900,6 @@ H5T__conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6107,9 +5917,6 @@ H5T__conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6129,9 +5936,6 @@ H5T__conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6149,9 +5953,6 @@ H5T__conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6171,9 +5972,6 @@ H5T__conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6191,9 +5989,6 @@ H5T__conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6213,9 +6008,6 @@ H5T__conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6233,9 +6025,6 @@ H5T__conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6255,9 +6044,6 @@ H5T__conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6275,9 +6061,6 @@ H5T__conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6297,9 +6080,6 @@ H5T__conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6317,9 +6097,6 @@ H5T__conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6339,9 +6116,6 @@ H5T__conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6359,9 +6133,6 @@ H5T__conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6381,9 +6152,6 @@ H5T__conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6401,9 +6169,6 @@ H5T__conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6423,9 +6188,6 @@ H5T__conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6443,9 +6205,6 @@ H5T__conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6465,9 +6224,6 @@ H5T__conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6485,9 +6241,6 @@ H5T__conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6507,9 +6260,6 @@ H5T__conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6527,9 +6277,6 @@ H5T__conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6549,9 +6296,6 @@ H5T__conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6569,9 +6313,6 @@ H5T__conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6591,9 +6332,6 @@ H5T__conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6611,9 +6349,6 @@ H5T__conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6633,9 +6368,6 @@ H5T__conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6653,9 +6385,6 @@ H5T__conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6675,9 +6404,6 @@ H5T__conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6695,9 +6421,6 @@ H5T__conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6717,9 +6440,6 @@ H5T__conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6737,9 +6457,6 @@ H5T__conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6759,9 +6476,6 @@ H5T__conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6779,9 +6493,6 @@ H5T__conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6801,9 +6512,6 @@ H5T__conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6821,9 +6529,6 @@ H5T__conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6843,9 +6548,6 @@ H5T__conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6863,9 +6565,6 @@ H5T__conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6885,9 +6584,6 @@ H5T__conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6905,9 +6601,6 @@ H5T__conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6927,9 +6620,6 @@ H5T__conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6947,9 +6637,6 @@ H5T__conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *        Friday, November 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -6969,9 +6656,6 @@ H5T__conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6990,9 +6674,6 @@ H5T__conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Monday, November 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7009,9 +6690,6 @@ H5T__conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Tuesday, June 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -7030,9 +6708,6 @@ H5T__conv_float_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, Feb 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7049,9 +6724,6 @@ H5T__conv_float_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Tuesday, June 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -7070,9 +6742,6 @@ H5T__conv_double_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, Feb 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7089,9 +6758,6 @@ H5T__conv_double_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, Feb 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7110,9 +6776,6 @@ H5T__conv_ldouble_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, Feb 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7129,9 +6792,6 @@ H5T__conv_ldouble_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7150,9 +6810,6 @@ H5T__conv_schar_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7169,9 +6826,6 @@ H5T__conv_schar_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7190,9 +6844,6 @@ H5T__conv_schar_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7209,9 +6860,6 @@ H5T__conv_uchar_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7230,9 +6878,6 @@ H5T__conv_uchar_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7249,9 +6894,6 @@ H5T__conv_uchar_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7270,9 +6912,6 @@ H5T__conv_short_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7289,9 +6928,6 @@ H5T__conv_short_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7310,9 +6946,6 @@ H5T__conv_short_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7329,9 +6962,6 @@ H5T__conv_ushort_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7350,9 +6980,6 @@ H5T__conv_ushort_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7369,9 +6996,6 @@ H5T__conv_ushort_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7390,9 +7014,6 @@ H5T__conv_int_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7409,9 +7030,6 @@ H5T__conv_int_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7430,9 +7048,6 @@ H5T__conv_int_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7449,9 +7064,6 @@ H5T__conv_uint_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7470,9 +7082,6 @@ H5T__conv_uint_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7489,9 +7098,6 @@ H5T__conv_uint_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7510,9 +7116,6 @@ H5T__conv_long_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7529,9 +7132,6 @@ H5T__conv_long_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7550,9 +7150,6 @@ H5T__conv_long_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7569,9 +7166,6 @@ H5T__conv_ulong_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7590,9 +7184,6 @@ H5T__conv_ulong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7609,9 +7200,6 @@ H5T__conv_ulong_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *        This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7630,9 +7218,6 @@ H5T__conv_llong_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7649,9 +7234,6 @@ H5T__conv_llong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7672,9 +7254,6 @@ H5T__conv_llong_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7692,9 +7271,6 @@ H5T__conv_ullong_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7711,9 +7287,6 @@ H5T__conv_ullong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7734,9 +7307,6 @@ H5T__conv_ullong_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7755,9 +7325,6 @@ H5T__conv_float_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7778,9 +7345,6 @@ H5T__conv_float_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7799,9 +7363,6 @@ H5T__conv_double_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7822,9 +7383,6 @@ H5T__conv_double_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7843,9 +7401,6 @@ H5T__conv_ldouble_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7866,9 +7421,6 @@ H5T__conv_ldouble_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7887,9 +7439,6 @@ H5T__conv_float_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7910,9 +7459,6 @@ H5T__conv_float_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7931,9 +7477,6 @@ H5T__conv_double_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -7954,9 +7497,6 @@ H5T__conv_double_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7975,9 +7515,6 @@ H5T__conv_ldouble_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7998,9 +7535,6 @@ H5T__conv_ldouble_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8019,9 +7553,6 @@ H5T__conv_float_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -8042,9 +7573,6 @@ H5T__conv_float_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8063,9 +7591,6 @@ H5T__conv_double_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -8086,9 +7611,6 @@ H5T__conv_double_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8107,9 +7629,6 @@ H5T__conv_ldouble_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8130,9 +7649,6 @@ H5T__conv_ldouble_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8151,9 +7667,6 @@ H5T__conv_float_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -8174,9 +7687,6 @@ H5T__conv_float_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8195,9 +7705,6 @@ H5T__conv_double_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -8218,9 +7725,6 @@ H5T__conv_double_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8239,9 +7743,6 @@ H5T__conv_ldouble_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8262,9 +7763,6 @@ H5T__conv_ldouble_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8283,9 +7781,6 @@ H5T__conv_float_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -8306,9 +7801,6 @@ H5T__conv_float_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8328,9 +7820,6 @@ H5T__conv_double_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Friday, November 7, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -8349,9 +7838,6 @@ H5T__conv_double_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *              hardware.  This is a fast special case.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8374,9 +7860,6 @@ H5T__conv_ldouble_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        Tuesday, February 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5T_CONV_INTERNAL_LDOUBLE_ULLONG
@@ -8398,9 +7881,6 @@ H5T__conv_ldouble_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  *              is probably not particularly fast.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Wednesday, Jan 21, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -8998,7 +8478,7 @@ next:
                     dp += direction * (ssize_t)dst_p->shared->size;
                 }
 
-                HDmemset(int_buf, 0, buf_size);
+                memset(int_buf, 0, buf_size);
             }
 
             break;
@@ -9024,9 +8504,6 @@ done:
  *              is probably not particularly fast.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Friday, Feb 6, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -9354,7 +8831,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         /*make destination infinity by setting exponent to maximal number and
                          *mantissa to zero.*/
                         expo = expo_max;
-                        HDmemset(int_buf, 0, buf_size);
+                        memset(int_buf, 0, buf_size);
                     }
                 }
 
@@ -9424,7 +8901,7 @@ padding:
                     dp += direction * (ssize_t)dst_p->shared->size;
                 }
 
-                HDmemset(int_buf, 0, buf_size);
+                memset(int_buf, 0, buf_size);
             }
 
             break;
@@ -9452,9 +8929,6 @@ done:
  * Return:      Success:        A pointer to the reversed byte sequence
  *
  *              Failure:        Null
- *
- * Programmer:    Raymond Lu
- *        April 26, 2004
  *
  *-------------------------------------------------------------------------
  */

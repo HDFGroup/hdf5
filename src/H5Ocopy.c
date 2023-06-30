@@ -116,9 +116,6 @@ H5FL_DEFINE(haddr_t);
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 29, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -190,9 +187,6 @@ done:
  *              By default, NULL messages are not copied.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              May 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -350,7 +344,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
      */
     if (NULL == (deleted = (hbool_t *)H5MM_malloc(sizeof(hbool_t) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
+    memset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
     /* "pre copy" pass over messages, to gather information for actual message copy operation
      * (for messages which depend on information from other messages)
@@ -798,9 +792,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -932,9 +923,6 @@ H5O__copy_free_addrmap_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UN
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              May 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -956,7 +944,7 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
     assert(oloc_dst->file);
 
     /* Initialize copy info before errors can be thrown */
-    HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
+    memset(&cpy_info, 0, sizeof(H5O_copy_t));
 
     /* Get the copy property list */
     if (NULL == (ocpy_plist = (H5P_genplist_t *)H5I_object(ocpypl_id)))
@@ -1029,9 +1017,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              June 4, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1091,9 +1076,6 @@ done:
  *
  * Return:      SUCCEED (never fails)
  *
- * Programmer:  Neil Fortner
- *              Oct 6 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1124,9 +1106,6 @@ H5O__copy_free_comm_dt_cb(void *item, void *_key, void H5_ATTR_UNUSED *_op_data)
  * Return:      0 if key1 and key2 are equal.
  *              <0 if key1 is less than key2.
  *              >0 if key1 is greater than key2.
- *
- * Programmer:  Neil Fortner
- *              Oct 6 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1164,9 +1143,6 @@ done:
  *              any already present.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Nov 3 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1244,9 +1220,6 @@ done:
  *              any already present.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Nov 3 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1362,9 +1335,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Oct 6 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1424,9 +1394,6 @@ done:
  *                      - oloc_dst will contain the address
  *              FALSE if a match is not found
  *              Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Sep 27 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1592,9 +1559,6 @@ done:
  *              dt skiplist.  The datatype must not be present already.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Oct 6 2011
  *
  *-------------------------------------------------------------------------
  */

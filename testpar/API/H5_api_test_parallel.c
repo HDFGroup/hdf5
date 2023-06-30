@@ -141,7 +141,7 @@ generate_random_parallel_dimensions(int space_rank, hsize_t **dims_out)
     if (space_rank <= 0)
         goto error;
 
-    if (NULL == (dims = HDmalloc((size_t)space_rank * sizeof(hsize_t))))
+    if (NULL == (dims = malloc((size_t)space_rank * sizeof(hsize_t))))
         goto error;
     if (MAINPROCESS) {
         for (i = 0; i < (size_t)space_rank; i++) {
@@ -164,7 +164,7 @@ generate_random_parallel_dimensions(int space_rank, hsize_t **dims_out)
 
 error:
     if (dims)
-        HDfree(dims);
+        free(dims);
 
     return -1;
 }
@@ -189,7 +189,7 @@ main(int argc, char **argv)
      */
     if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
         fprintf(stderr, "MPI_Init_thread failed\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -442,10 +442,10 @@ main(int argc, char **argv)
 
     MPI_Finalize();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDfree(vol_connector_string_copy);
+    free(vol_connector_string_copy);
 
     H5E_BEGIN_TRY
     {
@@ -457,5 +457,5 @@ error:
 
     MPI_Finalize();
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }

@@ -11,11 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, March 23, 1998
- */
-
-/*
  * We include the private header file so we can get to the uniform
  * programming environment it declares.  Other than that, h5ls only calls
  * HDF5 API functions (except for H5G_basename())
@@ -921,8 +916,8 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
             dst_size = H5Tget_size(type);
 
         /* Get the names and raw values of all members */
-        name  = (char **)HDcalloc((size_t)nmembs, sizeof(char *));
-        value = (unsigned char *)HDcalloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
+        name  = (char **)calloc((size_t)nmembs, sizeof(char *));
+        value = (unsigned char *)calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
         for (i = 0; i < (unsigned)nmembs; i++) {
             name[i] = H5Tget_member_name(type, i);
             H5Tget_member_value(type, i, value + i * H5Tget_size(type));
@@ -934,8 +929,8 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                 /* Release resources */
                 for (i = 0; i < (unsigned)nmembs; i++)
                     H5free_memory(name[i]);
-                HDfree(name);
-                HDfree(value);
+                free(name);
+                free(value);
                 H5Tclose(super);
 
                 return FALSE;
@@ -962,13 +957,13 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
             else if (H5T_SGN_NONE == H5Tget_sign(native)) {
                 unsigned long long copy;
 
-                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                memcpy(&copy, value + i * dst_size, sizeof(copy));
                 h5tools_str_append(buffer, "%llu", copy);
             }
             else {
                 long long copy;
 
-                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                memcpy(&copy, value + i * dst_size, sizeof(copy));
                 h5tools_str_append(buffer, "%lld", copy);
             }
         }
@@ -976,8 +971,8 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
         /* Release resources */
         for (i = 0; i < (unsigned)nmembs; i++)
             H5free_memory(name[i]);
-        HDfree(name);
-        HDfree(value);
+        free(name);
+        free(value);
     }
     else
         h5tools_str_append(buffer, "\n%*s <empty>", ind + 4, "");
@@ -1183,7 +1178,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
         return FALSE;
     ndims = H5Tget_array_ndims(type);
     if (ndims) {
-        dims = (hsize_t *)HDmalloc((unsigned)ndims * sizeof(dims[0]));
+        dims = (hsize_t *)malloc((unsigned)ndims * sizeof(dims[0]));
         H5Tget_array_dims2(type, dims);
 
         /* Print dimensions */
@@ -1191,7 +1186,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
             h5tools_str_append(buffer, "%s%" PRIuHSIZE, i ? "," : "[", dims[i]);
         h5tools_str_append(buffer, "]");
 
-        HDfree(dims);
+        free(dims);
     }
     else
         h5tools_str_append(buffer, " [SCALAR]\n");
@@ -1329,8 +1324,8 @@ dump_dataset_values(hid_t dset)
     f_type = H5Dget_type(dset);
     space  = H5Dget_space(dset);
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     outputformat          = *info;
     outputformat.line_1st = NULL;
@@ -1436,17 +1431,17 @@ dump_dataset_values(hid_t dset)
         ctx.need_prefix = TRUE;
 
         if (NULL !=
-            (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
+            (ref_buf = (H5R_ref_t *)calloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Dread reference read");
             if (H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
-                HDfree(ref_buf);
+                free(ref_buf);
                 H5TOOLS_INFO("H5Dread reference failed");
                 H5TOOLS_GOTO_DONE_NO_RET();
             }
             h5tools_dump_reference(rawoutstream, info, &ctx, dset, ref_buf, ndims);
 
             PRINTVALSTREAM(rawoutstream, "\n");
-            HDfree(ref_buf);
+            free(ref_buf);
         }
     }
     else {
@@ -1498,8 +1493,8 @@ dump_attribute_values(hid_t attr)
     f_type = H5Aget_type(attr);
     space  = H5Aget_space(attr);
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     outputformat          = *info;
     outputformat.line_1st = NULL;
@@ -1606,10 +1601,10 @@ dump_attribute_values(hid_t attr)
         ctx.need_prefix = TRUE;
 
         if (NULL !=
-            (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
+            (ref_buf = (H5R_ref_t *)calloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Aread reference read");
             if (H5Aread(attr, H5T_STD_REF, ref_buf) < 0) {
-                HDfree(ref_buf);
+                free(ref_buf);
                 H5TOOLS_INFO("H5Aread reference failed");
                 H5TOOLS_GOTO_DONE_NO_RET();
             }
@@ -1618,7 +1613,7 @@ dump_attribute_values(hid_t attr)
 
             PRINTVALSTREAM(rawoutstream, "\n");
             ctx.indent_level--;
-            HDfree(ref_buf);
+            free(ref_buf);
         }
     }
     else {
@@ -1671,8 +1666,8 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
 
     H5TOOLS_START_DEBUG(" ");
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     ctx.indent_level = 2;
     ctx.cur_column   = (size_t)curr_pos;
@@ -1777,8 +1772,8 @@ dataset_list1(hid_t dset)
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t  *info = &ls_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
@@ -1849,8 +1844,8 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t  *info = &ls_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
@@ -2056,8 +2051,8 @@ datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
         h5tools_context_t ctx;          /* print context  */
         h5tool_format_t  *info = &ls_dataformat;
 
-        HDmemset(&ctx, 0, sizeof(ctx));
-        HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+        memset(&ctx, 0, sizeof(ctx));
+        memset(&buffer, 0, sizeof(h5tools_str_t));
 
         h5tools_str_reset(&buffer);
 
@@ -2093,8 +2088,8 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
 
     H5TOOLS_START_DEBUG(" ");
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
@@ -2208,7 +2203,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                  */
                 if (cmt_bufsize > 0) {
                     comment =
-                        (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
+                        (char *)malloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
                     if (comment) {
                         cmt_bufsize = H5Oget_comment(obj_id, comment, (size_t)cmt_bufsize);
                         if (cmt_bufsize > 0) {
@@ -2220,7 +2215,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos,
                                                    (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
                         } /* end if */
-                        HDfree(comment);
+                        free(comment);
                     }
                 }
             }
@@ -2271,13 +2266,13 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
     h5tools_context_t  ctx;    /* print context  */
     h5tool_format_t   *info = &ls_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
     /* init linkinfo struct */
-    HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
+    memset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
     /* if verbose, make H5tools_get_symlink_info() display more */
     if (verbose_g)
@@ -2434,7 +2429,7 @@ done:
     h5tools_str_close(&buffer);
 
     if (buf)
-        HDfree(buf);
+        free(buf);
     return 0;
 } /* end list_lnk() */
 
@@ -2457,8 +2452,8 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t  *info = &ls_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
@@ -2535,7 +2530,7 @@ get_width(void)
     /* Try to get it from the COLUMNS environment variable first since it's
      * value is sometimes wrong. */
     if ((s = HDgetenv("COLUMNS")) && *s && isdigit((int)*s))
-        width = (int)HDstrtol(s, NULL, 0);
+        width = (int)strtol(s, NULL, 0);
 
 #if defined(H5_HAVE_STRUCT_VIDEOCONFIG) && defined(H5_HAVE__GETVIDEOCONFIG)
     {
@@ -2630,7 +2625,7 @@ leave(int ret)
 {
     h5tools_close();
 
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -2689,8 +2684,8 @@ main(int argc, char *argv[])
     h5tools_init();
 
     /* Initialize fapl info structs */
-    HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
-    HDmemset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
+    memset(&vol_info, 0, sizeof(h5tools_vol_info_t));
+    memset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* Build object display table */
     DISPATCH(H5O_TYPE_GROUP, "Group", NULL, NULL);
@@ -2754,7 +2749,7 @@ main(int argc, char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--vol-value=", (size_t)12)) {
             vol_info.type    = VOL_BY_VALUE;
-            vol_info.u.value = (H5VL_class_value_t)HDatoi(argv[argno] + 12);
+            vol_info.u.value = (H5VL_class_value_t)atoi(argv[argno] + 12);
             custom_vol_fapl  = TRUE;
         }
         else if (!HDstrncmp(argv[argno], "--vol-name=", (size_t)11)) {
@@ -2772,7 +2767,7 @@ main(int argc, char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--vfd-value=", (size_t)12)) {
             vfd_info.type    = VFD_BY_VALUE;
-            vfd_info.u.value = (H5FD_class_value_t)HDatoi(argv[argno] + 12);
+            vfd_info.u.value = (H5FD_class_value_t)atoi(argv[argno] + 12);
             custom_vfd_fapl  = TRUE;
         }
         else if (!HDstrncmp(argv[argno], "--vfd-name=", (size_t)11)) {
@@ -2784,7 +2779,7 @@ main(int argc, char *argv[])
             vfd_info.info = (const void *)(argv[argno] + 11);
         }
         else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
-            width_g = (int)HDstrtol(argv[argno] + 8, &rest, 0);
+            width_g = (int)strtol(argv[argno] + 8, &rest, 0);
 
             if (0 == width_g)
                 no_line_wrap_g = TRUE;
@@ -2801,7 +2796,7 @@ main(int argc, char *argv[])
             else {
                 s = argv[++argno];
             }
-            width_g = (int)HDstrtol(s, &rest, 0);
+            width_g = (int)strtol(s, &rest, 0);
             if (width_g <= 0 || *rest) {
                 usage();
                 leave(EXIT_FAILURE);
@@ -2828,7 +2823,7 @@ main(int argc, char *argv[])
             else {
                 s = argv[++argno];
             }
-            width_g = (int)HDstrtol(s, &rest, 0);
+            width_g = (int)strtol(s, &rest, 0);
 
             if (0 == width_g) {
                 no_line_wrap_g = TRUE;
@@ -3049,7 +3044,7 @@ main(int argc, char *argv[])
 
         if (file_id < 0) {
             fprintf(rawerrorstream, "%s: unable to open file\n", argv[argno - 1]);
-            HDfree(fname);
+            free(fname);
             err_exit = 1;
             continue;
         } /* end if */
@@ -3100,8 +3095,8 @@ main(int argc, char *argv[])
                 h5tools_context_t ctx;          /* print context  */
                 h5tool_format_t  *info = &ls_dataformat;
 
-                HDmemset(&ctx, 0, sizeof(ctx));
-                HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+                memset(&ctx, 0, sizeof(ctx));
+                memset(&buffer, 0, sizeof(h5tools_str_t));
 
                 h5tools_str_reset(&buffer);
                 print_obj_name(&buffer, &iter, oname, "**NOT FOUND**");
@@ -3126,17 +3121,17 @@ main(int argc, char *argv[])
             list_lnk(oname, &li, &iter);
         }
         H5Fclose(file_id);
-        HDfree(fname);
+        free(fname);
         if (x)
-            HDfree(oname);
+            free(oname);
 
         for (u = 0; u < symlink_list.nused; u++) {
             if (symlink_list.objs[u].type == H5L_TYPE_EXTERNAL)
-                HDfree(symlink_list.objs[u].file);
+                free(symlink_list.objs[u].file);
 
-            HDfree(symlink_list.objs[u].path);
+            free(symlink_list.objs[u].path);
         }
-        HDfree(symlink_list.objs);
+        free(symlink_list.objs);
 
         /* if no-dangling-links option specified and dangling link found */
         if (no_dangling_link_g && iter.symlink_list->dangle_link)

@@ -157,7 +157,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Create a dataspace for the record to add */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -313,7 +313,7 @@ usage(void)
     printf("Defaults to verbose (no '-q' given) and flushing every 1000 records\n");
     printf("('-f 1000')\n");
     printf("\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 int
@@ -335,7 +335,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* # of records to write between flushing file */
                     case 'f':
-                        flush_count = HDatol(argv[u + 1]);
+                        flush_count = atol(argv[u + 1]);
                         if (flush_count < 0)
                             usage();
                         u += 2;
@@ -354,7 +354,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to append */
-                nrecords = HDatol(argv[u]);
+                nrecords = atol(argv[u]);
                 if (nrecords <= 0)
                     usage();
 
@@ -389,7 +389,7 @@ main(int argc, char *argv[])
     /* Open file skeleton */
     if ((fid = open_skeleton(FILENAME, verbose)) < 0) {
         fprintf(stderr, "Error opening skeleton file!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -402,7 +402,7 @@ main(int argc, char *argv[])
     /* Append records to datasets */
     if (add_records(fid, verbose, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
         fprintf(stderr, "Error appending records to datasets!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -412,7 +412,7 @@ main(int argc, char *argv[])
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
         fprintf(stderr, "Error releasing symbols!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -422,7 +422,7 @@ main(int argc, char *argv[])
     /* Close objects opened */
     if (H5Fclose(fid) < 0) {
         fprintf(stderr, "Error closing file!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

@@ -307,7 +307,7 @@ test_create_hard_link_long_name(void)
         name_len = 99;
 
     /* Construct very long file name */
-    if ((objname = (char *)HDmalloc((size_t)(name_len + 1))) == NULL)
+    if ((objname = (char *)malloc((size_t)(name_len + 1))) == NULL)
         TEST_ERROR;
 
     for (u = 0; u < name_len; u++)
@@ -342,7 +342,7 @@ test_create_hard_link_long_name(void)
 
     /* Release memory */
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     PASSED();
 
@@ -358,7 +358,7 @@ error:
     H5E_END_TRY;
 
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     return 1;
 }
@@ -1493,7 +1493,7 @@ test_create_soft_link_long_name(void)
         name_len = 99;
 
     /* Construct very long file name */
-    if ((objname = (char *)HDmalloc((size_t)(name_len + 1))) == NULL)
+    if ((objname = (char *)malloc((size_t)(name_len + 1))) == NULL)
         TEST_ERROR;
 
     for (u = 0; u < name_len; u++)
@@ -1528,7 +1528,7 @@ test_create_soft_link_long_name(void)
 
     /* Release memory */
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     PASSED();
 
@@ -1544,7 +1544,7 @@ error:
     H5E_END_TRY;
 
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     return 1;
 }
@@ -11564,7 +11564,7 @@ test_get_link_val(void)
 
             TESTING_2("H5Lget_val on soft link");
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
 
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_VAL_TEST_SUBGROUP1_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -11642,7 +11642,7 @@ test_get_link_val(void)
 
             TESTING_2("H5Lget_val on external link");
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
 
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -11849,7 +11849,7 @@ test_get_link_val(void)
             }
 
             /* Retrieve the info and value of each link in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -11865,7 +11865,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -11880,7 +11880,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -11896,7 +11896,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -11911,7 +11911,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -11927,7 +11927,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 2, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12043,7 +12043,7 @@ test_get_link_val(void)
             }
 
             /* Retrieve the info and value of each link in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12059,7 +12059,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12074,7 +12074,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12090,7 +12090,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 1, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12105,7 +12105,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12121,7 +12121,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_crt_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 0, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12231,7 +12231,7 @@ test_get_link_val(void)
             }
 
             /* Retrieve the info and value of each link in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12247,7 +12247,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12262,7 +12262,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12278,7 +12278,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 1, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12293,7 +12293,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12309,7 +12309,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 2, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12419,7 +12419,7 @@ test_get_link_val(void)
             }
 
             /* Retrieve the info and value of each link in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12435,7 +12435,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12450,7 +12450,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12466,7 +12466,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12481,7 +12481,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12497,7 +12497,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12625,7 +12625,7 @@ test_get_link_val(void)
             }
 
             /* Retrieve the info and value of each link in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12641,7 +12641,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12670,7 +12670,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12686,7 +12686,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12715,7 +12715,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12731,7 +12731,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 2, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12875,7 +12875,7 @@ test_get_link_val(void)
             }
 
             /* Retrieve the info and value of each link in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12891,7 +12891,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12920,7 +12920,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12936,7 +12936,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 1, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12965,7 +12965,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -12981,7 +12981,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 0, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13119,7 +13119,7 @@ test_get_link_val(void)
             }
 
             /* Retrieve the info and value of each link in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13135,7 +13135,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13164,7 +13164,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13180,7 +13180,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 1, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13209,7 +13209,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13225,7 +13225,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 2, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13363,7 +13363,7 @@ test_get_link_val(void)
             }
 
             /* Retrieve the info and value of each link in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13379,7 +13379,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13408,7 +13408,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13424,7 +13424,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13453,7 +13453,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13469,7 +13469,7 @@ test_get_link_val(void)
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_decreasing);
             }
 
-            HDmemset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
+            memset(link_val_buf, 0, GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE);
             if (H5Lget_val_by_idx(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, link_val_buf,
                                   GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -13691,7 +13691,7 @@ test_get_link_val_invalid_params(void)
     }
 
     link_val_buf_size = 100;
-    if (NULL == (link_val_buf = (char *)HDmalloc(link_val_buf_size))) {
+    if (NULL == (link_val_buf = (char *)malloc(link_val_buf_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for storing link value\n");
         goto error;
@@ -13705,7 +13705,7 @@ test_get_link_val_invalid_params(void)
         {
             TESTING_2("H5Lget_val with an invalid location ID");
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
 
             H5E_BEGIN_TRY
             {
@@ -13781,7 +13781,7 @@ test_get_link_val_invalid_params(void)
         {
             TESTING_2("H5Lget_val_by_idx with an invalid location ID");
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
 
             H5E_BEGIN_TRY
             {
@@ -13928,7 +13928,7 @@ test_get_link_val_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (link_val_buf) {
-        HDfree(link_val_buf);
+        free(link_val_buf);
         link_val_buf = NULL;
     }
 
@@ -13949,7 +13949,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (link_val_buf)
-            HDfree(link_val_buf);
+            free(link_val_buf);
         H5Pclose(gcpl_id);
         H5Gclose(group_id);
         H5Gclose(container_group);
@@ -14033,7 +14033,7 @@ test_get_link_info(void)
         {
             TESTING_2("H5Lget_info2 on hard link");
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
 
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP1_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -14104,7 +14104,7 @@ test_get_link_info(void)
         {
             TESTING_2("H5Lget_info2 on soft link");
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
 
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP2_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -14187,7 +14187,7 @@ test_get_link_info(void)
         {
             TESTING_2("H5Lget_info2 on external link");
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
 
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -14380,7 +14380,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14401,7 +14401,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14422,7 +14422,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14543,7 +14543,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14564,7 +14564,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14585,7 +14585,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14700,7 +14700,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14723,7 +14723,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14746,7 +14746,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14863,7 +14863,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14886,7 +14886,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -14909,7 +14909,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15038,7 +15038,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15069,7 +15069,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15100,7 +15100,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15237,7 +15237,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15268,7 +15268,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15299,7 +15299,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15430,7 +15430,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15463,7 +15463,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15496,7 +15496,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15629,7 +15629,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15662,7 +15662,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15695,7 +15695,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15843,7 +15843,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15872,7 +15872,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15901,7 +15901,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_crt_order_increasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16047,7 +16047,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16076,7 +16076,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16105,7 +16105,7 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_crt_order_decreasing);
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16245,7 +16245,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16276,7 +16276,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16307,7 +16307,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_INC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16449,7 +16449,7 @@ test_get_link_info(void)
             }
 
             /* Retrieve info of links in turn */
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16480,7 +16480,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16511,7 +16511,7 @@ test_get_link_info(void)
                 }
             }
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
             if (H5Lget_info_by_idx2(subgroup_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, &link_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16740,7 +16740,7 @@ test_get_link_info_invalid_params(void)
         {
             TESTING_2("H5Lget_info2 with an invalid location ID");
 
-            HDmemset(&link_info, 0, sizeof(link_info));
+            memset(&link_info, 0, sizeof(link_info));
 
             H5E_BEGIN_TRY
             {
@@ -16812,7 +16812,7 @@ test_get_link_info_invalid_params(void)
         }
         PART_END(H5Lget_info_invalid_lapl);
 
-        HDmemset(&link_info, 0, sizeof(link_info));
+        memset(&link_info, 0, sizeof(link_info));
 
         PART_BEGIN(H5Lget_info_by_idx_invalid_loc_id)
         {
@@ -19303,7 +19303,7 @@ test_get_link_name_invalid_params(void)
     }
 
     link_name_buf_size = (size_t)ret;
-    if (NULL == (link_name_buf = (char *)HDmalloc(link_name_buf_size + 1)))
+    if (NULL == (link_name_buf = (char *)malloc(link_name_buf_size + 1)))
         TEST_ERROR;
 
     PASSED();
@@ -19459,7 +19459,7 @@ test_get_link_name_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (link_name_buf) {
-        HDfree(link_name_buf);
+        free(link_name_buf);
         link_name_buf = NULL;
     }
 
@@ -19478,7 +19478,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (link_name_buf)
-            HDfree(link_name_buf);
+            free(link_name_buf);
         H5Gclose(group_id);
         H5Gclose(container_group);
         H5Fclose(file_id);

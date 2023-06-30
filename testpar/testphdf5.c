@@ -79,7 +79,7 @@ pause_proc(void)
                 printf("Proc %d (%*s, %d): to debug, attach %d\n", mpi_rank, mpi_namelen, mpi_name, pid, pid);
             }
             printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
-            HDfflush(stdout);
+            fflush(stdout);
             HDsleep(time_int);
         }
     MPI_Barrier(MPI_COMM_WORLD);
@@ -334,9 +334,9 @@ main(int argc, char **argv)
     H5open();
     h5_show_hostname();
 
-    HDmemset(filenames, 0, sizeof(filenames));
+    memset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
-        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+        if (NULL == (filenames[i] = malloc(PATH_MAX))) {
             printf("couldn't allocate filename array\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
@@ -554,7 +554,7 @@ main(int argc, char **argv)
     }
 
     for (int i = 0; i < NFILENAME; i++) {
-        HDfree(filenames[i]);
+        free(filenames[i]);
         filenames[i] = NULL;
     }
 

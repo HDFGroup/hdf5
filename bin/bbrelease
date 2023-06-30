@@ -35,9 +35,6 @@ Usage: $0 -d <dir> [-h] [--private] [--revision [--branch BRANCHNAME]] <methods>
    -h           print the help page.
    --private    Make a private release with today's date in version information.
    --revision   Make a private release with the code revision number in version information.
-                This allows --branch to be used for the file name.
-   --branch BRANCHNAME  This is to get the correct version of the branch name from the
-                        repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
 
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use

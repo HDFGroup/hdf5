@@ -21,8 +21,6 @@
 # verify an executable indeed contains an exact copy of the content of the
 # libhdf5.settings file.
 #
-# Programmer: Albert Cheng
-#	      Sep 18, 2009
 
 srcdir=@srcdir@
 

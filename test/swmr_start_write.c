@@ -223,7 +223,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Create a dataspace for the record to add */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -340,7 +340,7 @@ usage(void)
     printf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
     printf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
     printf("\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* usage() */
 
 /*
@@ -375,7 +375,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* Compress dataset chunks */
                     case 'c':
-                        comp_level = HDatoi(argv[u + 1]);
+                        comp_level = atoi(argv[u + 1]);
                         if (comp_level < -1 || comp_level > 9)
                             usage();
                         u += 2;
@@ -391,7 +391,7 @@ main(int argc, char *argv[])
 
                     /* # of records to write between flushing file */
                     case 'f':
-                        flush_count = HDatol(argv[u + 1]);
+                        flush_count = atol(argv[u + 1]);
                         if (flush_count < 0)
                             usage();
                         u += 2;
@@ -406,7 +406,7 @@ main(int argc, char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;
-                        temp     = HDatoi(argv[u + 1]);
+                        temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();
                         else
@@ -421,7 +421,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to append */
-                nrecords = HDatol(argv[u]);
+                nrecords = atol(argv[u]);
                 if (nrecords <= 0)
                     usage();
 
@@ -449,9 +449,9 @@ main(int argc, char *argv[])
         char verbose_name[1024];
 
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
-        if (NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
+        if (NULL == (verbose_file = fopen(verbose_name, "w"))) {
             fprintf(stderr, "Can't open verbose output file!\n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
     } /* end if */
 
@@ -470,7 +470,7 @@ main(int argc, char *argv[])
     /* Create the test file */
     if ((fid = create_file(FILENAME, verbose, verbose_file, random_seed)) < 0) {
         fprintf(stderr, "Error creating the file...\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Emit informational message */
@@ -484,13 +484,13 @@ main(int argc, char *argv[])
     /* Create the datasets in the file */
     if (create_datasets(fid, comp_level, verbose, verbose_file, index_type) < 0) {
         fprintf(stderr, "Error creating datasets...\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Enable SWMR writing mode */
     if (H5Fstart_swmr_write(fid) < 0) {
         fprintf(stderr, "Error starting SWMR writing mode...\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -503,7 +503,7 @@ main(int argc, char *argv[])
     /* Append records to datasets */
     if (add_records(fid, verbose, verbose_file, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
         fprintf(stderr, "Error appending records to datasets!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -513,7 +513,7 @@ main(int argc, char *argv[])
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
         fprintf(stderr, "Error releasing symbols!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -523,7 +523,7 @@ main(int argc, char *argv[])
     /* Close objects opened */
     if (H5Fclose(fid) < 0) {
         fprintf(stderr, "Error closing file!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

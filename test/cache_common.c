@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              10/27/05
- *
+/*
  *        This file contains common code for tests of the cache
  *        implemented in H5C.c
  */
@@ -377,9 +375,6 @@ const H5C_class_t *types[NUMBER_OF_ENTRY_TYPES] = {pico_class,    nano_class,   
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/10/04
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -445,9 +440,6 @@ addr_to_type_and_index(haddr_t addr, int32_t *type_ptr, int32_t *index_ptr)
  *              functions funnel into get_initial_load_size proper.
  *
  * Return:    SUCCEED
- *
- * Programmer:    Quincey Koziol
- *              5/18/10
  *
  *-------------------------------------------------------------------------
  */
@@ -554,9 +546,6 @@ notify_get_initial_load_size(void *udata, size_t *image_length)
  *
  * Return:    SUCCEED
  *
- * Programmer:    Quincey Koziol
- *              11/18/16
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -613,8 +602,6 @@ variable_get_final_load_size(const void *image, size_t image_len, void *udata, s
  * Return:    TRUE: checksum is ok
  *        FALSE: checksum is not ok
  *
- * Programmer:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -665,9 +652,6 @@ variable_verify_chksum(const void *image, size_t len, void *udata)
  *        deserialize proper.
  *
  * Return:    void * (pointer to the in core representation of the entry)
- *
- * Programmer:    John Mainzer
- *              9/20/07
  *
  *-------------------------------------------------------------------------
  */
@@ -815,9 +799,6 @@ notify_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
  *
  * Return:    SUCCEED
  *
- * Programmer:    John Mainzer
- *              9/19/07
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -931,9 +912,6 @@ notify_image_len(const void *thing, size_t *image_length)
  *         proper.
  *
  * Return:    SUCCEED if successful, FAIL otherwise.
- *
- * Programmer:    John Mainzer
- *              8/07/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1098,9 +1076,6 @@ notify_pre_serialize(H5F_t *f, void *thing, haddr_t addr, size_t len, haddr_t *n
  *
  * Return:    SUCCEED if successful, FAIL otherwise.
  *
- * Programmer:    John Mainzer
- *              9/19/07
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1130,7 +1105,7 @@ serialize(const H5F_t H5_ATTR_UNUSED *f, void *image_ptr, size_t len, void *thin
     assert(entry->num_flush_ops < MAX_FLUSH_OPS);
 
     /* null out the image to avoid spurious failures */
-    HDmemset(image_ptr, 0, len);
+    memset(image_ptr, 0, len);
 
     if ((type == PICO_ENTRY_TYPE) || (type == VARIABLE_ENTRY_TYPE) || (type == NOTIFY_ENTRY_TYPE)) {
         assert(entry->size >= PICO_ENTRY_SIZE);
@@ -1244,9 +1219,6 @@ notify_serialize(const H5F_t H5_ATTR_UNUSED *f, void *image_ptr, size_t len, voi
  *
  * Return:    SUCCEED
  *
- * Programmer:    Quincey Koziol
- *              4/28/09
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1318,9 +1290,6 @@ notify_notify(H5C_notify_action_t action, void *thing)
  *         proper.
  *
  * Return:    SUCCEED
- *
- * Programmer:    John Mainzer
- *              9/19/07
  *
  *-------------------------------------------------------------------------
  */
@@ -1464,9 +1433,6 @@ notify_free_icr(void *thing)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              9/1/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1522,9 +1488,6 @@ add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, hb
  *        if that count was zero initially, pin the entry.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/10/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1591,9 +1554,6 @@ create_pinned_entry_dependency(H5F_t *file_ptr, int pinning_type, int pinning_id
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/10/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1657,9 +1617,6 @@ dirty_entry(H5F_t *file_ptr, int32_t type, int32_t idx, hbool_t dirty_pin)
  *        Do nothing if pass is false on entry.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              9/1/06
  *
  *-------------------------------------------------------------------------
  */
@@ -1792,9 +1749,6 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
  *
  * Return:    TRUE if the entry is in the cache, and FALSE otherwise.
  *
- * Programmer:    John Mainzer
- *              6/10/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1837,9 +1791,6 @@ entry_in_cache(H5C_t *cache_ptr, int32_t type, int32_t idx)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Dana Robinson
- *              Spring 2016
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1848,70 +1799,69 @@ create_entry_arrays(void)
 
 {
     /* pico entries */
-    if (NULL == (pico_entries = (test_entry_t *)HDcalloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (pico_entries = (test_entry_t *)calloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_pico_entries = (test_entry_t *)HDcalloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_pico_entries = (test_entry_t *)calloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* nano entries */
-    if (NULL == (nano_entries = (test_entry_t *)HDcalloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (nano_entries = (test_entry_t *)calloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_nano_entries = (test_entry_t *)HDcalloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_nano_entries = (test_entry_t *)calloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* micro entries */
-    if (NULL == (micro_entries = (test_entry_t *)HDcalloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (micro_entries = (test_entry_t *)calloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_micro_entries = (test_entry_t *)HDcalloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_micro_entries = (test_entry_t *)calloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* tiny entries */
-    if (NULL == (tiny_entries = (test_entry_t *)HDcalloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (tiny_entries = (test_entry_t *)calloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_tiny_entries = (test_entry_t *)HDcalloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_tiny_entries = (test_entry_t *)calloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* small entries */
-    if (NULL == (small_entries = (test_entry_t *)HDcalloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (small_entries = (test_entry_t *)calloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_small_entries = (test_entry_t *)HDcalloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_small_entries = (test_entry_t *)calloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* medium entries */
-    if (NULL == (medium_entries = (test_entry_t *)HDcalloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (medium_entries = (test_entry_t *)calloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_medium_entries = (test_entry_t *)HDcalloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_medium_entries = (test_entry_t *)calloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* large entries */
-    if (NULL == (large_entries = (test_entry_t *)HDcalloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (large_entries = (test_entry_t *)calloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_large_entries = (test_entry_t *)HDcalloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_large_entries = (test_entry_t *)calloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* huge entries */
-    if (NULL == (huge_entries = (test_entry_t *)HDcalloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (huge_entries = (test_entry_t *)calloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_huge_entries = (test_entry_t *)HDcalloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_huge_entries = (test_entry_t *)calloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* monster entries */
-    if (NULL == (monster_entries = (test_entry_t *)HDcalloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (monster_entries = (test_entry_t *)calloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_monster_entries = (test_entry_t *)HDcalloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_monster_entries = (test_entry_t *)calloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* variable entries */
-    if (NULL == (variable_entries = (test_entry_t *)HDcalloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (variable_entries = (test_entry_t *)calloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL ==
-        (orig_variable_entries = (test_entry_t *)HDcalloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_variable_entries = (test_entry_t *)calloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* notify entries */
-    if (NULL == (notify_entries = (test_entry_t *)HDcalloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (notify_entries = (test_entry_t *)calloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_notify_entries = (test_entry_t *)HDcalloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_notify_entries = (test_entry_t *)calloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     entries[0]  = pico_entries;
@@ -1953,9 +1903,6 @@ error:
  *
  * Return:      void
  *
- * Programmer:    Dana Robinson
- *              Spring 2016
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1964,48 +1911,48 @@ free_entry_arrays(void)
 
 {
     /* pico entries */
-    HDfree(pico_entries);
-    HDfree(orig_pico_entries);
+    free(pico_entries);
+    free(orig_pico_entries);
 
     /* nano entries */
-    HDfree(nano_entries);
-    HDfree(orig_nano_entries);
+    free(nano_entries);
+    free(orig_nano_entries);
 
     /* micro entries */
-    HDfree(micro_entries);
-    HDfree(orig_micro_entries);
+    free(micro_entries);
+    free(orig_micro_entries);
 
     /* tiny entries */
-    HDfree(tiny_entries);
-    HDfree(orig_tiny_entries);
+    free(tiny_entries);
+    free(orig_tiny_entries);
 
     /* small entries */
-    HDfree(small_entries);
-    HDfree(orig_small_entries);
+    free(small_entries);
+    free(orig_small_entries);
 
     /* medium entries */
-    HDfree(medium_entries);
-    HDfree(orig_medium_entries);
+    free(medium_entries);
+    free(orig_medium_entries);
 
     /* large entries */
-    HDfree(large_entries);
-    HDfree(orig_large_entries);
+    free(large_entries);
+    free(orig_large_entries);
 
     /* huge entries */
-    HDfree(huge_entries);
-    HDfree(orig_huge_entries);
+    free(huge_entries);
+    free(orig_huge_entries);
 
     /* monster entries */
-    HDfree(monster_entries);
-    HDfree(orig_monster_entries);
+    free(monster_entries);
+    free(orig_monster_entries);
 
     /* variable entries */
-    HDfree(variable_entries);
-    HDfree(orig_variable_entries);
+    free(variable_entries);
+    free(orig_variable_entries);
 
     /* notify entries */
-    HDfree(notify_entries);
-    HDfree(orig_notify_entries);
+    free(notify_entries);
+    free(orig_notify_entries);
 
 } /* free_entry_arrays() */
 
@@ -2015,9 +1962,6 @@ free_entry_arrays(void)
  * Purpose:    reset the contents of the entries arrays to known values.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/10/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2133,7 +2077,7 @@ reset_entries(void)
             } /* end for */
 
             /* Make copy of entries in base_addr for later */
-            HDmemcpy(orig_base_addr, base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
+            memcpy(orig_base_addr, base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
         } /* end for */
 
         /* Indicate that we've made a copy for later */
@@ -2146,7 +2090,7 @@ reset_entries(void)
             orig_base_addr = orig_entries[i];
 
             /* Make copy of entries in base_addr for later */
-            HDmemcpy(base_addr, orig_base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
+            memcpy(base_addr, orig_base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
         } /* end for */
     }     /* end else */
 
@@ -2164,9 +2108,6 @@ reset_entries(void)
  *              Do nothing if pass is false on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              1/11/08
  *
  *-------------------------------------------------------------------------
  */
@@ -2253,9 +2194,6 @@ resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t new_size, hbool_
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/10/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2304,9 +2242,6 @@ verify_clean(void)
  *        Do nothing if pass is FALSE on entry.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/8/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2620,9 +2555,6 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/10/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2670,9 +2602,6 @@ verify_unprotected(void)
  *
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              7/6/06
  *
  *-------------------------------------------------------------------------
  */
@@ -2728,9 +2657,6 @@ expunge_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
  *             requested.  If requested, dump stats first.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *                6/23/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2789,9 +2715,6 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
  *
  * Return:    void
  *
- * Programmer:    Vailin Choi
- *        Jan 2014
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2824,9 +2747,6 @@ cork_entry_type(H5F_t *file_ptr, int32_t type)
  *
  * Return:    void
  *
- * Programmer:    Vailin Choi
- *        Jan 2014
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2858,9 +2778,6 @@ uncork_entry_type(H5F_t *file_ptr, int32_t type)
  *        Do nothing if pass is false.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/16/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2956,9 +2873,6 @@ insert_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              3/28/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3014,9 +2928,6 @@ mark_entry_dirty(int32_t type, int32_t idx)
  *        already at the desired entry, do nothing.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/21/04
  *
  *-------------------------------------------------------------------------
  */
@@ -3112,9 +3023,6 @@ move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, hbool_t main_addr)
  *        Do nothing if pass is FALSE on entry.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/11/04
  *
  *-------------------------------------------------------------------------
  */
@@ -3212,9 +3120,6 @@ protect_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/1/07
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3278,9 +3183,6 @@ protect_entry_ro(H5F_t *file_ptr, int32_t type, int32_t idx)
  *
  * Return:    void
  *
- * Programmer:    Quincey Koziol
- *              3/17/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3333,9 +3235,6 @@ pin_entry(int32_t type, int32_t idx)
  *        Do nothing if pass is FALSE on entry.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              3/28/06
  *
  *-------------------------------------------------------------------------
  */
@@ -3390,9 +3289,6 @@ unpin_entry(int32_t type, int32_t idx)
  *        Do nothing if pass is FALSE on entry.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/12/04
  *
  *-------------------------------------------------------------------------
  */
@@ -3499,9 +3395,6 @@ unprotect_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags)
  *             pass is false on entry, do nothing.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/12/04
  *
  *-------------------------------------------------------------------------
  */
@@ -3822,9 +3715,6 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              10/21/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3913,9 +3803,6 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
  *        entries.  If pass is false on entry, do nothing.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/12/04
  *
  *-------------------------------------------------------------------------
  */
@@ -4174,9 +4061,6 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              10/21/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4266,9 +4150,6 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/23/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4357,9 +4238,6 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
  *        pass is false on entry, do nothing.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              19/25/04
  *
  *-------------------------------------------------------------------------
  */
@@ -4460,9 +4338,6 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
  *        entries.  If pass is false on entry, do nothing.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/23/04
  *
  *-------------------------------------------------------------------------
  */
@@ -4565,9 +4440,6 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              10/25/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4668,9 +4540,6 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
  *
  * Return:    void
  *
- * Programmer:    Quincey Koziol
- *              3/16/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4744,9 +4613,6 @@ create_flush_dependency(int32_t par_type, int32_t par_idx, int32_t chd_type, int
  *
  * Return:    void
  *
- * Programmer:    Quincey Koziol
- *              3/16/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4797,11 +4663,11 @@ destroy_flush_dependency(int32_t par_type, int32_t par_idx, int32_t chd_type, in
                 break;
         assert(i < chd_entry_ptr->flush_dep_npar);
         if (i < chd_entry_ptr->flush_dep_npar - 1)
-            HDmemmove(&chd_entry_ptr->flush_dep_par_type[i], &chd_entry_ptr->flush_dep_par_type[i + 1],
-                      (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
+            memmove(&chd_entry_ptr->flush_dep_par_type[i], &chd_entry_ptr->flush_dep_par_type[i + 1],
+                    (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
         if (i < chd_entry_ptr->flush_dep_npar - 1)
-            HDmemmove(&chd_entry_ptr->flush_dep_par_idx[i], &chd_entry_ptr->flush_dep_par_idx[i + 1],
-                      (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
+            memmove(&chd_entry_ptr->flush_dep_par_idx[i], &chd_entry_ptr->flush_dep_par_idx[i + 1],
+                    (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
         chd_entry_ptr->flush_dep_npar--;
         par_entry_ptr->flush_dep_nchd--;
         if (par_entry_ptr->flush_dep_nchd == 0) {
@@ -4826,9 +4692,6 @@ destroy_flush_dependency(int32_t par_type, int32_t par_idx, int32_t chd_type, in
  *              increased from 0.
  *
  * Return:      <none>
- *
- * Programmer:  Neil Fortner
- *              12/4/12
  *
  *-------------------------------------------------------------------------
  */
@@ -4867,9 +4730,6 @@ mark_flush_dep_dirty(test_entry_t *entry_ptr)
  *              reduced to 0.
  *
  * Return:      <none>
- *
- * Programmer:  Neil Fortner
- *              12/4/12
  *
  *-------------------------------------------------------------------------
  */
@@ -4921,9 +4781,6 @@ mark_flush_dep_clean(test_entry_t *entry_ptr)
  *        failure_mssg to an appropriate value.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/18/04
  *
  *-------------------------------------------------------------------------
  */
@@ -5036,9 +4893,6 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
  *        failure_mssg to an appropriate value.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/18/04
  *
  *-------------------------------------------------------------------------
  */
@@ -5199,9 +5053,6 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/14/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -5298,9 +5149,6 @@ validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, hbool_t 
  *              from head to tail.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              2/16/15
  *
  *-------------------------------------------------------------------------
  */

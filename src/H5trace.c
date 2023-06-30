@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5trace.c
- *              Aug 21 2006
- *              Quincey Koziol
  *
  * Purpose:     Internal code for tracing API calls
  *
@@ -85,9 +83,6 @@ static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degr
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Monday, September 21, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -112,9 +107,6 @@ H5_trace_args_bool(H5RS_str_t *rs, hbool_t val)
  *		the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Sunday, September 20, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -168,9 +160,6 @@ H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset)
  *		the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Monday, September 21, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -227,9 +216,6 @@ H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Saturday, September 19, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -248,7 +234,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
         asize[i] = -1;
 
     /* Parse the argument types */
-    for (argno = 0; *type; argno++, type += (HDisupper(*type) ? 2 : 1)) {
+    for (argno = 0; *type; argno++, type += (isupper(*type) ? 2 : 1)) {
         /* Count levels of indirection */
         for (ptr = 0; '*' == *type; type++)
             ptr++;
@@ -258,7 +244,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
             char *rest;
 
             if ('a' == type[1]) {
-                asize_idx = (int)HDstrtol(type + 2, &rest, 10);
+                asize_idx = (int)strtol(type + 2, &rest, 10);
                 assert(0 <= asize_idx && asize_idx < (int)NELMTS(asize));
                 assert(']' == *rest);
                 type = rest + 1;
@@ -3922,7 +3908,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     break;
 
                 default:
-                    if (HDisupper(type[0]))
+                    if (isupper(type[0]))
                         H5RS_asprintf_cat(rs, "BADTYPE(%c%c)", type[0], type[1]);
                     else
                         H5RS_asprintf_cat(rs, "BADTYPE(%c)", type[0]);
@@ -3965,9 +3951,6 @@ error:
  *              CAUSE LIBRARY INITIALIZATIONS THAT ARE NOT DESIRED.
  *
  * Return:      Execution time for an API call
- *
- * Programmer:  Robb Matzke
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4087,7 +4070,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         H5RS_acat(rs, ")");
     }
     HDfputs(H5RS_get_str(rs), out);
-    HDfflush(out);
+    fflush(out);
     H5RS_decr(rs);
 
     if (H5_debug_g.ttimes)

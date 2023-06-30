@@ -217,9 +217,6 @@ test_time(void)
  *
  * Return:    none
  *
- * Programmer:    Quincey Koziol
- *              October 19, 2000
- *
  *-------------------------------------------------------------------------
  */
 void

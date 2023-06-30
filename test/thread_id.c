@@ -39,7 +39,7 @@ my_errx(int code, const char *fmt, ...)
     (void)HDvfprintf(stderr, fmt, ap);
     va_end(ap);
     (void)HDfputc('\n', stderr);
-    HDexit(code);
+    exit(code);
 }
 
 #if defined(H5_HAVE_DARWIN)
@@ -73,7 +73,7 @@ pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *at
     if (attr != NULL)
         return EINVAL;
 
-    HDmemset(barrier, 0, sizeof(*barrier));
+    memset(barrier, 0, sizeof(*barrier));
 
     barrier->count = count;
 
@@ -181,7 +181,7 @@ my_err(int code, const char *fmt, ...)
     (void)HDvfprintf(stderr, fmt, ap);
     va_end(ap);
     (void)fprintf(stderr, ": %s\n", HDstrerror(errno_copy));
-    HDexit(code);
+    exit(code);
 }
 
 #define threads_failure(_call, _result)                                                                      \

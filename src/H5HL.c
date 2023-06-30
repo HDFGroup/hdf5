@@ -90,9 +90,6 @@ H5FL_BLK_DEFINE(lheap_chunk);
  *                          returned through the ADDR argument.
  *              Failure:    FAIL.  addr_p will be HADDR_UNDEF.
  *
- * Programmer:  Robb Matzke
- *              Jul 16 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -183,9 +180,6 @@ done:
  *              eliminate the free blocks at the tail of the buffer.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Bill Wendling
- *              Sept. 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -296,9 +290,6 @@ done:
  * Return:      Success:    Non-NULL pointer to the local heap prefix.
  *              Failure:    NULL
  *
- * Programmer:  Bill Wendling
- *              Sept. 17, 2003
- *
  *-------------------------------------------------------------------------
  */
 H5HL_t *
@@ -379,9 +370,6 @@ done:
  * Return:      Success:    Valid pointer
  *              Failure:    NULL
  *
- * Programmer:  Bill Wendling
- *              Sept. 17, 2003
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -408,9 +396,6 @@ done:
  * Purpose:     Unprotect the data retrieved by the H5HL_protect call.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Bill Wendling
- *              Sept. 17, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -458,9 +443,6 @@ done:
  *
  * Return:      NULL
  *
- * Programmer:  Robb Matzke
- *              Jul 17 1997
- *
  *-------------------------------------------------------------------------
  */
 static H5HL_free_t *
@@ -490,9 +472,6 @@ H5HL__remove_free(H5HL_t *heap, H5HL_free_t *fl)
  * Purpose:     Mark heap as dirty
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -534,9 +513,6 @@ done:
  *
  *              Failure:    FAIL
  *                          Offset set to SIZE_MAX
- *
- * Programmer:  Robb Matzke
- *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -719,7 +695,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
 
         /* Clear new section so junk doesn't appear in the file */
         /* (Avoid clearing section which will be overwritten with newly inserted data) */
-        HDmemset(heap->dblk_image + offset + buf_size, 0, (new_dblk_size - (offset + buf_size)));
+        memset(heap->dblk_image + offset + buf_size, 0, (new_dblk_size - (offset + buf_size)));
     }
 
     /* Copy the data into the heap */
@@ -748,9 +724,6 @@ done:
  *              one at the first offset past the removed portion.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Jul 16 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -886,9 +859,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Mar 22 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -950,9 +920,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Nov  7 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1001,9 +968,6 @@ done:
  *              H5HL_t via H5HL_size()
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              June 19 2007
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5WB.c
- *			Jun 26 2007
- *			Quincey Koziol
  *
  * Purpose:		Implements the "wrapped buffer" code for wrapping
  *                      an existing [statically sized] buffer, in order to
@@ -86,9 +84,6 @@ H5FL_BLK_DEFINE_STATIC(extra_buf);
  * Return:	Pointer to buffer wrapper info on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Jun 26 2007
- *
  *-------------------------------------------------------------------------
  */
 H5WB_t *
@@ -137,9 +132,6 @@ done:
  *
  * Return:	Pointer to buffer pointer on success
  *              NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Jun 26 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -204,9 +196,6 @@ done:
  * Return:	Pointer to buffer pointer on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Jun 26 2007
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -227,7 +216,7 @@ H5WB_actual_clear(H5WB_t *wb, size_t need)
         HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear the buffer */
-    HDmemset(ret_value, 0, need);
+    memset(ret_value, 0, need);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -239,9 +228,6 @@ done:
  * Purpose:	"unwrap" a wrapped buffer, releasing all resources used
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Jun 26 2007
  *
  *-------------------------------------------------------------------------
  */

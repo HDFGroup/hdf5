@@ -206,9 +206,6 @@ H5S_term_package(void)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Wednesday, April 8, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -360,9 +357,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -392,9 +386,6 @@ H5S__extent_release(H5S_extent_t *extent)
  * Purpose:     Releases all memory associated with a dataspace.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -433,9 +424,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -466,9 +454,6 @@ done:
  * Return:      Success:    ID of the new dataspace
  *
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Robb Matzke
- *              Friday, January 30, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -509,9 +494,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -545,9 +527,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Monday, February 23, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -580,9 +559,6 @@ done:
  * Purpose:     Copies a dataspace extent
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, June  3, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -656,9 +632,6 @@ done:
  *
  *              Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Thursday, December  4, 1997
- *
  *-------------------------------------------------------------------------
  */
 H5S_t *
@@ -700,9 +673,6 @@ done:
  *
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
  * Note:        This routine participates in the "Inlining C function pointers"
  *              pattern, don't call it directly, use the appropriate macro
  *              defined in H5Sprivate.h.
@@ -732,9 +702,6 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
  *
  * Return:      Success:    Number of data points in the dataset.
  *              Failure:    Negative
- *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -769,9 +736,6 @@ done:
  * Return:      Success:    Maximum number of data points the dataspace
  *                          may have.
  *              Failure:    0
- *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -829,9 +793,6 @@ done:
  * Return:      Success:    The number of dimensions in a dataspace.
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Thursday, December 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -862,9 +823,6 @@ done:
  *                          Zero implies a scalar.
  *
  *              Failure:    Negative
- *
- * Programmer:  Robb Matzke
- *              hursday, December 11, 1997
  *
  * Note:        This routine participates in the "Inlining C function pointers"
  *              pattern, don't call it directly, use the appropriate macro
@@ -910,9 +868,6 @@ done:
  *
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Thursday, December 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -942,9 +897,6 @@ done:
  *
  * Return:      Success:    Number of dimensions.  Zero implies scalar.
  *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -998,9 +950,6 @@ done:
  * Return:      Success:    Number of dimensions.  Zero implies scalar.
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Thursday, December 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1028,9 +977,6 @@ done:
  *              header.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1060,9 +1006,6 @@ done:
  * Purpose:     Updates a dataspace by adding a message to an object header.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, December 31, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1094,9 +1037,6 @@ done:
  * Return:      Success:    Pointer to a new dataspace.
  *
  *              Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1268,9 +1208,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Wednesday, July  8, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1322,7 +1259,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims, const hs
     /* Selection related cleanup */
 
     /* Set offset to zeros */
-    HDmemset(space->select.offset, 0, sizeof(hsize_t) * space->extent.rank);
+    memset(space->select.offset, 0, sizeof(hsize_t) * space->extent.rank);
     space->select.offset_changed = FALSE;
 
     /* If the selection is 'all', update the number of elements selected */
@@ -1349,9 +1286,6 @@ done:
  * Return:      Success:    The ID for the new simple dataspace object.
  *
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, January  27, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1410,9 +1344,6 @@ done:
  * Return:      Success:    A pointer to a dataspace object
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April  3, 2003
- *
  *-------------------------------------------------------------------------
  */
 H5S_t *
@@ -1445,9 +1376,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Raymond Lu
- *              July 14, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1483,9 +1411,6 @@ done:
  *              in a buffer.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Raymond Lu
- *              July 14, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1561,9 +1486,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Raymond Lu
- *              July 14, 2004
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1598,9 +1520,6 @@ done:
  * Return:      Success:    Pointer to a dataspace buffer
  *
  *              Failure:	NULL
- *
- * Programmer:  Raymond Lu
- *              July 14, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1681,9 +1600,6 @@ done:
  *
  *              Failure:    N5S_NO_CLASS
  *
- * Programmer:  Quincey Koziol
- *              Thursday, September 28, 2000
- *
  * Note:        This routine participates in the "Inlining C function pointers"
  *              pattern, don't call it directly, use the appropriate macro
  *              defined in H5Sprivate.h.
@@ -1712,9 +1628,6 @@ H5S_get_simple_extent_type(const H5S_t *space)
  * Return:      Success:    The class of the dataspace object
  *
  *              Failure:    N5S_NO_CLASS
- *
- * Programmer:  Quincey Koziol
- *              Thursday, July 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1781,9 +1694,6 @@ done:
  *
  * Return:      TRUE/FALSE/FAIL
  *
- * Programmer:  Pedro Vicente
- *              March 13, 2002
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1829,10 +1739,6 @@ done:
  * Return: TRUE if dataspace has extent set
  *         FALSE if dataspace's extent is uninitialized
  *
- * Programmer: James Laird
- *
- * Date: July 23, 2004
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE hbool_t
@@ -1859,9 +1765,6 @@ H5S_has_extent(const H5S_t *ds)
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
- *
- * Programmer:  Pedro Vicente
- *              March 13, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1906,9 +1809,6 @@ done:
  * Return:      Success:    TRUE if equal, FALSE if unequal
  *
  *              Failure:    FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 24, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2002,9 +1902,6 @@ done:
  * Return:      Success:    Number of data points in the dataset extent.
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, November 30, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE hsize_t
@@ -2025,8 +1922,6 @@ H5S_extent_nelem(const H5S_extent_t *ext)
  * Purpose:     Set the version to encode a dataspace with.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */

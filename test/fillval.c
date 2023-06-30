@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, October  1, 1998
- *
  * Purpose:    Tests dataset fill values.
  */
 #include "h5test.h"
@@ -59,9 +56,6 @@ typedef struct {
  *
  *              Failure:        -1
  *
- * Programmer:  Raymond Lu
- *              Monday, Jan 26, 2001
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -99,9 +93,6 @@ error:
  * Return:      Success:        datatype ID
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -153,9 +144,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -281,9 +269,6 @@ error:
  * Return:    Success:    0
  *        Failure:    number of errors
  *
- * Programmer:    Quincey Koziol
- *              Thursday, May 31, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -323,7 +308,7 @@ test_getset_vl(hid_t fapl)
         TEST_ERROR;
 
     /* Release the fill value retrieved */
-    HDfree(f2);
+    free(f2);
 
     /* Open file. */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -365,7 +350,7 @@ test_getset_vl(hid_t fapl)
         TEST_ERROR;
 
     /* Release the fill value retrieved */
-    HDfree(f2);
+    free(f2);
 
     /* Close IDs */
     if (H5Dclose(datasetid) < 0)
@@ -396,9 +381,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -855,9 +837,6 @@ error:
  *
  *        Failure:    1
  *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -970,7 +949,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     if (datatype == H5T_INTEGER) {
         /*check for overflow*/
         assert((nelmts * sizeof(int)) == (hsize_t)((size_t)(nelmts * sizeof(int))));
-        buf = (int *)HDmalloc((size_t)(nelmts * sizeof(int)));
+        buf = (int *)malloc((size_t)(nelmts * sizeof(int)));
 
         if (H5Dread(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
             goto error;
@@ -996,7 +975,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     else if (datatype == H5T_COMPOUND) {
         /*check for overflow*/
         assert((nelmts * sizeof(comp_datatype)) == (hsize_t)((size_t)(nelmts * sizeof(comp_datatype))));
-        buf_c = (comp_datatype *)HDmalloc((size_t)nelmts * sizeof(comp_datatype));
+        buf_c = (comp_datatype *)malloc((size_t)nelmts * sizeof(comp_datatype));
 
         if (H5Dread(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c) < 0)
             goto error;
@@ -1032,7 +1011,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     }
     /* case for compound datatype */
     else if (datatype == H5T_COMPOUND) {
-        HDmemset(buf_c, 0, ((size_t)nelmts * sizeof(comp_datatype)));
+        memset(buf_c, 0, ((size_t)nelmts * sizeof(comp_datatype)));
         for (u = 0; u < nelmts; u++) {
             buf_c[u].a = 1111.11F;
             buf_c[u].x = 2222;
@@ -1054,7 +1033,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
         printf("    Got %d\n", allocation);
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     H5Sclose(mspace);
 
@@ -1153,7 +1132,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
         } /* end for datatype==H5T_COMPOUND */
     }
     if (datatype == H5T_COMPOUND) {
-        HDfree(buf_c);
+        free(buf_c);
         buf_c = NULL;
     } /* end if */
 
@@ -1190,9 +1169,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Robb Matzke
- *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1285,7 +1261,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
          * as compound type */
         if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
             goto error;
-        HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
+        memset(&fill_ctype, 0, sizeof(fill_ctype));
         fill_ctype.y = 4444.4444;
         if (H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0)
             goto error;
@@ -1351,7 +1327,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
      * as compound type */
     if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
         goto error;
-    HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
+    memset(&fill_ctype, 0, sizeof(fill_ctype));
     fill_ctype.y = 4444.4444;
     if (H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0)
         goto error;
@@ -1388,9 +1364,6 @@ error:
  * Return:    Success:    0
  *        Failure:    < 0
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1414,9 +1387,6 @@ test_extend_init_integer(void *_buf, size_t nelmts, const void *_val)
  *
  * Return:    Success:    0
  *        Failure:    < 0
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1452,9 +1422,6 @@ error:
  * Return:    Success:    0
  *        Failure:    < 0
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1470,9 +1437,6 @@ test_extend_release_integer(void H5_ATTR_UNUSED *_elmt)
  *
  * Return:    Success:    0
  *        Failure:    < 0
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1504,9 +1468,6 @@ test_extend_init_cmpd_vl(void *_buf, size_t nelmts, const void *_val)
  *
  * Return:    Success:    0
  *        Failure:    < 0
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1545,9 +1506,6 @@ error:
  * Return:    Success:    0
  *        Failure:    < 0
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1556,8 +1514,8 @@ test_extend_release_cmpd_vl(void *_elmt)
     comp_vl_datatype *elmt = (comp_vl_datatype *)_elmt; /* Element to free */
 
     /* Free memory for string fields */
-    HDfree(elmt->a);
-    HDfree(elmt->b);
+    free(elmt->a);
+    free(elmt->b);
 
     return 0;
 } /* end test_extend_release_integer() */
@@ -1569,9 +1527,6 @@ test_extend_release_cmpd_vl(void *_elmt)
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1677,7 +1632,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1694,7 +1649,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     assert((nelmts * val_size) == (hsize_t)((size_t)(nelmts * val_size)));
 
     /* Allocate & initialize buffer */
-    buf = HDmalloc((size_t)(nelmts * val_size));
+    buf = malloc((size_t)(nelmts * val_size));
     init_rtn(buf, nelmts, init_val);
 
     /* Create dataspace describing memory buffer */
@@ -1741,7 +1696,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1789,7 +1744,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1835,7 +1790,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1883,7 +1838,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1938,7 +1893,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
         TEST_ERROR;
 
     /* Clear the read buffer */
-    HDmemset(val_rd, 0, val_size);
+    memset(val_rd, 0, val_size);
 
     /* Set location for another element initialized by H5Dset_extent() */
     hs_offset[3] -= 1;
@@ -1960,7 +1915,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
         TEST_ERROR;
 
     /* Clear the read buffer */
-    HDmemset(val_rd, 0, val_size);
+    memset(val_rd, 0, val_size);
 
     /* Read some data and make sure it's the right value */
     for (i = 0; i < 1000; i++) {
@@ -1991,7 +1946,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -2000,9 +1955,9 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     for (i = 0; i < nelmts; i++)
         release_rtn((void *)((char *)buf + (val_size * i)));
 
-    HDfree(init_val_c.a);
-    HDfree(init_val_c.b);
-    HDfree(buf);
+    free(init_val_c.a);
+    free(init_val_c.b);
+    free(buf);
 
     /* Cleanup IDs */
     if (H5Pclose(dcpl) < 0)
@@ -2015,9 +1970,9 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     return 0;
 
 error:
-    HDfree(init_val_c.a);
-    HDfree(init_val_c.b);
-    HDfree(buf);
+    free(init_val_c.a);
+    free(init_val_c.b);
+    free(buf);
 
     H5E_BEGIN_TRY
     {
@@ -2039,9 +1994,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Monday, October  5, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2159,16 +2111,16 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if (H5Fclose(file) < 0)
         TEST_ERROR;
 
-    HDfree(fillval_c.a);
-    HDfree(fillval_c.b);
+    free(fillval_c.a);
+    free(fillval_c.b);
 
     PASSED();
 
     return 0;
 
 error:
-    HDfree(fillval_c.a);
-    HDfree(fillval_c.b);
+    free(fillval_c.a);
+    free(fillval_c.b);
 
     H5E_BEGIN_TRY
     {
@@ -2180,8 +2132,8 @@ error:
     return 1;
 
 skip:
-    HDfree(fillval_c.a);
-    HDfree(fillval_c.b);
+    free(fillval_c.a);
+    free(fillval_c.b);
 
     H5E_BEGIN_TRY
     {
@@ -2201,9 +2153,6 @@ skip:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Feb 27, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2355,9 +2304,6 @@ error:
  *
  *        Failure:    1
  *
- * Programmer:    Joel Plutchak
- *              April 15, 2013
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2479,9 +2425,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Joel Plutchak
- *              April 15, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2625,9 +2568,6 @@ error:
  *
  *        Failure:
  *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2649,7 +2589,7 @@ main(int argc, char *argv[])
                 test_compact = 1;
             else {
                 fprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         } /* end for */
     }     /* end if */
@@ -2725,9 +2665,9 @@ main(int argc, char *argv[])
     if (h5_cleanup(FILENAME, fapl))
         HDremove(FILE_NAME_RAW);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("***** FILL VALUE TESTS FAILED *****");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }

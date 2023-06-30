@@ -94,7 +94,7 @@
         fprintf(stdout, " # %s(): ", __func__);                                                              \
         fprintf(stdout, __VA_ARGS__);                                                                        \
         fprintf(stdout, "\n");                                                                               \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 static const char *
 H5R__print_token(const H5O_token_t token)
@@ -575,7 +575,7 @@ H5R__equal(const H5R_ref_priv_t *ref1, const H5R_ref_priv_t *ref2)
     /* Compare object addresses */
     if (ref1->token_size != ref2->token_size)
         HGOTO_DONE(FALSE);
-    if (0 != HDmemcmp(&ref1->info.obj.token, &ref2->info.obj.token, ref1->token_size))
+    if (0 != memcmp(&ref1->info.obj.token, &ref2->info.obj.token, ref1->token_size))
         HGOTO_DONE(FALSE);
 
     /* Compare filenames */
@@ -1104,7 +1104,7 @@ H5R__decode_obj_token(const unsigned char *buf, size_t *nbytes, H5O_token_t *obj
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Invalid token size (%u)", *token_size)
 
     /* Make sure that token is initialized */
-    HDmemset(obj_token, 0, sizeof(H5O_token_t));
+    memset(obj_token, 0, sizeof(H5O_token_t));
 
     /* Decode token */
     H5MM_memcpy(obj_token, p, *token_size);

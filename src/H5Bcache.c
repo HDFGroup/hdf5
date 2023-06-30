@@ -138,7 +138,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     /* Allocate the B-tree node in memory */
     if (NULL == (bt = H5FL_MALLOC(H5B_t)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate B-tree struct")
-    HDmemset(&bt->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&bt->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Set & increment the ref-counted "shared" B-tree information for the node */
     bt->rc_shared = udata->rc_shared;
@@ -158,7 +158,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     /* Magic number */
     if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    if (HDmemcmp(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -325,7 +325,7 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     assert((size_t)(image - (uint8_t *)_image) <= len);
 
     /* Clear rest of node */
-    HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+    memset(image, 0, len - (size_t)(image - (uint8_t *)_image));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

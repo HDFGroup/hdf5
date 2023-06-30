@@ -23,10 +23,6 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -75,10 +71,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -121,10 +113,6 @@ done:
  * Purpose: Call H5IMmake_image_24bit
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
  *
  * Comments:
  *
@@ -181,10 +169,6 @@ done:
  * Purpose: Call H5IMget_image_info
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
  *
  * Comments:
  *
@@ -256,10 +240,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -298,10 +278,6 @@ h5imis_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
  * Purpose: Call H5IMmake_palette
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
  *
  * Comments:
  *
@@ -345,10 +321,6 @@ done:
  * Purpose: Call H5IMlink_palette
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
  *
  * Comments:
  *
@@ -403,10 +375,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -460,10 +428,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -512,10 +476,6 @@ done:
  * Purpose: Call H5IMget_palette_info
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 06 2004
  *
  * Comments:
  *
@@ -569,10 +529,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -618,10 +574,6 @@ done:
  * Purpose: Call H5IMis_palette
  *
  * Return: true, false, fail
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
  *
  * Comments:
  *

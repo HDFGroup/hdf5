@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
- *
+/*
  * Purpose:    Tests various aspects of indexed raw data storage.
  */
 
@@ -54,9 +52,6 @@ hsize_t zero[H5O_LAYOUT_NDIMS];
  *
  *        Failure:    zero
  *
- * Programmer:    Robb Matzke
- *              Wednesday, July 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -90,9 +85,6 @@ is_sparse(void)
  * Purpose:    Prints the values in an array
  *
  * Return:    void
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -131,9 +123,6 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
  * Return:    Success:    ID of dataset
  *
  *        Failure:    -1
- *
- * Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -186,9 +175,6 @@ error:
  *
  *        Failure:    FAIL
  *
- * Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -232,9 +218,6 @@ test_create(hid_t f, const char *prefix)
  *
  *        Failure:    FAIL
  *
- * Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -273,9 +256,9 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
 
     HDsnprintf(s, sizeof(s), "istore extend: %s", dims);
     TESTING(s);
-    buf   = (uint8_t *)HDmalloc(nx * ny * nz);
-    check = (uint8_t *)HDmalloc(nx * ny * nz);
-    whole = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz);
+    buf   = (uint8_t *)malloc(nx * ny * nz);
+    check = (uint8_t *)malloc(nx * ny * nz);
+    whole = (uint8_t *)calloc((size_t)1, nx * ny * nz);
 
     whole_size[0] = nx;
     whole_size[1] = ny;
@@ -320,7 +303,7 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         /* Fill the source array */
         if (0 == nelmts)
             continue;
-        HDmemset(buf, (signed)(128 + ctr), (size_t)nelmts);
+        memset(buf, (signed)(128 + ctr), (size_t)nelmts);
 
         /* Create dataspace for selection in memory */
         if ((mspace = H5Screate_simple(1, &nelmts, NULL)) < 0)
@@ -338,13 +321,13 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         }
 
         /* Read from disk */
-        HDmemset(check, 0xff, (size_t)nelmts);
+        memset(check, 0xff, (size_t)nelmts);
         if (H5Dread(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, check) < 0) {
             H5_FAILED();
             fprintf(stderr, "    Read failed: ctr=%lu\n", (unsigned long)ctr);
             goto error;
         }
-        if (HDmemcmp(buf, check, (size_t)nelmts) != 0) {
+        if (memcmp(buf, check, (size_t)nelmts) != 0) {
             H5_FAILED();
             fprintf(stderr, "    Read check failed: ctr=%lu\n", (unsigned long)ctr);
             fprintf(stderr, "    Wrote:\n");
@@ -368,7 +351,7 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
     }
 
     /* Now read the entire array back out and check it */
-    HDmemset(buf, 0xff, nx * ny * nz);
+    memset(buf, 0xff, nx * ny * nz);
     if (H5Dread(dataset, TEST_DATATYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
         H5_FAILED();
         fprintf(stderr, "    Read failed for whole array.\n");
@@ -405,17 +388,17 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         TEST_ERROR;
 
     /* Free memory used */
-    HDfree(buf);
-    HDfree(check);
-    HDfree(whole);
+    free(buf);
+    free(check);
+    free(whole);
 
     PASSED();
     return SUCCEED;
 
 error:
-    HDfree(buf);
-    HDfree(check);
-    HDfree(whole);
+    free(buf);
+    free(check);
+    free(whole);
     return FAIL;
 }
 
@@ -428,9 +411,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Wednesday, October 22, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -473,8 +453,8 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
         SKIPPED();
         return SUCCEED;
     }
-    buf = (uint8_t *)HDmalloc(nx * ny * nz);
-    HDmemset(buf, 128, nx * ny * nz);
+    buf = (uint8_t *)malloc(nx * ny * nz);
+    memset(buf, 128, nx * ny * nz);
 
     /* Set dimensions of dataset */
     for (u = 0; u < (size_t)ndims; u++)
@@ -542,12 +522,12 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
+    free(buf);
     PASSED();
     return SUCCEED;
 
 error:
-    HDfree(buf);
+    free(buf);
     return FAIL;
 }
 
@@ -557,9 +537,6 @@ error:
  * Purpose:     Tests indexed storage
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -626,7 +603,7 @@ main(int argc, char *argv[])
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) {
         printf("Cannot create file %s; test aborted\n", filename);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Initialize chunk dimensions */
@@ -693,12 +670,12 @@ main(int argc, char *argv[])
 
     if (nerrors) {
         printf("***** %d I-STORE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     printf("All i-store tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

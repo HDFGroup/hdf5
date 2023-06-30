@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Wednesday, July 20, 2011
- *
  * Purpose:	Query routines for global heaps.
  *
  */
@@ -66,9 +63,6 @@
  *
  * Return:	Address of heap on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, July 20, 2011
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -89,9 +83,6 @@ H5HG_get_addr(const H5HG_heap_t *heap)
  *
  * Return:	Size of heap on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, July 20, 2011
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -111,9 +102,6 @@ H5HG_get_size(const H5HG_heap_t *heap)
  * Purpose:	Query the free size of a global heap object.
  *
  * Return:	Free size of heap on success/abort on failure (shouldn't fail)
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */

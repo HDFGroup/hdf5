@@ -120,9 +120,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -153,9 +150,6 @@ H5O__stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -194,9 +188,6 @@ done:
  *
  *              Failure:        zero
  *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -219,9 +210,6 @@ H5O__stab_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, March 30, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -242,9 +230,6 @@ H5O__stab_free(void *mesg)
  * Purpose:     Free file space referenced by message
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, March 20, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -275,9 +260,6 @@ done:
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
- *
- * Programmer:  Peter Cao
- *              September 10, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -339,9 +321,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              September 28, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -387,9 +366,6 @@ done:
  * Purpose:     Prints debugging info for a symbol table message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */

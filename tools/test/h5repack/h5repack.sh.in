@@ -12,10 +12,6 @@
 #
 # Tests for the h5repack tool
 #
-# Modification:
-#  Pedro Vicente Nunes, 11/15/2006
-#  Added $FILEN variables for file names
-#
 
 srcdir=@srcdir@
 

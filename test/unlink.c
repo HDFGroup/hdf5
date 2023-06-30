@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, September 25, 1998
- *
  * Purpose:    Test unlinking operations.
  */
 
@@ -74,9 +71,6 @@ static const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -149,9 +143,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -257,9 +248,6 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -301,9 +289,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -365,9 +350,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Thursday, April 25, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -467,9 +449,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Thursday, April 25, 2002
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -526,9 +505,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, March 22, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -649,7 +625,7 @@ test_filespace(hid_t fapl)
         TEST_ERROR;
 
     /* Create buffer for writing dataset */
-    if (NULL == (data = (int *)HDmalloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2)))
+    if (NULL == (data = (int *)malloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2)))
         TEST_ERROR;
 
     /* Create single dataset (with contiguous storage & late allocation), remove it & verify file size */
@@ -1425,7 +1401,7 @@ test_filespace(hid_t fapl)
     /* Cleanup common objects */
 
     /* Release dataset buffer */
-    HDfree(data);
+    free(data);
 
     /* Close property lists */
     if (H5Pclose(fapl_nocache) < 0)
@@ -1452,7 +1428,7 @@ test_filespace(hid_t fapl)
 error:
     /* Release dataset buffer */
     if (data)
-        HDfree(data);
+        free(data);
 
     return 1;
 } /* end test_filespace() */
@@ -1464,9 +1440,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Friday, April 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1528,9 +1501,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1607,9 +1577,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1719,9 +1686,6 @@ delete_node(hid_t pid, hid_t id)
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1736,7 +1700,7 @@ test_unlink_rightleaf(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -1770,7 +1734,7 @@ test_unlink_rightleaf(hid_t fid)
         TEST_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -1786,7 +1750,7 @@ error:
                 }
                 H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
@@ -1806,9 +1770,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1823,7 +1784,7 @@ test_unlink_rightnode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -1860,7 +1821,7 @@ test_unlink_rightnode(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -1876,7 +1837,7 @@ error:
                 }
                 H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
@@ -1896,9 +1857,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1913,7 +1871,7 @@ test_unlink_middlenode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -2236,7 +2194,7 @@ test_unlink_middlenode(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -2252,7 +2210,7 @@ error:
                 }
                 H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
@@ -2271,9 +2229,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, July 14, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -2355,9 +2310,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  James Laird
- *              Wednesday, July 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2435,9 +2387,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  James Laird
- *              Wednesday, July 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2511,9 +2460,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Monday, September 27, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -2609,9 +2555,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, January 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2770,9 +2713,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, January 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2948,9 +2888,6 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -3076,15 +3013,15 @@ main(void)
 
     if (nerrors) {
         printf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     HDputs("All unlink tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

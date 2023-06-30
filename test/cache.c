@@ -10,11 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              6/9/04
- *
- *        This file contains tests for the cache implemented in
- *        H5C.c
+/*
+ *        This file contains tests for the cache implemented in H5C.c
  */
 #include "cache_common.h"
 #include "H5MFprivate.h"
@@ -242,9 +239,6 @@ static void takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_det
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/16/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -440,9 +434,6 @@ smoke_check_1(int express_test, unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -636,9 +627,6 @@ smoke_check_2(int express_test, unsigned paged)
  *        protects and unprotects.  All entries are marked as clean.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/16/04
  *
  *-------------------------------------------------------------------------
  */
@@ -835,9 +823,6 @@ smoke_check_3(int express_test, unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1032,9 +1017,6 @@ smoke_check_4(int express_test, unsigned paged)
  *        as clean.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/14/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1260,9 +1242,6 @@ smoke_check_5(int express_test, unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              10/25/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1486,9 +1465,6 @@ smoke_check_6(int express_test, unsigned paged)
  *        as clean.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              12/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1714,9 +1690,6 @@ smoke_check_7(int express_test, unsigned paged)
  *        entries are marked as dirty.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/25/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1945,9 +1918,6 @@ smoke_check_8(int express_test, unsigned paged)
  *         marked as clean.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              8/1/07
  *
  *-------------------------------------------------------------------------
  */
@@ -2254,9 +2224,6 @@ smoke_check_9(int express_test, unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              8/1/07
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2555,9 +2522,6 @@ smoke_check_10(int express_test, unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2764,9 +2728,6 @@ write_permitted_check(int
  *              elsewhere.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              8/10/06
  *
  *-------------------------------------------------------------------------
  */
@@ -3040,9 +3001,6 @@ check_insert_entry(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              1/10/05
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3128,9 +3086,6 @@ check_flush_cache(unsigned paged)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/12/05
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3188,9 +3143,6 @@ check_flush_cache__empty_cache(H5F_t *file_ptr)
  *        contains multiple elements.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              1/14/05
  *
  *-------------------------------------------------------------------------
  */
@@ -4384,9 +4336,6 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/13/05
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4540,9 +4489,6 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
  * Purpose:     Run a multi entry flush cache test.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/5/06
  *
  *-------------------------------------------------------------------------
  */
@@ -4711,9 +4657,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              9/3/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4737,14 +4680,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         failure_mssg = "cache not empty at beginning of flush ops test.";
     }
 
-    spec = HDmalloc((size_t)max_num_spec * sizeof(struct fo_flush_cache_test_spec));
+    spec = malloc((size_t)max_num_spec * sizeof(struct fo_flush_cache_test_spec));
     if (spec == NULL) {
 
         pass         = FALSE;
         failure_mssg = "couldn't allocate flush ops test spec array";
     }
 
-    checks = HDmalloc((size_t)max_num_check * sizeof(struct fo_flush_entry_check));
+    checks = malloc((size_t)max_num_check * sizeof(struct fo_flush_entry_check));
     if (checks == NULL) {
 
         pass         = FALSE;
@@ -8060,8 +8003,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         reset_entries();
     }
 
-    HDfree(checks);
-    HDfree(spec);
+    free(checks);
+    free(spec);
 
     /* finally finish up with the flush ops eviction test */
     check_flush_cache__flush_op_eviction_test(file_ptr);
@@ -8075,9 +8018,6 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
  *              flush operations, this is a multi-entry test.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/3/06
  *
  *-------------------------------------------------------------------------
  */
@@ -8337,9 +8277,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              10/3/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -8356,7 +8293,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
     test_entry_t *entry_ptr;
     test_entry_t *base_addr;
 
-    expected = HDmalloc((size_t)num_total_entries * sizeof(struct expected_entry_status));
+    expected = malloc((size_t)num_total_entries * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -8382,8 +8319,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -8428,8 +8365,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -8451,8 +8388,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -9574,7 +9511,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
         reset_entries();
     }
 
-    HDfree(expected);
+    free(expected);
 
 } /* check_flush_cache__flush_op_eviction_test() */
 
@@ -9585,9 +9522,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
  *        contains only one element.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              1/12/05
  *
  *-------------------------------------------------------------------------
  */
@@ -10640,7 +10574,7 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
         struct pinned_single_entry_test_spec *spec = NULL;
         size_t                                i;
 
-        spec = HDmalloc(256 * sizeof(struct pinned_single_entry_test_spec));
+        spec = malloc(256 * sizeof(struct pinned_single_entry_test_spec));
         if (spec == NULL) {
 
             pass         = FALSE;
@@ -10758,7 +10692,7 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             i++;
         }
 
-        HDfree(spec);
+        free(spec);
     }
 
 } /* check_flush_cache__single_entry() */
@@ -10769,9 +10703,6 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
  * Purpose:     Run a single entry flush cache test.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              1/12/05
  *
  *-------------------------------------------------------------------------
  */
@@ -10889,9 +10820,6 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
  * Purpose:     Run a pinned single entry flush cache test.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/28/06
  *
  *-------------------------------------------------------------------------
  */
@@ -11039,9 +10967,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
  * Purpose:    Verify that H5C_get_entry_status() behaves as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/28/06
  *
  *-------------------------------------------------------------------------
  */
@@ -11257,9 +11182,6 @@ check_get_entry_status(unsigned paged)
  * Purpose:    Verify that H5C_expunge_entry() behaves as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              7/5/06
  *
  *-------------------------------------------------------------------------
  */
@@ -11536,9 +11458,6 @@ check_expunge_entry(unsigned paged)
  *         single entry perform as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/1/07
  *
  *-------------------------------------------------------------------------
  */
@@ -11925,9 +11844,6 @@ check_multiple_read_protect(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/26/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -12022,9 +11938,6 @@ check_move_entry(unsigned paged)
  *        Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/27/06
  *
  *-------------------------------------------------------------------------
  */
@@ -12175,9 +12088,6 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/28/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -12275,9 +12185,6 @@ check_pin_protected_entry(unsigned paged)
  *              entries as expected.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/7/06
  *
  *-------------------------------------------------------------------------
  */
@@ -13138,9 +13045,6 @@ check_resize_entry(unsigned paged)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              8/2/07
- *
  *-------------------------------------------------------------------------
  */
 
@@ -13782,9 +13686,6 @@ check_evictions_enabled(unsigned paged)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -13874,9 +13775,6 @@ check_flush_protected_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/7/06
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -13957,9 +13855,6 @@ check_destroy_pinned_err(unsigned paged)
  *        a protected entry will generate an error.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -14052,9 +13947,6 @@ check_destroy_protected_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14131,9 +14023,6 @@ check_duplicate_insert_err(unsigned paged)
  *        pinned will generate an error.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/24/06
  *
  *-------------------------------------------------------------------------
  */
@@ -14216,9 +14105,6 @@ check_double_pin_err(unsigned paged)
  *         generate an error.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/24/06
  *
  *-------------------------------------------------------------------------
  */
@@ -14310,9 +14196,6 @@ check_double_unpin_err(unsigned paged)
  *         generate errors as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/24/06
  *
  *-------------------------------------------------------------------------
  */
@@ -14419,9 +14302,6 @@ check_pin_entry_errs(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14501,9 +14381,6 @@ check_double_protect_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14582,9 +14459,6 @@ check_double_unprotect_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              5/17/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14660,9 +14534,6 @@ check_mark_entry_dirty_errs(unsigned paged)
  *         generate errors as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              7/6/06
  *
  *-------------------------------------------------------------------------
  */
@@ -14773,9 +14644,6 @@ check_expunge_entry_errs(unsigned paged)
  *         generates errors as expected.
  *
  * Return:    void
- *
- * Programmer:    Quincey Koziol
- *              12/10/16
  *
  *-------------------------------------------------------------------------
  */
@@ -14890,9 +14758,6 @@ check_move_entry_errs(unsigned paged)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/7/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14990,9 +14855,6 @@ check_resize_entry_errs(unsigned paged)
  *         it dirty will generate an error.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/3/07
  *
  *-------------------------------------------------------------------------
  */
@@ -15112,9 +14974,6 @@ check_unprotect_ro_dirty_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/9/07
- *
  *-------------------------------------------------------------------------
  */
 
@@ -15194,8 +15053,6 @@ check_protect_ro_rw_err(unsigned paged)
  *        a speculative load.
  *
  * Return:
- *
- * Programmer:
  *
  *-------------------------------------------------------------------------
  */
@@ -15323,9 +15180,6 @@ check_protect_retries(unsigned paged)
  *              H5C_set_evictions_enabled() generate errors as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              8/3/07
  *
  *-------------------------------------------------------------------------
  */
@@ -15461,9 +15315,6 @@ check_check_evictions_enabled_err(unsigned paged)
  *        a few of them.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/29/04
  *
  *-------------------------------------------------------------------------
  */
@@ -19324,9 +19175,6 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              12/16/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -21920,9 +21768,6 @@ check_auto_cache_resize_disable(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              12/16/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -22604,9 +22449,6 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
  *        and rejects invalid input.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/29/04
  *
  *-------------------------------------------------------------------------
  */
@@ -24824,9 +24666,6 @@ check_auto_cache_resize_input_errs(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              11/4/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -25319,9 +25158,6 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    Mike McGreevy
- *              12/16/08
- *
  *-------------------------------------------------------------------------
  */
 
@@ -25343,7 +25179,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
      */
     hbool_t deserialized = (hbool_t) !(fill_via_insertion);
 
-    expected = HDmalloc(150 * sizeof(struct expected_entry_status));
+    expected = malloc(150 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -25367,8 +25203,8 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -26019,7 +25855,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     if (show_progress) /* 12 */
         fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
-    HDfree(expected);
+    free(expected);
 
     if (pass) {
         PASSED();
@@ -26038,9 +25874,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
  * Purpose:    Exercise the flush dependency routines.
  *
  * Return:    0 on success, non-zero on failure
- *
- * Programmer:    Quincey Koziol
- *               3/12/09
  *
  *-------------------------------------------------------------------------
  */
@@ -27962,9 +27795,6 @@ done:
  *
  * Return:    0 on success, non-zero on failure
  *
- * Programmer:    Quincey Koziol
- *               3/16/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -28228,9 +28058,6 @@ done:
  *              is correct
  *
  * Return:      0 on success, non-zero on failure
- *
- * Programmer:  Quincey Koziol
- *              3/17/09
  *
  *-------------------------------------------------------------------------
  */
@@ -30958,9 +30785,6 @@ done:
  *
  * Return:    0 on success, non-zero on failure
  *
- * Programmer:    Quincey Koziol
- *               4/28/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -31177,8 +31001,6 @@ done:
  *
  * Return:    void
  *
- * Programmer:    Vailin Choi
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -31200,7 +31022,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
      */
     hbool_t deserialized = (hbool_t) !(fill_via_insertion);
 
-    expected = HDmalloc(150 * sizeof(struct expected_entry_status));
+    expected = malloc(150 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -31224,8 +31046,8 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -31744,7 +31566,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     if (show_progress) /* 13 */
         fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
-    HDfree(expected);
+    free(expected);
 
     if (pass) {
         PASSED();
@@ -31777,9 +31599,6 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/3/15
  *
  *-------------------------------------------------------------------------
  */
@@ -31871,9 +31690,6 @@ check_entry_deletions_during_scans(unsigned paged)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              4/4/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -31884,7 +31700,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
     H5C_t                        *cache_ptr = file_ptr->shared->cache;
     int                           i;
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32078,7 +31894,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__expunge_dirty_entry_in_flush_test() */
 
@@ -32103,9 +31919,6 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              4/4/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -32118,7 +31931,7 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
     const int                     num_huge_entries    = 4;
     const int                     num_monster_entries = 32;
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32432,7 +32245,7 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__H5C_make_space_in_cache() */
 
@@ -32456,9 +32269,6 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/4/15
  *
  *-------------------------------------------------------------------------
  */
@@ -32513,7 +32323,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* hbool_t     apply_empty_reserve    = */ TRUE,
         /* double      empty_reserve          = */ 0.05};
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32823,7 +32633,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__H5C__autoadjust__ageout__evict_aged_out_entries() */
 
@@ -32908,9 +32718,6 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/9/15
  *
  *-------------------------------------------------------------------------
  */
@@ -33208,9 +33015,6 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/12/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -33287,9 +33091,6 @@ check_stats(unsigned paged)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/22/15
  *
  *-------------------------------------------------------------------------
  */
@@ -33662,8 +33463,6 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
  *
  * Return:      Non-negative on success/Negative on failure.
  *
- * Programmer:  John Mainzer, 5/15/04
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -33703,8 +33502,6 @@ check_write_permitted(const H5F_t H5_ATTR_UNUSED *f, hbool_t *write_permitted_pt
  * Return:      Success:        Ptr to H5C_t
  *
  *              Failure:        NULL
- *
- * Programmer:  JRM -- 9/13/07
  *
  *****************************************************************************/
 
@@ -33951,9 +33748,6 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              9/14/07
- *
  *-------------------------------------------------------------------------
  */
 
@@ -34048,9 +33842,6 @@ takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats)
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -34072,7 +33863,7 @@ main(void)
 
     if (!h5_using_default_driver(NULL)) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     if (create_entry_arrays() < 0) {

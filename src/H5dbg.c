@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5dbg.c
- *                  Mar  4 2006
- *                  Quincey Koziol
  *
  * Purpose:         Generic debugging routines
  *
@@ -61,9 +59,6 @@
  * Purpose:     Dumps a buffer of memory in an octal dump form
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Mar  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -119,7 +114,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
                 else {
                     c = buf[buf_offset + u + v];
 
-                    if (HDisprint(c))
+                    if (isprint(c))
                         HDfputc(c, stream);
                     else
                         HDfputc('.', stream);

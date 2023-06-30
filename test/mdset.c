@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              March 10, 2014
- *
  * Purpose:     Test H5Dwrite_multi() and H5Dread_multi using randomized
  *              parameters.  Also tests H5Dwrite() and H5Dread() using a similar
  *              method.
@@ -83,7 +80,7 @@ test_mdset_location(hid_t fapl_id)
     if ((file_id2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    if (NULL == (buf = (int *)HDcalloc(2 * MAX_DSET_X * MAX_DSET_Y, sizeof(int))))
+    if (NULL == (buf = (int *)calloc(2 * MAX_DSET_X * MAX_DSET_Y, sizeof(int))))
         TEST_ERROR;
 
     /* Generate memory dataspace */
@@ -172,9 +169,6 @@ error:
  *
  * Return:      Number of errors
  *
- * Programmer:  Neil Fortner
- *              Monday, March 10, 2014
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -224,13 +218,13 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         dcpl_id[i] = -1;
 
     /* Allocate buffers */
-    if (NULL == (rbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (rbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (erbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (erbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (wbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (wbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (efbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (efbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
 
     /* Initialize buffer indices */
@@ -378,8 +372,8 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         } /* end for */
 
         /* Initialize read buffer and expected read buffer */
-        (void)HDmemset(rbuf, 0, buf_size);
-        (void)HDmemset(erbuf, 0, buf_size);
+        (void)memset(rbuf, 0, buf_size);
+        (void)memset(erbuf, 0, buf_size);
 
         /* Initialize write buffer */
         for (j = 0; j < max_dsets; j++)
@@ -388,7 +382,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     wbufi[j][k][l] = (unsigned)((j * MAX_DSET_X * MAX_DSET_Y) + (k * MAX_DSET_Y) + l);
 
         /* Initialize expected file buffer */
-        (void)HDmemset(efbuf, 0, buf_size);
+        (void)memset(efbuf, 0, buf_size);
 
         /* Perform read/write operations */
         for (j = 0; j < OPS_PER_FILE; j++) {
@@ -637,9 +631,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Neil Fortner
- *              Monday, March 10, 2014
  *
  *-------------------------------------------------------------------------
  */

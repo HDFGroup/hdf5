@@ -77,7 +77,7 @@ test_logging_api(void)
         TEST_ERROR;
 
     /* Check to make sure that the property list getter works */
-    if (NULL == (location = (char *)HDcalloc(size, sizeof(char))))
+    if (NULL == (location = (char *)calloc(size, sizeof(char))))
         TEST_ERROR;
     if (H5Pget_mdc_log_options(fapl, &is_enabled_out, location, &size, &start_on_access_out) < 0)
         TEST_ERROR;
@@ -109,7 +109,7 @@ test_logging_api(void)
 
     /* Perform some manipulations */
     for (i = 0; i < N_GROUPS; i++) {
-        HDmemset(group_name, 0, sizeof(group_name));
+        memset(group_name, 0, sizeof(group_name));
         HDsnprintf(group_name, sizeof(group_name), "%d", i);
         if ((gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
@@ -127,7 +127,7 @@ test_logging_api(void)
         TEST_ERROR;
 
     /* Clean up */
-    HDfree(location);
+    free(location);
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
@@ -171,10 +171,10 @@ main(void)
 
     if (nerrors) {
         printf("***** %d Metadata cache logging TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     printf("All Metadata Cache Logging tests passed.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

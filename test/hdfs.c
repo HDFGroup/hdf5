@@ -19,8 +19,6 @@
  *
  *     Demonstrates basic use cases and fapl interaction.
  *
- * Programmer: Jacob Smith
- *             2018-04-23
  */
 
 #include "h5test.h"   /* testing utilities */
@@ -68,9 +66,6 @@
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *****************************************************************************/
 
 /*----------------------------------------------------------------------------
@@ -94,9 +89,6 @@
  *     Similar to `H5_FAILED(); AT();` from h5test.h
  *
  *     *FAILED* at somefile.c:12 in function_name()...
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -123,9 +115,6 @@
  *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
  *     similar to `TEST_ERROR` in h5test.h
  *
- * Programmer: Jacob Smith
- *             2017-10-23
- *
  *----------------------------------------------------------------------------
  */
 #define FAIL_IF(condition)                                                                                   \
@@ -150,9 +139,6 @@
  *     `FAIL_UNLESS( 5 == my_op() )`
  *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
  *         (see JSVERIFY)
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -183,9 +169,6 @@
  *     *FAILED* at myfile.c:488 in somefunc()...
  *       ! Expected 425
  *       ! Actual   3
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -223,9 +206,6 @@
  *     !!! Actual:
  *     not what I expected at all
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSERR_STR(expected, actual, reason)                                                                  \
@@ -253,9 +233,6 @@
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(expected, actual, reason)                                                                   \
@@ -274,9 +251,6 @@
  *     If equal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -297,9 +271,6 @@
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
@@ -317,8 +288,6 @@
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(actual, expected, reason)                                                                   \
@@ -330,8 +299,6 @@
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(actual, expected, reason)                                                               \
@@ -343,8 +310,6 @@
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
@@ -401,9 +366,6 @@ static H5FD_hdfs_fapl_t default_fa = {
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer:  Jacob Smith
- *              2018-04-25
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -413,7 +375,7 @@ test_fapl_config_validation(void)
     TESTING("HDFS fapl configuration validation");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -609,9 +571,6 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  Jacob Smith
- *              2018-04-25
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -621,7 +580,7 @@ test_hdfs_fapl(void)
     TESTING("HDFS fapl ");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -694,9 +653,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2018-06-07
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -707,7 +663,7 @@ test_vfd_open(void)
     TESTING("HDFS VFD-level open");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -951,9 +907,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2018-06-07
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -963,7 +916,7 @@ test_eof_eoa(void)
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1064,9 +1017,6 @@ error:
  *     Demonstrate a not-obvious constraint by the library, preventing
  *     file read before EoA is set
  *
- * Programmer: Jacob Smith
- *             2018-06-08
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -1076,7 +1026,7 @@ test_H5FDread_without_eoa_set_fails(void)
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1166,9 +1116,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2018-06-08
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1178,7 +1125,7 @@ test_read(void)
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1376,9 +1323,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-06
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1388,7 +1332,7 @@ test_noops_and_autofails(void)
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1489,9 +1433,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-06
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1518,9 +1459,6 @@ test_cmp(void)
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-07
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1530,7 +1468,7 @@ test_H5F_integration(void)
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1597,7 +1535,7 @@ error:
 
 #if HDFS_TEST_DEBUG
     printf("\nerror!");
-    HDfflush(stdout);
+    fflush(stdout);
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {
@@ -1625,9 +1563,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: 1
- *
- * Programmer:  Jacob Smith
- *              2017-10-23
  *
  *-------------------------------------------------------------------------
  */

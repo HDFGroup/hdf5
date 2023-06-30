@@ -185,8 +185,8 @@ multiple_dset_write(void)
         return;
     }
 
-    outme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
-    VRFY((outme != NULL), "HDmalloc succeeded for outme");
+    outme = malloc((size_t)size * (size_t)size * sizeof(double));
+    VRFY((outme != NULL), "malloc succeeded for outme");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     VRFY((plist >= 0), "create_faccess_plist succeeded");
@@ -236,7 +236,7 @@ multiple_dset_write(void)
     H5Pclose(dcpl);
     H5Fclose(iof);
 
-    HDfree(outme);
+    free(outme);
 }
 
 /* Example of using PHDF5 to create, write, and read compact dataset.
@@ -275,11 +275,11 @@ compact_dataset(void)
         return;
     }
 
-    outme = HDmalloc((size_t)((size_t)size * (size_t)size * sizeof(double)));
-    VRFY((outme != NULL), "HDmalloc succeeded for outme");
+    outme = malloc((size_t)((size_t)size * (size_t)size * sizeof(double)));
+    VRFY((outme != NULL), "malloc succeeded for outme");
 
-    inme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
-    VRFY((outme != NULL), "HDmalloc succeeded for inme");
+    inme = malloc((size_t)size * (size_t)size * sizeof(double));
+    VRFY((outme != NULL), "malloc succeeded for inme");
 
     filename = PARATESTFILE /* GetTestParameters() */;
     VRFY((mpi_size <= size), "mpi_size <= size");
@@ -373,8 +373,8 @@ compact_dataset(void)
     H5Pclose(dxpl);
     H5Dclose(dataset);
     H5Fclose(iof);
-    HDfree(inme);
-    HDfree(outme);
+    free(inme);
+    free(outme);
 }
 
 /*
@@ -683,10 +683,10 @@ dataset_fillvalue(void)
     dset_size    = dset_dims[0] * dset_dims[1] * dset_dims[2] * dset_dims[3];
 
     /* Allocate space for the buffers */
-    rdata = HDmalloc((size_t)(dset_size * sizeof(int)));
-    VRFY((rdata != NULL), "HDcalloc succeeded for read buffer");
-    wdata = HDmalloc((size_t)(dset_size * sizeof(int)));
-    VRFY((wdata != NULL), "HDmalloc succeeded for write buffer");
+    rdata = malloc((size_t)(dset_size * sizeof(int)));
+    VRFY((rdata != NULL), "calloc succeeded for read buffer");
+    wdata = malloc((size_t)(dset_size * sizeof(int)));
+    VRFY((wdata != NULL), "malloc succeeded for write buffer");
 
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     VRFY((fapl >= 0), "create_faccess_plist succeeded");
@@ -730,7 +730,7 @@ dataset_fillvalue(void)
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
 
         /* set entire read buffer with the constant 2 */
-        HDmemset(rdata, 2, (size_t)(dset_size * sizeof(int)));
+        memset(rdata, 2, (size_t)(dset_size * sizeof(int)));
 
         /* Read the entire dataset back */
         ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
@@ -820,7 +820,7 @@ dataset_fillvalue(void)
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
 
         /* set entire read buffer with the constant 2 */
-        HDmemset(rdata, 2, (size_t)(dset_size * sizeof(int)));
+        memset(rdata, 2, (size_t)(dset_size * sizeof(int)));
 
         /* Read the entire dataset back */
         ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
@@ -885,8 +885,8 @@ dataset_fillvalue(void)
     VRFY((ret >= 0), "H5Pclose succeeded");
 
     /* free the buffers */
-    HDfree(rdata);
-    HDfree(wdata);
+    free(rdata);
+    free(wdata);
 }
 
 /* combined cngrpw and ingrpr tests because ingrpr reads file created by cngrpw. */
@@ -945,8 +945,8 @@ collective_group_write(void)
     chunk_size[0] = (hsize_t)(size / 2);
     chunk_size[1] = (hsize_t)(size / 2);
 
-    outme = HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
-    VRFY((outme != NULL), "HDmalloc succeeded for outme");
+    outme = malloc((size_t)size * (size_t)size * sizeof(DATATYPE));
+    VRFY((outme != NULL), "malloc succeeded for outme");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     fid   = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
@@ -1011,7 +1011,7 @@ collective_group_write(void)
     ret1 = H5Fclose(fid);
     VRFY((ret1 == 0), "H5Fclose");
 
-    HDfree(outme);
+    free(outme);
 }
 
 /* Let two sets of processes open and read different groups and chunked
@@ -1086,11 +1086,11 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
 
     size = get_size();
 
-    indata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
-    VRFY((indata != NULL), "HDmalloc succeeded for indata");
+    indata = (DATATYPE *)malloc((size_t)size * (size_t)size * sizeof(DATATYPE));
+    VRFY((indata != NULL), "malloc succeeded for indata");
 
-    outdata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
-    VRFY((outdata != NULL), "HDmalloc succeeded for outdata");
+    outdata = (DATATYPE *)malloc((size_t)size * (size_t)size * sizeof(DATATYPE));
+    VRFY((outdata != NULL), "malloc succeeded for outdata");
 
     /* open every group under root group. */
     HDsnprintf(gname, sizeof(gname), "group%d", m);
@@ -1118,8 +1118,8 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
     ret = H5Gclose(gid);
     VRFY((ret == 0), "H5Gclose");
 
-    HDfree(indata);
-    HDfree(outdata);
+    free(indata);
+    free(outdata);
 }
 
 /*
@@ -1263,8 +1263,8 @@ write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     size = get_size();
 
-    outme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
-    VRFY((outme != NULL), "HDmalloc succeeded for outme");
+    outme = malloc((size_t)size * (size_t)size * sizeof(double));
+    VRFY((outme != NULL), "malloc succeeded for outme");
 
     for (n = 0; n < NDATASET; n++) {
         HDsnprintf(dname, sizeof(dname), "dataset%d", n);
@@ -1282,7 +1282,7 @@ write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
         H5Dclose(did);
     }
-    HDfree(outme);
+    free(outme);
 }
 
 /*
@@ -1426,11 +1426,11 @@ read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     size = get_size();
 
-    indata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
-    VRFY((indata != NULL), "HDmalloc succeeded for indata");
+    indata = (DATATYPE *)malloc((size_t)size * (size_t)size * sizeof(DATATYPE));
+    VRFY((indata != NULL), "malloc succeeded for indata");
 
-    outdata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
-    VRFY((outdata != NULL), "HDmalloc succeeded for outdata");
+    outdata = (DATATYPE *)malloc((size_t)size * (size_t)size * sizeof(DATATYPE));
+    VRFY((outdata != NULL), "malloc succeeded for outdata");
 
     for (n = 0; n < NDATASET; n++) {
         HDsnprintf(dname, sizeof(dname), "dataset%d", n);
@@ -1457,8 +1457,8 @@ read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
         H5Dclose(did);
     }
 
-    HDfree(indata);
-    HDfree(outdata);
+    free(indata);
+    free(outdata);
 
     return vrfy_errors;
 }

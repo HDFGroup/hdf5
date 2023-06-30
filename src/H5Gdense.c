@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Gdense.c
- *			Sep  9 2006
- *			Quincey Koziol
  *
  * Purpose:		Routines for operating on "dense" link storage for a
  *                      group in a file.
@@ -239,9 +237,6 @@ typedef struct {
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -265,7 +260,7 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
 
     /* Set fractal heap creation parameters */
     /* XXX: Give some control of these to applications? */
-    HDmemset(&fheap_cparam, 0, sizeof(fheap_cparam));
+    memset(&fheap_cparam, 0, sizeof(fheap_cparam));
     fheap_cparam.managed.width            = H5G_FHEAP_MAN_WIDTH;
     fheap_cparam.managed.start_block_size = H5G_FHEAP_MAN_START_BLOCK_SIZE;
     fheap_cparam.managed.max_direct_size  = H5G_FHEAP_MAN_MAX_DIRECT_SIZE;
@@ -290,7 +285,7 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
     assert(fheap_id_len == H5G_DENSE_FHEAP_ID_LEN);
 
     /* Create the name index v2 B-tree */
-    HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
+    memset(&bt2_cparam, 0, sizeof(bt2_cparam));
     bt2_cparam.cls       = H5G_BT2_NAME;
     bt2_cparam.node_size = (size_t)H5G_NAME_BT2_NODE_SIZE;
     H5_CHECK_OVERFLOW(fheap_id_len, /* From: */ hsize_t, /* To: */ uint32_t);
@@ -308,7 +303,7 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
     /* Check if we should create a creation order index v2 B-tree */
     if (linfo->index_corder) {
         /* Create the creation order index v2 B-tree */
-        HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
+        memset(&bt2_cparam, 0, sizeof(bt2_cparam));
         bt2_cparam.cls       = H5G_BT2_CORDER;
         bt2_cparam.node_size = (size_t)H5G_CORDER_BT2_NODE_SIZE;
         H5_CHECK_OVERFLOW(fheap_id_len, /* From: */ hsize_t, /* To: */ uint32_t);
@@ -342,9 +337,6 @@ done:
  * Purpose:	Insert a link into the  dense link storage structures for a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -445,9 +437,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -479,9 +468,6 @@ done:
  * Purpose:	Look up a link within a group that uses dense link storage
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -542,9 +528,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Nov  7 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -580,9 +563,6 @@ done:
  *
  * Return:	H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
- * Programmer:	Quincey Koziol
- *		Nov  7 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -615,9 +595,6 @@ done:
  *              according to the order of an index
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov  7 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -724,9 +701,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Sept 25 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -763,9 +737,6 @@ done:
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Sep 25, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -822,9 +793,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -856,9 +824,6 @@ done:
  * Purpose:	v2 B-tree callback for dense link storage iterator
  *
  * Return:	H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
- *
- * Programmer:	Quincey Koziol
- *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -910,9 +875,6 @@ done:
  * Purpose:	Iterate over the objects in a group using dense link storage
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1025,9 +987,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 19 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1068,9 +1027,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 19 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1106,9 +1062,6 @@ done:
  * Purpose:     Returns the name of objects in the group by giving index.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 19 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1222,9 +1175,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 12 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1287,9 +1237,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 12 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1327,9 +1274,6 @@ done:
  * Purpose:	Remove a link from the dense storage of a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 12 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1391,9 +1335,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Nov 15 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1421,9 +1362,6 @@ done:
  * Purpose:	v2 B-tree callback for dense link storage record removal by index
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov 15 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1529,9 +1467,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1635,9 +1570,6 @@ done:
  * Purpose:	Delete the dense storage for a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 12 2006
  *
  *-------------------------------------------------------------------------
  */

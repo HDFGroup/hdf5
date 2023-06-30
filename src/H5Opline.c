@@ -261,9 +261,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -362,9 +359,6 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
  *
  *        Failure:    NULL
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -454,9 +448,6 @@ done:
  *
  *        Failure:    zero
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -517,9 +508,6 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -570,9 +558,6 @@ H5O__pline_reset(void *mesg)
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Saturday, March 11, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -596,9 +581,6 @@ H5O__pline_free(void *mesg)
  * Return:      Success:        Non-negative
  *
  *              Failure:        Negative
- *
- * Programmer:  Peter Cao
- *              December 27, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -643,9 +625,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -672,7 +651,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
          */
         char name[64];
 
-        HDmemset(name, 0, 64);
+        memset(name, 0, 64);
         HDsnprintf(name, sizeof(name), "Filter at position %zu", i);
 
         fprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);
@@ -707,8 +686,6 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
  * Purpose:     Set the version to encode an I/O filter pipeline with.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5B2internal.c
- *			Dec 01 2016
- *			Quincey Koziol
  *
  * Purpose:		Routines for managing v2 B-tree internal nodes.
  *
@@ -75,9 +73,6 @@ H5FL_DEFINE(H5B2_internal_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb  3 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -109,14 +104,14 @@ H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, 
     if (NULL == (internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].nat_rec_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "memory allocation failed for B-tree internal native keys")
-    HDmemset(internal->int_native, 0, hdr->cls->nrec_size * hdr->node_info[depth].max_nrec);
+    memset(internal->int_native, 0, hdr->cls->nrec_size * hdr->node_info[depth].max_nrec);
 
     /* Allocate space for the node pointers in memory */
     if (NULL ==
         (internal->node_ptrs = (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].node_ptr_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "memory allocation failed for B-tree internal node pointers")
-    HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth].max_nrec + 1));
+    memset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth].max_nrec + 1));
 
     /* Set depth of the node */
     internal->depth = depth;
@@ -173,9 +168,6 @@ done:
  * Purpose:	"Protect" an internal node in the metadata cache
  *
  * Return:	Pointer to internal node on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Aug 25 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -272,9 +264,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
- *		Mar  9 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -347,9 +336,6 @@ done:
  * Purpose:	Adds a new record to a B-tree node.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar  2 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -516,9 +502,6 @@ done:
  *		H5B2_insert was called.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Dec 24 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -730,9 +713,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Apr 27 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -793,9 +773,6 @@ done:
  * Purpose:	Removes a record from a B-tree node.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar  3 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1037,9 +1014,6 @@ done:
  *              in the B-tree records
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1332,9 +1306,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 2 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1382,9 +1353,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 19 2005
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE herr_t
@@ -1421,9 +1389,6 @@ H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t H5_ATTR_NDEBUG_U
  * Purpose:	Verify than internal nodes are mostly sane
  *
  * Return:	Non-negative on success, negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 19 2005
  *
  *-------------------------------------------------------------------------
  */

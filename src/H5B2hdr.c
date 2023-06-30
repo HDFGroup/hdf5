@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5B2int.c
- *			Feb 27 2006
- *			Quincey Koziol
  *
  * Purpose:		Internal routines for managing v2 B-trees.
  *
@@ -90,9 +88,6 @@ H5FL_SEQ_DEFINE(H5B2_node_info_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb  2 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -134,7 +129,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     /* Allocate "page" for node I/O */
     if (NULL == (hdr->page = H5FL_BLK_MALLOC(node_page, hdr->node_size)))
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(hdr->page, 0, hdr->node_size);
+    memset(hdr->page, 0, hdr->node_size);
 
     /* Allocate array of node info structs */
     if (NULL == (hdr->node_info = H5FL_SEQ_MALLOC(H5B2_node_info_t, (size_t)(hdr->depth + 1))))
@@ -221,9 +216,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 27 2009
- *
  *-------------------------------------------------------------------------
  */
 H5B2_hdr_t *
@@ -264,9 +256,6 @@ done:
  * Purpose:	Create new fractal heap header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -345,9 +334,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 13 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -378,9 +364,6 @@ done:
  * Purpose:	Decrement reference count on B-tree header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 13 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -414,9 +397,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Oct 27 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -439,9 +419,6 @@ H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr)
  * Purpose:     Decrement file reference count on shared v2 B-tree header
  *
  * Return:      The file's reference count after the decrement. (Can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Oct 27 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -466,9 +443,6 @@ H5B2__hdr_fuse_decr(H5B2_hdr_t *hdr)
  * Purpose:	Mark B-tree header as dirty
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 13 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -496,9 +470,6 @@ done:
  * Purpose:	Convenience wrapper around protecting v2 B-tree header
  *
  * Return:	Non-NULL pointer to header on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Dec 18 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -562,9 +533,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Dec 18 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -592,9 +560,6 @@ done:
  * Purpose:	Free B-tree header info
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb  2 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -669,9 +634,6 @@ done:
  * Purpose:	Delete a v2 B-tree, starting with the header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 15 2009
  *
  *-------------------------------------------------------------------------
  */

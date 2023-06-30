@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Thursday, October  8, 2009
- *
  * Purpose:	Create a file with a dataset who's raw data immediately follows
  *      its object header, so that when the dataset is unlinked from its parent
  *      group, a speculative read of the object header would get the raw data

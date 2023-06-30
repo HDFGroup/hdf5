@@ -64,7 +64,7 @@ static unsigned int g_verbosity = DEFAULT_VERBOSITY;
     do {                                                                                                     \
         if ((lvl) <= g_verbosity) {                                                                          \
             fprintf(g_log_stream, __VA_ARGS__);                                                              \
-            HDfflush(g_log_stream);                                                                          \
+            fflush(g_log_stream);                                                                            \
         }                                                                                                    \
     } while (0)
 
@@ -140,7 +140,7 @@ populate_filepath(const char *dirname, const char *basename, hid_t fapl_id, char
     if ((basename == NULL) || (*basename == 0) || (dirname == NULL) || (*dirname == 0) || (path_out == NULL))
         TEST_ERROR;
 
-    if (NULL == (path = HDcalloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
+    if (NULL == (path = calloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
         TEST_ERROR;
 
     if (HDsnprintf(path, H5FD_SPLITTER_PATH_MAX, "%s%s%s", dirname,
@@ -157,12 +157,12 @@ populate_filepath(const char *dirname, const char *basename, hid_t fapl_id, char
             TEST_ERROR;
     }
 
-    HDfree(path);
+    free(path);
 
     return SUCCEED;
 
 error:
-    HDfree(path);
+    free(path);
     return FAIL;
 } /* end populate_filepath() */
 
@@ -181,7 +181,7 @@ build_paths(const char *basename, H5FD_splitter_vfd_config_t *splitter_config,
 {
     char *baselogname = NULL;
 
-    if (NULL == (baselogname = HDcalloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
+    if (NULL == (baselogname = calloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
         TEST_ERROR;
 
     if (populate_filepath(MIRROR_RW_DIR, basename, splitter_config->rw_fapl_id, names->rw, TRUE) < 0)
@@ -198,12 +198,12 @@ build_paths(const char *basename, H5FD_splitter_vfd_config_t *splitter_config,
     if (populate_filepath(MIRROR_WO_DIR, baselogname, splitter_config->wo_fapl_id, names->log, FALSE) < 0)
         TEST_ERROR;
 
-    HDfree(baselogname);
+    free(baselogname);
 
     return SUCCEED;
 
 error:
-    HDfree(baselogname);
+    free(baselogname);
     return FAIL;
 } /* end build_paths() */
 
@@ -303,13 +303,13 @@ test_encdec_uint8_t(void)
     TESTING("Mirror encode/decode of uint8_t data");
 
     /* Start of buffer uint8_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[0] = 200;
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint8(buf, v) != 1)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -319,13 +319,13 @@ test_encdec_uint8_t(void)
         TEST_ERROR;
 
     /* Middle of buffer uint8_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[3] = v;
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint8((buf + 3), v) != 1)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -335,13 +335,13 @@ test_encdec_uint8_t(void)
         TEST_ERROR;
 
     /* End of buffer uint8_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[7] = v;
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint8((buf + 7), v) != 1)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -369,14 +369,14 @@ test_encdec_uint16_t(void)
     TESTING("Mirror encode/decode of uint16_t data");
 
     /* Start of buffer uint16_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[0] = 0x8F;
     expected[1] = 0x02;
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint16(buf, v) != 2)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -386,14 +386,14 @@ test_encdec_uint16_t(void)
         TEST_ERROR;
 
     /* Middle of buffer uint16_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[3] = 0x8F;
     expected[4] = 0x02;
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint16((buf + 3), v) != 2)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -409,14 +409,14 @@ test_encdec_uint16_t(void)
         TEST_ERROR;
 
     /* End of buffer uint16_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[6] = 0x8F;
     expected[7] = 0x02;
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint16((buf + 6), v) != 2)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -444,8 +444,8 @@ test_encdec_uint32_t(void)
     TESTING("Mirror encode/decode of uint32_t data");
 
     /* Start of buffer uint32_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[0] = 0x8F;
     expected[1] = 0x02;
     expected[2] = 0x00;
@@ -453,7 +453,7 @@ test_encdec_uint32_t(void)
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint32(buf, v) != 4)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -463,8 +463,8 @@ test_encdec_uint32_t(void)
         TEST_ERROR;
 
     /* Middle of buffer uint32_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[3] = 0x8F;
     expected[4] = 0x02;
     expected[5] = 0x00;
@@ -472,7 +472,7 @@ test_encdec_uint32_t(void)
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint32((buf + 3), v) != 4)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -487,8 +487,8 @@ test_encdec_uint32_t(void)
         TEST_ERROR;
 
     /* End of buffer uint32_t */
-    HDmemset(buf, 0, 8);
-    HDmemset(expected, 0, 8);
+    memset(buf, 0, 8);
+    memset(expected, 0, 8);
     expected[4] = 0x8F;
     expected[5] = 0x02;
     expected[6] = 0x00;
@@ -496,7 +496,7 @@ test_encdec_uint32_t(void)
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint32((buf + 4), v) != 4)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 8) != 0) {
+    if (memcmp(buf, expected, 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 8);
         TEST_ERROR;
     }
@@ -524,8 +524,8 @@ test_encdec_uint64_t(void)
     TESTING("Mirror encode/decode of uint64_t data");
 
     /* Start of buffer uint64_t */
-    HDmemset(buf, 0, 16);
-    HDmemset(expected, 0, 16);
+    memset(buf, 0, 16);
+    memset(expected, 0, 16);
     expected[0] = 0x90;
     expected[1] = 0xDC;
     expected[2] = 0xBE;
@@ -537,7 +537,7 @@ test_encdec_uint64_t(void)
     out         = 0;
     if (H5FD__mirror_xmit_encode_uint64(buf, v) != 8)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 16) != 0) {
+    if (memcmp(buf, expected, 16) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 16);
         TEST_ERROR;
     }
@@ -547,8 +547,8 @@ test_encdec_uint64_t(void)
         TEST_ERROR;
 
     /* Middle of buffer uint64_t */
-    HDmemset(buf, 0, 16);
-    HDmemset(expected, 0, 16);
+    memset(buf, 0, 16);
+    memset(expected, 0, 16);
     expected[3]  = 0x90;
     expected[4]  = 0xDC;
     expected[5]  = 0xBE;
@@ -560,7 +560,7 @@ test_encdec_uint64_t(void)
     out          = 0;
     if (H5FD__mirror_xmit_encode_uint64((buf + 3), v) != 8)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 16) != 0) {
+    if (memcmp(buf, expected, 16) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 16);
         TEST_ERROR;
     }
@@ -575,8 +575,8 @@ test_encdec_uint64_t(void)
         TEST_ERROR;
 
     /* End of buffer uint64_t */
-    HDmemset(buf, 0, 16);
-    HDmemset(expected, 0, 16);
+    memset(buf, 0, 16);
+    memset(expected, 0, 16);
     expected[8]  = 0x90;
     expected[9]  = 0xDC;
     expected[10] = 0xBE;
@@ -588,7 +588,7 @@ test_encdec_uint64_t(void)
     out          = 0;
     if (H5FD__mirror_xmit_encode_uint64((buf + 8), v) != 8)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, 16) != 0) {
+    if (memcmp(buf, expected, 16) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, 16);
         TEST_ERROR;
     }
@@ -628,7 +628,7 @@ test_encdec_header(H5FD_mirror_xmit_t xmit_mock)
         FAIL_PUTS_ERROR("Header size definition does not match test\n");
 
     /* Populate the expected buffer; expect end padding of 0xFF */
-    HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
+    memset(expected, 0xFF, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
     for (i = 0; i < H5FD_MIRROR_XMIT_HEADER_SIZE; i++) {
         expected[i + 2] = (unsigned char)i;
     }
@@ -636,10 +636,10 @@ test_encdec_header(H5FD_mirror_xmit_t xmit_mock)
     /* Encode, and compare buffer contents
      * Initial buffer is filled with 0xFF to match expected padding
      */
-    HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
+    memset(buf, 0xFF, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
     if (H5FD_mirror_xmit_encode_header((buf + 2), &xmit_mock) != H5FD_MIRROR_XMIT_HEADER_SIZE)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_HEADER_SIZE + 8) != 0) {
+    if (memcmp(buf, expected, H5FD_MIRROR_XMIT_HEADER_SIZE + 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
         TEST_ERROR;
     }
@@ -704,7 +704,7 @@ test_encdec_set_eoa(H5FD_mirror_xmit_t xmit_mock)
         FAIL_PUTS_ERROR("shared header structure is not in expected state");
 
     /* Populate the expected buffer; expect end padding of 0xFF */
-    HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
+    memset(expected, 0xFF, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
     for (i = 0; i < H5FD_MIRROR_XMIT_EOA_SIZE; i++)
         expected[i + 2] = (unsigned char)i;
 
@@ -716,10 +716,10 @@ test_encdec_set_eoa(H5FD_mirror_xmit_t xmit_mock)
     /* Encode, and compare buffer contents
      * Initial buffer is filled with 0xFF to match expected padding
      */
-    HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
+    memset(buf, 0xFF, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
     if (H5FD_mirror_xmit_encode_set_eoa((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_EOA_SIZE)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_EOA_SIZE + 8) != 0) {
+    if (memcmp(buf, expected, H5FD_MIRROR_XMIT_EOA_SIZE + 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
         TEST_ERROR;
     }
@@ -792,7 +792,7 @@ test_encdec_lock(H5FD_mirror_xmit_t xmit_mock)
         FAIL_PUTS_ERROR("shared header structure is not in expected state");
 
     /* Populate the expected buffer; expect end padding of 0xFF */
-    HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
+    memset(expected, 0xFF, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
     for (i = 0; i < H5FD_MIRROR_XMIT_LOCK_SIZE; i++)
         expected[i + 2] = (unsigned char)i;
 
@@ -803,10 +803,10 @@ test_encdec_lock(H5FD_mirror_xmit_t xmit_mock)
     /* Encode, and compare buffer contents
      * Initial buffer is filled with 0xFF to match expected padding
      */
-    HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
+    memset(buf, 0xFF, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
     if (H5FD_mirror_xmit_encode_lock((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_LOCK_SIZE)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_LOCK_SIZE + 8) != 0) {
+    if (memcmp(buf, expected, H5FD_MIRROR_XMIT_LOCK_SIZE + 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
         TEST_ERROR;
     }
@@ -877,17 +877,17 @@ test_encdec_open(H5FD_mirror_xmit_t xmit_mock)
         FAIL_PUTS_ERROR("shared header structure is not in expected state");
 
     /* Allocate memory */
-    if (NULL == (buf = HDmalloc((H5FD_MIRROR_XMIT_OPEN_SIZE + 8) * sizeof(unsigned char))))
+    if (NULL == (buf = malloc((H5FD_MIRROR_XMIT_OPEN_SIZE + 8) * sizeof(unsigned char))))
         FAIL_PUTS_ERROR("Unable to allocate memory for buf");
-    if (NULL == (expected = HDmalloc((H5FD_MIRROR_XMIT_OPEN_SIZE + 8) * sizeof(unsigned char))))
+    if (NULL == (expected = malloc((H5FD_MIRROR_XMIT_OPEN_SIZE + 8) * sizeof(unsigned char))))
         FAIL_PUTS_ERROR("Unable to allocate memory for expected");
-    if (NULL == (xmit_in = HDmalloc(sizeof(H5FD_mirror_xmit_open_t))))
+    if (NULL == (xmit_in = malloc(sizeof(H5FD_mirror_xmit_open_t))))
         FAIL_PUTS_ERROR("Unable to allocate memory for xmit_in");
-    if (NULL == (xmit_out = HDmalloc(sizeof(H5FD_mirror_xmit_open_t))))
+    if (NULL == (xmit_out = malloc(sizeof(H5FD_mirror_xmit_open_t))))
         FAIL_PUTS_ERROR("Unable to allocate memory for xmit_out");
 
     /* Populate the expected buffer; expect end padding of 0xFF */
-    HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
+    memset(expected, 0xFF, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
     for (size_t i = 0; i < H5FD_MIRROR_XMIT_OPEN_SIZE; i++) {
         /* 0x100 is "zero" in a byte, so encode will treat it as a NULL-
          * terminator in the filepath string. Expect all zeroes following.
@@ -909,10 +909,10 @@ test_encdec_open(H5FD_mirror_xmit_t xmit_mock)
     /* Encode, and compare buffer contents
      * Initial buffer is filled with 0xFF to match expected padding
      */
-    HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
+    memset(buf, 0xFF, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
     if (H5FD_mirror_xmit_encode_open((buf + 2), xmit_in) != H5FD_MIRROR_XMIT_OPEN_SIZE)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_OPEN_SIZE + 8) != 0) {
+    if (memcmp(buf, expected, H5FD_MIRROR_XMIT_OPEN_SIZE + 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
         TEST_ERROR;
     }
@@ -970,19 +970,19 @@ test_encdec_open(H5FD_mirror_xmit_t xmit_mock)
         TEST_ERROR;
     }
 
-    HDfree(buf);
-    HDfree(expected);
-    HDfree(xmit_in);
-    HDfree(xmit_out);
+    free(buf);
+    free(expected);
+    free(xmit_in);
+    free(xmit_out);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(expected);
-    HDfree(xmit_in);
-    HDfree(xmit_out);
+    free(buf);
+    free(expected);
+    free(xmit_in);
+    free(xmit_out);
 
     return -1;
 }
@@ -1013,7 +1013,7 @@ test_encdec_reply(H5FD_mirror_xmit_t xmit_mock)
         FAIL_PUTS_ERROR("shared header structure is not in expected state");
 
     /* Populate the expected buffer; expect end padding of 0xFF */
-    HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
+    memset(expected, 0xFF, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
     for (i = 0; i < H5FD_MIRROR_XMIT_REPLY_SIZE; i++) {
         /* 0x100 is "zero" in a byte, so encode will treat it as a NULL-
          * terminator in the filepath string. Expect all zeroes following.
@@ -1033,10 +1033,10 @@ test_encdec_reply(H5FD_mirror_xmit_t xmit_mock)
     /* Encode, and compare buffer contents
      * Initial buffer is filled with 0xFF to match expected padding
      */
-    HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
+    memset(buf, 0xFF, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
     if (H5FD_mirror_xmit_encode_reply((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_REPLY_SIZE)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_REPLY_SIZE + 8) != 0) {
+    if (memcmp(buf, expected, H5FD_MIRROR_XMIT_REPLY_SIZE + 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
         TEST_ERROR;
     }
@@ -1116,7 +1116,7 @@ test_encdec_write(H5FD_mirror_xmit_t xmit_mock)
         FAIL_PUTS_ERROR("shared header structure is not in expected state");
 
     /* Populate the expected buffer; expect end padding of 0xFF */
-    HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
+    memset(expected, 0xFF, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
     for (i = 0; i < H5FD_MIRROR_XMIT_WRITE_SIZE; i++)
         expected[i + 2] = (unsigned char)i;
 
@@ -1129,10 +1129,10 @@ test_encdec_write(H5FD_mirror_xmit_t xmit_mock)
     /* Encode, and compare buffer contents
      * Initial buffer is filled with 0xFF to match expected padding
      */
-    HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
+    memset(buf, 0xFF, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
     if (H5FD_mirror_xmit_encode_write((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_WRITE_SIZE)
         TEST_ERROR;
-    if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_WRITE_SIZE + 8) != 0) {
+    if (memcmp(buf, expected, H5FD_MIRROR_XMIT_WRITE_SIZE + 8) != 0) {
         PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
         TEST_ERROR;
     }
@@ -1209,7 +1209,7 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
     H5FD_mirror_fapl_t          mirror_conf;
     hid_t                       ret_value = H5I_INVALID_HID;
 
-    if (NULL == (splitter_config = HDmalloc(sizeof(H5FD_splitter_vfd_config_t))))
+    if (NULL == (splitter_config = malloc(sizeof(H5FD_splitter_vfd_config_t))))
         TEST_ERROR;
 
     /* Initialize the fapls, too, so the library doesn't try to
@@ -1263,7 +1263,7 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
     if (H5Pclose(splitter_config->wo_fapl_id) < 0)
         TEST_ERROR;
 
-    HDfree(splitter_config);
+    free(splitter_config);
 
     return ret_value;
 
@@ -1275,7 +1275,7 @@ error:
         H5Pclose(ret_value);
     }
     H5E_END_TRY
-    HDfree(splitter_config);
+    free(splitter_config);
 
     return H5I_INVALID_HID;
 } /* end create_mirroring_split_fapl() */
@@ -1302,7 +1302,7 @@ test_create_and_close(const struct mt_opts *opts)
 
     TESTING("File creation and immediate close");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
 
     /* Create FAPL for splitter[sec2|mirror] */
@@ -1317,13 +1317,13 @@ test_create_and_close(const struct mt_opts *opts)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
-    HDfree(names);
+    free(names);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(names);
+    free(names);
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
@@ -1741,7 +1741,7 @@ test_basic_dataset_write(const struct mt_opts *opts)
 
     TESTING("Mirror open and dataset writing");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
 
     /* Create FAPL for Splitter[sec2|mirror] */
@@ -1749,7 +1749,7 @@ test_basic_dataset_write(const struct mt_opts *opts)
         TEST_ERROR;
 
     /* Prepare data to be written */
-    if (NULL == (buf = HDmalloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int))))
+    if (NULL == (buf = malloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int))))
         TEST_ERROR;
     for (i = 0; i < DATABUFFER_SIZE; i++) {
         for (j = 0; j < DATABUFFER_SIZE; j++) {
@@ -1798,15 +1798,15 @@ test_basic_dataset_write(const struct mt_opts *opts)
     if (h5_compare_file_bytes(names->rw, names->wo) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(names);
+    free(buf);
+    free(names);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(names);
+    free(buf);
+    free(names);
 
     H5E_BEGIN_TRY
     {
@@ -1841,7 +1841,7 @@ test_chunked_dataset_write(const struct mt_opts *opts)
 
     TESTING("Mirror open and dataset writing (chunked)");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
 
     /* Create FAPL for Splitter[sec2|mirror] */
@@ -1891,13 +1891,13 @@ test_chunked_dataset_write(const struct mt_opts *opts)
         TEST_ERROR;
     }
 
-    HDfree(names);
+    free(names);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(names);
+    free(names);
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
@@ -1931,7 +1931,7 @@ test_on_disk_zoo(const struct mt_opts *opts)
 
     TESTING("'Zoo' of on-disk structures");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
 
     /* Create FAPL for Splitter[sec2|mirror] */
@@ -1982,13 +1982,13 @@ test_on_disk_zoo(const struct mt_opts *opts)
     if (h5_compare_file_bytes(names->rw, names->wo) < 0)
         TEST_ERROR;
 
-    HDfree(names);
+    free(names);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(names);
+    free(names);
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
@@ -2035,9 +2035,9 @@ test_vanishing_datasets(const struct mt_opts *opts)
 
     TESTING("Vanishing Datasets");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
-    if (NULL == (buf = HDcalloc(1, sizeof(*buf))))
+    if (NULL == (buf = calloc(1, sizeof(*buf))))
         TEST_ERROR;
 
     /* -------------------- */
@@ -2121,15 +2121,15 @@ test_vanishing_datasets(const struct mt_opts *opts)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
-    HDfree(names);
-    HDfree(buf);
+    free(names);
+    free(buf);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(names);
-    HDfree(buf);
+    free(names);
+    free(buf);
     H5E_BEGIN_TRY
     {
         H5Pclose(fapl_id);
@@ -2173,7 +2173,7 @@ test_concurrent_access(const struct mt_opts *opts)
 
     TESTING("Concurrent opened mirrored files");
 
-    if (NULL == (bundle = HDmalloc(sizeof(struct file_bundle) * CONCURRENT_COUNT)))
+    if (NULL == (bundle = malloc(sizeof(struct file_bundle) * CONCURRENT_COUNT)))
         TEST_ERROR;
 
     /* Initialize bundle */
@@ -2198,7 +2198,7 @@ test_concurrent_access(const struct mt_opts *opts)
     }
 
     /* Prepare data to be written */
-    if (NULL == (buf = HDmalloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int))))
+    if (NULL == (buf = malloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int))))
         TEST_ERROR;
     for (i = 0; i < DATABUFFER_SIZE; i++) {
         for (j = 0; j < DATABUFFER_SIZE; j++) {
@@ -2258,8 +2258,8 @@ test_concurrent_access(const struct mt_opts *opts)
         if (h5_compare_file_bytes(bundle[i].names.rw, bundle[i].names.wo) < 0)
             TEST_ERROR;
 
-    HDfree(bundle);
-    HDfree(buf);
+    free(bundle);
+    free(buf);
 
     PASSED();
     return 0;
@@ -2275,8 +2275,8 @@ error:
         }
     }
     H5E_END_TRY
-    HDfree(bundle);
-    HDfree(buf);
+    free(bundle);
+    free(buf);
     return -1;
 } /* end test_concurrent_access() */
 
@@ -2302,7 +2302,7 @@ parse_args(int argc, char **argv, struct mt_opts *opts)
         if (!HDstrncmp(argv[i], "--ip=", 5))
             HDstrncpy(opts->ip, argv[i] + 5, H5FD_MIRROR_MAX_IP_LEN);
         else if (!HDstrncmp(argv[i], "--port=", 7))
-            opts->portno = HDatoi(argv[i] + 7);
+            opts->portno = atoi(argv[i] + 7);
         else {
             printf("Unrecognized option: '%s'\n", argv[i]);
             return -1;
@@ -2341,7 +2341,7 @@ confirm_server(struct mt_opts *opts)
     target_addr.sin_family      = AF_INET;
     target_addr.sin_port        = htons((uint16_t)opts->portno);
     target_addr.sin_addr.s_addr = inet_addr(opts->ip);
-    HDmemset(target_addr.sin_zero, '\0', sizeof(target_addr.sin_zero));
+    memset(target_addr.sin_zero, '\0', sizeof(target_addr.sin_zero));
 
     while (1) {
         if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
@@ -2431,12 +2431,12 @@ main(int argc, char **argv)
 
     if (parse_args(argc, argv, &opts) < 0) {
         printf("Unable to parse arguments\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (confirm_server(&opts) < 0) {
         printf("Unable to confirm server is running\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* TESTS */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, July 15, 2003
- *
  * Purpose:	Create a file which will have the newer superblock format.
  *		This program is used to create the test file `tsupern.h5' which
  *      has the new format for superblock information.
@@ -33,9 +30,6 @@
  * Purpose:     Create a file with a new version (>0) of the superblock
  *
  * Return:      EXIT_SUCCESS
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 15, 2003
  *
  *-------------------------------------------------------------------------
  */

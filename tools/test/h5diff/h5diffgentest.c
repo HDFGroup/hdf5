@@ -30,10 +30,6 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
  *
  * Purpose: generate files for h5diff testing
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
- *
  *-------------------------------------------------------------------------
  */
 
@@ -334,17 +330,17 @@ onion_filepaths_init(const char *basename)
 {
     struct onion_filepaths *paths = NULL;
 
-    if (NULL == (paths = HDcalloc(1, sizeof(struct onion_filepaths))))
+    if (NULL == (paths = calloc(1, sizeof(struct onion_filepaths))))
         goto error;
 
     if (NULL == (paths->canon = HDstrdup(basename)))
         goto error;
 
-    if (NULL == (paths->onion = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+    if (NULL == (paths->onion = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
     HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
-    if (NULL == (paths->recovery = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+    if (NULL == (paths->recovery = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
     HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
@@ -352,10 +348,10 @@ onion_filepaths_init(const char *basename)
 
 error:
     if (paths != NULL) {
-        HDfree(paths->canon);
-        HDfree(paths->onion);
-        HDfree(paths->recovery);
-        HDfree(paths);
+        free(paths->canon);
+        free(paths->onion);
+        free(paths->recovery);
+        free(paths);
     }
     return NULL;
 }
@@ -364,10 +360,10 @@ static void
 onion_filepaths_destroy(struct onion_filepaths *s)
 {
     if (s) {
-        HDfree(s->canon);
-        HDfree(s->onion);
-        HDfree(s->recovery);
-        HDfree(s);
+        free(s->canon);
+        free(s->onion);
+        free(s->recovery);
+        free(s);
     }
 }
 
@@ -2077,8 +2073,6 @@ test_special_datasets(const char *file, int make_diffs /* flag to modify data bu
  * Purpose: Create test files to compare links, one has longer name than
  *          the other and short name is subset of long name.
  *
- * Programmer: Jonathan Kim (Feb 17, 2010)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_link_name(const char *fname1)
@@ -2149,8 +2143,6 @@ out:
 /*-------------------------------------------------------------------------
  *
  * Purpose: Create test files to compare soft links in various way
- *
- * Programmer: Jonathan Kim (Feb 17, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -2269,8 +2261,6 @@ out:
 /*-------------------------------------------------------------------------
  *
  * Purpose: Create test files to compare linked soft links in various way
- *
- * Programmer: Jonathan Kim (Feb 17, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -2452,8 +2442,6 @@ out:
  *
  * Purpose: Create test files to compare external links in various way
  *
- * Programmer: Jonathan Kim (Feb 17, 2010)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_external_links(const char *fname1, const char *fname2)
@@ -2599,8 +2587,6 @@ out:
  *
  * Purpose: Create test files to compare external links which point to
  *          soft link in various way
- *
- * Programmer: Jonathan Kim (Feb 17, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -2820,8 +2806,6 @@ gen_dataset_idx(const char *file, int format)
  *
  * Purpose: Create test files to compare dangling links in various way
  *
- * Programmer: Jonathan Kim (Feb 17, 2010)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_dangle_links(const char *fname1, const char *fname2)
@@ -3020,8 +3004,6 @@ out:
 /*-------------------------------------------------------------------------
  *
  * Purpose: For testing comparing group member objects recursively
- *
- * Programmer: Jonathan Kim (Aug 19, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -3434,8 +3416,6 @@ out:
  *   For testing comparing group member objects recursively via multiple
  *   linked external links
  *
- * Programmer: Jonathan Kim (Sep 16, 2010)
- *
  *-------------------------------------------------------------------------*/
 #define GRP_R_DSETNAME1 "dset1"
 #define GRP_R_DSETNAME2 "dset2"
@@ -3748,8 +3728,6 @@ out:
  *          Same structure, same obj names
  * Test : exclude obj with different value to verify the rest are same
  *
- * Programmer: Jonathan Kim (July, 21, 2010)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_exclude_obj1(const char *fname1, const char *fname2)
@@ -3868,8 +3846,6 @@ out:
  * Purpose: Create test files for excluding obj.
  *          different structure and name
  * Test : exclude different objs to verify the rest are same
- *
- * Programmer: Jonathan Kim (July, 21, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -4001,8 +3977,6 @@ out:
  *          Only one file contains unique objs. Common objs are same.
  * Test : exclude unique objs to verify the rest are same - HDFFV-7837
  *
- * Programmer: Jonathan Kim (Mar, 19, 2012)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_exclude_obj3(const char *fname1, const char *fname2)
@@ -4087,8 +4061,6 @@ out:
  * Purpose: Create test files for multiple variable length string/string array
  *          along with fixed length string/string array types in
  *          a compound type dataset.
- *
- * Programmer: Jonathan Kim (Oct, 26, 2010)
  *
  *-------------------------------------------------------------------------*/
 #define STR_RANK             1
@@ -4761,8 +4733,6 @@ out:
  *
  * Purpose: Test diffs of enum values which may include invalid values.
  *
- * Programmer: Dana Robinson
- *
  *-------------------------------------------------------------------------*/
 
 static int
@@ -4871,8 +4841,6 @@ out:
  *
  * Function: test_comps_vlen_arry()
  *  - type: compound->vlen->compound->array->compound
- *
- * Programmer: Jonathan Kim (Sep, 1, 2011)
  *
  *-------------------------------------------------------------------------*/
 #define SDIM_DSET       2
@@ -5020,7 +4988,7 @@ test_comps_vlen(const char *fname, const char *dset, const char *attr, int diff,
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SDIM_DSET; i++) {
         wdata[i].i1     = (int)i;
-        wdata[i].vl.p   = HDmalloc((i + 1) * sizeof(cmpd2_t));
+        wdata[i].vl.p   = malloc((i + 1) * sizeof(cmpd2_t));
         wdata[i].vl.len = i + 1;
         for (j = 0; j < (i + 1); j++) {
             ((cmpd2_t *)wdata[i].vl.p)[j].i2 = (int)(i * 10 + (unsigned)diff);
@@ -5141,7 +5109,7 @@ test_comps_array_vlen(const char *fname, const char *dset, const char *attr, int
         /* Allocate and initialize VL data to write in compound2 */
         for (j = 0; j < SDIM_CMPD_ARRAY; j++) {
             wdata[i].cmpd2[j].i2     = (int)(j * 10);
-            wdata[i].cmpd2[j].vl.p   = HDmalloc((j + 1) * sizeof(cmpd3_t));
+            wdata[i].cmpd2[j].vl.p   = malloc((j + 1) * sizeof(cmpd3_t));
             wdata[i].cmpd2[j].vl.len = j + 1;
             for (k = 0; k < (j + 1); k++) {
                 /* Initialize data of compound3 */
@@ -5280,7 +5248,7 @@ test_comps_vlen_arry(const char *fname, const char *dset, const char *attr, int 
     for (i = 0; i < SDIM_DSET; i++) {
         /* compound 1 data */
         wdata[i].i1     = (int)i;
-        wdata[i].vl.p   = HDmalloc((i + 1) * sizeof(cmpd2_t));
+        wdata[i].vl.p   = malloc((i + 1) * sizeof(cmpd2_t));
         wdata[i].vl.len = i + 1;
         for (j = 0; j < (i + 1); j++) {
             /* compound2 data */
@@ -6088,10 +6056,10 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -6349,7 +6317,7 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     n = 0;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 2; j++) {
-            buf52[i][j].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((size_t)(i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)
@@ -6748,7 +6716,7 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     for (i = 0; i < 4; i++)
         for (j = 0; j < 3; j++)
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((size_t)(i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)
@@ -7074,10 +7042,10 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -7338,7 +7306,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     n = 0;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 2; j++) {
-            buf52[i][j].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((size_t)(i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)
@@ -7738,7 +7706,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     for (i = 0; i < 4; i++)
         for (j = 0; j < 3; j++)
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((size_t)(i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)
@@ -8041,10 +8009,10 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -8091,7 +8059,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
 
         /* allocate and initialize array data to write */
         size = (H5TOOLS_MALLOCSIZE / sizeof(double) + 1) * sizeof(double);
-        dbuf = (double *)HDmalloc(size);
+        dbuf = (double *)malloc(size);
 
         for (jj = 0; jj < (H5TOOLS_MALLOCSIZE / sizeof(double) + 1); jj++)
             dbuf[jj] = (double)jj;
@@ -8114,7 +8082,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
         H5Dclose(ldid);
         H5Tclose(ltid);
         H5Sclose(lsid);
-        HDfree(dbuf);
+        free(dbuf);
     }
 
     /*-------------------------------------------------------------------------
@@ -8229,7 +8197,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     n = 0;
     for (i = 0; i < 3; i++)
         for (j = 0; j < 2; j++) {
-            buf52[i][j].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((size_t)(i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++) {
                 if (make_diffs)
@@ -8408,7 +8376,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     for (i = 0; i < 4; i++)
         for (j = 0; j < 3; j++)
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((size_t)(i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++) {
                     if (make_diffs)
@@ -8500,10 +8468,10 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
     int                          i;
 
     /* allocate the buffer for write the references */
-    rbuf = (hdset_reg_ref_t *)HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
+    rbuf = (hdset_reg_ref_t *)calloc((size_t)2, sizeof(hdset_reg_ref_t));
 
     /* allocate the buffer for write the data dataset */
-    buf = (int *)HDmalloc(10 * 10 * sizeof(int));
+    buf = (int *)malloc(10 * 10 * sizeof(int));
 
     for (i = 0; i < 10 * 10; i++)
         buf[i] = i;
@@ -8579,8 +8547,8 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
     status = H5Sclose(sid2);
     assert(status >= 0);
 
-    HDfree(rbuf);
-    HDfree(buf);
+    free(rbuf);
+    free(buf);
 }
 
 /*-------------------------------------------------------------------------
@@ -8631,7 +8599,7 @@ test_hyperslab(const char *fname, int make_diffs /* flag to modify data buffers 
         goto out;
 
     /* create a evenly divided buffer from 0 to 127  */
-    buf = (char *)HDmalloc((size_t)(nelmts * size));
+    buf = (char *)malloc((size_t)(nelmts * size));
     s   = 1024 * 1024 / 127;
     for (i = 0, j = 0, c = 0; i < 1024 * 1024; j++, i++) {
         if (j == s) {
@@ -8640,11 +8608,11 @@ test_hyperslab(const char *fname, int make_diffs /* flag to modify data buffers 
         }
 
         /* set the hyperslab values */
-        HDmemset(buf, c, nelmts);
+        memset(buf, c, nelmts);
 
         /* make a different hyperslab at this position */
         if (make_diffs && i == 512 * 512)
-            HDmemset(buf, 0, nelmts);
+            memset(buf, 0, nelmts);
 
         hs_start[0] = (unsigned long long)i * GBLL / (1024 * 1024);
         if (H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL) < 0)
@@ -8656,7 +8624,7 @@ test_hyperslab(const char *fname, int make_diffs /* flag to modify data buffers 
                 goto out;
         }
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     /* close */

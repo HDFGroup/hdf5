@@ -10,13 +10,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Vailin Choi
- *              Feb 20, 2014
- *
- * This file contains tests for:
- *  H5Odisable_mdc_flushes()
- *  H5Oenable_mdc_flushes()
- *  H5Oare_mdc_flushes_disabled()
+/*
+ *      This file contains tests for:
+ *          * H5Odisable_mdc_flushes()
+ *          * H5Oenable_mdc_flushes()
+ *          * H5Oare_mdc_flushes_disabled()
  */
 #include "h5test.h"
 
@@ -85,8 +83,6 @@ static unsigned verify_multiple_cork(hbool_t swmr);
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -141,9 +137,9 @@ verify_old_dset_cork(void)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(100, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         buf[i] = buf_data + (i * 20);
@@ -255,8 +251,8 @@ verify_old_dset_cork(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return 0;
@@ -277,8 +273,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return 1;
 } /* verify_old_dset_cork */
@@ -291,8 +287,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -497,8 +491,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -653,9 +645,9 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(100, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         buf[i] = buf_data + (i * 20);
@@ -719,8 +711,8 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return 0;
@@ -740,8 +732,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return 1;
 } /* verify_dset_cork */
@@ -754,8 +746,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -923,8 +913,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1200,8 +1188,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1576,8 +1562,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1878,8 +1862,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2001,9 +1983,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (wbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+    if (NULL == (wbuf_data = (int *)calloc(DIMS0 * DIMS1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (wbuf = (int **)HDcalloc(DIMS0, sizeof(wbuf_data))))
+    if (NULL == (wbuf = (int **)calloc(DIMS0, sizeof(wbuf_data))))
         TEST_ERROR;
     for (i = 0; i < DIMS0; i++)
         wbuf[i] = wbuf_data + (i * DIMS1);
@@ -2048,7 +2030,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (rbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+    if (NULL == (rbuf_data = (int *)calloc(DIMS0 * DIMS1, sizeof(int))))
         TEST_ERROR;
 
     /* Read from the dataset */
@@ -2195,9 +2177,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
 
-    HDfree(wbuf);
-    HDfree(wbuf_data);
-    HDfree(rbuf_data);
+    free(wbuf);
+    free(wbuf_data);
+    free(rbuf_data);
 
     PASSED();
     return 0;
@@ -2217,9 +2199,9 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(wbuf);
-    HDfree(wbuf_data);
-    HDfree(rbuf_data);
+    free(wbuf);
+    free(wbuf_data);
+    free(rbuf_data);
 
     return 1;
 
@@ -2233,8 +2215,6 @@ error:
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */

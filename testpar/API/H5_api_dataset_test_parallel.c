@@ -215,7 +215,7 @@ test_write_dataset_data_verification(void)
                     data_size *= dims[i];
                 data_size *= DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE;
 
-                if (NULL != (write_buf = HDmalloc(data_size))) {
+                if (NULL != (write_buf = malloc(data_size))) {
                     for (i = 0; i < data_size / DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE; i++)
                         ((int *)write_buf)[i] = (int)i;
 
@@ -227,7 +227,7 @@ test_write_dataset_data_verification(void)
                     op_failed = TRUE;
 
                 if (write_buf) {
-                    HDfree(write_buf);
+                    free(write_buf);
                     write_buf = NULL;
                 }
             }
@@ -317,7 +317,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (NULL ==
-                (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE))) {
+                (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_all_read);
@@ -338,7 +338,7 @@ test_write_dataset_data_verification(void)
                 }
 
             if (read_buf) {
-                HDfree(read_buf);
+                free(read_buf);
                 read_buf = NULL;
             }
 
@@ -347,11 +347,11 @@ test_write_dataset_data_verification(void)
         PART_END(H5Dwrite_all_read);
 
         if (write_buf) {
-            HDfree(write_buf);
+            free(write_buf);
             write_buf = NULL;
         }
         if (read_buf) {
-            HDfree(read_buf);
+            free(read_buf);
             read_buf = NULL;
         }
         if (fspace_id >= 0) {
@@ -379,7 +379,7 @@ test_write_dataset_data_verification(void)
                 data_size *= dims[i];
             data_size *= DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 PART_ERROR(H5Dwrite_hyperslab_read);
@@ -442,7 +442,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -525,7 +525,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (NULL ==
-                (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE))) {
+                (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_hyperslab_read);
@@ -553,7 +553,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (read_buf) {
-                HDfree(read_buf);
+                free(read_buf);
                 read_buf = NULL;
             }
 
@@ -562,11 +562,11 @@ test_write_dataset_data_verification(void)
         PART_END(H5Dwrite_hyperslab_read);
 
         if (write_buf) {
-            HDfree(write_buf);
+            free(write_buf);
             write_buf = NULL;
         }
         if (read_buf) {
-            HDfree(read_buf);
+            free(read_buf);
             read_buf = NULL;
         }
         if (fspace_id >= 0) {
@@ -602,7 +602,7 @@ test_write_dataset_data_verification(void)
                 data_size *= dims[i];
             data_size *= DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -612,9 +612,9 @@ test_write_dataset_data_verification(void)
             for (i = 0; i < data_size / DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE; i++)
                 ((int *)write_buf)[i] = mpi_size - mpi_rank;
 
-            if (NULL == (points = HDmalloc(DATASET_WRITE_DATA_VERIFY_TEST_SPACE_RANK *
-                                           (data_size / DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE) *
-                                           sizeof(hsize_t)))) {
+            if (NULL == (points = malloc(DATASET_WRITE_DATA_VERIFY_TEST_SPACE_RANK *
+                                         (data_size / DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE) *
+                                         sizeof(hsize_t)))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for point selection\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -676,7 +676,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -759,7 +759,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (NULL ==
-                (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE))) {
+                (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -787,7 +787,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (read_buf) {
-                HDfree(read_buf);
+                free(read_buf);
                 read_buf = NULL;
             }
 
@@ -796,15 +796,15 @@ test_write_dataset_data_verification(void)
         PART_END(H5Dwrite_point_sel_read);
 
         if (write_buf) {
-            HDfree(write_buf);
+            free(write_buf);
             write_buf = NULL;
         }
         if (read_buf) {
-            HDfree(read_buf);
+            free(read_buf);
             read_buf = NULL;
         }
         if (points) {
-            HDfree(points);
+            free(points);
             points = NULL;
         }
         if (fspace_id >= 0) {
@@ -837,22 +837,22 @@ test_write_dataset_data_verification(void)
     TESTING_2("test cleanup");
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (points) {
-        HDfree(points);
+        free(points);
         points = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -873,13 +873,13 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (points)
-            HDfree(points);
+            free(points);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -988,7 +988,7 @@ test_write_dataset_independent(void)
         data_size *= dims[i];
     data_size *= DATASET_INDEPENDENT_WRITE_TEST_DTYPE_SIZE;
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         goto error;
@@ -1066,7 +1066,7 @@ test_write_dataset_independent(void)
     END_INDEPENDENT_OP(dset_write);
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
@@ -1139,7 +1139,7 @@ test_write_dataset_independent(void)
         goto error;
     }
 
-    if (NULL == (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_INDEPENDENT_WRITE_TEST_DTYPE_SIZE))) {
+    if (NULL == (read_buf = malloc((hsize_t)space_npoints * DATASET_INDEPENDENT_WRITE_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -1186,12 +1186,12 @@ test_write_dataset_independent(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -1218,11 +1218,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id1);
@@ -1319,7 +1319,7 @@ test_write_dataset_one_proc_0_selection(void)
     BEGIN_INDEPENDENT_OP(write_buf_alloc)
     {
         if (!MAINPROCESS) {
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(write_buf_alloc);
@@ -1376,7 +1376,7 @@ test_write_dataset_one_proc_0_selection(void)
     END_INDEPENDENT_OP(dset_write);
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
     if (mspace_id >= 0) {
@@ -1457,8 +1457,7 @@ test_write_dataset_one_proc_0_selection(void)
         goto error;
     }
 
-    if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_ONE_PROC_0_SEL_TEST_DTYPE_SIZE))) {
+    if (NULL == (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_ONE_PROC_0_SEL_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -1487,12 +1486,12 @@ test_write_dataset_one_proc_0_selection(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -1517,11 +1516,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -1617,7 +1616,7 @@ test_write_dataset_one_proc_none_selection(void)
     BEGIN_INDEPENDENT_OP(write_buf_alloc)
     {
         if (!MAINPROCESS) {
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(write_buf_alloc);
@@ -1687,7 +1686,7 @@ test_write_dataset_one_proc_none_selection(void)
     END_INDEPENDENT_OP(dset_write);
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
     if (mspace_id >= 0) {
@@ -1770,7 +1769,7 @@ test_write_dataset_one_proc_none_selection(void)
     }
 
     if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_ONE_PROC_NONE_SEL_TEST_DTYPE_SIZE))) {
+        (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_ONE_PROC_NONE_SEL_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -1800,12 +1799,12 @@ test_write_dataset_one_proc_none_selection(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -1830,11 +1829,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -1927,7 +1926,7 @@ test_write_dataset_one_proc_all_selection(void)
     BEGIN_INDEPENDENT_OP(write_buf_alloc)
     {
         if (MAINPROCESS) {
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(write_buf_alloc);
@@ -1983,7 +1982,7 @@ test_write_dataset_one_proc_all_selection(void)
     END_INDEPENDENT_OP(dset_write);
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
     if (mspace_id >= 0) {
@@ -2066,7 +2065,7 @@ test_write_dataset_one_proc_all_selection(void)
     }
 
     if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_ONE_PROC_ALL_SEL_TEST_DTYPE_SIZE))) {
+        (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_ONE_PROC_ALL_SEL_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -2088,12 +2087,12 @@ test_write_dataset_one_proc_all_selection(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -2118,11 +2117,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -2221,7 +2220,7 @@ test_write_dataset_hyper_file_all_mem(void)
         data_size *= dims[i];
     data_size *= DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_DTYPE_SIZE;
 
-    if (NULL == (write_buf = HDmalloc(data_size))) {
+    if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         goto error;
@@ -2258,7 +2257,7 @@ test_write_dataset_hyper_file_all_mem(void)
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
     if (fspace_id >= 0) {
@@ -2333,7 +2332,7 @@ test_write_dataset_hyper_file_all_mem(void)
     }
 
     if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_DTYPE_SIZE))) {
+        (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -2360,12 +2359,12 @@ test_write_dataset_hyper_file_all_mem(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -2394,11 +2393,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -2497,7 +2496,7 @@ test_write_dataset_all_file_hyper_mem(void)
              * buffer in order to prove that the mapping from hyperslab selection <-> all
              * selection works correctly.
              */
-            if (NULL == (write_buf = HDmalloc(2 * data_size))) {
+            if (NULL == (write_buf = malloc(2 * data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(write_buf_alloc);
@@ -2552,7 +2551,7 @@ test_write_dataset_all_file_hyper_mem(void)
     END_INDEPENDENT_OP(dset_write);
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
     if (mspace_id >= 0) {
@@ -2635,7 +2634,7 @@ test_write_dataset_all_file_hyper_mem(void)
     }
 
     if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_ALL_FILE_HYPER_MEM_TEST_DTYPE_SIZE))) {
+        (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_ALL_FILE_HYPER_MEM_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -2657,12 +2656,12 @@ test_write_dataset_all_file_hyper_mem(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -2687,11 +2686,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -2805,7 +2804,7 @@ test_write_dataset_all_file_point_mem(void)
              * buffer in order to prove that the mapping from point selection <-> all
              * selection works correctly.
              */
-            if (NULL == (write_buf = HDmalloc(2 * data_size))) {
+            if (NULL == (write_buf = malloc(2 * data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(write_buf_alloc);
@@ -2839,8 +2838,8 @@ test_write_dataset_all_file_point_mem(void)
                 INDEPENDENT_OP_ERROR(dset_write);
             }
 
-            if (NULL == (points = HDmalloc((data_size / DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_DTYPE_SIZE) *
-                                           sizeof(hsize_t)))) {
+            if (NULL == (points = malloc((data_size / DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_DTYPE_SIZE) *
+                                         sizeof(hsize_t)))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for point selection\n");
                 INDEPENDENT_OP_ERROR(dset_write);
@@ -2872,11 +2871,11 @@ test_write_dataset_all_file_point_mem(void)
     END_INDEPENDENT_OP(dset_write);
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
     if (points) {
-        HDfree(points);
+        free(points);
         points = NULL;
     }
     if (mspace_id >= 0) {
@@ -2959,7 +2958,7 @@ test_write_dataset_all_file_point_mem(void)
     }
 
     if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_DTYPE_SIZE))) {
+        (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -2981,12 +2980,12 @@ test_write_dataset_all_file_point_mem(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -3011,13 +3010,13 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (points)
-            HDfree(points);
+            free(points);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -3117,7 +3116,7 @@ test_write_dataset_hyper_file_point_mem(void)
      * buffer in order to prove that the mapping from point selection <-> hyperslab
      * selection works correctly.
      */
-    if (NULL == (write_buf = HDmalloc(2 * data_size))) {
+    if (NULL == (write_buf = malloc(2 * data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         goto error;
@@ -3161,8 +3160,8 @@ test_write_dataset_hyper_file_point_mem(void)
             goto error;
         }
 
-        if (NULL == (points = HDmalloc((data_size / DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_DTYPE_SIZE) *
-                                       sizeof(hsize_t)))) {
+        if (NULL == (points = malloc((data_size / DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_DTYPE_SIZE) *
+                                     sizeof(hsize_t)))) {
             H5_FAILED();
             printf("    couldn't allocate buffer for point selection\n");
             goto error;
@@ -3190,11 +3189,11 @@ test_write_dataset_hyper_file_point_mem(void)
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
     if (points) {
-        HDfree(points);
+        free(points);
         points = NULL;
     }
     if (mspace_id >= 0) {
@@ -3277,7 +3276,7 @@ test_write_dataset_hyper_file_point_mem(void)
     }
 
     if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_DTYPE_SIZE))) {
+        (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -3305,12 +3304,12 @@ test_write_dataset_hyper_file_point_mem(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -3335,13 +3334,13 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (points)
-            HDfree(points);
+            free(points);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -3437,7 +3436,7 @@ test_write_dataset_point_file_hyper_mem(void)
      * buffer in order to prove that the mapping from hyperslab selection <-> point
      * selection works correctly.
      */
-    if (NULL == (write_buf = HDmalloc(2 * data_size))) {
+    if (NULL == (write_buf = malloc(2 * data_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset write\n");
         goto error;
@@ -3451,8 +3450,8 @@ test_write_dataset_point_file_hyper_mem(void)
             ((int *)write_buf)[i] = 0;
     }
 
-    if (NULL == (points = HDmalloc((data_size / DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_DTYPE_SIZE) *
-                                   DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_SPACE_RANK * sizeof(hsize_t)))) {
+    if (NULL == (points = malloc((data_size / DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_DTYPE_SIZE) *
+                                 DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_SPACE_RANK * sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for point selection\n");
         goto error;
@@ -3508,11 +3507,11 @@ test_write_dataset_point_file_hyper_mem(void)
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
     if (points) {
-        HDfree(points);
+        free(points);
         points = NULL;
     }
     if (mspace_id >= 0) {
@@ -3595,7 +3594,7 @@ test_write_dataset_point_file_hyper_mem(void)
     }
 
     if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_DTYPE_SIZE))) {
+        (read_buf = malloc((hsize_t)space_npoints * DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_DTYPE_SIZE))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -3623,12 +3622,12 @@ test_write_dataset_point_file_hyper_mem(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -3653,13 +3652,13 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (points)
-            HDfree(points);
+            free(points);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -3758,7 +3757,7 @@ test_read_dataset_one_proc_0_selection(void)
                 data_size *= dims[i];
             data_size *= DATASET_READ_ONE_PROC_0_SEL_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -3793,7 +3792,7 @@ test_read_dataset_one_proc_0_selection(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -3889,7 +3888,7 @@ test_read_dataset_one_proc_0_selection(void)
             read_buf_size =
                 ((size_t)(space_npoints / mpi_size) * DATASET_READ_ONE_PROC_0_SEL_TEST_DTYPE_SIZE);
 
-            if (NULL == (read_buf = HDmalloc(read_buf_size))) {
+            if (NULL == (read_buf = malloc(read_buf_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset read\n");
                 INDEPENDENT_OP_ERROR(read_buf_alloc);
@@ -3957,12 +3956,12 @@ test_read_dataset_one_proc_0_selection(void)
     END_INDEPENDENT_OP(data_verify);
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -3989,11 +3988,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -4093,7 +4092,7 @@ test_read_dataset_one_proc_none_selection(void)
                 data_size *= dims[i];
             data_size *= DATASET_READ_ONE_PROC_NONE_SEL_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -4128,7 +4127,7 @@ test_read_dataset_one_proc_none_selection(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -4225,7 +4224,7 @@ test_read_dataset_one_proc_none_selection(void)
             read_buf_size =
                 ((size_t)(space_npoints / mpi_size) * DATASET_READ_ONE_PROC_NONE_SEL_TEST_DTYPE_SIZE);
 
-            if (NULL == (read_buf = HDmalloc(read_buf_size))) {
+            if (NULL == (read_buf = malloc(read_buf_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset read\n");
                 INDEPENDENT_OP_ERROR(read_buf_alloc);
@@ -4306,12 +4305,12 @@ test_read_dataset_one_proc_none_selection(void)
     END_INDEPENDENT_OP(data_verify);
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -4338,11 +4337,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -4439,7 +4438,7 @@ test_read_dataset_one_proc_all_selection(void)
                 data_size *= dims[i];
             data_size *= DATASET_READ_ONE_PROC_ALL_SEL_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -4474,7 +4473,7 @@ test_read_dataset_one_proc_all_selection(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -4569,7 +4568,7 @@ test_read_dataset_one_proc_all_selection(void)
         if (MAINPROCESS) {
             read_buf_size = (size_t)space_npoints * DATASET_READ_ONE_PROC_ALL_SEL_TEST_DTYPE_SIZE;
 
-            if (NULL == (read_buf = HDmalloc(read_buf_size))) {
+            if (NULL == (read_buf = malloc(read_buf_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset read\n");
                 INDEPENDENT_OP_ERROR(read_buf_alloc);
@@ -4643,12 +4642,12 @@ test_read_dataset_one_proc_all_selection(void)
     END_INDEPENDENT_OP(data_verify);
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -4675,11 +4674,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -4791,7 +4790,7 @@ test_read_dataset_all_file_hyper_mem(void)
                 data_size *= dims[i];
             data_size *= DATASET_READ_ALL_FILE_HYPER_MEM_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -4828,7 +4827,7 @@ test_read_dataset_all_file_hyper_mem(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -4938,7 +4937,7 @@ test_read_dataset_all_file_hyper_mem(void)
              * selection works correctly.
              */
             read_buf_size = (size_t)(2 * space_npoints) * DATASET_READ_ALL_FILE_HYPER_MEM_TEST_DTYPE_SIZE;
-            if (NULL == (read_buf = HDcalloc(1, read_buf_size))) {
+            if (NULL == (read_buf = calloc(1, read_buf_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset read\n");
                 INDEPENDENT_OP_ERROR(dset_read);
@@ -4992,12 +4991,12 @@ test_read_dataset_all_file_hyper_mem(void)
     END_INDEPENDENT_OP(dset_read);
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -5022,11 +5021,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -5139,7 +5138,7 @@ test_read_dataset_all_file_point_mem(void)
                 data_size *= dims[i];
             data_size *= DATASET_READ_ALL_FILE_POINT_MEM_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -5176,7 +5175,7 @@ test_read_dataset_all_file_point_mem(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -5283,7 +5282,7 @@ test_read_dataset_all_file_point_mem(void)
              * selection works correctly.
              */
             read_buf_size = (size_t)(2 * space_npoints) * DATASET_READ_ALL_FILE_POINT_MEM_TEST_DTYPE_SIZE;
-            if (NULL == (read_buf = HDcalloc(1, read_buf_size))) {
+            if (NULL == (read_buf = calloc(1, read_buf_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset read\n");
                 INDEPENDENT_OP_ERROR(dset_read);
@@ -5295,7 +5294,7 @@ test_read_dataset_all_file_point_mem(void)
                 INDEPENDENT_OP_ERROR(dset_read);
             }
 
-            if (NULL == (points = HDmalloc((size_t)space_npoints * sizeof(hsize_t)))) {
+            if (NULL == (points = malloc((size_t)space_npoints * sizeof(hsize_t)))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for point selection\n");
                 INDEPENDENT_OP_ERROR(dset_read);
@@ -5348,17 +5347,17 @@ test_read_dataset_all_file_point_mem(void)
     END_INDEPENDENT_OP(dset_read);
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (points) {
-        HDfree(points);
+        free(points);
         points = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -5383,13 +5382,13 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (points)
-            HDfree(points);
+            free(points);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -5492,7 +5491,7 @@ test_read_dataset_hyper_file_point_mem(void)
                 data_size *= dims[i];
             data_size *= DATASET_READ_HYPER_FILE_POINT_MEM_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -5529,7 +5528,7 @@ test_read_dataset_hyper_file_point_mem(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -5626,7 +5625,7 @@ test_read_dataset_hyper_file_point_mem(void)
      * selection works correctly.
      */
     read_buf_size = (2 * (size_t)(space_npoints / mpi_size) * DATASET_READ_ONE_PROC_NONE_SEL_TEST_DTYPE_SIZE);
-    if (NULL == (read_buf = HDcalloc(1, read_buf_size))) {
+    if (NULL == (read_buf = calloc(1, read_buf_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -5662,7 +5661,7 @@ test_read_dataset_hyper_file_point_mem(void)
             goto error;
         }
 
-        if (NULL == (points = HDmalloc((size_t)(space_npoints / mpi_size) * sizeof(hsize_t)))) {
+        if (NULL == (points = malloc((size_t)(space_npoints / mpi_size) * sizeof(hsize_t)))) {
             H5_FAILED();
             printf("    couldn't allocate buffer for point selection\n");
             goto error;
@@ -5706,17 +5705,17 @@ test_read_dataset_hyper_file_point_mem(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (points) {
-        HDfree(points);
+        free(points);
         points = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -5741,13 +5740,13 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (points)
-            HDfree(points);
+            free(points);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -5846,7 +5845,7 @@ test_read_dataset_point_file_hyper_mem(void)
                 data_size *= dims[i];
             data_size *= DATASET_READ_POINT_FILE_HYPER_MEM_TEST_DTYPE_SIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -5883,7 +5882,7 @@ test_read_dataset_point_file_hyper_mem(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
             if (mspace_id >= 0) {
@@ -5981,15 +5980,15 @@ test_read_dataset_point_file_hyper_mem(void)
      */
     read_buf_size =
         (2 * (size_t)(space_npoints / mpi_size) * DATASET_READ_POINT_FILE_HYPER_MEM_TEST_DTYPE_SIZE);
-    if (NULL == (read_buf = HDcalloc(1, read_buf_size))) {
+    if (NULL == (read_buf = calloc(1, read_buf_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset read\n");
         goto error;
     }
 
-    if (NULL == (points = HDmalloc((size_t)((space_npoints / mpi_size) *
-                                            DATASET_READ_POINT_FILE_HYPER_MEM_TEST_SPACE_RANK) *
-                                   sizeof(hsize_t)))) {
+    if (NULL == (points = malloc((size_t)((space_npoints / mpi_size) *
+                                          DATASET_READ_POINT_FILE_HYPER_MEM_TEST_SPACE_RANK) *
+                                 sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for point selection\n");
         goto error;
@@ -6061,17 +6060,17 @@ test_read_dataset_point_file_hyper_mem(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
     if (points) {
-        HDfree(points);
+        free(points);
         points = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -6098,13 +6097,13 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (points)
-            HDfree(points);
+            free(points);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -6166,14 +6165,14 @@ test_write_multi_chunk_dataset_same_shape_read(void)
     }
 
     if (NULL ==
-        (dims = HDmalloc(DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK * sizeof(hsize_t)))) {
+        (dims = malloc(DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK * sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset dimensionality\n");
         goto error;
     }
 
-    if (NULL == (chunk_dims = HDmalloc(DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK *
-                                       sizeof(hsize_t)))) {
+    if (NULL == (chunk_dims = malloc(DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK *
+                                     sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset dimensionality\n");
         goto error;
@@ -6286,7 +6285,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
                 }
             }
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -6360,7 +6359,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
 
@@ -6527,12 +6526,12 @@ test_write_multi_chunk_dataset_same_shape_read(void)
     }
 
     if (chunk_dims) {
-        HDfree(chunk_dims);
+        free(chunk_dims);
         chunk_dims = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -6559,11 +6558,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (chunk_dims)
-            HDfree(chunk_dims);
+            free(chunk_dims);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Pclose(dcpl_id);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
@@ -6629,14 +6628,14 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
     }
 
     if (NULL ==
-        (dims = HDmalloc(DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK * sizeof(hsize_t)))) {
+        (dims = malloc(DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK * sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset dimensionality\n");
         goto error;
     }
 
-    if (NULL == (chunk_dims = HDmalloc(DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK *
-                                       sizeof(hsize_t)))) {
+    if (NULL == (chunk_dims = malloc(DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK *
+                                     sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset dimensionality\n");
         goto error;
@@ -6749,7 +6748,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
                 }
             }
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -6823,7 +6822,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
 
@@ -6992,12 +6991,12 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
     }
 
     if (chunk_dims) {
-        HDfree(chunk_dims);
+        free(chunk_dims);
         chunk_dims = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
@@ -7024,11 +7023,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (chunk_dims)
-            HDfree(chunk_dims);
+            free(chunk_dims);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Pclose(dcpl_id);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
@@ -7093,15 +7092,15 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
         return 0;
     }
 
-    if (NULL == (dims = HDmalloc(DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK *
-                                 sizeof(hsize_t)))) {
+    if (NULL == (dims = malloc(DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK *
+                               sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset dimensionality\n");
         goto error;
     }
 
-    if (NULL == (chunk_dims = HDmalloc(DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK *
-                                       sizeof(hsize_t)))) {
+    if (NULL == (chunk_dims = malloc(DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK *
+                                     sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset dimensionality\n");
         goto error;
@@ -7222,7 +7221,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
                 }
             }
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -7514,17 +7513,17 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
     }
 
     if (chunk_dims) {
-        HDfree(chunk_dims);
+        free(chunk_dims);
         chunk_dims = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
@@ -7547,11 +7546,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (chunk_dims)
-            HDfree(chunk_dims);
+            free(chunk_dims);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Pclose(dcpl_id);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
@@ -7619,15 +7618,15 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
         return 0;
     }
 
-    if (NULL == (dims = HDmalloc(DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK *
-                                 sizeof(hsize_t)))) {
+    if (NULL == (dims = malloc(DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK *
+                               sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset dimensionality\n");
         goto error;
     }
 
-    if (NULL == (chunk_dims = HDmalloc(DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK *
-                                       sizeof(hsize_t)))) {
+    if (NULL == (chunk_dims = malloc(DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK *
+                                     sizeof(hsize_t)))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for dataset dimensionality\n");
         goto error;
@@ -7748,7 +7747,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
                 }
             }
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 printf("    couldn't allocate buffer for dataset write\n");
                 INDEPENDENT_OP_ERROR(dset_create);
@@ -8042,17 +8041,17 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
     }
 
     if (chunk_dims) {
-        HDfree(chunk_dims);
+        free(chunk_dims);
         chunk_dims = NULL;
     }
 
     if (dims) {
-        HDfree(dims);
+        free(dims);
         dims = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
@@ -8075,11 +8074,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (chunk_dims)
-            HDfree(chunk_dims);
+            free(chunk_dims);
         if (dims)
-            HDfree(dims);
+            free(dims);
         H5Pclose(dcpl_id);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);

@@ -164,7 +164,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_
     /* Magic */
     if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, image_end))
         HGOTO_ERROR(H5E_SYM, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    if (HDmemcmp(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "bad symbol table node signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -268,7 +268,7 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len, void *_thing
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
 
     /* Clear rest of symbol table node */
-    HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+    memset(image, 0, len - (size_t)(image - (uint8_t *)_image));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

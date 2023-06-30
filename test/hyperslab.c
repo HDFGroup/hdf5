@@ -10,14 +10,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke
- *        Friday, October 10, 1997
- *
- * Purpose:    Hyperslab operations are rather complex, so this file
- *        attempts to test them extensively so we can be relatively
- *        sure they really work.    We only test 1d, 2d, and 3d cases
- *        because testing general dimensionalities would require us to
- *        rewrite much of the hyperslab stuff.
+/*
+ * Purpose: Hyperslab operations are rather complex, so this file
+ *          attempts to test them extensively so we can be relatively
+ *          sure they really work.    We only test 1d, 2d, and 3d cases
+ *          because testing general dimensionalities would require us to
+ *          rewrite much of the hyperslab stuff.
  */
 #include "h5test.h"
 #include "H5VMprivate.h"
@@ -38,9 +36,6 @@
  * Purpose:    Initialize full array.
  *
  * Return:    void
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -69,9 +64,6 @@ init_full(uint8_t *array, size_t nx, size_t ny, size_t nz)
  * Purpose:    Prints the values in an array
  *
  * Return:    void
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -107,9 +99,6 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
  *
  *        Failure:
  *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -117,12 +106,12 @@ print_ref(size_t nx, size_t ny, size_t nz)
 {
     uint8_t *array;
 
-    if (NULL != (array = (uint8_t *)HDmalloc(nx * ny * nz))) {
+    if (NULL != (array = (uint8_t *)malloc(nx * ny * nz))) {
         printf("Reference array:\n");
         init_full(array, nx, ny, nz);
         print_array(array, nx, ny, nz);
-        HDfree(array);
-    } /* end if */
+        free(array);
+    }
 } /* end print_ref() */
 
 /*-------------------------------------------------------------------------
@@ -133,9 +122,6 @@ print_ref(size_t nx, size_t ny, size_t nz)
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -176,10 +162,10 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
     } /* end else */
     HDsnprintf(s, sizeof(s), "Testing hyperslab fill %-11s variable hyperslab", dim);
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Allocate array */
-    if (NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
+    if (NULL == (dst = (uint8_t *)calloc((size_t)1, nx * ny * nz)))
         TEST_ERROR;
 
     init_full(dst, nx, ny, nz);
@@ -258,13 +244,13 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
 
     PASSED();
 
-    HDfree(dst);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (dst)
-        HDfree(dst);
+        free(dst);
     return FAIL;
 } /* end test_fill() */
 
@@ -288,9 +274,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -365,14 +348,14 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
 
     HDsnprintf(s, sizeof(s), "Testing hyperslab copy %-11s %s", dim, sub);
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
 
     /*
      * Allocate arrays
      */
-    if (NULL == (src = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
+    if (NULL == (src = (uint8_t *)calloc((size_t)1, nx * ny * nz)))
         TEST_ERROR;
-    if (NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
+    if (NULL == (dst = (uint8_t *)calloc((size_t)1, nx * ny * nz)))
         TEST_ERROR;
 
     init_full(src, nx, ny, nz);
@@ -527,16 +510,16 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
 
     PASSED();
 
-    HDfree(src);
-    HDfree(dst);
+    free(src);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (src)
-        HDfree(src);
+        free(src);
     if (dst)
-        HDfree(dst);
+        free(dst);
 
     return FAIL;
 } /* end test_copy() */
@@ -553,9 +536,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -574,12 +554,12 @@ test_multifill(size_t nx)
     hsize_t i, j;
 
     printf("%-70s", "Testing multi-byte fill value");
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Initialize the source and destination */
-    if (NULL == (src = (struct a_struct *)HDmalloc(nx * sizeof(*src))))
+    if (NULL == (src = (struct a_struct *)malloc(nx * sizeof(*src))))
         TEST_ERROR;
-    if (NULL == (dst = (struct a_struct *)HDmalloc(nx * sizeof(*dst))))
+    if (NULL == (dst = (struct a_struct *)malloc(nx * sizeof(*dst))))
         TEST_ERROR;
 
     for (i = 0; i < nx; i++) {
@@ -645,16 +625,16 @@ test_multifill(size_t nx)
 
     PASSED();
 
-    HDfree(src);
-    HDfree(dst);
+    free(src);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (src)
-        HDfree(src);
+        free(src);
     if (dst)
-        HDfree(dst);
+        free(dst);
 
     return FAIL;
 } /* end test_multifill() */
@@ -670,9 +650,6 @@ error:
  *
  *        Failure:    FAIL
  *
- * Programmer:    Robb Matzke
- *        Saturday, October 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -686,12 +663,12 @@ test_endian(size_t nx)
     hsize_t  i, j;
 
     printf("%-70s", "Testing endian conversion by stride");
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Initialize arrays */
-    if (NULL == (src = (uint8_t *)HDmalloc(nx * 4)))
+    if (NULL == (src = (uint8_t *)malloc(nx * 4)))
         TEST_ERROR;
-    if (NULL == (dst = (uint8_t *)HDcalloc(nx, (size_t)4)))
+    if (NULL == (dst = (uint8_t *)calloc(nx, (size_t)4)))
         TEST_ERROR;
 
     init_full(src, nx, (size_t)4, (size_t)1);
@@ -731,16 +708,16 @@ test_endian(size_t nx)
 
     PASSED();
 
-    HDfree(src);
-    HDfree(dst);
+    free(src);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (src)
-        HDfree(src);
+        free(src);
     if (dst)
-        HDfree(dst);
+        free(dst);
 
     return FAIL;
 } /* end test_endian() */
@@ -754,9 +731,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -773,12 +747,12 @@ test_transpose(size_t nx, size_t ny)
     HDsnprintf(s, sizeof(s), "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx,
                (unsigned long)ny);
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Initialize */
-    if (NULL == (src = (int *)HDmalloc(nx * ny * sizeof(*src))))
+    if (NULL == (src = (int *)malloc(nx * ny * sizeof(*src))))
         TEST_ERROR;
-    if (NULL == (dst = (int *)HDcalloc(nx * ny, sizeof(*dst))))
+    if (NULL == (dst = (int *)calloc(nx * ny, sizeof(*dst))))
         TEST_ERROR;
 
     for (i = 0; i < nx; i++)
@@ -826,16 +800,16 @@ test_transpose(size_t nx, size_t ny)
 
     PASSED();
 
-    HDfree(src);
-    HDfree(dst);
+    free(src);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (src)
-        HDfree(src);
+        free(src);
     if (dst)
-        HDfree(dst);
+        free(dst);
 
     return FAIL;
 } /* end test_transpose() */
@@ -851,9 +825,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Monday, October 13, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -872,14 +843,14 @@ test_sub_super(size_t nx, size_t ny)
     HDsnprintf(s, sizeof(s), "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)(2 * nx),
                (unsigned long)(2 * ny), (unsigned long)nx, (unsigned long)ny);
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Initialize */
-    if (NULL == (full = (uint8_t *)HDmalloc(4 * nx * ny)))
+    if (NULL == (full = (uint8_t *)malloc(4 * nx * ny)))
         TEST_ERROR;
-    if (NULL == (half = (uint8_t *)HDcalloc((size_t)1, nx * ny)))
+    if (NULL == (half = (uint8_t *)calloc((size_t)1, nx * ny)))
         TEST_ERROR;
-    if (NULL == (twice = (uint8_t *)HDcalloc((size_t)4, nx * ny)))
+    if (NULL == (twice = (uint8_t *)calloc((size_t)4, nx * ny)))
         TEST_ERROR;
 
     init_full(full, 2 * nx, 2 * ny, (size_t)1);
@@ -922,7 +893,7 @@ test_sub_super(size_t nx, size_t ny)
     HDsnprintf(s, sizeof(s), "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)nx,
                (unsigned long)ny, (unsigned long)(2 * nx), (unsigned long)(2 * ny));
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Setup stride */
     size[0]       = nx;
@@ -973,19 +944,19 @@ test_sub_super(size_t nx, size_t ny)
 
     PASSED();
 
-    HDfree(full);
-    HDfree(half);
-    HDfree(twice);
+    free(full);
+    free(half);
+    free(twice);
 
     return SUCCEED;
 
 error:
     if (full)
-        HDfree(full);
+        free(full);
     if (half)
-        HDfree(half);
+        free(half);
     if (twice)
-        HDfree(twice);
+        free(twice);
 
     return FAIL;
 } /* test_sub_super() */
@@ -1001,9 +972,6 @@ error:
  *
  *        Failure:    FAIL
  *
- * Programmer:    Quincey Koziol
- *        Monday, April 21, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1018,7 +986,7 @@ test_array_fill(size_t lo, size_t hi)
     TESTING(s);
 
     /* Initialize */
-    if (NULL == (dst = (int *)HDcalloc(sizeof(int), ARRAY_FILL_SIZE * hi)))
+    if (NULL == (dst = (int *)calloc(sizeof(int), ARRAY_FILL_SIZE * hi)))
         TEST_ERROR;
 
     /* Setup */
@@ -1035,18 +1003,18 @@ test_array_fill(size_t lo, size_t hi)
                 if (dst[(u * ARRAY_FILL_SIZE) + v] != src[v])
                     TEST_ERROR;
 
-        HDmemset(dst, 0, sizeof(int) * ARRAY_FILL_SIZE * w);
+        memset(dst, 0, sizeof(int) * ARRAY_FILL_SIZE * w);
     } /* end for */
 
     PASSED();
 
-    HDfree(dst);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (dst)
-        HDfree(dst);
+        free(dst);
     return FAIL;
 } /* end test_array_fill() */
 
@@ -1060,9 +1028,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Quincey Koziol
- *        Monday, April 21, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1083,7 +1048,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     TESTING(s);
 
     /* Initialize */
-    if (NULL == (a = (hsize_t *)HDmalloc(sizeof(hsize_t) * x * y * z)))
+    if (NULL == (a = (hsize_t *)malloc(sizeof(hsize_t) * x * y * z)))
         TEST_ERROR;
 
     dims[0] = z;
@@ -1125,13 +1090,13 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
 
     PASSED();
 
-    HDfree(a);
+    free(a);
 
     return SUCCEED;
 
 error:
     if (a)
-        HDfree(a);
+        free(a);
 
     return FAIL;
 } /* end test_array_offset_n_calc() */
@@ -1144,9 +1109,6 @@ error:
  *              is assumed.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1170,7 +1132,7 @@ main(int argc, char *argv[])
                 size_of_test |= TEST_MEDIUM;
             else {
                 printf("unrecognized argument: %s\n", argv[i]);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             } /* end else */
         }     /* end for */
     }         /* end else */
@@ -1387,7 +1349,7 @@ main(int argc, char *argv[])
         printf("***** %d HYPERSLAB TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
         if (HDisatty(1))
             printf("(Redirect output to a pager or a file to see debug output)\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     printf("All hyperslab tests passed.\n");
@@ -1396,5 +1358,5 @@ main(int argc, char *argv[])
     H5close();
 #endif /* H5_HAVE_THREADSAFE */
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

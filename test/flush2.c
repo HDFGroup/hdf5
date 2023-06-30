@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  * Purpose:  This is the second half of a two-part test that makes sure
  *    that a file can be read after an application crashes as long
  *    as the file was flushed first.  This half tries to read the
@@ -52,9 +49,6 @@ static hbool_t file_ok(const char *filename, hid_t fapl_id, hbool_t check_second
  *
  * Return:      TRUE/FALSE
  *
- * Programmer:	Leon Arber
- *              Oct. 4, 2006.
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -77,7 +71,7 @@ dset_ok(hid_t fid, const char *dset_name)
         goto error;
 
     /* Read the data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         goto error;
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0)
         goto error;
@@ -90,7 +84,7 @@ dset_ok(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         goto error;
 
-    HDfree(data);
+    free(data);
 
     return TRUE;
 
@@ -102,7 +96,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(data);
+    free(data);
 
     return FALSE;
 } /* end dset_ok() */
@@ -113,9 +107,6 @@ error:
  * Purpose:     Checks that the contents of a file are what they should be.
  *
  * Return:      TRUE/FALSE
- *
- * Programmer:	Leon Arber
- *              Sept. 26, 2006.
  *
  *-------------------------------------------------------------------------
  */
@@ -177,9 +168,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              July 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -230,9 +218,6 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:	Robb Matzke
- *              Friday, October 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -256,12 +241,12 @@ main(void)
 
     if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
         printf("Can't check if VFD is compatible with default VFD\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (!driver_is_default_vfd_compatible) {
         printf("Skipping SWMR tests for VFD incompatible with default VFD\n");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* TEST 1 */
@@ -437,8 +422,8 @@ main(void)
 
     h5_cleanup(FILENAME, fapl_id);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

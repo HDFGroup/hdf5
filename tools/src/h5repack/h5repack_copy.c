@@ -658,7 +658,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     int                ret_value = 0;
 
     /* init linkinfo struct */
-    HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+    memset(&linkinfo, 0, sizeof(h5tool_link_info_t));
 
     /*-------------------------------------------------------------------------
      * copy the supplied object list
@@ -877,7 +877,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
                         if ((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
-                        HDmemset(dims, 0, sizeof dims);
+                        memset(dims, 0, sizeof dims);
                         if (H5Sget_simple_extent_dims(f_space_id, dims, NULL) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
                         if (H5Dget_space_status(dset_in, &space_status) < 0)
@@ -1012,7 +1012,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     /* have to read the whole dataset if there is only one element in the
                                      * dataset */
                                     if (need < H5TOOLS_MALLOCSIZE)
-                                        buf = HDmalloc(need);
+                                        buf = malloc(need);
 
                                     /* Set up collective write if using filters in parallel */
                                     {
@@ -1061,7 +1061,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
                                         if (buf != NULL) { /* TODO: is buf potentially released by
                                                               H5Dvlen_reclaim()? */
-                                            HDfree(buf);
+                                            free(buf);
                                             buf = NULL;
                                         }
                                     }
@@ -1108,7 +1108,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                                           &hslab_nbytes) < 0)
                                             H5TOOLS_GOTO_ERROR((-1), "get_hyperslab failed");
 
-                                        hslab_buf = HDmalloc((size_t)hslab_nbytes);
+                                        hslab_buf = malloc((size_t)hslab_nbytes);
                                         if (hslab_buf == NULL)
                                             H5TOOLS_GOTO_ERROR((-1), "can't allocate space for hyperslab");
 
@@ -1116,8 +1116,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                         hslab_space  = H5Screate_simple(1, &hslab_nelmts, NULL);
 
                                         /* the hyperslab selection loop */
-                                        HDmemset(hs_sel_offset, 0, sizeof hs_sel_offset);
-                                        HDmemset(zero, 0, sizeof zero);
+                                        memset(hs_sel_offset, 0, sizeof hs_sel_offset);
+                                        memset(zero, 0, sizeof zero);
 
                                         for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_select_nelmts) {
                                             if (rank > 0) {
@@ -1189,7 +1189,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
                                         H5Sclose(hslab_space);
                                         if (hslab_buf != NULL) {
-                                            HDfree(hslab_buf);
+                                            free(hslab_buf);
                                             hslab_buf = NULL;
                                         }
                                     } /* end if reading/writing by hyperslab */
@@ -1421,7 +1421,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
                         /* free link info path */
                         if (linkinfo.trg_path)
-                            HDfree(linkinfo.trg_path);
+                            free(linkinfo.trg_path);
                         linkinfo.trg_path = NULL;
                     } /* options->merge */
                     else {
@@ -1460,7 +1460,7 @@ done:
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree(linkinfo.trg_path);
+        free(linkinfo.trg_path);
 
     H5E_BEGIN_TRY
     {
@@ -1484,9 +1484,9 @@ done:
 
     /* free */
     if (buf != NULL)
-        HDfree(buf);
+        free(buf);
     if (hslab_buf != NULL)
-        HDfree(hslab_buf);
+        free(hslab_buf);
 
     return ret_value;
 } /* end do_copy_objects() */

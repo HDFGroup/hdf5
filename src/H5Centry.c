@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Centry.c
- *              May 8 2023
- *              Quincey Koziol
  *
  * Purpose:     Routines which operate on cache entries.
  *
@@ -105,9 +103,6 @@ H5FL_SEQ_DEFINE_STATIC(H5C_cache_entry_ptr_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              3/26/09
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -153,9 +148,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              1/6/18
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -196,9 +188,6 @@ done:
  * Purpose:     Internal routine to unpin a cache entry from a client action.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              3/24/09
  *
  *-------------------------------------------------------------------------
  */
@@ -246,9 +235,6 @@ done:
  *              flush destroy).
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              2/10/16
  *
  *-------------------------------------------------------------------------
  */
@@ -388,8 +374,8 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to serialize entry")
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-    assert(0 == HDmemcmp(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
-                         H5C_IMAGE_EXTRA_SPACE));
+    assert(0 == memcmp(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
+                       H5C_IMAGE_EXTRA_SPACE));
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
     entry_ptr->image_up_to_date = TRUE;
@@ -431,8 +417,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *              an attempt to flush a protected item.
- *
- * Programmer:  John Mainzer, 5/5/04
  *
  *-------------------------------------------------------------------------
  */
@@ -932,9 +916,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  Vailin Choi
- *              9/6/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -990,8 +971,6 @@ done:
  *              core.  It does not insert it into the cache.
  *
  * Return:      Non-NULL on success / NULL on failure.
- *
- * Programmer:  John Mainzer, 5/18/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1097,7 +1076,7 @@ H5C__load_entry(H5F_t *f,
 #ifdef H5_HAVE_PARALLEL
                     if (coll_access) {
                         /* Push an error, but still participate in following MPI_Bcast */
-                        HDmemset(image, 0, len);
+                        memset(image, 0, len);
                         HDONE_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
                     }
                     else
@@ -1155,7 +1134,7 @@ H5C__load_entry(H5F_t *f,
 #ifdef H5_HAVE_PARALLEL
                                 if (coll_access) {
                                     /* Push an error, but still participate in following MPI_Bcast */
-                                    HDmemset(image + len, 0, actual_len - len);
+                                    memset(image + len, 0, actual_len - len);
                                     HDONE_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
                                 }
                                 else
@@ -1345,9 +1324,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              11/13/12
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1391,9 +1367,6 @@ done:
  *              reduced to 0.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              11/13/12
  *
  *-------------------------------------------------------------------------
  */
@@ -1439,9 +1412,6 @@ done:
  *        the target entry becoming serialized.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/30/16
  *
  *-------------------------------------------------------------------------
  */
@@ -1489,9 +1459,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              8/30/16
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1538,9 +1505,6 @@ done:
  *
  * Return:      void
  *
- * Programmer:  Neil Fortner
- *              12/10/12
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1572,8 +1536,6 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t *entry, const H5C_cache_en
  *        parameter.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer, 7/24/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1644,9 +1606,6 @@ done:
  *		      be fixed at some point.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/11/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1783,8 +1742,6 @@ done:
  * Return:      SUCCEED on success, and FAIL on failure.
  *
  *              Note that *entry_ptr_ptr is undefined on failure.
- *
- * Programmer:  John Mainzer, 8/10/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2125,9 +2082,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *        6/2/04
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2418,9 +2372,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              5/15/06
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2515,9 +2466,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              7/23/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2590,9 +2538,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              12/23/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2635,9 +2580,6 @@ done:
  *             pinned.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              12/23/16
  *
  *-------------------------------------------------------------------------
  */
@@ -2683,9 +2625,6 @@ done:
  *              file address changed.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2830,9 +2769,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              7/5/06
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2962,9 +2898,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              4/26/06
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3023,8 +2956,6 @@ done:
  *
  * Return:      Success:        Ptr to the desired entry
  *              Failure:        NULL
- *
- * Programmer:  John Mainzer -  6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -3428,9 +3359,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              3/22/06
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3486,9 +3414,6 @@ done:
  *        disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -3784,9 +3709,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              January 3, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3852,9 +3774,6 @@ done:
  *              the parent entry.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              3/05/09
  *
  *-------------------------------------------------------------------------
  */
@@ -3991,9 +3910,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              3/05/09
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4038,8 +3954,8 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
 
     /* Remove parent entry from child's parent array */
     if (u < (child_entry->flush_dep_nparents - 1))
-        HDmemmove(&child_entry->flush_dep_parent[u], &child_entry->flush_dep_parent[u + 1],
-                  (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
+        memmove(&child_entry->flush_dep_parent[u], &child_entry->flush_dep_parent[u + 1],
+                (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
     child_entry->flush_dep_nparents--;
 
     /* Adjust parent entry's nchildren and unpin parent if it goes to zero */
@@ -4112,9 +4028,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              6/29/06
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4184,9 +4097,6 @@ done:
  *        dirty, involved in flush dependencies, etc.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */

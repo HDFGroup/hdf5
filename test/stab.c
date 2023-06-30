@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- */
-
 #define H5G_FRIEND /*suppress error about including H5Gpkg      */
 
 /* Define this macro to indicate that the testing APIs should be available */
@@ -84,9 +79,6 @@ static const char *FILENAME[] = {"stab", NULL};
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -189,8 +181,6 @@ error:
  *
  *         Failure:    number of errors
  *
- * Programmer:  Robb Matzke 2002-03-28
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -213,12 +203,12 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Group names */
-    name1 = (char *)HDmalloc((size_t)LONG_NAME_LEN);
+    name1 = (char *)malloc((size_t)LONG_NAME_LEN);
     for (i = 0; i < LONG_NAME_LEN; i++)
         name1[i] = (char)('A' + i % 26);
     name1[LONG_NAME_LEN - 1] = '\0';
     size_t name2Len          = (2 * LONG_NAME_LEN) + 2;
-    name2                    = (char *)HDmalloc(name2Len);
+    name2                    = (char *)malloc(name2Len);
     HDsnprintf(name2, name2Len, "%s/%s", name1, name1);
 
     /* Create groups */
@@ -246,8 +236,8 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Release name buffers */
-    HDfree(name2);
-    HDfree(name1);
+    free(name2);
+    free(name1);
 
     PASSED();
     return 0;
@@ -258,8 +248,8 @@ error:
         H5Gclose(g1);
         H5Gclose(g2);
         H5Fclose(fid);
-        HDfree(name2);
-        HDfree(name1);
+        free(name2);
+        free(name1);
     }
     H5E_END_TRY
     return 1;
@@ -273,10 +263,6 @@ error:
  * Return:      Success:    0
  *
  *         Failure:    number of errors
- *
- * Programmer:  Robb Matzke
- *              robb@maya.nuance.com
- *              Aug 29 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -349,9 +335,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -636,9 +619,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 18, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -668,9 +648,9 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Construct very long object name template */
-    if (NULL == (objname = (char *)HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))))
+    if (NULL == (objname = (char *)malloc((size_t)(LONG_COMPACT_LENGTH + 1))))
         TEST_ERROR;
-    HDmemset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
+    memset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
     objname[LONG_COMPACT_LENGTH] = '\0';
 
     /* Re-open file */
@@ -752,7 +732,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Free object name */
-    HDfree(objname);
+    free(objname);
     objname = NULL;
 
     /* Close top group */
@@ -788,7 +768,7 @@ error:
     H5E_END_TRY
 
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     return 1;
 } /* end long_compact() */
@@ -801,9 +781,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 24, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -908,9 +885,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1048,9 +1022,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1201,9 +1172,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Thursday, August 23, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1307,9 +1275,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Neil Fortner
- *              Wednesday, March 18, 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1400,9 +1365,6 @@ error:
  * Return:    Success:    zero
  *
  *        Failure:    non-zero
- *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */

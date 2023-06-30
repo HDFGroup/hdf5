@@ -299,8 +299,8 @@ distribute_separator_add(struct distribute_option *option, uint64_t separator)
         pos = low;
 
     if (pos < count)
-        HDmemmove(&option->separators[low + 1], &option->separators[low],
-                  sizeof(*option->separators) * (uint64_t)(count - pos));
+        memmove(&option->separators[low + 1], &option->separators[low],
+                sizeof(*option->separators) * (uint64_t)(count - pos));
 
     option->separators[pos] = separator;
     return 0;
@@ -758,7 +758,7 @@ fill_file_list(mfu_flist new_flist, const char *config_filename, int myrank, int
     char linebuf[PATH_MAX] = {
         '\0',
     };
-    FILE *config = HDfopen(config_filename, "r");
+    FILE *config = fopen(config_filename, "r");
     if (config == NULL)
         return -1;
     while (HDfgets(linebuf, sizeof(linebuf), config) != NULL) {
@@ -774,7 +774,7 @@ fill_file_list(mfu_flist new_flist, const char *config_filename, int myrank, int
         }
         linebuf[0] = 0;
     }
-    HDfclose(config);
+    fclose(config);
     return index;
 }
 
@@ -1175,7 +1175,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
 
     argv[k++] = HDstrdup(toolname);
 
-    HDmemset(cmdline, 0, sizeof(cmdline));
+    memset(cmdline, 0, sizeof(cmdline));
     buf += HDstrlen(toolname) + 1;
     /* Reconstruct the command line that the user provided for the h5tool */
     for (k = 1; k < count; k++) {
@@ -1184,7 +1184,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             mfu_flist   flist_arg;
             void       *check_ptr[2] = {NULL, NULL};
 
-            HDmemcpy(check_ptr, &buf[1], sizeof(void *));
+            memcpy(check_ptr, &buf[1], sizeof(void *));
             flist_arg = (mfu_flist)check_ptr[0];
 
             /* +2 (see below) accounts for the '&' and the trailing zero pad */
@@ -1257,7 +1257,7 @@ process_input_file(char *inputname, int myrank, int size)
     char linebuf[PATH_MAX] = {
         '\0',
     };
-    FILE     *config = HDfopen(inputname, "r");
+    FILE     *config = fopen(inputname, "r");
     mfu_flist flist1 = NULL;
 
     if (config == NULL)
@@ -1311,13 +1311,13 @@ process_input_file(char *inputname, int myrank, int size)
             index++;
         }
         linebuf[0] = 0;
-        HDfree(cmdline);
+        free(cmdline);
     }
 
     if (output_log_file) {
         dh5tool_flist_write_text(output_log_file, flist1);
     }
-    HDfclose(config);
+    fclose(config);
 
     mfu_flist_free(&flist1);
     return 0;
@@ -1352,7 +1352,7 @@ main(int argc, char *argv[])
 #if 0
 	env_var = HDgetenv("HDF5_H5DWALK_PRINT_CMDLINE");
     if (env_var) {
-		int enable = HDatoi(env_var);
+		int enable = atoi(env_var);
 		if (enable) {
 
 		}
@@ -1568,7 +1568,7 @@ main(int argc, char *argv[])
 
     if (tool_selected && (args_byte_length > 0)) {
         pred_head = mfu_pred_new();
-        args_buf  = (char *)HDmalloc((size_t)(args_byte_length + pathlen_total));
+        args_buf  = (char *)malloc((size_t)(args_byte_length + pathlen_total));
     }
 
     /* filter files to only include hdf5 files */
@@ -1607,10 +1607,10 @@ main(int argc, char *argv[])
                 *ptr++ = '&';
                 /* Select which argument list should be used */
                 if (k == 0) {
-                    HDmemcpy(ptr, &flist1, sizeof(void *));
+                    memcpy(ptr, &flist1, sizeof(void *));
                 }
                 if (k == 1) {
-                    HDmemcpy(ptr, &flist2, sizeof(void *));
+                    memcpy(ptr, &flist2, sizeof(void *));
                 }
                 ptr += sizeof(mfu_flist *);
                 k++;
@@ -1688,12 +1688,6 @@ main(int argc, char *argv[])
  * Purpose: close the tools library and exit
  *
  * Return: none
- *
- * Programmer: Albert Cheng
- * Date: Feb 6, 2005
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_NORETURN void
@@ -1708,5 +1702,5 @@ h5dwalk_exit(int status)
     if (require_finalize)
         MPI_Finalize();
 
-    HDexit(status);
+    exit(status);
 }

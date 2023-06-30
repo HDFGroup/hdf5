@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Leon Arber  <larber@uiuc.edu>
- *              Sept. 28, 2006.
- *
  * Purpose:     This is the second half of a two-part test that makes sure
  *              that a file can be read after a parallel application crashes as long
  *              as the file was flushed first.  We simulate a crash by
@@ -35,10 +32,6 @@ static int *data_g = NULL;
  * Purpose:     Part 2 of a two-part H5Fflush() test.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Leon Arber
- *              Sept. 26, 2006.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -129,10 +122,6 @@ error:
  * Purpose:     Part 2 of a two-part H5Fflush() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAIL
- *
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -167,10 +156,10 @@ main(int argc, char *argv[])
             HDputs("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
-    if (NULL == (data_g = HDmalloc(100 * 100 * sizeof(*data_g))))
+    if (NULL == (data_g = malloc(100 * 100 * sizeof(*data_g))))
         goto error;
 
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -217,17 +206,17 @@ main(int argc, char *argv[])
     h5_clean_files(&FILENAME[1], fapl_id2);
 
     if (data_g) {
-        HDfree(data_g);
+        free(data_g);
         data_g = NULL;
     }
 
     MPI_Finalize();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     if (data_g)
-        HDfree(data_g);
+        free(data_g);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

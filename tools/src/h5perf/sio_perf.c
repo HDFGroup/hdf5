@@ -181,7 +181,6 @@ static void report_parameters(struct options *opts);
  * Function:    main
  * Purpose:     Start things up.
  * Return:      EXIT_SUCCESS or EXIT_FAILURE
- * Programmer:  Bill Wendling, 30. October 2001
  */
 int
 main(int argc, char *argv[])
@@ -202,7 +201,7 @@ main(int argc, char *argv[])
     }
 
     if (opts->output_file) {
-        if ((output = HDfopen(opts->output_file, "w")) == NULL) {
+        if ((output = fopen(opts->output_file, "w")) == NULL) {
             fprintf(stderr, "%s: cannot open output file\n", progname);
             HDperror(opts->output_file);
             goto finish;
@@ -214,7 +213,7 @@ main(int argc, char *argv[])
     run_test_loop(opts);
 
 finish:
-    HDfree(opts);
+    free(opts);
     return exit_value;
 }
 
@@ -235,7 +234,6 @@ finish:
  *              this out.
  *
  * Return:      Nothing
- * Programmer:  Bill Wendling, 30. October 2001
  */
 static void
 run_test_loop(struct options *opts)
@@ -288,7 +286,6 @@ run_test_loop(struct options *opts)
  * Function:    run_test
  * Purpose:     Inner loop call to actually run the I/O test.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 18. December 2001
  */
 static int
 run_test(iotype iot, parameters parms, struct options *opts)
@@ -500,16 +497,16 @@ run_test(iotype iot, parameters parms, struct options *opts)
     }
 
     /* clean up our mess */
-    HDfree(write_sys_mm_table);
-    HDfree(write_mm_table);
-    HDfree(write_gross_mm_table);
-    HDfree(write_raw_mm_table);
+    free(write_sys_mm_table);
+    free(write_mm_table);
+    free(write_gross_mm_table);
+    free(write_raw_mm_table);
 
     if (!parms.h5_write_only) {
-        HDfree(read_sys_mm_table);
-        HDfree(read_mm_table);
-        HDfree(read_gross_mm_table);
-        HDfree(read_raw_mm_table);
+        free(read_sys_mm_table);
+        free(read_mm_table);
+        free(read_gross_mm_table);
+        free(read_raw_mm_table);
     }
 
     return ret_value;
@@ -519,7 +516,6 @@ run_test(iotype iot, parameters parms, struct options *opts)
  * Function:    output_all_info
  * Purpose:
  * Return:      Nothing
- * Programmer:  Bill Wendling, 29. January 2002
  */
 static void
 output_all_info(minmax *mm, int count, int indent_level)
@@ -540,7 +536,6 @@ output_all_info(minmax *mm, int count, int indent_level)
  * Function:    get_minmax
  * Purpose:     Gather all the min, max and total of val.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 21. December 2001
  */
 
 static void
@@ -556,7 +551,6 @@ get_minmax(minmax *mm, double val)
  * Purpose:     Accumulate the minimum, maximum, and average of the times
  *              across all processes.
  * Return:      TOTAL_MM - the total of all of these.
- * Programmer:  Bill Wendling, 21. December 2001
  */
 static void
 accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
@@ -586,7 +580,6 @@ accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
  * Purpose:     Print information about the time & bandwidth for a given
  *                  minmax & # of iterations.
  * Return:      Nothing
- * Programmer:  Quincey Koziol, 9. May 2002
  */
 static void
 output_results(const struct options *opts, const char *name, minmax *table, int table_size, off_t data_size)
@@ -626,7 +619,6 @@ output_results(const struct options *opts, const char *name, minmax *table, int 
  * Function:    output_report
  * Purpose:     Print a line of the report. Only do so if I'm the 0 process.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 19. December 2001
  */
 static void
 output_report(const char *fmt, ...)
@@ -645,7 +637,6 @@ output_report(const char *fmt, ...)
  * Purpose:     Print spaces to indent a new line of text for pretty printing
  *              things.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 29. October 2001
  */
 static void
 print_indent(int indent)
@@ -800,7 +791,6 @@ report_parameters(struct options *opts)
  * Purpose:     Parse the command line options and return a STRUCT OPTIONS
  *              structure which will need to be freed by the calling function.
  * Return:      Pointer to an OPTIONS structure
- * Programmer:  Bill Wendling, 31. October 2001
  */
 static struct options *
 parse_command_line(int argc, const char *const *argv)
@@ -809,7 +799,7 @@ parse_command_line(int argc, const char *const *argv)
     struct options *cl_opts;
     int             i, default_rank, actual_rank, ranks[4];
 
-    cl_opts = (struct options *)HDmalloc(sizeof(struct options));
+    cl_opts = (struct options *)malloc(sizeof(struct options));
 
     cl_opts->page_buffer_size = 0;
     cl_opts->page_size        = 0;
@@ -859,10 +849,10 @@ parse_command_line(int argc, const char *const *argv)
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
                     if (!HDstrcasecmp(buf, "hdf5")) {
@@ -873,7 +863,7 @@ parse_command_line(int argc, const char *const *argv)
                     }
                     else {
                         fprintf(stderr, "sio_perf: invalid --api option %s\n", buf);
-                        HDexit(EXIT_FAILURE);
+                        exit(EXIT_FAILURE);
                     }
 
                     if (*end == '\0')
@@ -899,10 +889,10 @@ parse_command_line(int argc, const char *const *argv)
                     while (end && *end != '\0') {
                         char buf[10];
 
-                        HDmemset(buf, '\0', sizeof(buf));
+                        memset(buf, '\0', sizeof(buf));
 
                         for (i = 0; *end != '\0' && *end != ','; ++end)
-                            if (HDisalnum(*end) && i < 10)
+                            if (isalnum(*end) && i < 10)
                                 buf[i++] = *end;
 
                         cl_opts->chk_size[j] = parse_size_directive(buf);
@@ -925,19 +915,19 @@ parse_command_line(int argc, const char *const *argv)
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    if (HDstrlen(buf) > 1 || HDisdigit(buf[0])) {
+                    if (HDstrlen(buf) > 1 || isdigit(buf[0])) {
                         size_t j;
 
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)
-                            if (!HDisdigit(buf[j])) {
+                            if (!isdigit(buf[j])) {
                                 fprintf(stderr, "sio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                exit(EXIT_FAILURE);
                             }
 
                         sio_debug_level = atoi(buf);
@@ -963,7 +953,7 @@ parse_command_line(int argc, const char *const *argv)
                                 break;
                             default:
                                 fprintf(stderr, "sio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                exit(EXIT_FAILURE);
                         }
                     }
 
@@ -982,10 +972,10 @@ parse_command_line(int argc, const char *const *argv)
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
                     cl_opts->dset_size[j] = parse_size_directive(buf);
@@ -1003,7 +993,7 @@ parse_command_line(int argc, const char *const *argv)
             break;
 
             case 'i':
-                cl_opts->num_iters = HDatoi(H5_optarg);
+                cl_opts->num_iters = atoi(H5_optarg);
                 break;
             case 'o':
                 cl_opts->output_file = H5_optarg;
@@ -1035,7 +1025,7 @@ parse_command_line(int argc, const char *const *argv)
                 }
                 else {
                     fprintf(stderr, "sio_perf: invalid --api option %s\n", H5_optarg);
-                    HDexit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                 }
                 break;
             case 'w':
@@ -1051,10 +1041,10 @@ parse_command_line(int argc, const char *const *argv)
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
                     cl_opts->buf_size[j] = parse_size_directive(buf);
@@ -1078,10 +1068,10 @@ parse_command_line(int argc, const char *const *argv)
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
                     cl_opts->order[j] = (int)parse_size_directive(buf);
@@ -1103,7 +1093,7 @@ parse_command_line(int argc, const char *const *argv)
             case '?':
             default:
                 usage(progname);
-                HDfree(cl_opts);
+                free(cl_opts);
                 return NULL;
         }
     }
@@ -1166,7 +1156,6 @@ parse_command_line(int argc, const char *const *argv)
  * Return:      The size as a off_t because this is related to file size.
  *              If an unknown size indicator is used, then the program will
  *              exit with EXIT_FAILURE as the return value.
- * Programmer:  Bill Wendling, 18. December 2001
  */
 
 static hsize_t
@@ -1175,7 +1164,7 @@ parse_size_directive(const char *size)
     hsize_t s;
     char   *endptr;
 
-    s = HDstrtoull(size, &endptr, 10);
+    s = strtoull(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -1199,7 +1188,7 @@ parse_size_directive(const char *size)
 
             default:
                 fprintf(stderr, "Illegal size specifier '%c'\n", *endptr);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
     }
 
@@ -1210,7 +1199,6 @@ parse_size_directive(const char *size)
  * Function:    usage
  * Purpose:     Print a usage message and then exit.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 31. October 2001
  */
 static void
 usage(const char *prog)
@@ -1281,5 +1269,5 @@ usage(const char *prog)
     printf("      HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
     printf("      HDF5_PREFIX      Data file prefix\n");
     printf("\n");
-    HDfflush(stdout);
+    fflush(stdout);
 } /* end usage() */

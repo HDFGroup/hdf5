@@ -122,7 +122,7 @@ typedef struct H5FD_mirror_t {
         /* end partial line */                                                                               \
         fprintf(stdout, "\n");                                                                               \
         fprintf(stdout, "```\n");                                                                            \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define LOG_XMIT_BYTES(label, buf, len) /* no-op */
@@ -132,7 +132,7 @@ typedef struct H5FD_mirror_t {
 #define LOG_OP_CALL(name)                                                                                    \
     do {                                                                                                     \
         printf("called %s()\n", (name));                                                                     \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define LOG_OP_CALL(name) /* no-op */
@@ -328,8 +328,6 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
  *
  * Return:      The number of bytes written to the buffer (8).
  *
- * Programmer:  Jacob Smith
- *              2020-03-05
  * ---------------------------------------------------------------------------
  */
 static hbool_t
@@ -820,7 +818,7 @@ H5FD_mirror_xmit_encode_open(unsigned char *dest, const H5FD_mirror_xmit_open_t 
     assert(dest && x);
 
     /* clear entire structure, but especially its filepath string area */
-    HDmemset(dest, 0, H5FD_MIRROR_XMIT_OPEN_SIZE);
+    memset(dest, 0, H5FD_MIRROR_XMIT_OPEN_SIZE);
 
     n_writ += H5FD_mirror_xmit_encode_header(dest, (const H5FD_mirror_xmit_t *)&(x->pub));
     n_writ += H5FD__mirror_xmit_encode_uint32(&dest[n_writ], x->flags);
@@ -857,7 +855,7 @@ H5FD_mirror_xmit_encode_reply(unsigned char *dest, const H5FD_mirror_xmit_reply_
     assert(dest && x);
 
     /* clear entire structure, but especially its message string area */
-    HDmemset(dest, 0, H5FD_MIRROR_XMIT_REPLY_SIZE);
+    memset(dest, 0, H5FD_MIRROR_XMIT_REPLY_SIZE);
 
     n_writ += H5FD_mirror_xmit_encode_header(dest, (const H5FD_mirror_xmit_t *)&(x->pub));
     n_writ += H5FD__mirror_xmit_encode_uint32(&dest[n_writ], x->status);
@@ -1387,7 +1385,7 @@ H5FD__mirror_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     target_addr.sin_family      = AF_INET;
     target_addr.sin_port        = htons((uint16_t)fa.handshake_port);
     target_addr.sin_addr.s_addr = inet_addr(fa.remote_ip);
-    HDmemset(target_addr.sin_zero, '\0', sizeof target_addr.sin_zero);
+    memset(target_addr.sin_zero, '\0', sizeof target_addr.sin_zero);
 
     addr_size = sizeof(target_addr);
     if (connect(live_socket, (struct sockaddr *)&target_addr, addr_size) < 0)

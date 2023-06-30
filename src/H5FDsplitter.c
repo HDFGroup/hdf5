@@ -90,7 +90,7 @@ typedef struct H5FD_splitter_t {
 #define H5FD_SPLITTER_LOG_CALL(name)                                                                         \
     do {                                                                                                     \
         printf("called %s()\n", (name));                                                                     \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define H5FD_SPLITTER_LOG_CALL(name) /* no-op */
@@ -406,7 +406,7 @@ H5FD__splitter_populate_config(H5FD_splitter_vfd_config_t *vfd_config, H5FD_spli
 
     assert(fapl_out);
 
-    HDmemset(fapl_out, 0, sizeof(H5FD_splitter_fapl_t));
+    memset(fapl_out, 0, sizeof(H5FD_splitter_fapl_t));
 
     if (!vfd_config) {
         vfd_config = H5MM_calloc(sizeof(H5FD_splitter_vfd_config_t));
@@ -849,7 +849,7 @@ H5FD__splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, ha
      */
     if (!file_ptr->logfp) {
         if (file_ptr->fa.log_file_path[0] != '\0') {
-            file_ptr->logfp = HDfopen(file_ptr->fa.log_file_path, "w");
+            file_ptr->logfp = fopen(file_ptr->fa.log_file_path, "w");
             if (file_ptr->logfp == NULL)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open log file")
         } /* end if logfile path given */
@@ -880,7 +880,7 @@ done:
             if (file_ptr->wo_file)
                 H5FD_close(file_ptr->wo_file);
             if (file_ptr->logfp)
-                HDfclose(file_ptr->logfp);
+                fclose(file_ptr->logfp);
             H5FL_FREE(H5FD_splitter_t, file_ptr);
         }
     } /* end if error */
@@ -924,7 +924,7 @@ H5FD__splitter_close(H5FD_t *_file)
                                    "unable to close W/O file")
 
     if (file->logfp) {
-        HDfclose(file->logfp);
+        fclose(file->logfp);
         file->logfp = NULL;
     }
 
@@ -1580,7 +1580,7 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
             ret_value = FAIL;
         else if (size < (size_t)HDsnprintf(s, size + 1, "%s: %s\n", atfunc, msg))
             ret_value = FAIL;
-        else if (size != HDfwrite(s, 1, size, file->logfp))
+        else if (size != fwrite(s, 1, size, file->logfp))
             ret_value = FAIL;
         H5MM_free(s);
     }

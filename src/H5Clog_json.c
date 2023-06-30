@@ -152,9 +152,6 @@ static const H5C_log_class_t H5C_json_log_class_g = {"json",
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -174,7 +171,7 @@ H5C__json_write_log_message(H5C_log_json_udata_t *json_udata)
     n_chars = HDstrlen(json_udata->message);
     if ((int)n_chars != fprintf(json_udata->outfile, "%s", json_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
-    HDmemset((void *)(json_udata->message), 0, (size_t)(n_chars * sizeof(char)));
+    memset((void *)(json_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -198,9 +195,6 @@ done:
  *              the H5C__json_write_log_message function.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -249,7 +243,7 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
         HDsnprintf(file_name, n_chars, "RANK_%d.%s", mpi_rank, log_location);
 
     /* Open log file and set it to be unbuffered */
-    if (NULL == (json_udata->outfile = HDfopen(file_name, "w")))
+    if (NULL == (json_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file")
     HDsetbuf(json_udata->outfile, NULL);
 
@@ -280,9 +274,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -303,7 +294,7 @@ H5C__json_tear_down_logging(H5C_log_info_t *log_info)
     H5MM_xfree(json_udata->message);
 
     /* Close log file */
-    if (EOF == HDfclose(json_udata->outfile))
+    if (EOF == fclose(json_udata->outfile))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file")
     json_udata->outfile = NULL;
 
@@ -324,9 +315,6 @@ done:
  * Purpose:     Write a log message when logging starts.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -368,9 +356,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -409,9 +394,6 @@ done:
  * Purpose:     Write a log message for cache creation.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -452,9 +434,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -492,9 +471,6 @@ done:
  * Purpose:     Write a log message for eviction of cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -534,9 +510,6 @@ done:
  * Purpose:     Write a log message for expunge of cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -579,9 +552,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -620,9 +590,6 @@ done:
  * Purpose:     Write a log message for insertion of cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -669,9 +636,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -713,9 +677,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -756,9 +717,6 @@ done:
  * Purpose:     Write a log message for marking cache entries as unserialized.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -802,9 +760,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -846,9 +801,6 @@ done:
  * Purpose:     Write a log message for moving a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -894,9 +846,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -938,9 +887,6 @@ done:
  *              two cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -986,9 +932,6 @@ done:
  * Purpose:     Write a log message for protecting a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1042,9 +985,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1088,9 +1028,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1132,9 +1069,6 @@ done:
  *              between two cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1181,9 +1115,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1227,9 +1158,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1270,9 +1198,6 @@ done:
  * Purpose:     Write a log message for removing a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */

@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Friday, February 24, 2006
- */
 #include "h5test.h"
 
 /*
@@ -186,16 +183,13 @@ static int del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_hea
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
 init_small_cparam(H5HF_create_t *cparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(H5HF_create_t));
+    memset(cparam, 0, sizeof(H5HF_create_t));
 
     /* General parameters */
     cparam->id_len           = SMALL_ID_LEN;
@@ -222,16 +216,13 @@ init_small_cparam(H5HF_create_t *cparam)
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
 init_large_cparam(H5HF_create_t *cparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(H5HF_create_t));
+    memset(cparam, 0, sizeof(H5HF_create_t));
 
     /* General parameters */
     cparam->id_len           = LARGE_ID_LEN;
@@ -256,9 +247,6 @@ init_large_cparam(H5HF_create_t *cparam)
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -329,16 +317,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, September 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 op_memcpy(const void *obj, size_t obj_len, void *op_data)
 {
     /* Make copy of the object */
-    HDmemcpy(op_data, obj, obj_len);
+    memcpy(op_data, obj, obj_len);
 
     return (SUCCEED);
 } /* op_memcpy() */
@@ -361,9 +346,6 @@ op_memcpy(const void *obj, size_t obj_len, void *op_data)
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -388,7 +370,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         TEST_ERROR;
 
     /* Insert object */
-    HDmemset(heap_id, 0, id_len);
+    memset(heap_id, 0, id_len);
     if (H5HF_insert(fh, obj_size, obj, heap_id) < 0)
         FAIL_STACK_ERROR;
 
@@ -423,7 +405,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         TEST_ERROR;
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(obj, shared_robj_g, obj_size) != 0)
+    if (memcmp(obj, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* If the heap IDs are to be retained, append them to the list */
@@ -450,7 +432,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         } /* end if */
 
         /* Append the object info onto the array */
-        HDmemcpy(&keep_ids->ids[keep_ids->num_ids * id_len], heap_id, id_len);
+        memcpy(&keep_ids->ids[keep_ids->num_ids * id_len], heap_id, id_len);
         keep_ids->lens[keep_ids->num_ids] = obj_size;
         keep_ids->offs[keep_ids->num_ids] = obj_off;
 
@@ -493,9 +475,6 @@ get_del_string(const fheap_test_param_t *tparam)
  * Return:      Size of object to pass down to "fill_heap" routine on
  *              success/can't fail
  *
- * Programmer:    Quincey Koziol
- *              Thursday, July 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE static size_t
@@ -525,9 +504,6 @@ get_fill_size(const fheap_test_param_t *tparam)
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -547,7 +523,7 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
     H5MM_xfree(test_desc);
 
     /* Initialize the heap ID structure */
-    HDmemset(keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Retrieve "bulk" filling object size */
     if (fill_size)
@@ -564,9 +540,6 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -621,9 +594,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -661,7 +631,7 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam, const fheap_t
             FAIL_STACK_ERROR;
         if (!H5_addr_defined(*fh_addr))
             TEST_ERROR;
-        HDmemset(state, 0, sizeof(fheap_heap_state_t));
+        memset(state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(*fh, state))
             TEST_ERROR;
 
@@ -706,7 +676,7 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam, const fheap_t
             FAIL_STACK_ERROR;
         if (!H5_addr_defined(*fh_addr))
             TEST_ERROR;
-        HDmemset(state, 0, sizeof(fheap_heap_state_t));
+        memset(state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(*fh, state))
             TEST_ERROR;
     } /* end if */
@@ -731,9 +701,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -766,9 +733,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -832,9 +796,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, June  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -925,9 +886,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -984,7 +942,7 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     } /* end for */
 
     /* Heap should be completely empty now, reset our state */
-    HDmemset(state, 0, sizeof(fheap_heap_state_t));
+    memset(state, 0, sizeof(fheap_heap_state_t));
 
     /* Check up on heap... */
     if (check_stats(*fh, state))
@@ -1015,9 +973,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1166,7 +1121,7 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
 
         /* Check that object is correct */
         wobj = &shared_wobj_g[*curr_off_ptr];
-        if (HDmemcmp(wobj, shared_robj_g, *curr_len_ptr) != 0)
+        if (memcmp(wobj, shared_robj_g, *curr_len_ptr) != 0)
             TEST_ERROR;
 
         /* Adjust object & ID pointers */
@@ -1192,9 +1147,9 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
         } /* end if */
 
         /* Append the IDs onto the array */
-        HDmemcpy(&keep_ids->ids[keep_ids->num_ids * id_len], shared_ids_g, (num_ids * id_len));
-        HDmemcpy(&keep_ids->lens[keep_ids->num_ids], shared_lens_g, (num_ids * sizeof(size_t)));
-        HDmemcpy(&keep_ids->offs[keep_ids->num_ids], shared_offs_g, (num_ids * sizeof(size_t)));
+        memcpy(&keep_ids->ids[keep_ids->num_ids * id_len], shared_ids_g, (num_ids * id_len));
+        memcpy(&keep_ids->lens[keep_ids->num_ids], shared_lens_g, (num_ids * sizeof(size_t)));
+        memcpy(&keep_ids->offs[keep_ids->num_ids], shared_offs_g, (num_ids * sizeof(size_t)));
 
         /* Increment the number of IDs kept */
         keep_ids->num_ids += num_ids;
@@ -1215,9 +1170,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1312,9 +1264,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1357,9 +1306,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1391,9 +1337,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1430,9 +1373,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1467,9 +1407,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1506,9 +1443,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1544,9 +1478,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1580,9 +1511,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1618,9 +1546,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1658,9 +1583,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1695,9 +1617,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1744,9 +1663,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1797,9 +1713,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1859,14 +1772,14 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
     PASSED();
 
     /* Query the type of address mapping */
     TESTING("query heap creation parameters");
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -1916,9 +1829,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1984,7 +1894,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -2018,7 +1928,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Query the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2069,9 +1979,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2139,7 +2046,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -2148,7 +2055,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2180,7 +2087,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2248,9 +2155,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, January  5, 2007
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2309,7 +2213,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -2322,7 +2226,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2426,9 +2330,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2464,7 +2365,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     TESTING("limits of heap ID lengths");
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set the 'default' heap ID length */
     tmp_cparam.id_len = 0;
@@ -2764,9 +2665,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2800,7 +2698,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     TESTING("creating heaps with I/O filters");
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -2843,7 +2741,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
 
     /* Query the heap creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(&tmp_cparam, &test_cparam))
@@ -2885,9 +2783,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, August 14, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -3028,9 +2923,6 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  Neil Fortner
- *              Tuesday, September 14, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3160,9 +3052,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3204,7 +3093,7 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -3275,9 +3164,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3317,7 +3203,7 @@ test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -3376,9 +3262,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3418,7 +3301,7 @@ test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting first (small) object into absolute heap
@@ -3472,9 +3355,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3515,7 +3395,7 @@ test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) object into absolute heap
@@ -3571,9 +3451,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3614,7 +3491,7 @@ test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test forcing creation of indirect root block & second direct block
@@ -3677,9 +3554,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3720,7 +3594,7 @@ test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill second direct block
@@ -3784,9 +3658,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3827,7 +3698,7 @@ test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to create third direct block
@@ -3895,9 +3766,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3938,7 +3806,7 @@ test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill first row in root indirect block
@@ -3991,9 +3859,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4034,7 +3899,7 @@ test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start second row in root indirect block
@@ -4094,9 +3959,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4137,7 +3999,7 @@ test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start second row in root indirect block
@@ -4195,9 +4057,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4238,7 +4097,7 @@ test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start third row in root indirect block
@@ -4305,9 +4164,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4349,7 +4205,7 @@ test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill four rows in root indirect block
@@ -4403,9 +4259,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4446,7 +4299,7 @@ test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct  rows in root indirect block
@@ -4499,9 +4352,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4542,7 +4392,7 @@ test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to force creation of first recursive indirect block
@@ -4601,9 +4451,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4644,7 +4491,7 @@ test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to force creation of second direct
@@ -4711,9 +4558,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4754,7 +4598,7 @@ test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -4814,9 +4658,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4857,7 +4698,7 @@ test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -4925,9 +4766,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4968,7 +4806,7 @@ test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5033,9 +4871,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5072,7 +4907,7 @@ test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5131,9 +4966,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5174,7 +5006,7 @@ test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5240,9 +5072,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5283,7 +5112,7 @@ test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5343,9 +5172,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5386,7 +5212,7 @@ test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5453,9 +5279,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5496,7 +5319,7 @@ test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5564,9 +5387,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5607,7 +5427,7 @@ test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5672,9 +5492,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5715,7 +5532,7 @@ test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5781,9 +5598,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5824,7 +5638,7 @@ test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5896,9 +5710,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5939,7 +5750,7 @@ test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6017,9 +5828,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -6060,7 +5868,7 @@ test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6129,9 +5937,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -6172,7 +5977,7 @@ test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6243,9 +6048,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -6286,7 +6088,7 @@ test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6370,9 +6172,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -6418,7 +6217,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -6530,9 +6329,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -6577,7 +6373,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -6694,9 +6490,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -6742,7 +6535,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -6888,9 +6681,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -6936,7 +6726,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -7057,9 +6847,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, June 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7106,7 +6893,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -7297,9 +7084,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7347,7 +7131,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -7595,9 +7379,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Sunday, April 1, 2012
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7622,9 +7403,9 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Set up data array */
-    if (NULL == (heap_id_data = (unsigned char *)HDcalloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
+    if (NULL == (heap_id_data = (unsigned char *)calloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
         TEST_ERROR;
-    if (NULL == (heap_id = (unsigned char **)HDcalloc(100, sizeof(heap_id_data))))
+    if (NULL == (heap_id = (unsigned char **)calloc(100, sizeof(heap_id_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         heap_id[i] = heap_id_data + (i * MAX_HEAP_ID_LEN);
@@ -7652,7 +7433,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR;
     if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -7661,8 +7442,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
      */
     TESTING("incremental object insertion and removal");
 
-    HDmemset(&obj1, 0, sizeof(obj1));
-    HDmemset(&obj2, 0, sizeof(obj2));
+    memset(&obj1, 0, sizeof(obj1));
+    memset(&obj2, 0, sizeof(obj2));
     for (i = 0; i < 100; i++) {
         for (j = 0; j < i; j++) {
             if (H5HF_remove(fh, heap_id[j]) < 0)
@@ -7678,7 +7459,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
             TEST_ERROR;
 
         /* Insert object */
-        HDmemset(heap_id[i], 0, id_len);
+        memset(heap_id[i], 0, id_len);
         HDsnprintf(obj1.b, sizeof(obj1.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
         if (H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR;
@@ -7695,8 +7476,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     /* All tests passed */
     PASSED();
 
-    HDfree(heap_id);
-    HDfree(heap_id_data);
+    free(heap_id);
+    free(heap_id_data);
 
     return 0;
 
@@ -7709,8 +7490,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(heap_id);
-    HDfree(heap_id_data);
+    free(heap_id);
+    free(heap_id_data);
 
     return 1;
 } /* test_man_incr_insert_remove() */
@@ -7724,9 +7505,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -7797,9 +7575,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -7886,9 +7661,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7955,9 +7727,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, June 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8027,9 +7796,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8104,9 +7870,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8173,9 +7936,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8247,9 +8007,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, July 24, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8329,9 +8086,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8406,9 +8160,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 28, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8505,9 +8256,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 28, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8616,9 +8364,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April  1, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8712,9 +8457,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Saturday, April  1, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8857,9 +8599,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9025,9 +8764,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -9151,9 +8887,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9280,9 +9013,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -9404,9 +9134,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9536,9 +9263,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9682,9 +9406,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9846,9 +9567,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -10001,9 +9719,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10186,9 +9901,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -10316,9 +10028,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10457,9 +10166,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10610,9 +10316,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10768,9 +10471,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tues, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10932,9 +10632,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tues, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -11101,9 +10798,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -11263,9 +10957,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -11446,9 +11137,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -11667,9 +11355,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -11866,9 +11551,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -12097,9 +11779,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, July 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -12227,9 +11906,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -12399,9 +12075,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -12510,9 +12183,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -12625,9 +12295,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -12692,10 +12359,10 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -12775,9 +12442,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -12845,10 +12509,10 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object too large for managed heap blocks */
@@ -12875,10 +12539,10 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13005,9 +12669,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -13078,10 +12739,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object too large for managed heap blocks */
@@ -13108,10 +12769,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert third object too large for managed heap blocks */
@@ -13138,10 +12799,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13310,9 +12971,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -13389,10 +13047,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object too large for managed heap blocks */
@@ -13419,10 +13077,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert third object too large for managed heap blocks */
@@ -13449,10 +13107,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
@@ -13486,10 +13144,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id4, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
@@ -13524,10 +13182,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id5, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13662,7 +13320,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         } /* end else */
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR;
     } /* end if */
@@ -13733,9 +13391,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, August 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -13764,7 +13419,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -13862,10 +13517,10 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13946,9 +13601,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -14013,10 +13665,10 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14096,9 +13748,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -14166,10 +13815,10 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object small enough to encode in heap ID */
@@ -14196,10 +13845,10 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14327,9 +13976,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -14412,17 +14058,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on first huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object too large for managed heap blocks */
@@ -14449,17 +14095,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on second huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id2, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert third object too large for managed heap blocks */
@@ -14486,17 +14132,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on third huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id3, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
@@ -14530,17 +14176,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id4, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on fourth ('normal') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id4, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
@@ -14575,17 +14221,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id5, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on fifth ('normal') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id5, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert sixth object small enough to encode in heap ID */
@@ -14612,17 +14258,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id6, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on sixth ('tiny') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id6, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert seventh object small enough to encode in heap ID */
@@ -14649,17 +14295,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id7, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on seventh ('tiny') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id7, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14856,7 +14502,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         } /* end else */
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR;
     } /* end if */
@@ -14931,9 +14577,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -14960,7 +14603,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     const char *base_desc = "insert one 'managed' object into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -15026,10 +14669,10 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -15045,7 +14688,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
             TEST_ERROR;
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR;
     } /* end if */
@@ -15104,9 +14747,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, October 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -15134,7 +14774,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     const char *base_desc = "insert two 'managed' objects into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -15209,10 +14849,10 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id1, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Read in ('normal') object #2 */
@@ -15220,10 +14860,10 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -15267,7 +14907,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR;
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR;
 
@@ -15297,7 +14937,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR;
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR;
         } /* end if */
@@ -15340,7 +14980,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR;
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR;
 
@@ -15370,7 +15010,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR;
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR;
         } /* end else */
@@ -15434,9 +15074,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, May  9, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -15460,10 +15097,10 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     size_t             u;                            /* Local index variable */
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15545,9 +15182,9 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
 
             /* Swap current position with future position */
             /* (just swap the heap ID, the len & offset isn't used */
-            HDmemcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
+            memcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
+            memcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
+            memcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
         } /* end if */
     }     /* end for */
 
@@ -15638,9 +15275,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -15664,10 +15298,10 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     size_t             u;                            /* Local index variable */
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15763,9 +15397,9 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
 
             /* Swap current position with future position */
             /* (just swap the heap ID, the len & offset isn't used */
-            HDmemcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
+            memcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
+            memcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
+            memcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
         } /* end if */
     }     /* end for */
 
@@ -15850,9 +15484,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, December 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 /* Custom filter used to verify that the filters are actually called and do not
@@ -15899,10 +15530,10 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TESTING("writing objects in heap");
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -16035,7 +15666,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             FAIL_STACK_ERROR;
 
         /* Compare data read in */
-        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
+        if (memcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
             TEST_ERROR;
 
         /* Change size of data to write */
@@ -16084,7 +15715,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             FAIL_STACK_ERROR;
 
         /* Compare data read in */
-        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
+        if (memcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
             TEST_ERROR;
 
         /* Change size of data to write */
@@ -16143,9 +15774,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -16169,7 +15797,7 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     TESTING("bug1: inserting several objects & removing one, then re-inserting");
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Perform common file & heap open operations */
     if (open_heap(filename, fapl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
@@ -16313,9 +15941,6 @@ error:
  * Return:    Success:
  *
  *            Failure:
- *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -16477,7 +16102,7 @@ main(void)
         /* Iterate over the testing parameters */
         for (curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; curr_test++) {
             /* Clear the testing parameters */
-            HDmemset(&tparam, 0, sizeof(fheap_test_param_t));
+            memset(&tparam, 0, sizeof(fheap_test_param_t));
             tparam.actual_id_len = HEAP_ID_LEN;
 
             /* Set to run with different file space setting */

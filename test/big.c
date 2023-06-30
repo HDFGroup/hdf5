@@ -90,9 +90,6 @@ static hsize_t values_used[WRT_N];
  *
  *            Failure:    Random value which overlaps another write
  *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -136,9 +133,6 @@ randll(hsize_t limit, int current_index)
  *
  *            Failure:    zero
  *
- * Programmer:    Robb Matzke
- *              Wednesday, July 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -176,9 +170,6 @@ is_sparse(void)
  *                otherwise.
  *
  *            Failure:    zero
- *
- * Programmer:    Raymond Lu
- *              Wednesday, April 18, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -245,9 +236,6 @@ error:
  *
  *            Failure:    zero
  *
- * Programmer:    Robb Matzke
- *              Thursday, August  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 /* Disable warning for "format not a string literal" here -QAK */
@@ -309,9 +297,6 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
  *
  *            Failure:    >0
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April  8, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -322,9 +307,9 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     hsize_t hs_start[1];
     hsize_t hs_size[1];
     hid_t   file = -1, space1 = -1, space2 = -1, mem_space = -1, d1 = -1, d2 = -1;
-    int    *buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int    *buf = (int *)malloc(sizeof(int) * WRT_SIZE);
     int     i, j;
-    FILE   *out = HDfopen(DNAME, "w");
+    FILE   *out = fopen(DNAME, "w");
     hid_t   dcpl;
 
     switch (testsize) {
@@ -426,8 +411,8 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
         goto error;
     if (H5Fclose(file) < 0)
         goto error;
-    HDfree(buf);
-    HDfclose(out);
+    free(buf);
+    fclose(out);
     PASSED();
     return 0;
 
@@ -443,9 +428,9 @@ error:
     }
     H5E_END_TRY
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (out)
-        HDfclose(out);
+        fclose(out);
     return 1;
 }
 
@@ -458,9 +443,6 @@ error:
  *
  *            Failure:    >0
  *
- * Programmer:    Robb Matzke
- *              Friday, April 10, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -471,11 +453,11 @@ reader(char *filename, hid_t fapl)
     char    ln[128], *s;
     hsize_t hs_offset[1];
     hsize_t hs_size[1] = {WRT_SIZE};
-    int    *buf        = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int    *buf        = (int *)malloc(sizeof(int) * WRT_SIZE);
     int     i, j, zero, wrong, nerrors = 0;
 
     /* Open script file */
-    script = HDfopen(DNAME, "r");
+    script = fopen(DNAME, "r");
 
     /* Open HDF5 file */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
@@ -495,10 +477,10 @@ reader(char *filename, hid_t fapl)
     while (HDfgets(ln, (int)sizeof(ln), script)) {
         if ('#' != ln[0])
             break;
-        i            = (int)HDstrtol(ln + 1, &s, 10);
-        hs_offset[0] = HDstrtoull(s, NULL, 0);
+        i            = (int)strtol(ln + 1, &s, 10);
+        hs_offset[0] = strtoull(s, NULL, 0);
         fprintf(stdout, "#%03d 0x%016" PRIxHSIZE "%47s", i, hs_offset[0], "");
-        HDfflush(stdout);
+        fflush(stdout);
 
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
             FAIL_STACK_ERROR;
@@ -534,8 +516,8 @@ reader(char *filename, hid_t fapl)
         FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
-    HDfree(buf);
-    HDfclose(script);
+    free(buf);
+    fclose(script);
 
     return nerrors;
 
@@ -549,9 +531,9 @@ error:
     }
     H5E_END_TRY
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (script)
-        HDfclose(script);
+        fclose(script);
     return 1;
 }
 
@@ -561,9 +543,6 @@ error:
  * Purpose:    Print command usage
  *
  * Return:    void
- *
- * Programmer:    Albert Chent
- *              Mar 28, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -649,12 +628,12 @@ quit:
     /* Clean up the test file */
     h5_clean_files(FILENAME, fapl);
     HDremove(DNAME);
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 error:
     HDputs("*** TEST FAILED ***");
-    HDfflush(stdout);
+    fflush(stdout);
     return 1;
 } /* end test_stdio() */
 
@@ -720,9 +699,6 @@ error:
  *
  *            Failure:
  *
- * Programmer:    Robb Matzke
- *              Friday, April 10, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -741,7 +717,7 @@ main(int ac, char **av)
             ac--;
             av++;
             if (ac > 0) {
-                family_size_def = (hsize_t)HDstrtoull(*av, NULL, 0);
+                family_size_def = (hsize_t)strtoull(*av, NULL, 0);
             }
             else {
                 printf("***Missing fsize value***\n");

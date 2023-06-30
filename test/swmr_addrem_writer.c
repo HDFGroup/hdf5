@@ -151,7 +151,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
     assert(fid > 0);
 
     /* Reset the buffer */
-    HDmemset(&buf, 0, sizeof(buf));
+    memset(&buf, 0, sizeof(buf));
 
     /* Create a dataspace for the record to add */
     if ((mem_sid = H5Screate_simple(2, count, NULL)) < 0)
@@ -278,7 +278,7 @@ usage(void)
     printf("Defaults to verbose (no '-q' given), flushing every 1000 operations\n");
     printf("('-f 1000'), and will generate a random seed (no -r given).\n");
     printf("\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 int
@@ -303,7 +303,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* # of records to write between flushing file */
                     case 'f':
-                        flush_count = HDatol(argv[u + 1]);
+                        flush_count = atol(argv[u + 1]);
                         if (flush_count < 0)
                             usage();
                         u += 2;
@@ -318,7 +318,7 @@ main(int argc, char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = 1;
-                        temp     = HDatoi(argv[u + 1]);
+                        temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();
                         else
@@ -333,7 +333,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to append */
-                nops = HDatol(argv[u]);
+                nops = atol(argv[u]);
                 if (nops <= 0)
                     usage();
 
@@ -378,7 +378,7 @@ main(int argc, char *argv[])
     /* Open file skeleton */
     if ((fid = open_skeleton(FILENAME, verbose)) < 0) {
         fprintf(stderr, "Error opening skeleton file!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -391,7 +391,7 @@ main(int argc, char *argv[])
     /* Grow and shrink datasets */
     if (addrem_records(fid, verbose, (unsigned long)nops, (unsigned long)flush_count) < 0) {
         fprintf(stderr, "Error adding and removing records from datasets!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -401,7 +401,7 @@ main(int argc, char *argv[])
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
         fprintf(stderr, "Error releasing symbols!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -411,7 +411,7 @@ main(int argc, char *argv[])
     /* Close objects opened */
     if (H5Fclose(fid) < 0) {
         fprintf(stderr, "Error closing file!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

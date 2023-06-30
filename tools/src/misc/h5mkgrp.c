@@ -48,8 +48,6 @@ static mkgrp_opt_t params_g; /* Command line parameter settings */
  *
  * Return:      Does not return
  *
- * Programmer: Quincey Koziol, 2/13/2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -58,18 +56,18 @@ leave(int ret)
     size_t curr_group;
 
     if (params_g.fname)
-        HDfree(params_g.fname);
+        free(params_g.fname);
     if (params_g.ngroups) {
         for (curr_group = 0; curr_group < params_g.ngroups; curr_group++)
-            HDfree(params_g.groups[curr_group]);
-        HDfree(params_g.groups);
+            free(params_g.groups[curr_group]);
+        free(params_g.groups);
     }
     if (H5I_INVALID_HID != params_g.fapl_id && H5P_DEFAULT != params_g.fapl_id)
         if (H5Pclose(params_g.fapl_id) < 0)
             error_msg("Could not close file access property list\n");
 
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 } /* end leave() */
 
 /*-------------------------------------------------------------------------
@@ -78,8 +76,6 @@ leave(int ret)
  * Purpose: Prints a usage message on stderr and then returns.
  *
  * Return: void
- *
- * Programmer: Quincey Koziol, 2/13/2007
  *
  *-------------------------------------------------------------------------
  */
@@ -132,8 +128,6 @@ usage(const char *prog)
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer: Quincey Koziol, 2/13/2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -154,8 +148,8 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
     }
 
     /* Initialize fapl info structs */
-    HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
-    HDmemset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
+    memset(&vol_info, 0, sizeof(h5tools_vol_info_t));
+    memset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* Parse command line options */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
@@ -189,7 +183,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 
             case '1':
                 vol_info.type    = VOL_BY_VALUE;
-                vol_info.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 custom_vol       = TRUE;
                 break;
 
@@ -205,7 +199,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 
             case '4':
                 vfd_info.type    = VFD_BY_VALUE;
-                vfd_info.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 custom_vfd       = TRUE;
                 break;
 
@@ -246,7 +240,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 
     /* Allocate space for the group name pointers */
     options->ngroups = (size_t)(argc - H5_optind);
-    options->groups  = (char **)HDmalloc(options->ngroups * sizeof(char *));
+    options->groups  = (char **)malloc(options->ngroups * sizeof(char *));
 
     /* Retrieve the group names */
     curr_group = 0;
@@ -282,8 +276,6 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
  *
  * Purpose: Create group(s) in an HDF5 file
  *
- * Programmer: Quincey Koziol, 2/13/2007
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -300,7 +292,7 @@ main(int argc, char *argv[])
     h5tools_init();
 
     /* Initialize the parameters */
-    HDmemset(&params_g, 0, sizeof(params_g));
+    memset(&params_g, 0, sizeof(params_g));
 
     /* Create file access property list */
     if ((params_g.fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {

@@ -209,7 +209,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Create a dataspace for the record to read */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -284,7 +284,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
         /* Check dataset */
         if (check_dataset(fid, verbose, symbol, &record, mem_sid) < 0)
             return -1;
-        HDmemset(&record, 0, sizeof(record));
+        memset(&record, 0, sizeof(record));
 
         /* Check for reopen */
         iter_to_reopen--;
@@ -336,7 +336,7 @@ usage(void)
     printf("Note that the # of records *must* be the same as that supplied to\n");
     printf("swmr_sparse_writer\n");
     printf("\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end usage() */
 
 int
@@ -358,7 +358,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* # of reads between reopens */
                     case 'n':
-                        reopen_count = HDatoi(argv[u + 1]);
+                        reopen_count = atoi(argv[u + 1]);
                         if (reopen_count < 0)
                             usage();
                         u += 2;
@@ -372,7 +372,7 @@ main(int argc, char *argv[])
 
                     /* # of seconds between polling */
                     case 's':
-                        poll_time = HDatoi(argv[u + 1]);
+                        poll_time = atoi(argv[u + 1]);
                         if (poll_time < 0)
                             usage();
                         u += 2;
@@ -385,7 +385,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to read */
-                nrecords = HDatol(argv[u]);
+                nrecords = atol(argv[u]);
                 if (nrecords <= 0)
                     usage();
 
@@ -409,7 +409,7 @@ main(int argc, char *argv[])
     /* Generate dataset names */
     if (generate_symbols() < 0) {
         fprintf(stderr, "Error generating symbol names!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Create datatype for creating datasets */
@@ -420,7 +420,7 @@ main(int argc, char *argv[])
     if (read_records(FILENAME, verbose, (unsigned long)nrecords, (unsigned)poll_time,
                      (unsigned)reopen_count) < 0) {
         fprintf(stderr, "Error reading records from datasets!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -430,7 +430,7 @@ main(int argc, char *argv[])
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
         fprintf(stderr, "Error releasing symbols!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -440,7 +440,7 @@ main(int argc, char *argv[])
     /* Close objects created */
     if (H5Tclose(symbol_tid) < 0) {
         fprintf(stderr, "Error closing symbol datatype!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

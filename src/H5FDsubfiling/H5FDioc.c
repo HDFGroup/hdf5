@@ -92,7 +92,7 @@ typedef struct H5FD_ioc_t {
 #define H5FD_IOC_LOG_CALL(name)                                                                              \
     do {                                                                                                     \
         printf("called %s()\n", (name));                                                                     \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define H5FD_IOC_LOG_CALL(name) /* no-op */
@@ -399,7 +399,7 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
     }
     else {
         /* Copy the IOC fapl data out */
-        HDmemcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
+        memcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
     }
 
 done:
@@ -424,7 +424,7 @@ H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
 
     assert(config_out);
 
-    HDmemset(config_out, 0, sizeof(*config_out));
+    memset(config_out, 0, sizeof(*config_out));
 
     config_out->magic            = H5FD_IOC_FAPL_MAGIC;
     config_out->version          = H5FD_IOC_CURR_FAPL_VERSION;
@@ -666,7 +666,7 @@ H5FD__ioc_fapl_copy(const void *_old_fa)
     if (NULL == new_fa_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL");
 
-    HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
+    memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
 
     ret_value = (void *)new_fa_ptr;
 
@@ -790,7 +790,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
 
     /* Fill in the file config values */
-    HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
+    memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
 
     /* Fully resolve the given filepath and get its dirname */
     if (H5_resolve_pathname(name, file_ptr->comm, &file_ptr->file_path) < 0)
@@ -936,7 +936,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
     }
 
 done:
-    HDfree(file_ptr->file_path);
+    free(file_ptr->file_path);
     file_ptr->file_path = NULL;
 
     H5MM_free(file_ptr->file_dir);
@@ -1486,7 +1486,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file dirname");
 
         /* Try to open the subfiling configuration file and get the number of IOCs */
-        if (NULL == (tmp_filename = HDmalloc(PATH_MAX)))
+        if (NULL == (tmp_filename = malloc(PATH_MAX)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate config file name buffer");
 
@@ -1498,7 +1498,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
                    prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
 
-        if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
+        if (NULL == (config_file = fopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
 #ifdef H5FD_IOC_DEBUG
                 printf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
@@ -1518,7 +1518,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         n_subfiles = (int32_t)read_n_subfiles;
 
         /* Delete the Subfiling configuration file */
-        if (EOF == HDfclose(config_file)) {
+        if (EOF == fclose(config_file)) {
             config_file = NULL;
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
                                         "can't close subfiling config file");
@@ -1555,7 +1555,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
 done:
     if (config_file)
-        if (EOF == HDfclose(config_file))
+        if (EOF == fclose(config_file))
             H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close subfiling config file");
 
     /* Set up a barrier (don't want processes to run ahead of the delete) */
@@ -1576,7 +1576,7 @@ done:
     if (H5_mpi_info_free(&info) < 0)
         H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object");
 
-    HDfree(tmp_filename);
+    free(tmp_filename);
     H5MM_free(file_dirname);
     H5MM_free(base_filename);
 
@@ -1633,9 +1633,9 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
      * that blocking write calls do not return early before the data is
      * actually written.
      */
-    if (NULL == (sf_io_reqs = HDcalloc((size_t)count, sizeof(*sf_io_reqs))))
+    if (NULL == (sf_io_reqs = calloc((size_t)count, sizeof(*sf_io_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
-    if (NULL == (mpi_reqs = HDmalloc(2 * (size_t)count * sizeof(*mpi_reqs))))
+    if (NULL == (mpi_reqs = malloc(2 * (size_t)count * sizeof(*mpi_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     /* Each pass thru the following should queue an MPI write
@@ -1669,12 +1669,12 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't complete I/O requests");
 
 done:
-    HDfree(mpi_reqs);
+    free(mpi_reqs);
 
     if (sf_io_reqs) {
         for (size_t i = 0; i < count; i++)
-            HDfree(sf_io_reqs[i]);
-        HDfree(sf_io_reqs);
+            free(sf_io_reqs[i]);
+        free(sf_io_reqs);
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -1712,9 +1712,9 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
      * that the actual I/O call (currently, HDpread) has completed and
      * the data read from the file has been transferred to the caller.
      */
-    if (NULL == (sf_io_reqs = HDcalloc((size_t)count, sizeof(*sf_io_reqs))))
+    if (NULL == (sf_io_reqs = calloc((size_t)count, sizeof(*sf_io_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
-    if (NULL == (mpi_reqs = HDmalloc((size_t)count * sizeof(*mpi_reqs))))
+    if (NULL == (mpi_reqs = malloc((size_t)count * sizeof(*mpi_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     for (size_t i = 0; i < (size_t)count; i++) {
@@ -1741,12 +1741,12 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't complete I/O requests");
 
 done:
-    HDfree(mpi_reqs);
+    free(mpi_reqs);
 
     if (sf_io_reqs) {
         for (size_t i = 0; i < count; i++)
-            HDfree(sf_io_reqs[i]);
-        HDfree(sf_io_reqs);
+            free(sf_io_reqs[i]);
+        free(sf_io_reqs);
     }
 
     H5_SUBFILING_FUNC_LEAVE;

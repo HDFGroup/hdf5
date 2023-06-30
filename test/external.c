@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, March  3, 1998
- *
  * Purpose:    Tests datasets stored in external raw files.
  */
 #include "external_common.h"
@@ -29,9 +26,6 @@
  *
  * Return:      Success:    nonzero if same, zero if different.
  *              Failure:    zero
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -53,8 +47,8 @@ files_have_same_contents(const char *name1, const char *name2)
 
     /* Loop until files are empty or we encounter a problem */
     while (1) {
-        HDmemset(buf1, 0, sizeof(buf1));
-        HDmemset(buf2, 0, sizeof(buf2));
+        memset(buf1, 0, sizeof(buf1));
+        memset(buf2, 0, sizeof(buf2));
 
         n1 = HDread(fd1, buf1, sizeof(buf1));
         if (n1 < 0 || (size_t)n1 > sizeof(buf1))
@@ -71,7 +65,7 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
         }
 
-        if (HDmemcmp(buf1, buf2, (size_t)n1) != 0)
+        if (memcmp(buf1, buf2, (size_t)n1) != 0)
             break;
 
     } /* end while */
@@ -91,9 +85,6 @@ out:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -197,9 +188,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -257,9 +245,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -311,9 +296,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -371,9 +353,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -466,9 +445,6 @@ error:
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Jacob Smith
- *              29 Sep 2019
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -483,12 +459,12 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
     for (i = 0; i < n_external_files; i++) {
         if (HDsnprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
             fprintf(stderr, "External file %d overflows name buffer\n", i + 1);
-            HDfflush(stderr);
+            fflush(stderr);
             return -1;
         }
         if (H5Pset_external(dcpl_id, exname, offset, max_ext_size) < 0) {
             fprintf(stderr, "Problem adding external file %s\n", exname);
-            HDfflush(stderr);
+            fflush(stderr);
             return -1;
         }
     }
@@ -502,9 +478,6 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -590,9 +563,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -645,9 +615,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -693,9 +660,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -756,7 +720,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -774,7 +738,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, hs_space, hs_space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -818,9 +782,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -949,9 +910,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1004,7 +962,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1043,9 +1001,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1094,7 +1049,7 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1135,9 +1090,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1218,7 +1170,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1255,7 +1207,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1302,9 +1254,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Dana Robinson
- *              March 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1362,7 +1311,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_STACK_ERROR;
 
     /* Check the value for the external prefix */
-    if ((buffer = (char *)HDcalloc((size_t)64, sizeof(char))) == NULL)
+    if ((buffer = (char *)calloc((size_t)64, sizeof(char))) == NULL)
         TEST_ERROR;
     if (H5Pget_efile_prefix(dapl_id, buffer, (size_t)64) < 0)
         FAIL_STACK_ERROR;
@@ -1370,7 +1319,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_PUTS_ERROR("external file prefix from dapl incorrect");
 
     /* Close everything */
-    HDfree(buffer);
+    free(buffer);
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
@@ -1387,7 +1336,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
 
 error:
     if (buffer)
-        HDfree(buffer);
+        free(buffer);
     H5E_BEGIN_TRY
     {
         H5Dclose(did);
@@ -1406,9 +1355,6 @@ error:
  * Purpose:     Runs external dataset tests.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Robb Matzke
- *              Tuesday, March  3, 1998
  *
  *-------------------------------------------------------------------------
  */

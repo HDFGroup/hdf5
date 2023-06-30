@@ -496,7 +496,7 @@ H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value, const voi
     } /* end if */
     else {
         assert(connector->info_cls.size > 0);
-        *cmp_value = HDmemcmp(info1, info2, connector->info_cls.size);
+        *cmp_value = memcmp(info1, info2, connector->info_cls.size);
     } /* end else */
 
 done:
@@ -7282,9 +7282,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, August 21, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7441,9 +7438,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Saturday, August 17, 2019
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -7537,9 +7531,6 @@ done:
  * Purpose:	Optional operation on blobs through the VOL
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *		Thursday, November 14, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -7671,7 +7662,7 @@ H5VL__token_cmp(void *obj, const H5VL_class_t *cls, const H5O_token_t *token1, c
                 HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare object tokens")
         } /* end if */
         else
-            *cmp_value = HDmemcmp(token1, token2, sizeof(H5O_token_t));
+            *cmp_value = memcmp(token1, token2, sizeof(H5O_token_t));
     } /* end else */
 
 done:

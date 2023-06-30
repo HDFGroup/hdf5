@@ -147,9 +147,6 @@ static const H5C_log_class_t H5C_trace_log_class_g = {"trace",
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -169,7 +166,7 @@ H5C__trace_write_log_message(H5C_log_trace_udata_t *trace_udata)
     n_chars = HDstrlen(trace_udata->message);
     if ((int)n_chars != fprintf(trace_udata->outfile, "%s", trace_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
-    HDmemset((void *)(trace_udata->message), 0, (size_t)(n_chars * sizeof(char)));
+    memset((void *)(trace_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -193,9 +190,6 @@ done:
  *              the H5C__trace_write_log_message function.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -244,7 +238,7 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
         HDsnprintf(file_name, n_chars, "%s.%d", log_location, mpi_rank);
 
     /* Open log file and set it to be unbuffered */
-    if (NULL == (trace_udata->outfile = HDfopen(file_name, "w")))
+    if (NULL == (trace_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file")
     HDsetbuf(trace_udata->outfile, NULL);
 
@@ -278,9 +272,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -301,7 +292,7 @@ H5C__trace_tear_down_logging(H5C_log_info_t *log_info)
     H5MM_xfree(trace_udata->message);
 
     /* Close log file */
-    if (EOF == HDfclose(trace_udata->outfile))
+    if (EOF == fclose(trace_udata->outfile))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file")
     trace_udata->outfile = NULL;
 
@@ -322,9 +313,6 @@ done:
  * Purpose:     Write a log message for expunge of cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -359,9 +347,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -393,9 +378,6 @@ done:
  * Purpose:     Write a log message for insertion of cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -431,9 +413,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -468,9 +447,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -504,9 +480,6 @@ done:
  * Purpose:     Write a log message for marking cache entries as unserialized.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -543,9 +516,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -581,9 +551,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -617,9 +584,6 @@ done:
  * Purpose:     Write a log message for pinning a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -655,9 +619,6 @@ done:
  *              two cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -696,9 +657,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -733,9 +691,6 @@ done:
  * Purpose:     Write a log message for resizing a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -772,9 +727,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -809,9 +761,6 @@ done:
  *              between two cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -850,9 +799,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -886,9 +832,6 @@ done:
  * Purpose:     Write a log message for setting the cache configuration.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -936,9 +879,6 @@ done:
  * Purpose:     Write a log message for removing a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */

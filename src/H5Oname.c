@@ -107,9 +107,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -140,9 +137,6 @@ H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -189,9 +183,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -219,9 +210,6 @@ H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -246,9 +234,6 @@ H5O__name_reset(void *_mesg)
  * Purpose:     Prints debugging info for the message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
  *
  *-------------------------------------------------------------------------
  */

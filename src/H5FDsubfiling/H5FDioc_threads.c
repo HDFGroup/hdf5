@@ -102,9 +102,6 @@ static void ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_r
  * Return:      SUCCESS (0) or FAIL (-1) if any errors are detected
  *              for the multi-threaded initialization.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -125,7 +122,7 @@ initialize_ioc_threads(void *_sf_context)
      * Allocate and initialize IOC data that will be passed
      * to the IOC main thread
      */
-    if (NULL == (ioc_data = HDmalloc(sizeof(*ioc_data))))
+    if (NULL == (ioc_data = malloc(sizeof(*ioc_data))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, (-1),
                                 "can't allocate IOC data for IOC main thread");
     ioc_data->sf_context_id  = sf_context->sf_context_id;
@@ -171,7 +168,7 @@ initialize_ioc_threads(void *_sf_context)
 
     /* Allow experimentation with the number of helper threads */
     if ((env_value = HDgetenv(H5FD_IOC_THREAD_POOL_SIZE)) != NULL) {
-        int value_check = HDatoi(env_value);
+        int value_check = atoi(env_value);
         if (value_check > 0) {
             thread_pool_size = (unsigned int)value_check;
         }
@@ -196,7 +193,7 @@ initialize_ioc_threads(void *_sf_context)
 #ifdef H5FD_IOC_DEBUG
     if (sf_context->topology->ioc_idx == 0) {
         printf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
-        HDfflush(stdout);
+        fflush(stdout);
     }
 #endif
 
@@ -242,7 +239,7 @@ finalize_ioc_threads(void *_sf_context)
         H5_SUBFILING_DONE_ERROR(H5E_IO, H5E_CLOSEERROR, -1, "%" PRId32 " I/O requests failed",
                                 ioc_data->io_queue.num_failed);
 
-    HDfree(ioc_data);
+    free(ioc_data);
     sf_context->ioc_data = NULL;
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -258,9 +255,6 @@ finalize_ioc_threads(void *_sf_context)
  *              file associated with this context is open.  At file close,
  *              the thread will return from 'ioc_main' and the thread
  *              exit status will be checked by the main program.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -332,9 +326,6 @@ ioc_thread_main(void *arg)
  * Return:      None
  * Errors:      None
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -398,7 +389,7 @@ ioc_main(ioc_data_t *ioc_data)
              * Zero out work request, since the received message should
              * be smaller than sizeof(sf_work_request_t)
              */
-            HDmemset(&wk_req, 0, sizeof(sf_work_request_t));
+            memset(&wk_req, 0, sizeof(sf_work_request_t));
 
             if (MPI_SUCCESS != (mpi_code = MPI_Recv(&wk_req, count, MPI_BYTE, source, tag,
                                                     context->sf_msg_comm, MPI_STATUS_IGNORE)))
@@ -484,9 +475,6 @@ translate_opcode(io_op_t op)
  *              returned directly to the client via ACK or NACK messages.
  *
  * Return:      (none) Doesn't fail.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -581,9 +569,6 @@ handle_work_request(void *arg)
  *
  * Return:      integer result of mutex_lock request.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -599,9 +584,6 @@ H5FD_ioc_begin_thread_exclusive(void)
  *              of the locked mutex.
  *
  * Return:      result of mutex_unlock operation.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -664,9 +646,6 @@ from the thread pool threads...
  * Return:      The integer status returned by the Internal read_independent
  *              function.  Successful operations will return 0.
  * Errors:      An MPI related error value.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -739,7 +718,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
 #endif
 
     /* Allocate space to receive data sent from the client */
-    if (NULL == (recv_buf = HDmalloc((size_t)data_size))) {
+    if (NULL == (recv_buf = malloc((size_t)data_size))) {
         send_nack = TRUE;
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, -1, "couldn't allocate receive buffer for data");
     }
@@ -836,7 +815,7 @@ done:
             H5_SUBFILING_DONE_ERROR(H5E_IO, H5E_WRITEERROR, -1, "couldn't send NACK to client");
     }
 
-    HDfree(recv_buf);
+    free(recv_buf);
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* ioc_file_queue_write_indep() */
@@ -853,9 +832,6 @@ done:
  * Return:      The integer status returned by the Internal read_independent
  *              function.  Successful operations will return 0.
  * Errors:      An MPI related error value.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -935,7 +911,7 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
 #endif
 
     /* Allocate space to send data read from file to client */
-    if (NULL == (send_buf = HDmalloc((size_t)data_size))) {
+    if (NULL == (send_buf = malloc((size_t)data_size))) {
         if (need_data_tag) {
             send_nack      = TRUE;
             send_empty_buf = FALSE;
@@ -1010,7 +986,7 @@ done:
             H5_SUBFILING_MPI_DONE_ERROR(-1, "MPI_Send failed", mpi_code);
     }
 
-    HDfree(send_buf);
+    free(send_buf);
 
     return ret_value;
 } /* end ioc_file_queue_read_indep() */
@@ -1110,7 +1086,7 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
             assert(bytes_remaining > 0);
 
             /* end of file but not end of format address space */
-            HDmemset(this_buffer, 0, (size_t)bytes_remaining);
+            memset(this_buffer, 0, (size_t)bytes_remaining);
             break;
         }
         else {
@@ -1178,7 +1154,7 @@ ioc_file_truncate(sf_work_request_t *msg)
 #ifdef H5FD_IOC_DEBUG
     printf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", ioc_idx, __func__, (long long)length,
            errno);
-    HDfflush(stdout);
+    fflush(stdout);
 #endif
 
 done:
@@ -1198,9 +1174,6 @@ done:
  *                     in two different VFDs.
  *
  * Return:      0 if successful, 1 or an MPI error code on failure.
- *
- * Programmer:  John Mainzer
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -1264,8 +1237,6 @@ done:
  * Return:      Pointer to new instance of ioc_io_queue_entry_t
  *              on success, and NULL on failure.
  *
- * Programmer:  JRM -- 11/6/21
- *
  *-------------------------------------------------------------------------
  */
 static ioc_io_queue_entry_t *
@@ -1273,7 +1244,7 @@ ioc_io_queue_alloc_entry(void)
 {
     ioc_io_queue_entry_t *q_entry_ptr = NULL;
 
-    q_entry_ptr = (ioc_io_queue_entry_t *)HDmalloc(sizeof(ioc_io_queue_entry_t));
+    q_entry_ptr = (ioc_io_queue_entry_t *)malloc(sizeof(ioc_io_queue_entry_t));
 
     if (q_entry_ptr) {
 
@@ -1317,8 +1288,6 @@ ioc_io_queue_alloc_entry(void)
  *
  * Return:      void.
  *
- * Programmer:  JRM -- 11/7/21
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1335,7 +1304,7 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
     assert(entry_ptr);
     assert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
 
-    HDmemcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
+    memcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
 
     /* must obtain io_queue mutex before appending */
     hg_thread_mutex_lock(&ioc_data->io_queue.q_mutex);
@@ -1437,8 +1406,6 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
  *              the queue.
  *
  * Return:      void.
- *
- * Programmer:  JRM -- 11/7/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1604,8 +1571,6 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
  *
  * Return:      void.
  *
- * Programmer:  JRM -- 11/7/21
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1688,8 +1653,6 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
  *
  * Return:      void.
  *
- * Programmer:  JRM -- 11/6/21
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1703,7 +1666,7 @@ ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr)
 
     q_entry_ptr->magic = 0;
 
-    HDfree(q_entry_ptr);
+    free(q_entry_ptr);
 
     q_entry_ptr = NULL;
 

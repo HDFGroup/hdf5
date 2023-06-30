@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5VLtest.c
- *			Jan  3 2021
- *			Quincey Koziol
  *
  * Purpose:		Virtual Object Layer (VOL) testing routines.
  *
@@ -74,9 +72,6 @@
  *              with setenv(3).
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Feb 3, 2021
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi
- *              June 2015
- *
  * Purpose: This test checks for the correct initialization and
  * termination of the HDF5 library with MPI init and finalize.
  */

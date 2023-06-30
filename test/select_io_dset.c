@@ -11,8 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:
- *
  * Purpose:    Tests selection IO for the dataset interface (H5D)
  */
 
@@ -178,7 +176,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(wbuf_bak, wbuf, sizeof(wbuf));
+        memcpy(wbuf_bak, wbuf, sizeof(wbuf));
 
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
@@ -186,7 +184,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
+        memcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     /* Read data from the dataset without data transform set in dxpl */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
@@ -268,11 +266,11 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     char   *rbuf     = NULL;
     char    dset_name[DSET_NAME_LEN];
 
-    if ((wbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
+    if ((wbuf = (char *)malloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         FAIL_STACK_ERROR;
-    if (mwbuf && (wbuf_bak = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
+    if (mwbuf && (wbuf_bak = (char *)malloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         FAIL_STACK_ERROR;
-    if ((rbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
+    if ((rbuf = (char *)malloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         FAIL_STACK_ERROR;
 
     /* Create dataset transfer property list */
@@ -318,7 +316,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(wbuf_bak, wbuf, (size_t)(4 * DSET_SELECT_DIM));
+        memcpy(wbuf_bak, wbuf, (size_t)(4 * DSET_SELECT_DIM));
 
     /* Write the data to the dataset with little endian */
     if (H5Dwrite(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
@@ -326,7 +324,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(wbuf, wbuf_bak, (size_t)(4 * DSET_SELECT_DIM));
+        memcpy(wbuf, wbuf_bak, (size_t)(4 * DSET_SELECT_DIM));
 
     /* Read the data from the dataset with little endian */
     if (H5Dread(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
@@ -365,9 +363,9 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     if (H5Pclose(dxpl) < 0)
         FAIL_STACK_ERROR;
 
-    HDfree(wbuf);
-    HDfree(wbuf_bak);
-    HDfree(rbuf);
+    free(wbuf);
+    free(wbuf_bak);
+    free(rbuf);
 
     PASSED();
 
@@ -384,11 +382,11 @@ error:
     H5E_END_TRY;
 
     if (wbuf)
-        HDfree(wbuf);
+        free(wbuf);
     if (wbuf_bak)
-        HDfree(wbuf_bak);
+        free(wbuf_bak);
     if (wbuf)
-        HDfree(rbuf);
+        free(rbuf);
 
     return FAIL;
 
@@ -468,7 +466,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(wbuf_bak, wbuf, sizeof(wbuf));
+        memcpy(wbuf_bak, wbuf, sizeof(wbuf));
 
     /* Write data to the dataset with/without data transform set in dxpl */
     if (H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
@@ -476,7 +474,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
+        memcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     /* Read the data from the dataset without data transform in dxpl */
     if (H5Dread(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
@@ -611,7 +609,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(wbuf_bak, wbuf, sizeof(wbuf));
+        memcpy(wbuf_bak, wbuf, sizeof(wbuf));
 
     /* Write data to the dataset with/without data transform in dxpl */
     if (H5Dwrite(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
@@ -619,7 +617,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
+        memcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     /* Read data from the dataset without data transform in dxpl */
     if (H5Dread(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
@@ -737,17 +735,17 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             FAIL_STACK_ERROR;
 
     /* Allocate buffers for datasets */
-    if (NULL == (s1_wbuf = (s1_t *)HDmalloc(sizeof(s1_t) * DSET_SELECT_DIM)))
+    if (NULL == (s1_wbuf = (s1_t *)malloc(sizeof(s1_t) * DSET_SELECT_DIM)))
         FAIL_STACK_ERROR;
-    if (mwbuf && NULL == (s1_wbuf_bak = (s1_t *)HDmalloc(sizeof(s1_t) * DSET_SELECT_DIM)))
+    if (mwbuf && NULL == (s1_wbuf_bak = (s1_t *)malloc(sizeof(s1_t) * DSET_SELECT_DIM)))
         FAIL_STACK_ERROR;
-    if (NULL == (s1_rbuf = (s1_t *)HDmalloc(sizeof(s1_t) * DSET_SELECT_DIM)))
+    if (NULL == (s1_rbuf = (s1_t *)malloc(sizeof(s1_t) * DSET_SELECT_DIM)))
         FAIL_STACK_ERROR;
-    if (NULL == (s2_wbuf = (s2_t *)HDmalloc(sizeof(s2_t) * DSET_SELECT_DIM)))
+    if (NULL == (s2_wbuf = (s2_t *)malloc(sizeof(s2_t) * DSET_SELECT_DIM)))
         FAIL_STACK_ERROR;
-    if (mwbuf && NULL == (s2_wbuf_bak = (s2_t *)HDmalloc(sizeof(s2_t) * DSET_SELECT_DIM)))
+    if (mwbuf && NULL == (s2_wbuf_bak = (s2_t *)malloc(sizeof(s2_t) * DSET_SELECT_DIM)))
         FAIL_STACK_ERROR;
-    if (NULL == (s2_rbuf = (s2_t *)HDmalloc(sizeof(s2_t) * DSET_SELECT_DIM)))
+    if (NULL == (s2_rbuf = (s2_t *)malloc(sizeof(s2_t) * DSET_SELECT_DIM)))
         FAIL_STACK_ERROR;
 
     /* Create the memory data type */
@@ -793,7 +791,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(s1_wbuf_bak, s1_wbuf, sizeof(s1_t) * DSET_SELECT_DIM);
+        memcpy(s1_wbuf_bak, s1_wbuf, sizeof(s1_t) * DSET_SELECT_DIM);
 
     /* Write all the data to the dataset */
     if (H5Dwrite(did, s1_tid, H5S_ALL, H5S_ALL, dxpl, s1_wbuf) < 0)
@@ -801,7 +799,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(s1_wbuf, s1_wbuf_bak, sizeof(s1_t) * DSET_SELECT_DIM);
+        memcpy(s1_wbuf, s1_wbuf_bak, sizeof(s1_t) * DSET_SELECT_DIM);
 
     /* Read all the data from the dataset */
     if (H5Dread(did, s1_tid, H5S_ALL, H5S_ALL, dxpl, s1_rbuf) < 0)
@@ -839,7 +837,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(s1_wbuf_bak, s1_wbuf, sizeof(s1_t) * DSET_SELECT_DIM);
+        memcpy(s1_wbuf_bak, s1_wbuf, sizeof(s1_t) * DSET_SELECT_DIM);
 
     /* Write s1_wbuf to the dataset with only subset members in ss_tid */
     if (H5Dwrite(did, ss_ac_tid, H5S_ALL, H5S_ALL, dxpl, s1_wbuf) < 0)
@@ -847,7 +845,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(s1_wbuf, s1_wbuf_bak, sizeof(s1_t) * DSET_SELECT_DIM);
+        memcpy(s1_wbuf, s1_wbuf_bak, sizeof(s1_t) * DSET_SELECT_DIM);
 
     /* Read the whole compound back */
     if (H5Dread(did, ss_ac_tid, H5S_ALL, H5S_ALL, dxpl, s1_rbuf) < 0)
@@ -925,14 +923,14 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(s2_wbuf_bak, s2_wbuf, sizeof(s2_t) * DSET_SELECT_DIM);
+        memcpy(s2_wbuf_bak, s2_wbuf, sizeof(s2_t) * DSET_SELECT_DIM);
 
     if (H5Dwrite(did, s2_tid, H5S_ALL, H5S_ALL, dxpl, s2_wbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(s2_wbuf, s2_wbuf_bak, sizeof(s2_t) * DSET_SELECT_DIM);
+        memcpy(s2_wbuf, s2_wbuf_bak, sizeof(s2_t) * DSET_SELECT_DIM);
 
     /* Read it back */
     if (H5Dread(did, s2_tid, H5S_ALL, H5S_ALL, dxpl, s2_rbuf) < 0) {
@@ -968,12 +966,12 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         FAIL_STACK_ERROR;
 
     /* Release buffers */
-    HDfree(s1_wbuf);
-    HDfree(s1_wbuf_bak);
-    HDfree(s1_rbuf);
-    HDfree(s2_wbuf);
-    HDfree(s2_wbuf_bak);
-    HDfree(s2_rbuf);
+    free(s1_wbuf);
+    free(s1_wbuf_bak);
+    free(s1_rbuf);
+    free(s2_wbuf);
+    free(s2_wbuf_bak);
+    free(s2_rbuf);
 
     PASSED();
 
@@ -994,17 +992,17 @@ error:
     H5E_END_TRY;
 
     if (s1_wbuf)
-        HDfree(s1_wbuf);
+        free(s1_wbuf);
     if (s1_wbuf_bak)
-        HDfree(s1_wbuf_bak);
+        free(s1_wbuf_bak);
     if (s1_rbuf)
-        HDfree(s1_rbuf);
+        free(s1_rbuf);
     if (s2_wbuf)
-        HDfree(s2_wbuf);
+        free(s2_wbuf);
     if (s2_wbuf_bak)
-        HDfree(s2_wbuf_bak);
+        free(s2_wbuf_bak);
     if (s2_rbuf)
-        HDfree(s2_rbuf);
+        free(s2_rbuf);
     return FAIL;
 
 } /* test_cmpd_with_bkg() */
@@ -1116,24 +1114,24 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
     buf_size = ndsets * DSET_SELECT_DIM * sizeof(int);
 
     /* Allocate buffers for all datasets */
-    if (NULL == (total_wbuf = (int *)HDmalloc(buf_size)))
+    if (NULL == (total_wbuf = (int *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (mwbuf && NULL == (total_wbuf_bak = (int *)HDmalloc(buf_size)))
+    if (mwbuf && NULL == (total_wbuf_bak = (int *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_trans_wbuf = (int *)HDmalloc(buf_size)))
+    if (NULL == (total_trans_wbuf = (int *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_rbuf = (int *)HDmalloc(buf_size)))
+    if (NULL == (total_rbuf = (int *)malloc(buf_size)))
         FAIL_STACK_ERROR;
 
     buf_size = ndsets * DSET_SELECT_DIM * sizeof(long);
 
-    if (NULL == (total_lwbuf = (long *)HDmalloc(buf_size)))
+    if (NULL == (total_lwbuf = (long *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (mwbuf && NULL == (total_lwbuf_bak = (long *)HDmalloc(buf_size)))
+    if (mwbuf && NULL == (total_lwbuf_bak = (long *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_trans_lwbuf = (long *)HDmalloc(buf_size)))
+    if (NULL == (total_trans_lwbuf = (long *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_lrbuf = (long *)HDmalloc(buf_size)))
+    if (NULL == (total_lrbuf = (long *)malloc(buf_size)))
         FAIL_STACK_ERROR;
 
     /* Initialize buffer indices */
@@ -1161,7 +1159,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(total_wbuf_bak, total_wbuf, ndsets * DSET_SELECT_DIM * sizeof(int));
+        memcpy(total_wbuf_bak, total_wbuf, ndsets * DSET_SELECT_DIM * sizeof(int));
 
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
@@ -1169,7 +1167,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(total_wbuf, total_wbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
+        memcpy(total_wbuf, total_wbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
 
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, ntrans_dxpl, rbufs) < 0)
@@ -1226,7 +1224,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(total_lwbuf_bak, total_lwbuf, ndsets * DSET_SELECT_DIM * sizeof(long));
+        memcpy(total_lwbuf_bak, total_lwbuf, ndsets * DSET_SELECT_DIM * sizeof(long));
 
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
@@ -1234,7 +1232,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(total_lwbuf, total_lwbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
+        memcpy(total_lwbuf, total_lwbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
 
     /* Read data from the dataset (if dtrans, with data transform again in dxpl) */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -1267,14 +1265,14 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
             FAIL_STACK_ERROR;
     }
 
-    HDfree(total_wbuf);
-    HDfree(total_wbuf_bak);
-    HDfree(total_rbuf);
-    HDfree(total_trans_wbuf);
-    HDfree(total_lwbuf);
-    HDfree(total_lwbuf_bak);
-    HDfree(total_lrbuf);
-    HDfree(total_trans_lwbuf);
+    free(total_wbuf);
+    free(total_wbuf_bak);
+    free(total_rbuf);
+    free(total_trans_wbuf);
+    free(total_lwbuf);
+    free(total_lwbuf_bak);
+    free(total_lrbuf);
+    free(total_trans_lwbuf);
 
     PASSED();
 
@@ -1293,21 +1291,21 @@ error:
     H5E_END_TRY;
 
     if (total_wbuf)
-        HDfree(total_wbuf);
+        free(total_wbuf);
     if (total_wbuf_bak)
-        HDfree(total_wbuf_bak);
+        free(total_wbuf_bak);
     if (total_trans_wbuf)
-        HDfree(total_trans_wbuf);
+        free(total_trans_wbuf);
     if (total_rbuf)
-        HDfree(total_rbuf);
+        free(total_rbuf);
     if (total_lwbuf)
-        HDfree(total_lwbuf);
+        free(total_lwbuf);
     if (total_lwbuf_bak)
-        HDfree(total_lwbuf_bak);
+        free(total_lwbuf_bak);
     if (total_lrbuf)
-        HDfree(total_lrbuf);
+        free(total_lrbuf);
     if (total_trans_lwbuf)
-        HDfree(total_lrbuf);
+        free(total_lrbuf);
 
     return FAIL;
 
@@ -1446,18 +1444,18 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     s2_buf_size = ndsets * DSET_SELECT_DIM * sizeof(s2_t);
 
     /* Allocate buffers */
-    if (NULL == (total_wbuf = (s1_t *)HDmalloc(buf_size)))
+    if (NULL == (total_wbuf = (s1_t *)malloc(buf_size)))
         TEST_ERROR;
-    if (mwbuf && NULL == (total_wbuf_bak = (s1_t *)HDmalloc(buf_size)))
+    if (mwbuf && NULL == (total_wbuf_bak = (s1_t *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (total_rbuf = (s1_t *)HDmalloc(buf_size)))
+    if (NULL == (total_rbuf = (s1_t *)malloc(buf_size)))
         TEST_ERROR;
 
-    if (NULL == (s2_total_wbuf = (s2_t *)HDmalloc(s2_buf_size)))
+    if (NULL == (s2_total_wbuf = (s2_t *)malloc(s2_buf_size)))
         TEST_ERROR;
-    if (mwbuf && NULL == (s2_total_wbuf_bak = (s2_t *)HDmalloc(s2_buf_size)))
+    if (mwbuf && NULL == (s2_total_wbuf_bak = (s2_t *)malloc(s2_buf_size)))
         TEST_ERROR;
-    if (NULL == (s2_total_rbuf = (s2_t *)HDmalloc(s2_buf_size)))
+    if (NULL == (s2_total_rbuf = (s2_t *)malloc(s2_buf_size)))
         TEST_ERROR;
 
     /* Initialize buffer indices */
@@ -1486,14 +1484,14 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(total_wbuf_bak, total_wbuf, buf_size);
+        memcpy(total_wbuf_bak, total_wbuf, buf_size);
 
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
+        memcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         TEST_ERROR;
@@ -1545,14 +1543,14 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(total_wbuf_bak, total_wbuf, buf_size);
+        memcpy(total_wbuf_bak, total_wbuf, buf_size);
 
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
+        memcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         TEST_ERROR;
@@ -1703,14 +1701,14 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(s2_total_wbuf_bak, s2_total_wbuf, s2_buf_size);
+        memcpy(s2_total_wbuf_bak, s2_total_wbuf, s2_buf_size);
 
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(s2_total_wbuf, s2_total_wbuf_bak, s2_buf_size);
+        memcpy(s2_total_wbuf, s2_total_wbuf_bak, s2_buf_size);
 
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         TEST_ERROR;
@@ -1740,12 +1738,12 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             FAIL_STACK_ERROR;
     }
 
-    HDfree(total_wbuf);
-    HDfree(total_wbuf_bak);
-    HDfree(total_rbuf);
-    HDfree(s2_total_wbuf);
-    HDfree(s2_total_wbuf_bak);
-    HDfree(s2_total_rbuf);
+    free(total_wbuf);
+    free(total_wbuf_bak);
+    free(total_rbuf);
+    free(s2_total_wbuf);
+    free(s2_total_wbuf_bak);
+    free(s2_total_rbuf);
 
     PASSED();
 
@@ -1763,17 +1761,17 @@ error:
     H5E_END_TRY;
 
     if (total_wbuf)
-        HDfree(total_wbuf);
+        free(total_wbuf);
     if (total_wbuf_bak)
-        HDfree(total_wbuf_bak);
+        free(total_wbuf_bak);
     if (total_rbuf)
-        HDfree(total_rbuf);
+        free(total_rbuf);
     if (s2_total_wbuf)
-        HDfree(s2_total_wbuf);
+        free(s2_total_wbuf);
     if (s2_total_wbuf_bak)
-        HDfree(s2_total_wbuf_bak);
+        free(s2_total_wbuf_bak);
     if (s2_total_rbuf)
-        HDfree(s2_total_rbuf);
+        free(s2_total_rbuf);
 
     return FAIL;
 
@@ -1882,11 +1880,11 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     buf_size = ndsets * ss * DSET_SELECT_DIM;
 
     /* Allocate buffers for all datasets */
-    if (NULL == (total_wbuf = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_wbuf = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_wbuf_bak = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_wbuf_bak = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_rbuf = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_rbuf = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
 
     /* Initialize buffer indices */
@@ -1913,7 +1911,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(total_wbuf_bak, total_wbuf, buf_size);
+        memcpy(total_wbuf_bak, total_wbuf, buf_size);
 
     /* Write data to the dataset */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
@@ -1921,7 +1919,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
+        memcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     /* Read data from the dataset */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -1949,11 +1947,11 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     buf_size = ndsets * (ss * DSET_SELECT_DIM);
 
     /* Allocate buffers for all datasets */
-    if (NULL == (total_lwbuf = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_lwbuf = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_lwbuf_bak = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_lwbuf_bak = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_lrbuf = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_lrbuf = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
 
     /* Initialize buffer indices */
@@ -1984,7 +1982,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(total_lwbuf_bak, total_lwbuf, buf_size);
+        memcpy(total_lwbuf_bak, total_lwbuf, buf_size);
 
     /* Write data to the dataset */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
@@ -1992,7 +1990,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(total_lwbuf, total_lwbuf_bak, buf_size);
+        memcpy(total_lwbuf, total_lwbuf_bak, buf_size);
 
     /* Read data from the dataset */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -2024,11 +2022,11 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     buf_size = ndsets * (ss * DSET_SELECT_DIM);
 
     /* Allocate buffers for all datasets */
-    if (NULL == (total_swbuf = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_swbuf = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_swbuf_bak = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_swbuf_bak = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_srbuf = (uint8_t *)HDmalloc(buf_size)))
+    if (NULL == (total_srbuf = (uint8_t *)malloc(buf_size)))
         FAIL_STACK_ERROR;
 
     /* Initialize buffer indices */
@@ -2053,7 +2051,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        HDmemcpy(total_swbuf_bak, total_swbuf, buf_size);
+        memcpy(total_swbuf_bak, total_swbuf, buf_size);
 
     /* Write data to the dataset */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
@@ -2061,7 +2059,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        HDmemcpy(total_swbuf, total_swbuf_bak, buf_size);
+        memcpy(total_swbuf, total_swbuf_bak, buf_size);
 
     /* Read data from the dataset */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -2093,15 +2091,15 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             FAIL_STACK_ERROR;
     }
 
-    HDfree(total_wbuf);
-    HDfree(total_wbuf_bak);
-    HDfree(total_rbuf);
-    HDfree(total_lwbuf);
-    HDfree(total_lwbuf_bak);
-    HDfree(total_lrbuf);
-    HDfree(total_swbuf);
-    HDfree(total_swbuf_bak);
-    HDfree(total_srbuf);
+    free(total_wbuf);
+    free(total_wbuf_bak);
+    free(total_rbuf);
+    free(total_lwbuf);
+    free(total_lwbuf_bak);
+    free(total_lrbuf);
+    free(total_swbuf);
+    free(total_swbuf_bak);
+    free(total_srbuf);
 
     PASSED();
 
@@ -2119,23 +2117,23 @@ error:
     H5E_END_TRY;
 
     if (total_wbuf)
-        HDfree(total_wbuf);
+        free(total_wbuf);
     if (total_wbuf_bak)
-        HDfree(total_wbuf_bak);
+        free(total_wbuf_bak);
     if (total_rbuf)
-        HDfree(total_rbuf);
+        free(total_rbuf);
     if (total_lwbuf)
-        HDfree(total_lwbuf);
+        free(total_lwbuf);
     if (total_lwbuf_bak)
-        HDfree(total_lwbuf_bak);
+        free(total_lwbuf_bak);
     if (total_lrbuf)
-        HDfree(total_lrbuf);
+        free(total_lrbuf);
     if (total_swbuf)
-        HDfree(total_swbuf);
+        free(total_swbuf);
     if (total_swbuf_bak)
-        HDfree(total_swbuf_bak);
+        free(total_swbuf_bak);
     if (total_srbuf)
-        HDfree(total_srbuf);
+        free(total_srbuf);
 
     return FAIL;
 
@@ -2363,49 +2361,49 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 
         /* DSET_WITH_NO_CONV */
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(int);
-        if (NULL == (total_wbuf1 = (int *)HDmalloc(buf_size)))
+        if (NULL == (total_wbuf1 = (int *)malloc(buf_size)))
             FAIL_STACK_ERROR;
-        if (mwbuf && NULL == (total_wbuf1_bak = (int *)HDmalloc(buf_size)))
+        if (mwbuf && NULL == (total_wbuf1_bak = (int *)malloc(buf_size)))
             FAIL_STACK_ERROR;
-        if (NULL == (total_rbuf1 = (int *)HDmalloc(buf_size)))
+        if (NULL == (total_rbuf1 = (int *)malloc(buf_size)))
             FAIL_STACK_ERROR;
 
         /* DSET_WITH_CONV_AND_NO_BKG */
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(unsigned long);
-        if (NULL == (ul_total_wbuf2 = (unsigned long *)HDmalloc(buf_size)))
+        if (NULL == (ul_total_wbuf2 = (unsigned long *)malloc(buf_size)))
             FAIL_STACK_ERROR;
-        if (mwbuf && NULL == (ul_total_wbuf2_bak = (unsigned long *)HDmalloc(buf_size)))
+        if (mwbuf && NULL == (ul_total_wbuf2_bak = (unsigned long *)malloc(buf_size)))
             FAIL_STACK_ERROR;
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(long);
-        if (NULL == (l_total_rbuf2 = (long *)HDmalloc(buf_size)))
+        if (NULL == (l_total_rbuf2 = (long *)malloc(buf_size)))
             FAIL_STACK_ERROR;
 
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(long);
-        if (NULL == (l_total_wbuf2 = (long *)HDmalloc(buf_size)))
+        if (NULL == (l_total_wbuf2 = (long *)malloc(buf_size)))
             FAIL_STACK_ERROR;
-        if (mwbuf && NULL == (l_total_wbuf2_bak = (long *)HDmalloc(buf_size)))
+        if (mwbuf && NULL == (l_total_wbuf2_bak = (long *)malloc(buf_size)))
             FAIL_STACK_ERROR;
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(short);
-        if (NULL == (s_total_rbuf2 = (short *)HDmalloc(buf_size)))
+        if (NULL == (s_total_rbuf2 = (short *)malloc(buf_size)))
             FAIL_STACK_ERROR;
 
         /* DSET_WITH_CONV_AND_BKG */
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
-        if (NULL == (s1_total_wbuf3 = (s1_t *)HDmalloc(buf_size)))
+        if (NULL == (s1_total_wbuf3 = (s1_t *)malloc(buf_size)))
             FAIL_STACK_ERROR;
-        if (mwbuf && NULL == (s1_total_wbuf3_bak = (s1_t *)HDmalloc(buf_size)))
+        if (mwbuf && NULL == (s1_total_wbuf3_bak = (s1_t *)malloc(buf_size)))
             FAIL_STACK_ERROR;
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(s3_t);
-        if (NULL == (s3_total_rbuf3 = (s3_t *)HDmalloc(buf_size)))
+        if (NULL == (s3_total_rbuf3 = (s3_t *)malloc(buf_size)))
             FAIL_STACK_ERROR;
 
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(s4_t);
-        if (NULL == (s4_total_wbuf3 = (s4_t *)HDmalloc(buf_size)))
+        if (NULL == (s4_total_wbuf3 = (s4_t *)malloc(buf_size)))
             FAIL_STACK_ERROR;
-        if (mwbuf && NULL == (s4_total_wbuf3_bak = (s4_t *)HDmalloc(buf_size)))
+        if (mwbuf && NULL == (s4_total_wbuf3_bak = (s4_t *)malloc(buf_size)))
             FAIL_STACK_ERROR;
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
-        if (NULL == (s1_total_rbuf3 = (s1_t *)HDmalloc(buf_size)))
+        if (NULL == (s1_total_rbuf3 = (s1_t *)malloc(buf_size)))
             FAIL_STACK_ERROR;
 
         /* Test with s settings for ndsets */
@@ -2517,12 +2515,11 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 
             /* Copy wbufs if the library will be modifying them */
             if (mwbuf) {
-                HDmemcpy(total_wbuf1_bak, total_wbuf1, ndsets * DSET_SELECT_DIM * sizeof(int));
-                HDmemcpy(ul_total_wbuf2_bak, ul_total_wbuf2,
-                         ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
-                HDmemcpy(l_total_wbuf2_bak, l_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(long));
-                HDmemcpy(s1_total_wbuf3_bak, s1_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
-                HDmemcpy(s4_total_wbuf3_bak, s4_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
+                memcpy(total_wbuf1_bak, total_wbuf1, ndsets * DSET_SELECT_DIM * sizeof(int));
+                memcpy(ul_total_wbuf2_bak, ul_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
+                memcpy(l_total_wbuf2_bak, l_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(long));
+                memcpy(s1_total_wbuf3_bak, s1_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
+                memcpy(s4_total_wbuf3_bak, s4_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
             }
 
             if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
@@ -2530,12 +2527,11 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 
             /* Restore wbufs from backup if the library modified them */
             if (mwbuf) {
-                HDmemcpy(total_wbuf1, total_wbuf1_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
-                HDmemcpy(ul_total_wbuf2, ul_total_wbuf2_bak,
-                         ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
-                HDmemcpy(l_total_wbuf2, l_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
-                HDmemcpy(s1_total_wbuf3, s1_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
-                HDmemcpy(s4_total_wbuf3, s4_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
+                memcpy(total_wbuf1, total_wbuf1_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
+                memcpy(ul_total_wbuf2, ul_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
+                memcpy(l_total_wbuf2, l_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
+                memcpy(s1_total_wbuf3, s1_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
+                memcpy(s4_total_wbuf3, s4_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
             }
 
             if (H5Dread_multi(ndsets, dset_dids, r_mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -2639,37 +2635,37 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
         }
 
         /* Freeing */
-        HDfree(total_wbuf1);
+        free(total_wbuf1);
         total_wbuf1 = NULL;
-        HDfree(total_wbuf1_bak);
+        free(total_wbuf1_bak);
         total_wbuf1_bak = NULL;
-        HDfree(total_rbuf1);
+        free(total_rbuf1);
         total_rbuf1 = NULL;
 
-        HDfree(ul_total_wbuf2);
+        free(ul_total_wbuf2);
         ul_total_wbuf2 = NULL;
-        HDfree(ul_total_wbuf2_bak);
+        free(ul_total_wbuf2_bak);
         ul_total_wbuf2_bak = NULL;
-        HDfree(l_total_rbuf2);
+        free(l_total_rbuf2);
         l_total_rbuf2 = NULL;
-        HDfree(l_total_wbuf2);
+        free(l_total_wbuf2);
         l_total_wbuf2 = NULL;
-        HDfree(l_total_wbuf2_bak);
+        free(l_total_wbuf2_bak);
         l_total_wbuf2_bak = NULL;
-        HDfree(s_total_rbuf2);
+        free(s_total_rbuf2);
         s_total_rbuf2 = NULL;
 
-        HDfree(s1_total_wbuf3);
+        free(s1_total_wbuf3);
         s1_total_wbuf3 = NULL;
-        HDfree(s1_total_wbuf3_bak);
+        free(s1_total_wbuf3_bak);
         s1_total_wbuf3_bak = NULL;
-        HDfree(s3_total_rbuf3);
+        free(s3_total_rbuf3);
         s3_total_rbuf3 = NULL;
-        HDfree(s4_total_wbuf3);
+        free(s4_total_wbuf3);
         s4_total_wbuf3 = NULL;
-        HDfree(s4_total_wbuf3_bak);
+        free(s4_total_wbuf3_bak);
         s4_total_wbuf3_bak = NULL;
-        HDfree(s1_total_rbuf3);
+        free(s1_total_rbuf3);
         s1_total_rbuf3 = NULL;
 
     } /* end for n niter */
@@ -2693,37 +2689,37 @@ error:
     H5E_END_TRY;
 
     if (total_wbuf1)
-        HDfree(total_wbuf1);
+        free(total_wbuf1);
     if (total_wbuf1_bak)
-        HDfree(total_wbuf1_bak);
+        free(total_wbuf1_bak);
     if (total_rbuf1)
-        HDfree(total_rbuf1);
+        free(total_rbuf1);
 
     if (ul_total_wbuf2)
-        HDfree(ul_total_wbuf2);
+        free(ul_total_wbuf2);
     if (ul_total_wbuf2_bak)
-        HDfree(ul_total_wbuf2_bak);
+        free(ul_total_wbuf2_bak);
     if (l_total_rbuf2)
-        HDfree(l_total_rbuf2);
+        free(l_total_rbuf2);
     if (l_total_wbuf2)
-        HDfree(l_total_wbuf2);
+        free(l_total_wbuf2);
     if (l_total_wbuf2_bak)
-        HDfree(l_total_wbuf2_bak);
+        free(l_total_wbuf2_bak);
     if (s_total_rbuf2)
-        HDfree(s_total_rbuf2);
+        free(s_total_rbuf2);
 
     if (s1_total_wbuf3)
-        HDfree(s1_total_wbuf3);
+        free(s1_total_wbuf3);
     if (s1_total_wbuf3_bak)
-        HDfree(s1_total_wbuf3_bak);
+        free(s1_total_wbuf3_bak);
     if (s3_total_rbuf3)
-        HDfree(s3_total_rbuf3);
+        free(s3_total_rbuf3);
     if (s4_total_wbuf3)
-        HDfree(s4_total_wbuf3);
+        free(s4_total_wbuf3);
     if (s4_total_wbuf3_bak)
-        HDfree(s4_total_wbuf3_bak);
+        free(s4_total_wbuf3_bak);
     if (s1_total_rbuf3)
-        HDfree(s1_total_rbuf3);
+        free(s1_total_rbuf3);
 
     return FAIL;
 
@@ -3104,8 +3100,6 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -3270,11 +3264,11 @@ main(void)
 
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
     printf("***** %d SELECTION I/O DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 
 } /* end main() */

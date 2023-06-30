@@ -178,7 +178,7 @@ test_page_buffer_access(void)
     ret = H5Pset_file_space_page_size(fcpl, sizeof(int) * 100);
     VRFY((ret == 0), "");
 
-    data = (int *)HDmalloc(sizeof(int) * (size_t)num_elements);
+    data = (int *)malloc(sizeof(int) * (size_t)num_elements);
 
     /* initialize all the elements to have a value of -1 */
     for (i = 0; i < num_elements; i++)
@@ -427,7 +427,7 @@ test_page_buffer_access(void)
         api_ctx_pushed = FALSE;
     }
 
-    HDfree(data);
+    free(data);
     data = NULL;
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -500,8 +500,8 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
 
     num_elements = block[0] * block[1];
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(num_elements * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(num_elements * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
     /* put some trivial data in the data_array */
     for (i = 0; i < num_elements; i++)
         data_array[i] = mpi_rank + 1;
@@ -542,7 +542,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        HDmemset(data_array, 0, num_elements * sizeof(DATATYPE));
+        memset(data_array, 0, num_elements * sizeof(DATATYPE));
         dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
 
@@ -583,7 +583,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
-    HDfree(data_array);
+    free(data_array);
     return 0;
 } /* create_file */
 
@@ -658,8 +658,8 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
 
     num_elements = block[0] * block[1];
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(num_elements * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(num_elements * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
 
     /* create a memory dataspace independently */
     mem_dataspace = H5Screate_simple(1, &num_elements, NULL);
@@ -744,7 +744,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
         api_ctx_pushed = FALSE;
     }
 
-    HDfree(data_array);
+    free(data_array);
 
     return nerrors;
 }

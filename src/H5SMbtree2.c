@@ -77,9 +77,6 @@ H5FL_DEFINE_STATIC(H5SM_bt2_ctx_t);
  * Return:	Success:	non-NULL
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 26, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -116,9 +113,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 26, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -147,9 +141,6 @@ H5SM__bt2_dst_context(void *_ctx)
  * Return:	Non-negative on success
  *              Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -172,9 +163,6 @@ H5SM__bt2_store(void *native, const void *udata)
  *
  * Return:	Non-negative on success
  *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
  *
  *-------------------------------------------------------------------------
  */

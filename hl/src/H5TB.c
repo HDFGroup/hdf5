@@ -36,19 +36,11 @@ static hid_t H5TB_create_type(hid_t loc_id, const char *dset_name, size_t type_s
  */
 
 /*-------------------------------------------------------------------------
- * Function: H5TBmake_table
+ * Function:    H5TBmake_table
  *
- * Purpose: Make a table
+ * Purpose:     Make a table
  *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *             Quincey Koziol
- *
- * Date: January 17, 2001
- *
- * Comments:
- *
+ * Return:      Success: 0, Failure: -1
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -252,12 +244,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmers:
- *  Pedro Vicente
- *  Quincey Koziol
- *
- * Date: November 19, 2001
- *
  * Comments: Uses memory offsets
  *
  *-------------------------------------------------------------------------
@@ -318,10 +304,6 @@ out:
  * Purpose: Writes records
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 19, 2001
  *
  * Comments: Uses memory offsets
  *
@@ -410,10 +392,6 @@ out:
  * Purpose: Writes fields
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 21, 2001
  *
  * Comments:
  *
@@ -568,10 +546,6 @@ out:
  * Purpose: Writes fields
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 21, 2001
  *
  * Comments: Uses memory offsets
  *
@@ -734,10 +708,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 20, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -807,10 +777,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 19, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -872,10 +838,6 @@ out:
  * Purpose: Reads fields
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 19, 2001
  *
  * Comments:
  *
@@ -1030,10 +992,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 19, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1187,10 +1145,6 @@ out:
  * Purpose: Delete records from middle of table ("pulling up" all the records after it)
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 26, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1348,10 +1302,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 26, 2001
- *
  * Comments: Uses memory offsets
  *
  *-------------------------------------------------------------------------
@@ -1500,10 +1450,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: December 5, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1628,10 +1574,6 @@ out:
  * Purpose: Combine records from two tables into a third
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: December 10, 2001
  *
  * Comments:
  *
@@ -1984,10 +1926,6 @@ out:
  * Purpose: Inserts a field
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: January 30, 2002
  *
  * Comments:
  *
@@ -2401,10 +2339,6 @@ out:
  * Purpose: Deletes a field
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: January 30, 2002
  *
  * Comments:
  *
@@ -2854,10 +2788,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: January 30, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -2879,10 +2809,6 @@ H5TBAget_title(hid_t loc_id, char *table_title)
  * Purpose: Read the table attribute fill values
  *
  * Return: Success: true/false, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: January 30, 2002
  *
  * Comments:
  *
@@ -2949,10 +2875,6 @@ out:
  * Purpose: Gets the number of records and fields of a table
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 19, 2001
  *
  * Comments:
  *
@@ -3034,10 +2956,6 @@ out:
  * Purpose: Get information about fields
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 19, 2001
  *
  * Comments:
  *
@@ -3152,10 +3070,6 @@ out:
  *
  * Return: Success: true/false, Failure: N/A
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 19, 2001
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE static bool
@@ -3192,10 +3106,6 @@ H5TB_find_field(const char *field, const char *field_list)
  *          the fill value attributes from an existing table
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: December 6, 2001
  *
  * Comments:
  *
@@ -3253,10 +3163,6 @@ out:
  * Purpose: Private function that creates a memory type ID
  *
  * Return: Success: the memory type ID, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 31, 2004
  *
  * Comments:
  *
@@ -3350,10 +3256,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Nat Furrer
- *             James Laird
- *
- * Date: March 8, 2004
  *
  * Comments: Called by H5TBappend_records and H5PTappend_records
  *
@@ -3415,10 +3317,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Nat Furrer
- *             James Laird
- *
- * Date: March 8, 2004
  *
  * Comments: Called by H5TBread_records and H5PTread_records
  *

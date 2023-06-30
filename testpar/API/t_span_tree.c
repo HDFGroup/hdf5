@@ -52,9 +52,6 @@ static void coll_read_test(void);
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -89,9 +86,6 @@ coll_irregular_cont_write(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -128,9 +122,6 @@ coll_irregular_cont_read(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -165,9 +156,6 @@ coll_irregular_simple_chunk_write(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -204,9 +192,6 @@ coll_irregular_simple_chunk_read(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -241,9 +226,6 @@ coll_irregular_complex_chunk_write(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -280,9 +262,6 @@ coll_irregular_complex_chunk_read(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -337,11 +316,11 @@ coll_write_test(int chunk_factor)
     fsdim[0] = FSPACE_DIM1;
     fsdim[1] = (hsize_t)(FSPACE_DIM2 * mpi_size);
 
-    vector      = (int *)HDmalloc(sizeof(int) * (size_t)mdim1[0] * (size_t)mpi_size);
-    matrix_out  = (int *)HDmalloc(sizeof(int) * (size_t)mdim[0] * (size_t)mdim[1] * (size_t)mpi_size);
-    matrix_out1 = (int *)HDmalloc(sizeof(int) * (size_t)mdim[0] * (size_t)mdim[1] * (size_t)mpi_size);
+    vector      = (int *)malloc(sizeof(int) * (size_t)mdim1[0] * (size_t)mpi_size);
+    matrix_out  = (int *)malloc(sizeof(int) * (size_t)mdim[0] * (size_t)mdim[1] * (size_t)mpi_size);
+    matrix_out1 = (int *)malloc(sizeof(int) * (size_t)mdim[0] * (size_t)mdim[1] * (size_t)mpi_size);
 
-    HDmemset(vector, 0, sizeof(int) * (size_t)mdim1[0] * (size_t)mpi_size);
+    memset(vector, 0, sizeof(int) * (size_t)mdim1[0] * (size_t)mpi_size);
     vector[0] = vector[MSPACE1_DIM * mpi_size - 1] = -1;
     for (i = 1; i < MSPACE1_DIM * mpi_size - 1; i++)
         vector[i] = (int)i;
@@ -664,8 +643,8 @@ coll_write_test(int chunk_factor)
      * Initialize data buffer.
      */
 
-    HDmemset(matrix_out, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
-    HDmemset(matrix_out1, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    memset(matrix_out, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    memset(matrix_out1, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
     /*
      * Read data back to the buffer matrix_out.
      */
@@ -718,11 +697,11 @@ coll_write_test(int chunk_factor)
     VRFY((ret >= 0), "");
 
     if (vector)
-        HDfree(vector);
+        free(vector);
     if (matrix_out)
-        HDfree(matrix_out);
+        free(matrix_out);
     if (matrix_out1)
-        HDfree(matrix_out1);
+        free(matrix_out1);
 
     return;
 }
@@ -737,9 +716,6 @@ coll_write_test(int chunk_factor)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -784,8 +760,8 @@ coll_read_test(void)
 
     mdim[0]     = MSPACE_DIM1;
     mdim[1]     = (hsize_t)(MSPACE_DIM2 * mpi_size);
-    matrix_out  = (int *)HDmalloc(sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
-    matrix_out1 = (int *)HDmalloc(sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    matrix_out  = (int *)malloc(sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    matrix_out1 = (int *)malloc(sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
 
     /*** For testing collective hyperslab selection read ***/
 
@@ -905,8 +881,8 @@ coll_read_test(void)
      * Initialize data buffer.
      */
 
-    HDmemset(matrix_out, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
-    HDmemset(matrix_out1, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    memset(matrix_out, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    memset(matrix_out1, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
 
     /*
      * Read data back to the buffer matrix_out.
@@ -945,8 +921,8 @@ coll_read_test(void)
     /*
      * Free read buffers.
      */
-    HDfree(matrix_out);
-    HDfree(matrix_out1);
+    free(matrix_out);
+    free(matrix_out1);
 
     /*
      * Close memory file and memory dataspaces.
@@ -1524,9 +1500,6 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
  *        has been corrected.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 11/11/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1625,16 +1598,16 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
     /* Allocate buffers */
-    small_ds_buf_0 = (uint32_t *)HDmalloc(sizeof(uint32_t) * small_ds_size);
+    small_ds_buf_0 = (uint32_t *)malloc(sizeof(uint32_t) * small_ds_size);
     VRFY((small_ds_buf_0 != NULL), "malloc of small_ds_buf_0 succeeded");
 
-    small_ds_buf_1 = (uint32_t *)HDmalloc(sizeof(uint32_t) * small_ds_size);
+    small_ds_buf_1 = (uint32_t *)malloc(sizeof(uint32_t) * small_ds_size);
     VRFY((small_ds_buf_1 != NULL), "malloc of small_ds_buf_1 succeeded");
 
-    large_ds_buf_0 = (uint32_t *)HDmalloc(sizeof(uint32_t) * large_ds_size);
+    large_ds_buf_0 = (uint32_t *)malloc(sizeof(uint32_t) * large_ds_size);
     VRFY((large_ds_buf_0 != NULL), "malloc of large_ds_buf_0 succeeded");
 
-    large_ds_buf_1 = (uint32_t *)HDmalloc(sizeof(uint32_t) * large_ds_size);
+    large_ds_buf_1 = (uint32_t *)malloc(sizeof(uint32_t) * large_ds_size);
     VRFY((large_ds_buf_1 != NULL), "malloc of large_ds_buf_1 succeeded");
 
     /* initialize the buffers */
@@ -2352,14 +2325,14 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
     /* Free memory buffers */
     if (small_ds_buf_0 != NULL)
-        HDfree(small_ds_buf_0);
+        free(small_ds_buf_0);
     if (small_ds_buf_1 != NULL)
-        HDfree(small_ds_buf_1);
+        free(small_ds_buf_1);
 
     if (large_ds_buf_0 != NULL)
-        HDfree(large_ds_buf_0);
+        free(large_ds_buf_0);
     if (large_ds_buf_1 != NULL)
-        HDfree(large_ds_buf_1);
+        free(large_ds_buf_1);
 
     return;
 
@@ -2373,9 +2346,6 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
  *        been corrected.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 11/11/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2435,9 +2405,6 @@ lower_dim_size_comp_test(void)
  *        and uses a 1 dimensional dataset.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 12/16/09
- *
  *-------------------------------------------------------------------------
  */
 

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cdbg.c
- *              July 8 2016
- *              Quincey Koziol
  *
  * Purpose:     Debugging Routines for the generic cache structure or entries.
  *
@@ -68,9 +66,6 @@
  *              debugging purposes.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              10/10/10
  *
  *-------------------------------------------------------------------------
  */
@@ -174,9 +169,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              10/10/10
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -248,9 +240,6 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              11/15/14
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -319,9 +308,6 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              1/20/06
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -348,9 +334,6 @@ done:
  * Purpose:     Prints statistics about the cache.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -684,8 +667,6 @@ done:
  *
  * Return:      void
  *
- * Programmer:  John Mainzer, 4/28/04
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -809,9 +790,6 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
  * Return:      SUCCEED on success/FAIL on failure.  Note that
  *              *fd_exists_ptr is undefined on failure.
  *
- * Programmer:  John Mainzer
- *              9/28/16
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -868,8 +846,6 @@ done:
  *		the function returns SUCCEED.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  John Mainzer, 9/16/16
  *
  *-------------------------------------------------------------------------
  */
@@ -1003,8 +979,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  John Mainzer, 5/30/14
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -1048,9 +1022,6 @@ done:
  *
  * Return:      Current value of cache_ptr->serialization_in_progress.
  *
- * Programmer:  John Mainzer
- *		8/24/15
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -1077,8 +1048,6 @@ H5C_get_serialization_in_progress(const H5C_t *cache_ptr)
  *		if not.  Throws an assertion failure on error.
  *
  * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
- *
- * Programmer:  John Mainzer, 6/18/16
  *
  *-------------------------------------------------------------------------
  */
@@ -1127,8 +1096,6 @@ done:
  *		is not defined.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  John Mainzer, 5/30/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1179,9 +1146,6 @@ done:
  *        well -- i.e. not on Windows.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *        10/27/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1310,8 +1274,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  John Mainzer, 7/14/05
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -1381,8 +1343,6 @@ done:
  *        the function returns SUCCEED.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  John Mainzer, 4/25/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1457,8 +1417,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  John Mainzer, 4/25/14
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -1530,8 +1488,6 @@ done:
  * Return:      FALSE if the entry is not in the skip list, and TRUE
  *        if it is.
  *
- * Programmer:  John Mainzer, 11/1/14
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5C_DO_SLIST_SANITY_CHECKS
@@ -1579,9 +1535,6 @@ done:
  * Purpose:     Prints statistics specific to the cache image.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              10/26/15
  *
  *-------------------------------------------------------------------------
  */

@@ -151,7 +151,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create a data buffer for dataset writes */
-    if (NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc(NELEMENTS, sizeof(int))))
         TEST_ERROR;
 
     /* Create file */
@@ -183,7 +183,7 @@ generate_eoc_test_file(hid_t fapl_id)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR;
 
@@ -278,7 +278,7 @@ generate_eoc_test_file(hid_t fapl_id)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR;
 
@@ -546,7 +546,7 @@ generate_eoc_test_file(hid_t fapl_id)
     if (H5Pclose(fapl_copy_id) < 0)
         TEST_ERROR;
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return fid;
@@ -564,7 +564,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(data);
+    free(data);
 
     H5_FAILED();
     return -1;
@@ -619,7 +619,7 @@ check_group_layout(hid_t fid, const char *group_name)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR;
 
@@ -712,7 +712,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
         TEST_ERROR;
 
     /* Create the data buffer */
-    if (NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc(NELEMENTS, sizeof(int))))
         TEST_ERROR;
 
     /* Record the number of cache entries */
@@ -771,7 +771,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     if (before != after || before == during)
         TEST_ERROR;
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return SUCCEED;
@@ -957,7 +957,7 @@ main(void)
 
     printf("All evict-on-close tests passed.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
 
@@ -971,7 +971,7 @@ error:
     }
     H5E_END_TRY
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 
 } /* end main() */
 
@@ -1049,13 +1049,13 @@ main(void)
     printf("All evict-on-close tests passed.\n");
     printf("Note that EoC is not supported under parallel so most tests are skipped.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
 
     printf("***** %u evict-on-close test%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 
 } /* main() - parallel */
 

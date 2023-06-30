@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, April 17, 2000
- *
  * Purpose:     The POSIX unbuffered file driver using only the HDF5 public
  *              API and with a few optimizations: the lseek() call is made
  *              only when the current file position is unknown or needs to be
@@ -236,9 +233,6 @@ H5FL_DEFINE_STATIC(H5FD_log_t);
  * Return:      Success:    The driver ID for the log driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -274,9 +268,6 @@ H5FD_log_init(void)
  *
  * Returns:     SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -298,9 +289,6 @@ H5FD__log_term(void)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Thursday, February 19, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -316,7 +304,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     /* Do this first, so that we don't try to free a wild pointer if
      * H5P_object_verify() fails.
      */
-    HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
+    memset(&fa, 0, sizeof(H5FD_log_fapl_t));
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -352,9 +340,6 @@ done:
  *                          members copied from the file struct.
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 20, 2000
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -378,9 +363,6 @@ H5FD__log_fapl_get(H5FD_t *_file)
  *
  * Return:      Success:    Ptr to a new property list
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Thursday, April 20, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -428,9 +410,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 20, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -457,9 +436,6 @@ H5FD__log_fapl_free(void *_fa)
  *                          public fields will be initialized by the
  *                          caller, which is always H5FD_open().
  *              Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -599,7 +575,7 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
         /* Set the log file pointer */
         if (fa->logfile)
-            file->logfp = HDfopen(fa->logfile, "w");
+            file->logfp = fopen(fa->logfile, "w");
         else
             file->logfp = stderr;
 
@@ -661,9 +637,6 @@ done:
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL, file not closed.
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -797,7 +770,7 @@ H5FD__log_close(H5FD_t *_file)
         if (file->fa.flags & H5FD_LOG_FLAVOR)
             file->flavor = (unsigned char *)H5MM_xfree(file->flavor);
         if (file->logfp != stderr)
-            HDfclose(file->logfp);
+            fclose(file->logfp);
     } /* end if */
 
     if (file->fa.logfile)
@@ -819,9 +792,6 @@ done:
  * Return:      Success:    A value like strcmp()
  *              Failure:    never fails (arguments were checked by the
  *                          caller).
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -860,9 +830,9 @@ H5FD__log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
      */
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
         HGOTO_DONE(-1)
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
         HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
 
@@ -884,9 +854,6 @@ done:
  *              (listed in H5FDpublic.h)
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Friday, August 25, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -927,9 +894,6 @@ H5FD__log_query(const H5FD_t *_file, unsigned long *flags /* out */)
  * Return:      Success:    Address of new memory
  *              Failure:    HADDR_UNDEF
  *
- * Programmer:  Quincey Koziol
- *              Monday, April 17, 2000
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -952,7 +916,7 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             assert(addr < file->iosize);
             H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-            HDmemset(&file->flavor[addr], (int)type, (size_t)size);
+            memset(&file->flavor[addr], (int)type, (size_t)size);
         }
 
         if (file->fa.flags & H5FD_LOG_ALLOC)
@@ -974,9 +938,6 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, September 28, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -991,7 +952,7 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             assert(addr < file->iosize);
             H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-            HDmemset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
+            memset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
         }
 
         /* Log the file memory freed */
@@ -1012,9 +973,6 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
  *
  * Return:      Success:    The end-of-address marker.
  *              Failure:    HADDR_UNDEF
- *
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1037,9 +995,6 @@ H5FD__log_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1058,7 +1013,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
             if (file->fa.flags & H5FD_LOG_FLAVOR) {
                 assert(addr < file->iosize);
                 H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-                HDmemset(&file->flavor[file->eoa], (int)type, (size_t)size);
+                memset(&file->flavor[file->eoa], (int)type, (size_t)size);
             }
 
             /* Log the extension like an allocation */
@@ -1076,7 +1031,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
             if (file->fa.flags & H5FD_LOG_FLAVOR) {
                 assert((addr + size) < file->iosize);
                 H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-                HDmemset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
+                memset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
             }
 
             /* Log the shrink like a free */
@@ -1104,9 +1059,6 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
  *                          or the HDF5 file.
  *              Failure:    HADDR_UNDEF
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1125,9 +1077,6 @@ H5FD__log_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Purpose:        Returns the file handle of LOG file driver.
  *
  * Returns:        SUCCEED/FAIL
- *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1158,9 +1107,6 @@ done:
  * Return:      Success:    SUCCEED. Result is stored in caller-supplied
  *                          buffer BUF.
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1300,7 +1246,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
         if (0 == bytes_read) {
             /* End of file but not end of format address space */
-            HDmemset(buf, 0, size);
+            memset(buf, 0, size);
             break;
         }
 
@@ -1372,9 +1318,6 @@ done:
  *              DXPL_ID.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1551,7 +1494,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
          * algorithm */
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             if ((H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT) {
-                HDmemset(&file->flavor[orig_addr], (int)type, orig_size);
+                memset(&file->flavor[orig_addr], (int)type, orig_size);
                 fprintf(file->logfp, " (fresh)");
             }
         }
@@ -1589,9 +1532,6 @@ done:
  *              than the end-of-address.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1698,8 +1638,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL, file not locked.
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1739,8 +1677,6 @@ done:
  * Purpose:     Remove the existing lock on the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */

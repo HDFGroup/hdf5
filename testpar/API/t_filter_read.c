@@ -13,9 +13,6 @@
 /*
  * This verifies the correctness of parallel reading of a dataset that has been
  * written serially using filters.
- *
- * Created by: Christian Chilan
- * Date: 2007/05/15
  */
 
 #include "hdf5.h"
@@ -47,11 +44,6 @@ static int mpi_size, mpi_rank;
  * Return:  1:  decode+encode is enabled
  *    0:  only decode is enabled
  *              -1: other
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -88,10 +80,6 @@ h5_szip_can_encode(void)
  * Purpose:     Tests parallel reading of a 2D dataset written serially using
  *              filters. During the parallel reading phase, the dataset is
  *              divided evenly among the processors in vertical hyperslabs.
- *
- * Programmer:  Christian Chilan
- *              Tuesday, May 15, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -129,11 +117,11 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     VRFY(sid >= 0, "H5Screate_simple");
 
     /* Create buffers */
-    points = (int *)HDmalloc(size[0] * size[1] * sizeof(int));
-    VRFY(points != NULL, "HDmalloc");
+    points = (int *)malloc(size[0] * size[1] * sizeof(int));
+    VRFY(points != NULL, "malloc");
 
-    check = (int *)HDmalloc(hs_size[0] * hs_size[1] * sizeof(int));
-    VRFY(check != NULL, "HDmalloc");
+    check = (int *)malloc(hs_size[0] * hs_size[1] * sizeof(int));
+    VRFY(check != NULL, "malloc");
 
     /* Initialize writing buffer with random data */
     for (i = 0; i < size[0]; i++)
@@ -227,8 +215,8 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     hrc = H5Fclose(file);
     VRFY(hrc >= 0, "H5Fclose");
 
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -238,12 +226,6 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
  *
  * Purpose:    Tests parallel reading of datasets written serially using
  *              several (combinations of) filters.
- *
- * Programmer:    Christian Chilan
- *              Tuesday, May 15, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 

@@ -33,9 +33,6 @@ static const char *EXT_ENV_FNAME[] = {"extern_env_dir/env_file_1", NULL};
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -94,7 +91,7 @@ test_path_env(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -134,9 +131,6 @@ error:
  * Purpose:     Runs external dataset tests.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *              Tuesday, March  3, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -34,9 +34,6 @@ static void H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsign
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Saturday, July  2, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -68,8 +65,8 @@ H5F__close_mounts(H5F_t *f)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
 
             /* Eliminate the mount point from the table */
-            HDmemmove(f->shared->mtab.child + u, f->shared->mtab.child + u + 1,
-                      (f->shared->mtab.nmounts - u - 1) * sizeof(f->shared->mtab.child[0]));
+            memmove(f->shared->mtab.child + u, f->shared->mtab.child + u + 1,
+                    (f->shared->mtab.nmounts - u - 1) * sizeof(f->shared->mtab.child[0]));
             f->shared->mtab.nmounts--;
             f->nmounts--;
         }
@@ -89,9 +86,6 @@ done:
  *		mouted and must not be a mount ancestor of the mount-point.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -201,8 +195,8 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
     }
 
     /* Insert into table */
-    HDmemmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
-              (parent->shared->mtab.nmounts - md) * sizeof(parent->shared->mtab.child[0]));
+    memmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
+            (parent->shared->mtab.nmounts - md) * sizeof(parent->shared->mtab.child[0]));
     parent->shared->mtab.nmounts++;
     parent->nmounts++;
     parent->shared->mtab.child[md].group = mount_point;
@@ -252,9 +246,6 @@ done:
  *		mounted file, not the group where the file is mounted.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -365,10 +356,10 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */
-    HDmemmove(parent->shared->mtab.child + (unsigned)child_idx,
-              (parent->shared->mtab.child + (unsigned)child_idx) + 1,
-              ((parent->shared->mtab.nmounts - (unsigned)child_idx) - 1) *
-                  sizeof(parent->shared->mtab.child[0]));
+    memmove(parent->shared->mtab.child + (unsigned)child_idx,
+            (parent->shared->mtab.child + (unsigned)child_idx) + 1,
+            ((parent->shared->mtab.nmounts - (unsigned)child_idx) - 1) *
+                sizeof(parent->shared->mtab.child[0]));
     parent->shared->mtab.nmounts -= 1;
     parent->nmounts -= 1;
 
@@ -399,9 +390,6 @@ done:
  * Return:	Success:	TRUE/FALSE
  *		Failure:	(can't happen)
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January  2, 2002
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -428,9 +416,6 @@ H5F_is_mount(const H5F_t *file)
  *              hierarchy.
  *
  * Return:      void
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -478,9 +463,6 @@ H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_ob
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Tues, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -509,9 +491,6 @@ H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
  * Purpose:	Flush a mount hierarchy, recursively
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Fri, August 21, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -551,9 +530,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Fri, August 21, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -585,9 +561,6 @@ done:
  *		group of the mounted file into LNK.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
  *
  *-------------------------------------------------------------------------
  */

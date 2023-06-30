@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Friday, May 29, 1998
- *
+/*
  * Purpose:	Dataspace selection functions.
  */
 
@@ -253,9 +251,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Friday, May 30, 2003
- *
  * Note: This routine participates in the "Inlining C function pointers"
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
@@ -286,9 +281,6 @@ done:
  *              selection
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, May 18, 2004
  *
  * Note: This routine participates in the "Inlining C function pointers"
  *      pattern, don't call it directly, use the appropriate macro
@@ -1274,9 +1266,6 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, May 18, 2004
- *
  * Note: This routine participates in the "Inlining C function pointers"
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
@@ -2238,7 +2227,7 @@ H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsign
          */
         if (H5S_GET_EXTENT_TYPE(base_space) == H5S_SIMPLE && base_space->select.offset_changed) {
             if (new_space_rank > base_space_rank) {
-                HDmemset(new_space->select.offset, 0, sizeof(new_space->select.offset[0]) * rank_diff);
+                memset(new_space->select.offset, 0, sizeof(new_space->select.offset[0]) * rank_diff);
                 H5MM_memcpy(&new_space->select.offset[rank_diff], base_space->select.offset,
                             sizeof(new_space->select.offset[0]) * base_space_rank);
             } /* end if */
@@ -2487,8 +2476,8 @@ H5S_select_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
             /* Get source space bounds.  Should be a single point. */
             if (H5S_SELECT_BOUNDS(src_space, coords_start, coords_end) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get source space bounds")
-            assert(0 == HDmemcmp(coords_start, coords_end,
-                                 H5S_GET_EXTENT_NDIMS(src_space) * sizeof(coords_start[0])));
+            assert(0 == memcmp(coords_start, coords_end,
+                               H5S_GET_EXTENT_NDIMS(src_space) * sizeof(coords_start[0])));
 
             /* Check for intersection */
             if ((intersect = H5S_SELECT_INTERSECT_BLOCK(src_intersect_space, coords_start, coords_end)) < 0)
@@ -2815,7 +2804,6 @@ done:
     Creates a selection iterator and initializes it to start at the first
     element selected in the dataspace.
  PROGRAMMER
-    Quincey Koziol -  February 11, 2019
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -2899,7 +2887,6 @@ done:
     further sequences of elements to retrieve, calls to this routine will
     set *NSEQ and *NELMTS to zero.
  PROGRAMMER
-    Quincey Koziol -  February 11, 2019
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -3073,9 +3060,6 @@ done:
  *
  * Return:	Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *	        Wednesday, April 8, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3103,9 +3087,6 @@ done:
  * Purpose:	Releases a dataspace selection iterator and its memory.
  *
  * Return:	Non-negative on success / Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Monday, February 11, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -3144,7 +3125,6 @@ done:
  DESCRIPTION
     Close a dataspace selection iterator, releasing its state.
  PROGRAMMER
-    Quincey Koziol -  February 11, 2019
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, September 28, 1998
- *
  * Purpose:  Creates a chunked dataset and measures the storage overhead.
  */
 
@@ -59,9 +56,6 @@ typedef enum fill_t { FILL_ALL, FILL_FORWARD, FILL_REVERSE, FILL_INWARD, FILL_OU
  *
  * Return:  never returns
  *
- * Programmer:  Robb Matzke
- *              Wednesday, September 30, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -106,9 +100,6 @@ usage(const char *prog)
  *
  * Return:  void
  *
- * Programmer:  Robb Matzke
- *              Thursday, June  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -127,9 +118,6 @@ cleanup(void)
  * Return:  Success:  0
  *
  *    Failure:  -1
- *
- * Programmer:  Robb Matzke
- *    Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -150,9 +138,6 @@ display_error_cb(hid_t estack, void H5_ATTR_UNUSED *client_data)
  * Return:  Success:  0
  *
  *    Failure:  number of errors
- *
- * Programmer:  Robb Matzke
- *              Wednesday, September 30, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -321,9 +306,6 @@ error:
  * Return:  Success:        zero
  *
  *    Failure:  non-zero
- *
- * Programmer:  Robb Matzke
- *              Monday, September 28, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  * Purpose:  The Direct I/O file driver forces the data to be written to
  *    the file directly without being copied into system kernel
  *    buffer.  The main system support this feature is Linux.
@@ -195,9 +192,6 @@ H5FL_DEFINE_STATIC(H5FD_direct_t);
  * Return:      Success:    The driver ID for the direct driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -237,9 +231,6 @@ done:
  *
  * Returns:     Non-negative on success or negative on failure
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -261,9 +252,6 @@ H5FD__direct_term(void)
  *    specific properties.
  *
  * Return:  Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *    Wednesday, 20 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -298,9 +286,6 @@ done:
  * Return:  Success:  Non-negative
  *
  *    Failure:  Negative
- *
- * Programmer:  Raymond Lu
- *              Wednesday, October 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -351,7 +336,7 @@ H5FD__direct_populate_config(size_t boundary, size_t block_size, size_t cbuf_siz
 
     assert(fa_out);
 
-    HDmemset(fa_out, 0, sizeof(H5FD_direct_fapl_t));
+    memset(fa_out, 0, sizeof(H5FD_direct_fapl_t));
 
     if (boundary != 0)
         fa_out->mboundary = boundary;
@@ -391,9 +376,6 @@ done:
  *
  *    Failure:  NULL
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 18 October 2006
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -418,9 +400,6 @@ H5FD__direct_fapl_get(H5FD_t *_file)
  * Return:  Success:  Ptr to a new property list
  *
  *    Failure:  NULL
- *
- * Programmer:  Raymond Lu
- *              Wednesday, 18 October 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -450,9 +429,6 @@ H5FD__direct_fapl_copy(const void *_old_fa)
  *        caller, which is always H5FD_open().
  *
  *    Failure:  NULL
- *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -549,12 +525,12 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
      * is to handle correctly the case that the file is in a different file system
      * than the one where the program is running.
      */
-    /* NOTE: Use HDmalloc and HDfree here to ensure compatibility with
-     *       HDposix_memalign.
+    /* NOTE: Use malloc and free here to ensure compatibility with
+     *       posix_memalign().
      */
-    buf1 = HDmalloc(sizeof(int));
-    if (HDposix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "HDposix_memalign failed")
+    buf1 = malloc(sizeof(int));
+    if (posix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "posix_memalign failed")
 
     if (o_flags & O_CREAT) {
         if (HDwrite(file->fd, buf1, sizeof(int)) < 0) {
@@ -591,9 +567,9 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     }
 
     if (buf1)
-        HDfree(buf1);
+        free(buf1);
     if (buf2)
-        HDfree(buf2);
+        free(buf2);
 
     /* Set return value */
     ret_value = (H5FD_t *)file;
@@ -615,9 +591,6 @@ done:
  * Return:  Success:  0
  *
  *    Failure:  -1, file not closed.
- *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -648,9 +621,6 @@ done:
  *
  *    Failure:  never fails (arguments were checked by the
  *        caller).
- *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -685,9 +655,9 @@ H5FD__direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
      */
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
         HGOTO_DONE(-1)
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
         HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
 
@@ -711,9 +681,6 @@ done:
  * Return:  Success:  non-negative
  *
  *    Failure:  negative
- *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -747,9 +714,6 @@ H5FD__direct_query(const H5FD_t H5_ATTR_UNUSED *_f, unsigned long *flags /* out 
  *
  *    Failure:  HADDR_UNDEF
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -772,9 +736,6 @@ H5FD__direct_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Return:  Success:  0
  *
  *    Failure:  -1
- *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -803,9 +764,6 @@ H5FD__direct_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
  *
  *    Failure:  HADDR_UNDEF
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -824,9 +782,6 @@ H5FD__direct_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Purpose:        Returns the file handle of direct file driver.
  *
  * Returns:        Non-negative if succeed or negative if fails.
- *
- * Programmer:     Raymond Lu
- *                 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -857,9 +812,6 @@ done:
  *        buffer BUF.
  *
  *    Failure:  -1, Contents of buffer BUF are undefined.
- *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -921,7 +873,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
                 HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
             if (0 == nbytes) {
                 /* end of file but not end of format address space */
-                HDmemset(buf, 0, size);
+                memset(buf, 0, size);
                 break;
             }
             assert(nbytes >= 0);
@@ -944,8 +896,8 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
         if (alloc_size > _cbsize)
             alloc_size = _cbsize;
         assert(!(alloc_size % _fbsize));
-        if (HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "HDposix_memalign failed")
+        if (posix_memalign(&copy_buf, _boundary, alloc_size) != 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "posix_memalign failed")
 
         /* look for the aligned position for reading the data */
         assert(!(((addr / _fbsize) * _fbsize) % _fbsize));
@@ -963,7 +915,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
              * system calls and partial results like sec2 driver does because the
              * data may no longer be aligned. It's especially true when the data in
              * file is smaller than ALLOC_SIZE. */
-            HDmemset(copy_buf, 0, alloc_size);
+            memset(copy_buf, 0, alloc_size);
 
             /* Calculate how much data we have to read in this iteration
              * (including unused parts of blocks) */
@@ -1003,8 +955,8 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
         addr = (haddr_t)(((addr + size - 1) / _fbsize + 1) * _fbsize);
 
         if (copy_buf) {
-            /* Free with HDfree since it came from posix_memalign */
-            HDfree(copy_buf);
+            /* Free with free since it came from posix_memalign */
+            free(copy_buf);
             copy_buf = NULL;
         } /* end if */
     }
@@ -1015,9 +967,9 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
 
 done:
     if (ret_value < 0) {
-        /* Free with HDfree since it came from posix_memalign */
+        /* Free with free since it came from posix_memalign */
         if (copy_buf)
-            HDfree(copy_buf);
+            free(copy_buf);
 
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
@@ -1037,9 +989,6 @@ done:
  * Return:  Success:  Zero
  *
  *    Failure:  -1
- *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1125,8 +1074,8 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
             alloc_size = _cbsize;
         assert(!(alloc_size % _fbsize));
 
-        if (HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "HDposix_memalign failed")
+        if (posix_memalign(&copy_buf, _boundary, alloc_size) != 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "posix_memalign failed")
 
         /* look for the right position for reading or writing the data */
         if (HDlseek(file->fd, (HDoff_t)write_addr, SEEK_SET) < 0)
@@ -1150,7 +1099,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
              * both ends are misaligned, otherwise only read the block on the
              * misaligned end.
              */
-            HDmemset(copy_buf, 0, _fbsize);
+            memset(copy_buf, 0, _fbsize);
 
             if (copy_offset > 0) {
                 if ((write_addr + write_size) > (addr + size)) {
@@ -1230,8 +1179,8 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
         buf  = (const char *)buf + size;
 
         if (copy_buf) {
-            /* Free with HDfree since it came from posix_memalign */
-            HDfree(copy_buf);
+            /* Free with free since it came from posix_memalign */
+            free(copy_buf);
             copy_buf = NULL;
         } /* end if */
     }
@@ -1244,9 +1193,9 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
 
 done:
     if (ret_value < 0) {
-        /* Free with HDfree since it came from posix_memalign */
+        /* Free with free since it came from posix_memalign */
         if (copy_buf)
-            HDfree(copy_buf);
+            free(copy_buf);
 
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
@@ -1265,9 +1214,6 @@ done:
  * Return:  Success:  Non-negative
  *
  *    Failure:  Negative
- *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1330,8 +1276,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1370,8 +1314,6 @@ done:
  * Purpose:     To remove the existing lock on the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */

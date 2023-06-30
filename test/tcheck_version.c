@@ -19,9 +19,6 @@
  * if it will indeed issue the warning message and aborts.  With environment
  * variable $HDF5_DISABLE_VERSION_CHECK sets to 1, it should issue warnings
  * but no abort.  If it is 2, no warning or abort.
- *
- * Programmer: Albert Cheng
- *             September 20, 2009
  */
 
 #include "h5test.h"
@@ -63,7 +60,7 @@ parse(int ac, char **av)
         pt = *(++av);
         if (*pt != '-') {
             fprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
         else {
             switch (*(++pt)) {
@@ -80,15 +77,15 @@ parse(int ac, char **av)
                             break;
                         default:
                             fprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
-                            HDexit(EXIT_FAILURE);
+                            exit(EXIT_FAILURE);
                     }
                     break;
                 case 'h': /* help page */
                     showhelp();
-                    HDexit(EXIT_SUCCESS);
+                    exit(EXIT_SUCCESS);
                 default:
                     fprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
-                    HDexit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
             }
         }
     }
@@ -106,7 +103,7 @@ parse(int ac, char **av)
 H5_ATTR_NORETURN void
 abort_intercept(int H5_ATTR_UNUSED sig)
 {
-    HDexit(6);
+    exit(6);
 }
 
 #ifdef H5_HAVE_WIN32_API

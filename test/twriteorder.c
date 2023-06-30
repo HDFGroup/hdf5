@@ -24,7 +24,6 @@
  * write operation has returned success, all reads issued afterward should
  * get the same data the write has written.
  *
- * Created: Albert Cheng, 2013/8/28.
  *************************************************************/
 
 /***********************************************************
@@ -136,24 +135,24 @@ parse_option(int argc, char *const argv[])
         switch (c) {
             case 'h':
                 usage(progname_g);
-                HDexit(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
                 break;
             case 'b': /* number of planes to write/read */
-                if ((blocksize_g = HDatoi(optarg)) <= 0) {
+                if ((blocksize_g = atoi(optarg)) <= 0) {
                     fprintf(stderr, "bad blocksize %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
                 break;
             case 'n': /* number of planes to write/read */
-                if ((nlinkedblock_g = HDatoi(optarg)) < 2) {
+                if ((nlinkedblock_g = atoi(optarg)) < 2) {
                     fprintf(stderr, "bad number of linked blocks %s, must be greater than 1.\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
                 break;
             case 'p': /* number of planes to write/read */
-                if ((part_size_g = HDatoi(optarg)) <= 0) {
+                if ((part_size_g = atoi(optarg)) <= 0) {
                     fprintf(stderr, "bad partition size %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
@@ -267,10 +266,10 @@ write_wo_file(void)
         blkaddr = i * part_size_g + i;
 
         /* store old block address in byte 0-3 */
-        HDmemcpy(&buffer[0], &blkaddr_old, sizeof(blkaddr_old));
+        memcpy(&buffer[0], &blkaddr_old, sizeof(blkaddr_old));
 
         /* fill the rest with the lowest byte of i */
-        HDmemset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
+        memset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
 
         /* write the block */
         HDlseek(write_fd_g, (HDoff_t)blkaddr, SEEK_SET);
@@ -327,7 +326,7 @@ read_wo_file(void)
         }
 
         /* retrieve the block address in byte 0-3 */
-        HDmemcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
+        memcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
     }
 
     return 0;
@@ -375,7 +374,7 @@ main(int argc, char *argv[])
             printf("File created.\n");
     }
     /* flush output before possible fork */
-    HDfflush(stdout);
+    fflush(stdout);
 
     if (launch_g == UC_READWRITE) {
         /* fork process */
@@ -395,12 +394,12 @@ main(int argc, char *argv[])
             printf("%d: launch reader process\n", mypid);
             if (read_wo_file() < 0) {
                 fprintf(stderr, "read_wo_file encountered error\n");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
 
             /* Reader is done. Clean up by removing the data file */
             HDremove(DATAFILE);
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
     }
 

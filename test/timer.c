@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Dana Robinson
- *              May, 2011
- *
  * Purpose:     Tests the operation of the platform-independent timers.
  */
 
@@ -26,9 +23,6 @@
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -43,62 +37,62 @@ test_time_formatting(void)
     s = H5_timer_get_time_string(-1.0);
     if (NULL == s || HDstrcmp(s, "N/A") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      0               0               */
     s = H5_timer_get_time_string(0.0);
     if (NULL == s || HDstrcmp(s, "0.0 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 us          nanoseconds     */
     s = H5_timer_get_time_string(123.0E-9);
     if (NULL == s || HDstrcmp(s, "123 ns") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 ms          microseconds    */
     s = H5_timer_get_time_string(23.456E-6);
     if (NULL == s || HDstrcmp(s, "23.5 us") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 s           milliseconds    */
     s = H5_timer_get_time_string(4.56789E-3);
     if (NULL == s || HDstrcmp(s, "4.6 ms") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 min         seconds         */
     s = H5_timer_get_time_string(3.14);
     if (NULL == s || HDstrcmp(s, "3.14 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 hr          mins, secs      */
     s = H5_timer_get_time_string(2521.0);
     if (NULL == s || HDstrcmp(s, "42 m 1 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 d           hrs, mins, secs */
     s = H5_timer_get_time_string(9756.0);
     if (NULL == s || HDstrcmp(s, "2 h 42 m 36 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      > 1 d            days, hrs, mins, secs */
     s = H5_timer_get_time_string(280802.0);
     if (NULL == s || HDstrcmp(s, "3 d 6 h 0 m 2 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     PASSED();
     return 0;
 
 error:
     if (s)
-        HDfree(s);
+        free(s);
     return -1;
 }
 
@@ -113,9 +107,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -149,8 +140,8 @@ test_timer_system_user(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     err = H5_timer_stop(&timer);
@@ -182,9 +173,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -208,8 +196,8 @@ test_timer_elapsed(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     err = H5_timer_stop(&timer);
@@ -275,8 +263,8 @@ test_timer_functionality(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     /* Running state should change after stop */
@@ -317,8 +305,8 @@ test_timer_functionality(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     /* Times should be non-negative */
@@ -334,8 +322,8 @@ test_timer_functionality(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     /* State should flip on stop */
@@ -367,9 +355,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Dana Robinson
- *              May, 2011
  *
  *-------------------------------------------------------------------------
  */

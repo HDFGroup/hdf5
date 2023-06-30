@@ -78,9 +78,6 @@ H5FL_BLK_DEFINE(page_elmts);
  *
  * Return:      Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 H5FA_dblk_page_t *
@@ -130,9 +127,6 @@ done:
  * Purpose:     Creates a new fixed array data block page in the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -207,9 +201,6 @@ done:
  *
  * Return:      Non-NULL pointer to data block page on success/NULL on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 H5FA_dblk_page_t *
@@ -279,9 +270,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -314,9 +302,6 @@ done:
  * Purpose:     Destroys a fixed array data block page in memory.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */

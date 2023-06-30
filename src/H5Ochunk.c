@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Ochunk.c
- *			Jul 13 2008
- *			Quincey Koziol
  *
  * Purpose:		Object header chunk routines.
  *
@@ -71,9 +69,6 @@ H5FL_DEFINE(H5O_chunk_proxy_t);
  * Purpose:     Add new chunk for object header to metadata cache
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -140,9 +135,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Jul 17 2008
- *
  *-------------------------------------------------------------------------
  */
 H5O_chunk_proxy_t *
@@ -179,7 +171,7 @@ H5O__chunk_protect(H5F_t *f, H5O_t *oh, unsigned idx)
 
         /* Construct the user data for protecting chunk proxy */
         /* (and _not_ decoding it) */
-        HDmemset(&chk_udata, 0, sizeof(chk_udata));
+        memset(&chk_udata, 0, sizeof(chk_udata));
         chk_udata.oh      = oh;
         chk_udata.chunkno = idx;
         chk_udata.size    = oh->chunk[idx].size;
@@ -212,9 +204,6 @@ done:
  * Purpose:     Unprotect an object header chunk after modifications
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Jul 17 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -263,9 +252,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May  6 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -302,9 +288,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Jul 13 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -324,7 +307,7 @@ H5O__chunk_update_idx(H5F_t *f, H5O_t *oh, unsigned idx)
 
     /* Construct the user data for protecting chunk proxy */
     /* (and _not_ decoding it) */
-    HDmemset(&chk_udata, 0, sizeof(chk_udata));
+    memset(&chk_udata, 0, sizeof(chk_udata));
     chk_udata.oh      = oh;
     chk_udata.chunkno = idx;
     chk_udata.size    = oh->chunk[idx].size;
@@ -351,9 +334,6 @@ done:
  * Purpose:     Notify metadata cache that a chunk has been deleted
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -394,9 +374,6 @@ done:
  * Purpose:     Destroy a chunk proxy object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              July 13, 2008
  *
  *-------------------------------------------------------------------------
  */

@@ -88,9 +88,6 @@ cast_to_void(const void *data)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -167,7 +164,7 @@ ioc__write_independent_async(int64_t context_id, int64_t offset, int64_t element
      * Allocate the I/O request object that will
      * be returned to the caller
      */
-    if (NULL == (sf_io_request = HDmalloc(sizeof(io_req_t))))
+    if (NULL == (sf_io_request = malloc(sizeof(io_req_t))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "couldn't allocate I/O request");
 
     H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
@@ -228,7 +225,7 @@ done:
             }
         }
 
-        HDfree(sf_io_request);
+        free(sf_io_request);
         *io_req = NULL;
     }
 
@@ -258,9 +255,6 @@ done:
  *              all pending operations have completed.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -320,7 +314,7 @@ ioc__read_independent_async(int64_t context_id, int64_t offset, int64_t elements
      * Allocate the I/O request object that will
      * be returned to the caller
      */
-    if (NULL == (sf_io_request = HDmalloc(sizeof(io_req_t))))
+    if (NULL == (sf_io_request = malloc(sizeof(io_req_t))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_READERROR, FAIL, "couldn't allocate I/O request");
 
     H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
@@ -402,7 +396,7 @@ done:
             }
         }
 
-        HDfree(sf_io_request);
+        free(sf_io_request);
         *io_req = NULL;
     }
 

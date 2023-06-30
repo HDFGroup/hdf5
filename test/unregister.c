@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
- * Programmer:	Raymond Lu
- *              24 April 2013
- *
  * Purpose:	Tests H5Zunregister function
  */
 #include "h5test.h"
@@ -97,9 +94,9 @@ test_unregister_filters(hid_t fapl_id)
     TESTING("Unregistering filter");
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(DSET_DIM1, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(DSET_DIM1, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         buf[i] = buf_data + (i * DSET_DIM2);
@@ -240,8 +237,8 @@ test_unregister_filters(hid_t fapl_id)
     if (H5Fclose(fid2) < 0)
         goto error;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return SUCCEED;
@@ -260,8 +257,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return FAIL;
 }
@@ -305,7 +302,7 @@ main(void)
         FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
@@ -314,5 +311,5 @@ error:
     if (api_ctx_pushed)
         H5CX_pop(FALSE);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

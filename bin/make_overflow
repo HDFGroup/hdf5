@@ -22,8 +22,6 @@ my @ctypes = ( () );
 
 # Create assignment overflow #ifdefs
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2009/04/09
 
 ##############################################################################
 # Parse a meaningful line (not a comment or blank line) into the appropriate

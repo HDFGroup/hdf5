@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Thursday, March 12, 1998
- */
-
 /* See H5private.h for how to include headers */
 #include "hdf5.h"
 
@@ -45,9 +40,6 @@
  * Purpose:  Prints statistics
  *
  * Return:  void
- *
- * Programmer:  Robb Matzke
- *              Thursday, March 12, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -86,9 +78,6 @@ print_stats(const char *prefix,
  *
  * Return:  void
  *
- * Programmer:  Robb Matzke
- *              Thursday, March 12, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -115,9 +104,6 @@ synchronize(void)
  * Return:  Success:
  *
  *    Failure:
- *
- * Programmer:  Robb Matzke
- *              Thursday, March 12, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -159,25 +145,25 @@ main(void)
     assert(file_space >= 0);
     dset = H5Dcreate2(file, "dset", H5T_NATIVE_UCHAR, file_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(dset >= 0);
-    the_data = (unsigned char *)HDmalloc((size_t)(size[0] * size[1]));
+    the_data = (unsigned char *)malloc((size_t)(size[0] * size[1]));
 
     /* initial fill for lazy malloc */
-    HDmemset(the_data, 0xAA, (size_t)(size[0] * size[1]));
+    memset(the_data, 0xAA, (size_t)(size[0] * size[1]));
 
     /* Fill raw */
     synchronize();
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_start);
+    getrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "fill raw");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
-        HDmemset(the_data, 0xAA, (size_t)(size[0] * size[1]));
+        fflush(stderr);
+        memset(the_data, 0xAA, (size_t)(size[0] * size[1]));
     }
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_stop);
+    getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
     HDputc('\n', stderr);
@@ -190,18 +176,18 @@ main(void)
     /* Fill hdf5 */
     synchronize();
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_start);
+    getrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "fill hdf5");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
     }
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_stop);
+    getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
     HDputc('\n', stderr);
@@ -214,20 +200,20 @@ main(void)
     /* Write the raw dataset */
     synchronize();
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_start);
+    getrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "out raw");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         offset = HDlseek(fd, (off_t)0, SEEK_SET);
         assert(0 == offset);
         n = HDwrite(fd, the_data, (size_t)(size[0] * size[1]));
         assert(n >= 0 && (size_t)n == (size[0] * size[1]));
     }
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_stop);
+    getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
     HDputc('\n', stderr);
@@ -240,18 +226,18 @@ main(void)
     /* Write the hdf5 dataset */
     synchronize();
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_start);
+    getrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "out hdf5");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         status = H5Dwrite(dset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, the_data);
         assert(status >= 0);
     }
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_stop);
+    getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
     HDputc('\n', stderr);
@@ -264,20 +250,20 @@ main(void)
     /* Read the raw dataset */
     synchronize();
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_start);
+    getrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "in raw");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         offset = HDlseek(fd, (off_t)0, SEEK_SET);
         assert(0 == offset);
         n = HDread(fd, the_data, (size_t)(size[0] * size[1]));
         assert(n >= 0 && (size_t)n == (size[0] * size[1]));
     }
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_stop);
+    getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
     HDputc('\n', stderr);
@@ -290,18 +276,18 @@ main(void)
     /* Read the hdf5 dataset */
     synchronize();
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_start);
+    getrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "in hdf5");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
     }
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_stop);
+    getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
     HDputc('\n', stderr);
@@ -319,18 +305,18 @@ main(void)
     assert(status >= 0);
     synchronize();
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_start);
+    getrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "in hdf5 partial");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
     }
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &r_stop);
+    getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
     HDputc('\n', stderr);
@@ -347,7 +333,7 @@ main(void)
     H5Sclose(file_space);
     H5Fclose(file);
 
-    HDfree(the_data);
+    free(the_data);
 
     return 0;
 }

@@ -180,9 +180,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Aug 23 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -234,9 +231,6 @@ H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
  *
- * Programmer:  Quincey Koziol
- *              Aug 23 2005
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -273,9 +267,6 @@ done:
  * Return:      Success:        Message data size in bytes without alignment.
  *              Failure:        zero
  *
- * Programmer:  Quincey Koziol
- *              Aug 23 2005
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -306,9 +297,6 @@ H5O__linfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 23, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -329,9 +317,6 @@ H5O__linfo_free(void *mesg)
  * Purpose:     Free file space referenced by message
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Saturday, September 16, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -364,9 +349,6 @@ done:
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              June 26, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -433,9 +415,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Sept 26 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -482,9 +461,6 @@ done:
  * Purpose:     Finish copying a message from between files
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 26, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -536,9 +512,6 @@ done:
  * Purpose:     Prints debugging info for a message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Aug 23 2005
  *
  *-------------------------------------------------------------------------
  */
