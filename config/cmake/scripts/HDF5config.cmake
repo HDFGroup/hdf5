@@ -11,8 +11,8 @@
 #
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
-### BUILD_GENERATOR required [Unix, VS2022, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564] ###
-### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
+### BUILD_GENERATOR required [Unix, VS2022, VS202264, VS2019, VS201964]                   ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
 cmake_minimum_required (VERSION 3.18)
@@ -68,7 +68,7 @@ endif ()
 
 # build generator must be defined
 if (NOT DEFINED BUILD_GENERATOR)
-  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2022, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
+  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2022, VS202264, VS2019, VS201964")
 endif ()
 
 ###################################################################
@@ -105,7 +105,7 @@ endif ()
 #########       Following describes compiler           ############
 if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
-    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2022, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
+    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2022, VS202264, VS2019, VS201964")
   endif ()
   if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")
@@ -175,10 +175,10 @@ if (NOT DEFINED HPC)
       set (SITE_COMPILER_NAME "vs2012")
       set (SITE_COMPILER_VERSION "11")
     else ()
-      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2022, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
+      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2022, VS202264, VS2019, VS201964")
     endif ()
   ##  Set the following to unique id your computer  ##
-    set (CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")
+    set (CTEST_SITE "WIN10${BUILD_GENERATOR}.XXXX")
   else ()
     if (MINGW)
       set (CTEST_CMAKE_GENERATOR "MinGW Makefiles")
@@ -187,7 +187,7 @@ if (NOT DEFINED HPC)
     endif ()
   ##  Set the following to unique id your computer  ##
     if (APPLE)
-     set (CTEST_SITE "MAC.XXXX")
+      set (CTEST_SITE "MAC.XXXX")
     else ()
       set (CTEST_SITE "LINUX.XXXX")
     endif ()
