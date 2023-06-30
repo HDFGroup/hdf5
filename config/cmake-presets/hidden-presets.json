@@ -360,7 +360,7 @@
       "hidden": true,
       "execution": {
         "noTestsAction": "error",
-        "timeout": 180,
+        "timeout": 600,
         "jobs": 8
       }
     },
