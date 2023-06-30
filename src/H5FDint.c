@@ -2413,7 +2413,7 @@ H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct
 
         srt_tmp_size = (count * sizeof(struct H5FD_vsrt_tmp_t));
 
-        if (NULL == (*srt_tmp = (H5FD_vsrt_tmp_t *)HDmalloc(srt_tmp_size)))
+        if (NULL == (*srt_tmp = (H5FD_vsrt_tmp_t *)malloc(srt_tmp_size)))
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
 
@@ -2531,7 +2531,6 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
         size_t j;
         size_t fixed_size_index = count;
         size_t fixed_type_index = count;
-
 
         if ((NULL == (*s_types_ptr = (H5FD_mem_t *)malloc(count * sizeof(H5FD_mem_t)))) ||
             (NULL == (*s_addrs_ptr = (haddr_t *)malloc(count * sizeof(haddr_t)))) ||
@@ -2690,12 +2689,12 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
         size_t fixed_element_sizes_index = count;
         size_t fixed_bufs_index          = count;
 
-        if ((NULL == (*s_mem_space_ids_ptr = (hid_t *)HDmalloc(count * sizeof(hid_t)))) ||
-            (NULL == (*s_file_space_ids_ptr = (hid_t *)HDmalloc(count * sizeof(hid_t)))) ||
-            (NULL == (*s_offsets_ptr = (haddr_t *)HDmalloc(count * sizeof(haddr_t)))) ||
-            (NULL == (*s_element_sizes_ptr = (size_t *)HDmalloc(count * sizeof(size_t)))) ||
+        if ((NULL == (*s_mem_space_ids_ptr = (hid_t *)malloc(count * sizeof(hid_t)))) ||
+            (NULL == (*s_file_space_ids_ptr = (hid_t *)malloc(count * sizeof(hid_t)))) ||
+            (NULL == (*s_offsets_ptr = (haddr_t *)malloc(count * sizeof(haddr_t)))) ||
+            (NULL == (*s_element_sizes_ptr = (size_t *)malloc(count * sizeof(size_t)))) ||
             (NULL ==
-             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)HDmalloc(count * sizeof(H5_flexible_const_ptr_t))))) {
+             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t))))) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted selection(s)")
         }
@@ -2737,7 +2736,7 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
 
 done:
     if (srt_tmp) {
-        HDfree(srt_tmp);
+        free(srt_tmp);
         srt_tmp = NULL;
     }
 
@@ -2751,27 +2750,27 @@ done:
 
         /* free space allocated for sorted arrays */
         if (*s_mem_space_ids_ptr) {
-            HDfree(*s_mem_space_ids_ptr);
+            free(*s_mem_space_ids_ptr);
             *s_mem_space_ids_ptr = NULL;
         }
 
         if (*s_file_space_ids_ptr) {
-            HDfree(*s_file_space_ids_ptr);
+            free(*s_file_space_ids_ptr);
             *s_file_space_ids_ptr = NULL;
         }
 
         if (*s_offsets_ptr) {
-            HDfree(*s_offsets_ptr);
+            free(*s_offsets_ptr);
             *s_offsets_ptr = NULL;
         }
 
         if (*s_element_sizes_ptr) {
-            HDfree(*s_element_sizes_ptr);
+            free(*s_element_sizes_ptr);
             *s_element_sizes_ptr = NULL;
         }
 
         if (*s_bufs_ptr) {
-            HDfree(*s_bufs_ptr);
+            free(*s_bufs_ptr);
             *s_bufs_ptr = NULL;
         }
     }
