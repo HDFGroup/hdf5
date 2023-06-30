@@ -1,133 +1,63 @@
-name: hdf5 1.12 release
+name: hdf5 1.12 release build
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Controls when the action will run. Triggers the workflow on a manual run
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      file_base:
-        description: "The common base name of the source tarballs"
-        required: true
+      use_tag:
+        description: 'Release version tag'
         type: string
-      file_branch:
-        description: "The branch name for the source tarballs"
+        required: false
+        default: snapshot-1.12
+      use_environ:
+        description: 'Environment to locate files'
+        type: choice
         required: true
-        type: string
-      file_sha:
-        description: "The sha for the source tarballs"
-        required: true
-        type: string
+        default: snapshots
+        options:
+        - snapshots
+        - release
 
-# Minimal permissions to be inherited by any job that doesn't declare its own permissions
 permissions:
   contents: read
 
-# Previous workflows must pass to get here so tag the commit that created the files
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel.
 jobs:
-  create-tag:
+  log-the-inputs:
     runs-on: ubuntu-latest
-    permissions:
-        contents: write # In order to allow tag creation
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
       - run: |
-          git checkout ${{ inputs.file_sha }}
+          echo "Tag: $TAG"
+          echo "Environment: $ENVIRONMENT"
+        env:
+          TAG: ${{ inputs.tag }}
+          ENVIRONMENT: ${{ inputs.environment }}
 
-      - uses: rickstaa/action-create-tag@v1
-        id: "tag_create"
-        with:
-          commit_sha: ${{ inputs.file_sha }}
-          tag: "snapshot"
-          force_push_tag: true
-          message: "Latest snapshot"
+  call-workflow-tarball:
+    needs: log-the-inputs
+    uses: ./.github/workflows/tarball.yml
+    with:
+      use_tag: ${{ inputs.use_tag }}
+      use_environ: ${{ inputs.use_environ }}
 
-      # Print result using the action output.
-      - run: |
-          echo "Tag already present: ${{ steps.tag_create.outputs.tag_exists }}"
+  call-workflow-ctest:
+    needs: call-workflow-tarball
+    uses: ./.github/workflows/cmake-ctest.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_tag: ${{ inputs.use_tag }}
+      use_environ: ${{ inputs.use_environ }}
 
-  PreRelease-getfiles:
-    runs-on: ubuntu-latest
-    needs: create-tag
-    environment: snapshots_1_12
+  call-workflow-release:
+    needs: [call-workflow-tarball, call-workflow-ctest]
     permissions:
-        contents: write
-    steps:
-      - name: Get file base name
-        id: get-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+      contents: write # In order to allow tag creation
+    uses: ./.github/workflows/release-files.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
+      file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
+      use_tag: ${{ inputs.use_tag }}
+      use_environ: ${{ inputs.use_environ }}
 
-      # Get files created by tarball script
-      - name: Get doxygen (Linux)
-        uses: actions/download-artifact@v3
-        with:
-              name: docs-doxygen
-              path: ${{ github.workspace }}
-
-      - name: Zip Folder
-        run: zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip . -i ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
-
-      - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@v3
-        with:
-              name: tgz-tarball
-              path: ${{ github.workspace }}
-
-      - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@v3
-        with:
-              name: zip-tarball
-              path: ${{ github.workspace }}
-
-      # Get files created by cmake-ctest script
-      - name: Get published binary (Windows)
-        uses: actions/download-artifact@v3
-        with:
-              name: zip-vs2022-binary
-              path: ${{ github.workspace }}
-
-      - name: Get published binary (MacOS)
-        uses: actions/download-artifact@v3
-        with:
-              name: tgz-osx12-binary
-              path: ${{ github.workspace }}
-
-      - name: Get published binary (Linux)
-        uses: actions/download-artifact@v3
-        with:
-              name: tgz-ubuntu-2204-binary
-              path: ${{ github.workspace }}
-
-      - name: PreRelease tag
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: "snapshot_1_12"
-          prerelease: true
-          files: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Store Release url
-        run: |
-          echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-
-#      - uses: actions/upload-artifact@v3
-#        with:
-#          path: ./upload_url
-#          name: upload_url
-
-      - name: List files for the space (Linux)
-        run: |
-              ls -l ${{ github.workspace }}
-              ls ${{ runner.workspace }}
