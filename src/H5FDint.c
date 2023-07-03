@@ -109,14 +109,14 @@ typedef struct H5FD_get_driver_ud_t {
 /* Local Prototypes */
 /********************/
 static int    H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data);
-static herr_t H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, 
-                                             hid_t dxpl_id, uint32_t count, H5S_t **mem_spaces, 
-                                             H5S_t **file_spaces, haddr_t offsets[],
-                                             size_t element_sizes[], void *bufs[] /* out */);
-static herr_t H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, 
-                                              hid_t dxpl_id, uint32_t count, H5S_t **mem_spaces, 
-                                              H5S_t **file_spaces, haddr_t offsets[],
-                                              size_t element_sizes[], const void *bufs[]);
+static herr_t H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type,
+                                             hid_t dxpl_id, uint32_t count, H5S_t **mem_spaces,
+                                             H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
+                                             void *bufs[] /* out */);
+static herr_t H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type,
+                                              hid_t dxpl_id, uint32_t count, H5S_t **mem_spaces,
+                                              H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
+                                              const void *bufs[]);
 
 /*********************/
 /* Package Variables */
@@ -750,7 +750,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, 
+H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                                uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                size_t element_sizes[], void *bufs[] /* out */)
 {
@@ -1190,7 +1190,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
         /* Otherwise, implement the selection read as a sequence of regular
          * or vector read calls.
          */
-        if (H5FD__read_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces, 
+        if (H5FD__read_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces,
                                            offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
 
@@ -1354,7 +1354,7 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__read_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces, 
+        if (H5FD__read_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
                                            file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
     }
@@ -1396,7 +1396,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, 
+H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                                 uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                 size_t element_sizes[], const void *bufs[])
 {
@@ -1828,7 +1828,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
         /* Otherwise, implement the selection write as a sequence of regular
          * or vector write calls.
          */
-        if (H5FD__write_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces, 
+        if (H5FD__write_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces,
                                             offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
 
@@ -1876,8 +1876,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t count, 
-                        hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], 
+H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t count,
+                        hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
                         size_t element_sizes[], const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
@@ -1984,7 +1984,7 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__write_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces, 
+        if (H5FD__write_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
                                             file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
     }

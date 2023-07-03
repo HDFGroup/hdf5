@@ -1723,8 +1723,8 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_read_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
-                               bufs) < 0)
+    if (H5FD_read_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                               element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
 
 done:
@@ -1820,8 +1820,8 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_write_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
-                                bufs) < 0)
+    if (H5FD_write_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                                element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
 
 done:
@@ -2080,7 +2080,6 @@ H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite_from_selection() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FDflush
