@@ -1723,7 +1723,7 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_read_selection_id(file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
+    if (H5FD_read_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
                                bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
 
@@ -1820,13 +1820,267 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_write_selection_id(file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
+    if (H5FD_write_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
                                 bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite_selection() */
+
+/*
+ * Translate selections to vector CB if possible, if not, scalar CB
+ *  --skip selection CB
+ */
+herr_t
+H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                               hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                               size_t element_sizes[], void *bufs[] /* out */)
+{
+    herr_t ret_value = SUCCEED; /* Return value             */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*#MtiIu*i*i*a*zx", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
+             element_sizes, bufs);
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    if ((!mem_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive")
+
+    if ((!file_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive")
+
+    if ((!offsets) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive")
+
+    if ((!element_sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "element_sizes parameter can't be NULL if count is positive")
+
+    if ((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    if ((count > 0) && (element_sizes[0] == 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+
+    if ((count > 0) && (bufs[0] == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_read_vector_from_selection(file, type, count, mem_space_ids, file_space_ids, offsets,
+                                        element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDread_vector_from_selection() */
+
+/*
+ * Translate selections to vector CB if possible, if not, scalar CB
+ *  --skip selection CB
+ */
+herr_t
+H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                                hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                                size_t element_sizes[], const void *bufs[])
+{
+    herr_t ret_value = SUCCEED; /* Return value             */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
+             element_sizes, bufs);
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    if ((!mem_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive")
+
+    if ((!file_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive")
+
+    if ((!offsets) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive")
+
+    if ((!element_sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "element_sizes parameter can't be NULL if count is positive")
+
+    if ((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    if ((count > 0) && (element_sizes[0] == 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+
+    if ((count > 0) && (bufs[0] == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_write_vector_from_selection(file, type, count, mem_space_ids, file_space_ids, offsets,
+                                         element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDwrite_vector_from_selection() */
+
+/*
+ * Translate selections to scalar CB
+ *  --skip selection CB
+ *  --skip vector CB
+ */
+herr_t
+H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
+                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+{
+    herr_t ret_value = SUCCEED; /* Return value             */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
+             element_sizes, bufs);
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    if ((!mem_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive")
+
+    if ((!file_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive")
+
+    if ((!offsets) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive")
+
+    if ((!element_sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "element_sizes parameter can't be NULL if count is positive")
+
+    if ((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    if ((count > 0) && (element_sizes[0] == 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+
+    if ((count > 0) && (bufs[0] == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_read_from_selection(file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
+                                 bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDread_from_selection() */
+
+/*
+ * Translate selections to scalar CB
+ *  --skip selection CB
+ *  --skip vector CB
+ */
+herr_t
+H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
+                         hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                         const void *bufs[])
+{
+    herr_t ret_value = SUCCEED; /* Return value             */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*#MtiIu*i*i*a*z**x", file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
+             element_sizes, bufs);
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    if ((!mem_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive")
+
+    if ((!file_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive")
+
+    if ((!offsets) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive")
+
+    if ((!element_sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "element_sizes parameter can't be NULL if count is positive")
+
+    if ((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    if ((count > 0) && (element_sizes[0] == 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+
+    if ((count > 0) && (bufs[0] == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_write_from_selection(file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
+                                  bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDwrite_from_selection() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FDflush

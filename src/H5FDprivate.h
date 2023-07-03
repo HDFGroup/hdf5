@@ -77,6 +77,11 @@ typedef struct {
         }                                                                                                    \
     }
 
+#define SKIP_NO_CB        0x00u
+#define SKIP_SELECTION_CB 0x01u
+#define SKIP_VECTOR_CB    0x02u
+
+
 /* Define structure to hold driver ID, info & configuration string for FAPLs */
 typedef struct {
     hid_t       driver_id;         /* Driver's ID */
@@ -149,12 +154,27 @@ H5_DLL herr_t  H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count
 H5_DLL herr_t  H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, struct H5S_t **mem_spaces,
                                     struct H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
                                     const void *bufs[]);
-H5_DLL herr_t  H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
-                                      hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
-                                      void *bufs[] /* out */);
-H5_DLL herr_t  H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+H5_DLL herr_t  H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t count, 
+                                      hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], 
+                                      size_t element_sizes[], void *bufs[] /* out */);
+H5_DLL herr_t  H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t count, 
+                                       hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[], 
+                                       size_t element_sizes[], const void *bufs[]);
+H5_DLL herr_t H5FD_read_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
+                                              hid_t mem_space_ids[], hid_t file_space_ids[],
+                                              haddr_t offsets[], size_t element_sizes[], void *bufs[]);
+
+H5_DLL herr_t H5FD_write_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
+                                               hid_t mem_space_ids[], hid_t file_space_ids[],
+                                               haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
+
+H5_DLL herr_t H5FD_read_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
                                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
-                                       const void *bufs[]);
+                                       void *bufs[]);
+
+H5_DLL herr_t H5FD_write_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                        const void *bufs[]);
 H5_DLL herr_t  H5FD_flush(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_truncate(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_lock(H5FD_t *file, hbool_t rw);
@@ -171,6 +191,13 @@ H5_DLL herr_t H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count
                                       haddr_t addrs[], size_t sizes[], H5_flexible_const_ptr_t bufs[],
                                       H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr, size_t **s_sizes_ptr,
                                       H5_flexible_const_ptr_t **s_bufs_ptr);
+
+H5_DLL herr_t H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count,
+                                         hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                                         size_t element_sizes[], H5_flexible_const_ptr_t bufs[],
+                                         hid_t **s_mem_space_ids, hid_t **s_file_space_ids,
+                                         haddr_t **s_offsets_ptr, size_t **s_element_sizes_ptr,
+                                         H5_flexible_const_ptr_t **s_bufs_ptr);
 H5_DLL herr_t H5FD_init(void);
 
 /* Function prototypes for MPI based VFDs*/
