@@ -1829,7 +1829,7 @@ done:
 } /* end H5FDwrite_selection() */
 
 /*-------------------------------------------------------------------------
- * Purpose:     This is similar to H5FDread_selection() with the 
+ * Purpose:     This is similar to H5FDread_selection() with the
  *              exception noted below.
  *
  *              Perform count reads from the specified file at the
@@ -1929,7 +1929,7 @@ done:
 } /* end H5FDread_vector_from_selection() */
 
 /*-------------------------------------------------------------------------
- * Purpose:     This is similar to H5FDwrite_selection() with the 
+ * Purpose:     This is similar to H5FDwrite_selection() with the
  *              exception noted below.
  *
  *              Perform count writes to the specified file at the
@@ -2027,7 +2027,7 @@ done:
 } /* end H5FDwrite_vector_from_selection() */
 
 /*-------------------------------------------------------------------------
- * Purpose:     This is similar to H5FDread_selection() with the 
+ * Purpose:     This is similar to H5FDread_selection() with the
  *              exception noted below.
  *
  *              Perform count reads from the specified file at the
@@ -2050,7 +2050,7 @@ done:
  *              It will skip selection and vector read calls whether the underlying
  *              VFD supports selection and vector reads or not.
  *
- *              It will translate the selection read to a series of 
+ *              It will translate the selection read to a series of
  *              scalar read calls.
  *
  *              All reads are done according to the data transfer property
@@ -2125,7 +2125,7 @@ done:
 } /* end H5FDread_from_selection() */
 
 /*-------------------------------------------------------------------------
- * Purpose:     This is similar to H5FDwrite_selection() with the 
+ * Purpose:     This is similar to H5FDwrite_selection() with the
  *              exception noted below.
  *
  *              Perform count writes to the specified file at the

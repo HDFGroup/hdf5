@@ -2737,7 +2737,7 @@ done:
  * Purpose:     Build MPI derived datatype for each piece and then
  *              build MPI final derived datatype for file and memory.
  *
- *              Note: This is derived from H5D__link_piece_collective_io() in 
+ *              Note: This is derived from H5D__link_piece_collective_io() in
  *              src/H5Dmpio.c.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -2956,11 +2956,11 @@ done:
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
- *              --sort the selections 
+ *              --sort the selections
  *              --set mpi_bufs_base
  *              --build the MPI derived types
  *              --perform MPI_File_set_view()
- *              --perform MPI_File_read_at_all() or MPI_File_read_at() 
+ *              --perform MPI_File_read_at_all() or MPI_File_read_at()
  *                depending on whether this is a H5FD_MPIO_COLLECTIVE_IO
  *
  *              If this is not H5FD_MPIO_COLLECTIVE:
@@ -3022,9 +3022,9 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    int    mpi_code; /* MPI return code */
+    int                     mpi_code; /* MPI return code */
     H5_flexible_const_ptr_t mbb;
-    herr_t ret_value = SUCCEED;
+    herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -3063,9 +3063,9 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
         if (count) {
-            if (H5FD_sort_selection_io_req(&selection_was_sorted, count, mem_space_ids, file_space_ids, offsets,
-                                           element_sizes, (H5_flexible_const_ptr_t *)bufs, &s_mem_space_ids,
-                                           &s_file_space_ids, &s_offsets, &s_element_sizes,
+            if (H5FD_sort_selection_io_req(&selection_was_sorted, count, mem_space_ids, file_space_ids,
+                                           offsets, element_sizes, (H5_flexible_const_ptr_t *)bufs,
+                                           &s_mem_space_ids, &s_file_space_ids, &s_offsets, &s_element_sizes,
                                            &s_bufs) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't sort selection I/O request");
 
@@ -3326,11 +3326,11 @@ done:
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
- *              --sort the selections 
+ *              --sort the selections
  *              --set mpi_bufs_base
  *              --build the MPI derived types
  *              --perform MPI_File_set_view()
- *              --perform MPI_File_write_at_all() or MPI_File_write_at() 
+ *              --perform MPI_File_write_at_all() or MPI_File_write_at()
  *                depending on whether this is a H5FD_MPIO_COLLECTIVE_IO
  *              --calculate and set the file's eof for the bytes written
  *
@@ -3430,10 +3430,10 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
         if (count) {
-            if (H5FD_sort_selection_io_req(&selection_was_sorted, count, mem_space_ids, file_space_ids, offsets,
-                                       element_sizes, (H5_flexible_const_ptr_t *)bufs, &s_mem_space_ids,
-                                       &s_file_space_ids, &s_offsets, &s_element_sizes,
-                                       &s_bufs) < 0)
+            if (H5FD_sort_selection_io_req(&selection_was_sorted, count, mem_space_ids, file_space_ids,
+                                           offsets, element_sizes, (H5_flexible_const_ptr_t *)bufs,
+                                           &s_mem_space_ids, &s_file_space_ids, &s_offsets, &s_element_sizes,
+                                           &s_bufs) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't sort selection I/O request");
 
             tmp_offset = s_offsets[0];

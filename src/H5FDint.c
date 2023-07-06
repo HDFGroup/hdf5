@@ -736,7 +736,7 @@ done:
  * Function:    H5FD__read_selection_translate
  *
  * Purpose:     Translates a selection read call to a vector read call if
- *              vector reads are supported and !skip_vector_cb, 
+ *              vector reads are supported and !skip_vector_cb,
  *              or a series of scalar read calls otherwise.
  *
  * Return:      Success:    SUCCEED
@@ -1232,7 +1232,7 @@ done:
  *              Depending on the parameter skip_cb which is translated into
  *              skip_selection_cb and skip_vector_cb:
  *
- *              --If the underlying VFD supports selection reads and !skip_selection_cb, 
+ *              --If the underlying VFD supports selection reads and !skip_selection_cb,
  *                pass the call through directly.
  *
  *              --If it doesn't, convert the selection reads into a sequence of vector or
@@ -1393,7 +1393,7 @@ done:
  * Function:    H5FD__write_selection_translate
  *
  * Purpose:     Translates a selection write call to a vector write call
- *              if vector writes are supported and !skip_vector_cb, 
+ *              if vector writes are supported and !skip_vector_cb,
  *              or a series of scalar write calls otherwise.
  *
  * Return:      Success:    SUCCEED
@@ -1879,7 +1879,7 @@ done:
  *              Depending on the parameter skip_cb which is translated into
  *              skip_selection_cb and skip_vector_cb:
  *
- *              --If the underlying VFD supports selection writes and !skip_selection_cb, 
+ *              --If the underlying VFD supports selection writes and !skip_selection_cb,
  *                pass the call through directly.
  *
  *              --If it doesn't, convert the selection writes into a sequence of vector or
@@ -2417,9 +2417,9 @@ H5FD__srt_tmp_cmp(const void *element_1, const void *element_2)
  *
  *               If not sorted, use qsort() to sort the array.
  *               Do this by allocating an array of struct H5FD_srt_tmp_t,
- *               where each instance of H5FD_srt_tmp_t has two fields, 
- *               addr and index.  Load the array with the contents of the 
- *               addrs array and the index of the associated entry. 
+ *               where each instance of H5FD_srt_tmp_t has two fields,
+ *               addr and index.  Load the array with the contents of the
+ *               addrs array and the index of the associated entry.
  *               Then sort the array using qsort().
  *               Return *FALSE in was_sorted.
  *
@@ -2527,9 +2527,9 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
                         size_t sizes[], H5_flexible_const_ptr_t bufs[], H5FD_mem_t **s_types_ptr,
                         haddr_t **s_addrs_ptr, size_t **s_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
 {
-    herr_t                  ret_value = SUCCEED; /* Return value */
-    size_t                  count     = (size_t)_count;
-    size_t                  i;
+    herr_t                 ret_value = SUCCEED; /* Return value */
+    size_t                 count     = (size_t)_count;
+    size_t                 i;
     struct H5FD_srt_tmp_t *srt_tmp = NULL;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2570,7 +2570,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
     }
     else {
 
-        /* 
+        /*
          * Allocate the s_types_ptr, s_addrs_ptr, s_sizes_ptr, and s_bufs_ptr
          * arrays and populate them using the mapping provided by
          * the sorted array of H5FD_srt_tmp_t.
@@ -2681,8 +2681,8 @@ done:
  *              and return.
  *
  *              If it is not sorted, duplicate the mem_space_ids, file_space_ids,
- *              offsets, element_sizes and bufs arrays, storing the base 
- *              addresses of the new arrays in *s_mem_space_ids_ptr, 
+ *              offsets, element_sizes and bufs arrays, storing the base
+ *              addresses of the new arrays in *s_mem_space_ids_ptr,
  *              s_file_space_ids_ptr, s_offsets_ptr, *s_element_sizes_ptr,
  *              and s_bufs_ptr respectively.  Determine the sorted order
  *              of the selection I/O request, and load it into the new
@@ -2702,10 +2702,10 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
                            hid_t **s_file_space_ids_ptr, haddr_t **s_offsets_ptr,
                            size_t **s_element_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
 {
-    size_t                  count = (size_t)_count;
-    size_t                  i;
+    size_t                 count = (size_t)_count;
+    size_t                 i;
     struct H5FD_srt_tmp_t *srt_tmp   = NULL;
-    herr_t                  ret_value = SUCCEED; /* Return value */
+    herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2733,7 +2733,7 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
 
     /* Sort the offsets array in increasing offet order, while
      * maintaining the association between each offset, and the
-     * mem_space_ids[], file_space_ids[], element_sizes and bufs[] 
+     * mem_space_ids[], file_space_ids[], element_sizes and bufs[]
      * values at the same index.
      */
     if (H5FD__sort_io_req_real(count, offsets, selection_was_sorted, &srt_tmp) < 0)
@@ -2749,9 +2749,9 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
     }
     else {
 
-        /* 
-         * Allocate the s_mem_space_ids_ptr, s_file_space_ids_ptr, s_offsets_ptr, 
-         * s_element_sizes_ptr and s_bufs_ptr arrays and populate them using the 
+        /*
+         * Allocate the s_mem_space_ids_ptr, s_file_space_ids_ptr, s_offsets_ptr,
+         * s_element_sizes_ptr and s_bufs_ptr arrays and populate them using the
          * mapping provided by the sorted array of H5FD_srt_tmp_t.
          */
         size_t j;
