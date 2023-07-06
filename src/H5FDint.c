@@ -2731,7 +2731,7 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
     assert((count == 0) || ((s_element_sizes_ptr) && (NULL == *s_element_sizes_ptr)));
     assert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
 
-    /* Sort the offsets array in increasing offet order, while
+    /* Sort the offsets array in increasing offset order, while
      * maintaining the association between each offset, and the
      * mem_space_ids[], file_space_ids[], element_sizes and bufs[]
      * values at the same index.
