@@ -2734,13 +2734,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__selection_build_types
  *
- * Purpose:     ??
- *              (derived from H5D__link_piece_collective_io() in src/H5Dmpio.c)
- *              (also reference H5FD__mpio_vector_build_types() in src/H5FDmpio.c)
+ * Purpose:     Build MPI derived datatype for each piece and then
+ *              build MPI final derived datatype for file and memory.
+ *
+ *              Note: This is derived from H5D__link_piece_collective_io() in 
+ *              src/H5Dmpio.c.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:
  *
  *-------------------------------------------------------------------------
  */
@@ -2952,21 +2952,24 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_selection
  *
- * Purpose:     ???Reads SIZE bytes of data from FILE beginning at address ADDR
- *              into buffer BUF according to data transfer properties in
- *              DXPL_ID using potentially complex file and buffer types to
- *              effect the transfer.
+ * Purpose:     The behaviour of this function dependes on the value of
+ *              the transfer mode obtained from the context.
  *
- *              Reading past the end of the MPI file returns zeros instead of
- *              failing.  MPI is able to coalesce requests from different
- *              processes (collective or independent).
+ *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
+ *              --sort the selections 
+ *              --set mpi_bufs_base
+ *              --build the MPI derived types
+ *              --perform MPI_File_set_view()
+ *              --perform MPI_File_read_at_all() or MPI_File_read_at() 
+ *                depending on whether this is a H5FD_MPIO_COLLECTIVE_IO
  *
- * Return:      Success:    SUCCEED. Result is stored in caller-supplied
- *                          buffer BUF.
+ *              If this is not H5FD_MPIO_COLLECTIVE:
+ *              --undo possible base address addition in internal routines
+ *              --call H5FD_read_vector_from_selection() to perform vector
+ *                or scalar writes for the selections
  *
- *              Failure:    FAIL. Contents of buffer BUF are undefined.
- *
- * Programmer:
+ * Return:      Success:    SUCCEED.
+ *              Failure:    FAIL.
  *
  *-------------------------------------------------------------------------
  */
@@ -3019,9 +3022,9 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    int                     mpi_code; /* MPI return code */
-    herr_t                  ret_value = SUCCEED;
+    int    mpi_code; /* MPI return code */
     H5_flexible_const_ptr_t mbb;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -3047,21 +3050,6 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     /* Portably initialize MPI status variable */
     memset(&mpi_stat, 0, sizeof(MPI_Status));
 
-    if (count) {
-        if (H5FD_sort_selection_io_req(&selection_was_sorted, count, mem_space_ids, file_space_ids, offsets,
-                                       element_sizes, (H5_flexible_const_ptr_t *)bufs, &s_mem_space_ids,
-                                       &s_file_space_ids, &s_offsets, &s_element_sizes, &s_bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't sort selection I/O request");
-
-        tmp_offset = s_offsets[0];
-    }
-
-    /* some numeric conversions */
-    if (H5FD_mpi_haddr_to_MPIOff(tmp_offset, &mpi_off /*out*/) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
-
-    /* I remove the check and if/else for H5FD_MEM_DRAW */
-
     /* Get the transfer mode from the API context */
     if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
@@ -3075,6 +3063,14 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
         if (count) {
+            if (H5FD_sort_selection_io_req(&selection_was_sorted, count, mem_space_ids, file_space_ids, offsets,
+                                           element_sizes, (H5_flexible_const_ptr_t *)bufs, &s_mem_space_ids,
+                                           &s_file_space_ids, &s_offsets, &s_element_sizes,
+                                           &s_bufs) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't sort selection I/O request");
+
+            tmp_offset = s_offsets[0];
+
             if (NULL == (s_file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
             if (NULL == (s_mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
@@ -3129,6 +3125,10 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
             final_ftype = MPI_BYTE;
             final_mtype = MPI_BYTE;
         }
+
+        /* some numeric conversions */
+        if (H5FD_mpi_haddr_to_MPIOff(tmp_offset, &mpi_off /*out*/) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
 
         /*
          * Set the file view when we are using MPI derived types
@@ -3322,20 +3322,25 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_selection
  *
- * Purpose:     ???Writes SIZE bytes of data to FILE beginning at address ADDR
- *              from buffer BUF according to data transfer properties in
- *              DXPL_ID using potentially complex file and buffer types to
- *              effect the transfer.
+ * Purpose:     The behaviour of this function dependes on the value of
+ *              the transfer mode obtained from the context.
  *
- *              MPI is able to coalesce requests from different processes
- *              (collective and independent).
+ *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
+ *              --sort the selections 
+ *              --set mpi_bufs_base
+ *              --build the MPI derived types
+ *              --perform MPI_File_set_view()
+ *              --perform MPI_File_write_at_all() or MPI_File_write_at() 
+ *                depending on whether this is a H5FD_MPIO_COLLECTIVE_IO
+ *              --calculate and set the file's eof for the bytes written
  *
- * Return:      Success:    SUCCEED. USE_TYPES and OLD_USE_TYPES in the
- *                          access params are altered.
- *              Failure:    FAIL. USE_TYPES and OLD_USE_TYPES in the
- *                          access params may be altered.
+ *              If this is not H5FD_MPIO_COLLECTIVE:
+ *              --undo possible base address addition in internal routines
+ *              --call H5FD_write_vector_from_selection() to perform vector
+ *                or scalar writes for the selections
  *
- * Programmer:
+ * Return:      Success:    SUCCEED.
+ *              Failure:    FAIL.
  *
  *-------------------------------------------------------------------------
  */
@@ -3418,35 +3423,21 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
     /* Portably initialize MPI status variable */
     memset(&mpi_stat, 0, sizeof(MPI_Status));
 
-    if (count) {
-        if (H5FD_sort_selection_io_req(&selection_was_sorted, count, mem_space_ids, file_space_ids, offsets,
-                                       element_sizes, (H5_flexible_const_ptr_t *)bufs, &s_mem_space_ids,
-                                       &s_file_space_ids, &s_offsets, &s_element_sizes, &s_bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't sort selection I/O request");
-
-        tmp_offset = s_offsets[0];
-    }
-
-    /* some numeric conversions */
-    if (H5FD_mpi_haddr_to_MPIOff(tmp_offset, &mpi_off /*out*/) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
-
-    /* To be used at the end of the routine for setting local_eof */
-    save_mpi_off = mpi_off;
-
     /* Get the transfer mode from the API context */
     if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
-    /*
-     * Set up for a fancy xfer using complex types, or single byte block. We
-     * wouldn't need to rely on the use_view field if MPI semantics allowed
-     * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
-     * could mean "use MPI_BYTE" by convention).
-     */
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
         if (count) {
+            if (H5FD_sort_selection_io_req(&selection_was_sorted, count, mem_space_ids, file_space_ids, offsets,
+                                       element_sizes, (H5_flexible_const_ptr_t *)bufs, &s_mem_space_ids,
+                                       &s_file_space_ids, &s_offsets, &s_element_sizes,
+                                       &s_bufs) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't sort selection I/O request");
+
+            tmp_offset = s_offsets[0];
+
             if (NULL == (s_file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
             if (NULL == (s_mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
@@ -3502,6 +3493,13 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
             final_mtype = MPI_BYTE;
         }
 
+        /* some numeric conversions */
+        if (H5FD_mpi_haddr_to_MPIOff(tmp_offset, &mpi_off /*out*/) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+
+        /* To be used at the end of the routine for setting local_eof */
+        save_mpi_off = mpi_off;
+
         /*
          * Set the file view when we are using MPI derived types
          */
@@ -3541,7 +3539,6 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
             }
         }
         else {
-            /* I remove the check for H5FD_MEM_DRAW: Do I need that? */
 
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)

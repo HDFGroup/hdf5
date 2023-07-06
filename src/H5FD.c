@@ -1828,9 +1828,46 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite_selection() */
 
-/*
- * Translate selections to vector CB if possible, if not, scalar CB
- *  --skip selection CB
+/*-------------------------------------------------------------------------
+ * Purpose:     This is similar to H5FDread_selection() with the 
+ *              exception noted below.
+ *
+ *              Perform count reads from the specified file at the
+ *              locations selected in the dataspaces in the file_spaces
+ *              array, with each of those dataspaces starting at the file
+ *              address specified by the corresponding element of the
+ *              offsets array, and with the size of each element in the
+ *              dataspace specified by the corresponding element of the
+ *              element_sizes array.  The memory type provided by type is
+ *              the same for all selections.  Data read is returned in
+ *              the locations selected in the dataspaces in the
+ *              mem_spaces array, within the buffers provided in the
+ *              corresponding elements of the bufs array.
+ *
+ *              If i > 0 and element_sizes[i] == 0, presume
+ *              element_sizes[n] = element_sizes[i-1] for all n >= i and
+ *              < count.
+ *
+ *              Note:
+ *              It will skip selection read call whether the underlying VFD
+ *              supports selection reads or not.
+ *
+ *              It will translate the selection read to a vector read call
+ *              if vector reads are supported, or a series of scalar read
+ *              calls otherwise.
+ *
+ *              All reads are done according to the data transfer property
+ *              list dxpl_id (which may be the constant H5P_DEFAULT).
+ *
+ * Return:      Success:    SUCCEED
+ *                          All reads have completed successfully, and
+ *                          the results havce been into the supplied
+ *                          buffers.
+ *
+ *              Failure:    FAIL
+ *                          The contents of supplied buffers are undefined.
+ *
+ *-------------------------------------------------------------------------
  */
 herr_t
 H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
@@ -1891,9 +1928,44 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDread_vector_from_selection() */
 
-/*
- * Translate selections to vector CB if possible, if not, scalar CB
- *  --skip selection CB
+/*-------------------------------------------------------------------------
+ * Purpose:     This is similar to H5FDwrite_selection() with the 
+ *              exception noted below.
+ *
+ *              Perform count writes to the specified file at the
+ *              locations selected in the dataspaces in the file_spaces
+ *              array, with each of those dataspaces starting at the file
+ *              address specified by the corresponding element of the
+ *              offsets array, and with the size of each element in the
+ *              dataspace specified by the corresponding element of the
+ *              element_sizes array.  The memory type provided by type is
+ *              the same for all selections.  Data write is from
+ *              the locations selected in the dataspaces in the
+ *              mem_spaces array, within the buffers provided in the
+ *              corresponding elements of the bufs array.
+ *
+ *              If i > 0 and element_sizes[i] == 0, presume
+ *              element_sizes[n] = element_sizes[i-1] for all n >= i and
+ *              < count.
+ *
+ *              Note:
+ *              It will skip selection write call whether the underlying VFD
+ *              supports selection writes or not.
+ *
+ *              It will translate the selection write to a vector write call
+ *              if vector writes are supported, or a series of scalar write
+ *              calls otherwise.
+ *
+ *              All writes are done according to the data transfer property
+ *              list dxpl_id (which may be the constant H5P_DEFAULT).
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully
+ *
+ *              Failure:    FAIL
+ *                          One or more of the writes failed.
+ *
+ *-------------------------------------------------------------------------
  */
 herr_t
 H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
@@ -1954,10 +2026,45 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite_vector_from_selection() */
 
-/*
- * Translate selections to scalar CB
- *  --skip selection CB
- *  --skip vector CB
+/*-------------------------------------------------------------------------
+ * Purpose:     This is similar to H5FDread_selection() with the 
+ *              exception noted below.
+ *
+ *              Perform count reads from the specified file at the
+ *              locations selected in the dataspaces in the file_spaces
+ *              array, with each of those dataspaces starting at the file
+ *              address specified by the corresponding element of the
+ *              offsets array, and with the size of each element in the
+ *              dataspace specified by the corresponding element of the
+ *              element_sizes array.  The memory type provided by type is
+ *              the same for all selections.  Data read is returned in
+ *              the locations selected in the dataspaces in the
+ *              mem_spaces array, within the buffers provided in the
+ *              corresponding elements of the bufs array.
+ *
+ *              If i > 0 and element_sizes[i] == 0, presume
+ *              element_sizes[n] = element_sizes[i-1] for all n >= i and
+ *              < count.
+ *
+ *              Note:
+ *              It will skip selection and vector read calls whether the underlying
+ *              VFD supports selection and vector reads or not.
+ *
+ *              It will translate the selection read to a series of 
+ *              scalar read calls.
+ *
+ *              All reads are done according to the data transfer property
+ *              list dxpl_id (which may be the constant H5P_DEFAULT).
+ *
+ * Return:      Success:    SUCCEED
+ *                          All reads have completed successfully, and
+ *                          the results havce been into the supplied
+ *                          buffers.
+ *
+ *              Failure:    FAIL
+ *                          The contents of supplied buffers are undefined.
+ *
+ *-------------------------------------------------------------------------
  */
 herr_t
 H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
@@ -2017,10 +2124,43 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDread_from_selection() */
 
-/*
- * Translate selections to scalar CB
- *  --skip selection CB
- *  --skip vector CB
+/*-------------------------------------------------------------------------
+ * Purpose:     This is similar to H5FDwrite_selection() with the 
+ *              exception noted below.
+ *
+ *              Perform count writes to the specified file at the
+ *              locations selected in the dataspaces in the file_spaces
+ *              array, with each of those dataspaces starting at the file
+ *              address specified by the corresponding element of the
+ *              offsets array, and with the size of each element in the
+ *              dataspace specified by the corresponding element of the
+ *              element_sizes array.  The memory type provided by type is
+ *              the same for all selections.  Data write is from
+ *              the locations selected in the dataspaces in the
+ *              mem_spaces array, within the buffers provided in the
+ *              corresponding elements of the bufs array.
+ *
+ *              If i > 0 and element_sizes[i] == 0, presume
+ *              element_sizes[n] = element_sizes[i-1] for all n >= i and
+ *              < count.
+ *
+ *              Note:
+ *              It will skip selection and vector write calls whether the underlying
+ *              VFD supports selection and vector writes or not.
+ *
+ *              It will translate the selection write to a series of
+ *              scalar write calls.
+ *
+ *              All writes are done according to the data transfer property
+ *              list dxpl_id (which may be the constant H5P_DEFAULT).
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully
+ *
+ *              Failure:    FAIL
+ *                          One or more of the writes failed.
+ *
+ *-------------------------------------------------------------------------
  */
 herr_t
 H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
