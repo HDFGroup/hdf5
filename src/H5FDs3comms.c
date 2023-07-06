@@ -1258,7 +1258,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
 #if S3COMMS_DEBUG
     fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
-              offset, offset + len - 1, len);
+            offset, offset + len - 1, len);
 #endif
 
     /*******************
