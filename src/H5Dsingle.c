@@ -10,15 +10,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Vailin Choi
- *	       	May 2011; updated 10/2015
- *
- * Purpose:	Single Chunk I/O functions.
- *		This is used when the dataset has only 1 chunk (with or without filter):
- *			cur_dims[] is equal to max_dims[] is equal to the chunk dims[]
- *		non-filter chunk record: [address of the chunk]
- *		filtered chunk record: 	[address of the chunk, chunk size, filter mask]
- *
+/*
+ * Purpose: Single Chunk I/O functions.
+ *          This is used when the dataset has only 1 chunk (with or without filter):
+ *          cur_dims[] is equal to max_dims[] is equal to the chunk dims[]
+ *          non-filter chunk record: [address of the chunk]
+ *          filtered chunk record: 	[address of the chunk, chunk size, filter mask]
  */
 
 /****************/
@@ -106,9 +103,6 @@ const H5D_chunk_ops_t H5D_COPS_SINGLE[1] = {{
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              July, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -118,16 +112,16 @@ H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(idx_info->storage);
 
     if (idx_info->pline->nused) {
         idx_info->layout->flags |= H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER;
 
-        if (!H5F_addr_defined(idx_info->storage->idx_addr)) {
+        if (!H5_addr_defined(idx_info->storage->idx_addr)) {
             idx_info->storage->u.single.nbytes      = 0;
             idx_info->storage->u.single.filter_mask = 0;
         }
@@ -146,8 +140,6 @@ H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
  * Return:	Non-negative on success
  *		Negative on failure.
  *
- * Programmer:	Vailin Choi; July 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -156,19 +148,19 @@ H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(idx_info->layout->max_nchunks == idx_info->layout->nchunks);
-    HDassert(idx_info->layout->nchunks == 1);
-    HDassert(!H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(idx_info->storage);
+    assert(idx_info->layout->max_nchunks == idx_info->layout->nchunks);
+    assert(idx_info->layout->nchunks == 1);
+    assert(!H5_addr_defined(idx_info->storage->idx_addr));
 
     if (idx_info->pline->nused)
-        HDassert(idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER);
+        assert(idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER);
     else
-        HDassert(!(idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER));
+        assert(!(idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__single_idx_create() */
@@ -180,8 +172,6 @@ H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; July 2011
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -190,9 +180,9 @@ H5D__single_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(storage);
+    assert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
 } /* end H5D__single_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -201,8 +191,6 @@ H5D__single_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Purpose:	Allocate space for the single chunk
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; July 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -214,17 +202,17 @@ H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(idx_info->layout->nchunks == 1);
-    HDassert(idx_info->layout->max_nchunks == 1);
-    HDassert(udata);
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(idx_info->storage);
+    assert(idx_info->layout->nchunks == 1);
+    assert(idx_info->layout->max_nchunks == 1);
+    assert(udata);
 
     /* Set the address for the chunk */
-    HDassert(H5F_addr_defined(udata->chunk_block.offset));
+    assert(H5_addr_defined(udata->chunk_block.offset));
     idx_info->storage->idx_addr = udata->chunk_block.offset;
 
     if (idx_info->pline->nused > 0) {
@@ -250,8 +238,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; July 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -260,14 +246,14 @@ H5D__single_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(idx_info->layout->nchunks == 1);
-    HDassert(idx_info->layout->max_nchunks == 1);
-    HDassert(udata);
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(idx_info->storage);
+    assert(idx_info->layout->nchunks == 1);
+    assert(idx_info->layout->max_nchunks == 1);
+    assert(udata);
 
     udata->chunk_block.offset = idx_info->storage->idx_addr;
     if (idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
@@ -278,7 +264,7 @@ H5D__single_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
         udata->chunk_block.length = idx_info->layout->size;
         udata->filter_mask        = 0;
     } /* end else */
-    if (!H5F_addr_defined(udata->chunk_block.offset))
+    if (!H5_addr_defined(udata->chunk_block.offset))
         udata->chunk_block.length = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -291,8 +277,6 @@ H5D__single_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; July 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -304,17 +288,17 @@ H5D__single_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(chunk_cb);
-    HDassert(chunk_udata);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(idx_info->storage);
+    assert(chunk_cb);
+    assert(chunk_udata);
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Initialize generic chunk record */
-    HDmemset(&chunk_rec, 0, sizeof(chunk_rec));
+    memset(&chunk_rec, 0, sizeof(chunk_rec));
     chunk_rec.chunk_addr = idx_info->storage->idx_addr;
 
     if (idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
@@ -340,8 +324,6 @@ H5D__single_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; July 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -353,12 +335,12 @@ H5D__single_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(idx_info->storage);
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
 
     if (idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER)
         nbytes = idx_info->storage->u.single.nbytes;
@@ -382,8 +364,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	negative
  *
- * Programmer:	Vailin Choi; Sept 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -394,16 +374,16 @@ H5D__single_idx_delete(const H5D_chk_idx_info_t *idx_info)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(idx_info->storage);
 
-    if (H5F_addr_defined(idx_info->storage->idx_addr))
+    if (H5_addr_defined(idx_info->storage->idx_addr))
         ret_value = H5D__single_idx_remove(idx_info, NULL);
     else
-        HDassert(!H5F_addr_defined(idx_info->storage->idx_addr));
+        assert(!H5_addr_defined(idx_info->storage->idx_addr));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__single_idx_delete() */
@@ -414,8 +394,6 @@ H5D__single_idx_delete(const H5D_chk_idx_info_t *idx_info)
  * Purpose:	Set up any necessary information for copying the single chunk
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; Sept 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -428,21 +406,21 @@ H5D__single_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_i
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(idx_info_src);
-    HDassert(idx_info_src->f);
-    HDassert(idx_info_src->pline);
-    HDassert(idx_info_src->layout);
-    HDassert(idx_info_src->storage);
-    HDassert(H5F_addr_defined(idx_info_src->storage->idx_addr));
+    assert(idx_info_src);
+    assert(idx_info_src->f);
+    assert(idx_info_src->pline);
+    assert(idx_info_src->layout);
+    assert(idx_info_src->storage);
+    assert(H5_addr_defined(idx_info_src->storage->idx_addr));
 
-    HDassert(idx_info_dst);
-    HDassert(idx_info_dst->f);
-    HDassert(idx_info_dst->pline);
-    HDassert(idx_info_dst->layout);
-    HDassert(idx_info_dst->storage);
+    assert(idx_info_dst);
+    assert(idx_info_dst->f);
+    assert(idx_info_dst->pline);
+    assert(idx_info_dst->layout);
+    assert(idx_info_dst->storage);
 
     /* Set copied metadata tag */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Set up information at the destination file */
     if (H5D__single_idx_create(idx_info_dst) < 0)
@@ -463,8 +441,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        negative
  *
- * Programmer:	Vailin Choi; Sept 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -473,7 +449,7 @@ H5D__single_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(index_size);
+    assert(index_size);
 
     *index_size = 0;
 
@@ -487,8 +463,6 @@ H5D__single_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t 
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; Sept 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -497,7 +471,7 @@ H5D__single_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(storage);
+    assert(storage);
 
     /* Reset index info */
     if (reset_addr)
@@ -513,8 +487,6 @@ H5D__single_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; September 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -523,10 +495,10 @@ H5D__single_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(storage);
-    HDassert(stream);
+    assert(storage);
+    assert(stream);
 
-    HDfprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
+    fprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__single_idx_dump() */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Pdeprec.c
- *		October 11 2007
- *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5P interface.  These
  *              functions are here for compatibility purposes and may be
@@ -243,7 +241,7 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_p
         /* Substitute the new property class in the ID */
         if (NULL == (old_pclass = (H5P_genclass_t *)H5I_subst(cls_id, pclass)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to substitute property class in ID")
-        HDassert(old_pclass == orig_pclass);
+        assert(old_pclass == orig_pclass);
 
         /* Close the previous class */
         if (H5P__close_class(orig_pclass) < 0)
@@ -441,9 +439,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -529,7 +524,6 @@ done:
  *
  * Return:	    Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; Jan 2017
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -599,8 +593,6 @@ done:
  * Purpose:	    It is mapped to H5Pget_file_space_strategy().
  *
  * Return:	    Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; Jan 2017
  *
  *-------------------------------------------------------------------------
  */

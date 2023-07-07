@@ -95,12 +95,12 @@ H5B__cache_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(udata);
-    HDassert(image_len);
+    assert(udata);
+    assert(image_len);
 
     /* Get shared info for B-tree */
     shared = (H5B_shared_t *)H5UC_GET_OBJ(udata->rc_shared);
-    HDassert(shared);
+    assert(shared);
 
     /* Set the image length size */
     *image_len = shared->sizeof_rnode;
@@ -132,13 +132,13 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(image);
-    HDassert(udata);
+    assert(image);
+    assert(udata);
 
     /* Allocate the B-tree node in memory */
     if (NULL == (bt = H5FL_MALLOC(H5B_t)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate B-tree struct")
-    HDmemset(&bt->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&bt->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Set & increment the ref-counted "shared" B-tree information for the node */
     bt->rc_shared = udata->rc_shared;
@@ -158,7 +158,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     /* Magic number */
     if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    if (HDmemcmp(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -239,12 +239,12 @@ H5B__cache_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(bt);
-    HDassert(image_len);
+    assert(bt);
+    assert(image_len);
 
     /* Get shared info for B-tree */
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
+    assert(shared);
 
     /* Set the image length size */
     *image_len = shared->sizeof_rnode;
@@ -273,13 +273,13 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(image);
-    HDassert(bt);
-    HDassert(bt->rc_shared);
+    assert(image);
+    assert(bt);
+    assert(bt->rc_shared);
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
-    HDassert(shared->type);
-    HDassert(shared->type->encode);
+    assert(shared);
+    assert(shared->type);
+    assert(shared->type->encode);
 
     /* magic number */
     H5MM_memcpy(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -322,10 +322,10 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     } /* end if */
 
     /* Sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+    assert((size_t)(image - (uint8_t *)_image) <= len);
 
     /* Clear rest of node */
-    HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+    memset(image, 0, len - (size_t)(image - (uint8_t *)_image));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -347,7 +347,7 @@ H5B__cache_free_icr(void *thing)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(thing);
+    assert(thing);
 
     /* Destroy B-tree node */
     if (H5B__node_dest((H5B_t *)thing) < 0)

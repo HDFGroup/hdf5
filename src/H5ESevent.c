@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5ESevent.c
- *              Nov  7 2020
- *              Quincey Koziol
  *
  * Purpose:     Operations on "events" for managing asynchronous
  *                      operations.
@@ -78,9 +76,6 @@ H5FL_DEFINE_STATIC(H5ES_event_t);
  *
  * Return:      Non-NULL pointer to new event on success, NULL on failure
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 H5ES_event_t *
@@ -93,8 +88,8 @@ H5ES__event_new(H5VL_t *connector, void *token)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(connector);
-    HDassert(token);
+    assert(connector);
+    assert(token);
 
     /* Create vol object for token */
     if (NULL == (request = H5VL_create_object(token, connector))) {
@@ -114,7 +109,7 @@ H5ES__event_new(H5VL_t *connector, void *token)
     ret_value = ev;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__event_new() */
 
 /*-------------------------------------------------------------------------
@@ -123,9 +118,6 @@ done:
  * Purpose:     Free an event
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -137,7 +129,7 @@ H5ES__event_free(H5ES_event_t *ev)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ev);
+    assert(ev);
 
     /* The 'app_func_name', 'app_file_name', and 'api_name' strings are statically allocated (by the compiler)
      * and are not allocated, so there's no need to free them.
@@ -170,9 +162,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sunday, November 8, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -183,7 +172,7 @@ H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ev);
+    assert(ev);
 
     /* Remove the event from the event list */
     H5ES__list_remove(el, ev);

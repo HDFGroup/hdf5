@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, May 14, 1998
- *
  * Purpose:	Checks the effect of various I/O request sizes and raw data
  *		cache sizes.  Performance depends on the amount of data read
  *		from disk and we use a filter to get that number.
@@ -75,7 +72,7 @@ static size_t counter(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const uns
                       size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_COUNTER[1] = {{
+static const H5Z_class2_t H5Z_COUNTER[1] = {{
     H5Z_CLASS_T_VERS, /* H5Z_class_t version		*/
     FILTER_COUNTER,   /* Filter id number		*/
     1, 1,             /* Encoding and decoding enabled */
@@ -93,9 +90,6 @@ const H5Z_class2_t H5Z_COUNTER[1] = {{
  * Return:	Success:	src_nbytes-1
  *
  *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -117,9 +111,6 @@ counter(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *		dataset size is in terms of chunks.
  *
  * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -167,9 +158,6 @@ create_dataset(void)
  *		I/O requests in row major order.
  *
  * Return:	Efficiency: data requested divided by data actually read.
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -238,9 +226,6 @@ test_rowmaj(int op, size_t cache_size, size_t io_size)
  *
  * Return:	Efficiency.
  *
- * Programmer:	Robb Matzke
- *              Friday, May 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static double
@@ -306,9 +291,6 @@ test_diag(int op, size_t cache_size, size_t io_size, size_t offset)
  * Return:	Success:
  *
  *		Failure:
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 14, 1998
  *
  *-------------------------------------------------------------------------
  */

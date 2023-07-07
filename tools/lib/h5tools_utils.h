@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling
- *              Tuesday, 6. March 2001
- *
  * Purpose:     Support functions for the various tools.
  */
 #ifndef H5TOOLS_UTILS_H

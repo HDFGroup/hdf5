@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              11/10/05
- *
+/*
  *        This file contains tests for the API calls associated
  *        with the cache implemented in H5C.c
  */
@@ -23,7 +21,7 @@
 
 /* global variable declarations: */
 
-const char *FILENAME[] = {"cache_api_test", NULL};
+static const char *FILENAME[] = {"cache_api_test", NULL};
 
 /* macro definitions */
 
@@ -54,9 +52,6 @@ static hbool_t              check_file_mdc_api_errs(unsigned paged, hid_t fcpl_i
  *              data is getting to the cache.
  *
  * Return:      Test pass status (TRUE/FALSE)
- *
- * Programmer:  John Mainzer
- *              4/12/04
  *
  *-------------------------------------------------------------------------
  */
@@ -475,7 +470,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return pass;
@@ -497,9 +492,6 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *              point.
  *
  * Return:      Test pass status (TRUE/FALSE)
- *
- * Programmer:  John Mainzer
- *              4/14/04
  *
  *-------------------------------------------------------------------------
  */
@@ -800,7 +792,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return pass;
@@ -817,9 +809,6 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *                    testing express level value.
  *
  * Return:      Test pass status (TRUE/FALSE)
- *
- * Programmer:  John Mainzer
- *              4/14/04
  *
  *-------------------------------------------------------------------------
  */
@@ -964,7 +953,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
         SKIPPED();
 
-        HDfprintf(stdout, "     Long tests disabled.\n");
+        fprintf(stdout, "     Long tests disabled.\n");
 
         return pass;
     }
@@ -1418,7 +1407,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return pass;
@@ -1438,9 +1427,6 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
  * Return:      Success:    Pointer to an array of cache configurations.
  *              Failure:    NULL
  *
- * Programmer:  Dana Robinson
- *              Spring 2016
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1455,8 +1441,7 @@ init_invalid_configs(void)
     H5AC_cache_config_t *configs = NULL;
 
     /* Allocate memory */
-    if (NULL ==
-        (configs = (H5AC_cache_config_t *)HDcalloc(NUM_INVALID_CONFIGS, sizeof(H5AC_cache_config_t)))) {
+    if (NULL == (configs = (H5AC_cache_config_t *)calloc(NUM_INVALID_CONFIGS, sizeof(H5AC_cache_config_t)))) {
 
         return NULL;
     }
@@ -1629,9 +1614,6 @@ init_invalid_configs(void)
  *
  * Return:      Test pass status (TRUE/FALSE)
  *
- * Programmer:  John Mainzer
- *              4/19/04
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1658,7 +1640,7 @@ check_fapl_mdc_api_errs(void)
         {
             result = H5Pget_mdc_config((hid_t)-1, &scratch);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1696,7 +1678,7 @@ check_fapl_mdc_api_errs(void)
         {
             result = H5Pget_mdc_config(fapl_id, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1714,7 +1696,7 @@ check_fapl_mdc_api_errs(void)
         {
             result = H5Pget_mdc_config(fapl_id, &scratch);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1733,7 +1715,7 @@ check_fapl_mdc_api_errs(void)
         {
             result = H5Pset_mdc_config((hid_t)-1, &default_config);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1748,7 +1730,7 @@ check_fapl_mdc_api_errs(void)
         {
             result = H5Pset_mdc_config(fapl_id, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1763,7 +1745,7 @@ check_fapl_mdc_api_errs(void)
         {
             result = H5Pset_mdc_config(fapl_id, &(invalid_configs[i]));
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1796,7 +1778,7 @@ check_fapl_mdc_api_errs(void)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return pass;
@@ -1810,9 +1792,6 @@ check_fapl_mdc_api_errs(void)
  *              errors gracefully.
  *
  * Return:      Test pass status (TRUE/FALSE)
- *
- * Programmer:  John Mainzer
- *              4/19/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1849,7 +1828,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: calling h5_fixname().\n", __func__);
+            fprintf(stdout, "%s: calling h5_fixname().\n", __func__);
         }
 
         if (h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
@@ -1863,7 +1842,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: calling H5Fcreate().\n", __func__);
+            fprintf(stdout, "%s: calling H5Fcreate().\n", __func__);
         }
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
@@ -1884,14 +1863,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 1.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fget_mdc_config() 1.\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fget_mdc_config((hid_t)-1, &scratch);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1904,14 +1883,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 2.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fget_mdc_config() 2.\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fget_mdc_config(file_id, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1925,14 +1904,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 3.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fget_mdc_config() 3.\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fget_mdc_config(file_id, &scratch);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1948,14 +1927,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 1.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fset_mdc_config() 1.\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fset_mdc_config((hid_t)-1, &default_config);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1968,14 +1947,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 2.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fset_mdc_config() 2.\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fset_mdc_config(file_id, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -1988,14 +1967,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
     while ((pass) && (i < NUM_INVALID_CONFIGS)) {
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fset_mdc_config() with invalid config %d.\n", __func__, i);
+            fprintf(stdout, "%s: testing H5Fset_mdc_config() with invalid config %d.\n", __func__, i);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fset_mdc_config(file_id, &(invalid_configs[i]));
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -2016,14 +1995,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 1.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 1.\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fget_mdc_hit_rate((hid_t)-1, &hit_rate);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -2036,14 +2015,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 2.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 2.\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fget_mdc_hit_rate(file_id, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -2057,14 +2036,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Freset_mdc_hit_rate_stats().\n", __func__);
+            fprintf(stdout, "%s: testing H5Freset_mdc_hit_rate_stats().\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Freset_mdc_hit_rate_stats((hid_t)-1);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -2078,14 +2057,14 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 1.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fget_mdc_size() 1.\n", __func__);
         }
 
         H5E_BEGIN_TRY
         {
             result = H5Fget_mdc_size((hid_t)-1, &max_size, &min_clean_size, &cur_size, &cur_num_entries);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (result >= 0) {
 
@@ -2098,7 +2077,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 2.\n", __func__);
+            fprintf(stdout, "%s: testing H5Fget_mdc_size() 2.\n", __func__);
         }
 
         if ((H5Fget_mdc_size(file_id, &max_size, NULL, NULL, NULL) < 0) ||
@@ -2117,7 +2096,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         if (show_progress) {
 
-            HDfprintf(stdout, "%s: cleaning up from tests.\n", __func__);
+            fprintf(stdout, "%s: cleaning up from tests.\n", __func__);
         }
 
         if (H5Fclose(file_id) < 0) {
@@ -2143,7 +2122,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return pass;
@@ -2156,9 +2135,6 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
  * Purpose:     Run tests on the cache code contained in H5C.c
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2175,36 +2151,36 @@ main(void)
 
     express_test = GetTestExpress();
 
-    HDprintf("===================================\n");
-    HDprintf("Cache API tests\n");
-    HDprintf("        express_test = %d\n", express_test);
-    HDprintf("===================================\n");
+    printf("===================================\n");
+    printf("Cache API tests\n");
+    printf("        express_test = %d\n", express_test);
+    printf("===================================\n");
 
     /* Initialize invalid configurations.
      */
     invalid_configs = init_invalid_configs();
     if (NULL == invalid_configs) {
         failure_mssg = "Unable to allocate memory for invalid configs.";
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
         return EXIT_FAILURE;
     } /* end if */
 
     if ((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0) {
         failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.\n";
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
         return EXIT_FAILURE;
     } /* end if */
 
     /* Set file space strategy to default or paged aggregation strategy */
     if ((fcpl2_id = H5Pcopy(fcpl_id)) < 0) {
         failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.\n";
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
         return EXIT_FAILURE;
     } /* end if */
 
     if (H5Pset_file_space_strategy(fcpl2_id, H5F_FSPACE_STRATEGY_PAGE, 1, (hsize_t)1) < 0) {
         failure_mssg = "H5Pset_file_space_strategy() failed.\n";
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
         return EXIT_FAILURE;
     } /* end if */
 
@@ -2238,11 +2214,11 @@ main(void)
         nerrs += 1;
 
     if (invalid_configs)
-        HDfree(invalid_configs);
+        free(invalid_configs);
 
     if (H5Pclose(fcpl_id) < 0) {
         failure_mssg = "H5Pclose() failed.\n";
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
         return EXIT_FAILURE;
     } /* end if */
 

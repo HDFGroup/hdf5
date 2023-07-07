@@ -13,21 +13,28 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cprefetched.c
- *              December 28 2016
- *              Quincey Koziol
  *
- * Purpose:     Metadata cache prefetched entry callbacks.
+ * Purpose:     Metadata cache prefetched entry callbacks
  *
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
+#include "H5Cmodule.h" /* This source code file is part of the H5C module */
+
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5FLprivate.h" /* Free Lists                           */
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Cpkg.h"      /* Cache                                    */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MMprivate.h" /* Memory Management                        */
 
 /****************/
 /* Local Macros */
@@ -195,9 +202,6 @@ H5C__prefetched_entry_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUS
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              8/13/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -210,8 +214,8 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(entry_ptr);
-    HDassert(entry_ptr->prefetched);
+    assert(entry_ptr);
+    assert(entry_ptr->prefetched);
 
     switch (action) {
         case H5C_NOTIFY_ACTION_AFTER_INSERT:
@@ -231,10 +235,10 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                 H5C_cache_entry_t *parent_ptr;
 
                 /* Sanity checks */
-                HDassert(entry_ptr->flush_dep_parent);
+                assert(entry_ptr->flush_dep_parent);
                 parent_ptr = entry_ptr->flush_dep_parent[u];
-                HDassert(parent_ptr);
-                HDassert(parent_ptr->flush_dep_nchildren > 0);
+                assert(parent_ptr);
+                assert(parent_ptr->flush_dep_nchildren > 0);
 
                 /* Destroy flush dependency with flush dependency parent */
                 if (H5C_destroy_flush_dependency(parent_ptr, entry_ptr) < 0)
@@ -247,7 +251,7 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                      * field to reflect the destruction of the flush
                      * dependency relationship.
                      */
-                    HDassert(parent_ptr->fd_child_count > 0);
+                    assert(parent_ptr->fd_child_count > 0);
                     (parent_ptr->fd_child_count)--;
                 } /* end if */
             }     /* end for */
@@ -272,9 +276,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              8/13/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -286,16 +287,16 @@ H5C__prefetched_entry_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(entry_ptr);
-    HDassert(entry_ptr->prefetched);
+    assert(entry_ptr);
+    assert(entry_ptr->prefetched);
 
     /* Release array for flush dependency parent addresses */
     if (entry_ptr->fd_parent_addrs != NULL) {
-        HDassert(entry_ptr->fd_parent_count > 0);
+        assert(entry_ptr->fd_parent_count > 0);
         entry_ptr->fd_parent_addrs = (haddr_t *)H5MM_xfree((void *)entry_ptr->fd_parent_addrs);
     } /* end if */
     else
-        HDassert(entry_ptr->fd_parent_count == 0);
+        assert(entry_ptr->fd_parent_count == 0);
 
     if (entry_ptr->image_ptr != NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "prefetched entry image buffer still attached?")

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5ESint.c
- *              Apr  8 2020
- *              Quincey Koziol
  *
  * Purpose:     Internal "event set" routines for managing asynchronous
  *                      operations.
@@ -156,9 +154,6 @@ done:
  *                          affect other interfaces; zero otherwise.
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, April 6, 2020
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -181,9 +176,6 @@ H5ES_term_package(void)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, April 6, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -195,7 +187,7 @@ H5ES__close_cb(void *_es, void H5_ATTR_UNUSED **rt)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
+    assert(es);
 
     /* Close the event set object */
     if (H5ES__close(es) < 0)
@@ -212,9 +204,6 @@ done:
  *
  * Return:      Success:    Pointer to an event set struct
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -248,9 +237,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Friday, December 11, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -264,7 +250,7 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
+    assert(es);
 
     /* Create new event */
     if (NULL == (ev = H5ES__event_new(connector, request_token)))
@@ -291,7 +277,7 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
      * there's no need to duplicate it.
      */
     ev->op_info.api_name = caller;
-    HDassert(ev->op_info.api_args == NULL);
+    assert(ev->op_info.api_args == NULL);
     if (api_args && NULL == (ev->op_info.api_args = H5MM_xstrdup(api_args)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine arguments")
 
@@ -324,9 +310,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -345,10 +328,10 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(connector);
-    HDassert(token);
-    HDassert(caller);
-    HDassert(caller_args);
+    assert(connector);
+    assert(token);
+    assert(caller);
+    assert(caller_args);
 
     /* Get event set */
     if (NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
@@ -359,16 +342,16 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
 
     /* Start working on the API routines arguments */
-    HDva_start(ap, caller_args);
+    va_start(ap, caller_args);
     arg_started = TRUE;
 
     /* Copy the app source information */
-    (void)HDva_arg(ap, char *); /* Toss the 'app_file' parameter name */
-    app_file = HDva_arg(ap, char *);
-    (void)HDva_arg(ap, char *); /* Toss the 'app_func' parameter name */
-    app_func = HDva_arg(ap, char *);
-    (void)HDva_arg(ap, char *); /* Toss the 'app_line' parameter name */
-    app_line = HDva_arg(ap, unsigned);
+    (void)va_arg(ap, char *); /* Toss the 'app_file' parameter name */
+    app_file = va_arg(ap, char *);
+    (void)va_arg(ap, char *); /* Toss the 'app_func' parameter name */
+    app_func = va_arg(ap, char *);
+    (void)va_arg(ap, char *); /* Toss the 'app_line' parameter name */
+    app_line = va_arg(ap, unsigned);
 
     /* Create the string for the API routine's arguments */
     if (NULL == (rs = H5RS_create(NULL)))
@@ -376,7 +359,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
 
     /* Copy the string for the API routine's arguments */
     /* (skip the six characters from the app's file, function and line # arguments) */
-    HDassert(0 == HDstrncmp(caller_args, "*s*sIu", 6));
+    assert(0 == HDstrncmp(caller_args, "*s*sIu", 6));
     if (H5_trace_args(rs, caller_args + 6, ap) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "can't create formatted API arguments")
     if (NULL == (api_args = H5RS_get_str(rs)))
@@ -389,7 +372,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
 done:
     /* Clean up */
     if (arg_started)
-        HDva_end(ap);
+        va_end(ap);
     if (rs)
         H5RS_decr(rs);
 
@@ -403,9 +386,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Friday, December 11, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -416,9 +396,9 @@ H5ES__insert_request(H5ES_t *es, H5VL_t *connector, void *token)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
-    HDassert(connector);
-    HDassert(token);
+    assert(es);
+    assert(connector);
+    assert(token);
 
     /* Insert an 'anonymous' operation into the event set */
     if (H5ES__insert(es, connector, token, NULL, NULL, 0, NULL, NULL) < 0)
@@ -436,9 +416,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Neil Fortner
- *              Tuesday, November 23, 2021
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -450,9 +427,9 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ev);
-    HDassert(ctx);
-    HDassert(ctx->i < ctx->array_len);
+    assert(ev);
+    assert(ctx);
+    assert(ctx->i < ctx->array_len);
 
     /* Get the connector ID for the event */
     if (ctx->connector_ids)
@@ -476,9 +453,6 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Neil Fortner
- *              Tuesday, November 23, 2021
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -490,9 +464,9 @@ H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
-    HDassert(array_len > 0);
-    HDassert(requests || connector_ids);
+    assert(es);
+    assert(array_len > 0);
+    assert(requests || connector_ids);
 
     /* Set up context for iterator callbacks */
     ctx.connector_ids = connector_ids;
@@ -515,9 +489,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, October 15, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -526,9 +497,9 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(es);
-    HDassert(es->active.head);
-    HDassert(ev);
+    assert(es);
+    assert(es->active.head);
+    assert(ev);
 
     /* Set error flag for event set */
     es->err_occurred = TRUE;
@@ -549,9 +520,6 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Friday, December 11, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -564,10 +532,10 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
-    HDassert(ev);
-    HDassert(H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_FAIL == ev_status ||
-             H5VL_REQUEST_STATUS_CANCELED == ev_status);
+    assert(es);
+    assert(ev);
+    assert(H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_FAIL == ev_status ||
+           H5VL_REQUEST_STATUS_CANCELED == ev_status);
 
     /* Handle each form of event completion */
     if (H5VL_REQUEST_STATUS_SUCCEED == ev_status || H5VL_REQUEST_STATUS_CANCELED == ev_status) {
@@ -644,9 +612,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sunday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -660,8 +625,8 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ev);
-    HDassert(ctx);
+    assert(ev);
+    assert(ctx);
 
     /* Wait on the request */
     if (ctx->timeout != H5ES_WAIT_NONE && ctx->timeout != H5ES_WAIT_FOREVER)
@@ -694,7 +659,7 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
                     "received \"can't cancel\" status for operation")
     else {
         /* Sanity check */
-        HDassert(ev_status == H5VL_REQUEST_STATUS_IN_PROGRESS);
+        assert(ev_status == H5VL_REQUEST_STATUS_IN_PROGRESS);
 
         /* Increment "in progress operation" counter */
         (*ctx->num_in_progress)++;
@@ -722,9 +687,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, July 13, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -736,9 +698,9 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_fa
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
-    HDassert(num_in_progress);
-    HDassert(op_failed);
+    assert(es);
+    assert(num_in_progress);
+    assert(op_failed);
 
     /* Set user's parameters to known values */
     *num_in_progress = 0;
@@ -765,9 +727,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Thursday, December 10, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -780,8 +739,8 @@ H5ES__cancel_cb(H5ES_event_t *ev, void *_ctx)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ev);
-    HDassert(ctx);
+    assert(ev);
+    assert(ctx);
 
     /* Attempt to cancel the request */
     if (H5VL_request_cancel(ev->request, &ev_status) < 0)
@@ -813,7 +772,7 @@ H5ES__cancel_cb(H5ES_event_t *ev, void *_ctx)
     } /* end else-if */
     else {
         /* Sanity check */
-        HDassert(ev_status == H5VL_REQUEST_STATUS_CANCELED);
+        assert(ev_status == H5VL_REQUEST_STATUS_CANCELED);
 
         /* Handle event completion */
         if (H5ES__op_complete(ctx->es, ev, ev_status) < 0)
@@ -831,9 +790,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Thursday, December 10, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -845,9 +801,9 @@ H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, hbool_t *op_failed)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
-    HDassert(num_not_canceled);
-    HDassert(op_failed);
+    assert(es);
+    assert(num_not_canceled);
+    assert(op_failed);
 
     /* Set user's parameters to known values */
     *num_not_canceled = 0;
@@ -873,9 +829,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, November 11, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -888,8 +841,8 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ev);
-    HDassert(ctx);
+    assert(ev);
+    assert(ctx);
 
     /* Copy operation info for event */
     /* The 'app_func_name', 'app_file_name', and 'api_name' strings are statically allocated (by the compiler)
@@ -947,9 +900,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Friday, November 6, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -961,10 +911,10 @@ H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[], 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
-    HDassert(num_err_info);
-    HDassert(err_info);
-    HDassert(num_cleared);
+    assert(es);
+    assert(num_err_info);
+    assert(err_info);
+    assert(num_cleared);
 
     /* Set up context for iterator callbacks */
     ctx.es            = es;
@@ -990,9 +940,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, November 11, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1004,8 +951,8 @@ H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ev);
-    HDassert(es);
+    assert(ev);
+    assert(es);
 
     /* Remove event from event set's failed list */
     H5ES__list_remove(&es->failed, ev);
@@ -1025,9 +972,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, April 6, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1038,7 +982,7 @@ H5ES__close(H5ES_t *es)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(es);
+    assert(es);
 
     /* Fail if active operations still present */
     if (H5ES__list_count(&es->active) > 0)

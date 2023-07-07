@@ -82,7 +82,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -149,7 +149,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -261,7 +261,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -291,7 +291,7 @@ test_get_config_str(void)
         TEST_ERROR;
 
     /* Try to retrieve length of default configuration string - should be 0 */
-    HDmemset(config_str_buf, 0, 128);
+    memset(config_str_buf, 0, 128);
 
     if ((config_str_len = H5Pget_driver_config_str(fapl_id, config_str_buf, 128)) < 0)
         TEST_ERROR;
@@ -322,7 +322,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -349,7 +349,7 @@ test_env_var(void)
     TESTING("Loading of VFD plugin with HDF5_DRIVER environment variable");
 
     /* Try to retrieve length of default configuration string - should be 0 */
-    HDmemset(config_str_buf, 0, 128);
+    memset(config_str_buf, 0, 128);
 
     if ((config_str_len = H5Pget_driver_config_str(H5P_FILE_ACCESS_DEFAULT, config_str_buf, 128)) < 0)
         TEST_ERROR;
@@ -379,7 +379,7 @@ test_env_var(void)
         TEST_ERROR;
 
     /* Check driver configuration string */
-    HDmemset(config_str_buf, 0, 128);
+    memset(config_str_buf, 0, 128);
     if ((config_str_len = H5Pget_driver_config_str(H5P_FILE_ACCESS_DEFAULT, config_str_buf, 128)) < 0)
         TEST_ERROR;
     if (HDstrlen(config_str) != config_str_len)
@@ -429,11 +429,11 @@ main(void)
     nerrors += (test_env_var() < 0) ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d VFD plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        printf("***** %d VFD plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        exit(EXIT_FAILURE);
     }
 
     HDputs("All VFD plugin tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

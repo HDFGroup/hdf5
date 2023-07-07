@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              7/13/15
- *
+/*
  *              This file contains tests specific to the cache image
  *              feature implemented in H5C.c
  */
@@ -21,7 +19,7 @@
 
 /* global variable declarations: */
 
-const char *FILENAMES[] = {"cache_image_test", NULL};
+static const char *FILENAMES[] = {"cache_image_test", NULL};
 
 /* local utility function declarations */
 static void create_datasets(hid_t file_id, int min_dset, int max_dset);
@@ -77,9 +75,6 @@ static unsigned evict_on_close_test(hbool_t single_file_vfd);
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/15/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -110,11 +105,11 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
     hsize_t     chunk_size[2];
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     /* create the datasets */
 
@@ -191,7 +186,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create the mem space to be used to read and write chunks */
     if (pass) {
@@ -208,7 +203,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* select in memory hyperslab */
     if (pass) {
@@ -227,7 +222,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* initialize all datasets on a round robin basis */
     i = 0;
@@ -274,7 +269,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* read data from datasets and validate it */
     i = 0;
@@ -323,11 +318,11 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
 
                                 if (verbose) {
 
-                                    HDfprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", k, l,
-                                              data_chunk[k][l],
-                                              ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l));
-                                    HDfprintf(stdout, "m = %d, i = %d, j = %d, k = %d, l = %d\n", m, i, j, k,
-                                              l);
+                                    fprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", k, l,
+                                            data_chunk[k][l],
+                                            ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l));
+                                    fprintf(stdout, "m = %d, i = %d, j = %d, k = %d, l = %d\n", m, i, j, k,
+                                            l);
                                 }
                             }
                         }
@@ -340,7 +335,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
 
                         if (verbose) {
 
-                            HDfprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n", i, j, m);
+                            fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n", i, j, m);
                         }
                     }
                 }
@@ -352,7 +347,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the file spaces */
     i = min_dset;
@@ -405,9 +400,6 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              10/31/16
- *
  *-------------------------------------------------------------------------
  */
 
@@ -421,20 +413,20 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
     int         i;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* first, verify the contents of the target dataset(s) */
     verify_datasets(file_id, min_dset, max_dset);
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* now delete the target datasets */
     if (pass) {
@@ -455,7 +447,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
 } /* delete_datasets() */
 
@@ -495,9 +487,6 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/14/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -536,12 +525,12 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
         }
         else if (verbose) {
 
-            HDfprintf(stdout, "%s: HDF file name = \"%s\".\n", fcn_name, hdf_file_name);
+            fprintf(stdout, "%s: HDF file name = \"%s\".\n", fcn_name, hdf_file_name);
         }
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create a file access property list. */
     if (pass) {
@@ -556,7 +545,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
     if (pass) {
@@ -569,7 +558,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* get metadata cache image config -- verify that it is the default */
     if (pass) {
@@ -593,7 +582,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* set metadata cache image fapl entry if indicated */
     if ((pass) && (set_mdci_fapl)) {
@@ -613,7 +602,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* setup the persistent free space manager if indicated */
     if ((pass) && (config_fsm)) {
@@ -635,7 +624,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* set evict on close if indicated */
     if ((pass) && (set_eoc)) {
@@ -648,7 +637,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* open the file */
     if (pass) {
@@ -691,14 +680,14 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
                 failure_mssg = "Can't get file_ptr.";
 
                 if (verbose) {
-                    HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
+                    fprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
                 }
             }
         }
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* get a pointer to the files internal data structure and then
      * to the cache structure
@@ -717,7 +706,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* verify expected metadata cache status */
 
@@ -736,7 +725,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if (pass) {
 
@@ -779,7 +768,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if ((pass) && (set_mdci_fapl)) {
 
@@ -793,7 +782,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if (pass) {
 
@@ -833,7 +822,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if (pass) {
 
@@ -843,7 +832,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
 
 } /* open_hdf5_file() */
 
@@ -859,9 +848,6 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -891,7 +877,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
     if (pass) {
@@ -904,7 +890,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* set metadata cache image fapl entry if indicated */
     if ((pass) && (set_mdci_fapl)) {
@@ -924,7 +910,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* open the file */
     if (pass) {
@@ -935,7 +921,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
             {
                 file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
         else {
 
@@ -943,7 +929,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
             {
                 file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
 
         if (file_id >= 0) {
@@ -954,7 +940,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
 } /* attempt_swmr_open_hdf5_file() */
 
@@ -975,9 +961,6 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/15/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1002,11 +985,11 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
     hsize_t     offset[2];
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     /* open the datasets */
 
@@ -1045,7 +1028,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create the mem space to be used to read and write chunks */
     if (pass) {
@@ -1062,7 +1045,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* select in memory hyperslab */
     if (pass) {
@@ -1081,7 +1064,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* read data from datasets and validate it */
     i = 0;
@@ -1130,11 +1113,11 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
 
                                 if (verbose) {
 
-                                    HDfprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", k, l,
-                                              data_chunk[k][l],
-                                              ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l));
-                                    HDfprintf(stdout, "m = %d, i = %d, j = %d, k = %d, l = %d\n", m, i, j, k,
-                                              l);
+                                    fprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", k, l,
+                                            data_chunk[k][l],
+                                            ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l));
+                                    fprintf(stdout, "m = %d, i = %d, j = %d, k = %d, l = %d\n", m, i, j, k,
+                                            l);
                                 }
                             }
                         }
@@ -1147,7 +1130,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
 
                         if (verbose) {
 
-                            HDfprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n", i, j, m);
+                            fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n", i, j, m);
                         }
                     }
                 }
@@ -1159,7 +1142,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the file spaces */
     i = min_dset;
@@ -1260,9 +1243,6 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/15/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1289,7 +1269,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -1302,7 +1282,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -1328,7 +1308,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some datasets in the file. */
 
@@ -1338,7 +1318,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -1352,7 +1332,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file.
      *
@@ -1378,7 +1358,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open and close a dataset.
      *
@@ -1399,7 +1379,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -1413,7 +1393,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Open the file.
      *
@@ -1437,7 +1417,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Close the file. */
 
@@ -1451,7 +1431,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Delete the file */
 
@@ -1472,7 +1452,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -1537,9 +1517,6 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/15/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1566,7 +1543,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -1579,7 +1556,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -1605,7 +1582,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Close the file. */
 
@@ -1619,7 +1596,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Open the file.
      *
@@ -1645,7 +1622,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Close the file. */
 
@@ -1659,7 +1636,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open the file.
      *
@@ -1683,7 +1660,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -1697,7 +1674,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Delete the file */
 
@@ -1718,7 +1695,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -1801,9 +1778,6 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/16/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1830,7 +1804,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress) /* 0 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -1843,7 +1817,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file WITHOUT the cache image FAPL entry.
      *
@@ -1867,7 +1841,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Close the file. */
 
@@ -1881,7 +1855,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Open the file WITH the cache image FAPL entry.
      *
@@ -1907,7 +1881,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Create some datasets. */
 
@@ -1917,7 +1891,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Close the file. */
 
@@ -1931,7 +1905,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Open the file READ ONLY.
      *
@@ -1958,7 +1932,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Verify the contents of the datasets. */
 
@@ -1968,7 +1942,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Close the file. */
 
@@ -1982,7 +1956,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Open the file READ/WRITE.
      *
@@ -2009,7 +1983,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Verify the contents of the datasets. */
 
@@ -2019,7 +1993,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Close the file. */
 
@@ -2033,7 +2007,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Open the file
      *
@@ -2057,7 +2031,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Close the file. */
 
@@ -2071,7 +2045,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 14) Delete the file. */
 
@@ -2092,7 +2066,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -2167,9 +2141,6 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/16/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2196,7 +2167,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress) /* 0 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -2209,7 +2180,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file WITHOUT the cache image FAPL entry.
      *
@@ -2233,7 +2204,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Close the file. */
 
@@ -2247,7 +2218,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Open the file WITH the cache image FAPL entry.
      *
@@ -2273,7 +2244,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Close the file. */
 
@@ -2287,7 +2258,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open the file READ ONLY.
      *
@@ -2314,7 +2285,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -2328,7 +2299,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Open the file READ/WRITE.
      *
@@ -2355,7 +2326,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Close the file. */
 
@@ -2369,7 +2340,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Open the file
      *
@@ -2393,7 +2364,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Close the file. */
 
@@ -2407,7 +2378,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Delete the file. */
 
@@ -2428,7 +2399,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -2496,9 +2467,6 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/17/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2525,7 +2493,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress) /* 0 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -2538,7 +2506,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -2564,7 +2532,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some datasets. */
 
@@ -2574,7 +2542,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -2588,7 +2556,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file WITH the cache image FAPL entry.
      *
@@ -2621,7 +2589,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Verify the contents of the datasets. */
 
@@ -2631,7 +2599,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -2645,7 +2613,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Open the file.
      *
@@ -2672,7 +2640,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Verify the contents of the datasets. */
 
@@ -2682,7 +2650,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Close the file. */
 
@@ -2696,7 +2664,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Delete the file. */
 
@@ -2717,7 +2685,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -2777,9 +2745,6 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/17/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2806,7 +2771,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress) /* 0 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -2819,7 +2784,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -2845,7 +2810,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Close the file. */
 
@@ -2859,7 +2824,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file WITH the cache image FAPL entry.
      *
@@ -2892,7 +2857,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Close the file. */
 
@@ -2906,7 +2871,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open the file.
      *
@@ -2933,7 +2898,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -2947,7 +2912,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Delete the file. */
 
@@ -2968,7 +2933,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -3063,9 +3028,6 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              8/17/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3092,7 +3054,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -3105,7 +3067,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -3130,7 +3092,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some datasets in the file. */
 
@@ -3151,7 +3113,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -3165,7 +3127,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file.
      *
@@ -3191,7 +3153,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open and close a dataset.
      *
@@ -3216,7 +3178,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -3230,7 +3192,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Open the file.
      *
@@ -3254,7 +3216,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Open and close a dataset.
      *
@@ -3279,7 +3241,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Close the file. */
 
@@ -3293,7 +3255,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Open the file with the cache image FAPL entry.
      *
@@ -3317,7 +3279,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Close the file.  Since there has been no access to
      *       any entries that would be included in the cache image,
@@ -3334,7 +3296,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Open the file.
      *
@@ -3358,7 +3320,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Open a dataset.
      *
@@ -3382,7 +3344,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 14) Close the file. */
 
@@ -3396,7 +3358,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 15) Delete the file */
 
@@ -3417,7 +3379,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -3474,9 +3436,6 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              8/18/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3503,7 +3462,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -3516,7 +3475,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -3541,7 +3500,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some datasets in the file. */
 
@@ -3562,7 +3521,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -3576,7 +3535,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file.
      *
@@ -3606,7 +3565,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
      */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Close the file. */
 
@@ -3620,7 +3579,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Open the file.
      *
@@ -3644,7 +3603,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Open and close a dataset.
      *
@@ -3658,7 +3617,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Close the file. */
 
@@ -3672,7 +3631,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Delete the file */
 
@@ -3693,7 +3652,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -3772,9 +3731,6 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              8/18/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3801,7 +3757,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -3814,7 +3770,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -3839,7 +3795,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some datasets in the file. */
 
@@ -3860,7 +3816,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -3874,7 +3830,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file read only.
      *
@@ -3898,7 +3854,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open and close a dataset.
      *
@@ -3923,7 +3879,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -3937,7 +3893,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Open the file.
      *
@@ -3961,7 +3917,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Open and close a dataset.
      *
@@ -3986,7 +3942,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Close the file. */
 
@@ -4021,7 +3977,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Open and close a dataset.
      *
@@ -4046,7 +4002,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Close the file. */
 
@@ -4060,7 +4016,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Delete the file */
 
@@ -4081,7 +4037,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -4149,9 +4105,6 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              8/18/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4180,7 +4133,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -4193,7 +4146,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -4218,7 +4171,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create a dataset in the file. */
 
@@ -4239,7 +4192,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -4253,7 +4206,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     while ((pass) && (max_dset < MAX_NUM_DSETS)) {
 
@@ -4279,7 +4232,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
         }
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L1 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp, max_dset, pass);
+            fprintf(stdout, "%s:L1 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp, max_dset, pass);
 
         /* 5) Create a dataset in the file. */
 
@@ -4300,7 +4253,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L2 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 1, max_dset, pass);
+            fprintf(stdout, "%s:L2 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 1, max_dset, pass);
 
         /* 6) Close the file. */
 
@@ -4314,7 +4267,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
         }
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L3 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 2, max_dset, pass);
+            fprintf(stdout, "%s:L3 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 2, max_dset, pass);
     } /* end while */
     cp += 3;
 
@@ -4340,7 +4293,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Open and close all datasets.
      *
@@ -4365,7 +4318,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Close the file. */
 
@@ -4400,7 +4353,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Open and close all datasets.
      *
@@ -4425,7 +4378,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Close the file. */
 
@@ -4439,7 +4392,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Delete the file */
 
@@ -4460,7 +4413,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 } /* cache_image_smoke_check_4() */
@@ -4540,9 +4493,6 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/15/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4576,7 +4526,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -4593,7 +4543,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -4618,7 +4568,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create a process specific group. */
     if (pass) {
@@ -4635,7 +4585,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Construct a "zoo" in the above group, and validate it. */
     if (pass)
@@ -4653,7 +4603,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Close the file. */
 
@@ -4676,7 +4626,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     while ((pass) && (max_group < MAX_NUM_GROUPS)) {
 
@@ -4702,7 +4652,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
         }
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L1 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp, max_group, pass);
+            fprintf(stdout, "%s:L1 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp, max_group, pass);
 
         /* 6) Validate the "zoo" created in the previous file open. */
         if (pass)
@@ -4720,8 +4670,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L2 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp + 1, max_group,
-                      pass);
+            fprintf(stdout, "%s:L2 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp + 1, max_group, pass);
 
         /* 7) Create a process specific group for this file open */
         if (pass) {
@@ -4739,16 +4688,14 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
         }
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L3 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp + 2, max_group,
-                      pass);
+            fprintf(stdout, "%s:L3 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp + 2, max_group, pass);
 
         /* 8) Construct a "zoo" in the above group, and validate it. */
         if (pass)
             create_zoo(file_id, process_group_name, max_group);
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L4 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp + 3, max_group,
-                      pass);
+            fprintf(stdout, "%s:L4 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp + 3, max_group, pass);
 
         /* 9) Close the file. */
 
@@ -4771,8 +4718,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
         }
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L5 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp + 4, max_group,
-                      pass);
+            fprintf(stdout, "%s:L5 cp = %d, max_group = %d, pass = %d.\n", fcn_name, cp + 4, max_group, pass);
     } /* end while */
     cp += 5;
 
@@ -4796,7 +4742,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Validate all the zoos. */
     i = min_group;
@@ -4815,7 +4761,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Close the file. */
     if (pass) {
@@ -4847,7 +4793,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 14) Validate all the zoos. */
     i = min_group;
@@ -4869,7 +4815,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 15) Close the file. */
 
@@ -4904,7 +4850,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 17) Validate all the zoos.
      *
@@ -4929,7 +4875,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 18) Close the file. */
 
@@ -4943,7 +4889,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 19) Delete the file */
 
@@ -4964,7 +4910,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -5044,9 +4990,6 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              10/31/16
- *
  *-------------------------------------------------------------------------
  */
 
@@ -5076,7 +5019,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -5089,7 +5032,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
@@ -5114,7 +5057,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create a dataset in the file. */
 
@@ -5135,7 +5078,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -5149,7 +5092,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     while ((pass) && (max_dset < MAX_NUM_DSETS)) {
 
@@ -5175,7 +5118,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
         }
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L1 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp, max_dset, pass);
+            fprintf(stdout, "%s:L1 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp, max_dset, pass);
 
         /* 5) Create a dataset in the file. */
 
@@ -5196,7 +5139,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L2 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 1, max_dset, pass);
+            fprintf(stdout, "%s:L2 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 1, max_dset, pass);
 
         /* 6) Verify and delete the old dataset. */
         if (pass) {
@@ -5205,7 +5148,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
         }
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L3 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 2, max_dset, pass);
+            fprintf(stdout, "%s:L3 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 2, max_dset, pass);
 
         /* 7) Close the file. */
 
@@ -5219,7 +5162,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
         }
 
         if (show_progress)
-            HDfprintf(stdout, "%s:L4 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 3, max_dset, pass);
+            fprintf(stdout, "%s:L4 cp = %d, max_dset = %d, pass = %d.\n", fcn_name, cp + 3, max_dset, pass);
     } /* end while */
     cp += 4;
 
@@ -5245,7 +5188,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Verify the last dataset created. */
 
@@ -5266,7 +5209,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Close the file. */
 
@@ -5301,7 +5244,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Verify and delete the last dataset.
      *
@@ -5336,7 +5279,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 14) Get the size of the file.  Verify that it is less
      *     than 20 KB.  Without deletions and persistent free
@@ -5361,7 +5304,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 15) Delete the file */
     if (pass) {
@@ -5381,7 +5324,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -5439,9 +5382,6 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/25/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -5468,7 +5408,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -5481,7 +5421,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file. */
 
@@ -5501,7 +5441,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some datasets in the file. */
 
@@ -5522,7 +5462,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -5536,7 +5476,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file read only with a cache image FAPL entry requested. */
 
@@ -5556,7 +5496,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open and close a dataset.
      *
@@ -5582,7 +5522,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -5596,7 +5536,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Open the file read only. */
 
@@ -5616,7 +5556,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Open and close a dataset.
      *
@@ -5642,7 +5582,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Close the file. */
 
@@ -5656,7 +5596,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Open the file read / write. */
 
@@ -5676,7 +5616,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Open and close a dataset.
      *
@@ -5702,7 +5642,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Close the file.  */
 
@@ -5716,7 +5656,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Delete the file */
 
@@ -5737,7 +5677,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -5807,9 +5747,6 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/25/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -5836,7 +5773,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -5849,7 +5786,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with a cache image requested. */
 
@@ -5869,7 +5806,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some datasets in the file. */
 
@@ -5890,7 +5827,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -5904,7 +5841,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file read only with a cache image FAPL entry requested. */
 
@@ -5924,7 +5861,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open and close a dataset.
      *
@@ -5950,7 +5887,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Close the file. */
 
@@ -5964,7 +5901,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Open the file read only. */
 
@@ -5984,7 +5921,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Open and close a dataset.
      *
@@ -6010,7 +5947,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Close the file. */
 
@@ -6024,7 +5961,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Open the file read / write. */
 
@@ -6044,7 +5981,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Open and close a dataset.
      *
@@ -6070,7 +6007,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Close the file.  */
 
@@ -6084,7 +6021,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Open the file read / write. */
 
@@ -6104,7 +6041,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 14) Open and close a dataset.
      *
@@ -6130,7 +6067,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 15) Close the file.  */
 
@@ -6144,7 +6081,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Delete the file */
 
@@ -6165,7 +6102,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -6208,9 +6145,6 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              12/29/16
- *
  *-------------------------------------------------------------------------
  */
 
@@ -6237,7 +6171,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -6250,7 +6184,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with a cache image requested. */
 
@@ -6270,7 +6204,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Try to start SWMR write -- should fail. */
 
@@ -6284,11 +6218,11 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
                 failure_mssg = "SWMR start succeeded in file with cache image.";
             }
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Discard the file if necessary */
 
@@ -6308,7 +6242,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Attempt to create a HDF5 file with SWMR write
      *    access and cache image requested -- should fail.
@@ -6319,7 +6253,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
                                 /* hdf_file_name */ filename);
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Discard the file if necessary */
 
@@ -6332,7 +6266,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Create a HDF5 file with a cache image requested. */
 
@@ -6352,7 +6286,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Create some datasets in the file. */
 
@@ -6373,7 +6307,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Close the file. */
 
@@ -6387,7 +6321,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Attempt to open the file with SWMR write access -- should fail. */
 
@@ -6396,7 +6330,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
                                 /* hdf_file_name */ filename);
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Discard the file if necessary. */
 
@@ -6410,7 +6344,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
         PASSED();
@@ -6420,7 +6354,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -6489,9 +6423,6 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/25/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -6520,7 +6451,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -6533,7 +6464,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /*    1) Create a FAPL requesting  a cache image, but WITHOUT
      *           specifying the latest file format.
@@ -6550,7 +6481,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -6568,7 +6499,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create a HDF5 file using the above FAPL. */
 
@@ -6594,7 +6525,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* get a pointer to the files internal data structure and then
      * to the cache structure
@@ -6613,7 +6544,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Create some datasets in the file. */
 
@@ -6625,7 +6556,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 
-        HDassert(cache_ptr);
+        assert(cache_ptr);
 
         if (cache_ptr->images_loaded != 0) {
 
@@ -6636,7 +6567,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Close the file. */
 
@@ -6650,7 +6581,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Open the file read only. */
 
@@ -6670,7 +6601,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Verify that the datasets exist and contain the
      *    expected data
@@ -6693,7 +6624,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Close the file. */
 
@@ -6707,7 +6638,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Open the file R/W using the FAPL defined in 1) above.
      *
@@ -6736,7 +6667,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* get a pointer to the files internal data structure and then
      * to the cache structure
@@ -6755,7 +6686,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -6767,7 +6698,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Close the file. */
 
@@ -6781,7 +6712,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Open the file R/W using the FAPL defined in 1) above.
      *     Verify that the file does not contain a cache image.
@@ -6809,7 +6740,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* get a pointer to the files internal data structure and then
      * to the cache structure
@@ -6828,7 +6759,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -6840,7 +6771,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Verify that the data sets contain the expected data
      *
@@ -6864,7 +6795,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Create several more data sets. */
 
@@ -6874,7 +6805,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Close the file. */
 
@@ -6888,7 +6819,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 14) Open the file read write.
      *
@@ -6911,7 +6842,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 15) Verify the data sets exist and contain the expected  data.
      *
@@ -6935,7 +6866,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 16) Close the file. */
 
@@ -6949,7 +6880,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 17) Delete the file */
 
@@ -6963,7 +6894,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* tidy up */
     if (fapl_id != -1)
@@ -6977,7 +6908,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -7062,9 +6993,6 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/10/17
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7091,7 +7019,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -7104,7 +7032,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file with a cache image requested
      *    and persistent free space managers enabled.
@@ -7126,7 +7054,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some data sets, and then delete some of
      *    of those near the beginning of the file.
@@ -7138,7 +7066,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -7146,7 +7074,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -7154,7 +7082,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -7168,7 +7096,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file read only. */
 
@@ -7188,7 +7116,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Verify that a cache image exists, and has not been loaded. */
 
@@ -7202,7 +7130,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Verify that one or more self referential FSMs
      *    have been stored at the end of the file just
@@ -7214,9 +7142,9 @@ get_free_sections_test(hbool_t single_file_vfd)
         /* file_ptr->shared->first_alloc_dealloc is set to FALSE if the
          * file is opened R/O.
          */
-        if ((!H5F_addr_defined(file_ptr->shared->eoa_fsm_fsalloc)) ||
-            (!H5F_addr_defined(file_ptr->shared->cache->image_addr)) ||
-            (H5F_addr_gt(file_ptr->shared->eoa_fsm_fsalloc, file_ptr->shared->cache->image_addr))) {
+        if ((!H5_addr_defined(file_ptr->shared->eoa_fsm_fsalloc)) ||
+            (!H5_addr_defined(file_ptr->shared->cache->image_addr)) ||
+            (H5_addr_gt(file_ptr->shared->eoa_fsm_fsalloc, file_ptr->shared->cache->image_addr))) {
 
             pass         = FALSE;
             failure_mssg = "unexpected cache image status (1).\n";
@@ -7224,7 +7152,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Call H5Fget_free_sections(). */
 
@@ -7238,7 +7166,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Verify that the cache image has been loaded and
      *    that the self referential FSMs have been floated.
@@ -7253,7 +7181,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Verify that the remaining data sets contain the expected data. */
 
@@ -7263,7 +7191,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Close the file. */
 
@@ -7277,7 +7205,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Open the file R/W. */
 
@@ -7297,7 +7225,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Verify that a cache image exists, and has not been loaded. */
 
@@ -7311,7 +7239,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Verify that one or more self referential FSMs
      *     have been stored at the end of the file just
@@ -7319,9 +7247,9 @@ get_free_sections_test(hbool_t single_file_vfd)
      */
     if (pass) {
 
-        if ((!H5F_addr_defined(file_ptr->shared->eoa_fsm_fsalloc)) ||
-            (!H5F_addr_defined(file_ptr->shared->cache->image_addr)) ||
-            (H5F_addr_gt(file_ptr->shared->eoa_fsm_fsalloc, file_ptr->shared->cache->image_addr))) {
+        if ((!H5_addr_defined(file_ptr->shared->eoa_fsm_fsalloc)) ||
+            (!H5_addr_defined(file_ptr->shared->cache->image_addr)) ||
+            (H5_addr_gt(file_ptr->shared->eoa_fsm_fsalloc, file_ptr->shared->cache->image_addr))) {
 
             pass         = FALSE;
             failure_mssg = "unexpected cache image status (2).\n";
@@ -7329,7 +7257,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 14) Call H5Fget_free_sections(). */
 
@@ -7343,7 +7271,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 15) Verify that the cache image has been loaded and
      *     that the self referential FSMs have been floated.
@@ -7358,7 +7286,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 16) Verify that the remaining data sets contain the expected data. */
 
@@ -7368,7 +7296,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 17) Delete the remaining data sets. */
 
@@ -7378,7 +7306,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 18) Close the file. */
 
@@ -7392,7 +7320,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 19) Verify that file space has been reclaimed. */
 
@@ -7411,7 +7339,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 20) Discard the file. */
 
@@ -7425,7 +7353,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
         PASSED();
@@ -7435,7 +7363,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -7503,9 +7431,6 @@ get_free_sections_test(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/23/17
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7540,7 +7465,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the file name */
     if (pass) {
@@ -7553,7 +7478,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 1) Create a HDF5 file without a cache image requested
      *    and persistent free space managers enabled.
@@ -7574,7 +7499,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Create some data sets and verify them.  */
 
@@ -7584,7 +7509,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -7592,7 +7517,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Close the file. */
 
@@ -7606,7 +7531,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 4) Open the file R/W, and with cache image requested. */
 
@@ -7626,7 +7551,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Verify the datasets created in 2) above.  This will
      *    force their (clean) metadata into the metadata cache,
@@ -7639,7 +7564,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Create some more datasets and verify them */
 
@@ -7649,7 +7574,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -7658,14 +7583,14 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
 
     if (verbose) {
 
-        HDassert(cache_ptr);
+        assert(cache_ptr);
 
-        HDfprintf(stdout, "index size / index dirty size = %lld / %lld\n", (long long)(cache_ptr->index_size),
-                  (long long)(cache_ptr->dirty_index_size));
+        fprintf(stdout, "index size / index dirty size = %lld / %lld\n", (long long)(cache_ptr->index_size),
+                (long long)(cache_ptr->dirty_index_size));
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Close the file. */
 
@@ -7679,7 +7604,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 8) Open the file R/O and with evict on close enabled. */
 
@@ -7699,7 +7624,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s*: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s*: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Verify all datasets twice */
 
@@ -7709,7 +7634,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -7717,7 +7642,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 10) Close the file. */
 
@@ -7731,7 +7656,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 11) Open the file R/w and with evict on close enabled. */
 
@@ -7751,7 +7676,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s*: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s*: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 12) Verify all datasets twice */
 
@@ -7761,7 +7686,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -7769,7 +7694,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Close the file. */
 
@@ -7783,7 +7708,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 14) Discard the file. */
 
@@ -7797,7 +7722,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (show_progress)
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
         PASSED();
@@ -7807,7 +7732,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 #endif /* H5_HAVE_PARALLEL */
@@ -7822,9 +7747,6 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -7845,10 +7767,10 @@ main(void)
 
     express_test = GetTestExpress();
 
-    HDprintf("=========================================\n");
-    HDprintf("Cache image tests\n");
-    HDprintf("        express_test = %d\n", express_test);
-    HDprintf("=========================================\n");
+    printf("=========================================\n");
+    printf("Cache image tests\n");
+    printf("        express_test = %d\n", express_test);
+    printf("=========================================\n");
 
     /* Check for VFD which stores data in multiple files */
     single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, H5_EXCLUDE_NON_MULTIPART_DRIVERS);

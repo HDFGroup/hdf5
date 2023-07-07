@@ -14,7 +14,7 @@
  *
  * Created:     H5Ocopy_ref.c
  *
- * Purpose:     Object with references copying routines.
+ * Purpose:     Object with references copying routines
  *
  *-------------------------------------------------------------------------
  */
@@ -30,6 +30,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* File                                     */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
@@ -99,15 +100,15 @@ H5O__copy_obj_by_ref(H5O_loc_t *src_oloc, H5O_loc_t *dst_oloc, H5G_loc_t *dst_ro
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(src_oloc);
-    HDassert(dst_oloc);
+    assert(src_oloc);
+    assert(dst_oloc);
 
     /* Perform the copy, or look up existing copy */
     if ((ret_value = H5O_copy_header_map(src_oloc, dst_oloc, cpy_info, FALSE, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
     /* Check if a new valid object is copied to the destination */
-    if (H5F_addr_defined(dst_oloc->addr) && (ret_value > SUCCEED)) {
+    if (H5_addr_defined(dst_oloc->addr) && (ret_value > SUCCEED)) {
         char       tmp_obj_name[80];
         H5G_name_t new_path;
         H5O_loc_t  new_oloc;
@@ -134,7 +135,7 @@ H5O__copy_obj_by_ref(H5O_loc_t *src_oloc, H5O_loc_t *dst_oloc, H5G_loc_t *dst_ro
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link")
 
         H5G_loc_free(&new_loc);
-    } /* if (H5F_addr_defined(dst_oloc.addr)) */
+    } /* if (H5_addr_defined(dst_oloc.addr)) */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -170,8 +171,8 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
         H5O_token_t          tmp_token = {0};
 
         /* If data is not initialized, copy zeros and skip */
-        if (0 == HDmemcmp(src_buf, zeros, buf_size))
-            HDmemset(dst_buf, 0, buf_size);
+        if (0 == memcmp(src_buf, zeros, buf_size))
+            memset(dst_buf, 0, buf_size);
         else {
             /* Set up for the object copy for the reference */
             if (H5R__decode_token_obj_compat(src_buf, &buf_size, &tmp_token, token_size) < 0)
@@ -180,7 +181,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
                             "can't deserialize object token into address")
 
-            if (!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
+            if (!H5_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
             dst_oloc->addr = HADDR_UNDEF;
 
@@ -233,8 +234,8 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
         uint8_t             *q;
 
         /* If data is not initialized, copy zeros and skip */
-        if (0 == HDmemcmp(src_buf, zeros, buf_size))
-            HDmemset(dst_buf, 0, buf_size);
+        if (0 == memcmp(src_buf, zeros, buf_size))
+            memset(dst_buf, 0, buf_size);
         else {
             /* Read from heap */
             if (H5R__decode_heap(src_oloc->file, src_buf, &buf_size, &data, &data_size) < 0)
@@ -243,7 +244,7 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
             /* Get object address */
             p = (const uint8_t *)data;
             H5F_addr_decode(src_oloc->file, &p, &src_oloc->addr);
-            if (!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0) {
+            if (!H5_addr_defined(src_oloc->addr) || src_oloc->addr == 0) {
                 H5MM_free(data);
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
             }
@@ -358,7 +359,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
         H5R_ref_priv_t *ref     = (H5R_ref_priv_t *)&ref_ptr[i];
 
         /* Check for null reference - only expand reference if it is not null */
-        if (HDmemcmp(ref, zeros, H5R_REF_BUF_SIZE)) {
+        if (memcmp(ref, zeros, H5R_REF_BUF_SIZE)) {
             H5O_token_t tmp_token = {0};
 
             /* Get src object address */
@@ -441,12 +442,12 @@ H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, const H5T_t *dt_src, void *b
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file_src);
-    HDassert(buf_src);
-    HDassert(file_dst);
-    HDassert(buf_dst);
-    HDassert(nbytes_src);
-    HDassert(cpy_info);
+    assert(file_src);
+    assert(buf_src);
+    assert(file_dst);
+    assert(buf_dst);
+    assert(nbytes_src);
+    assert(cpy_info);
 
     /* Initialize object locations */
     H5O_loc_reset(&src_oloc);

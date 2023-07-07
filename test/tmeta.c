@@ -26,7 +26,7 @@
 #define TEST_INT32_VALUE  (-981236)
 #define TEST_UINT32_VALUE 3476589
 
-uint8_t compar_buffer[] = {
+static uint8_t compar_buffer[] = {
     /* Little-endian encoded version of the 16-bit signed integer */
     (uint8_t)((TEST_INT16_VALUE)&0xff),
     (uint8_t)((TEST_INT16_VALUE >> 8) & 0xff),
@@ -45,7 +45,7 @@ uint8_t compar_buffer[] = {
     (uint8_t)((TEST_UINT32_VALUE >> 24) & 0xff),
 };
 
-uint8_t encode_buffer[sizeof(compar_buffer)];
+static uint8_t encode_buffer[sizeof(compar_buffer)];
 
 /****************************************************************
 **
@@ -76,7 +76,7 @@ test_metadata(void)
     UINT32ENCODE(p, eu32); /* Encode the uint32 value */
 
     /* Check if we got what we asked for */
-    if (HDmemcmp(encode_buffer, compar_buffer, sizeof(compar_buffer)) != 0) {
+    if (memcmp(encode_buffer, compar_buffer, sizeof(compar_buffer)) != 0) {
         unsigned u; /* local counting variable */
 
         for (u = 0; u < sizeof(compar_buffer); u++) {
@@ -117,9 +117,6 @@ test_metadata(void)
  * Purpose:	Cleanup temporary test files
  *
  * Return:	none
- *
- * Programmer:	Albert Cheng
- *              July 2, 1998
  *
  *-------------------------------------------------------------------------
  */

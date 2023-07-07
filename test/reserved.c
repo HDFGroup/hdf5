@@ -13,7 +13,7 @@
 #include "h5test.h"
 
 #ifdef BROKEN
-const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
+static const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
 
 /*-------------------------------------------------------------------------
  * Function:    rsrv_heap
@@ -25,10 +25,6 @@ const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    James Laird
- *              Nat Furrer
- *              Friday, May 28, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -158,10 +154,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    James Laird
- *              Nat Furrer
- *              Friday, May 28, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -300,10 +292,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    James Laird
- *        Nat Furrer
- *              Thursday, July 1, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -462,9 +450,6 @@ error:
  *
  *        Failure:
  *
- * Programmer:    Nat Furrer and James Laird
- *              Thursday, July 1, 2004
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -491,7 +476,7 @@ main(void)
         num_errs += rsrv_vlen();
 
         if (num_errs > 0)
-            HDprintf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
+            printf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
         else
             HDputs("All address space reservation tests passed.");
 

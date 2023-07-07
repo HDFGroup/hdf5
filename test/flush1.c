@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  * Purpose:	This is the first half of a two-part test that makes sure
  *		that a file can be read after an application crashes as long
  *		as the file was flushed first.  We simulate a crash by
@@ -27,9 +24,9 @@
 #define H5FD_TESTING
 #include "H5FDpkg.h" /* File drivers             */
 
-const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
-                          "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
-                          "noflush_extend", "noflush_extend-swmr", NULL};
+static const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
+                                 "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
+                                 "noflush_extend", "noflush_extend-swmr", NULL};
 
 /* Number and size of dataset dims, chunk size, etc. */
 #define NDIMS            1
@@ -51,9 +48,6 @@ static herr_t add_dset_to_file(hid_t fid, const char *dset_name);
  *
  * Return:      Success:	a valid file ID
  *              Failure:	-1
- *
- * Programmer:	Leon Arber
- *              Sept. 26, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -99,7 +93,7 @@ error:
         H5Gclose(gid);
         H5Gclose(top_gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end create_file() */
@@ -110,9 +104,6 @@ error:
  * Purpose:     Add a dataset to the file.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Leon Arber
- *              Oct. 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -138,7 +129,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
         STACK_ERROR;
 
     /* Write some data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         STACK_ERROR;
     for (i = 0; i < NELEMENTS; i++)
         data[i] = i;
@@ -152,7 +143,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         STACK_ERROR;
 
-    HDfree(data);
+    free(data);
 
     return SUCCEED;
 
@@ -163,9 +154,9 @@ error:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(data);
+    free(data);
 
     return FAIL;
 } /* end add_dset_to_file() */
@@ -179,9 +170,6 @@ error:
  *              Part 1 of a two-part H5Fflush() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:	Robb Matzke
- *              Friday, October 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -312,25 +300,25 @@ main(void)
         SKIPPED();
 
     if (!vfd_supports_swmr)
-        HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
+        printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     /* Flush console output streams */
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
 
     /* DO NOT CLOSE FILE ID! */
     if (H5Pclose(fapl_id) < 0)
         STACK_ERROR;
 
     /* _exit() is necessary since we want a hard close of the library */
-    HD_exit(EXIT_SUCCESS);
+    _exit(EXIT_SUCCESS);
 
 error:
     H5E_BEGIN_TRY
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

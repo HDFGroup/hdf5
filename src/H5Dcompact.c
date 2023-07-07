@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              August 5, 2002
- *
  * Purpose:     Compact dataset I/O functions.  These routines are similar
  *              H5D_contig_* and H5D_chunk_*.
  */
@@ -110,9 +107,6 @@ H5FL_BLK_EXTERN(type_conv);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		May 6, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -125,10 +119,10 @@ H5D__compact_fill(const H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(dset && H5D_COMPACT == dset->shared->layout.type);
-    HDassert(dset->shared->layout.storage.u.compact.buf);
-    HDassert(dset->shared->type);
-    HDassert(dset->shared->space);
+    assert(dset && H5D_COMPACT == dset->shared->layout.type);
+    assert(dset->shared->layout.storage.u.compact.buf);
+    assert(dset->shared->type);
+    assert(dset->shared->space);
 
     /* Initialize the fill value buffer */
     /* (use the compact dataset storage buffer as the fill value buffer) */
@@ -159,9 +153,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 22, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -176,8 +167,8 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(dset);
+    assert(f);
+    assert(dset);
 
     /* Check for invalid dataset dimensions */
     for (u = 0; u < dset->shared->ndims; u++)
@@ -189,9 +180,9 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
      * layout.
      */
     stmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
-    HDassert(stmp_size >= 0);
+    assert(stmp_size >= 0);
     tmp_size = H5T_get_size(dset->shared->type);
-    HDassert(tmp_size > 0);
+    assert(tmp_size > 0);
     tmp_size = tmp_size * (hsize_t)stmp_size;
     H5_CHECKED_ASSIGN(dset->shared->layout.storage.u.compact.size, size_t, tmp_size, hssize_t);
 
@@ -214,9 +205,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -225,7 +213,7 @@ H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(storage);
+    assert(storage);
 
     /* Compact storage is currently always allocated */
     FUNC_LEAVE_NOAPI(TRUE)
@@ -237,9 +225,6 @@ H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  * Purpose:	Performs initialization before any sort of I/O on the raw data
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -310,9 +295,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              May 7, 2003
- *
  * Notes:
  *              Offsets in the sequences must be monotonically increasing
  *
@@ -328,8 +310,8 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(io_info);
-    HDassert(dset_info);
+    assert(io_info);
+    assert(dset_info);
 
     /* Check if file driver wishes to do its own memory management */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_MEMMANAGE)) {
@@ -371,9 +353,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              May 2, 2003
- *
  * Notes:
  *              Offsets in the sequences must be monotonically increasing
  *
@@ -389,8 +368,8 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dse
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(io_info);
-    HDassert(dset_info);
+    assert(io_info);
+    assert(dset_info);
 
     /* Check if file driver wishes to do its own memory management */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_MEMMANAGE)) {
@@ -429,9 +408,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -442,7 +418,7 @@ H5D__compact_flush(H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset);
+    assert(dset);
 
     /* Check if the buffered compact information is dirty */
     if (dset->shared->layout.storage.u.compact.dirty) {
@@ -464,9 +440,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -475,7 +448,7 @@ H5D__compact_dest(H5D_t *dset)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(dset);
+    assert(dset);
 
     /* Free the buffer for the raw data for compact datasets */
     dset->shared->layout.storage.u.compact.buf = H5MM_xfree(dset->shared->layout.storage.u.compact.buf);
@@ -489,9 +462,6 @@ H5D__compact_dest(H5D_t *dset)
  * Purpose:     Copy compact storage raw data from SRC file to DST file.
  *
  * Return:      Non-negative on success, negative on failure.
- *
- * Programmer:  Peter Cao
- *              December 11, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -514,12 +484,12 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f_src);
-    HDassert(storage_src);
-    HDassert(f_dst);
-    HDassert(storage_dst);
-    HDassert(storage_dst->buf);
-    HDassert(dt_src);
+    assert(f_src);
+    assert(storage_src);
+    assert(f_dst);
+    assert(storage_dst);
+    assert(storage_dst->buf);
+    assert(dt_src);
 
     /* If the dataset is open in the file, point to "layout" in the shared struct */
     if (shared_fo != NULL)
@@ -620,7 +590,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
         H5MM_memcpy(reclaim_buf, buf, buf_size);
 
         /* Set background buffer to all zeros */
-        HDmemset(bkg, 0, buf_size);
+        memset(bkg, 0, buf_size);
 
         /* Convert from memory to destination file */
         if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
@@ -643,7 +613,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
             } /* end if */
             else
                 /* Reset value to zero */
-                HDmemset(storage_dst->buf, 0, storage_src->size);
+                memset(storage_dst->buf, 0, storage_src->size);
         } /* end if */
         else
             /* Type conversion not necessary */

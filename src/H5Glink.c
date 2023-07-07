@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Glink.c
- *			Nov 13 2006
- *			Quincey Koziol
  *
  * Purpose:		Functions for handling links in groups.
  *
@@ -86,9 +84,6 @@ static int H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2);
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. same as strcmp())
  *
- * Programmer:	Quincey Koziol
- *		Sep  5 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -111,9 +106,6 @@ H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2)
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. opposite strcmp())
  *
- * Programmer:	Quincey Koziol
- *		Sep 25 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -134,9 +126,6 @@ H5G__link_cmp_name_dec(const void *lnk1, const void *lnk2)
  *              first argument is considered to be respectively less than,
  *              equal to, or greater than the second.  If two members compare
  *              as equal, their order in the sorted array is undefined.
- *
- * Programmer:	Quincey Koziol
- *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -168,9 +157,6 @@ H5G__link_cmp_corder_inc(const void *lnk1, const void *lnk2)
  *              equal to, or greater than the first.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *
- * Programmer:	Quincey Koziol
- *		Nov  6 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -197,9 +183,6 @@ H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 16 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -211,10 +194,10 @@ H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap, const H5G_entry_t *ent, co
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(lnk);
-    HDassert(heap);
-    HDassert(ent);
-    HDassert(name);
+    assert(lnk);
+    assert(heap);
+    assert(ent);
+    assert(name);
 
     /* Set (default) common info for link */
     lnk->cset         = H5F_DEFAULT_CSET;
@@ -264,9 +247,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, November  7 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -277,8 +257,8 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(link_loc);
-    HDassert(lnk);
+    assert(link_loc);
+    assert(lnk);
 
     /* Get information from the link */
     if (info) {
@@ -345,9 +325,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 20 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -358,9 +335,9 @@ H5G__link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(grp_loc);
-    HDassert(lnk);
-    HDassert(obj_loc);
+    assert(grp_loc);
+    assert(lnk);
+    assert(obj_loc);
 
     /*
      * Build location from the link
@@ -391,9 +368,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Nov 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -404,32 +378,32 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type, H5_iter_orde
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ltable);
+    assert(ltable);
 
     /* Can't sort when empty since the links table will be NULL */
     if (0 == ltable->nlinks)
         HGOTO_DONE(ret_value);
 
     /* This should never be NULL if the number of links is non-zero */
-    HDassert(ltable->lnks);
+    assert(ltable->lnks);
 
     /* Pick appropriate sorting routine */
     if (idx_type == H5_INDEX_NAME) {
         if (order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
         else
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
-        HDassert(idx_type == H5_INDEX_CRT_ORDER);
+        assert(idx_type == H5_INDEX_CRT_ORDER);
         if (order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
         else
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
     } /* end else */
 
 done:
@@ -445,9 +419,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Nov 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -460,15 +431,15 @@ H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip, hsize_t *l
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ltable);
-    HDassert(op);
+    assert(ltable);
+    assert(op);
 
     /* Skip over links, if requested */
     if (last_lnk)
         *last_lnk += skip;
 
     /* Iterate over link messages */
-    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t)
+    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t);
     for (; u < ltable->nlinks && !ret_value; u++) {
         /* Make the callback */
         ret_value = (op)(&(ltable->lnks[u]), op_data);
@@ -493,9 +464,6 @@ H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip, hsize_t *l
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Sep  6, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -507,7 +475,7 @@ H5G__link_release_table(H5G_link_table_t *ltable)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ltable);
+    assert(ltable);
 
     /* Release link info, if any */
     if (ltable->nlinks > 0) {
@@ -520,7 +488,7 @@ H5G__link_release_table(H5G_link_table_t *ltable)
         H5MM_xfree(ltable->lnks);
     } /* end if */
     else
-        HDassert(ltable->lnks == NULL);
+        assert(ltable->lnks == NULL);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -534,9 +502,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 13 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -548,7 +513,7 @@ H5G__link_name_replace(H5F_t *file, H5RS_str_t *grp_full_path_r, const H5O_link_
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(file);
+    assert(file);
 
     /* Search the open IDs and replace names for unlinked object */
     if (grp_full_path_r) {

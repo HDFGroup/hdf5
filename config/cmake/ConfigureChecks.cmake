@@ -122,9 +122,6 @@ CHECK_INCLUDE_FILE_CONCAT ("globus/common.h" ${HDF_PREFIX}_HAVE_GLOBUS_COMMON_H)
 CHECK_INCLUDE_FILE_CONCAT ("pdb.h"           ${HDF_PREFIX}_HAVE_PDB_H)
 CHECK_INCLUDE_FILE_CONCAT ("pthread.h"       ${HDF_PREFIX}_HAVE_PTHREAD_H)
 CHECK_INCLUDE_FILE_CONCAT ("srbclient.h"     ${HDF_PREFIX}_HAVE_SRBCLIENT_H)
-CHECK_INCLUDE_FILE_CONCAT ("string.h"        ${HDF_PREFIX}_HAVE_STRING_H)
-CHECK_INCLUDE_FILE_CONCAT ("strings.h"       ${HDF_PREFIX}_HAVE_STRINGS_H)
-CHECK_INCLUDE_FILE_CONCAT ("stdlib.h"        ${HDF_PREFIX}_HAVE_STDLIB_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         ${HDF_PREFIX}_HAVE_DLFCN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    ${HDF_PREFIX}_HAVE_NETINET_IN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
@@ -138,7 +135,7 @@ endif ()
 ## Check for non-standard extension quadmath.h
 
 CHECK_INCLUDE_FILES(quadmath.h C_HAVE_QUADMATH)
-if (${C_HAVE_QUADMATH})
+if (C_HAVE_QUADMATH)
   set(${HDF_PREFIX}_HAVE_QUADMATH_H 1)
 else ()
   set(${HDF_PREFIX}_HAVE_QUADMATH_H 0)
@@ -428,13 +425,6 @@ if (MINGW OR NOT WINDOWS)
   endif ()
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGWINSZ)
   CHECK_SYMBOL_EXISTS (TIOCGETD   "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGETD)
-
-  # ----------------------------------------------------------------------
-  # cygwin user credentials are different then on linux
-  #
-  if (NOT CYGWIN AND NOT MINGW)
-    CHECK_FUNCTION_EXISTS (getpwuid        ${HDF_PREFIX}_HAVE_GETPWUID)
-  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -447,19 +437,12 @@ CHECK_FUNCTION_EXISTS (fork              ${HDF_PREFIX}_HAVE_FORK)
 
 CHECK_FUNCTION_EXISTS (gethostname       ${HDF_PREFIX}_HAVE_GETHOSTNAME)
 CHECK_FUNCTION_EXISTS (getrusage         ${HDF_PREFIX}_HAVE_GETRUSAGE)
-CHECK_FUNCTION_EXISTS (lstat             ${HDF_PREFIX}_HAVE_LSTAT)
 
 CHECK_FUNCTION_EXISTS (pread             ${HDF_PREFIX}_HAVE_PREAD)
 CHECK_FUNCTION_EXISTS (pwrite            ${HDF_PREFIX}_HAVE_PWRITE)
 CHECK_FUNCTION_EXISTS (rand_r            ${HDF_PREFIX}_HAVE_RAND_R)
 CHECK_FUNCTION_EXISTS (random            ${HDF_PREFIX}_HAVE_RANDOM)
-CHECK_FUNCTION_EXISTS (setsysinfo        ${HDF_PREFIX}_HAVE_SETSYSINFO)
 
-CHECK_FUNCTION_EXISTS (siglongjmp        ${HDF_PREFIX}_HAVE_SIGLONGJMP)
-CHECK_FUNCTION_EXISTS (sigsetjmp         ${HDF_PREFIX}_HAVE_SIGSETJMP)
-CHECK_FUNCTION_EXISTS (sigprocmask       ${HDF_PREFIX}_HAVE_SIGPROCMASK)
-
-CHECK_FUNCTION_EXISTS (srandom           ${HDF_PREFIX}_HAVE_SRANDOM)
 CHECK_FUNCTION_EXISTS (strcasestr        ${HDF_PREFIX}_HAVE_STRCASESTR)
 CHECK_FUNCTION_EXISTS (strdup            ${HDF_PREFIX}_HAVE_STRDUP)
 CHECK_FUNCTION_EXISTS (symlink           ${HDF_PREFIX}_HAVE_SYMLINK)
@@ -758,7 +741,7 @@ endif()
 
 if (HDF5_BUILD_FORTRAN)
   HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
-  if (${_SIZEOF___FLOAT128})
+  if (_SIZEOF___FLOAT128)
     set (${HDF_PREFIX}_HAVE_FLOAT128 1)
     set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
   else ()
@@ -767,7 +750,7 @@ if (HDF5_BUILD_FORTRAN)
   endif ()
 
   HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
-  if (NOT ${_SIZEOF__QUAD})
+  if (NOT _SIZEOF__QUAD)
     set (${HDF_PREFIX}_SIZEOF__QUAD 0)
   else ()
     set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
@@ -847,7 +830,7 @@ if (HDF5_BUILD_FORTRAN)
 #define C_LDBL_DIG DECIMAL_DIG\n\
 #else\n\
 #define C_LDBL_DIG LDBL_DIG\n\
-#endif\n\nint main() {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
+#endif\n\nint main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
          "
     )
 
@@ -915,9 +898,9 @@ endmacro ()
 #-----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# Set the flag to indicate that the machine is using a special algorithm to convert
+# Set the flag to indicate that the machine is using a special algorithm toconvert
 # 'long double' to '(unsigned) long' values.  (This flag should only be set for
-# the IBM Power6 Linux.  When the bit sequence of long double is
+# the IBM Power Linux.  When the bit sequence of long double is
 # 0x4351ccf385ebc8a0bfcc2a3c3d855620, the converted value of (unsigned)long
 # is 0x004733ce17af227f, not the same as the library's conversion to 0x004733ce17af2282.
 # The machine's conversion gets the correct value.  We define the macro and disable
@@ -927,7 +910,7 @@ H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your syst
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine is using a special algorithm
 # to convert some values of '(unsigned) long' to 'long double' values.
-# (This flag should be off for all machines, except for IBM Power6 Linux,
+# (This flag should be off for all machines, except for IBM Power Linux,
 # when the bit sequences are 003fff..., 007fff..., 00ffff..., 01ffff...,
 # ..., 7fffff..., the compiler uses a unknown algorithm.  We define a
 # macro and skip the test for now until we know about the algorithm.

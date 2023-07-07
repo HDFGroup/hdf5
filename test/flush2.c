@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  * Purpose:  This is the second half of a two-part test that makes sure
  *    that a file can be read after an application crashes as long
  *    as the file was flushed first.  This half tries to read the
@@ -30,9 +27,9 @@
 /* This is used in the helper routine clear_status_flags() */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME "clear_status_flags"
 
-const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
-                          "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
-                          "noflush_extend", "noflush_extend-swmr", NULL};
+static const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
+                                 "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
+                                 "noflush_extend", "noflush_extend-swmr", NULL};
 
 /* Number and size of dataset dims, chunk size, etc. */
 #define NELEMENTS        10000
@@ -51,9 +48,6 @@ static hbool_t file_ok(const char *filename, hid_t fapl_id, hbool_t check_second
  * Purpose:     Checks if the data in a dataset is what it is supposed to be.
  *
  * Return:      TRUE/FALSE
- *
- * Programmer:	Leon Arber
- *              Oct. 4, 2006.
  *
  *-------------------------------------------------------------------------
  */
@@ -77,7 +71,7 @@ dset_ok(hid_t fid, const char *dset_name)
         goto error;
 
     /* Read the data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         goto error;
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0)
         goto error;
@@ -90,7 +84,7 @@ dset_ok(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         goto error;
 
-    HDfree(data);
+    free(data);
 
     return TRUE;
 
@@ -100,9 +94,9 @@ error:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(data);
+    free(data);
 
     return FALSE;
 } /* end dset_ok() */
@@ -113,9 +107,6 @@ error:
  * Purpose:     Checks that the contents of a file are what they should be.
  *
  * Return:      TRUE/FALSE
- *
- * Programmer:	Leon Arber
- *              Sept. 26, 2006.
  *
  *-------------------------------------------------------------------------
  */
@@ -164,7 +155,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FALSE;
 } /* end file_ok() */
@@ -176,9 +167,6 @@ error:
  *              It is smilar to the tool "h5clear".
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              July 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -217,7 +205,7 @@ error:
         H5Pclose(new_fapl_id);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end clear_status_flags() */
@@ -229,9 +217,6 @@ error:
  *              Part 2 of a two-part H5Fflush() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:	Robb Matzke
- *              Friday, October 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -255,13 +240,13 @@ main(void)
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
-        HDprintf("Can't check if VFD is compatible with default VFD\n");
-        HDexit(EXIT_FAILURE);
+        printf("Can't check if VFD is compatible with default VFD\n");
+        exit(EXIT_FAILURE);
     }
 
     if (!driver_is_default_vfd_compatible) {
-        HDprintf("Skipping SWMR tests for VFD incompatible with default VFD\n");
-        HDexit(EXIT_SUCCESS);
+        printf("Skipping SWMR tests for VFD incompatible with default VFD\n");
+        exit(EXIT_SUCCESS);
     }
 
     /* TEST 1 */
@@ -433,12 +418,12 @@ main(void)
         SKIPPED();
 
     if (!vfd_supports_swmr)
-        HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
+        printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     h5_cleanup(FILENAME, fapl_id);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

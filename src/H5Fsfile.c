@@ -35,7 +35,7 @@ typedef struct H5F_sfile_node_t {
 H5FL_DEFINE_STATIC(H5F_sfile_node_t);
 
 /* Declare a local variable to track the shared file information */
-H5F_sfile_node_t *H5F_sfile_head_g = NULL;
+static H5F_sfile_node_t *H5F_sfile_head_s = NULL;
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_sfile_assert_num
@@ -43,9 +43,6 @@ H5F_sfile_node_t *H5F_sfile_head_g = NULL;
  * Purpose:     Sanity checking that shared file list is empty
  *
  * Return:      void
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -56,14 +53,14 @@ H5F_sfile_assert_num(unsigned n)
 
     if (n == 0) {
         /* Sanity checking */
-        HDassert(H5F_sfile_head_g == NULL);
+        assert(H5F_sfile_head_s == NULL);
     } /* end if */
     else {
         unsigned          count; /* Number of open shared files */
         H5F_sfile_node_t *curr;  /* Current shared file node */
 
         /* Iterate through low-level files for matching low-level file info */
-        curr  = H5F_sfile_head_g;
+        curr  = H5F_sfile_head_s;
         count = 0;
         while (curr) {
             /* Increment # of open shared file structs */
@@ -74,7 +71,7 @@ H5F_sfile_assert_num(unsigned n)
         } /* end while */
 
         /* Sanity checking */
-        HDassert(count == n);
+        assert(count == n);
     } /* end else */
 
     FUNC_LEAVE_NOAPI_VOID
@@ -87,9 +84,6 @@ H5F_sfile_assert_num(unsigned n)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -101,7 +95,7 @@ H5F__sfile_add(H5F_shared_t *shared)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(shared);
+    assert(shared);
 
     /* Allocate new shared file node */
     if (NULL == (new_shared = H5FL_CALLOC(H5F_sfile_node_t)))
@@ -111,8 +105,8 @@ H5F__sfile_add(H5F_shared_t *shared)
     new_shared->shared = shared;
 
     /* Prepend to list of shared files open */
-    new_shared->next = H5F_sfile_head_g;
-    H5F_sfile_head_g = new_shared;
+    new_shared->next = H5F_sfile_head_s;
+    H5F_sfile_head_s = new_shared;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -126,9 +120,6 @@ done:
  *
  * Return:      Non-NULL on success / NULL on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
- *
  *-------------------------------------------------------------------------
  */
 H5F_shared_t *
@@ -140,10 +131,10 @@ H5F__sfile_search(H5FD_t *lf)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(lf);
+    assert(lf);
 
     /* Iterate through low-level files for matching low-level file info */
-    curr = H5F_sfile_head_g;
+    curr = H5F_sfile_head_s;
     while (curr) {
         /* Check for match */
         if (0 == H5FD_cmp(curr->shared->lf, lf))
@@ -164,9 +155,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -179,11 +167,11 @@ H5F__sfile_remove(H5F_shared_t *shared)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(shared);
+    assert(shared);
 
     /* Locate shared file node with correct shared file */
     last = NULL;
-    curr = H5F_sfile_head_g;
+    curr = H5F_sfile_head_s;
     while (curr && curr->shared != shared) {
         /* Advance to next node */
         last = curr;
@@ -200,7 +188,7 @@ H5F__sfile_remove(H5F_shared_t *shared)
         last->next = curr->next;
     else
         /* Removing head node in list */
-        H5F_sfile_head_g = curr->next;
+        H5F_sfile_head_s = curr->next;
 
     /* Release the shared file node struct */
     /* (the shared file info itself is freed elsewhere) */

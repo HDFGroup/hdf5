@@ -129,10 +129,6 @@ END SUBROUTINE group_test
 ! * Return:      Success:        0
 ! *              Failure:        -1
 ! *
-! * Programmer:  Adapted from C test routines by
-! *              M.S. Breitenfeld
-! *              February 18, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -552,11 +548,6 @@ END SUBROUTINE group_info
 ! *
 ! * Purpose:     Verify that disabling tracking timestamps for an object
 ! *              works correctly
-! *
-! *
-! * Programmer:  M.S. Breitenfeld
-! *              February 20, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -745,10 +736,6 @@ END SUBROUTINE group_info
 ! *
 ! * Purpose:	Build a file with assorted links.
 ! *
-! *
-! * Programmer:	Adapted from C test by:
-! *             M.S. Breitenfeld
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -836,10 +823,6 @@ END SUBROUTINE group_info
 ! *
 ! * Purpose:     Tests that moving and renaming links preserves their
 ! *              properties.
-! *
-! * Programmer:  M.S. Breitenfeld
-! *              March 3, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -936,8 +919,8 @@ END SUBROUTINE group_info
 !    old_modification_time = oinfo.mtime;
 
 !     If this test happens too quickly, the times will all be the same.  Make sure the time changes.
-!    curr_time = HDtime(NULL);
-!    while(HDtime(NULL) <= curr_time)
+!    curr_time = time(NULL);
+!    while(time(NULL) <= curr_time)
 !        ;
 
 !     Close the file and reopen it
@@ -1041,10 +1024,6 @@ END SUBROUTINE group_info
 ! * Return:      Success:        0
 ! *
 ! *              Failure:        -1
-! *
-! * Programmer:  Quincey Koziol
-! *              Monday, October 17, 2005
-! *
 ! *-------------------------------------------------------------------------
 !
 SUBROUTINE lifecycle(cleanup, fapl2, total_error)
@@ -1182,10 +1161,6 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 ! * Return:	Success:	0
 ! *
 ! *		Failure:	-1
-! *
-! * Programmer:	M.S. Breitenfeld
-! *             April 14, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -1220,7 +1195,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 !!$	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 !!$	TEST_ERROR
 !!$    }  end if
-!!$    if(H5F_addr_ne(oinfo1.addr, oinfo2.addr)) {
+!!$    if(H5_addr_ne(oinfo1.addr, oinfo2.addr)) {
 !!$	H5_FAILED();
 !!$	puts("    Hard link test failed. Link seems not to point to the ");
 !!$	puts("    expected file location.");
@@ -1250,12 +1225,6 @@ END SUBROUTINE cklinks
 ! *              links by index.
 ! *
 ! * Return:      Total error
-! *
-! * C Programmer:  Quincey Koziol
-! *                Tuesday, November 14, 2006
-! *
-! * Adapted to FORTRAN: M.S. Breitenfeld
-! *                     March 3, 2008
 ! *
 ! *-------------------------------------------------------------------------
 !
@@ -1411,7 +1380,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
               CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(0,HSIZE_T), error)
               CALL check("H5Ldelete_by_idx_f", error, total_error)
               !  Verify the link information for first link in appropriate order
-              ! HDmemset(&linfo, 0, sizeof(linfo));
+              ! memset(&linfo, 0, sizeof(linfo));
 
               CALL H5Lget_info_by_idx_f(group_id, ".", idx_type, iorder, INT(0,HSIZE_T), &
                    link_type, f_corder_valid, corder, cset, token, val_size, error)
@@ -1441,7 +1410,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
 
               !  Verify the name for first link in appropriate order
-              ! HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+              ! memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
 !!$              size_tmp = 20
 !!$              CALL H5Lget_name_by_idx_f(group_id, ".", idx_type, order, INT(0,HSIZE_T), size_tmp, tmpname, error)
 !!$              CALL check("delete_by_idx.H5Lget_name_by_idx_f", error, total_error)
@@ -1491,10 +1460,6 @@ END SUBROUTINE delete_by_idx
 ! *
 ! * Return:      Success:        0
 ! *              Failure:        -1
-! *
-! * Programmer:  Quincey Koziol
-! *              Tuesday, November  7, 2006
-! *
 ! *-------------------------------------------------------------------------
 !
 SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
@@ -1530,14 +1495,14 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   valname = 'valn.'//chr2
 
   !  Verify the link information for first link, in increasing creation order
-  !  HDmemset(&linfo, 0, sizeof(linfo));
+  !  memset(&linfo, 0, sizeof(linfo));
   CALL H5Lget_info_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,HSIZE_T), &
        link_type, f_corder_valid, corder, cset, token, val_size, error)
   CALL check("H5Lget_info_by_idx_f", error, total_error)
   CALL verify("H5Lget_info_by_idx_f", corder, 0, total_error)
 
   !  Verify the link information for new link, in increasing creation order
-  ! HDmemset(&linfo, 0, sizeof(linfo));
+  ! memset(&linfo, 0, sizeof(linfo));
   CALL H5Lget_info_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), &
        link_type, f_corder_valid, corder, cset, token, val_size, error)
   CALL check("H5Lget_info_by_idx_f", error, total_error)
@@ -1545,16 +1510,16 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   !  Verify value for new soft link, in increasing creation order
 !!$  IF(hard_link)THEN
-!!$     ! HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+!!$     ! memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
 !!$
 !!$     CALL H5Lget_val_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, n, tmpval, INT(7,SIZE_T),error)
 !!$     CALL check("H5Lget_val_by_idx",error,total_error)
 !!$
-!!$!     IF(HDstrcmp(valname, tmpval)) TEST_ERROR
+!!$!     IF(strcmp(valname, tmpval)) TEST_ERROR
 !!$  ENDIF
 
   !  Verify the name for new link, in increasing creation order
-  !  HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+  !  memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
 
   ! The actual size of tmpname should be 7
 
@@ -1589,10 +1554,6 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 ! *
 ! * Return:      Success:        0
 ! *              Failure:        number of errors
-! *
-! * Programmer:  M.S. Breitenfeld
-! *              Modified C routine
-! *              March 12, 2008
 ! *
 ! *-------------------------------------------------------------------------
 !
@@ -1958,10 +1919,6 @@ END SUBROUTINE objcopy
 ! * Return:      Success:        0
 ! *
 ! *              Failure:        -1
-! *
-! * Programmer:  James Laird
-! *              Tuesday, June 6, 2006
-! *
 ! *-------------------------------------------------------------------------
 !
 

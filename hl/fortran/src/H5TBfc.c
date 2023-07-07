@@ -25,10 +25,6 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -61,9 +57,9 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
         HGOTO_DONE(FAIL)
     if (NULL == (c_name1 = (char *)HD5f2cstring(name1, (size_t)*namelen1)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_field_offset = (size_t *)HDmalloc(sizeof(size_t) * (size_t)c_nfields)))
+    if (NULL == (c_field_offset = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_field_types = (hid_t *)HDmalloc(sizeof(hid_t) * (size_t)c_nfields)))
+    if (NULL == (c_field_types = (hid_t *)malloc(sizeof(hid_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
 
     for (i = 0; i < num_elem; i++) {
@@ -74,7 +70,7 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
     /*
      * allocate array of character pointers
      */
-    if (NULL == (c_field_names = (char **)HDcalloc((size_t)num_elem, sizeof(char *))))
+    if (NULL == (c_field_names = (char **)calloc((size_t)num_elem, sizeof(char *))))
         HGOTO_DONE(FAIL)
 
     /* copy data to long C string */
@@ -86,9 +82,9 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {
-        if (NULL == (c_field_names[i] = (char *)HDmalloc((size_t)char_len_field_names[i] + 1)))
+        if (NULL == (c_field_names[i] = (char *)malloc((size_t)char_len_field_names[i] + 1)))
             HGOTO_DONE(FAIL)
-        HDmemcpy(c_field_names[i], tmp_p, (size_t)char_len_field_names[i]);
+        memcpy(c_field_names[i], tmp_p, (size_t)char_len_field_names[i]);
         c_field_names[i][char_len_field_names[i]] = '\0';
         tmp_p                                     = tmp_p + *max_char_size_field_names;
     } /* end for */
@@ -103,22 +99,22 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_name1)
-        HDfree(c_name1);
+        free(c_name1);
     if (c_field_names) {
         for (i = 0; i < num_elem; i++) {
             if (c_field_names[i])
-                HDfree(c_field_names[i]);
+                free(c_field_names[i]);
         } /* end for */
-        HDfree(c_field_names);
+        free(c_field_names);
     } /* end if */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
     if (c_field_offset)
-        HDfree(c_field_offset);
+        free(c_field_offset);
     if (c_field_types)
-        HDfree(c_field_types);
+        free(c_field_types);
 
     return ret_value;
 } /* end h5tbmake_table_c() */
@@ -129,10 +125,6 @@ done:
  * Purpose: Call H5TBmake_table using F2003 features
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: Sept. 10, 2015
  *
  * Comments:
  *
@@ -166,9 +158,9 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
         HGOTO_DONE(FAIL)
     if (NULL == (c_name1 = (char *)HD5f2cstring(name1, (size_t)*namelen1)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_field_offset = (size_t *)HDmalloc(sizeof(size_t) * (size_t)c_nfields)))
+    if (NULL == (c_field_offset = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_field_types = (hid_t *)HDmalloc(sizeof(hid_t) * (size_t)c_nfields)))
+    if (NULL == (c_field_types = (hid_t *)malloc(sizeof(hid_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
 
     for (i = 0; i < num_elem; i++) {
@@ -179,7 +171,7 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
     /*
      * allocate array of character pointers
      */
-    if (NULL == (c_field_names = (char **)HDcalloc((size_t)num_elem, sizeof(char *))))
+    if (NULL == (c_field_names = (char **)calloc((size_t)num_elem, sizeof(char *))))
         HGOTO_DONE(FAIL)
 
     /* copy data to long C string */
@@ -191,9 +183,9 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {
-        if (NULL == (c_field_names[i] = (char *)HDmalloc((size_t)char_len_field_names[i] + 1)))
+        if (NULL == (c_field_names[i] = (char *)malloc((size_t)char_len_field_names[i] + 1)))
             HGOTO_DONE(FAIL)
-        HDmemcpy(c_field_names[i], tmp_p, (size_t)char_len_field_names[i]);
+        memcpy(c_field_names[i], tmp_p, (size_t)char_len_field_names[i]);
         c_field_names[i][char_len_field_names[i]] = '\0';
         tmp_p                                     = tmp_p + *max_char_size_field_names;
     } /* end for */
@@ -208,22 +200,22 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_name1)
-        HDfree(c_name1);
+        free(c_name1);
     if (c_field_names) {
         for (i = 0; i < num_elem; i++) {
             if (c_field_names[i])
-                HDfree(c_field_names[i]);
+                free(c_field_names[i]);
         } /* end for */
-        HDfree(c_field_names);
+        free(c_field_names);
     } /* end if */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
     if (c_field_offset)
-        HDfree(c_field_offset);
+        free(c_field_offset);
     if (c_field_types)
-        HDfree(c_field_types);
+        free(c_field_types);
 
     return ret_value;
 } /* end h5tbmake_table_c() */
@@ -234,10 +226,6 @@ done:
  * Purpose: Call H5TBread_table using F2003 features
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: Sept. 14, 2015
  *
  * Comments:
  *
@@ -260,9 +248,9 @@ h5tbread_table_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hsize_t_f *nfiel
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL)
 
-    if (NULL == (c_dst_offset = (size_t *)HDmalloc(sizeof(size_t) * (size_t)c_nfields)))
+    if (NULL == (c_dst_offset = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_dst_sizes = (size_t *)HDmalloc(sizeof(size_t) * (size_t)c_nfields)))
+    if (NULL == (c_dst_sizes = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
 
     for (i = 0; i < c_nfields; i++) {
@@ -278,12 +266,12 @@ h5tbread_table_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hsize_t_f *nfiel
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     if (c_dst_offset)
-        HDfree(c_dst_offset);
+        free(c_dst_offset);
     if (c_dst_sizes)
-        HDfree(c_dst_sizes);
+        free(c_dst_sizes);
 
     return ret_value;
 } /* end h5tbmake_table_c() */
@@ -294,10 +282,6 @@ done:
  * Purpose: Call H5TBwrite_fields_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
  *
  * Comments:
  *
@@ -329,9 +313,9 @@ h5tbwrite_field_name_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_name1)
-        HDfree(c_name1);
+        free(c_name1);
 
     return ret_value;
 }
@@ -342,10 +326,6 @@ done:
  * Purpose: Call H5TBread_fields_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
  *
  * Comments:
  *
@@ -377,9 +357,9 @@ h5tbread_field_name_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *n
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_name1)
-        HDfree(c_name1);
+        free(c_name1);
 
     return ret_value;
 }
@@ -390,10 +370,6 @@ done:
  * Purpose: Call H5TBwrite_fields_index
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
  *
  * Comments:
  *
@@ -423,7 +399,7 @@ h5tbwrite_field_index_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *fi
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -434,10 +410,6 @@ done:
  * Purpose: Call H5TBread_fields_index
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
  *
  * Comments:
  *
@@ -467,7 +439,7 @@ h5tbread_field_index_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *fie
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -478,10 +450,6 @@ done:
  * Purpose: Call H5TBinsert_field
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 13, 2004
  *
  * Comments:
  *
@@ -512,9 +480,9 @@ h5tbinsert_field_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *name
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_name1)
-        HDfree(c_name1);
+        free(c_name1);
 
     return ret_value;
 }
@@ -525,10 +493,6 @@ done:
  * Purpose: Call H5TBdelete_field
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 13, 2004
  *
  * Comments:
  *
@@ -557,9 +521,9 @@ h5tbdelete_field_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *name
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_name1)
-        HDfree(c_name1);
+        free(c_name1);
 
     return ret_value;
 }
@@ -570,10 +534,6 @@ done:
  * Purpose: Call H5TBread_fields_index
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
  *
  * Comments:
  *
@@ -604,7 +564,7 @@ h5tbget_table_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -615,10 +575,6 @@ done:
  * Purpose: Call H5TBget_field_info
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 13, 2004
  *
  * Comments:
  *
@@ -655,15 +611,15 @@ h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_field_offsets = (size_t *)HDmalloc(sizeof(size_t) * (size_t)c_nfields)))
+    if (NULL == (c_field_offsets = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_field_sizes = (size_t *)HDmalloc(sizeof(size_t) * (size_t)c_nfields)))
+    if (NULL == (c_field_sizes = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_field_names = (char **)HDcalloc((size_t)c_nfields, sizeof(char *))))
+    if (NULL == (c_field_names = (char **)calloc((size_t)c_nfields, sizeof(char *))))
         HGOTO_DONE(FAIL)
 
     for (i = 0; i < c_nfields; i++)
-        if (NULL == (c_field_names[i] = (char *)HDmalloc(sizeof(char) * HLTB_MAX_FIELD_LEN)))
+        if (NULL == (c_field_names[i] = (char *)malloc(sizeof(char) * HLTB_MAX_FIELD_LEN)))
             HGOTO_DONE(FAIL)
 
     /*
@@ -676,15 +632,15 @@ h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
     /* return values */
 
     /* names array */
-    if (NULL == (tmp = (char *)HDmalloc((c_lenmax * (size_t)c_nfields) + 1)))
+    if (NULL == (tmp = (char *)malloc((c_lenmax * (size_t)c_nfields) + 1)))
         HGOTO_DONE(FAIL)
     tmp_p = tmp;
-    HDmemset(tmp, ' ', c_lenmax * (size_t)c_nfields);
+    memset(tmp, ' ', c_lenmax * (size_t)c_nfields);
     tmp[c_lenmax * c_nfields] = '\0';
     for (i = 0; i < c_nfields; i++) {
-        size_t field_name_len = HDstrlen(c_field_names[i]);
+        size_t field_name_len = strlen(c_field_names[i]);
 
-        HDmemcpy(tmp_p, c_field_names[i], field_name_len);
+        memcpy(tmp_p, c_field_names[i], field_name_len);
         namelen2[i] = (size_t_f)field_name_len;
         length      = MAX(length, strlen((c_field_names[i])));
         tmp_p       = tmp_p + c_lenmax;
@@ -702,19 +658,19 @@ h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_field_names) {
         for (i = 0; i < num_elem; i++)
             if (c_field_names[i])
-                HDfree(c_field_names[i]);
-        HDfree(c_field_names);
+                free(c_field_names[i]);
+        free(c_field_names);
     } /* end if */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
     if (c_field_offsets)
-        HDfree(c_field_offsets);
+        free(c_field_offsets);
     if (c_field_sizes)
-        HDfree(c_field_sizes);
+        free(c_field_sizes);
 
     return ret_value;
 }

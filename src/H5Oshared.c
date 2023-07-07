@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke
- *		Wednesday, April  1, 1998
- *
  * Purpose:	Functions that operate on a shared message.  The shared
  *		message doesn't ever actually appear in the object header as
  *		a normal message.  Instead, if a message is shared, the
@@ -93,9 +90,6 @@ static herr_t H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class
  *
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		Sep 24 2003
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -110,15 +104,15 @@ H5O__shared_read(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const H5O_shared_t
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(shared);
-    HDassert(type);
-    HDassert(type->share_flags & H5O_SHARE_IS_SHARABLE);
+    assert(f);
+    assert(shared);
+    assert(type);
+    assert(type->share_flags & H5O_SHARE_IS_SHARABLE);
 
     /* This message could have a heap ID (SOHM) or the address of an object
      * header on disk (named datatype)
      */
-    HDassert(H5O_IS_STORED_SHARED(shared->type));
+    assert(H5O_IS_STORED_SHARED(shared->type));
 
     /* Check for implicit shared object header message */
     if (shared->type == H5O_SHARE_TYPE_SOHM) {
@@ -157,7 +151,7 @@ H5O__shared_read(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const H5O_shared_t
     else {
         H5O_loc_t oloc; /* Location for object header where message is stored */
 
-        HDassert(shared->type == H5O_SHARE_TYPE_COMMITTED);
+        assert(shared->type == H5O_SHARE_TYPE_COMMITTED);
 
         /* Build the object location for the shared message's object header */
         oloc.file         = f;
@@ -206,9 +200,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 26 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -219,8 +210,8 @@ H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(shared);
+    assert(f);
+    assert(shared);
 
     /* Check for type of shared message */
     if (shared->type == H5O_SHARE_TYPE_COMMITTED) {
@@ -259,7 +250,7 @@ H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_
             if (H5O__link_oh(f, adjust, open_oh, &deleted) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
-            HDassert(!deleted);
+            assert(!deleted);
         }
         else
             /* The shared message is in another object header */
@@ -267,7 +258,7 @@ H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
     } /* end if */
     else {
-        HDassert(shared->type == H5O_SHARE_TYPE_SOHM || shared->type == H5O_SHARE_TYPE_HERE);
+        assert(shared->type == H5O_SHARE_TYPE_SOHM || shared->type == H5O_SHARE_TYPE_HERE);
 
         /* Check for decrementing reference count on shared message */
         if (adjust < 0) {
@@ -293,9 +284,6 @@ done:
  * Return:      Success:    A buffer containing the decoded shared object
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *              Monday, January 22, 2007
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -309,9 +297,9 @@ H5O__shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *b
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f);
-    HDassert(buf);
-    HDassert(type);
+    assert(f);
+    assert(buf);
+    assert(type);
 
     /* Version */
     version = *buf++;
@@ -346,7 +334,7 @@ H5O__shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *b
          * Otherwise, it is a named datatype, so copy an H5O_loc_t.
          */
         if (sh_mesg.type == H5O_SHARE_TYPE_SOHM) {
-            HDassert(version >= H5O_SHARED_VERSION_3);
+            assert(version >= H5O_SHARED_VERSION_3);
             H5MM_memcpy(&sh_mesg.u.heap_id, buf, sizeof(sh_mesg.u.heap_id));
         } /* end if */
         else {
@@ -380,9 +368,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *              Thursday, April  2, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -393,9 +378,9 @@ H5O__shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(f);
-    HDassert(buf);
-    HDassert(sh_mesg);
+    assert(f);
+    assert(buf);
+    assert(sh_mesg);
 
     /* If this message is shared in the heap, we need to use version 3 of the
      * encoding and encode the SHARED_IN_HEAP flag.
@@ -403,7 +388,7 @@ H5O__shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_
     if (sh_mesg->type == H5O_SHARE_TYPE_SOHM)
         version = H5O_SHARED_VERSION_LATEST;
     else {
-        HDassert(sh_mesg->type == H5O_SHARE_TYPE_COMMITTED);
+        assert(sh_mesg->type == H5O_SHARE_TYPE_COMMITTED);
         version = H5O_SHARED_VERSION_2; /* version 1 is no longer used */
     }                                   /* end else */
 
@@ -428,9 +413,6 @@ H5O__shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 26 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -439,8 +421,8 @@ H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    HDassert(dst);
-    HDassert(src);
+    assert(dst);
+    assert(src);
 
     /* copy */
     *dst = *src;
@@ -455,9 +437,6 @@ H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
  *
  * Return:      Success:    Length
  *              Failure:    0
- *
- * Programmer:	Robb Matzke
- *              Thursday, April  2, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -474,7 +453,7 @@ H5O__shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
                     (size_t)H5F_SIZEOF_ADDR(f); /* Sharing by another obj hdr   */
     }                                           /* end if */
     else {
-        HDassert(sh_mesg->type == H5O_SHARE_TYPE_SOHM);
+        assert(sh_mesg->type == H5O_SHARE_TYPE_SOHM);
         ret_value = 1 +               /* Version              */
                     1 +               /* Type field           */
                     H5O_FHEAP_ID_LEN; /* Shared in the heap   */
@@ -490,9 +469,6 @@ H5O__shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Friday, September 26, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -503,8 +479,8 @@ H5O__shared_delete(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_sh
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(sh_mesg);
+    assert(f);
+    assert(sh_mesg);
 
     /*
      * Committed datatypes increment the OH of the original message when they
@@ -531,9 +507,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Friday, September 26, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -544,8 +517,8 @@ H5O__shared_link(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_shar
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f);
-    HDassert(sh_mesg);
+    assert(f);
+    assert(sh_mesg);
 
     /* Increment the reference count on the shared object */
     if (H5O__shared_link_adj(f, open_oh, type, sh_mesg, 1) < 0)
@@ -561,9 +534,6 @@ done:
  * Purpose:     Copies a message from _MESG to _DEST in file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              January 22, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -582,13 +552,13 @@ H5O__shared_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, H5F_t *file_dst,
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(file_src);
-    HDassert(file_dst);
-    HDassert(mesg_type);
-    HDassert(shared_src);
-    HDassert(shared_dst);
-    HDassert(recompute_size);
-    HDassert(cpy_info);
+    assert(file_src);
+    assert(file_dst);
+    assert(mesg_type);
+    assert(shared_src);
+    assert(shared_dst);
+    assert(recompute_size);
+    assert(cpy_info);
 
     /* Committed shared messages create a shared message at the destination
      * and also copy the committed object that they point to.
@@ -602,7 +572,7 @@ H5O__shared_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, H5F_t *file_dst,
     if (shared_src->type != H5O_SHARE_TYPE_COMMITTED) {
         /* Simulate trying to share new message in the destination file. */
         /* Set copied metadata tag */
-        H5_BEGIN_TAG(H5AC__COPIED_TAG);
+        H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
         if (H5SM_try_share(file_dst, NULL, H5SM_DEFER, mesg_type->id, _native_dst, mesg_flags) < 0)
             HGOTO_ERROR_TAG(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to determine if message should be shared")
@@ -633,9 +603,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Peter Cao
- *              May 24 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -647,9 +614,9 @@ H5O__shared_post_copy_file(H5F_t *f, const H5O_msg_class_t *mesg_type, const H5O
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(shared_src);
-    HDassert(shared_dst);
+    assert(f);
+    assert(shared_src);
+    assert(shared_dst);
 
     /* Copy the target of committed messages, try to share others */
     if (shared_src->type == H5O_SHARE_TYPE_COMMITTED) {
@@ -683,9 +650,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Thursday, April  2, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -694,35 +658,35 @@ H5O__shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     switch (mesg->type) {
         case H5O_SHARE_TYPE_UNSHARED:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Unshared");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Unshared");
             break;
 
         case H5O_SHARE_TYPE_COMMITTED:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Obj Hdr");
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Object address:", mesg->u.loc.oh_addr);
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Obj Hdr");
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                    "Object address:", mesg->u.loc.oh_addr);
             break;
 
         case H5O_SHARE_TYPE_SOHM:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "SOHM");
-            HDfprintf(stream, "%*s%-*s %016llx\n", indent, "", fwidth,
-                      "Heap ID:", (unsigned long long)mesg->u.heap_id.val);
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "SOHM");
+            fprintf(stream, "%*s%-*s %016llx\n", indent, "", fwidth,
+                    "Heap ID:", (unsigned long long)mesg->u.heap_id.val);
             break;
 
         case H5O_SHARE_TYPE_HERE:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Here");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Here");
             break;
 
         default:
-            HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Shared Message type:", "Unknown",
-                      (unsigned)mesg->type);
+            fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Shared Message type:", "Unknown",
+                    (unsigned)mesg->type);
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

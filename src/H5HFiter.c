@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFiter.c
- *			Apr 24 2006
- *			Quincey Koziol
  *
  * Purpose:		Block iteration routines for fractal heaps.
  *
@@ -64,7 +62,7 @@
 /*******************/
 
 /* Declare a free list to manage the H5HF_block_loc_t struct */
-H5FL_DEFINE(H5HF_block_loc_t);
+H5FL_DEFINE_STATIC(H5HF_block_loc_t);
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__man_iter_init
@@ -74,9 +72,6 @@ H5FL_DEFINE(H5HF_block_loc_t);
  *              actually used)
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -88,10 +83,10 @@ H5HF__man_iter_init(H5HF_block_iter_t *biter)
     /*
      * Check arguments.
      */
-    HDassert(biter);
+    assert(biter);
 
     /* Reset block iterator information */
-    HDmemset(biter, 0, sizeof(H5HF_block_iter_t));
+    memset(biter, 0, sizeof(H5HF_block_iter_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__man_iter_init() */
@@ -103,9 +98,6 @@ H5HF__man_iter_init(H5HF_block_iter_t *biter)
  *              an offset in the heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -128,11 +120,11 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
     /*
      * Check arguments.
      */
-    HDassert(biter);
-    HDassert(!biter->ready);
+    assert(biter);
+    assert(!biter->ready);
 
     /* Check for empty heap */
-    HDassert(offset >= hdr->man_dtable.cparam.start_block_size);
+    assert(offset >= hdr->man_dtable.cparam.start_block_size);
 
     /* Allocate level structure */
     if (NULL == (biter->curr = H5FL_MALLOC(H5HF_block_loc_t)))
@@ -225,7 +217,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
         /* Or, if the offset has just filled up a direct or indirect block */
         if (curr_offset == (col * hdr->man_dtable.row_block_size[row]) ||
             row < hdr->man_dtable.max_direct_rows) {
-            HDassert(curr_offset - (col * hdr->man_dtable.row_block_size[row]) == 0);
+            assert(curr_offset - (col * hdr->man_dtable.row_block_size[row]) == 0);
             break; /* Done now */
         }          /* end if */
         /* Indirect block row */
@@ -262,9 +254,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May 31 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -275,7 +264,7 @@ H5HF__man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsign
     /*
      * Check arguments.
      */
-    HDassert(biter);
+    assert(biter);
 
     /* Set location context */
     biter->curr->entry = entry;
@@ -293,9 +282,6 @@ H5HF__man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsign
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -310,10 +296,10 @@ H5HF__man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, H5HF_indir
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(biter);
-    HDassert(!biter->ready);
-    HDassert(iblock);
+    assert(hdr);
+    assert(biter);
+    assert(!biter->ready);
+    assert(iblock);
 
     /* Create new location for iterator */
     if (NULL == (new_loc = H5FL_MALLOC(H5HF_block_loc_t)))
@@ -352,9 +338,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -367,7 +350,7 @@ H5HF__man_iter_reset(H5HF_block_iter_t *biter)
     /*
      * Check arguments.
      */
-    HDassert(biter);
+    assert(biter);
 
     /* Free any location contexts that exist */
     if (biter->curr) {
@@ -411,9 +394,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -424,16 +404,16 @@ H5HF__man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries
     /*
      * Check arguments.
      */
-    HDassert(biter);
-    HDassert(biter->curr);
-    HDassert(biter->curr->context);
-    HDassert(biter->curr->row < biter->curr->context->nrows);
+    assert(biter);
+    assert(biter->curr);
+    assert(biter->curr->context);
+    assert(biter->curr->row < biter->curr->context->nrows);
 
     /* Advance entry in current block */
     biter->curr->entry += nentries;
     biter->curr->row = biter->curr->entry / hdr->man_dtable.cparam.width;
     biter->curr->col = biter->curr->entry % hdr->man_dtable.cparam.width;
-    /*    HDassert(biter->curr->row <= biter->curr->context->nrows); */
+    /*    assert(biter->curr->row <= biter->curr->context->nrows); */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__man_iter_next() */
@@ -444,9 +424,6 @@ H5HF__man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries
  * Purpose:	Move iterator up one level
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -461,11 +438,11 @@ H5HF__man_iter_up(H5HF_block_iter_t *biter)
     /*
      * Check arguments.
      */
-    HDassert(biter);
-    HDassert(biter->ready);
-    HDassert(biter->curr);
-    HDassert(biter->curr->up);
-    HDassert(biter->curr->context);
+    assert(biter);
+    assert(biter->ready);
+    assert(biter->curr);
+    assert(biter->curr->up);
+    assert(biter->curr->context);
 
     /* Release hold on current location's indirect block */
     if (H5HF__iblock_decr(biter->curr->context) < 0)
@@ -491,9 +468,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -507,10 +481,10 @@ H5HF__man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
     /*
      * Check arguments.
      */
-    HDassert(biter);
-    HDassert(biter->ready);
-    HDassert(biter->curr);
-    HDassert(biter->curr->context);
+    assert(biter);
+    assert(biter->ready);
+    assert(biter->curr);
+    assert(biter->curr->context);
 
     /* Create new location to move down to */
     if (NULL == (down_loc = H5FL_MALLOC(H5HF_block_loc_t)))
@@ -545,9 +519,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -559,8 +530,8 @@ H5HF__man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsi
     /*
      * Check arguments.
      */
-    HDassert(biter);
-    HDassert(biter->ready);
+    assert(biter);
+    assert(biter->ready);
 
     /* Retrieve the information asked for */
     if (row)
@@ -582,9 +553,6 @@ H5HF__man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsi
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 25 2006
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -595,7 +563,7 @@ H5HF__man_iter_ready(H5HF_block_iter_t *biter)
     /*
      * Check arguments.
      */
-    HDassert(biter);
+    assert(biter);
 
     FUNC_LEAVE_NOAPI(biter->ready)
 } /* end H5HF__man_iter_ready() */

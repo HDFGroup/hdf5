@@ -20,8 +20,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Tvisit.c
- *			Jul 19 2007
- *			Quincey Koziol
  *
  * Purpose:		Visit all the components of a datatype
  *
@@ -77,9 +75,6 @@
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 19, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -91,8 +86,8 @@ H5T__visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op, void *op_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dt);
-    HDassert(op);
+    assert(dt);
+    assert(op);
 
     /* Check for complex datatype */
     is_complex = H5T_IS_COMPLEX(dt->shared->type);

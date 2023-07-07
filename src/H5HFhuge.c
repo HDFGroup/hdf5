@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFhuge.c
- *			Aug  7 2006
- *			Quincey Koziol
  *
  * Purpose:		Routines for "huge" objects in fractal heap
  *
@@ -84,9 +82,6 @@ static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -100,7 +95,7 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Compute the size of 'raw' records on disk */
     /* (Note: the size for huge IDs could be set to 'huge_id_size', instead
@@ -165,9 +160,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -178,7 +170,7 @@ H5HF__huge_init(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Compute information about 'huge' objects for the heap */
 
@@ -234,9 +226,6 @@ H5HF__huge_init(H5HF_hdr_t *hdr)
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 15 2006
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -250,7 +239,7 @@ H5HF__huge_new_id(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Check for wrapping around 'huge' object ID space */
     if (hdr->huge_ids_wrapped)
@@ -280,9 +269,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -300,13 +286,13 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(obj_size > hdr->max_man_size);
-    HDassert(obj);
-    HDassert(id);
+    assert(hdr);
+    assert(obj_size > hdr->max_man_size);
+    assert(obj);
+    assert(id);
 
     /* Check if the v2 B-tree for tracking 'huge' heap objects has been created yet */
-    if (!H5F_addr_defined(hdr->huge_bt2_addr)) {
+    if (!H5_addr_defined(hdr->huge_bt2_addr)) {
         /* Go create (& open) v2 B-tree */
         if (H5HF__huge_bt2_create(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL,
@@ -321,7 +307,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
                             "unable to open v2 B-tree for tracking 'huge' heap objects")
         } /* end if */
     }     /* end else */
-    HDassert(hdr->huge_bt2);
+    assert(hdr->huge_bt2);
 
     /* Check for I/O pipeline filter on heap */
     if (hdr->filter_len > 0) {
@@ -362,7 +348,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
     /* Release buffer for writing, if we had one */
     if (write_buf != obj) {
-        HDassert(hdr->filter_len > 0);
+        assert(hdr->filter_len > 0);
         H5MM_xfree(write_buf);
     } /* end if */
 
@@ -444,7 +430,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
         /* Encode ID for user */
         *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_HUGE;
-        UINT64ENCODE_VAR(id, new_id, hdr->huge_id_size)
+        UINT64ENCODE_VAR(id, new_id, hdr->huge_id_size);
     } /* end else */
 
     /* Update statistics about heap */
@@ -466,9 +452,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -481,10 +464,10 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
-    HDassert(id);
-    HDassert(obj_len_p);
+    assert(hdr);
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
+    assert(id);
+    assert(obj_len_p);
 
     /* Skip over the flag byte */
     id++;
@@ -522,7 +505,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
             H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_filt_indir_found, &found_rec) <
@@ -539,7 +522,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
             H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_indir_found, &found_rec) < 0)
@@ -563,9 +546,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -579,10 +559,10 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
-    HDassert(id);
-    HDassert(obj_off_p);
+    assert(hdr);
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
+    assert(id);
+    assert(obj_off_p);
 
     /* Skip over the flag byte */
     id++;
@@ -596,7 +576,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
         hbool_t found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -611,7 +591,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
             H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_filt_indir_found, &found_rec) <
@@ -628,7 +608,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
             H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_indir_found, &found_rec) < 0)
@@ -655,9 +635,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -674,9 +651,9 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(is_read || op);
+    assert(hdr);
+    assert(id);
+    assert(is_read || op);
 
     /* Skip over the flag byte */
     id++;
@@ -695,7 +672,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
         hbool_t found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -710,7 +687,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
             H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_filt_indir_found, &found_rec) <
@@ -729,7 +706,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
             H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_indir_found, &found_rec) < 0)
@@ -801,37 +778,31 @@ done:
 } /* end H5HF__huge_op_real() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF__huge_write
+ * Function:    H5HF__huge_write
  *
- * Purpose:	Write a 'huge' object to the heap
+ * Purpose:     Write a 'huge' object to the heap
  *
- * Note:	This implementation somewhat limited: it doesn't handle
- *		heaps with filters, which would require re-compressing the
- *		huge object and probably changing the address of the object
- *		on disk (and possibly the heap ID for "direct" huge IDs).
+ * Note:        This implementation somewhat limited: it doesn't handle
+ *              heaps with filters, which would require re-compressing the
+ *              huge object and probably changing the address of the object
+ *              on disk (and possibly the heap ID for "direct" huge IDs).
  *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Feb 21 2007
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
 {
-    haddr_t obj_addr;            /* Object's address in the file */
-    size_t  obj_size;            /* Object's size in the file */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    haddr_t obj_addr  = HADDR_UNDEF; /* Object's address in the file */
+    size_t  obj_size  = 0;           /* Object's size in the file */
+    herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    /*
-     * Check arguments.
-     */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj);
+    assert(hdr);
+    assert(id);
+    assert(obj);
 
     /* Check for filters on the heap */
     if (hdr->filter_len > 0)
@@ -845,14 +816,14 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
         /* Retrieve the object's address and length (common) */
         H5F_addr_decode(hdr->f, &id, &obj_addr);
         H5F_DECODE_LENGTH(hdr->f, id, obj_size);
-    } /* end if */
+    }
     else {
         H5HF_huge_bt2_indir_rec_t found_rec;     /* Record found from tracking object */
         H5HF_huge_bt2_indir_rec_t search_rec;    /* Record for searching for object */
         hbool_t                   found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -860,10 +831,10 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
             if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
                             "unable to open v2 B-tree for tracking 'huge' heap objects")
-        } /* end if */
+        }
 
         /* Get ID for looking up 'huge' object in v2 B-tree */
-        UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+        UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
         /* Look up object in v2 B-tree */
         if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_indir_found, &found_rec) < 0)
@@ -874,7 +845,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
         /* Retrieve the object's address & length */
         obj_addr = found_rec.addr;
         H5_CHECKED_ASSIGN(obj_size, size_t, found_rec.len, hsize_t);
-    } /* end else */
+    }
 
     /* Write the object's data to the file */
     /* (writes directly from application's buffer) */
@@ -892,9 +863,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -907,9 +875,9 @@ H5HF__huge_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj);
+    assert(hdr);
+    assert(id);
+    assert(obj);
 
     /* Call the internal 'op' routine */
     if (H5HF__huge_op_real(hdr, id, TRUE, NULL, obj) < 0)
@@ -926,9 +894,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -941,9 +906,9 @@ H5HF__huge_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_d
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(op);
+    assert(hdr);
+    assert(id);
+    assert(op);
 
     /* Call the internal 'op' routine routine */
     if (H5HF__huge_op_real(hdr, id, FALSE, op, op_data) < 0)
@@ -960,9 +925,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -976,9 +938,9 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
-    HDassert(id);
+    assert(hdr);
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
+    assert(id);
 
     /* Check if v2 B-tree is open yet */
     if (NULL == hdr->huge_bt2) {
@@ -1028,7 +990,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
             H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
             /* (space in the file for the object is freed in the 'remove' callback) */
@@ -1039,7 +1001,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
             H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
             /* (space in the file for the object is freed in the 'remove' callback) */
@@ -1067,9 +1029,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1082,12 +1041,12 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Check if v2 B-tree index is open */
     if (hdr->huge_bt2) {
         /* Sanity check */
-        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5_addr_defined(hdr->huge_bt2_addr));
 
         /* Close v2 B-tree index */
         if (H5B2_close(hdr->huge_bt2) < 0)
@@ -1098,9 +1057,9 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
     /* Check if there are no more 'huge' objects in the heap and delete the
      *  v2 B-tree that tracks them, if so
      */
-    if (H5F_addr_defined(hdr->huge_bt2_addr) && hdr->huge_nobjs == 0) {
+    if (H5_addr_defined(hdr->huge_bt2_addr) && hdr->huge_nobjs == 0) {
         /* Sanity check */
-        HDassert(hdr->huge_size == 0);
+        assert(hdr->huge_size == 0);
 
         /* Delete the v2 B-tree */
         /* (any v2 B-tree class will work here) */
@@ -1129,9 +1088,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1146,10 +1102,10 @@ H5HF__huge_delete(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
-    HDassert(hdr->huge_nobjs);
-    HDassert(hdr->huge_size);
+    assert(hdr);
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
+    assert(hdr->huge_nobjs);
+    assert(hdr->huge_size);
 
     /* Set up the callback info */
     udata.hdr = hdr;

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5HLdblk.c
- *              Summer 2012
- *              Dana Robinson
  *
  * Purpose:     Data block routines for local heaps.
  *
@@ -75,9 +73,6 @@ H5FL_DEFINE_STATIC(H5HL_dblk_t);
  * Return:      Success:    non-NULL pointer to new local heap data block
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
- *
  *-------------------------------------------------------------------------
  */
 H5HL_dblk_t *
@@ -89,7 +84,7 @@ H5HL__dblk_new(H5HL_t *heap)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(heap);
+    assert(heap);
 
     /* Allocate new local heap data block */
     if (NULL == (dblk = H5FL_CALLOC(H5HL_dblk_t)))
@@ -112,7 +107,7 @@ done:
         /* H5FL_FREE always returns NULL so we can't check for errors */
         dblk = H5FL_FREE(H5HL_dblk_t, dblk);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__dblk_new() */
 
 /*-------------------------------------------------------------------------
@@ -121,9 +116,6 @@ done:
  * Purpose:     Destroy a local heap data block object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -135,7 +127,7 @@ H5HL__dblk_dest(H5HL_dblk_t *dblk)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(dblk);
+    assert(dblk);
 
     /* Check if data block was initialized */
     if (dblk->heap) {
@@ -165,9 +157,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -182,8 +171,8 @@ H5HL__dblk_realloc(H5F_t *f, H5HL_t *heap, size_t new_heap_size)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(heap);
-    HDassert(new_heap_size > 0);
+    assert(heap);
+    assert(new_heap_size > 0);
 
     /* Release old space on disk */
     old_addr      = heap->dblk_addr;
@@ -202,12 +191,12 @@ H5HL__dblk_realloc(H5F_t *f, H5HL_t *heap, size_t new_heap_size)
     heap->dblk_size = new_heap_size;
 
     /* Check if heap data block actually moved in the file */
-    if (H5F_addr_eq(old_addr, new_addr)) {
+    if (H5_addr_eq(old_addr, new_addr)) {
         /* Check if heap data block is contiguous w/prefix */
         if (heap->single_cache_obj) {
             /* Sanity check */
-            HDassert(H5F_addr_eq(heap->prfx_addr + heap->prfx_size, old_addr));
-            HDassert(heap->prfx);
+            assert(H5_addr_eq(heap->prfx_addr + heap->prfx_size, old_addr));
+            assert(heap->prfx);
 
             /* Resize the heap prefix in the cache */
             if (FAIL == H5AC_resize_entry(heap->prfx, (size_t)(heap->prfx_size + new_heap_size)))
@@ -215,8 +204,8 @@ H5HL__dblk_realloc(H5F_t *f, H5HL_t *heap, size_t new_heap_size)
         }
         else {
             /* Sanity check */
-            HDassert(H5F_addr_ne(heap->prfx_addr + heap->prfx_size, old_addr));
-            HDassert(heap->dblk);
+            assert(H5_addr_ne(heap->prfx_addr + heap->prfx_size, old_addr));
+            assert(heap->dblk);
 
             /* Resize the heap data block in the cache */
             if (H5AC_resize_entry(heap->dblk, (size_t)new_heap_size) < 0)

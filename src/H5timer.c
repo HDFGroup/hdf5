@@ -12,8 +12,6 @@
 
 /*-------------------------------------------------------------------------
  * Created:		H5timer.c
- *			Aug 21 2006
- *			Quincey Koziol
  *
  * Purpose:             Internal, platform-independent 'timer' support routines.
  *
@@ -89,9 +87,6 @@
  *
  * Return:	void
  *
- * Programmer:	Robb Matzke
- *              Wednesday, August  5, 1998
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -146,9 +141,6 @@ H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds)
  *
  * Return:	# of seconds from the epoch (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 time_t
@@ -177,9 +169,6 @@ H5_now(void)
  *
  * Return:	# of microseconds from the epoch (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 uint64_t
@@ -191,7 +180,7 @@ H5_now_usec(void)
     {
         struct timespec ts;
 
-        HDclock_gettime(CLOCK_MONOTONIC, &ts);
+        clock_gettime(CLOCK_MONOTONIC, &ts);
 
         /* Cast all values in this expression to uint64_t to ensure that all intermediate
          * calculations are done in 64 bit, to prevent overflow */
@@ -225,8 +214,6 @@ H5_now_usec(void)
  * Return:      Success:    A non-negative time value
  *              Failure:    -1.0 (in theory, can't currently fail)
  *
- * Programmer:  Quincey Koziol
- *              October 05, 2016
  *--------------------------------------------------------------------------
  */
 double
@@ -240,7 +227,7 @@ H5_get_time(void)
     {
         struct timespec ts;
 
-        HDclock_gettime(CLOCK_MONOTONIC, &ts);
+        clock_gettime(CLOCK_MONOTONIC, &ts);
         ret_value = (double)ts.tv_sec + ((double)ts.tv_nsec / 1000000000.0);
     }
 #elif defined(H5_HAVE_GETTIMEOFDAY)
@@ -266,16 +253,13 @@ H5_get_time(void)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     /* Windows call handles both system/user and elapsed times */
 #ifdef H5_HAVE_WIN32_API
@@ -295,7 +279,7 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
     {
         struct rusage res;
 
-        if (HDgetrusage(RUSAGE_SELF, &res) < 0)
+        if (getrusage(RUSAGE_SELF, &res) < 0)
             return -1;
         times->system = (double)res.ru_stime.tv_sec + ((double)res.ru_stime.tv_usec / 1.0E6);
         times->user   = (double)res.ru_utime.tv_sec + ((double)res.ru_utime.tv_usec / 1.0E6);
@@ -366,19 +350,16 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5_timer_init(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Initialize everything */
-    HDmemset(timer, 0, sizeof(H5_timer_t));
+    memset(timer, 0, sizeof(H5_timer_t));
 
     return 0;
 } /* end H5_timer_init() */
@@ -391,16 +372,13 @@ H5_timer_init(H5_timer_t *timer /*in,out*/)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5_timer_start(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Start the timer
      * This sets the "initial" times to the system-defined start times.
@@ -421,16 +399,13 @@ H5_timer_start(H5_timer_t *timer /*in,out*/)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5_timer_stop(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Stop the timer */
     if (H5__timer_get_timevals(&(timer->final_interval)) < 0)
@@ -472,16 +447,13 @@ H5_timer_stop(H5_timer_t *timer /*in,out*/)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     if (timer.is_running) {
         H5_timevals_t now;
@@ -527,16 +499,13 @@ H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     if (timer.is_running) {
         H5_timevals_t now;
@@ -580,9 +549,6 @@ H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
  *
  *              Failure:  NULL
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 char *
@@ -617,7 +583,7 @@ H5_timer_get_time_string(double seconds)
     } /* end if */
 
     /* Allocate */
-    if (NULL == (s = (char *)HDcalloc(H5TIMER_TIME_STRING_LEN, sizeof(char))))
+    if (NULL == (s = (char *)calloc(H5TIMER_TIME_STRING_LEN, sizeof(char))))
         return NULL;
 
     /* Do we need a format string? Some people might like a certain

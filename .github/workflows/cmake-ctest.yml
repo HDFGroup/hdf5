@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux)
-        run: sudo apt-get install ninja-build
+        run: sudo apt-get install ninja-build doxygen graphviz
 
       - name: Set file base name (Linux)
         id: set-file-base
@@ -113,7 +113,7 @@ jobs:
 
       - name: List files for the space (Linux)
         run: |
-              ls ${{ github.workspace }}
+              ls -l ${{ github.workspace }}
               ls ${{ runner.workspace }}
 
       - name: Uncompress source (Linux)
@@ -141,7 +141,7 @@ jobs:
       - name: List files in the space (Linux)
         run: |
               ls ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls -l ${{ runner.workspace }}
 
       # Save files created by ctest script
       - name: Save published binary (Linux)
@@ -151,6 +151,14 @@ jobs:
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
+      # Save doxygen files created by ctest script
+      - name: Save published doxygen (Linux)
+        uses: actions/upload-artifact@v3
+        with:
+              name: docs-doxygen
+              path: ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/hdf5lib_docs/html
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
   build_and_test_mac:
   # MacOS w/ Clang + CMake
   #
@@ -158,7 +166,7 @@ jobs:
     runs-on: macos-11
     steps:
       - name: Install Dependencies (MacOS)
-        run: brew install ninja
+        run: brew install ninja doxygen
 
       - name: Set file base name (MacOS)
         id: set-file-base
@@ -208,7 +216,7 @@ jobs:
       - name: List files in the space (MacOS)
         run: |
               ls ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls -l ${{ runner.workspace }}
 
       # Save files created by ctest script
       - name: Save published binary (MacOS)

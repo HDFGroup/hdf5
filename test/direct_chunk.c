@@ -86,7 +86,7 @@ static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts, const unsigned
                             size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_BOGUS1[1] = {{
+static const H5Z_class2_t H5Z_BOGUS1[1] = {{
     H5Z_CLASS_T_VERS,  /* H5Z_class_t version */
     H5Z_FILTER_BOGUS1, /* Filter id number        */
     1, 1,              /* Encoding and decoding enabled */
@@ -96,7 +96,7 @@ const H5Z_class2_t H5Z_BOGUS1[1] = {{
     filter_bogus1,     /* The actual filter function    */
 }};
 
-const H5Z_class2_t H5Z_BOGUS2[1] = {{
+static const H5Z_class2_t H5Z_BOGUS2[1] = {{
     H5Z_CLASS_T_VERS,  /* H5Z_class_t version */
     H5Z_FILTER_BOGUS2, /* Filter id number        */
     1, 1,              /* Encoding and decoding enabled */
@@ -113,9 +113,6 @@ const H5Z_class2_t H5Z_BOGUS2[1] = {{
  *
  * Return:        Success:    0
  *                Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -204,7 +201,7 @@ test_direct_chunk_write(hid_t file)
             direct_buf[i][j] = n++;
 
     /* Allocate output (compressed) buffer */
-    outbuf = HDmalloc(z_dst_nbytes);
+    outbuf = malloc(z_dst_nbytes);
     z_dst  = (Bytef *)outbuf;
 
     /* Perform compression from the source to the destination buffer */
@@ -212,15 +209,15 @@ test_direct_chunk_write(hid_t file)
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "overflow");
+        fprintf(stderr, "overflow");
         goto error;
     }
     else if (Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "deflate memory error");
+        fprintf(stderr, "deflate memory error");
         goto error;
     }
     else if (Z_OK != ret) {
-        HDfprintf(stderr, "other deflate error");
+        fprintf(stderr, "other deflate error");
         goto error;
     }
 
@@ -236,7 +233,7 @@ test_direct_chunk_write(hid_t file)
     }
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     if (H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
@@ -269,9 +266,9 @@ test_direct_chunk_write(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != check_chunk[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -283,7 +280,7 @@ test_direct_chunk_write(hid_t file)
             direct_buf[i][j] = i + j;
 
     /* Allocate output (compressed) buffer */
-    outbuf = HDmalloc(z_dst_nbytes);
+    outbuf = malloc(z_dst_nbytes);
     z_dst  = (Bytef *)outbuf;
 
     /* Perform compression from the source to the destination buffer */
@@ -291,15 +288,15 @@ test_direct_chunk_write(hid_t file)
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "overflow");
+        fprintf(stderr, "overflow");
         goto error;
     }
     else if (Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "deflate memory error");
+        fprintf(stderr, "deflate memory error");
         goto error;
     }
     else if (Z_OK != ret) {
-        HDfprintf(stderr, "other deflate error");
+        fprintf(stderr, "other deflate error");
         goto error;
     }
 
@@ -316,7 +313,7 @@ test_direct_chunk_write(hid_t file)
     }
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     if (H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
@@ -335,9 +332,9 @@ test_direct_chunk_write(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != check_chunk[i][j]) {
-                HDprintf("    2. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
+                printf("    2. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -364,10 +361,10 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     H5_FAILED();
     return 1;
@@ -381,9 +378,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Dana Robinson
- *              Spring 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -476,7 +470,7 @@ error:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -490,9 +484,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -605,9 +596,9 @@ test_skip_compress_write1(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != check_chunk[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -620,7 +611,7 @@ test_skip_compress_write1(hid_t file)
         goto error;
 
     /* Read the raw chunk back */
-    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    memset(&read_direct_buf, 0, sizeof(read_direct_buf));
     if ((status = H5Dread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
         goto error;
     if (read_filter_mask != filter_mask)
@@ -630,9 +621,9 @@ test_skip_compress_write1(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != read_direct_buf[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
                 goto error;
             }
         }
@@ -659,7 +650,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -671,9 +662,6 @@ error:
  * Purpose:        A bogus filter that adds ADD_ON to the original value
  *
  * Return:        Success:    Data chunk size
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -709,8 +697,6 @@ filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *
  * Return:    Success:    Data chunk size
  *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -746,9 +732,6 @@ filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -880,10 +863,10 @@ test_skip_compress_write2(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (origin_direct_buf[i][j] != check_chunk[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j],
-                         check_chunk[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j],
+                       check_chunk[i][j]);
                 goto error;
             }
         }
@@ -896,7 +879,7 @@ test_skip_compress_write2(hid_t file)
         goto error;
 
     /* Read the raw chunk back */
-    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    memset(&read_direct_buf, 0, sizeof(read_direct_buf));
     if ((status = H5Dread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
         goto error;
     if (read_filter_mask != filter_mask)
@@ -906,9 +889,9 @@ test_skip_compress_write2(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != read_direct_buf[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
                 goto error;
             }
         }
@@ -935,7 +918,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -948,9 +931,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1088,16 +1068,16 @@ test_data_conv(hid_t file)
                 (direct_buf[i][j]).c[3] != (read_chunk[i][j]).c[3] ||
                 (direct_buf[i][j]).d != (read_chunk[i][j]).d ||
                 (direct_buf[i][j]).e != (read_chunk[i][j]).e) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
-                         (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
-                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
-                         (direct_buf[i][j]).e);
-                HDprintf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (read_chunk[i][j]).a,
-                         (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1],
-                         (read_chunk[i][j]).c[2], (read_chunk[i][j]).c[3], (read_chunk[i][j]).d,
-                         (read_chunk[i][j]).e);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
+                       (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
+                       (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
+                       (direct_buf[i][j]).e);
+                printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (read_chunk[i][j]).a,
+                       (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1],
+                       (read_chunk[i][j]).c[2], (read_chunk[i][j]).c[3], (read_chunk[i][j]).d,
+                       (read_chunk[i][j]).e);
 
                 goto error;
             }
@@ -1131,15 +1111,15 @@ test_data_conv(hid_t file)
                 (direct_buf[i][j]).c[2] != (check_chunk[i][j]).c[2] ||
                 (direct_buf[i][j]).c[3] != (check_chunk[i][j]).c[3] ||
                 (direct_buf[i][j]).e != (check_chunk[i][j]).e) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
-                         (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
-                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
-                         (direct_buf[i][j]).e);
-                HDprintf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n", (check_chunk[i][j]).a,
-                         (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2],
-                         (check_chunk[i][j]).c[3], (check_chunk[i][j]).e);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
+                       (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
+                       (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
+                       (direct_buf[i][j]).e);
+                printf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n", (check_chunk[i][j]).a,
+                       (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2],
+                       (check_chunk[i][j]).c[3], (check_chunk[i][j]).e);
 
                 goto error;
             }
@@ -1171,7 +1151,7 @@ error:
         H5Tclose(st);
         H5Tclose(dt);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -1184,9 +1164,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1251,7 +1228,7 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Try to get chunk size for a contiguous dataset.  It should fail */
     H5E_BEGIN_TRY
@@ -1259,7 +1236,7 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dget_chunk_storage_size(dataset, offset, &chunk_nbytes)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Try to H5Dread_chunk from the contiguous dataset.  It should fail */
     H5E_BEGIN_TRY
@@ -1267,7 +1244,7 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Dclose(dataset) < 0)
         goto error;
@@ -1293,14 +1270,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk((hid_t)-1, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check invalid DXPL ID for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY
@@ -1308,14 +1285,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, (hid_t)-1, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check invalid OFFSET for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY
@@ -1323,14 +1300,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, NULL, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, dxpl, NULL, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check when OFFSET is out of dataset range for H5Dwrite_chunk and H5Dread_chunk */
     offset[0] = NX + 1;
@@ -1340,14 +1317,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check when OFFSET is not on chunk boundary for H5Dwrite_chunk and H5Dread_chunk */
     offset[0] = CHUNK_NX;
@@ -1357,14 +1334,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check invalid buffer size for H5Dwrite_chunk only */
     offset[0] = CHUNK_NX;
@@ -1375,7 +1352,7 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check invalid data buffer for H5Dwrite_chunk and H5Dread_chunk */
     buf_size = CHUNK_NX * CHUNK_NY * sizeof(int);
@@ -1384,14 +1361,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, NULL)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, NULL)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Dclose(dataset) < 0)
         goto error;
@@ -1416,7 +1393,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -1430,9 +1407,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              14 February 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1510,7 +1484,7 @@ test_direct_chunk_read_no_cache(hid_t file)
         goto error;
 
     /* Allocate output (compressed) buffer */
-    outbuf = HDmalloc(z_src_nbytes);
+    outbuf = malloc(z_src_nbytes);
     z_src  = (Bytef *)outbuf;
 
     /* For each chunk in the dataset, compare the result of H5Dread and H5Dread_chunk. */
@@ -1550,19 +1524,19 @@ test_direct_chunk_read_no_cache(hid_t file)
 
             /* Check for various zlib errors */
             if (Z_BUF_ERROR == ret) {
-                HDfprintf(stderr, "overflow\n");
+                fprintf(stderr, "overflow\n");
                 goto error;
             }
             else if (Z_MEM_ERROR == ret) {
-                HDfprintf(stderr, "deflate memory error\n");
+                fprintf(stderr, "deflate memory error\n");
                 goto error;
             }
             else if (Z_DATA_ERROR == ret) {
-                HDfprintf(stderr, "corrupted data\n");
+                fprintf(stderr, "corrupted data\n");
                 goto error;
             }
             else if (Z_OK != ret) {
-                HDfprintf(stderr, "other deflate error\n");
+                fprintf(stderr, "other deflate error\n");
                 goto error;
             }
 
@@ -1570,9 +1544,9 @@ test_direct_chunk_read_no_cache(hid_t file)
             for (k = 0; k < CHUNK_NX; k++) {
                 for (l = 0; l < CHUNK_NY; l++) {
                     if (direct_buf[k][l] != check_chunk[k][l]) {
-                        HDprintf("\n    1. Read different values than written.");
-                        HDprintf("    At index %d,%d\n", k, l);
-                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -1589,7 +1563,7 @@ test_direct_chunk_read_no_cache(hid_t file)
     H5Pclose(dapl);
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     PASSED();
     return 0;
@@ -1604,10 +1578,10 @@ error:
         H5Pclose(dxpl);
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     H5_FAILED();
     return 1;
@@ -1694,7 +1668,7 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
     }
 
     /* Allocate output (compressed) buffer */
-    outbuf = HDmalloc(z_src_nbytes);
+    outbuf = malloc(z_src_nbytes);
     z_src  = (Bytef *)outbuf;
 
     /* For each chunk in the dataset, compare the result of H5Dread and H5Dread_chunk. */
@@ -1741,19 +1715,19 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
 
             /* Check for various zlib errors */
             if (Z_BUF_ERROR == ret) {
-                HDfprintf(stderr, "overflow\n");
+                fprintf(stderr, "overflow\n");
                 goto error;
             }
             else if (Z_MEM_ERROR == ret) {
-                HDfprintf(stderr, "deflate memory error\n");
+                fprintf(stderr, "deflate memory error\n");
                 goto error;
             }
             else if (Z_DATA_ERROR == ret) {
-                HDfprintf(stderr, "corrupted data\n");
+                fprintf(stderr, "corrupted data\n");
                 goto error;
             }
             else if (Z_OK != ret) {
-                HDfprintf(stderr, "other deflate error\n");
+                fprintf(stderr, "other deflate error\n");
                 goto error;
             }
 
@@ -1761,9 +1735,9 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
             for (k = 0; k < CHUNK_NX; k++) {
                 for (l = 0; l < CHUNK_NY; l++) {
                     if (direct_buf[k][l] != check_chunk[k][l]) {
-                        HDprintf("\n    1. Read different values than written.");
-                        HDprintf("    At index %d,%d\n", k, l);
-                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -1779,7 +1753,7 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
     H5Pclose(dxpl);
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     PASSED();
     return 0;
@@ -1793,10 +1767,10 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     H5_FAILED();
     return 1;
@@ -1811,9 +1785,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              30 November 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1910,7 +1881,7 @@ test_read_unfiltered_dset(hid_t file)
             offset[0] = (hsize_t)i * CHUNK_NX;
             offset[1] = (hsize_t)j * CHUNK_NY;
             /* Read the raw chunk back */
-            HDmemset(&direct_buf, 0, sizeof(direct_buf));
+            memset(&direct_buf, 0, sizeof(direct_buf));
             filter_mask = UINT_MAX;
             if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) < 0)
                 goto error;
@@ -1923,9 +1894,9 @@ test_read_unfiltered_dset(hid_t file)
             for (k = 0; k < CHUNK_NX; k++) {
                 for (l = 0; l < CHUNK_NY; l++) {
                     if (direct_buf[k][l] != check_chunk[k][l]) {
-                        HDprintf("\n    1. Read different values than written.");
-                        HDprintf("    At index %d,%d\n", k, l);
-                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -1952,7 +1923,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -1967,9 +1938,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              30 November 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -2014,7 +1982,7 @@ test_read_unallocated_chunk(hid_t file)
         FAIL_STACK_ERROR;
 
     /* Write a single chunk to initialize the chunk storage */
-    HDmemset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
+    memset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
     offset[0] = 0;
     offset[1] = 0;
 
@@ -2035,7 +2003,7 @@ test_read_unallocated_chunk(hid_t file)
             {
                 status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, &direct_buf);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             /* Check that the chunk read call does not succeed. */
             if (status != -1)
@@ -2047,7 +2015,7 @@ test_read_unallocated_chunk(hid_t file)
             {
                 status = H5Dget_chunk_storage_size(dataset, offset, &direct_chunk_nbytes);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             /* Check that the chunk storage size call does not succeed. */
             if (status != -1)
@@ -2081,7 +2049,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -2238,7 +2206,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -2252,9 +2220,6 @@ error:
  *
  * Return:        Success:    0
  *                Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -2299,41 +2264,41 @@ main(void)
             continue;
 
         /* Print configuration */
-        HDprintf("Configuration: ");
+        printf("Configuration: ");
         if (config == 0)
-            HDprintf("<empty>");
+            printf("<empty>");
         if (config & CONFIG_LATEST) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("latest format");
+                printf(", ");
+            printf("latest format");
             need_comma = TRUE;
         } /* end if */
         if (config & CONFIG_REOPEN_FILE) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("reopen file");
+                printf(", ");
+            printf("reopen file");
             need_comma = TRUE;
         } /* end if */
         else if (config & CONFIG_REOPEN_DSET) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("reopen dataset");
+                printf(", ");
+            printf("reopen dataset");
             need_comma = TRUE;
         } /* end if */
         if (config & CONFIG_DIRECT_WRITE) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("direct write");
+                printf(", ");
+            printf("direct write");
             need_comma = TRUE;
         } /* end if */
         if (config & CONFIG_DIRECT_READ) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("direct read");
+                printf(", ");
+            printf("direct read");
             need_comma = TRUE;
         } /* end if */
-        HDprintf(":\n");
-        HDfflush(stdout);
+        printf(":\n");
+        fflush(stdout);
 
         nerrors += test_single_chunk(config);
     } /* end for */

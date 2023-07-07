@@ -106,9 +106,6 @@ H5FL_DEFINE_STATIC(H5FA__test_ctx_t);
  * Return:      Success:    non-NULL
  *              Failure:    NULL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -140,9 +137,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -153,7 +147,7 @@ H5FA__test_dst_context(void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Release context structure */
     ctx = H5FL_FREE(H5FA__test_ctx_t, ctx);
@@ -168,9 +162,6 @@ H5FA__test_dst_context(void *_ctx)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -181,8 +172,8 @@ H5FA__test_fill(void *nat_blk, size_t nelmts)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(nat_blk);
-    HDassert(nelmts);
+    assert(nat_blk);
+    assert(nelmts);
 
     H5VM_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
 
@@ -195,9 +186,6 @@ H5FA__test_fill(void *nat_blk, size_t nelmts)
  * Purpose:     Encode an element from "native" to "raw" form
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -212,10 +200,10 @@ H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void H5_ATTR_UNUS
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(raw);
-    HDassert(elmt);
-    HDassert(nelmts);
-    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(raw);
+    assert(elmt);
+    assert(nelmts);
+    assert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Encode native elements into raw elements */
     while (nelmts) {
@@ -240,9 +228,6 @@ H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void H5_ATTR_UNUS
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -257,10 +242,10 @@ H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(raw);
-    HDassert(elmt);
-    HDassert(nelmts);
-    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(raw);
+    assert(elmt);
+    assert(nelmts);
+    assert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Decode raw elements into native elements */
     while (nelmts) {
@@ -285,9 +270,6 @@ H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_UNU
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -298,13 +280,13 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(stream);
-    HDassert(elmt);
+    assert(stream);
+    assert(elmt);
 
     /* Print element */
     HDsnprintf(temp_str, sizeof(temp_str), "Element #%llu:", (unsigned long long)idx);
-    HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
-              (unsigned long long)*(const uint64_t *)elmt);
+    fprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
+            (unsigned long long)*(const uint64_t *)elmt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FA__test_debug() */
@@ -316,9 +298,6 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
  *
  * Return:      Success:    non-NULL
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, December 1, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -341,7 +320,7 @@ H5FA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_a
     ret_value = ctx;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__test_crt_dbg_context() */
 
 /*-------------------------------------------------------------------------
@@ -351,9 +330,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -362,14 +338,14 @@ H5FA__get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(fa);
-    HDassert(cparam);
+    assert(fa);
+    assert(cparam);
 
     /* Get fixed array creation parameters */
     cparam->raw_elmt_size = fa->hdr->cparam.raw_elmt_size;
     cparam->nelmts        = fa->hdr->cparam.nelmts;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FA__get_cparam_test() */
 
 /*-------------------------------------------------------------------------
@@ -378,9 +354,6 @@ H5FA__get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam)
  * Purpose:     Compare the parameters used to create the fixed array
  *
  * Return:      An integer value like strcmp
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -392,8 +365,8 @@ H5FA__cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(cparam1);
-    HDassert(cparam2);
+    assert(cparam1);
+    assert(cparam2);
 
     /* Compare creation parameters for array */
     if (cparam1->raw_elmt_size < cparam2->raw_elmt_size)

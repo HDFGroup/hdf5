@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Apr 17, 2007
- *
  * Purpose:     This program is run to generate an HDF5 data file with several
  *              datasets that have "bogus" messages in their object header.
  */
@@ -133,7 +130,7 @@ error:
         H5Sclose(sid);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* generate_datasets() */
@@ -177,7 +174,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 #else  /* H5O_ENABLE_BOGUS */
     HDputs("H5O_ENABLE_BOGUS compiler macro not defined!");
 #endif /* H5O_ENABLE_BOGUS */

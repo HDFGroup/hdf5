@@ -259,7 +259,7 @@ H5FD__onion_term(void)
     /* Reset VFL ID */
     H5FD_ONION_g = 0;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 
 } /* end H5FD__onion_term() */
 
@@ -295,7 +295,7 @@ H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
     if (NULL == (info_ptr = (const H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
-    HDmemcpy(fa_out, info_ptr, sizeof(H5FD_onion_fapl_info_t));
+    memcpy(fa_out, info_ptr, sizeof(H5FD_onion_fapl_info_t));
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -377,8 +377,8 @@ H5FD__onion_sb_size(H5FD_t *_file)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->original_file);
+    assert(file);
+    assert(file->original_file);
 
     if (file->original_file)
         ret_value = H5FD_sb_size(file->original_file);
@@ -403,8 +403,8 @@ H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*ou
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->original_file);
+    assert(file);
+    assert(file->original_file);
 
     if (file->original_file && H5FD_sb_encode(file->original_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL, "unable to encode the superblock in R/W file")
@@ -430,8 +430,8 @@ H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->original_file);
+    assert(file);
+    assert(file->original_file);
 
     if (H5FD_sb_load(file->original_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode the superblock in R/W file")
@@ -494,7 +494,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     if (history->n_revisions == 0) {
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
 
-        HDassert(history->record_locs == NULL);
+        assert(history->record_locs == NULL);
         history->n_revisions = 1;
         if (NULL == (history->record_locs = H5MM_calloc(sizeof(H5FD_onion_record_loc_t))))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate temporary record pointer list")
@@ -510,11 +510,11 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     else {
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
 
-        HDassert(history->record_locs != NULL);
+        assert(history->record_locs != NULL);
 
         if (NULL == (new_list = H5MM_calloc((history->n_revisions + 1) * sizeof(H5FD_onion_record_loc_t))))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to resize record pointer list")
-        HDmemcpy(new_list, history->record_locs, sizeof(H5FD_onion_record_loc_t) * history->n_revisions);
+        memcpy(new_list, history->record_locs, sizeof(H5FD_onion_record_loc_t) * history->n_revisions);
         H5MM_xfree(history->record_locs);
         history->record_locs                                   = new_list;
         new_list                                               = NULL;
@@ -535,7 +535,7 @@ done:
     H5MM_xfree(buf);
     H5MM_xfree(new_list);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_commit_new_revision_record() */
 
 /*-----------------------------------------------------------------------------
@@ -554,15 +554,15 @@ H5FD__onion_close(H5FD_t *_file)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     if (H5FD_ONION_STORE_TARGET_ONION == file->fa.store_target) {
 
-        HDassert(file->onion_file);
+        assert(file->onion_file);
 
         if (file->is_open_rw) {
 
-            HDassert(file->recovery_file);
+            assert(file->recovery_file);
 
             if (H5FD__onion_commit_new_revision_record(file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write revision record to backing store")
@@ -624,7 +624,7 @@ H5FD__onion_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_onion_t *file = (const H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->logical_eoa)
 } /* end H5FD__onion_get_eoa() */
@@ -642,7 +642,7 @@ H5FD__onion_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_onion_t *file = (const H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->logical_eof)
 } /* end H5FD__onion_get_eof() */
@@ -693,9 +693,9 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     size_t                        size            = 0;
     herr_t                        ret_value       = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
-    HDassert(file != NULL);
+    assert(file != NULL);
 
     hdr     = &file->header;
     history = &file->history;
@@ -772,7 +772,7 @@ done:
     if (FAIL == ret_value)
         HDremove(recovery_file_nameery); /* destroy new temp file, if 'twas created */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_create_truncate_onion() */
 
 static herr_t
@@ -780,7 +780,7 @@ H5FD__onion_remove_unused_symbols(char *s)
 {
     char *d = s;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     do {
         while (*d == '{' || *d == '}' || *d == ' ') {
@@ -788,7 +788,7 @@ H5FD__onion_remove_unused_symbols(char *s)
         }
     } while ((*s++ = *d++));
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 static herr_t
@@ -797,7 +797,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
     char  *config_str_copy = NULL;
     herr_t ret_value       = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     if (!HDstrcmp(config_str, ""))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "configure string can't be empty")
@@ -817,7 +817,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
      * e.g. {revision_num: 2; page_size: 4;}
      */
     if (config_str[0] != '{')
-        fa->revision_num = (uint64_t)HDstrtoull(config_str, NULL, 10);
+        fa->revision_num = (uint64_t)strtoull(config_str, NULL, 10);
     else {
         char *token1 = NULL, *token2 = NULL;
 
@@ -847,22 +847,22 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
                     else if (!strcmp(token2, "H5I_INVALID_HID"))
                         fa->backing_fapl_id = H5I_INVALID_HID;
                     else
-                        fa->backing_fapl_id = HDstrtoll(token2, NULL, 10);
+                        fa->backing_fapl_id = strtoll(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "page_size")) {
-                    fa->page_size = (uint32_t)HDstrtoul(token2, NULL, 10);
+                    fa->page_size = (uint32_t)strtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "revision_num")) {
                     if (!HDstrcmp(token2, "H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST"))
                         fa->revision_num = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
                     else
-                        fa->revision_num = (uint64_t)HDstrtoull(token2, NULL, 10);
+                        fa->revision_num = (uint64_t)strtoull(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "force_write_open")) {
-                    fa->force_write_open = (uint8_t)HDstrtoul(token2, NULL, 10);
+                    fa->force_write_open = (uint8_t)strtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "creation_flags")) {
-                    fa->creation_flags = (uint8_t)HDstrtoul(token2, NULL, 10);
+                    fa->creation_flags = (uint8_t)strtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "comment")) {
                     HDstrcpy(fa->comment, token2);
@@ -891,7 +891,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
 done:
     H5MM_free(config_str_copy);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-----------------------------------------------------------------------------
@@ -925,7 +925,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name")
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
-    HDassert(H5P_DEFAULT != fapl_id);
+    assert(H5P_DEFAULT != fapl_id);
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
@@ -979,7 +979,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
     /* Initialize file structure fields */
 
-    HDmemcpy(&(file->fa), fa, sizeof(H5FD_onion_fapl_info_t));
+    memcpy(&(file->fa), fa, sizeof(H5FD_onion_fapl_info_t));
 
     file->header.version   = H5FD_ONION_HEADER_VERSION_CURR;
     file->header.page_size = file->fa.page_size; /* guarded on FAPL-set */
@@ -1028,7 +1028,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         {
             file->onion_file = H5FD_open(name_onion, flags, backing_fapl_id, maxaddr);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* If that didn't work, create a new onion file */
         /* TODO: Move to a new function */
@@ -1042,7 +1042,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 size_t                        size       = 0;
                 size_t                        saved_size = 0;
 
-                HDassert(file != NULL);
+                assert(file != NULL);
 
                 hdr     = &file->header;
                 history = &file->history;
@@ -1237,7 +1237,7 @@ done:
 
     H5MM_xfree(new_fa);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_open() */
 
 /*-----------------------------------------------------------------------------
@@ -1261,7 +1261,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
     uint32_t       checksum  = 0;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* Guard against simultaneous write-open.
      * TODO: support recovery open with force-write-open flag in FAPL info.
@@ -1321,7 +1321,7 @@ done:
 
     H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_open_rw() */
 
 /*-----------------------------------------------------------------------------
@@ -1347,8 +1347,8 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file != NULL);
-    HDassert(buf_out != NULL);
+    assert(file != NULL);
+    assert(buf_out != NULL);
 
     if ((uint64_t)(offset + len) > file->logical_eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Read extends beyond addressed space")
@@ -1421,10 +1421,10 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         bytes_to_read -= page_readsize;
     } /* end for each page in range */
 
-    HDassert(0 == bytes_to_read);
+    assert(0 == bytes_to_read);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_read() */
 
 /*-----------------------------------------------------------------------------
@@ -1440,11 +1440,11 @@ H5FD__onion_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_onion_t *file = (H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     file->logical_eoa = addr;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__onion_set_eoa() */
 
 /*-----------------------------------------------------------------------------
@@ -1471,10 +1471,10 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file != NULL);
-    HDassert(buf != NULL);
-    HDassert(file->rev_index != NULL);
-    HDassert((uint64_t)(offset + len) <= file->logical_eoa);
+    assert(file != NULL);
+    assert(buf != NULL);
+    assert(file->rev_index != NULL);
+    assert((uint64_t)(offset + len) <= file->logical_eoa);
 
     if (FALSE == file->is_open_rw)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Write not allowed if file not opened in write mode")
@@ -1522,7 +1522,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
                 if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, page_buf) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
                 /* Overlay delta from input buffer onto page buffer. */
-                HDmemcpy(page_buf + page_gap_head, buf, page_n_used);
+                memcpy(page_buf + page_gap_head, buf, page_n_used);
                 write_buf = page_buf;
             } /* end if partial page */
 
@@ -1569,8 +1569,8 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
             } /* end if page exists in neither index */
 
             /* Copy input buffer to temporary page buffer */
-            HDassert((page_size - page_gap_head) >= page_n_used);
-            HDmemcpy(page_buf + page_gap_head, buf, page_n_used);
+            assert((page_size - page_gap_head) >= page_n_used);
+            memcpy(page_buf + page_gap_head, buf, page_n_used);
             write_buf = page_buf;
 
         } /* end if data range does not span entire page */
@@ -1593,14 +1593,14 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
     } /* end for each page to write */
 
-    HDassert(0 == bytes_to_write);
+    assert(0 == bytes_to_write);
 
     file->logical_eof = MAX(file->logical_eof, (offset + len));
 
 done:
     H5MM_xfree(page_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_write() */
 
 /*-------------------------------------------------------------------------
@@ -1630,7 +1630,7 @@ H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_A
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(file);
+    assert(file);
 
     switch (op_code) {
         case H5FD_CTL_GET_NUM_REVISIONS:
@@ -1713,8 +1713,8 @@ H5FD__get_onion_revision_count(H5FD_t *file, uint64_t *revision_count)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
-    HDassert(revision_count);
+    assert(file);
+    assert(revision_count);
 
     op_code = H5FD_CTL_GET_NUM_REVISIONS;
     flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
@@ -1741,7 +1741,7 @@ H5FD__onion_write_final_history(H5FD_onion_t *file)
     size_t size      = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* TODO: history EOF may not be correct (under what circumstances?) */
     if (0 == (size = H5FD__onion_write_history(&(file->history), file->onion_file, file->onion_eof,
@@ -1757,5 +1757,5 @@ H5FD__onion_write_final_history(H5FD_onion_t *file)
     file->onion_eof += size;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_write_final_history() */

@@ -54,9 +54,6 @@
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -70,9 +67,9 @@ H5VL__native_blob_put(void *obj, const void *buf, size_t size, void *blob_id, vo
     FUNC_ENTER_PACKAGE
 
     /* Check parameters */
-    HDassert(f);
-    HDassert(size == 0 || buf);
-    HDassert(id);
+    assert(f);
+    assert(size == 0 || buf);
+    assert(id);
 
     /* Write the VL information to disk (allocates space also) */
     if (H5HG_insert(f, size, buf, &hobjid) < 0)
@@ -93,9 +90,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -110,9 +104,9 @@ H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t size, vo
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(id);
-    HDassert(buf);
+    assert(f);
+    assert(id);
+    assert(buf);
 
     /* Get the heap information */
     H5F_addr_decode(f, &id, &hobjid.addr);
@@ -139,9 +133,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -153,8 +144,8 @@ H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_args_t *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(blob_id);
+    assert(f);
+    assert(blob_id);
 
     switch (args->op_type) {
         case H5VL_BLOB_ISNULL: {

@@ -34,9 +34,6 @@ static void H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsign
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Saturday, July  2, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -47,7 +44,7 @@ H5F__close_mounts(H5F_t *f)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
+    assert(f);
 
     /* Unmount all child files.  Loop backwards to avoid having to adjust u when
      * a file is unmounted.  Note that we rely on unsigned u "wrapping around"
@@ -68,14 +65,14 @@ H5F__close_mounts(H5F_t *f)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
 
             /* Eliminate the mount point from the table */
-            HDmemmove(f->shared->mtab.child + u, f->shared->mtab.child + u + 1,
-                      (f->shared->mtab.nmounts - u - 1) * sizeof(f->shared->mtab.child[0]));
+            memmove(f->shared->mtab.child + u, f->shared->mtab.child + u + 1,
+                    (f->shared->mtab.nmounts - u - 1) * sizeof(f->shared->mtab.child[0]));
             f->shared->mtab.nmounts--;
             f->nmounts--;
         }
     }
 
-    HDassert(f->nmounts == 0);
+    assert(f->nmounts == 0);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -89,9 +86,6 @@ done:
  *		mouted and must not be a mount ancestor of the mount-point.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -111,10 +105,10 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(child);
-    HDassert(TRUE == H5P_isa_class(plist_id, H5P_FILE_MOUNT));
+    assert(loc);
+    assert(name && *name);
+    assert(child);
+    assert(TRUE == H5P_isa_class(plist_id, H5P_FILE_MOUNT));
 
     /* Set up group location to fill in */
     mp_loc.oloc = &mp_oloc;
@@ -151,11 +145,11 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
      *  "took over" the group location - QAK)
      */
     parent = H5G_fileof(mount_point);
-    HDassert(parent);
+    assert(parent);
     mp_loc.oloc = H5G_oloc(mount_point);
-    HDassert(mp_loc.oloc);
+    assert(mp_loc.oloc);
     mp_loc.path = H5G_nameof(mount_point);
-    HDassert(mp_loc.path);
+    assert(mp_loc.path);
     for (ancestor = parent; ancestor; ancestor = ancestor->parent)
         if (ancestor->shared == child->shared)
             HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
@@ -177,7 +171,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
 
         md   = (lt + rt) / 2;
         oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-        cmp  = H5F_addr_cmp(mp_loc.oloc->addr, oloc->addr);
+        cmp  = H5_addr_cmp(mp_loc.oloc->addr, oloc->addr);
         if (cmp < 0)
             rt = md;
         else if (cmp > 0)
@@ -201,8 +195,8 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
     }
 
     /* Insert into table */
-    HDmemmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
-              (parent->shared->mtab.nmounts - md) * sizeof(parent->shared->mtab.child[0]));
+    memmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
+            (parent->shared->mtab.nmounts - md) * sizeof(parent->shared->mtab.child[0]));
     parent->shared->mtab.nmounts++;
     parent->nmounts++;
     parent->shared->mtab.child[md].group = mount_point;
@@ -253,9 +247,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -275,8 +266,8 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up mount point location to fill in */
     mp_loc.oloc = &mp_oloc;
@@ -295,7 +286,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
     mnt_oloc     = H5G_oloc(child->shared->root_grp);
     child_idx    = -1;
 
-    if (child->parent && H5F_addr_eq(mp_oloc.addr, mnt_oloc->addr)) {
+    if (child->parent && H5_addr_eq(mp_oloc.addr, mnt_oloc->addr)) {
         unsigned u; /*counters			*/
 
         /*
@@ -326,7 +317,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
         while (lt < rt && cmp) {
             md       = (lt + rt) / 2;
             mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-            cmp      = H5F_addr_cmp(mp_oloc.addr, mnt_oloc->addr);
+            cmp      = H5_addr_cmp(mp_oloc.addr, mnt_oloc->addr);
             if (cmp < 0)
                 rt = md;
             else
@@ -348,7 +339,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
          * Could be different due to the shared mount table. */
         parent = child->parent;
     } /* end else */
-    HDassert(child_idx >= 0);
+    assert(child_idx >= 0);
 
     /* Save the information about the child from the mount table */
     child_group = parent->shared->mtab.child[child_idx].group;
@@ -365,10 +356,10 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */
-    HDmemmove(parent->shared->mtab.child + (unsigned)child_idx,
-              (parent->shared->mtab.child + (unsigned)child_idx) + 1,
-              ((parent->shared->mtab.nmounts - (unsigned)child_idx) - 1) *
-                  sizeof(parent->shared->mtab.child[0]));
+    memmove(parent->shared->mtab.child + (unsigned)child_idx,
+            (parent->shared->mtab.child + (unsigned)child_idx) + 1,
+            ((parent->shared->mtab.nmounts - (unsigned)child_idx) - 1) *
+                sizeof(parent->shared->mtab.child[0]));
     parent->shared->mtab.nmounts -= 1;
     parent->nmounts -= 1;
 
@@ -399,9 +390,6 @@ done:
  * Return:	Success:	TRUE/FALSE
  *		Failure:	(can't happen)
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January  2, 2002
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -411,7 +399,7 @@ H5F_is_mount(const H5F_t *file)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(file);
+    assert(file);
 
     if (file->parent != NULL)
         ret_value = TRUE;
@@ -429,9 +417,6 @@ H5F_is_mount(const H5F_t *file)
  *
  * Return:      void
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -442,9 +427,9 @@ H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_ob
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(nopen_files);
-    HDassert(nopen_objs);
+    assert(f);
+    assert(nopen_files);
+    assert(nopen_objs);
 
     /* If this file is still open, increment number of file IDs open */
     if (H5F_ID_EXISTS(f))
@@ -478,9 +463,6 @@ H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_ob
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Tues, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -489,9 +471,9 @@ H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(nopen_files);
-    HDassert(nopen_objs);
+    assert(f);
+    assert(nopen_files);
+    assert(nopen_objs);
 
     /* Find the top file in the mounting hierarchy */
     while (f->parent)
@@ -510,9 +492,6 @@ H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Fri, August 21, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -525,7 +504,7 @@ H5F__flush_mounts_recurse(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Flush all child files, not stopping for errors */
     for (u = 0; u < f->shared->mtab.nmounts; u++)
@@ -551,9 +530,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Fri, August 21, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -564,7 +540,7 @@ H5F_flush_mounts(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Find the top file in the mount hierarchy */
     while (f->parent)
@@ -586,9 +562,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -604,7 +577,7 @@ H5F_traverse_mount(H5O_loc_t *oloc /*in,out*/)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(oloc);
+    assert(oloc);
 
     /*
      * The loop is necessary because we might have file1 mounted at the root
@@ -621,7 +594,7 @@ H5F_traverse_mount(H5O_loc_t *oloc /*in,out*/)
         while (lt < rt && cmp) {
             md       = (lt + rt) / 2;
             mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-            cmp      = H5F_addr_cmp(oloc->addr, mnt_oloc->addr);
+            cmp      = H5_addr_cmp(oloc->addr, mnt_oloc->addr);
             if (cmp < 0)
                 rt = md;
             else

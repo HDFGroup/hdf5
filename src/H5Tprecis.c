@@ -38,9 +38,6 @@ static herr_t H5T__set_precision(const H5T_t *dt, size_t prec);
  *		Failure:	0 (all atomic types have at least one
  *				significant bit)
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -75,9 +72,6 @@ done:
  * Return:	Success:	Number of significant bits
  *		Failure:	0 (all atomic types have at least one
  *				significant bit)
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, October 17, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -120,9 +114,6 @@ done:
  *		fields first.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -179,9 +170,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -193,12 +181,12 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(dt);
-    HDassert(prec > 0);
-    HDassert(H5T_OPAQUE != dt->shared->type);
-    HDassert(H5T_COMPOUND != dt->shared->type);
-    HDassert(H5T_STRING != dt->shared->type);
-    HDassert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
+    assert(dt);
+    assert(prec > 0);
+    assert(H5T_OPAQUE != dt->shared->type);
+    assert(H5T_COMPOUND != dt->shared->type);
+    assert(H5T_STRING != dt->shared->type);
+    assert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
         if (H5T__set_precision(dt->shared->parent, prec) < 0)

@@ -156,19 +156,19 @@
 #define H5SL_GROW(X, LVL, ERR)                                                                               \
     {                                                                                                        \
         /* Check if we need to increase allocation of forward pointers */                                    \
-        if (LVL + 1 >= 1u << X->log_nalloc) {                                                                \
+        if (LVL + 1 >= ((size_t)1) << X->log_nalloc) {                                                       \
             H5SL_node_t **_tmp;                                                                              \
-            HDassert(LVL + 1 == 1U << X->log_nalloc);                                                        \
+            assert(LVL + 1 == ((size_t)1) << X->log_nalloc);                                                 \
             /* Double the amount of allocated space */                                                       \
             X->log_nalloc++;                                                                                 \
                                                                                                              \
             /* Check if we need to create a new factory */                                                   \
             if (X->log_nalloc >= H5SL_fac_nused_g) {                                                         \
-                HDassert(X->log_nalloc == H5SL_fac_nused_g);                                                 \
+                assert(X->log_nalloc == H5SL_fac_nused_g);                                                   \
                                                                                                              \
                 /* Check if we need to allocate space for the factory pointer*/                              \
                 if (H5SL_fac_nused_g >= H5SL_fac_nalloc_g) {                                                 \
-                    HDassert(H5SL_fac_nused_g == H5SL_fac_nalloc_g);                                         \
+                    assert(H5SL_fac_nused_g == H5SL_fac_nalloc_g);                                           \
                     /* Double the size of the array of factory pointers */                                   \
                     H5SL_fac_nalloc_g *= 2;                                                                  \
                     if (NULL == (H5SL_fac_g = (H5FL_fac_head_t **)H5MM_realloc(                              \
@@ -178,7 +178,7 @@
                                                                                                              \
                 /* Create the new factory */                                                                 \
                 H5SL_fac_g[H5SL_fac_nused_g] =                                                               \
-                    H5FL_fac_init((1u << H5SL_fac_nused_g) * sizeof(H5SL_node_t *));                         \
+                    H5FL_fac_init((((size_t)1) << H5SL_fac_nused_g) * sizeof(H5SL_node_t *));                \
                 H5SL_fac_nused_g++;                                                                          \
             }                                                                                                \
                                                                                                              \
@@ -198,9 +198,9 @@
 #define H5SL_SHRINK(X, LVL)                                                                                  \
     {                                                                                                        \
         /* Check if we can reduce the allocation of forward pointers */                                      \
-        if (LVL <= 1u << (X->log_nalloc - 1)) {                                                              \
+        if (LVL <= ((size_t)1) << (X->log_nalloc - 1)) {                                                     \
             H5SL_node_t **_tmp;                                                                              \
-            HDassert(LVL == 1U << (X->log_nalloc - 1));                                                      \
+            assert(LVL == ((size_t)1) << (X->log_nalloc - 1));                                               \
             X->log_nalloc--;                                                                                 \
                                                                                                              \
             /* Allocate space for new forward pointers */                                                    \
@@ -224,14 +224,14 @@
         H5SL_GROW(X, _lvl, ERR);                                                                             \
                                                                                                              \
         if (_lvl == (size_t)SLIST->curr_level) {                                                             \
-            HDassert(PREV == SLIST->header);                                                                 \
+            assert(PREV == SLIST->header);                                                                   \
             /* Grow the head */                                                                              \
             H5SL_GROW(PREV, _lvl, ERR)                                                                       \
             SLIST->curr_level++;                                                                             \
             X->forward[_lvl + 1] = NULL;                                                                     \
         }                                                                                                    \
         else {                                                                                               \
-            HDassert(_lvl < (size_t)SLIST->curr_level);                                                      \
+            assert(_lvl < (size_t)SLIST->curr_level);                                                        \
             X->forward[_lvl + 1] = PREV->forward[_lvl + 1];                                                  \
         }                                                                                                    \
         PREV->forward[_lvl + 1] = X;                                                                         \
@@ -243,7 +243,7 @@
     {                                                                                                        \
         size_t _lvl = X->level;                                                                              \
                                                                                                              \
-        HDassert(PREV->forward[_lvl] == X);                                                                  \
+        assert(PREV->forward[_lvl] == X);                                                                    \
         PREV->forward[_lvl] = X->forward[_lvl];                                                              \
         H5SL_SHRINK(X, _lvl);                                                                                \
     }
@@ -287,12 +287,12 @@
                 }                                                                                            \
                 X = X->forward[_i];                                                                          \
             }                                                                                                \
-            HDassert(!_drop->forward[_i] ||                                                                  \
-                     !H5_GLUE3(H5SL_LOCATE_, CMP, _CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL));     \
+            assert(!_drop->forward[_i] ||                                                                    \
+                   !H5_GLUE3(H5SL_LOCATE_, CMP, _CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL));       \
                                                                                                              \
             /* Promote the middle node if necessary */                                                       \
             if (_count == 3) {                                                                               \
-                HDassert(X == _last->forward[_i]->forward[_i]);                                              \
+                assert(X == _last->forward[_i]->forward[_i]);                                                \
                 H5SL_PROMOTE(SLIST, X, _last, NULL)                                                          \
             }                                                                                                \
                                                                                                              \
@@ -351,7 +351,7 @@
                 /* If we have already found the node to drop into and there */                               \
                 /* is more than one node in this gap, we can stop searching */                               \
                 if (_drop) {                                                                                 \
-                    HDassert(_count >= 1);                                                                   \
+                    assert(_count >= 1);                                                                     \
                     _count = 2;                                                                              \
                     break;                                                                                   \
                 }                                                                                            \
@@ -378,9 +378,9 @@
                 }                                                                                            \
                 X = X->forward[_i];                                                                          \
             }                                                                                                \
-            HDassert(_count >= 1 && _count <= 3);                                                            \
-            HDassert(!_drop->forward[_i] ||                                                                  \
-                     !H5_GLUE3(H5SL_LOCATE_, CMP, _CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL));     \
+            assert(_count >= 1 && _count <= 3);                                                              \
+            assert(!_drop->forward[_i] ||                                                                    \
+                   !H5_GLUE3(H5SL_LOCATE_, CMP, _CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL));       \
                                                                                                              \
             /* Check if we need to adjust node heights */                                                    \
             if (_count == 1) {                                                                               \
@@ -402,8 +402,8 @@
                     }                                                                                        \
                     else if (!_head->forward[_i + 1]) {                                                      \
                         /* shrink the header */                                                              \
-                        HDassert(_i == SLIST->curr_level - 1);                                               \
-                        HDassert((size_t)SLIST->curr_level == _head->level);                                 \
+                        assert(_i == SLIST->curr_level - 1);                                                 \
+                        assert((size_t)SLIST->curr_level == _head->level);                                   \
                                                                                                              \
                         H5SL_SHRINK(_head, (size_t)(_i + 1))                                                 \
                         SLIST->curr_level--;                                                                 \
@@ -417,7 +417,7 @@
                     X = _llast->forward[_i];                                                                 \
                     for (_count = 1; _count < 3 && X->forward[_i] != _last; _count++)                        \
                         X = X->forward[_i];                                                                  \
-                    HDassert(X->forward[_i] == _last);                                                       \
+                    assert(X->forward[_i] == _last);                                                         \
                                                                                                              \
                     /* Demote the separator node */                                                          \
                     H5SL_DEMOTE(_last, _llast)                                                               \
@@ -427,8 +427,8 @@
                         H5SL_PROMOTE(SLIST, X, _llast, NULL)                                                 \
                     else if (!_head->forward[_i + 1]) {                                                      \
                         /* shrink the header */                                                              \
-                        HDassert(_i == SLIST->curr_level - 1);                                               \
-                        HDassert((size_t)SLIST->curr_level == _head->level);                                 \
+                        assert(_i == SLIST->curr_level - 1);                                                 \
+                        assert((size_t)SLIST->curr_level == _head->level);                                   \
                                                                                                              \
                         H5SL_SHRINK(_head, (size_t)(_i + 1))                                                 \
                         SLIST->curr_level--;                                                                 \
@@ -455,7 +455,7 @@
                 _next->item    = X->item;                                                                    \
                 _next->hashval = X->hashval;                                                                 \
             }                                                                                                \
-            HDassert(!X->level);                                                                             \
+            assert(!X->level);                                                                               \
                                                                                                              \
             /* Remove the node */                                                                            \
             X->backward->forward[0] = X->forward[0];                                                         \
@@ -538,12 +538,12 @@ H5SL_init(void)
 
     /* Allocate space for array of factories */
     H5SL_fac_g = (H5FL_fac_head_t **)H5MM_malloc(sizeof(H5FL_fac_head_t *));
-    HDassert(H5SL_fac_g);
+    assert(H5SL_fac_g);
     H5SL_fac_nalloc_g = 1;
 
     /* Initialize first factory */
     H5SL_fac_g[0] = H5FL_fac_init(sizeof(H5SL_node_t *));
-    HDassert(H5SL_fac_g[0]);
+    assert(H5SL_fac_g[0]);
     H5SL_fac_nused_g = 1;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -582,7 +582,7 @@ H5SL_term_package(void)
 
         for (i = 0; i < H5SL_fac_nused_g; i++) {
             ret = H5FL_fac_term(H5SL_fac_g[i]);
-            HDassert(ret >= 0);
+            assert(ret >= 0);
         }
         H5SL_fac_nused_g = 0;
 
@@ -680,8 +680,8 @@ H5SL__insert_common(H5SL_t *slist, void *item, const void *key)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -730,7 +730,7 @@ H5SL__insert_common(H5SL_t *slist, void *item, const void *key)
             break;
 
         default:
-            HDassert(0 && "Unknown skiplist type!");
+            assert(0 && "Unknown skiplist type!");
     }
 
     /* 'key' must not have been found in existing list, if we get here */
@@ -749,7 +749,7 @@ H5SL__insert_common(H5SL_t *slist, void *item, const void *key)
     if (x->forward[0])
         x->forward[0]->backward = x;
     else {
-        HDassert(slist->last == prev);
+        assert(slist->last == prev);
         slist->last = x;
     }
 
@@ -796,7 +796,7 @@ H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -874,7 +874,7 @@ H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -922,7 +922,7 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
-    HDassert(type >= H5SL_TYPE_INT && type <= H5SL_TYPE_GENERIC);
+    assert(type >= H5SL_TYPE_INT && type <= H5SL_TYPE_GENERIC);
 
     /* Allocate skip list structure */
     if (NULL == (new_slist = H5FL_MALLOC(H5SL_t)))
@@ -930,7 +930,7 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
 
     /* Set the static internal fields */
     new_slist->type = type;
-    HDassert((type == H5SL_TYPE_GENERIC) == !!cmp);
+    assert((type == H5SL_TYPE_GENERIC) == !!cmp);
     new_slist->cmp = cmp;
 
     /* Set the dynamic internal fields */
@@ -988,7 +988,7 @@ H5SL_count(H5SL_t *slist)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1025,8 +1025,8 @@ H5SL_insert(H5SL_t *slist, void *item, const void *key)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1071,8 +1071,8 @@ H5SL_add(H5SL_t *slist, void *item, const void *key)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1114,8 +1114,8 @@ H5SL_remove(H5SL_t *slist, const void *key)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1164,7 +1164,7 @@ H5SL_remove(H5SL_t *slist, const void *key)
             break;
 
         default:
-            HDassert(0 && "Unknown skiplist type!");
+            assert(0 && "Unknown skiplist type!");
     }
 
 done:
@@ -1202,7 +1202,7 @@ H5SL_remove_first(H5SL_t *slist)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Assign level */
     H5_CHECK_OVERFLOW(slist->curr_level, int, size_t);
@@ -1218,8 +1218,8 @@ H5SL_remove_first(H5SL_t *slist)
 
         /* Assign return value */
         ret_value = tmp->item;
-        HDassert(level == head->level);
-        HDassert(0 == tmp->level);
+        assert(level == head->level);
+        assert(0 == tmp->level);
 
         /* Remove the first node */
         head->forward[0] = tmp->forward[0];
@@ -1235,14 +1235,14 @@ H5SL_remove_first(H5SL_t *slist)
         /* Reshape the skip list as necessary to maintain 1-2-3 condition */
         for (i = 0; i < level; i++) {
             next = head->forward[i + 1];
-            HDassert(next);
+            assert(next);
 
             /* Check if  head->forward[i] == head->forward[i+1] (illegal) */
             if (head->forward[i] == next) {
                 tmp  = next;
                 next = next->forward[i + 1];
 
-                HDassert(tmp->level == i + 1);
+                assert(tmp->level == i + 1);
 
                 /* Demote head->forward[i] */
                 H5SL_DEMOTE(tmp, head)
@@ -1250,8 +1250,8 @@ H5SL_remove_first(H5SL_t *slist)
                 /* Check if we need to promote the following node to maintain
                  * 1-2-3 condition */
                 if (tmp->forward[i]->forward[i] != next) {
-                    HDassert(tmp->forward[i]->forward[i]->forward[i] == next ||
-                             tmp->forward[i]->forward[i]->forward[i]->forward[i] == next);
+                    assert(tmp->forward[i]->forward[i]->forward[i] == next ||
+                           tmp->forward[i]->forward[i]->forward[i]->forward[i] == next);
                     tmp = tmp->forward[i];
                     H5SL_PROMOTE(slist, tmp, head, NULL);
                     /* In this case, since there is a node of height = i+1 here
@@ -1261,7 +1261,7 @@ H5SL_remove_first(H5SL_t *slist)
                 }
                 else if (!head->forward[i + 1]) {
                     /* We just shrunk the largest node, shrink the header */
-                    HDassert(i == level - 1);
+                    assert(i == level - 1);
 
                     H5SL_SHRINK(head, level)
                     slist->curr_level--;
@@ -1305,8 +1305,8 @@ H5SL_search(H5SL_t *slist, const void *key)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1355,7 +1355,7 @@ H5SL_search(H5SL_t *slist, const void *key)
             break;
 
         default:
-            HDassert(0 && "Unknown skiplist type!");
+            assert(0 && "Unknown skiplist type!");
     }
 
     /* 'key' must not have been found in list, if we get here */
@@ -1397,8 +1397,8 @@ H5SL_less(H5SL_t *slist, const void *key)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1447,7 +1447,7 @@ H5SL_less(H5SL_t *slist, const void *key)
             break;
 
         default:
-            HDassert(0 && "Unknown skiplist type!");
+            assert(0 && "Unknown skiplist type!");
     }
 
     /* An exact match for 'key' must not have been found in list, if we get here */
@@ -1502,8 +1502,8 @@ H5SL_greater(H5SL_t *slist, const void *key)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1552,7 +1552,7 @@ H5SL_greater(H5SL_t *slist, const void *key)
             break;
 
         default:
-            HDassert(0 && "Unknown skiplist type!");
+            assert(0 && "Unknown skiplist type!");
     }
 
     /* An exact match for 'key' must not have been found in list, if we get here */
@@ -1597,8 +1597,8 @@ H5SL_find(H5SL_t *slist, const void *key)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1647,7 +1647,7 @@ H5SL_find(H5SL_t *slist, const void *key)
             break;
 
         default:
-            HDassert(0 && "Unknown skiplist type!");
+            assert(0 && "Unknown skiplist type!");
     }
 
     /* 'key' must not have been found in list, if we get here */
@@ -1689,8 +1689,8 @@ H5SL_below(H5SL_t *slist, const void *key)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1739,7 +1739,7 @@ H5SL_below(H5SL_t *slist, const void *key)
             break;
 
         default:
-            HDassert(0 && "Unknown skiplist type!");
+            assert(0 && "Unknown skiplist type!");
     }
 
     /* An exact match for 'key' must not have been found in list, if we get here */
@@ -1794,8 +1794,8 @@ H5SL_above(H5SL_t *slist, const void *key)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
-    HDassert(key);
+    assert(slist);
+    assert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1844,7 +1844,7 @@ H5SL_above(H5SL_t *slist, const void *key)
             break;
 
         default:
-            HDassert(0 && "Unknown skiplist type!");
+            assert(0 && "Unknown skiplist type!");
     }
 
     /* An exact match for 'key' must not have been found in list, if we get here */
@@ -1883,7 +1883,7 @@ H5SL_first(H5SL_t *slist)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1916,7 +1916,7 @@ H5SL_next(H5SL_node_t *slist_node)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist_node);
+    assert(slist_node);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1949,7 +1949,7 @@ H5SL_prev(H5SL_node_t *slist_node)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist_node);
+    assert(slist_node);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -1983,7 +1983,7 @@ H5SL_last(H5SL_t *slist)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -2016,7 +2016,7 @@ H5SL_item(H5SL_node_t *slist_node)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist_node);
+    assert(slist_node);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -2067,7 +2067,7 @@ H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -2125,7 +2125,7 @@ H5SL_release(H5SL_t *slist)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -2174,7 +2174,7 @@ H5SL_free(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -2221,7 +2221,7 @@ H5SL_destroy(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -2261,7 +2261,7 @@ H5SL_close(H5SL_t *slist)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(slist);
+    assert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */

@@ -85,12 +85,12 @@ test_reference_params(void)
     MESSAGE(5, ("Testing Reference Parameters\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
-    CHECK_PTR(wbuf, "HDmalloc");
-    rbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
-    CHECK_PTR(rbuf, "HDmalloc");
-    tbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
-    CHECK_PTR(tbuf, "HDmalloc");
+    wbuf = (hobj_ref_t *)malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+    CHECK_PTR(wbuf, "malloc");
+    rbuf = (hobj_ref_t *)malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+    CHECK_PTR(rbuf, "malloc");
+    tbuf = (hobj_ref_t *)malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+    CHECK_PTR(tbuf, "malloc");
 
     /* Create file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -232,9 +232,9 @@ test_reference_params(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(tbuf);
+    free(wbuf);
+    free(rbuf);
+    free(tbuf);
 } /* test_reference_obj() */
 
 /****************************************************************
@@ -270,12 +270,12 @@ test_reference_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
-    CHECK_PTR(wbuf, "HDmalloc");
-    rbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
-    CHECK_PTR(rbuf, "HDmalloc");
-    tbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
-    CHECK_PTR(tbuf, "HDmalloc");
+    wbuf = (hobj_ref_t *)malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+    CHECK_PTR(wbuf, "malloc");
+    rbuf = (hobj_ref_t *)malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+    CHECK_PTR(rbuf, "malloc");
+    tbuf = (hobj_ref_t *)malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+    CHECK_PTR(tbuf, "malloc");
 
     /* Create file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -465,7 +465,7 @@ test_reference_obj(void)
         {
             ret = H5Rget_obj_type2(dataset, H5R_OBJECT, &nvrbuf[j], &obj_type);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Rget_obj_type2");
     } /* end for */
 
@@ -486,9 +486,9 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(tbuf);
+    free(wbuf);
+    free(rbuf);
+    free(tbuf);
 } /* test_reference_obj() */
 
 /****************************************************************
@@ -542,10 +542,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
-    rbuf  = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
+    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+    rbuf  = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
+    dwbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    drbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
 
     /* Create file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -665,7 +665,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     {
         ret = H5Rcreate(&wbuf[2], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (libver_high < H5F_LIBVER_V110)
         VERIFY(ret, FAIL, "H5Rcreate");
@@ -743,7 +743,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     {
         dset2 = H5Rdereference2(dset_NA, H5P_DEFAULT, H5R_DATASET_REGION, &rdata_NA[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Close and release resources. */
@@ -756,7 +756,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     {
         ret = H5Dclose(dset2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dclose");
 
     /*
@@ -807,15 +807,15 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(ret, 36, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_hyper_nblocks(sid2);
     VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
-    coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t) *
-                                 2); /* allocate space for the hyperslab blocks */
+    coords = (hsize_t *)malloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t) *
+                               2); /* allocate space for the hyperslab blocks */
     ret    = H5Sget_select_hyper_blocklist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0], 2, "Hyperslab Coordinates");
     VERIFY(coords[1], 2, "Hyperslab Coordinates");
     VERIFY(coords[2], 7, "Hyperslab Coordinates");
     VERIFY(coords[3], 7, "Hyperslab Coordinates");
-    HDfree(coords);
+    free(coords);
     ret = H5Sget_select_bounds(sid2, low, high);
     CHECK(ret, FAIL, "H5Sget_select_bounds");
     VERIFY(low[0], 2, "Selection Bounds");
@@ -836,8 +836,8 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(ret, 10, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_elem_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
-    coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK *
-                                 sizeof(hsize_t)); /* allocate space for the element points */
+    coords = (hsize_t *)malloc((size_t)ret * SPACE2_RANK *
+                               sizeof(hsize_t)); /* allocate space for the element points */
     ret    = H5Sget_select_elem_pointlist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY(coords[0], coord1[0][0], "Element Coordinates");
@@ -860,7 +860,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(coords[17], coord1[8][1], "Element Coordinates");
     VERIFY(coords[18], coord1[9][0], "Element Coordinates");
     VERIFY(coords[19], coord1[9][1], "Element Coordinates");
-    HDfree(coords);
+    free(coords);
     ret = H5Sget_select_bounds(sid2, low, high);
     CHECK(ret, FAIL, "H5Sget_select_bounds");
     VERIFY(low[0], 0, "Selection Bounds");
@@ -913,7 +913,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         {
             ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &nvrbuf[j], &obj_type);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Rget_obj_type2");
     } /* end for */
 
@@ -930,10 +930,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(dwbuf);
-    HDfree(drbuf);
+    free(wbuf);
+    free(rbuf);
+    free(dwbuf);
+    free(drbuf);
 } /* test_reference_region() */
 
 /****************************************************************
@@ -978,10 +978,10 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     MESSAGE(5, ("Testing 1-D Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
-    rbuf  = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE3_DIM1);
-    drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
+    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+    rbuf  = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
+    dwbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE3_DIM1);
+    drbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
 
     /* Create the file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -1131,8 +1131,8 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(ret, 30, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_hyper_nblocks(sid3);
     VERIFY(ret, 15, "H5Sget_select_hyper_nblocks");
-    coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t) *
-                                 2); /* allocate space for the hyperslab blocks */
+    coords = (hsize_t *)malloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t) *
+                               2); /* allocate space for the hyperslab blocks */
     ret    = H5Sget_select_hyper_blocklist(sid3, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0], 2, "Hyperslab Coordinates");
@@ -1165,7 +1165,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(coords[27], 68, "Hyperslab Coordinates");
     VERIFY(coords[28], 72, "Hyperslab Coordinates");
     VERIFY(coords[29], 73, "Hyperslab Coordinates");
-    HDfree(coords);
+    free(coords);
     ret = H5Sget_select_bounds(sid3, low, high);
     CHECK(ret, FAIL, "H5Sget_select_bounds");
     VERIFY(low[0], 2, "Selection Bounds");
@@ -1184,8 +1184,8 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(ret, 10, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_elem_npoints(sid3);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
-    coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK *
-                                 sizeof(hsize_t)); /* allocate space for the element points */
+    coords = (hsize_t *)malloc((size_t)ret * SPACE3_RANK *
+                               sizeof(hsize_t)); /* allocate space for the element points */
     ret    = H5Sget_select_elem_pointlist(sid3, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY(coords[0], coord1[0][0], "Element Coordinates");
@@ -1198,7 +1198,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(coords[7], coord1[7][0], "Element Coordinates");
     VERIFY(coords[8], coord1[8][0], "Element Coordinates");
     VERIFY(coords[9], coord1[9][0], "Element Coordinates");
-    HDfree(coords);
+    free(coords);
     ret = H5Sget_select_bounds(sid3, low, high);
     CHECK(ret, FAIL, "H5Sget_select_bounds");
     VERIFY(low[0], 3, "Selection Bounds");
@@ -1233,10 +1233,10 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(dwbuf);
-    HDfree(drbuf);
+    free(wbuf);
+    free(rbuf);
+    free(dwbuf);
+    free(drbuf);
 } /* test_reference_region_1D() */
 
 /****************************************************************
@@ -1317,7 +1317,7 @@ test_reference_obj_deleted(void)
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Read selection from disk */
-    HDmemset(&oref, 0, sizeof(hobj_ref_t));
+    memset(&oref, 0, sizeof(hobj_ref_t));
     ret = H5Dread(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &oref);
     CHECK(ret, FAIL, "H5Dread");
 
@@ -1326,7 +1326,7 @@ test_reference_obj_deleted(void)
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Open nonsense reference */
-    HDmemset(&oref, 0, sizeof(hobj_ref_t));
+    memset(&oref, 0, sizeof(hobj_ref_t));
     dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &oref);
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
@@ -1426,9 +1426,9 @@ test_reference_group(void)
 
     /* Create bottom dataset */
     did = H5Dcreate2(gid, DSETNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    HDassert(did > 0);
+    assert(did > 0);
     ret = H5Dclose(did);
-    HDassert(ret >= 0);
+    assert(ret >= 0);
 
     ret = H5Gclose(gid);
     CHECK(ret, FAIL, "H5Gclose");
@@ -1538,10 +1538,10 @@ test_reference_compat(void)
     MESSAGE(5, ("Testing Deprecated Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf_obj = (hobj_ref_t *)HDcalloc(sizeof(hobj_ref_t), SPACE1_DIM1);
-    rbuf_obj = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
-    wbuf_reg = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf_reg = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
+    wbuf_obj = (hobj_ref_t *)calloc(sizeof(hobj_ref_t), SPACE1_DIM1);
+    rbuf_obj = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    wbuf_reg = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf_reg = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1798,10 +1798,10 @@ test_reference_compat(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free memory buffers */
-    HDfree(wbuf_obj);
-    HDfree(rbuf_obj);
-    HDfree(wbuf_reg);
-    HDfree(rbuf_reg);
+    free(wbuf_obj);
+    free(rbuf_obj);
+    free(wbuf_reg);
+    free(rbuf_reg);
 } /* test_reference_compat() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -1849,9 +1849,6 @@ test_reference_deprec(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Quincey Koziol
- *              September 8, 1998
  *
  *-------------------------------------------------------------------------
  */

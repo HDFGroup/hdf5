@@ -30,9 +30,6 @@
  * Return:      Success:        Pointer to 'faked up' file structure
  *              Failure:        NULL
  *
- * Programmer:  Quincey Koziol
- *              Oct  2, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -72,9 +69,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:  Quincey Koziol
- *              Oct  2, 2006
  *
  *-------------------------------------------------------------------------
  */

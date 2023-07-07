@@ -169,7 +169,7 @@ H5E_init(void)
 #endif /* H5_HAVE_THREADSAFE */
 
     /* Allocate the HDF5 error class */
-    HDassert(H5E_ERR_CLS_g == (-1));
+    assert(H5E_ERR_CLS_g == (-1));
     HDsnprintf(lib_vers, sizeof(lib_vers), "%u.%u.%u%s", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
                (HDstrlen(H5_VERS_SUBRELEASE) > 0 ? "-" H5_VERS_SUBRELEASE : ""));
     if (NULL == (cls = H5E__register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, lib_vers)))
@@ -193,9 +193,6 @@ done:
  *                          affect other interfaces; zero otherwise.
  *
  *              Failure:    Negative
- *
- * Programmer:	Raymond Lu
- *	        Tuesday, July 22, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -273,9 +270,6 @@ H5E_term_package(void)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, November 1, 2007
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -313,9 +307,6 @@ H5E__set_default_auto(H5E_t *stk)
  *
  *              Failure:    NULL
  *
- * Programmer:	Chee Wai LEE
- *              April 24, 2000
- *
  *-------------------------------------------------------------------------
  */
 H5E_t *
@@ -333,12 +324,12 @@ H5E__get_stack(void)
         /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
         estack = (H5E_t *)LocalAlloc(LPTR, sizeof(H5E_t));
 #else
-        /* Use HDmalloc here since this has to match the HDfree in the
+        /* Use malloc here since this has to match the free in the
          * destructor and we want to avoid the codestack there.
          */
-        estack = (H5E_t *)HDmalloc(sizeof(H5E_t));
+        estack = (H5E_t *)malloc(sizeof(H5E_t));
 #endif /* H5_HAVE_WIN_THREADS */
-        HDassert(estack);
+        assert(estack);
 
         /* Set the thread-specific info */
         estack->nused = 0;
@@ -363,9 +354,6 @@ H5E__get_stack(void)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Friday, January 22, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -374,7 +362,7 @@ H5E__free_class(H5E_cls_t *cls)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(cls);
+    assert(cls);
 
     /* Free error class structure */
     cls->cls_name = (char *)H5MM_xfree((void *)cls->cls_name);
@@ -392,9 +380,6 @@ H5E__free_class(H5E_cls_t *cls)
  *
  * Return:      Success:    An ID for the error class
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -431,9 +416,6 @@ done:
  * Return:      Success:    Pointer to an error class struct
  *              Failure:    NULL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 static H5E_cls_t *
@@ -445,9 +427,9 @@ H5E__register_class(const char *cls_name, const char *lib_name, const char *vers
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(cls_name);
-    HDassert(lib_name);
-    HDassert(version);
+    assert(cls_name);
+    assert(lib_name);
+    assert(version);
 
     /* Allocate space for new error class */
     if (NULL == (cls = H5FL_CALLOC(H5E_cls_t)))
@@ -478,9 +460,6 @@ done:
  * Purpose:     Closes an error class.
  *
  * Return:      Non-negative value on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -514,9 +493,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -527,7 +503,7 @@ H5E__unregister_class(H5E_cls_t *cls, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(cls);
+    assert(cls);
 
     /* Iterate over all the messages and delete those in this error class */
     if (H5I_iterate(H5I_ERROR_MSG, H5E__close_msg_cb, cls, FALSE) < 0)
@@ -548,9 +524,6 @@ done:
  *
  * Return:      Success:    Name length (zero means no name)
  *              Failure:    -1
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -583,9 +556,6 @@ done:
  * Return:      Success:    Name length (zero means no name)
  *              Failure:    -1
  *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 static ssize_t
@@ -596,7 +566,7 @@ H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(cls);
+    assert(cls);
 
     /* Get the class's name */
     len = (ssize_t)HDstrlen(cls->cls_name);
@@ -621,9 +591,6 @@ H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size)
  * Return:      Success:    H5_ITER_CONT (0)
  *              Failure:    H5_ITER_ERROR (-1)
  *
- * Programmer:  Raymond Lu
- *              July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -636,7 +603,7 @@ H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(err_msg);
+    assert(err_msg);
 
     /* Close the message if it is in the class being closed */
     if (err_msg->cls == cls) {
@@ -656,9 +623,6 @@ done:
  * Purpose:     Closes a major or minor error.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -689,9 +653,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -700,7 +661,7 @@ H5E__close_msg(H5E_msg_t *err, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(err);
+    assert(err);
 
     /* Release message */
     err->msg = (char *)H5MM_xfree((void *)err->msg);
@@ -717,9 +678,6 @@ H5E__close_msg(H5E_msg_t *err, void H5_ATTR_UNUSED **request)
  *
  * Return:      Success:    An error ID
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -763,9 +721,6 @@ done:
  * Return:      Success:    Pointer to a message struct
  *              Failure:    NULL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 static H5E_msg_t *
@@ -777,9 +732,9 @@ H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(cls);
-    HDassert(msg_type == H5E_MAJOR || msg_type == H5E_MINOR);
-    HDassert(msg_str);
+    assert(cls);
+    assert(msg_type == H5E_MAJOR || msg_type == H5E_MINOR);
+    assert(msg_str);
 
     /* Allocate new message object */
     if (NULL == (msg = H5FL_MALLOC(H5E_msg_t)))
@@ -809,9 +764,6 @@ done:
  *
  * Return:      Success:    Message length (zero means no message)
  *              Failure:    -1
- *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -843,9 +795,6 @@ done:
  *
  * Return:      Success:    An error stack ID
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 1, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -882,9 +831,6 @@ done:
  * Return:      Success:    An error stack ID
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -916,9 +862,6 @@ done:
  *
  * Return:      Success:    Pointer to an error class struct
  *              Failure:    NULL
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -996,9 +939,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Friday, July 15, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1037,9 +977,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 15, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1052,7 +989,7 @@ H5E__set_current_stack(H5E_t *estack)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(estack);
+    assert(estack);
 
     /* Get a pointer to the current error stack */
     if (NULL == (current_stack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean'
@@ -1102,9 +1039,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1139,9 +1073,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1150,7 +1081,7 @@ H5E__close_stack(H5E_t *estack, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(estack);
+    assert(estack);
 
     /* Release the stack's error information */
     H5E_clear_stack(estack);
@@ -1168,9 +1099,6 @@ H5E__close_stack(H5E_t *estack, void H5_ATTR_UNUSED **request)
  *
  * Return:      Success:    The number of errors
  *              Failure:    -1
- *
- * Programmer:	Raymond Lu
- *              Friday, July 15, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1215,9 +1143,6 @@ done:
  * Return:      Success:    The number of errors
  *              Failure:    -1 (can't fail at this time)
  *
- * Programmer:	Raymond Lu
- *              Friday, July 15, 2003
- *
  *-------------------------------------------------------------------------
  */
 static ssize_t
@@ -1225,7 +1150,7 @@ H5E__get_num(const H5E_t *estack)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(estack);
+    assert(estack);
 
     FUNC_LEAVE_NOAPI((ssize_t)estack->nused)
 } /* end H5E__get_num() */
@@ -1236,9 +1161,6 @@ H5E__get_num(const H5E_t *estack)
  * Purpose:     Deletes some error messages from the top of error stack.
  *
  * Return:      Non-negative value on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Friday, July 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1292,9 +1214,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *		Monday, October 18, 1999
- *
  * Notes:       Basically a new public API wrapper around the H5E__push_stack
  *              function.
  *
@@ -1332,7 +1251,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
      */
 
     /* Format the description */
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     va_started = TRUE;
 
     /* Use the vasprintf() routine, since it does what we're trying to do below */
@@ -1345,12 +1264,12 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
 
 done:
     if (va_started)
-        HDva_end(ap);
+        va_end(ap);
     /* Memory was allocated with HDvasprintf so it needs to be freed
-     * with HDfree
+     * with free
      */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush2() */
@@ -1361,9 +1280,6 @@ done:
  * Purpose:     Clears the error stack for the specified error stack.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Wednesday, July 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1405,9 +1321,6 @@ done:
  *              own more specific error handlers.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1475,9 +1388,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Friday, February 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1524,9 +1434,6 @@ done:
  *              value is not returned.
  *
  * Return:      Non-negative value on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Saturday, February 28, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1588,9 +1495,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Friday, February 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1651,9 +1555,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, September  8, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1699,9 +1600,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, October 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1743,9 +1641,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, October 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1757,8 +1652,8 @@ H5E__append_stack(H5E_t *dst_stack, const H5E_t *src_stack)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(dst_stack);
-    HDassert(src_stack);
+    assert(dst_stack);
+    assert(src_stack);
 
     /* Copy the errors from the source stack to the destination stack */
     for (u = 0; u < src_stack->nused; u++) {

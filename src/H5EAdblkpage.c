@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAdblkpage.c
- *			Nov 20 2008
- *			Quincey Koziol
  *
  * Purpose:		Data block page routines for extensible arrays.
  *
@@ -78,9 +76,6 @@ H5FL_DEFINE_STATIC(H5EA_dblk_page_t);
  *
  * Return:	Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 20 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_dblk_page_t *
@@ -92,7 +87,7 @@ H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Allocate memory for the data block */
     if (NULL == (dblk_page = H5FL_CALLOC(H5EA_dblk_page_t)))
@@ -130,9 +125,6 @@ done:
  *
  * Return:	Valid file address on success/HADDR_UNDEF on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 20 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -145,7 +137,7 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Allocate the data block page */
     if (NULL == (dblk_page = H5EA__dblk_page_alloc(hdr, parent)))
@@ -200,9 +192,6 @@ done:
  *
  * Return:	Non-NULL pointer to data block page on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 20 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_dblk_page_t *
@@ -215,11 +204,11 @@ H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t dblk_pag
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(dblk_page_addr));
+    assert(hdr);
+    assert(H5_addr_defined(dblk_page_addr));
 
     /* only the H5AC__READ_ONLY_FLAG may be set */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up user data */
     udata.hdr            = hdr;
@@ -266,9 +255,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 20 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -279,7 +265,7 @@ H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dblk_page);
+    assert(dblk_page);
 
     /* Unprotect the data block page */
     if (H5AC_unprotect(dblk_page->hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, cache_flags) < 0)
@@ -298,9 +284,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 20 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -311,8 +294,8 @@ H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dblk_page);
-    HDassert(!dblk_page->has_hdr_depend);
+    assert(dblk_page);
+    assert(!dblk_page->has_hdr_depend);
 
     /* Check if header field has been initialized */
     if (dblk_page->hdr) {
@@ -333,7 +316,7 @@ H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page)
     } /* end if */
 
     /* Sanity check */
-    HDassert(NULL == dblk_page->top_proxy);
+    assert(NULL == dblk_page->top_proxy);
 
     /* Free the data block page itself */
     dblk_page = H5FL_FREE(H5EA_dblk_page_t, dblk_page);

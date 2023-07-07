@@ -47,6 +47,24 @@ New Features
 
     Configuration:
     -------------
+    - Removed CMake cross-compiling variables
+
+      * HDF5_USE_PREGEN
+      * HDF5_BATCH_H5DETECT
+
+      These were used to work around H5detect and H5make_libsettings and
+      are no longer required.
+
+    - Running H5make_libsettings is no longer required for cross-compiling
+
+      The functionality of H5make_libsettings is now handled via template files,
+      so H5make_libsettings has been removed.
+
+    - Running H5detect is no longer required for cross-compiling
+
+      The functionality of H5detect is now exercised at library startup,
+      so H5detect has been removed.
+
     - Updated HDF5 API tests CMake code to support VOL connectors
 
       * Implemented support for fetching, building and testing HDF5
@@ -145,6 +163,9 @@ New Features
 
       See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
 
+    - Added the CMake variable HDF5_ENABLE_ROS3_VFD to the HDF5 CMake config
+      file hdf5-config.cmake. This allows to easily detect if the library
+      has been built with or without read-only S3 functionality.
 
     Library:
     --------
@@ -185,6 +206,9 @@ New Features
 
     Fortran Library:
     ----------------
+    - Added h5pget_vol_cap_flags_f and related Fortran VOL
+      capability definitions.
+
     - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
     - Added Fortran APIs:
@@ -234,6 +258,28 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed an assertion failure when attempting to use the Subfiling IOC
+      VFD directly
+
+      The Subfiling feature makes use of two Virtual File Drivers, the
+      Subfiling VFD and the IOC (I/O Concentrator) VFD. The two VFDs are
+      intended to be stacked together such that the Subfiling VFD sits
+      "on top" of the IOC VFD and routes I/O requests through it; using the
+      IOC VFD alone is currently unsupported. The IOC VFD has been fixed so
+      that an error message is displayed in this situation rather than causing
+      an assertion failure.
+
+    - Fixed a potential bug when copying empty enum datatypes
+
+      Copying an empty enum datatype (including implicitly, as when an enum
+      is a part of a compound datatype) would fail in an assert in debug
+      mode and could fail in release mode depending on how the platform
+      handles undefined behavior regarding size 0 memory allocations and
+      using memcpy with a NULL src pointer.
+
+      The library is now more careful about using memory operations when
+      copying empty enum datatypes and will not error or raise an assert.
+
     - Added an AAPL check to H5Acreate
 
       A check was added to H5Acreate to ensure that a failure is correctly
@@ -434,7 +480,15 @@ Bug Fixes since HDF5-1.14.0 release
 
     Java Library
     ------------
-    -
+    - Fixed switch case 'L' block missing a break statement.
+
+      The HDF5Array.arrayify method is missing a break statement in the case 'L': section
+      which causes it to fall through and throw an HDF5JavaException when attempting to
+      read an Array[Array[Long]].
+
+      The error was fixed by inserting a break statement at the end of the case 'L': sections.
+
+      Fixes GitHub issue #3056
 
 
     Configuration
@@ -594,25 +648,28 @@ Platforms Tested
     Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
                                      (cmake and autotools)
 
-    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.3.0-17ubuntu1
-    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.3.0-17ubuntu1
-    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4
+    Linux 5.19.0-1027-aws            GNU gcc (GCC) 11.3.0-1ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 11.3.0-1ubuntu1
+    Ubuntu 22.04                     Intel oneAPI DPC++/C++ Compiler, IFX 2023.1.0
+                                     Ubuntu clang version 14.0.0-1ubuntu1
                                      (cmake and autotools)
 
-    Linux 5.3.18-150300-cray_shasta_c cray-mpich/8.1.16
-    #1 SMP x86_64 GNU/Linux              Cray clang 14.0.0
-    (crusher)                            GCC 11.2.0
+    Linux 5.15.0-1037-aws            GNU gcc (GCC) 9.4.0-1ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.4.0-1ubuntu1
+    Ubuntu 20.04                     Intel oneAPI DPC++/C++ Compiler, IFX 2023.1.0
+                                     Ubuntu clang version 10.0.0-4ubuntu1
+                                     (cmake and autotools)
+
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.25
+    #1 SMP x86_64 GNU/Linux            cce 15.0.1
+    (perlmutter)                       GCC 12.2.0
+                                       intel-oneapi/2023.1.0
+                                       nvidia/22.7
                                      (cmake)
 
-    Linux 4.14.0-115.35.1.1chaos     openmpi 4.0.5
-    #1 SMP aarch64 GNU/Linux             GCC 9.2.0 (ARM-build-5)
-    (stria)                              GCC 7.2.0 (Spack GCC)
-                                     (cmake)
-
-    Linux 4.14.0-115.35.1.3chaos     spectrum-mpi/rolling-release
-    #1 SMP ppc64le GNU/Linux             clang 12.0.1
-    (vortex)                             GCC 8.3.1
-                                         XL 16.1.1
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.23
+    #1 SMP x86_64 GNU/Linux              cce 15.0.1
+    (crusher)                            GCC 12.2.0
                                      (cmake)
 
     Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
@@ -630,12 +687,15 @@ Platforms Tested
     Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     Power8 (echidna)                 GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+                                     IBM XL C for Linux, V13.1
+                                     IBM XL Fortran for Linux, V15.1
 
     Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:
     Centos7                              Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly/kituo/moohan)                 Version 4.9.3, Version 5.3.0, Version 6.3.0,
                                          Version 7.2.0, Version 8.3.0, Version 9.1.0
+                                         Version 10.2.0
                                      Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                      compilers:
                                          Version 17.0.0.098 Build 20160721
@@ -643,33 +703,22 @@ Platforms Tested
                                          with NAG Fortran Compiler Release 6.1(Tozai)
                                      Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
                                          with NAG Fortran Compiler Release 6.1(Tozai)
-                                     MPICH 3.1.4 compiled with GCC 4.9.3
                                      MPICH 3.3 compiled with GCC 7.2.0
-                                     OpenMPI 2.1.6 compiled with icc 18.0.1
-                                     OpenMPI 3.1.3 and 4.0.0 compiled with GCC 7.2.0
+                                     MPICH 4.0.3 compiled with GCC 7.2.0
+                                     OpenMPI 3.1.3 compiled with GCC 7.2.0
+                                     OpenMPI 4.1.2 compiled with GCC 9.1.0
                                      PGI C, Fortran, C++ for 64-bit target on
                                      x86_64;
                                          Version 19.10-0
+                                     NVIDIA C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 22.5-0
                                      (autotools and cmake)
 
     Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
     #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
     (quartz)                             GCC 7.3.0, 8.1.0
                                          Intel 19.0.4, 2022.2, oneapi.2022.2
-
-    Linux-3.10.0-1160.71.1.1chaos    openmpi/4.1
-    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
-    (skybridge)                          Intel/19.1
-                                     (cmake)
-
-    Linux-3.10.0-1160.66.1.1chaos    openmpi/4.1
-    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
-    (attaway)                            Intel/19.1
-                                     (cmake)
-
-    Linux-3.10.0-1160.59.1.1chaos    openmpi/4.1
-    #1 SMP x86_64 GNU/Linux              Intel/19.1
-    (chama)                          (cmake)
 
     macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
     Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
@@ -683,14 +732,9 @@ Platforms Tested
     64-bit                           gfortran GNU Fortran (GCC) 6.3.0
     (bear)                           Intel icc/icpc/ifort version 19.0.4.233 20190416
 
-    macOS Sierra 10.12.6             Apple LLVM version 9.0.0 (clang-900.39.2)
-    64-bit                           gfortran GNU Fortran (GCC) 7.4.0
-    (kite)                           Intel icc/icpc/ifort version 17.0.2
-
     Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
     64-bit                           gfortran GNU Fortran (GCC) 5.2.0
     (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
-
 
     Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:

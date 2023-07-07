@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5checksum.c
- *			Aug 21 2006
- *			Quincey Koziol
  *
  * Purpose:		Internal code for computing fletcher32 checksums
  *
@@ -91,9 +89,6 @@ static hbool_t H5_crc_table_computed = FALSE;
  *
  * Return:	32-bit fletcher checksum of input buffer (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Monday, August 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 uint32_t
@@ -106,8 +101,8 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(_data);
-    HDassert(_len > 0);
+    assert(_data);
+    assert(_len > 0);
 
     /* Compute checksum for pairs of bytes */
     /* (the magic "360" value is the largest number of sums that can be
@@ -147,9 +142,6 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
  *
  * Return:	none
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -185,9 +177,6 @@ H5__checksum_crc_make_table(void)
  *
  * Return:	32-bit CRC checksum of input buffer (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static uint32_t
@@ -220,9 +209,6 @@ H5__checksum_crc_update(uint32_t crc, const uint8_t *buf, size_t len)
  *
  * Return:	32-bit CRC checksum of input buffer (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 uint32_t
@@ -231,8 +217,8 @@ H5_checksum_crc(const void *_data, size_t len)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(_data);
-    HDassert(len > 0);
+    assert(_data);
+    assert(len > 0);
 
     FUNC_LEAVE_NOAPI(H5__checksum_crc_update((uint32_t)0xffffffffL, (const uint8_t *)_data, len) ^
                      0xffffffffL)
@@ -284,7 +270,7 @@ rotates.
 */
 #define H5_lookup3_rot(x, k) (((x) << (k)) ^ ((x) >> (32 - (k))))
 #define H5_lookup3_mix(a, b, c)                                                                              \
-    {                                                                                                        \
+    do {                                                                                                     \
         a -= c;                                                                                              \
         a ^= H5_lookup3_rot(c, 4);                                                                           \
         c += b;                                                                                              \
@@ -303,7 +289,7 @@ rotates.
         c -= b;                                                                                              \
         c ^= H5_lookup3_rot(b, 4);                                                                           \
         b += a;                                                                                              \
-    }
+    } while (0)
 
 /*
 -------------------------------------------------------------------------------
@@ -331,7 +317,7 @@ and these came close:
 -------------------------------------------------------------------------------
 */
 #define H5_lookup3_final(a, b, c)                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         c ^= b;                                                                                              \
         c -= H5_lookup3_rot(b, 14);                                                                          \
         a ^= c;                                                                                              \
@@ -346,7 +332,7 @@ and these came close:
         b -= H5_lookup3_rot(a, 14);                                                                          \
         c ^= b;                                                                                              \
         c -= H5_lookup3_rot(b, 24);                                                                          \
-    }
+    } while (0)
 
 /*
 -------------------------------------------------------------------------------
@@ -384,8 +370,8 @@ H5_checksum_lookup3(const void *key, size_t length, uint32_t initval)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(key);
-    HDassert(length > 0);
+    assert(key);
+    assert(length > 0);
 
     /* Set up the internal state */
     a = b = c = 0xdeadbeef + ((uint32_t)length) + initval;
@@ -462,7 +448,7 @@ H5_checksum_lookup3(const void *key, size_t length, uint32_t initval)
         case 0:
             goto done;
         default:
-            HDassert(0 && "This Should never be executed!");
+            assert(0 && "This Should never be executed!");
     }
 
     H5_lookup3_final(a, b, c);
@@ -480,9 +466,6 @@ done:
  *
  * Return:	checksum of input buffer (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 uint32_t
@@ -491,8 +474,8 @@ H5_checksum_metadata(const void *data, size_t len, uint32_t initval)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(data);
-    HDassert(len > 0);
+    assert(data);
+    assert(len > 0);
 
     /* Choose the appropriate checksum routine */
     /* (use Bob Jenkin's "lookup3" algorithm for all buffer sizes) */
@@ -509,9 +492,6 @@ H5_checksum_metadata(const void *data, size_t len, uint32_t initval)
  *
  * Return:	hash of input string (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, December 11, 2007
- *
  *-------------------------------------------------------------------------
  */
 uint32_t
@@ -523,7 +503,7 @@ H5_hash_string(const char *str)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(str);
+    assert(str);
 
     while ((c = *str++))
         hash = ((hash << 5) + hash) + (uint32_t)c; /* hash * 33 + c */

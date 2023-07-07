@@ -30,9 +30,6 @@
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, May 20, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -73,9 +70,6 @@ done:
  *
  * Return:	A pointer to an allocated string. The caller should free
  *              the string. NULL is returned for errors.
- *
- * Programmer:	Robb Matzke
- *		Thursday, May 20, 1999
  *
  *-------------------------------------------------------------------------
  */

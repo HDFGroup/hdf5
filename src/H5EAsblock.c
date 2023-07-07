@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAsblock.c
- *			Sep 30 2008
- *			Quincey Koziol
  *
  * Purpose:		Super block routines for extensible arrays.
  *
@@ -85,9 +83,6 @@ H5FL_BLK_DEFINE(page_init);
  *
  * Return:	Non-NULL pointer to super block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_sblock_t *
@@ -99,7 +94,7 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Allocate memory for the index block */
     if (NULL == (sblock = H5FL_CALLOC(H5EA_sblock_t)))
@@ -118,7 +113,7 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx)
     /* Compute/cache information */
     sblock->idx    = sblk_idx;
     sblock->ndblks = hdr->sblk_info[sblk_idx].ndblks;
-    HDassert(sblock->ndblks);
+    assert(sblock->ndblks);
     sblock->dblk_nelmts = hdr->sblk_info[sblk_idx].dblk_nelmts;
 
     /* Allocate buffer for data block addresses in super block */
@@ -132,14 +127,14 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx)
         sblock->dblk_npages = sblock->dblk_nelmts / hdr->dblk_page_nelmts;
 
         /* Sanity check that we have at least 2 pages in data block */
-        HDassert(sblock->dblk_npages > 1);
+        assert(sblock->dblk_npages > 1);
 
         /* Sanity check for integer truncation */
-        HDassert((sblock->dblk_npages * hdr->dblk_page_nelmts) == sblock->dblk_nelmts);
+        assert((sblock->dblk_npages * hdr->dblk_page_nelmts) == sblock->dblk_nelmts);
 
         /* Compute size of buffer for each data block's 'page init' bitmask */
         sblock->dblk_page_init_size = ((sblock->dblk_npages) + 7) / 8;
-        HDassert(sblock->dblk_page_init_size > 0);
+        assert(sblock->dblk_page_init_size > 0);
 
         /* Allocate buffer for all 'page init' bitmasks in super block */
         if (NULL ==
@@ -169,9 +164,6 @@ done:
  *
  * Return:	Valid file address on success/HADDR_UNDEF on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -186,8 +178,8 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, hbool_t *stats_chang
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(stats_changed);
+    assert(hdr);
+    assert(stats_changed);
 
     /* Allocate the super block */
     if (NULL == (sblock = H5EA__sblock_alloc(hdr, parent, sblk_idx)))
@@ -234,7 +226,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, hbool_t *stats_chang
     ret_value = sblock_addr;
 
 done:
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (sblock) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -243,7 +235,7 @@ done:
                                 "unable to remove extensible array super block from cache")
 
             /* Release super block's disk space */
-            if (H5F_addr_defined(sblock->addr) &&
+            if (H5_addr_defined(sblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_SBLOCK, sblock->addr, (hsize_t)sblock->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
                             "unable to release extensible array super block")
@@ -264,9 +256,6 @@ done:
  *
  * Return:	Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_sblock_t *
@@ -280,11 +269,11 @@ H5EA__sblock_protect(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(sblk_addr));
+    assert(hdr);
+    assert(H5_addr_defined(sblk_addr));
 
     /* only the H5AC__READ_ONLY_FLAG may be set */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up user data */
     udata.hdr       = hdr;
@@ -332,9 +321,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -345,7 +331,7 @@ H5EA__sblock_unprotect(H5EA_sblock_t *sblock, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(sblock);
+    assert(sblock);
 
     /* Unprotect the super block */
     if (H5AC_unprotect(sblock->hdr->f, H5AC_EARRAY_SBLOCK, sblock->addr, sblock, cache_flags) < 0)
@@ -364,9 +350,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -379,8 +362,8 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, u
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(sblk_addr));
+    assert(hdr);
+    assert(H5_addr_defined(sblk_addr));
 
     /* Protect super block */
     if (NULL == (sblock = H5EA__sblock_protect(hdr, parent, sblk_addr, sblk_idx, H5AC__NO_FLAGS_SET)))
@@ -391,7 +374,7 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, u
     /* Iterate over data blocks */
     for (u = 0; u < sblock->ndblks; u++) {
         /* Check for data block existing */
-        if (H5F_addr_defined(sblock->dblk_addrs[u])) {
+        if (H5_addr_defined(sblock->dblk_addrs[u])) {
             /* Delete data block */
             if (H5EA__dblock_delete(hdr, sblock, sblock->dblk_addrs[u], sblock->dblk_nelmts) < 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTDELETE, FAIL, "unable to delete extensible array data block")
@@ -415,9 +398,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -428,8 +408,8 @@ H5EA__sblock_dest(H5EA_sblock_t *sblock)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(sblock);
-    HDassert(!sblock->has_hdr_depend);
+    assert(sblock);
+    assert(!sblock->has_hdr_depend);
 
     /* Check if shared header field has been initialized */
     if (sblock->hdr) {
@@ -439,7 +419,7 @@ H5EA__sblock_dest(H5EA_sblock_t *sblock)
 
         /* Free buffer for super block 'page init' bitmask, if there is one */
         if (sblock->page_init) {
-            HDassert(sblock->dblk_npages > 0);
+            assert(sblock->dblk_npages > 0);
             sblock->page_init = H5FL_BLK_FREE(page_init, sblock->page_init);
         } /* end if */
 
@@ -451,7 +431,7 @@ H5EA__sblock_dest(H5EA_sblock_t *sblock)
     } /* end if */
 
     /* Sanity check */
-    HDassert(NULL == sblock->top_proxy);
+    assert(NULL == sblock->top_proxy);
 
     /* Free the super block itself */
     sblock = H5FL_FREE(H5EA_sblock_t, sblock);

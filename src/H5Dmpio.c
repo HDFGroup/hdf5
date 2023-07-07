@@ -11,13 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  rky 980813
- * KY 2005 revised the code and made the change to support and optimize
- * collective IO support.
  * Purpose:    Functions to read/write directly between app buffer and file.
- *
- *         Beware of the ifdef'ed print statements.
- *         I didn't make them portable.
  */
 
 /****************/
@@ -123,7 +117,7 @@
  */
 #define H5D_MPIO_INIT_CHUNK_UD_INFO(chunk_ud, index_info_ptr)                                                \
     do {                                                                                                     \
-        HDmemset(&chunk_ud, 0, sizeof(H5D_chunk_ud_t));                                                      \
+        memset(&chunk_ud, 0, sizeof(H5D_chunk_ud_t));                                                        \
         chunk_ud.common.layout  = (index_info_ptr)->layout;                                                  \
         chunk_ud.common.storage = (index_info_ptr)->storage;                                                 \
     } while (0)
@@ -432,8 +426,8 @@ static FILE             *debug_stream             = NULL;
 #define H5D_MPIO_DEBUG(rank, string)                                                                         \
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
-            HDfprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank);                    \
-            HDfflush(debug_stream);                                                                          \
+            fprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank);                      \
+            fflush(debug_stream);                                                                            \
         }                                                                                                    \
     } while (0)
 
@@ -441,8 +435,8 @@ static FILE             *debug_stream             = NULL;
 #define H5D_MPIO_DEBUG_VA(rank, string, ...)                                                                 \
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
-            HDfprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank, __VA_ARGS__);       \
-            HDfflush(debug_stream);                                                                          \
+            fprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank, __VA_ARGS__);         \
+            fflush(debug_stream);                                                                            \
         }                                                                                                    \
     } while (0)
 
@@ -497,7 +491,7 @@ H5D__mpio_parse_debug_str(const char *s)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(s);
+    assert(s);
 
     while (*s) {
         int c = (int)(*s);
@@ -544,10 +538,10 @@ H5D__mpio_debug_init(void)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(!H5D_mpio_debug_inited);
+    assert(!H5D_mpio_debug_inited);
 
     /* Clear the debug flag buffer */
-    HDmemset(H5D_mpio_debug_flags_s, 0, sizeof(H5D_mpio_debug_flags_s));
+    memset(H5D_mpio_debug_flags_s, 0, sizeof(H5D_mpio_debug_flags_s));
 
     /* Retrieve and parse the H5Dmpio debug string */
     debug_str = HDgetenv("H5D_mpio_Debug");
@@ -596,11 +590,11 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(io_info);
+    assert(io_info);
 
     for (i = 0; i < io_info->count; i++) {
-        HDassert(io_info->dsets_info[i].file_space);
-        HDassert(io_info->dsets_info[i].mem_space);
+        assert(io_info->dsets_info[i].file_space);
+        assert(io_info->dsets_info[i].mem_space);
     }
 
     /* For independent I/O, get out quickly and don't try to form consensus */
@@ -671,7 +665,7 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
         if ((io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF) && local_cause[0] &&
             !(local_cause[0] &
               ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS))) {
-            HDassert(io_info->no_selection_io_cause & H5D_MPIO_NO_SELECTION_IO_CAUSES);
+            assert(io_info->no_selection_io_cause & H5D_MPIO_NO_SELECTION_IO_CAUSES);
             local_cause[0] |= H5D_MPIO_NO_SELECTION_IO;
         }
 
@@ -741,8 +735,8 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
          * selection I/O and re-enable collective I/O since it's supported by selection I/O */
         if (global_cause[0] && !(global_cause[0] & ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION |
                                                      (unsigned)H5D_MPIO_DATA_TRANSFORMS))) {
-            HDassert(!(local_cause[0] &
-                       ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)));
+            assert(!(local_cause[0] &
+                     ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)));
             local_cause[0]         = 0;
             global_cause[0]        = 0;
             io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
@@ -800,7 +794,7 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
 
     FUNC_ENTER_PACKAGE
 
-    HDassert((local_cause && local_cause_len > 0) || (global_cause && global_cause_len > 0));
+    assert((local_cause && local_cause_len > 0) || (global_cause && global_cause_len > 0));
 
     /*
      * Use compile-time assertion so this routine is updated
@@ -867,7 +861,7 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
             case H5D_MPIO_COLLECTIVE:
             case H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE:
             default:
-                HDassert(0 && "invalid no collective cause reason");
+                assert(0 && "invalid no collective cause reason");
                 break;
         }
 
@@ -1049,7 +1043,7 @@ H5D__mpio_get_sum_chunk_dset(const H5D_io_info_t *io_info, const H5D_dset_io_inf
 
     /* Check for non-chunked dataset, in this case we know the number of "chunks"
      * is simply the mpi size */
-    HDassert(dset_info->layout->type == H5D_CHUNKED);
+    assert(dset_info->layout->type == H5D_CHUNKED);
 
     /* Get the number of chunks to perform I/O on */
     num_chunkf     = 0;
@@ -1089,16 +1083,6 @@ done:
  *                      4. DO IO
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
- * Modification:
- *  - Refctore to remove multi-chunk-without-opimization feature and update for
- *    multi-chunk-io accordingly
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1122,9 +1106,9 @@ H5D__piece_io(H5D_io_info_t *io_info)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(io_info);
-    HDassert(io_info->using_mpi_vfd);
-    HDassert(io_info->count > 0);
+    assert(io_info);
+    assert(io_info->using_mpi_vfd);
+    assert(io_info->count > 0);
 
     /* Obtain the current rank of the process and the number of ranks */
     if ((mpi_rank = H5F_mpi_get_rank(io_info->dsets_info[0].dset->oloc.file)) < 0)
@@ -1145,12 +1129,12 @@ H5D__piece_io(H5D_io_info_t *io_info)
 
         HDsnprintf(debug_log_filename, 1024, "H5Dmpio_debug.rank%d", mpi_rank);
 
-        if (NULL == (debug_log_file = HDfopen(debug_log_filename, "a")))
+        if (NULL == (debug_log_file = fopen(debug_log_filename, "a")))
             HGOTO_ERROR(H5E_IO, H5E_OPENERROR, FAIL, "couldn't open debugging log file")
 
         /* Print a short header for this I/O operation */
         time_now = HDtime(NULL);
-        HDfprintf(debug_log_file, "##### %s", HDasctime(HDlocaltime(&time_now)));
+        fprintf(debug_log_file, "##### %s", HDasctime(HDlocaltime(&time_now)));
 
         debug_stream = debug_log_file;
     }
@@ -1244,7 +1228,7 @@ H5D__piece_io(H5D_io_info_t *io_info)
             }
             else {
                 /* Chunked I/O path */
-                HDassert(io_info->dsets_info[i].layout->type == H5D_CHUNKED);
+                assert(io_info->dsets_info[i].layout->type == H5D_CHUNKED);
 
                 /* Recalculate io_option if necessary */
                 if (recalc_io_option) {
@@ -1356,8 +1340,8 @@ done:
 #ifdef H5Dmpio_DEBUG
     /* Close debugging log file */
     if (debug_log_file) {
-        HDfprintf(debug_log_file, "##############\n\n");
-        if (EOF == HDfclose(debug_log_file))
+        fprintf(debug_log_file, "##############\n\n");
+        if (EOF == fclose(debug_log_file))
             HDONE_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "couldn't close debugging log file")
         debug_stream = H5DEBUG(D);
     }
@@ -1373,9 +1357,6 @@ done:
  *              application memory using collective I/O.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  4, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1401,9 +1382,6 @@ done:
  *              application memory using collective I/O.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  4, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1434,9 +1412,6 @@ done:
  *              4. Use common collective IO routine to do MPI-IO
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1472,7 +1447,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
 
     /* set actual_io_mode */
     for (i = 0; i < io_info->count; i++) {
-        HDassert(io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused == 0);
+        assert(io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused == 0);
         if (io_info->dsets_info[i].layout->type == H5D_CHUNKED)
             actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
         else if (io_info->dsets_info[i].layout->type == H5D_CONTIGUOUS)
@@ -1512,9 +1487,9 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
             hbool_t need_sort = FALSE;
 
             /* Check if sel_pieces array is sorted */
-            HDassert(io_info->sel_pieces[0]->faddr != HADDR_UNDEF);
+            assert(io_info->sel_pieces[0]->faddr != HADDR_UNDEF);
             for (i = 1; i < num_chunk; i++) {
-                HDassert(io_info->sel_pieces[i]->faddr != HADDR_UNDEF);
+                assert(io_info->sel_pieces[i]->faddr != HADDR_UNDEF);
 
                 if (io_info->sel_pieces[i]->faddr < io_info->sel_pieces[i - 1]->faddr) {
                     need_sort = TRUE;
@@ -1524,8 +1499,8 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
 
             /* Sort sel_pieces if necessary */
             if (need_sort)
-                HDqsort(io_info->sel_pieces, io_info->pieces_added, sizeof(io_info->sel_pieces[0]),
-                        H5D__cmp_piece_addr);
+                qsort(io_info->sel_pieces, io_info->pieces_added, sizeof(io_info->sel_pieces[0]),
+                      H5D__cmp_piece_addr);
 
             /* Allocate chunking information */
             if (NULL == (chunk_mtype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
@@ -1595,7 +1570,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
 
                 /* Sanity check */
                 if (is_permuted)
-                    HDassert(permute_map);
+                    assert(permute_map);
                 if (H5S_mpio_space_type(piece_info->mspace, piece_info->dset_info->type_info.dst_type_size,
                                         &chunk_mtype[i], &chunk_mpi_mem_counts[i],
                                         &(chunk_mbt_is_derived_array[i]), FALSE, /* this is a memory
@@ -1615,7 +1590,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buf type")
                 /* Sanity check */
                 if (is_permuted)
-                    HDassert(!permute_map);
+                    assert(!permute_map);
 
                 /* Piece address relative to the first piece addr
                  * Assign piece address to MPI displacement
@@ -1813,7 +1788,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_
 
     FUNC_ENTER_PACKAGE_TAG(dset_info->dset->oloc.addr)
 
-    HDassert(io_info);
+    assert(io_info);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -1860,7 +1835,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_
                             "unable to send chunk modification data between MPI ranks")
 
             /* Make sure the local chunk list was updated correctly */
-            HDassert(chunk_list_num_entries == rank_chunks_assigned_map[mpi_rank]);
+            assert(chunk_list_num_entries == rank_chunks_assigned_map[mpi_rank]);
         }
 
         /* Proceed to update all the chunks this rank owns with its own
@@ -1984,9 +1959,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2012,7 +1984,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
 
     FUNC_ENTER_PACKAGE_TAG(dset_info->dset->oloc.addr)
 
-    HDassert(dset_info->layout->type == H5D_CHUNKED);
+    assert(dset_info->layout->type == H5D_CHUNKED);
 
     /* Get the current I/O collective opt mode so we can restore it later */
     if (H5CX_get_mpio_coll_opt(&orig_coll_opt_mode) < 0)
@@ -2023,7 +1995,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
 
     /* Retrieve total # of chunks in dataset */
     H5_CHECKED_ASSIGN(total_chunk, size_t, dset_info->layout->u.chunk.nchunks, hsize_t);
-    HDassert(total_chunk != 0);
+    assert(total_chunk != 0);
 
     /* Allocate memories */
     chunk_io_option = (uint8_t *)H5MM_calloc(total_chunk);
@@ -2068,8 +2040,8 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
 
         /* Check if this chunk is the next chunk in the skip list, if there are
          * selected chunks left to process */
-        HDassert(!num_chunk || next_chunk_info);
-        HDassert(!num_chunk || next_chunk_info->index >= u);
+        assert(!num_chunk || next_chunk_info);
+        assert(!num_chunk || next_chunk_info->index >= u);
         if (num_chunk && next_chunk_info->index == u) {
             /* Next chunk is this chunk */
             chunk_info = next_chunk_info;
@@ -2139,7 +2111,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
                               u);
 #endif
 
-            HDassert(chunk_io_option[u] == 0);
+            assert(chunk_io_option[u] == 0);
 
             /* Set the file & memory dataspaces */
             if (chunk_info) {
@@ -2289,7 +2261,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info
 
     FUNC_ENTER_PACKAGE_TAG(dset_info->dset->oloc.addr)
 
-    HDassert(io_info);
+    assert(io_info);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -2489,9 +2461,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2518,7 +2487,7 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *di, H
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain MPI rank")
 #endif
 
-    HDassert(io_info);
+    assert(io_info);
 
     if ((file_space != NULL) && (mem_space != NULL)) {
         int      mpi_file_count;     /* Number of file "objects" to transfer */
@@ -2528,7 +2497,7 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *di, H
                                         point selection of the file space */
         hbool_t is_permuted = FALSE;
 
-        HDassert(di);
+        assert(di);
 
         /* Obtain disk and memory MPI derived datatype */
         /* NOTE: The permute_map array can be allocated within H5S_mpio_space_type
@@ -2550,7 +2519,7 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *di, H
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
         /* Sanity check */
         if (is_permuted)
-            HDassert(permute_map);
+            assert(permute_map);
         if (H5S_mpio_space_type(mem_space, di->type_info.src_type_size, &mpi_buf_type, &mpi_buf_count,
                                 &mbt_is_derived, /* OUT: datatype created */
                                 FALSE,           /* this is a memory space, so if
@@ -2569,7 +2538,7 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *di, H
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buffer type")
         /* Sanity check */
         if (is_permuted)
-            HDassert(!permute_map);
+            assert(!permute_map);
     } /* end if */
     else {
         /* For non-selection, participate with a none MPI derived datatype, the count is 0.  */
@@ -2610,9 +2579,6 @@ done:
  * Purpose:     Routine for the common part of collective IO with different storages.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2680,7 +2646,7 @@ H5D__cmp_piece_addr(const void *piece_info1, const void *piece_info2)
     addr1 = (*((const H5D_piece_info_t *const *)piece_info1))->faddr;
     addr2 = (*((const H5D_piece_info_t *const *)piece_info2))->faddr;
 
-    FUNC_LEAVE_NOAPI(H5F_addr_cmp(addr1, addr2))
+    FUNC_LEAVE_NOAPI(H5_addr_cmp(addr1, addr2))
 } /* end H5D__cmp_chunk_addr() */
 
 /*-------------------------------------------------------------------------
@@ -2715,23 +2681,23 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
     addr2 = entry2->chunk_new.offset;
 
     /*
-     * If both chunk addresses are defined, H5F_addr_cmp is safe to use.
+     * If both chunk addresses are defined, H5_addr_cmp is safe to use.
      * Otherwise, if both addresses aren't defined, compared chunk
      * entries based on their chunk index. Finally, if only one chunk
      * address is defined, return the appropriate value based on which
      * is defined.
      */
-    if (H5F_addr_defined(addr1) && H5F_addr_defined(addr2)) {
-        ret_value = H5F_addr_cmp(addr1, addr2);
+    if (H5_addr_defined(addr1) && H5_addr_defined(addr2)) {
+        ret_value = H5_addr_cmp(addr1, addr2);
     }
-    else if (!H5F_addr_defined(addr1) && !H5F_addr_defined(addr2)) {
+    else if (!H5_addr_defined(addr1) && !H5_addr_defined(addr2)) {
         hsize_t chunk_idx1 = entry1->index_info.chunk_idx;
         hsize_t chunk_idx2 = entry2->index_info.chunk_idx;
 
         ret_value = (chunk_idx1 > chunk_idx2) - (chunk_idx1 < chunk_idx2);
     }
     else
-        ret_value = H5F_addr_defined(addr1) ? 1 : -1;
+        ret_value = H5_addr_defined(addr1) ? 1 : -1;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__cmp_filtered_collective_io_info_entry() */
@@ -2814,23 +2780,23 @@ H5D__cmp_chunk_redistribute_info_orig_owner(const void *_entry1, const void *_en
         haddr_t addr2 = entry2->chunk_block.offset;
 
         /*
-         * If both chunk addresses are defined, H5F_addr_cmp is safe to use.
+         * If both chunk addresses are defined, H5_addr_cmp is safe to use.
          * Otherwise, if both addresses aren't defined, compared chunk
          * entries based on their chunk index. Finally, if only one chunk
          * address is defined, return the appropriate value based on which
          * is defined.
          */
-        if (H5F_addr_defined(addr1) && H5F_addr_defined(addr2)) {
-            ret_value = H5F_addr_cmp(addr1, addr2);
+        if (H5_addr_defined(addr1) && H5_addr_defined(addr2)) {
+            ret_value = H5_addr_cmp(addr1, addr2);
         }
-        else if (!H5F_addr_defined(addr1) && !H5F_addr_defined(addr2)) {
+        else if (!H5_addr_defined(addr1) && !H5_addr_defined(addr2)) {
             hsize_t chunk_idx1 = entry1->chunk_idx;
             hsize_t chunk_idx2 = entry2->chunk_idx;
 
             ret_value = (chunk_idx1 > chunk_idx2) - (chunk_idx1 < chunk_idx2);
         }
         else
-            ret_value = H5F_addr_defined(addr1) ? 1 : -1;
+            ret_value = H5_addr_defined(addr1) ? 1 : -1;
     }
     else
         ret_value = (owner1 > owner2) - (owner1 < owner2);
@@ -2870,9 +2836,6 @@ H5D__cmp_chunk_redistribute_info_orig_owner(const void *_entry1, const void *_en
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2898,7 +2861,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(di->layout->type == H5D_CHUNKED);
+    assert(di->layout->type == H5D_CHUNKED);
 
     /* Assign the rank 0 to the root */
     root = 0;
@@ -3038,7 +3001,7 @@ done:
     if (mergebuf)
         H5MM_free(mergebuf);
     if (recv_io_mode_info) {
-        HDassert(mpi_rank == root);
+        assert(mpi_rank == root);
         H5MM_free(recv_io_mode_info);
     } /* end if */
 
@@ -3074,16 +3037,16 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(io_info);
-    HDassert(di);
-    HDassert(chunk_list);
-    HDassert(num_entries);
+    assert(io_info);
+    assert(di);
+    assert(chunk_list);
+    assert(num_entries);
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
     H5D_MPIO_TIME_START(mpi_rank, "Filtered Collective I/O Setup");
 #endif
 
-    HDassert(di->layout->type == H5D_CHUNKED);
+    assert(di->layout->type == H5D_CHUNKED);
 
     /* Each rank builds a local list of the chunks they have selected */
     if ((num_chunks_selected = H5SL_count(di->layout_io_info.chunk_map->dset_sel_pieces))) {
@@ -3194,7 +3157,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                 haddr_t curr_chunk_offset = local_info_array[i].chunk_current.offset;
                 haddr_t prev_chunk_offset = local_info_array[i - 1].chunk_current.offset;
 
-                if (!H5F_addr_defined(prev_chunk_offset) || !H5F_addr_defined(curr_chunk_offset) ||
+                if (!H5_addr_defined(prev_chunk_offset) || !H5_addr_defined(curr_chunk_offset) ||
                     (curr_chunk_offset < prev_chunk_offset))
                     need_sort = TRUE;
             }
@@ -3219,8 +3182,8 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
 
         /* Ensure the chunk list is sorted in ascending order of offset in the file */
         if (need_sort)
-            HDqsort(local_info_array, num_chunks_selected, sizeof(H5D_filtered_collective_io_info_t),
-                    H5D__cmp_filtered_collective_io_info_entry);
+            qsort(local_info_array, num_chunks_selected, sizeof(H5D_filtered_collective_io_info_t),
+                  H5D__cmp_filtered_collective_io_info_entry);
 
 #ifdef H5Dmpio_DEBUG
         H5D__mpio_dump_collective_filtered_chunk_list(local_info_array, num_chunks_selected, mpi_rank);
@@ -3293,9 +3256,9 @@ H5D__mpio_redistribute_shared_chunks(H5D_filtered_collective_io_info_t *chunk_li
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(chunk_list || 0 == chunk_list_num_entries);
-    HDassert(io_info);
-    HDassert(mpi_size > 1); /* No chunk sharing is possible for MPI Comm size of 1 */
+    assert(chunk_list || 0 == chunk_list_num_entries);
+    assert(io_info);
+    assert(mpi_size > 1); /* No chunk sharing is possible for MPI Comm size of 1 */
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -3436,10 +3399,10 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(num_chunks_assigned_map);
-    HDassert(chunk_list || 0 == num_chunks_assigned_map[mpi_rank]);
-    HDassert(io_info);
-    HDassert(mpi_size > 1);
+    assert(num_chunks_assigned_map);
+    assert(chunk_list || 0 == num_chunks_assigned_map[mpi_rank]);
+    assert(io_info);
+    assert(mpi_size > 1);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -3524,11 +3487,11 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
         int                            new_chunk_owner;
 
         /* Clear the mapping from rank value -> number of assigned chunks */
-        HDmemset(num_chunks_assigned_map, 0, (size_t)mpi_size * sizeof(*num_chunks_assigned_map));
+        memset(num_chunks_assigned_map, 0, (size_t)mpi_size * sizeof(*num_chunks_assigned_map));
 
         /* Sort collective chunk list according to chunk index */
-        HDqsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
-                H5D__cmp_chunk_redistribute_info);
+        qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
+              H5D__cmp_chunk_redistribute_info);
 
         /*
          * Process all chunks in the collective chunk list.
@@ -3577,7 +3540,7 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
             } while (++i < coll_chunk_list_num_entries && chunk_entry->chunk_idx == curr_chunk_idx);
 
             /* We should never have more writers to a chunk than the number of MPI ranks */
-            HDassert(num_writers <= mpi_size);
+            assert(num_writers <= mpi_size);
 
             /* Set all processed chunk entries' "new_owner" and "num_writers" fields */
             for (; set_begin_index < i; set_begin_index++) {
@@ -3609,8 +3572,8 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
          *       algorithm may be devised that doesn't rely on frail sorting,
          *       but the current implementation is a quick and naive approach.
          */
-        HDqsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
-                H5D__cmp_chunk_redistribute_info_orig_owner);
+        qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
+              H5D__cmp_chunk_redistribute_info_orig_owner);
     }
 
     if (all_ranks_involved) {
@@ -3772,13 +3735,13 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(chunk_list_num_entries);
-    HDassert(chunk_list || 0 == *chunk_list_num_entries);
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(mpi_size > 1);
-    HDassert(chunk_msg_bufs);
-    HDassert(chunk_msg_bufs_len);
+    assert(chunk_list_num_entries);
+    assert(chunk_list || 0 == *chunk_list_num_entries);
+    assert(io_info);
+    assert(dset_info);
+    assert(mpi_size > 1);
+    assert(chunk_msg_bufs);
+    assert(chunk_msg_bufs_len);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -3875,7 +3838,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
             mod_data_p = msg_send_bufs[num_send_requests];
 
             /* Store the chunk's index into the buffer */
-            HDmemcpy(mod_data_p, &chunk_entry->index_info.chunk_idx, sizeof(hsize_t));
+            memcpy(mod_data_p, &chunk_entry->index_info.chunk_idx, sizeof(hsize_t));
             mod_data_p += sizeof(hsize_t);
 
             /* Serialize the chunk's file dataspace into the buffer */
@@ -3990,7 +3953,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
             if (msg_size <= 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid chunk modification message size")
 
-            HDassert((num_recv_requests + 1) <= num_msgs_incoming);
+            assert((num_recv_requests + 1) <= num_msgs_incoming);
             if (NULL ==
                 (msg_recv_bufs[num_recv_requests] = H5MM_malloc((size_t)msg_size * sizeof(unsigned char))))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
@@ -4176,8 +4139,8 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(chunk_list || 0 == chunk_list_num_entries);
-    HDassert(io_info);
+    assert(chunk_list || 0 == chunk_list_num_entries);
+    assert(io_info);
 
     /* Initialize temporary I/O info */
     coll_io_info = *io_info;
@@ -4198,10 +4161,10 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
      */
     if (io_info->op_type == H5D_IO_OP_READ) {
         for (i = 0, num_chunks = 0; i < chunk_list_num_entries; i++) {
-            HDassert(chunk_list[i].buf);
+            assert(chunk_list[i].buf);
 
             if (chunk_list[i].need_read) {
-                if (!H5F_addr_defined(base_read_offset))
+                if (!H5_addr_defined(base_read_offset))
                     base_read_offset = chunk_list[i].chunk_current.offset;
 
                 num_chunks++;
@@ -4297,9 +4260,9 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(chunk_list || 0 == chunk_list_num_entries);
-    HDassert(io_info);
-    HDassert(di);
+    assert(chunk_list || 0 == chunk_list_num_entries);
+    assert(io_info);
+    assert(di);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -4342,7 +4305,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
      *    chunk size would of course be bad.
      */
     for (i = 0; i < chunk_list_num_entries; i++) {
-        HDassert(chunk_list[i].need_read);
+        assert(chunk_list[i].need_read);
 
         chunk_list[i].chunk_buf_size = MAX(chunk_list[i].chunk_current.length, file_chunk_size);
 
@@ -4357,7 +4320,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
          * read it from the file. Instead, just fill the chunk buffer
          * with the fill value if necessary.
          */
-        if (H5F_addr_defined(chunk_list[i].chunk_current.offset)) {
+        if (H5_addr_defined(chunk_list[i].chunk_current.offset)) {
             /* Set first read buffer */
             if (!base_read_buf)
                 base_read_buf = chunk_list[i].buf;
@@ -4379,7 +4342,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
                 if (!fb_info_init) {
                     hsize_t chunk_dims[H5S_MAX_RANK];
 
-                    HDassert(di->dset->shared->ndims == di->dset->shared->layout.u.chunk.ndims - 1);
+                    assert(di->dset->shared->ndims == di->dset->shared->layout.u.chunk.ndims - 1);
                     for (size_t j = 0; j < di->dset->shared->layout.u.chunk.ndims - 1; j++)
                         chunk_dims[j] = (hsize_t)di->dset->shared->layout.u.chunk.dim[j];
 
@@ -4400,7 +4363,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
                 }
 
                 /* Write fill value to memory buffer */
-                HDassert(fb_info.fill_buf);
+                assert(fb_info.fill_buf);
                 if (H5D__fill(fb_info.fill_buf, di->dset->shared->type, chunk_list[i].buf,
                               di->type_info.mem_type, fill_space) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't fill chunk buffer with fill value")
@@ -4520,10 +4483,10 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(chunk_list || 0 == chunk_list_num_entries);
-    HDassert((chunk_msg_bufs && chunk_hash_table) || 0 == chunk_msg_bufs_len);
-    HDassert(io_info);
-    HDassert(di);
+    assert(chunk_list || 0 == chunk_list_num_entries);
+    assert((chunk_msg_bufs && chunk_hash_table) || 0 == chunk_msg_bufs_len);
+    assert(io_info);
+    assert(di);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -4532,7 +4495,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
     /* Set convenience pointers */
     type_info = &(di->type_info);
-    HDassert(type_info);
+    assert(type_info);
 
     if (chunk_list_num_entries) {
         /* Retrieve filter settings from API context */
@@ -4570,7 +4533,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
      *    chunk size would of course be bad.
      */
     for (i = 0; i < chunk_list_num_entries; i++) {
-        HDassert(mpi_rank == chunk_list[i].new_owner);
+        assert(mpi_rank == chunk_list[i].new_owner);
 
         chunk_list[i].chunk_buf_size = MAX(chunk_list[i].chunk_current.length, file_chunk_size);
 
@@ -4579,7 +4542,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
          * out fill values to it, make sure to 0-fill its memory buffer
          * so we don't use uninitialized memory.
          */
-        if (!H5F_addr_defined(chunk_list[i].chunk_current.offset) && !should_fill)
+        if (!H5_addr_defined(chunk_list[i].chunk_current.offset) && !should_fill)
             chunk_list[i].buf = H5MM_calloc(chunk_list[i].chunk_buf_size);
         else
             chunk_list[i].buf = H5MM_malloc(chunk_list[i].chunk_buf_size);
@@ -4597,7 +4560,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
              * read it from the file. Instead, just fill the chunk buffer
              * with the fill value if fill values are to be written.
              */
-            if (H5F_addr_defined(chunk_list[i].chunk_current.offset)) {
+            if (H5_addr_defined(chunk_list[i].chunk_current.offset)) {
                 /* Set first read buffer */
                 if (!base_read_buf)
                     base_read_buf = chunk_list[i].buf;
@@ -4619,7 +4582,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                     if (!fb_info_init) {
                         hsize_t chunk_dims[H5S_MAX_RANK];
 
-                        HDassert(di->dset->shared->ndims == di->dset->shared->layout.u.chunk.ndims - 1);
+                        assert(di->dset->shared->ndims == di->dset->shared->layout.u.chunk.ndims - 1);
                         for (size_t j = 0; j < di->dset->shared->layout.u.chunk.ndims - 1; j++)
                             chunk_dims[j] = (hsize_t)di->dset->shared->layout.u.chunk.dim[j];
 
@@ -4642,7 +4605,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                     }
 
                     /* Write fill value to memory buffer */
-                    HDassert(fb_info.fill_buf);
+                    assert(fb_info.fill_buf);
                     if (H5D__fill(fb_info.fill_buf, di->dset->shared->type, chunk_list[i].buf,
                                   type_info->mem_type, fill_space) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -4693,7 +4656,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
     /* Process all chunks with data from the owning rank first */
     for (i = 0; i < chunk_list_num_entries; i++) {
-        HDassert(mpi_rank == chunk_list[i].new_owner);
+        assert(mpi_rank == chunk_list[i].new_owner);
 
         chunk_info = chunk_list[i].chunk_info;
 
@@ -4728,7 +4691,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
         if (msg_ptr) {
             /* Retrieve the chunk's index value */
-            HDmemcpy(&chunk_idx, msg_ptr, sizeof(hsize_t));
+            memcpy(&chunk_idx, msg_ptr, sizeof(hsize_t));
             msg_ptr += sizeof(hsize_t);
 
             /* Find the chunk entry according to its chunk index */
@@ -4865,10 +4828,10 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(chunk_list || 0 == chunk_list_num_entries);
-    HDassert(io_info);
-    HDassert(idx_info);
-    HDassert(idx_info->storage->idx_type != H5D_CHUNK_IDX_NONE);
+    assert(chunk_list || 0 == chunk_list_num_entries);
+    assert(io_info);
+    assert(idx_info);
+    assert(idx_info->storage->idx_type != H5D_CHUNK_IDX_NONE);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -4964,8 +4927,8 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
             local_chunk = &chunk_list[num_local_chunks_processed];
 
             /* Sanity check that this chunk is actually local */
-            HDassert(mpi_rank == local_chunk->orig_owner);
-            HDassert(mpi_rank == local_chunk->new_owner);
+            assert(mpi_rank == local_chunk->orig_owner);
+            assert(mpi_rank == local_chunk->new_owner);
 
             local_chunk->chunk_new              = coll_entry->chunk_new;
             local_chunk->index_info.need_insert = need_insert;
@@ -4979,7 +4942,7 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
                 haddr_t curr_chunk_offset = local_chunk->chunk_new.offset;
                 haddr_t prev_chunk_offset = chunk_list[num_local_chunks_processed - 1].chunk_new.offset;
 
-                HDassert(H5F_addr_defined(prev_chunk_offset) && H5F_addr_defined(curr_chunk_offset));
+                assert(H5_addr_defined(prev_chunk_offset) && H5_addr_defined(curr_chunk_offset));
                 if (curr_chunk_offset < prev_chunk_offset)
                     need_sort = TRUE;
             }
@@ -4988,15 +4951,15 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
         }
     }
 
-    HDassert(chunk_list_num_entries == num_local_chunks_processed);
+    assert(chunk_list_num_entries == num_local_chunks_processed);
 
     /*
      * Ensure this rank's local chunk list is sorted in
      * ascending order of offset in the file
      */
     if (need_sort)
-        HDqsort(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
-                H5D__cmp_filtered_collective_io_info_entry);
+        qsort(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
+              H5D__cmp_filtered_collective_io_info_entry);
 
 done:
     H5MM_free(gathered_array);
@@ -5055,10 +5018,10 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(chunk_list || 0 == chunk_list_num_entries);
-    HDassert(io_info);
-    HDassert(di);
-    HDassert(idx_info);
+    assert(chunk_list || 0 == chunk_list_num_entries);
+    assert(io_info);
+    assert(di);
+    assert(idx_info);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -5190,11 +5153,11 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
          */
         for (size_t dbg_idx = 0; dbg_idx < chunk_list_num_entries; dbg_idx++) {
             if (coll_entry->index_info.chunk_idx == chunk_list[dbg_idx].index_info.chunk_idx) {
-                hbool_t coords_match = !HDmemcmp(scaled_coords, chunk_list[dbg_idx].chunk_info->scaled,
-                                                 di->dset->shared->ndims * sizeof(hsize_t));
+                hbool_t coords_match = !memcmp(scaled_coords, chunk_list[dbg_idx].chunk_info->scaled,
+                                               di->dset->shared->ndims * sizeof(hsize_t));
 
-                HDassert(coords_match && "Calculated scaled coordinates for chunk didn't match "
-                                         "chunk's actual scaled coordinates!");
+                assert(coords_match && "Calculated scaled coordinates for chunk didn't match "
+                                       "chunk's actual scaled coordinates!");
                 break;
             }
         }
@@ -5266,10 +5229,10 @@ H5D__mpio_get_chunk_redistribute_info_types(MPI_Datatype *contig_type, hbool_t *
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(contig_type);
-    HDassert(contig_type_derived);
-    HDassert(resized_type);
-    HDassert(resized_type_derived);
+    assert(contig_type);
+    assert(contig_type_derived);
+    assert(resized_type);
+    assert(resized_type_derived);
 
     *contig_type_derived  = FALSE;
     *resized_type_derived = FALSE;
@@ -5279,7 +5242,7 @@ H5D__mpio_get_chunk_redistribute_info_types(MPI_Datatype *contig_type, hbool_t *
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't create derived type for chunk file description")
 
     field_count = 5;
-    HDassert(field_count == (sizeof(types) / sizeof(MPI_Datatype)));
+    assert(field_count == (sizeof(types) / sizeof(MPI_Datatype)));
 
     /*
      * Create structure type to pack chunk H5F_block_t structure
@@ -5407,10 +5370,10 @@ H5D__mpio_get_chunk_alloc_info_types(MPI_Datatype *contig_type, hbool_t *contig_
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(contig_type);
-    HDassert(contig_type_derived);
-    HDassert(resized_type);
-    HDassert(resized_type_derived);
+    assert(contig_type);
+    assert(contig_type_derived);
+    assert(resized_type);
+    assert(resized_type_derived);
 
     *contig_type_derived  = FALSE;
     *resized_type_derived = FALSE;
@@ -5420,7 +5383,7 @@ H5D__mpio_get_chunk_alloc_info_types(MPI_Datatype *contig_type, hbool_t *contig_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't create derived type for chunk file description")
 
     field_count = 3;
-    HDassert(field_count == (sizeof(types) / sizeof(MPI_Datatype)));
+    assert(field_count == (sizeof(types) / sizeof(MPI_Datatype)));
 
     /*
      * Create structure type to pack both chunk H5F_block_t structures
@@ -5538,10 +5501,10 @@ H5D__mpio_get_chunk_insert_info_types(MPI_Datatype *contig_type, hbool_t *contig
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(contig_type);
-    HDassert(contig_type_derived);
-    HDassert(resized_type);
-    HDassert(resized_type_derived);
+    assert(contig_type);
+    assert(contig_type_derived);
+    assert(resized_type);
+    assert(resized_type_derived);
 
     *contig_type_derived  = FALSE;
     *resized_type_derived = FALSE;
@@ -5551,7 +5514,7 @@ H5D__mpio_get_chunk_insert_info_types(MPI_Datatype *contig_type, hbool_t *contig
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't create derived type for chunk file description")
 
     field_count = 4;
-    HDassert(field_count == (sizeof(types) / sizeof(MPI_Datatype)));
+    assert(field_count == (sizeof(types) / sizeof(MPI_Datatype)));
 
     /*
      * Create struct type to pack information into memory as follows:
@@ -5664,11 +5627,11 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(chunk_list || 0 == num_entries);
-    HDassert(new_mem_type);
-    HDassert(mem_type_derived);
-    HDassert(new_file_type);
-    HDassert(file_type_derived);
+    assert(chunk_list || 0 == num_entries);
+    assert(new_mem_type);
+    assert(mem_type_derived);
+    assert(new_file_type);
+    assert(file_type_derived);
 
     *mem_type_derived  = FALSE;
     *file_type_derived = FALSE;
@@ -5748,7 +5711,7 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                      * set the base chunk offset and base chunk
                      * data buffer if we haven't already
                      */
-                    if (!H5F_addr_defined(base_offset)) {
+                    if (!H5_addr_defined(base_offset)) {
 #if H5_CHECK_MPI_VERSION(3, 0)
                         if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[i].buf, &base_buf)))
                             HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
@@ -5768,7 +5731,7 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                  * Set the current chunk entry's offset in the file, relative to
                  * the first chunk entry
                  */
-                HDassert(H5F_addr_defined(chunk_block->offset));
+                assert(H5_addr_defined(chunk_block->offset));
                 file_offset_array[chunk_count] = (MPI_Aint)(chunk_block->offset - base_offset);
 
                 /*
@@ -5776,7 +5739,7 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                  * offset in the file
                  */
                 if (chunk_count)
-                    HDassert(file_offset_array[chunk_count] > file_offset_array[chunk_count - 1]);
+                    assert(file_offset_array[chunk_count] > file_offset_array[chunk_count - 1]);
 
                 /* Set the current chunk entry's size for the I/O operation */
                 H5_CHECK_OVERFLOW(chunk_block->length, hsize_t, int);
@@ -5837,9 +5800,9 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
             }
             else {
-                HDassert(file_offset_array);
-                HDassert(length_array);
-                HDassert(io_buf_array);
+                assert(file_offset_array);
+                assert(length_array);
+                assert(io_buf_array);
 
                 /* Multiple chunks - use an hindexed type for both memory and file */
 
@@ -5907,7 +5870,7 @@ H5D__mpio_dump_collective_filtered_chunk_list(H5D_filtered_collective_io_info_t 
 
         chunk_entry = &chunk_list[i];
 
-        HDassert(chunk_entry->chunk_info);
+        assert(chunk_entry->chunk_info);
         chunk_rank = (unsigned)H5S_GET_EXTENT_NDIMS(chunk_entry->chunk_info->fspace);
 
         H5D_MPIO_DEBUG(mpi_rank, " {");

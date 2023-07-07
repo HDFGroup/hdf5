@@ -209,8 +209,6 @@ H5O_init(void)
  * Return:  Success:    Non-negative
  *          Failure:    Negative
  *
- * Programmer:  Vailin Choi; December 2017
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -222,8 +220,8 @@ H5O__set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_id
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
-    HDassert(oh);
+    assert(f);
+    assert(oh);
 
     /* Set the correct version to encode object header with */
     if (store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
@@ -259,9 +257,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Aug  5 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -272,9 +267,9 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(loc);
-    HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
+    assert(f);
+    assert(loc);
+    assert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
 
     /* create object header in freelist
      * header version is set internally
@@ -303,9 +298,6 @@ done:
  * Return:     Success: Pointer to the newly-crated header object.
  *             Failure: NULL
  *
- * Programmer: Jacob Smith
- *             2018 August 17
- *
  *-----------------------------------------------------------------------------
  */
 H5O_t *
@@ -318,8 +310,8 @@ H5O_create_ohdr(H5F_t *f, hid_t ocpl_id)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    HDassert(f);
-    HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
+    assert(f);
+    assert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
 
     /* Check for invalid access request */
     if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
@@ -368,9 +360,6 @@ done:
  * Return:     Success: SUCCEED (0) (non-negative value)
  *             Failure: FAIL (-1) (negative value)
  *
- * Programmer: Jacob Smith
- *             2018 August 17
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -384,10 +373,10 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(loc_out);
-    HDassert(oh);
-    HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
+    assert(f);
+    assert(loc_out);
+    assert(oh);
+    assert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
 
     /* Allocate at least a reasonable size for the object header */
     size_hint = H5O_ALIGN_F(f, MAX(H5O_MIN_SIZE, size_hint));
@@ -517,7 +506,7 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
     }
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(oh_addr);
+    H5_BEGIN_TAG(oh_addr)
 
     /* Cache object header */
     if (H5AC_insert_entry(f, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
@@ -537,7 +526,7 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object header")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_apply_ohdr() */
 
 /*-------------------------------------------------------------------------
@@ -547,15 +536,6 @@ done:
  *        entry OBJ_ENT.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Monday, January     5, 1998
- *
- * Modification:
- *              Raymond Lu
- *              5 November 2007
- *              Turn off the holding file variable if it's on.  When it's
- *              needed, the caller will turn it on again.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -566,12 +546,12 @@ H5O_open(H5O_loc_t *loc)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
-    HDassert(loc);
-    HDassert(loc->file);
+    assert(loc);
+    assert(loc->file);
 
 #ifdef H5O_DEBUG
     if (H5DEBUG(O))
-        HDfprintf(H5DEBUG(O), "> %" PRIuHADDR "\n", loc->addr);
+        fprintf(H5DEBUG(O), "> %" PRIuHADDR "\n", loc->addr);
 #endif
 
     /* Turn off the variable for holding file or increment open-lock counters */
@@ -591,9 +571,6 @@ H5O_open(H5O_loc_t *loc)
  * Return:      Success:    Pointer to object data
  *              Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        March  5 2007
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -608,8 +585,8 @@ H5O_open_name(const H5G_loc_t *loc, const char *name, H5I_type_t *opened_type)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -641,9 +618,6 @@ done:
  * Return:      Success:    Pointer to object data
  *              Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        December 28, 2017
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -659,7 +633,7 @@ H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type, H5
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
+    assert(loc);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -692,9 +666,6 @@ done:
  * Return:      Success:    Pointer to object data
  *              Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        December 28, 2017
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -708,7 +679,7 @@ H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
+    assert(loc);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -734,9 +705,6 @@ done:
  * Return:      Success:    Pointer to object data
  *              Failure:    NULL
  *
- * Programmer:    James Laird
- *        July 25 2006
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -747,14 +715,14 @@ H5O_open_by_loc(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    HDassert(obj_loc);
+    assert(obj_loc);
 
     /* Get the object class for this location */
     if (NULL == (obj_class = H5O__obj_class(obj_loc->oloc)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to determine object class")
 
     /* Call the object class's 'open' routine */
-    HDassert(obj_class->open);
+    assert(obj_class->open);
     if (NULL == (ret_value = obj_class->open(obj_loc, opened_type)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
 
@@ -769,9 +737,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Monday, January     5, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -782,9 +747,9 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_NOPEN_OBJS(loc->file) > 0);
+    assert(loc);
+    assert(loc->file);
+    assert(H5F_NOPEN_OBJS(loc->file) > 0);
 
     /* Set the file_closed flag to the default value.
      * This flag lets downstream code know if the file struct is
@@ -801,10 +766,10 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
 #ifdef H5O_DEBUG
     if (H5DEBUG(O)) {
         if (FALSE == H5F_ID_EXISTS(loc->file) && 1 == H5F_NREFS(loc->file))
-            HDfprintf(H5DEBUG(O), "< %" PRIuHADDR " auto %lu remaining\n", loc->addr,
-                      (unsigned long)H5F_NOPEN_OBJS(loc->file));
+            fprintf(H5DEBUG(O), "< %" PRIuHADDR " auto %lu remaining\n", loc->addr,
+                    (unsigned long)H5F_NOPEN_OBJS(loc->file));
         else
-            HDfprintf(H5DEBUG(O), "< %" PRIuHADDR "\n", loc->addr);
+            fprintf(H5DEBUG(O), "< %" PRIuHADDR "\n", loc->addr);
     }
 #endif
 
@@ -835,9 +800,6 @@ done:
  *
  *              Failure:    -1
  *
- * Programmer:    Robb Matzke
- *        Aug  5 1997
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -849,9 +811,9 @@ H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(deleted);
+    assert(f);
+    assert(oh);
+    assert(deleted);
 
     /* Check for adjusting link count */
     if (adjust) {
@@ -950,9 +912,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Aug  5 1997
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -965,9 +924,9 @@ H5O_link(const H5O_loc_t *loc, int adjust)
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
     /* check args */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
+    assert(loc);
+    assert(loc->file);
+    assert(H5_addr_defined(loc->addr));
 
     /* Pin the object header */
     if (NULL == (oh = H5O_pin(loc)))
@@ -997,9 +956,6 @@ done:
  *                              object.
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        Dec 31 2002
- *
  *-------------------------------------------------------------------------
  */
 H5O_t *
@@ -1014,14 +970,14 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
     FUNC_ENTER_NOAPI_TAG(loc->addr, NULL)
 
     /* check args */
-    HDassert(loc);
-    HDassert(loc->file);
+    assert(loc);
+    assert(loc->file);
 
     /* prot_flags may only contain the H5AC__READ_ONLY_FLAG */
-    HDassert((prot_flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((prot_flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Check for valid address */
-    if (!H5F_addr_defined(loc->addr))
+    if (!H5_addr_defined(loc->addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "address undefined")
 
     /* Check for write access on the file */
@@ -1038,7 +994,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
     udata.common.f                = loc->file;
     udata.common.file_intent      = file_intent;
     udata.common.merged_null_msgs = 0;
-    HDmemset(&cont_msg_info, 0, sizeof(cont_msg_info));
+    memset(&cont_msg_info, 0, sizeof(cont_msg_info));
     udata.common.cont_msg_info = &cont_msg_info;
     udata.common.addr          = loc->addr;
 
@@ -1054,8 +1010,8 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
         /* Sanity check - we should only have continuation messages to process
          *      when the object header is actually loaded from the file.
          */
-        HDassert(udata.made_attempt == TRUE);
-        HDassert(cont_msg_info.msgs);
+        assert(udata.made_attempt == TRUE);
+        assert(cont_msg_info.msgs);
 
         /* Construct the user data for protecting chunks */
         chk_udata.decoding                = TRUE;
@@ -1087,9 +1043,9 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
 
             /* Sanity check */
-            HDassert(chk_proxy->oh == oh);
-            HDassert(chk_proxy->chunkno == chkcnt);
-            HDassert(oh->nchunks == (chkcnt + 1));
+            assert(chk_proxy->oh == oh);
+            assert(chk_proxy->chunkno == chkcnt);
+            assert(oh->nchunks == (chkcnt + 1));
 
             /* Release the chunk from the cache */
             if (H5AC_unprotect(loc->file, H5AC_OHDR_CHK, cont_msg_info.msgs[curr_msg].addr, chk_proxy,
@@ -1136,7 +1092,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
         unsigned u; /* Local index variable */
 
         /* Sanity check */
-        HDassert(oh->swmr_write);
+        assert(oh->swmr_write);
 
         /* Iterate over chunks > 0 */
         for (u = 1; u < oh->nchunks; u++) {
@@ -1189,9 +1145,6 @@ done:
  *                              object.
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        Jul 13 2008
- *
  *-------------------------------------------------------------------------
  */
 H5O_t *
@@ -1203,7 +1156,7 @@ H5O_pin(const H5O_loc_t *loc)
     FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
-    HDassert(loc);
+    assert(loc);
 
     /* Get header */
     if (NULL == (oh = H5O_protect(loc, H5AC__NO_FLAGS_SET, FALSE)))
@@ -1234,9 +1187,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        Jul 13 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1247,7 +1197,7 @@ H5O_unpin(H5O_t *oh)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(oh);
+    assert(oh);
 
     /* Decrement the reference count on the object header */
     /* (which will unpin it, if appropriate) */
@@ -1268,9 +1218,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        Dec 31 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1281,15 +1228,15 @@ H5O_unprotect(const H5O_loc_t *loc, H5O_t *oh, unsigned oh_flags)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(loc);
-    HDassert(oh);
+    assert(loc);
+    assert(oh);
 
     /* Unpin the other chunks */
     if (oh->chunks_pinned && oh->nchunks > 1) {
         unsigned u; /* Local index variable */
 
         /* Sanity check */
-        HDassert(oh->swmr_write);
+        assert(oh->swmr_write);
 
         /* Iterate over chunks > 0 */
         for (u = 1; u < oh->nchunks; u++) {
@@ -1322,9 +1269,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Monday, July 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1337,8 +1281,8 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(f);
-    HDassert(oh);
+    assert(f);
+    assert(oh);
 
     /* Check if this object header is tracking times */
     if (oh->flags & H5O_HDR_STORE_TIMES) {
@@ -1419,9 +1363,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Monday, July 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1434,7 +1375,7 @@ H5O_touch(const H5O_loc_t *loc, hbool_t force)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(loc);
+    assert(loc);
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__NO_FLAGS_SET, FALSE)))
@@ -1463,9 +1404,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, January 21, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1477,8 +1415,8 @@ H5O_bogus_oh(H5F_t *f, H5O_t *oh, unsigned bogus_id, unsigned mesg_flags)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(oh);
+    assert(f);
+    assert(oh);
 
     /* Look for existing message */
     for (idx = 0; idx < oh->nmesgs; idx++)
@@ -1533,9 +1471,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Mar 19 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1550,8 +1485,8 @@ H5O_delete(H5F_t *f, haddr_t addr)
     FUNC_ENTER_NOAPI_TAG(addr, FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(H5_addr_defined(addr));
 
     /* Set up the object location */
     loc.file         = f;
@@ -1594,9 +1529,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Mar 19 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1609,8 +1541,8 @@ H5O__delete_oh(H5F_t *f, H5O_t *oh)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f);
-    HDassert(oh);
+    assert(f);
+    assert(oh);
 
     /* Walk through the list of object header messages, asking each one to
      * delete any file space used
@@ -1633,9 +1565,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *              Wednesday, November  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1670,9 +1599,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Monday, November 21, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1683,8 +1609,8 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(oh);
-    HDassert(obj_type);
+    assert(oh);
+    assert(obj_type);
 
     /* Look up class for object header */
     if (NULL == (obj_class = H5O__obj_class_real(oh))) {
@@ -1708,9 +1634,6 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
  *
  * Return:      Success:    An object class
  *              Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1745,9 +1668,6 @@ done:
  * Return:    Success:    An object class
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Monday, November 21, 2005
- *
  *-------------------------------------------------------------------------
  */
 static const H5O_obj_class_t *
@@ -1759,7 +1679,7 @@ H5O__obj_class_real(const H5O_t *oh)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(oh);
+    assert(oh);
 
     /* Test whether entry qualifies as a particular type of object */
     /* (Note: loop is in reverse order, to test specific objects first) */
@@ -1786,9 +1706,6 @@ done:
  *
  * Return:    Success:    Pointer to H5O_loc_t
  *        Failure:    NULL
- *
- * Programmer:    James Laird
- *        July 25 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1849,9 +1766,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Monday, September 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1860,10 +1774,10 @@ H5O_loc_reset(H5O_loc_t *loc)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(loc);
+    assert(loc);
 
     /* Clear the object location to an empty state */
-    HDmemset(loc, 0, sizeof(H5O_loc_t));
+    memset(loc, 0, sizeof(H5O_loc_t));
     loc->addr = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1877,9 +1791,6 @@ H5O_loc_reset(H5O_loc_t *loc)
  * Return:    Success:    Non-negative
  *            Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Monday, September 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1888,9 +1799,9 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(src);
-    HDassert(dst);
-    HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
+    assert(src);
+    assert(dst);
+    assert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Invoke correct routine */
     if (depth == H5_COPY_SHALLOW)
@@ -1912,9 +1823,6 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
  * Return:    Success:    Non-negative
  *            Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *	        January 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1923,8 +1831,8 @@ H5O_loc_copy_shallow(H5O_loc_t *dst, H5O_loc_t *src)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(src);
-    HDassert(dst);
+    assert(src);
+    assert(dst);
 
     /* Copy the top level information */
     H5MM_memcpy(dst, src, sizeof(H5O_loc_t));
@@ -1945,9 +1853,6 @@ H5O_loc_copy_shallow(H5O_loc_t *dst, H5O_loc_t *src)
  * Return:    Success:    Non-negative
  *            Failure:    Negative
  *
- * Programmer:	David Young
- *	        January 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1956,8 +1861,8 @@ H5O_loc_copy_deep(H5O_loc_t *dst, const H5O_loc_t *src)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(src);
-    HDassert(dst);
+    assert(src);
+    assert(dst);
 
     /* Copy the top level information */
     H5MM_memcpy(dst, src, sizeof(H5O_loc_t));
@@ -1980,9 +1885,6 @@ H5O_loc_copy_deep(H5O_loc_t *dst, const H5O_loc_t *src)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    James Laird
- *              Wednesday, August 16, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1991,8 +1893,8 @@ H5O_loc_hold_file(H5O_loc_t *loc)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(loc->file);
+    assert(loc);
+    assert(loc->file);
 
     /* If this location is not already holding its file open, do so. */
     if (!loc->holding_file) {
@@ -2013,9 +1915,6 @@ H5O_loc_hold_file(H5O_loc_t *loc)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    James Laird
- *              Wednesday, August 16, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2026,7 +1925,7 @@ H5O_loc_free(H5O_loc_t *loc)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
-    HDassert(loc);
+    assert(loc);
 
     /* If this location is holding its file open try to close the file. */
     if (loc->holding_file) {
@@ -2050,9 +1949,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        September 22 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2064,11 +1960,11 @@ H5O_get_hdr_info(const H5O_loc_t *loc, H5O_hdr_info_t *hdr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(loc);
-    HDassert(hdr);
+    assert(loc);
+    assert(hdr);
 
     /* Reset the object header info structure */
-    HDmemset(hdr, 0, sizeof(*hdr));
+    memset(hdr, 0, sizeof(*hdr));
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2093,9 +1989,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        September 22 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2108,8 +2001,8 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(oh);
-    HDassert(hdr);
+    assert(oh);
+    assert(hdr);
 
     /* Set the version for the object header */
     hdr->version = oh->version;
@@ -2160,7 +2053,7 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
     } /* end for */
 
     /* Sanity check that all the bytes are accounted for */
-    HDassert(hdr->space.total == (hdr->space.free + hdr->space.meta + hdr->space.mesg));
+    assert(hdr->space.total == (hdr->space.free + hdr->space.meta + hdr->space.mesg));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__get_hdr_info_real() */
@@ -2172,9 +2065,6 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              November 21 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2188,8 +2078,8 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
     /* Check args */
-    HDassert(loc);
-    HDassert(oinfo);
+    assert(loc);
+    assert(oinfo);
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2282,9 +2172,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              November 21 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2297,8 +2184,8 @@ H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fie
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
     /* Check args */
-    HDassert(loc);
-    HDassert(oinfo);
+    assert(loc);
+    assert(oinfo);
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2309,7 +2196,7 @@ H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fie
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object class")
 
     /* Reset the object info structure */
-    HDmemset(oinfo, 0, sizeof(*oinfo));
+    memset(oinfo, 0, sizeof(*oinfo));
 
     /* Get the information for the object header, if requested */
     if (fields & H5O_NATIVE_INFO_HDR)
@@ -2344,9 +2231,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        November 28 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2358,8 +2242,8 @@ H5O_get_create_plist(const H5O_loc_t *loc, H5P_genplist_t *oc_plist)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(loc);
-    HDassert(oc_plist);
+    assert(loc);
+    assert(oc_plist);
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2402,9 +2286,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        March 11 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2416,8 +2297,8 @@ H5O_get_nlinks(const H5O_loc_t *loc, hsize_t *nlinks)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(loc);
-    HDassert(nlinks);
+    assert(loc);
+    assert(nlinks);
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2441,9 +2322,6 @@ done:
  * Return:    Success:    Pointer to object opened
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *        April 9 2007
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -2455,17 +2333,17 @@ H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(obj_type >= H5O_TYPE_GROUP && obj_type <= H5O_TYPE_NAMED_DATATYPE);
-    HDassert(crt_info);
-    HDassert(obj_loc);
+    assert(f);
+    assert(obj_type >= H5O_TYPE_GROUP && obj_type <= H5O_TYPE_NAMED_DATATYPE);
+    assert(crt_info);
+    assert(obj_loc);
 
     /* Iterate through the object classes */
     for (u = 0; u < NELMTS(H5O_obj_class_g); u++) {
         /* Check for correct type of object to create */
         if (H5O_obj_class_g[u]->type == obj_type) {
             /* Call the object class's 'create' routine */
-            HDassert(H5O_obj_class_g[u]->create);
+            assert(H5O_obj_class_g[u]->create);
             if (NULL == (ret_value = H5O_obj_class_g[u]->create(f, crt_info, obj_loc)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
 
@@ -2473,7 +2351,7 @@ H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc
             break;
         } /* end if */
     }     /* end for */
-    HDassert(ret_value);
+    assert(ret_value);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2491,9 +2369,6 @@ done:
  * Return:    Success:    Valid haddr_t
  *        Failure:    HADDR_UNDEF
  *
- * Programmer:    Quincey Koziol
- *        March 15 2007
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -2502,8 +2377,8 @@ H5O_get_oh_addr(const H5O_t *oh)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(oh);
-    HDassert(oh->chunk);
+    assert(oh);
+    assert(oh->chunk);
 
     FUNC_LEAVE_NOAPI(oh->chunk[0].addr)
 } /* end H5O_get_oh_addr() */
@@ -2511,17 +2386,14 @@ H5O_get_oh_addr(const H5O_t *oh)
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_flags
  *
- * Programmer:  Jacob Smith
- *              2018 August 17
- *
  *-------------------------------------------------------------------------
  */
 uint8_t
 H5O_get_oh_flags(const H5O_t *oh)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-    HDassert(oh);
-    FUNC_LEAVE_NOAPI(oh->flags); /* flags can be 0 */
+    assert(oh);
+    FUNC_LEAVE_NOAPI(oh->flags) /* flags can be 0 */
 } /* H5O_get_oh_flags() */
 
 /*-------------------------------------------------------------------------
@@ -2531,25 +2403,19 @@ H5O_get_oh_flags(const H5O_t *oh)
  *              caller has verified that accessing this variable is appropriate
  *              to the header in question.
  *
- * Programmer:  Jacob Smith
- *              2018 August 17
- *
  *-------------------------------------------------------------------------
  */
 time_t
 H5O_get_oh_mtime(const H5O_t *oh)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-    HDassert(oh);
-    HDassert(oh->mtime);
-    FUNC_LEAVE_NOAPI(oh->mtime);
+    assert(oh);
+    assert(oh->mtime);
+    FUNC_LEAVE_NOAPI(oh->mtime)
 } /* H5O_get_oh_mtime() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_oh_version
- *
- * Programmer:  Jacob Smith
- *              2018 August 17
  *
  *-------------------------------------------------------------------------
  */
@@ -2557,9 +2423,9 @@ uint8_t
 H5O_get_oh_version(const H5O_t *oh)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-    HDassert(oh);
-    HDassert(oh->version);
-    FUNC_LEAVE_NOAPI(oh->version);
+    assert(oh);
+    assert(oh->version);
+    FUNC_LEAVE_NOAPI(oh->version)
 } /* H5O_get_oh_version() */
 
 /*-------------------------------------------------------------------------
@@ -2569,9 +2435,6 @@ H5O_get_oh_version(const H5O_t *oh)
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *        November  4 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2584,7 +2447,7 @@ H5O_get_rc_and_type(const H5O_loc_t *loc, unsigned *rc, H5O_type_t *otype)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(loc);
+    assert(loc);
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2613,9 +2476,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *            Nov 25, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2636,9 +2496,6 @@ H5O__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSE
  * Return:    Success:        Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *            Nov 25, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2654,9 +2511,9 @@ H5O__visit_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t *l
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(name);
-    HDassert(linfo);
-    HDassert(udata);
+    assert(name);
+    assert(linfo);
+    assert(udata);
 
     /* Check if this is a hard link */
     if (linfo->type == H5L_TYPE_HARD) {
@@ -2748,9 +2605,6 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:    Quincey Koziol
- *              November 24 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2771,10 +2625,10 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     FUNC_ENTER_PACKAGE
 
     /* Portably initialize user data struct to zeros */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
 
     /* Check args */
-    HDassert(loc);
+    assert(loc);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -2880,9 +2734,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Jul 13 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2893,7 +2744,7 @@ H5O__inc_rc(H5O_t *oh)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
+    assert(oh);
 
     /* Pin the object header when the reference count goes above 0 */
     if (oh->rc == 0)
@@ -2913,9 +2764,6 @@ done:
  * Purpose:    Decrements the reference count on an object header
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -2950,9 +2798,6 @@ done:
  *
  * Return:     Non-negative on success/Negative on failure
  *
- * Programmer: Quincey Koziol
- *             Oct 08 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2964,7 +2809,7 @@ H5O_dec_rc_by_loc(const H5O_loc_t *loc)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(loc);
+    assert(loc);
 
     /* Get header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2990,9 +2835,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        July 24 2016
- *
  *-------------------------------------------------------------------------
  */
 H5AC_proxy_entry_t *
@@ -3001,7 +2843,7 @@ H5O_get_proxy(const H5O_t *oh)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(oh);
+    assert(oh);
 
     FUNC_LEAVE_NOAPI(oh->proxy)
 } /* end H5O_get_proxy() */
@@ -3012,9 +2854,6 @@ H5O_get_proxy(const H5O_t *oh)
  * Purpose:    Destroys an object header.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Jan 15 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -3027,8 +2866,8 @@ H5O__free(H5O_t *oh, hbool_t H5_ATTR_NDEBUG_UNUSED force)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
-    HDassert(0 == oh->rc);
+    assert(oh);
+    assert(0 == oh->rc);
 
     /* Destroy chunks */
     if (oh->chunk) {
@@ -3049,14 +2888,14 @@ H5O__free(H5O_t *oh, hbool_t H5_ATTR_NDEBUG_UNUSED force)
             if (oh->ndecode_dirtied && oh->mesg[u].dirty)
                 oh->ndecode_dirtied--;
             else if (!force)
-                HDassert(oh->mesg[u].dirty == 0);
+                assert(oh->mesg[u].dirty == 0);
 #endif /* NDEBUG */
 
             H5O__msg_free_mesg(&oh->mesg[u]);
         } /* end for */
 
         /* Make sure we accounted for all the messages dirtied by decoding */
-        HDassert(!oh->ndecode_dirtied);
+        assert(!oh->ndecode_dirtied);
 
         oh->mesg = (H5O_mesg_t *)H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
     } /* end if */
@@ -3085,12 +2924,12 @@ done:
 static herr_t
 H5O__reset_info2(H5O_info2_t *oinfo)
 {
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset the passed-in info struct */
-    HDmemset(oinfo, 0, sizeof(H5O_info2_t));
+    memset(oinfo, 0, sizeof(H5O_info2_t));
     oinfo->type  = H5O_TYPE_UNKNOWN;
     oinfo->token = H5O_TOKEN_UNDEF;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__reset_info2() */

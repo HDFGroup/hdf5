@@ -26,6 +26,7 @@
 #include "H5ESprivate.h" /* Event Sets                               */
 #include "H5FLprivate.h" /* Free lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
@@ -749,9 +750,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Tuesday, February  3, 1998
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -810,9 +808,6 @@ done:
  *                          released by calling H5Pclose().
  *
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Neil Fortner
- *              Wednesday, October 29, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1049,9 +1044,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Thursday, December 4, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1078,9 +1070,6 @@ done:
  * Purpose:     Asynchronously read dataset elements.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Houjun Tang
- *              Oct 15, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1125,8 +1114,6 @@ done:
  *              multiple datasets from a file into application memory BUFS.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jonathan Kim Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1202,9 +1189,6 @@ done:
  * Purpose:     Reads an entire chunk from the file directly.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              14 February 2016
  *
  *---------------------------------------------------------------------------
  */
@@ -1370,9 +1354,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Thursday, December 4, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1399,9 +1380,6 @@ done:
  * Purpose:     For asynchronous VOL with request token
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Houjun Tang
- *              Oct 15, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1447,8 +1425,6 @@ done:
  *              application memory BUFs into multiple datasets in a file.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jonathan Kim  Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1525,9 +1501,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		        30 July 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1590,9 +1563,6 @@ done:
  *              scattered is specified by type_id.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              14 Jan 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1687,9 +1657,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              16 Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1755,14 +1722,14 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
         if (0 ==
             (nelmts_gathered = H5D__gather_mem(src_buf, iter, MIN(dst_buf_nelmts, (size_t)nelmts), dst_buf)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "gather failed")
-        HDassert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
+        assert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
 
         /* Make callback to process dst_buf */
         if (op && op(dst_buf, nelmts_gathered * type_size, op_data) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure")
 
         nelmts -= (hssize_t)nelmts_gathered;
-        HDassert(op || (nelmts == 0));
+        assert(op || (nelmts == 0));
     } /* end while */
 
 done:
@@ -1881,9 +1848,6 @@ done:
  *          or zero if all elements were processed. Otherwise returns a
  *          negative value.
  *
- * Programmer:  Quincey Koziol
- *              Friday, June 11, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1931,9 +1895,6 @@ done:
  *      bytes are required to store the VL data in memory.
  *
  * Return:  Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, August 11, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -2190,9 +2151,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Vailin Choi
- *              Feb 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2231,9 +2189,6 @@ done:
  * Purpose:     Retrieve a dataset's chunk indexing type
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Vailin Choi
- *              Feb 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2276,9 +2231,6 @@ done:
  *              the caller can construct an appropriate buffer.
  *
  * Return:	Non-negative on success, negative on failure
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              20 October 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -2331,9 +2283,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Binh-Minh Ribler
- *              May 2019 (HDFFV-10677)
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2383,9 +2332,6 @@ done:
  *              hsize_t *size           OUT: Size of the chunk
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Binh-Minh Ribler
- *              May 2019 (HDFFV-10677)
  *
  *-------------------------------------------------------------------------
  */
@@ -2457,9 +2403,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Binh-Minh Ribler
- *              May 2019 (HDFFV-10677)
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2511,9 +2454,6 @@ done:
  *              void *op_data           IN/OUT: Optional user data passed on to user callback.
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Gaute Hope
- *              August 2020
  *
  *-------------------------------------------------------------------------
  */

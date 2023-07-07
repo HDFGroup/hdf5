@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Monday, October 17, 2005
- *
+/*
  * Purpose:	Group testing functions.
  */
 
@@ -134,11 +132,11 @@ H5G__is_empty_test(hid_t gid)
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Check for 'dense' link storage file addresses being defined */
-        if (H5F_addr_defined(linfo.fheap_addr))
+        if (H5_addr_defined(linfo.fheap_addr))
             HGOTO_DONE(FALSE)
-        if (H5F_addr_defined(linfo.name_bt2_addr))
+        if (H5_addr_defined(linfo.name_bt2_addr))
             HGOTO_DONE(FALSE)
-        if (H5F_addr_defined(linfo.corder_bt2_addr))
+        if (H5_addr_defined(linfo.corder_bt2_addr))
             HGOTO_DONE(FALSE)
 
         /* Check for link count */
@@ -368,9 +366,9 @@ H5G__is_new_dense_test(hid_t gid)
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Check for 'dense' link storage file addresses being defined */
-        if (!H5F_addr_defined(linfo.fheap_addr))
+        if (!H5_addr_defined(linfo.fheap_addr))
             HGOTO_DONE(FALSE)
-        if (!H5F_addr_defined(linfo.name_bt2_addr))
+        if (!H5_addr_defined(linfo.name_bt2_addr))
             HGOTO_DONE(FALSE)
     } /* end if */
 
@@ -424,16 +422,16 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     api_ctx_pushed = TRUE;
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(grp->oloc.addr);
+    H5_BEGIN_TAG(grp->oloc.addr)
 
     /* Get the link info */
     if (H5G__obj_get_linfo(&(grp->oloc), &linfo) < 0)
         HGOTO_ERROR_TAG(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
     /* Check for 'dense' link storage file addresses being defined */
-    if (!H5F_addr_defined(linfo.fheap_addr))
+    if (!H5_addr_defined(linfo.fheap_addr))
         HGOTO_DONE_TAG(FAIL)
-    if (!H5F_addr_defined(linfo.name_bt2_addr))
+    if (!H5_addr_defined(linfo.name_bt2_addr))
         HGOTO_DONE_TAG(FAIL)
 
     /* Open the name index v2 B-tree */
@@ -445,7 +443,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
 
     /* Check if there is a creation order index */
-    if (H5F_addr_defined(linfo.corder_bt2_addr)) {
+    if (H5_addr_defined(linfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
         if (NULL == (bt2_corder = H5B2_open(grp->oloc.file, linfo.corder_bt2_addr, NULL)))
             HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL,
@@ -560,8 +558,8 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(user_path_len);
-    HDassert(obj_hidden);
+    assert(user_path_len);
+    assert(obj_hidden);
 
     /* Get pointer to object for ID */
     if (NULL == (obj_ptr = H5VL_object(obj_id)))
@@ -611,7 +609,7 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object type")
     } /* end switch */
-    HDassert(obj_path);
+    assert(obj_path);
 
     /* Retrieve a copy of the user path and put it into the buffer */
     if (obj_path->user_path_r) {
@@ -648,9 +646,6 @@ done:
  *              addresses are valid.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Neil Fortner
- *	        Mar  31, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -703,9 +698,6 @@ done:
  *
  * Return:      H5_ITER_STOP/H5_ITER_CONT/H5_ITER_ERROR
  *
- * Programmer:  Neil Fortner
- *              Apr 8, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -723,8 +715,8 @@ H5G__verify_cached_stabs_test_cb(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, h
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(H5_addr_defined(addr));
 
     /* Load the node */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
@@ -777,7 +769,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
 
     if (targ_oh) {
-        HDassert(ret_value == H5_ITER_ERROR);
+        assert(ret_value == H5_ITER_ERROR);
         if (H5O_unprotect(&targ_oloc, targ_oh, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release object header");
     } /* end if */
@@ -797,9 +789,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              April 6 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -815,7 +804,7 @@ H5G__verify_cached_stabs_test(hid_t gid)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(gid >= 0);
+    assert(gid >= 0);
 
     /* Check args */
     if (NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:   H5Pocpl.c
- *            Nov 28 2006
- *            Quincey Koziol
  *
  * Purpose:   Object creation property list class routines
  *
@@ -31,14 +29,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions */
-#include "H5Eprivate.h"  /* Error handling    */
-#include "H5Iprivate.h"  /* IDs               */
-#include "H5MMprivate.h" /* Memory management */
-#include "H5Opkg.h"      /* Object headers    */
-#include "H5Ppkg.h"      /* Property lists    */
-#include "H5PLprivate.h" /* Dynamic plugin    */
-#include "H5Zprivate.h"  /* Filter pipeline   */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Opkg.h"      /* Object headers                           */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5PLprivate.h" /* Dynamic plugin                           */
+#include "H5VMprivate.h" /* Vector Functions                         */
+#include "H5Zprivate.h"  /* Filter pipeline                          */
 
 /****************/
 /* Local Macros */
@@ -143,9 +142,6 @@ static const H5O_pline_t H5O_def_pline_g  = H5O_CRT_PIPELINE_DEF;   /* Default I
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -201,9 +197,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -244,9 +237,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -282,9 +272,6 @@ done:
  * Purpose:     Set the flags for creation order of attributes on an object
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -334,9 +321,6 @@ done:
  *              for attributes on an object.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -394,9 +378,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -437,9 +418,6 @@ done:
  * Purpose:     Returns whether times are tracked for an object.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March  1, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -503,9 +481,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Wednesday, October 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -563,9 +538,6 @@ done:
  *              property list.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Friday, April  5, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -625,9 +597,6 @@ done:
  *      attempting to write will generate an error.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -691,9 +660,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -741,9 +707,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *              Tuesday, August  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -789,9 +752,6 @@ done:
  * Return:    Success:    Filter identification number.
  *
  *        Failure:    H5Z_FILTER_ERROR (Negative)
- *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -873,9 +833,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Wednesday, October 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -921,9 +878,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Friday, April  5, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -983,9 +937,6 @@ done:
  *                              more filters not currently available.
  *        Failure:    FAIL on error
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April  8, 2003
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1024,9 +975,6 @@ done:
  *        FALSE:        not found
  *              FAIL:         error
  *
- * Programmer:    Raymond Lu
- *              26 April 2013
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1056,9 +1004,6 @@ done:
  *  deletes all filters if FILTER is H5Z_FILTER_NONE
  *
  * Return: Non-negative on success/Negative on failure
- *
- * Programmer:  Pedro Vicente
- *              January 26, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1108,9 +1053,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1155,9 +1097,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *              Dec 19, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1197,9 +1136,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Monday, October 23, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1210,7 +1146,7 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(filter);
+    assert(filter);
 
     /* Filter flags */
     if (flags)
@@ -1272,9 +1208,6 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1288,7 +1221,7 @@ H5P__ocrt_pipeline_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of I/O pipeline */
     if (NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
@@ -1309,9 +1242,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1325,7 +1255,7 @@ H5P__ocrt_pipeline_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of I/O pipeline */
     if (NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
@@ -1348,9 +1278,6 @@ done:
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1362,8 +1289,8 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(pline);
-    HDassert(size);
+    assert(pline);
+    assert(size);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     if (NULL != *pp) {
@@ -1376,7 +1303,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
         /* encode nused value */
         enc_value = (uint64_t)pline->nused;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
@@ -1385,10 +1312,10 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             unsigned v; /* Local index variable */
 
             /* encode filter ID */
-            INT32ENCODE(*pp, pline->filter[u].id)
+            INT32ENCODE(*pp, pline->filter[u].id);
 
             /* encode filter flags */
-            H5_ENCODE_UNSIGNED(*pp, pline->filter[u].flags)
+            H5_ENCODE_UNSIGNED(*pp, pline->filter[u].flags);
 
             /* encode filter name if it exists */
             if (NULL != pline->filter[u].name) {
@@ -1406,13 +1333,13 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;
             enc_size  = H5VM_limit_enc_size(enc_value);
-            HDassert(enc_size < 256);
+            assert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
             /* encode all values */
             for (v = 0; v < pline->filter[u].cd_nelmts; v++)
-                H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v])
+                H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v]);
         } /* end for */
     }     /* end if */
 
@@ -1440,9 +1367,6 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1467,12 +1391,12 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
 
     /* decode nused */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     nused = (size_t)enc_value;
 
     /* Set property default value */
-    HDmemset(pline, 0, sizeof(H5O_pline_t));
+    memset(pline, 0, sizeof(H5O_pline_t));
     *pline = H5O_def_pline_g;
 
     for (u = 0; u < nused; u++) {
@@ -1481,10 +1405,10 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         unsigned          v;        /* Local index variable */
 
         /* decode filter id */
-        INT32DECODE(*pp, filter.id)
+        INT32DECODE(*pp, filter.id);
 
         /* decode filter flags */
-        H5_DECODE_UNSIGNED(*pp, filter.flags)
+        H5_DECODE_UNSIGNED(*pp, filter.flags);
 
         /* decode value indicating if the name is encoded */
         has_name = *(*pp)++;
@@ -1498,7 +1422,7 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
 
         /* decode num elements */
         enc_size = *(*pp)++;
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         filter.cd_nelmts = (size_t)enc_value;
 
@@ -1511,7 +1435,7 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
 
         /* decode values */
         for (v = 0; v < filter.cd_nelmts; v++)
-            H5_DECODE_UNSIGNED(*pp, filter.cd_values[v])
+            H5_DECODE_UNSIGNED(*pp, filter.cd_values[v]);
 
         /* Add the filter to the I/O pipeline */
         if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0)
@@ -1533,9 +1457,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1547,7 +1468,7 @@ H5P__ocrt_pipeline_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Reset the old I/O pipeline */
     if (H5O_msg_reset(H5O_PLINE_ID, value) < 0)
@@ -1565,9 +1486,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -1580,7 +1498,7 @@ H5P__ocrt_pipeline_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED s
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pline);
+    assert(pline);
 
     /* Make copy of I/O pipeline */
     if (NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
@@ -1603,9 +1521,6 @@ done:
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, January 7, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1619,9 +1534,9 @@ H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(pline1);
-    HDassert(pline2);
-    HDassert(size == sizeof(H5O_pline_t));
+    assert(pline1);
+    assert(pline2);
+    assert(size == sizeof(H5O_pline_t));
 
     /* Check the number of used pipeline entries */
     if (pline1->nused < pline2->nused)
@@ -1698,9 +1613,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1711,7 +1623,7 @@ H5P__ocrt_pipeline_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Reset the old I/O pipeline */
     if (H5O_msg_reset(H5O_PLINE_ID, value) < 0)
@@ -1740,9 +1652,6 @@ done:
  * Return:    Success:    Filter identification number.
  *
  *        Failure:    H5Z_FILTER_ERROR (Negative)
- *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1821,9 +1730,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Friday, April  5, 2003
  *
  *-------------------------------------------------------------------------
  */

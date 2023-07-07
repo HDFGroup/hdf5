@@ -79,9 +79,6 @@ static H5T_t *H5T__reopen_member_type(const H5T_t *dt, unsigned membno);
  *				H5Tget_member_dims() fails with the same
  *				arguments.
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -120,9 +117,6 @@ done:
  *				H5Tget_member_dims() fails with the same
  *				arguments.
  *
- * Programmer:	Raymond Lu
- *		October 8, 2002
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -130,8 +124,8 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(dt);
-    HDassert(membno < dt->shared->u.compnd.nmembs);
+    assert(dt);
+    assert(membno < dt->shared->u.compnd.nmembs);
 
     FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].offset)
 } /* end H5T_get_member_offset() */
@@ -144,9 +138,6 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
  * Return:	Success: Non-negative
  *
  *		Failure: H5T_NO_CLASS
- *
- * Programmer:	Quincey Koziol
- *		Thursday, November  9, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -186,9 +177,6 @@ done:
  *				modify the member type.
  *
  *		Failure:	H5I_INVALID_HID
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -235,9 +223,6 @@ done:
  *
  *		Failure:        NULL
  *
- * Programmer:	Raymond Lu
- *	        October 8, 2002
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -248,8 +233,8 @@ H5T_get_member_type(const H5T_t *dt, unsigned membno)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity checks */
-    HDassert(dt);
-    HDassert(membno < dt->shared->u.compnd.nmembs);
+    assert(dt);
+    assert(membno < dt->shared->u.compnd.nmembs);
 
     /* Copy datatype */
     if (NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, H5T_COPY_TRANSIENT)))
@@ -271,9 +256,6 @@ done:
  *
  *		Failure:        NULL
  *
- * Programmer:	David Young
- *	        January 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -284,8 +266,8 @@ H5T__reopen_member_type(const H5T_t *dt, unsigned membno)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(dt);
-    HDassert(membno < dt->shared->u.compnd.nmembs);
+    assert(dt);
+    assert(membno < dt->shared->u.compnd.nmembs);
 
     /* Copy datatype, possibly re-opening it */
     if (NULL == (ret_value = H5T_copy_reopen(dt->shared->u.compnd.memb[membno].type)))
@@ -303,9 +285,6 @@ done:
  * Return:	Success:	The size in bytes of the member's datatype.
  *		Failure:        0
  *
- * Programmer:	Quincey Koziol
- *	        October 4, 2004
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -313,8 +292,8 @@ H5T__get_member_size(const H5T_t *dt, unsigned membno)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt);
-    HDassert(membno < dt->shared->u.compnd.nmembs);
+    assert(dt);
+    assert(membno < dt->shared->u.compnd.nmembs);
 
     FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].type->shared->size)
 } /* end H5T__get_member_size() */
@@ -335,9 +314,6 @@ H5T__get_member_size(const H5T_t *dt, unsigned membno)
  *		Failure:	Negative
  *
  * Errors:
- *
- * Programmer:	Robb Matzke
- *		Monday, December  8, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -380,9 +356,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -417,9 +390,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Monday, December  8, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -433,10 +403,10 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(parent && H5T_COMPOUND == parent->shared->type);
-    HDassert(H5T_STATE_TRANSIENT == parent->shared->state);
-    HDassert(member);
-    HDassert(name && *name);
+    assert(parent && H5T_COMPOUND == parent->shared->type);
+    assert(H5T_STATE_TRANSIENT == parent->shared->state);
+    assert(member);
+    assert(name && *name);
 
     /* Does NAME already exist in PARENT? */
     for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
@@ -469,10 +439,12 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Add member to end of member array */
     idx                                       = parent->shared->u.compnd.nmembs;
-    parent->shared->u.compnd.memb[idx].name   = H5MM_xstrdup(name);
     parent->shared->u.compnd.memb[idx].offset = offset;
     parent->shared->u.compnd.memb[idx].size   = total_size;
-    parent->shared->u.compnd.memb[idx].type   = H5T_copy(member, H5T_COPY_ALL);
+    if (NULL == (parent->shared->u.compnd.memb[idx].name = H5MM_xstrdup(name)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "couldn't duplicate name string")
+    if (NULL == (parent->shared->u.compnd.memb[idx].type = H5T_copy(member, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "couldn't copy datatype")
 
     parent->shared->u.compnd.sorted = H5T_SORT_NONE;
     parent->shared->u.compnd.nmembs++;
@@ -480,7 +452,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* It should not be possible to get this far if the type is already packed
      * - the new member would overlap something */
-    HDassert(!(parent->shared->u.compnd.packed));
+    assert(!(parent->shared->u.compnd.packed));
 
     /* Determine if the compound datatype becomes packed */
     H5T__update_packed(parent);
@@ -510,9 +482,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -522,7 +491,7 @@ H5T__pack(const H5T_t *dt)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(dt);
+    assert(dt);
 
     if (H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
         /* If datatype has been packed, skip packing it and indicate success */
@@ -585,9 +554,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, September 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -597,7 +563,7 @@ H5T__is_packed(const H5T_t *dt)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt);
+    assert(dt);
 
     /* Go up the chain as far as possible */
     while (dt->shared->parent)
@@ -620,9 +586,6 @@ H5T__is_packed(const H5T_t *dt)
  *
  * Return:	void
  *
- * Programmer:	Neil Fortner
- *		Monday, October 19, 2009
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -632,8 +595,8 @@ H5T__update_packed(const H5T_t *dt)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt);
-    HDassert(dt->shared->type == H5T_COMPOUND);
+    assert(dt);
+    assert(dt->shared->type == H5T_COMPOUND);
 
     /* First check if all space is used in the "top level" type */
     if (dt->shared->size == dt->shared->u.compnd.memb_size) {

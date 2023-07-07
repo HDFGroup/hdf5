@@ -201,9 +201,6 @@ done:
  *              0 if a VOL connector with that name has NOT been registered
  *              <0 on errors
  *
- * Programmer:  Dana Robinson
- *              June 17, 2017
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -260,9 +257,6 @@ done:
  *
  *              H5I_INVALID_HID on error.
  *
- * Programmer:  Dana Robinson
- *              June 17, 2017
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -292,9 +286,6 @@ done:
  *
  *              H5I_INVALID_HID on error or if a VOL connector of that
  *              name has not been registered.
- *
- * Programmer:  Dana Robinson
- *              June 17, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -770,9 +761,6 @@ done:
  * Return:      Success:    Non-negative, *state set
  *              Failure:    Negative, *state unset
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 10, 2019
- *
  *---------------------------------------------------------------------------
  */
 herr_t
@@ -807,9 +795,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, February 5, 2021
- *
  *---------------------------------------------------------------------------
  */
 herr_t
@@ -839,9 +824,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              Thursday, January 10, 2019
  *
  *---------------------------------------------------------------------------
  */
@@ -882,9 +864,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Saturday, February 23, 2019
- *
  *---------------------------------------------------------------------------
  */
 herr_t
@@ -917,9 +896,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              Thursday, January 10, 2019
  *
  *---------------------------------------------------------------------------
  */

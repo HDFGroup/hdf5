@@ -76,9 +76,6 @@ H5FL_DEFINE_STATIC(H5FA_hdr_t);
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 H5FA_hdr_t *
@@ -90,7 +87,7 @@ H5FA__hdr_alloc(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
+    assert(f);
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FL_CALLOC(H5FA_hdr_t)))
@@ -122,9 +119,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sunday, November 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -135,7 +129,7 @@ H5FA__hdr_init(H5FA_hdr_t *hdr, void *ctx_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Set size of header on disk (locally and in statistics) */
     hdr->stats.hdr_size = hdr->size = H5FA_HEADER_SIZE_HDR(hdr);
@@ -161,9 +155,6 @@ done:
  * Return:      Success:    Address of new header in the file
  *              Failure:    HADDR_UNDEF
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -176,8 +167,8 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
 #ifndef NDEBUG
     {
@@ -230,7 +221,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     ret_value = hdr->addr;
 
 done:
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (hdr) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -239,7 +230,7 @@ done:
                                 "unable to remove fixed array header from cache")
 
             /* Release header's disk space */
-            if (H5F_addr_defined(hdr->addr) &&
+            if (H5_addr_defined(hdr->addr) &&
                 H5MF_xfree(f, H5FD_MEM_FARRAY_HDR, hdr->addr, (hsize_t)hdr->size) < 0)
                 HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to free Fixed Array header")
 
@@ -258,9 +249,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -271,7 +259,7 @@ H5FA__hdr_incr(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Mark header as un-evictable when something is depending on it */
     if (hdr->rc == 0)
@@ -292,9 +280,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -305,15 +290,15 @@ H5FA__hdr_decr(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->rc);
+    assert(hdr);
+    assert(hdr->rc);
 
     /* Decrement reference count on shared header */
     hdr->rc--;
 
     /* Mark header as evictable again when nothing depend on it */
     if (hdr->rc == 0) {
-        HDassert(hdr->file_rc == 0);
+        assert(hdr->file_rc == 0);
         if (H5AC_unpin_entry(hdr) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNPIN, FAIL, "unable to unpin fixed array header")
     }
@@ -329,9 +314,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -340,7 +322,7 @@ H5FA__hdr_fuse_incr(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Increment file reference count on shared header */
     hdr->file_rc++;
@@ -356,9 +338,6 @@ H5FA__hdr_fuse_incr(H5FA_hdr_t *hdr)
  * Return:      Success:    The reference count of the header
  *              Failure:    Can't fail
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -369,8 +348,8 @@ H5FA__hdr_fuse_decr(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->file_rc);
+    assert(hdr);
+    assert(hdr->file_rc);
 
     /* Decrement file reference count on shared header */
     hdr->file_rc--;
@@ -388,9 +367,6 @@ H5FA__hdr_fuse_decr(H5FA_hdr_t *hdr)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -401,7 +377,7 @@ H5FA__hdr_modified(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Mark header as dirty in cache */
     if (H5AC_mark_entry_dirty(hdr) < 0)
@@ -418,9 +394,6 @@ done:
  *
  * Return:	Non-NULL pointer to header on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 12 2013
- *
  *-------------------------------------------------------------------------
  */
 H5FA_hdr_t *
@@ -433,11 +406,11 @@ H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fa_addr));
+    assert(f);
+    assert(H5_addr_defined(fa_addr));
 
     /* only the H5AC__READ_ONLY_FLAG is permitted */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up user data for cache callbacks */
     udata.f         = f;
@@ -476,9 +449,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 12 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -489,7 +459,7 @@ H5FA__hdr_unprotect(H5FA_hdr_t *hdr, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Unprotect the header */
     if (H5AC_unprotect(hdr->f, H5AC_FARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
@@ -507,9 +477,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -521,8 +488,8 @@ H5FA__hdr_delete(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(!hdr->file_rc);
+    assert(hdr);
+    assert(!hdr->file_rc);
 
 #ifndef NDEBUG
 
@@ -533,13 +500,13 @@ H5FA__hdr_delete(H5FA_hdr_t *hdr)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "unable to check metadata cache status for array header")
 
     /* Sanity checks on array header */
-    HDassert(hdr_status & H5AC_ES__IN_CACHE);
-    HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
+    assert(hdr_status & H5AC_ES__IN_CACHE);
+    assert(hdr_status & H5AC_ES__IS_PROTECTED);
 
 #endif /* NDEBUG */
 
     /* Check for Fixed Array Data block */
-    if (H5F_addr_defined(hdr->dblk_addr)) {
+    if (H5_addr_defined(hdr->dblk_addr)) {
         /* Delete Fixed Array Data block */
         if (H5FA__dblock_delete(hdr, hdr->dblk_addr) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTDELETE, FAIL, "unable to delete fixed array data block")
@@ -563,9 +530,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -576,8 +540,8 @@ H5FA__hdr_dest(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
-    HDassert(hdr->rc == 0);
+    assert(hdr);
+    assert(hdr->rc == 0);
 
     /* Destroy the callback context */
     if (hdr->cb_ctx) {

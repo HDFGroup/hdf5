@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5EAdbg.c
- *                  Sep 11 2008
- *                  Quincey Koziol
  *
  * Purpose:        Dump debugging information about an extensible array.
  *
@@ -73,9 +71,6 @@
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -90,13 +85,13 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(H5F_addr_defined(obj_addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(cls);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(H5_addr_defined(obj_addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(cls);
 
     /* Check for debugging context callback available */
     if (cls->crt_dbg_ctx)
@@ -109,35 +104,35 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
 
     /* Print opening message */
-    HDfprintf(stream, "%*sExtensible Array Header...\n", indent, "");
+    fprintf(stream, "%*sExtensible Array Header...\n", indent, "");
 
     /* Print the values */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size:", hdr->size);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Raw Element Size:", (unsigned)hdr->cparam.raw_elmt_size);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "Native Element Size (on this platform):", hdr->cparam.cls->nat_elmt_size);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Log2(Max. # of elements in array):", (unsigned)hdr->cparam.max_nelmts_bits);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "# of elements in index block:", (unsigned)hdr->cparam.idx_blk_elmts);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Min. # of elements per data block:", (unsigned)hdr->cparam.data_blk_min_elmts);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Min. # of data block pointers for a super block:",
-              (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Log2(Max. # of elements in data block page):",
-              (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Highest element index stored (+1):", hdr->stats.stored.max_idx_set);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of super blocks created:", hdr->stats.stored.nsuper_blks);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of data blocks created:", hdr->stats.stored.ndata_blks);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of elements 'realized':", hdr->stats.stored.nelmts);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Index Block Address:", hdr->idx_blk_addr);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size:", hdr->size);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Raw Element Size:", (unsigned)hdr->cparam.raw_elmt_size);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "Native Element Size (on this platform):", hdr->cparam.cls->nat_elmt_size);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Log2(Max. # of elements in array):", (unsigned)hdr->cparam.max_nelmts_bits);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "# of elements in index block:", (unsigned)hdr->cparam.idx_blk_elmts);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Min. # of elements per data block:", (unsigned)hdr->cparam.data_blk_min_elmts);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Min. # of data block pointers for a super block:", (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Log2(Max. # of elements in data block page):", (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Highest element index stored (+1):", hdr->stats.stored.max_idx_set);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Number of super blocks created:", hdr->stats.stored.nsuper_blks);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Number of data blocks created:", hdr->stats.stored.ndata_blks);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Number of elements 'realized':", hdr->stats.stored.nelmts);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Index Block Address:", hdr->idx_blk_addr);
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
@@ -155,9 +150,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -173,14 +165,14 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(hdr_addr));
-    HDassert(H5F_addr_defined(obj_addr));
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(cls);
+    assert(H5_addr_defined(hdr_addr));
+    assert(H5_addr_defined(obj_addr));
 
     /* Check for debugging context callback available */
     if (cls->crt_dbg_ctx)
@@ -193,7 +185,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
 
     /* Sanity check */
-    HDassert(H5F_addr_eq(hdr->idx_blk_addr, addr));
+    assert(H5_addr_eq(hdr->idx_blk_addr, addr));
 
     /* Protect index block */
     if (NULL == (iblock = H5EA__iblock_protect(hdr, H5AC__READ_ONLY_FLAG)))
@@ -202,22 +194,22 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
                     (unsigned long long)hdr->idx_blk_addr)
 
     /* Print opening message */
-    HDfprintf(stream, "%*sExtensible Array Index Block...\n", indent, "");
+    fprintf(stream, "%*sExtensible Array Index Block...\n", indent, "");
 
     /* Print the values */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Index Block size:", iblock->size);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "# of data block addresses in index block:", iblock->ndblk_addrs);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "# of super block addresses in index block:", iblock->nsblk_addrs);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Index Block size:", iblock->size);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "# of data block addresses in index block:", iblock->ndblk_addrs);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "# of super block addresses in index block:", iblock->nsblk_addrs);
 
     /* Check if there are any elements in index block */
     if (hdr->cparam.idx_blk_elmts > 0) {
         unsigned u; /* Local index variable */
 
         /* Print the elements in the index block */
-        HDfprintf(stream, "%*sElements in Index Block:\n", indent, "");
+        fprintf(stream, "%*sElements in Index Block:\n", indent, "");
         for (u = 0; u < hdr->cparam.idx_blk_elmts; u++) {
             /* Call the class's 'debug' callback */
             if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
@@ -233,12 +225,12 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         unsigned u;             /* Local index variable */
 
         /* Print the data block addresses in the index block */
-        HDfprintf(stream, "%*sData Block Addresses in Index Block:\n", indent, "");
+        fprintf(stream, "%*sData Block Addresses in Index Block:\n", indent, "");
         for (u = 0; u < iblock->ndblk_addrs; u++) {
             /* Print address */
             HDsnprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
-                      iblock->dblk_addrs[u]);
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
+                    iblock->dblk_addrs[u]);
         } /* end for */
     }     /* end if */
 
@@ -248,12 +240,12 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         unsigned u;             /* Local index variable */
 
         /* Print the super block addresses in the index block */
-        HDfprintf(stream, "%*sSuper Block Addresses in Index Block:\n", indent, "");
+        fprintf(stream, "%*sSuper Block Addresses in Index Block:\n", indent, "");
         for (u = 0; u < iblock->nsblk_addrs; u++) {
             /* Print address */
             HDsnprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
-                      iblock->sblk_addrs[u]);
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
+                    iblock->sblk_addrs[u]);
         } /* end for */
     }     /* end if */
 
@@ -275,9 +267,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -293,14 +282,14 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(hdr_addr));
-    HDassert(H5F_addr_defined(obj_addr));
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(cls);
+    assert(H5_addr_defined(hdr_addr));
+    assert(H5_addr_defined(obj_addr));
 
     /* Check for debugging context callback available */
     if (cls->crt_dbg_ctx)
@@ -321,15 +310,15 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                     (unsigned long long)addr)
 
     /* Print opening message */
-    HDfprintf(stream, "%*sExtensible Array Super Block...\n", indent, "");
+    fprintf(stream, "%*sExtensible Array Super Block...\n", indent, "");
 
     /* Print the values */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Super Block size:", sblock->size);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "# of data block addresses in super block:", sblock->ndblks);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "# of elements in data blocks from this super block:", sblock->dblk_nelmts);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Super Block size:", sblock->size);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "# of data block addresses in super block:", sblock->ndblks);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "# of elements in data blocks from this super block:", sblock->dblk_nelmts);
 
     /* Check if there are any data block addresses in super block */
     if (sblock->ndblks > 0) {
@@ -337,12 +326,12 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
         unsigned u;             /* Local index variable */
 
         /* Print the data block addresses in the super block */
-        HDfprintf(stream, "%*sData Block Addresses in Super Block:\n", indent, "");
+        fprintf(stream, "%*sData Block Addresses in Super Block:\n", indent, "");
         for (u = 0; u < sblock->ndblks; u++) {
             /* Print address */
             HDsnprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
-                      sblock->dblk_addrs[u]);
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
+                    sblock->dblk_addrs[u]);
         } /* end for */
     }     /* end if */
 
@@ -364,9 +353,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Sep 22 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -383,15 +369,15 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(hdr_addr));
-    HDassert(H5F_addr_defined(obj_addr));
-    HDassert(dblk_nelmts > 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(cls);
+    assert(H5_addr_defined(hdr_addr));
+    assert(H5_addr_defined(obj_addr));
+    assert(dblk_nelmts > 0);
 
     /* Check for debugging context callback available */
     if (cls->crt_dbg_ctx)
@@ -410,14 +396,14 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                     "unable to protect extensible array data block, address = %" PRIuHADDR, addr)
 
     /* Print opening message */
-    HDfprintf(stream, "%*sExtensible Array data Block...\n", indent, "");
+    fprintf(stream, "%*sExtensible Array data Block...\n", indent, "");
 
     /* Print the values */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Data Block size:", dblock->size);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Data Block size:", dblock->size);
 
     /* Print the elements in the index block */
-    HDfprintf(stream, "%*sElements:\n", indent, "");
+    fprintf(stream, "%*sElements:\n", indent, "");
     for (u = 0; u < dblk_nelmts; u++) {
         /* Call the class's 'debug' callback */
         if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,

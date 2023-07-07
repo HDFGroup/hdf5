@@ -80,7 +80,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                       (((VAR1)[i][j] <= (TYPE)((VAR2)[i][j])) &&                                             \
                        (((VAR1)[i][j] + (TOL)) > (TYPE)((VAR2)[i][j]))))) {                                  \
                     H5_FAILED();                                                                             \
-                    HDfprintf(stderr, "    ERROR: Conversion failed to match computed data\n");              \
+                    fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");                \
                     goto error;                                                                              \
                 }                                                                                            \
             }                                                                                                \
@@ -96,7 +96,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                 if (!(((VAR1)[i][j] <= ((TYPE)(VAR2)[i][j] + (TOL))) &&                                      \
                       ((VAR1)[i][j] >= ((TYPE)(VAR2)[i][j] - (TOL))))) {                                     \
                     H5_FAILED();                                                                             \
-                    HDfprintf(stderr, "    ERROR: Conversion failed to match computed data\n");              \
+                    fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");                \
                     goto error;                                                                              \
                 }                                                                                            \
             }                                                                                                \
@@ -111,7 +111,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             for (j = 0; j < COLS; j++) {                                                                     \
                 if ((VAR1)[i][j] != (VAR2)[i][j]) {                                                          \
                     H5_FAILED();                                                                             \
-                    HDfprintf(stderr, "    ERROR: data  failed to match computed data\n");                   \
+                    fprintf(stderr, "    ERROR: data  failed to match computed data\n");                     \
                     goto error;                                                                              \
                 }                                                                                            \
             }                                                                                                \
@@ -131,7 +131,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         hsize_t     dim[2] = {ROWS, COLS};                                                                   \
                                                                                                              \
         /* NOTE: If this macro encounters errors, this memory will leak */                                   \
-        if (NULL == (array = HDcalloc(1, sizeof(*array))))                                                   \
+        if (NULL == (array = calloc(1, sizeof(*array))))                                                     \
             TEST_ERROR;                                                                                      \
                                                                                                              \
         if ((dataspace = H5Screate_simple(2, dim, NULL)) < 0)                                                \
@@ -210,11 +210,11 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         if (H5Sclose(dataspace) < 0)                                                                         \
             TEST_ERROR;                                                                                      \
                                                                                                              \
-        HDfree(array);                                                                                       \
+        free(array);                                                                                         \
     }
 
 #define TEST_TYPE_CHUNK(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)                               \
-    {                                                                                                        \
+    do {                                                                                                     \
         struct {                                                                                             \
             TYPE arr[ROWS][COLS];                                                                            \
         } *array           = NULL;                                                                           \
@@ -227,7 +227,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         hsize_t offset[2] = {0, 0};                                                                          \
                                                                                                              \
         /* NOTE: If this macro encounters errors, this memory will leak */                                   \
-        if (NULL == (array = HDcalloc(1, sizeof(*array))))                                                   \
+        if (NULL == (array = calloc(1, sizeof(*array))))                                                     \
             TEST_ERROR;                                                                                      \
                                                                                                              \
         if ((dataspace = H5Screate_simple(2, dim, NULL)) < 0)                                                \
@@ -297,20 +297,20 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         if (H5Sclose(memspace) < 0)                                                                          \
             TEST_ERROR;                                                                                      \
                                                                                                              \
-        HDfree(array);                                                                                       \
-    }
+        free(array);                                                                                         \
+    } while (0)
 
 #define INVALID_SET_TEST(TRANSFORM)                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (H5Pset_data_transform(dxpl_id, TRANSFORM) < 0) {                                                 \
             PASSED();                                                                                        \
         }                                                                                                    \
         else {                                                                                               \
             H5_FAILED();                                                                                     \
-            HDfprintf(stderr, "    ERROR: Data transform allowed invalid TRANSFORM transform to be set\n");  \
+            fprintf(stderr, "    ERROR: Data transform allowed invalid TRANSFORM transform to be set\n");    \
             goto error;                                                                                      \
         }                                                                                                    \
-    }
+    } while (0)
 
 int
 main(void)
@@ -857,7 +857,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
 
     TESTING("H5Pget_data_transform");
 
-    if (NULL == (ptrgetTest = (char *)HDmalloc(HDstrlen(simple) + 1)))
+    if (NULL == (ptrgetTest = (char *)malloc(HDstrlen(simple) + 1)))
         TEST_ERROR;
 
     if (H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, HDstrlen(c_to_f) + 1) < 0)
@@ -867,7 +867,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
 
     PASSED();
 
-    HDfree(ptrgetTest);
+    free(ptrgetTest);
     ptrgetTest = NULL;
 
     TESTING("data transform, read after resetting of transform property");
@@ -888,7 +888,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
 
     TESTING("H5Pget_data_transform, after resetting transform property");
 
-    if (NULL == (ptrgetTest = (char *)HDcalloc((size_t)1, HDstrlen(simple) + 1)))
+    if (NULL == (ptrgetTest = (char *)calloc((size_t)1, HDstrlen(simple) + 1)))
         TEST_ERROR;
     if (H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, HDstrlen(simple) + 1) < 0)
         TEST_ERROR;
@@ -897,14 +897,14 @@ test_getset(const hid_t dxpl_id_c_to_f)
 
     PASSED();
 
-    HDfree(ptrgetTest);
+    free(ptrgetTest);
     ptrgetTest = NULL;
 
     return 0;
 
 error:
     if (ptrgetTest)
-        HDfree(ptrgetTest);
+        free(ptrgetTest);
 
     return -1;
 }
@@ -919,7 +919,7 @@ test_set(void)
 
     TESTING("H5Pget_data_transform (get before set)");
 
-    if (NULL == (ptrgetTest = (char *)HDmalloc(HDstrlen(str) + 1)))
+    if (NULL == (ptrgetTest = (char *)malloc(HDstrlen(str) + 1)))
         TEST_ERROR;
 
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -935,7 +935,7 @@ test_set(void)
     else
         FAIL_PUTS_ERROR("    ERROR: Data transform get before set succeeded (it shouldn't have)\n");
 
-    HDfree(ptrgetTest);
+    free(ptrgetTest);
     ptrgetTest = NULL;
 
     TESTING("H5Pset_data_transform (set with NULL transform)");
@@ -974,7 +974,7 @@ test_set(void)
 
 error:
     if (ptrgetTest)
-        HDfree(ptrgetTest);
+        free(ptrgetTest);
     H5E_BEGIN_TRY
     {
         H5Pclose(dxpl_id);

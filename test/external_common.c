@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              April, 2019
- *
  * Purpose:     Private function for external.c and external_env.c
  */
 
@@ -26,9 +23,6 @@
  *              perform dataset I/O on a set of files.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              February 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -46,7 +40,7 @@ reset_raw_data_files(hbool_t is_env)
 
     /* Set up garbage buffer */
     garbage_count = N_EXT_FILES * GARBAGE_PER_FILE;
-    if (NULL == (garbage = (uint8_t *)HDcalloc(garbage_count, sizeof(uint8_t))))
+    if (NULL == (garbage = (uint8_t *)calloc(garbage_count, sizeof(uint8_t))))
         goto error;
     for (i = 0; i < garbage_count; i++)
         garbage[i] = 0xFF;
@@ -113,13 +107,13 @@ reset_raw_data_files(hbool_t is_env)
         HDclose(fd);
 
     } /* end for */
-    HDfree(garbage);
+    free(garbage);
     return SUCCEED;
 
 error:
     if (fd)
         HDclose(fd);
     if (garbage)
-        HDfree(garbage);
+        free(garbage);
     return FAIL;
 }

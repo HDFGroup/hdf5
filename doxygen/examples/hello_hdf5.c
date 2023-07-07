@@ -1,7 +1,7 @@
 #include "hdf5.h"
 
 int
-main()
+main(void)
 {
     herr_t   retval;
     unsigned majnum, minnum, relnum;

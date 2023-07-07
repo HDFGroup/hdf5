@@ -67,9 +67,6 @@ const unsigned H5O_layout_ver_bounds[] = {
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, March 20, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -80,7 +77,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(dataset);
+    assert(dataset);
 
     /* Set the I/O functions for each layout type */
     switch (dataset->shared->layout.type) {
@@ -122,7 +119,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
 
                 case H5D_CHUNK_IDX_NTYPES:
                 default:
-                    HDassert(0 && "Unknown chunk index method!");
+                    assert(0 && "Unknown chunk index method!");
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown chunk index method")
             } /* end switch */
             break;
@@ -155,9 +152,6 @@ done:
  * Return:      Success:        Message data size in bytes
  *              Failure:        0
  *
- * Programmer:  Raymond Lu
- *              August 14, 2002
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -168,8 +162,8 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(layout);
+    assert(f);
+    assert(layout);
 
     ret_value = 1 + /* Version number                       */
                 1;  /* layout class type                    */
@@ -192,7 +186,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
         case H5D_CHUNKED:
             if (layout->version < H5O_LAYOUT_VERSION_4) {
                 /* Number of dimensions (1 byte) */
-                HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                assert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
                 ret_value++;
 
                 /* B-tree address */
@@ -206,11 +200,11 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                 ret_value++;
 
                 /* Number of dimensions (1 byte) */
-                HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                assert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
                 ret_value++;
 
                 /* Encoded # of bytes for each chunk dimension */
-                HDassert(layout->u.chunk.enc_bytes_per_dim > 0 && layout->u.chunk.enc_bytes_per_dim <= 8);
+                assert(layout->u.chunk.enc_bytes_per_dim > 0 && layout->u.chunk.enc_bytes_per_dim <= 8);
                 ret_value++;
 
                 /* Dimension sizes */
@@ -283,9 +277,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; December 2017
- *
- *-------------------------------------------------------------------------
  */
 herr_t
 H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
@@ -296,8 +287,8 @@ H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(layout);
-    HDassert(f);
+    assert(layout);
+    assert(f);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(layout->version, H5O_layout_ver_bounds[H5F_LOW_BOUND(f)]);
@@ -320,9 +311,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -333,9 +321,9 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(layout);
-    HDassert(space);
-    HDassert(dcpl_cache);
+    assert(layout);
+    assert(space);
+    assert(dcpl_cache);
 
     /* The indexing methods only apply to chunked datasets (currently) */
     if (layout->type == H5D_CHUNKED) {
@@ -444,9 +432,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, July 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -461,9 +446,9 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Sanity checking */
-    HDassert(file);
-    HDassert(oh);
-    HDassert(dset);
+    assert(file);
+    assert(oh);
+    assert(dset);
 
     /* Set some local variables, for convenience */
     layout    = &dset->shared->layout;
@@ -580,9 +565,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, July 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -597,8 +579,8 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
-    HDassert(dataset);
-    HDassert(plist);
+    assert(dataset);
+    assert(plist);
 
     /* Get the optional filters message */
     if ((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_PLINE_ID)) < 0)
@@ -641,7 +623,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     } /* end if */
 
     /* Sanity check that the layout operations are set up */
-    HDassert(dataset->shared->layout.ops);
+    assert(dataset->shared->layout.ops);
 
     /* Initialize the layout information for the dataset */
     if (dataset->shared->layout.ops->init &&
@@ -684,9 +666,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, July 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -698,8 +677,8 @@ H5D__layout_oh_write(const H5D_t *dataset, H5O_t *oh, unsigned update_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
-    HDassert(dataset);
-    HDassert(oh);
+    assert(dataset);
+    assert(oh);
 
     /* Check if the layout message has been added to the dataset's header */
     if ((msg_exists = H5O_msg_exists_oh(oh, H5O_LAYOUT_ID)) < 0)

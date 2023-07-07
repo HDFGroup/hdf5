@@ -152,9 +152,6 @@ static const H5C_log_class_t H5C_json_log_class_g = {"json",
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -166,15 +163,15 @@ H5C__json_write_log_message(H5C_log_json_udata_t *json_udata)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->outfile);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->outfile);
+    assert(json_udata->message);
 
     /* Write the log message and flush */
     n_chars = HDstrlen(json_udata->message);
-    if ((int)n_chars != HDfprintf(json_udata->outfile, "%s", json_udata->message))
+    if ((int)n_chars != fprintf(json_udata->outfile, "%s", json_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
-    HDmemset((void *)(json_udata->message), 0, (size_t)(n_chars * sizeof(char)));
+    memset((void *)(json_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -199,9 +196,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -215,8 +209,8 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(log_info);
-    HDassert(log_location);
+    assert(log_info);
+    assert(log_location);
 
     /* Set up the class struct */
     log_info->cls = &H5C_json_log_class_g;
@@ -249,7 +243,7 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
         HDsnprintf(file_name, n_chars, "RANK_%d.%s", mpi_rank, log_location);
 
     /* Open log file and set it to be unbuffered */
-    if (NULL == (json_udata->outfile = HDfopen(file_name, "w")))
+    if (NULL == (json_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file")
     HDsetbuf(json_udata->outfile, NULL);
 
@@ -280,9 +274,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -294,7 +285,7 @@ H5C__json_tear_down_logging(H5C_log_info_t *log_info)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(log_info);
+    assert(log_info);
 
     /* Alias */
     json_udata = (H5C_log_json_udata_t *)(log_info->udata);
@@ -303,7 +294,7 @@ H5C__json_tear_down_logging(H5C_log_info_t *log_info)
     H5MM_xfree(json_udata->message);
 
     /* Close log file */
-    if (EOF == HDfclose(json_udata->outfile))
+    if (EOF == fclose(json_udata->outfile))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file")
     json_udata->outfile = NULL;
 
@@ -325,9 +316,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -339,8 +327,8 @@ H5C__json_write_start_log_msg(void *udata)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string (opens the JSON array) */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -368,9 +356,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -382,8 +367,8 @@ H5C__json_write_stop_log_msg(void *udata)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string (closes the JSON array) */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -410,9 +395,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -424,8 +406,8 @@ H5C__json_write_create_cache_log_msg(void *udata, herr_t fxn_ret_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -452,9 +434,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -466,8 +445,8 @@ H5C__json_write_destroy_cache_log_msg(void *udata)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -493,9 +472,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -507,8 +483,8 @@ H5C__json_write_evict_cache_log_msg(void *udata, herr_t fxn_ret_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -535,9 +511,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -549,8 +522,8 @@ H5C__json_write_expunge_entry_log_msg(void *udata, haddr_t address, int type_id,
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -579,9 +552,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -593,8 +563,8 @@ H5C__json_write_flush_cache_log_msg(void *udata, herr_t fxn_ret_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -621,9 +591,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -636,8 +603,8 @@ H5C__json_write_insert_entry_log_msg(void *udata, haddr_t address, int type_id, 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -669,9 +636,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -683,9 +647,9 @@ H5C__json_write_mark_entry_dirty_log_msg(void *udata, const H5C_cache_entry_t *e
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -713,9 +677,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -727,9 +688,9 @@ H5C__json_write_mark_entry_clean_log_msg(void *udata, const H5C_cache_entry_t *e
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -757,9 +718,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -772,9 +730,9 @@ H5C__json_write_mark_unserialized_entry_log_msg(void *udata, const H5C_cache_ent
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -802,9 +760,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -817,9 +772,9 @@ H5C__json_write_mark_serialized_entry_log_msg(void *udata, const H5C_cache_entry
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -847,9 +802,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -862,8 +814,8 @@ H5C__json_write_move_entry_log_msg(void *udata, haddr_t old_addr, haddr_t new_ad
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -894,9 +846,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -908,9 +857,9 @@ H5C__json_write_pin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, h
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -939,9 +888,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -954,10 +900,10 @@ H5C__json_write_create_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(parent);
-    HDassert(child);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(parent);
+    assert(child);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -987,9 +933,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1003,9 +946,9 @@ H5C__json_write_protect_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     if (H5C__READ_ONLY_FLAG == flags)
         HDstrcpy(rw_s, "READ");
@@ -1042,9 +985,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1057,9 +997,9 @@ H5C__json_write_resize_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -1088,9 +1028,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1102,9 +1039,9 @@ H5C__json_write_unpin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry,
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -1133,9 +1070,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1148,10 +1082,10 @@ H5C__json_write_destroy_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(parent);
-    HDassert(child);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(parent);
+    assert(child);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -1181,9 +1115,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1196,8 +1127,8 @@ H5C__json_write_unprotect_entry_log_msg(void *udata, haddr_t address, int type_i
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
+    assert(json_udata);
+    assert(json_udata->message);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -1227,9 +1158,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1242,9 +1170,9 @@ H5C__json_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(config);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(config);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\
@@ -1271,9 +1199,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1285,9 +1210,9 @@ H5C__json_write_remove_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(json_udata);
-    HDassert(json_udata->message);
-    HDassert(entry);
+    assert(json_udata);
+    assert(json_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, "\

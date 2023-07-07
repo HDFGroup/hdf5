@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pstrcpl.c
- *			October 26 2005
- *			James Laird
  *
  * Purpose:		String creation property list class routines
  *
@@ -108,8 +106,6 @@ static const H5T_cset_t H5P_def_char_encoding_g =
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -136,8 +132,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Wednesday, October 26, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -172,8 +166,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              November 1, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -208,9 +200,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -222,8 +211,8 @@ H5P__strcrt_char_encoding_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(encoding);
-    HDassert(size);
+    assert(encoding);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode character set encoding */
@@ -245,9 +234,6 @@ H5P__strcrt_char_encoding_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -259,9 +245,9 @@ H5P__strcrt_char_encoding_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(encoding);
+    assert(pp);
+    assert(*pp);
+    assert(encoding);
 
     /* Decode character set encoding */
     *encoding = (H5T_cset_t) * (*pp)++;

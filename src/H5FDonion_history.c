@@ -19,11 +19,12 @@
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
 
-#include "H5private.h"      /* Generic Functions           */
-#include "H5Eprivate.h"     /* Error handling              */
-#include "H5FDprivate.h"    /* File drivers                */
-#include "H5FDonion.h"      /* Onion file driver           */
-#include "H5FDonion_priv.h" /* Onion file driver internals */
+#include "H5private.h"      /* Generic Functions                        */
+#include "H5Eprivate.h"     /* Error handling                           */
+#include "H5FDprivate.h"    /* File drivers                             */
+#include "H5FDonion.h"      /* Onion file driver                        */
+#include "H5FDonion_priv.h" /* Onion file driver internals              */
+#include "H5MMprivate.h"    /* Memory management                        */
 
 /*-----------------------------------------------------------------------------
  * Function:    H5FD__onion_write_history
@@ -42,10 +43,10 @@ H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD_t *raw_file, 
     uint32_t       sum       = 0;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
-    HDassert(history_out);
-    HDassert(raw_file);
+    assert(history_out);
+    assert(raw_file);
 
     /* Set early so we can clean up properly on errors */
     history_out->record_locs = NULL;
@@ -82,7 +83,7 @@ done:
     if (ret_value < 0)
         H5MM_xfree(history_out->record_locs);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_ingest_history() */
 
 /*-----------------------------------------------------------------------------
@@ -103,7 +104,7 @@ H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t o
     unsigned char *buf       = NULL;
     uint64_t       ret_value = 0;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY +
                                    (H5FD_ONION_ENCODED_SIZE_RECORD_POINTER * history->n_revisions))))
@@ -123,7 +124,7 @@ H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t o
 done:
     H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_write_history() */
 
 /*-----------------------------------------------------------------------------
@@ -165,11 +166,11 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     unsigned char *ptr         = NULL;
     size_t         ret_value   = 0;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
-    HDassert(buf != NULL);
-    HDassert(history != NULL);
-    HDassert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
+    assert(buf != NULL);
+    assert(history != NULL);
+    assert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
 
     if (HDstrncmp((const char *)buf, H5FD_ONION_HISTORY_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature")
@@ -179,7 +180,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 
     ptr = buf + 8;
 
-    HDmemcpy(&ui64, ptr, 8);
+    memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT64DECODE(ui8p, n_revisions);
     ptr += 8;
@@ -206,19 +207,19 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
             uint64_t record_size;
             uint64_t phys_addr;
 
-            HDmemcpy(&ui64, ptr, 8);
+            memcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
             UINT64DECODE(ui8p, phys_addr);
             H5_CHECKED_ASSIGN(rloc->phys_addr, haddr_t, phys_addr, uint64_t);
             ptr += 8;
 
-            HDmemcpy(&ui64, ptr, 8);
+            memcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
             UINT64DECODE(ui8p, record_size);
             H5_CHECKED_ASSIGN(rloc->record_size, hsize_t, record_size, uint64_t);
             ptr += 8;
 
-            HDmemcpy(&ui32, ptr, 4);
+            memcpy(&ui32, ptr, 4);
             ui8p = (uint8_t *)&ui32;
             UINT32DECODE(ui8p, rloc->checksum);
             ptr += 4;
@@ -227,7 +228,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 
     sum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
 
-    HDmemcpy(&ui32, ptr, 4);
+    memcpy(&ui32, ptr, 4);
     ui8p = (uint8_t *)&ui32;
     UINT32DECODE(ui8p, history->checksum);
     ptr += 4;
@@ -238,7 +239,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     ret_value = (size_t)(ptr - buf);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_history_decode() */
 
 /*-----------------------------------------------------------------------------
@@ -267,19 +268,19 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
     unsigned char *ptr      = buf;
     size_t         vers_u32 = (uint32_t)history->version; /* pad out unused bytes */
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(history != NULL);
-    HDassert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
-    HDassert(buf != NULL);
-    HDassert(checksum != NULL);
+    assert(history != NULL);
+    assert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
+    assert(buf != NULL);
+    assert(checksum != NULL);
 
-    HDmemcpy(ptr, H5FD_ONION_HISTORY_SIGNATURE, 4);
+    memcpy(ptr, H5FD_ONION_HISTORY_SIGNATURE, 4);
     ptr += 4;
     UINT32ENCODE(ptr, vers_u32);
     UINT64ENCODE(ptr, history->n_revisions);
     if (history->n_revisions > 0) {
-        HDassert(history->record_locs != NULL);
+        assert(history->record_locs != NULL);
         for (uint64_t i = 0; i < history->n_revisions; i++) {
             H5FD_onion_record_loc_t *rloc = &history->record_locs[i];
 
@@ -301,5 +302,5 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
     *checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
     UINT32ENCODE(ptr, *checksum);
 
-    FUNC_LEAVE_NOAPI((size_t)(ptr - buf));
+    FUNC_LEAVE_NOAPI((size_t)(ptr - buf))
 } /* end H5FD__onion_history_encode() */

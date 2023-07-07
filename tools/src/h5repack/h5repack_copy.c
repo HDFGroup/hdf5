@@ -299,7 +299,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
     if (options->verbose > 0)
-        HDprintf("Making new file ...\n");
+        printf("Making new file ...\n");
 
     if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
@@ -390,7 +390,7 @@ done:
             H5Fclose(fidout);
             H5Fclose(fidin);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (travt)
         trav_table_free(travt);
@@ -658,7 +658,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     int                ret_value = 0;
 
     /* init linkinfo struct */
-    HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+    memset(&linkinfo, 0, sizeof(h5tool_link_info_t));
 
     /*-------------------------------------------------------------------------
      * copy the supplied object list
@@ -667,14 +667,14 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
     if (options->verbose > 0) {
         if (options->verbose == 2) {
-            HDprintf("-----------------------------------------------------------------\n");
-            HDprintf(" Type     Filter (Compression)        Timing read/write    Name\n");
-            HDprintf("-----------------------------------------------------------------\n");
+            printf("-----------------------------------------------------------------\n");
+            printf(" Type     Filter (Compression)        Timing read/write    Name\n");
+            printf("-----------------------------------------------------------------\n");
         }
         else {
-            HDprintf("-----------------------------------------\n");
-            HDprintf(" Type     Filter (Compression)     Name\n");
-            HDprintf("-----------------------------------------\n");
+            printf("-----------------------------------------\n");
+            printf(" Type     Filter (Compression)     Name\n");
+            printf("-----------------------------------------\n");
         }
     }
 
@@ -695,9 +695,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                 case H5TRAV_TYPE_GROUP:
                     if (options->verbose > 0) {
                         if (options->verbose == 2)
-                            HDprintf(FORMAT_OBJ_NOTIME, "group", travt->objs[i].name);
+                            printf(FORMAT_OBJ_NOTIME, "group", travt->objs[i].name);
                         else
-                            HDprintf(FORMAT_OBJ, "group", travt->objs[i].name);
+                            printf(FORMAT_OBJ, "group", travt->objs[i].name);
                     }
 
                     /* open input group */
@@ -877,7 +877,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
                         if ((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
-                        HDmemset(dims, 0, sizeof dims);
+                        memset(dims, 0, sizeof dims);
                         if (H5Sget_simple_extent_dims(f_space_id, dims, NULL) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
                         if (H5Dget_space_status(dset_in, &space_status) < 0)
@@ -991,9 +991,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 if (dset_out == H5I_INVALID_HID) {
                                     H5TOOLS_INFO("H5Dcreate2 failed");
                                     if (options->verbose > 0)
-                                        HDprintf(" warning: could not create dataset <%s>. Applying original "
-                                                 "settings\n",
-                                                 travt->objs[i].name);
+                                        printf(" warning: could not create dataset <%s>. Applying original "
+                                               "settings\n",
+                                               travt->objs[i].name);
 
                                     if ((dset_out =
                                              H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id,
@@ -1012,7 +1012,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     /* have to read the whole dataset if there is only one element in the
                                      * dataset */
                                     if (need < H5TOOLS_MALLOCSIZE)
-                                        buf = HDmalloc(need);
+                                        buf = malloc(need);
 
                                     /* Set up collective write if using filters in parallel */
                                     {
@@ -1061,7 +1061,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
                                         if (buf != NULL) { /* TODO: is buf potentially released by
                                                               H5Dvlen_reclaim()? */
-                                            HDfree(buf);
+                                            free(buf);
                                             buf = NULL;
                                         }
                                     }
@@ -1108,7 +1108,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                                           &hslab_nbytes) < 0)
                                             H5TOOLS_GOTO_ERROR((-1), "get_hyperslab failed");
 
-                                        hslab_buf = HDmalloc((size_t)hslab_nbytes);
+                                        hslab_buf = malloc((size_t)hslab_nbytes);
                                         if (hslab_buf == NULL)
                                             H5TOOLS_GOTO_ERROR((-1), "can't allocate space for hyperslab");
 
@@ -1116,8 +1116,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                         hslab_space  = H5Screate_simple(1, &hslab_nelmts, NULL);
 
                                         /* the hyperslab selection loop */
-                                        HDmemset(hs_sel_offset, 0, sizeof hs_sel_offset);
-                                        HDmemset(zero, 0, sizeof zero);
+                                        memset(hs_sel_offset, 0, sizeof hs_sel_offset);
+                                        memset(zero, 0, sizeof zero);
 
                                         for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_select_nelmts) {
                                             if (rank > 0) {
@@ -1189,7 +1189,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
                                         H5Sclose(hslab_space);
                                         if (hslab_buf != NULL) {
-                                            HDfree(hslab_buf);
+                                            free(hslab_buf);
                                             hslab_buf = NULL;
                                         }
                                     } /* end if reading/writing by hyperslab */
@@ -1221,13 +1221,13 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                      * (in case there was a filter)
                                      */
                                     if (has_filter && apply_s == 0)
-                                        HDprintf(" <warning: filter not applied to %s. dataset smaller than "
-                                                 "%d bytes>\n",
-                                                 travt->objs[i].name, (int)options->min_comp);
+                                        printf(" <warning: filter not applied to %s. dataset smaller than "
+                                               "%d bytes>\n",
+                                               travt->objs[i].name, (int)options->min_comp);
 
                                     if (has_filter && apply_f == 0)
-                                        HDprintf(" <warning: could not apply the filter to %s>\n",
-                                                 travt->objs[i].name);
+                                        printf(" <warning: could not apply the filter to %s>\n",
+                                               travt->objs[i].name);
                                 } /* end if verbose (print compression) */
 
                                 /*-------------------------------------------------------------------------
@@ -1310,9 +1310,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
                         if (options->verbose > 0) {
                             if (options->verbose == 2)
-                                HDprintf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[i].name);
+                                printf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[i].name);
                             else
-                                HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
+                                printf(FORMAT_OBJ, "dset", travt->objs[i].name);
                         }
 
                     } /* end whether we have request for filter/chunking */
@@ -1327,9 +1327,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                 case H5TRAV_TYPE_NAMED_DATATYPE:
                     if (options->verbose > 0) {
                         if (options->verbose == 2)
-                            HDprintf(FORMAT_OBJ_NOTIME, "type", travt->objs[i].name);
+                            printf(FORMAT_OBJ_NOTIME, "type", travt->objs[i].name);
                         else
-                            HDprintf(FORMAT_OBJ, "type", travt->objs[i].name);
+                            printf(FORMAT_OBJ, "type", travt->objs[i].name);
                     }
 
                     if ((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
@@ -1371,9 +1371,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                 case H5TRAV_TYPE_UDLINK:
                     if (options->verbose > 0) {
                         if (options->verbose == 2)
-                            HDprintf(FORMAT_OBJ_NOTIME, "link", travt->objs[i].name);
+                            printf(FORMAT_OBJ_NOTIME, "link", travt->objs[i].name);
                         else
-                            HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
+                            printf(FORMAT_OBJ, "link", travt->objs[i].name);
                     }
 
                     /* Check -X option. */
@@ -1381,7 +1381,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                         if (H5tools_get_symlink_info(fidin, travt->objs[i].name, &linkinfo, 1) == 0) {
                             /* dangling link */
                             if (options->prune) {
-                                HDprintf("Pruned %s.\n", travt->objs[i].name);
+                                printf("Pruned %s.\n", travt->objs[i].name);
                             }
                             else {
                                 if (H5Lcopy(fidin, travt->objs[i].name, fidout, travt->objs[i].name,
@@ -1421,12 +1421,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
                         /* free link info path */
                         if (linkinfo.trg_path)
-                            HDfree(linkinfo.trg_path);
+                            free(linkinfo.trg_path);
                         linkinfo.trg_path = NULL;
                     } /* options->merge */
                     else {
                         if (options->prune) {
-                            HDprintf("Pruned %s.\n", travt->objs[i].name);
+                            printf("Pruned %s.\n", travt->objs[i].name);
                         }
                         else {
                             if (H5Lcopy(fidin, travt->objs[i].name, fidout, travt->objs[i].name, H5P_DEFAULT,
@@ -1455,12 +1455,12 @@ done:
         {
             named_datatype_free(&named_dt_head, 1);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree(linkinfo.trg_path);
+        free(linkinfo.trg_path);
 
     H5E_BEGIN_TRY
     {
@@ -1480,13 +1480,13 @@ done:
         H5Tclose(type_in);
         H5Tclose(type_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* free */
     if (buf != NULL)
-        HDfree(buf);
+        free(buf);
     if (hslab_buf != NULL)
-        HDfree(hslab_buf);
+        free(hslab_buf);
 
     return ret_value;
 } /* end do_copy_objects() */
@@ -1589,9 +1589,9 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr, pack_opt_
 
     if (!pr)
         if (options->verbose == 2)
-            HDprintf(FORMAT_OBJ_TIME, "dset", read_time, write_time, objname);
+            printf(FORMAT_OBJ_TIME, "dset", read_time, write_time, objname);
         else
-            HDprintf(FORMAT_OBJ, "dset", objname);
+            printf(FORMAT_OBJ, "dset", objname);
     else {
         char str[512], temp[512];
 
@@ -1600,9 +1600,9 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr, pack_opt_
         HDsnprintf(temp, sizeof(temp), "  (%.3f:1)", ratio);
         HDstrcat(str, temp);
         if (options->verbose == 2)
-            HDprintf(FORMAT_OBJ_TIME, str, read_time, write_time, objname);
+            printf(FORMAT_OBJ_TIME, str, read_time, write_time, objname);
         else
-            HDprintf(FORMAT_OBJ, str, objname);
+            printf(FORMAT_OBJ, str, objname);
     }
 } /* end print_dataset_info() */
 
@@ -1654,13 +1654,13 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
             } while (-1 == nwritten && EINTR == errno);
             if (-1 == nwritten) /* error */
                 H5TOOLS_GOTO_ERROR((-1), "HDwrite failed");
-            HDassert(nwritten > 0);
-            HDassert(nwritten <= nbytes);
+            assert(nwritten > 0);
+            assert(nwritten <= nbytes);
 
             /* Update # of bytes left & offset in buffer */
             nbytes -= nwritten;
             wbuf += nwritten;
-            HDassert(nbytes == 0 || wbuf < (rbuf + USERBLOCK_XFER_SIZE));
+            assert(nbytes == 0 || wbuf < (rbuf + USERBLOCK_XFER_SIZE));
         } /* end while */
 
         /* Update size of userblock left to transfer */
@@ -1728,9 +1728,9 @@ print_user_block(const char *filename, hid_t fid)
 
         for (i = 0; i < nread; i++) {
 
-            HDprintf("%c ", rbuf[i]);
+            printf("%c ", rbuf[i]);
         }
-        HDprintf("\n");
+        printf("\n");
 
         if (nread < 0) {
             H5TOOLS_GOTO_ERROR((-1), "nread < 0");

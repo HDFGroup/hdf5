@@ -1,0 +1,39 @@
+name: h5py
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "6 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install gfortran
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gfortran-12
+    - name: Checkout Spack
+      uses: actions/checkout@v3
+      with:
+        repository: spack/spack
+        path: ./spack
+
+    - name: Run a multi-line script
+      run: |
+        sed -i 's/hdf5@1.8.4:1.14/hdf5@1.8.4:/g' \
+        ./spack/var/spack/repos/builtin/packages/py-h5py/package.py
+        . ./spack/share/spack/setup-env.sh
+        ./spack/bin/spack spec py-h5py@master+mpi ^hdf5@develop-1.15
+        ./spack/bin/spack install py-h5py@master+mpi ^hdf5@develop-1.15
+        ./spack/bin/spack install py-pytest
+        ./spack/bin/spack install py-ipython
+        ./spack/bin/spack install py-pip
+        spack load py-h5py
+        spack load py-pytest
+        spack load py-ipython
+        spack load py-pip
+        pip install pytest-mpi
+        python -c "import h5py; h5py.run_tests(); print(h5py.version.info);"

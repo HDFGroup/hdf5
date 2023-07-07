@@ -86,9 +86,6 @@ H5FL_DEFINE(H5G_copy_file_ud_t);
  *
  *		Failure:	NULL
  *
- * Programmer:	Neil Fortner
- *              Thursday, July 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -116,9 +113,6 @@ done:
  *
  * Return:	<none>
  *
- * Programmer:	Neil Fortner
- *              Thursday, July 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -129,7 +123,7 @@ H5O__group_free_copy_file_udata(void *_udata)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(udata);
+    assert(udata);
 
     /* Free the ginfo struct (including nested data structs) */
     H5O_msg_free(H5O_PLINE_ID, udata->common.src_pline);
@@ -152,9 +146,6 @@ H5O__group_free_copy_file_udata(void *_udata)
  *		Failure:	FAIL if the existence of certain messages
  *				cannot be determined.
  *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -166,7 +157,7 @@ H5O__group_isa(const H5O_t *oh)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(oh);
+    assert(oh);
 
     /* Check for any of the messages that indicate a group */
     if ((stab_exists = H5O_msg_exists_oh(oh, H5O_STAB_ID)) < 0)
@@ -188,9 +179,6 @@ done:
  * Return:      Success:    Pointer to group data
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -201,7 +189,7 @@ H5O__group_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(obj_loc);
+    assert(obj_loc);
 
     *opened_type = H5I_GROUP;
 
@@ -227,9 +215,6 @@ done:
  * Return:	Success:	Pointer to the group data structure
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, April 10, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -242,9 +227,9 @@ H5O__group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(crt_info);
-    HDassert(obj_loc);
+    assert(f);
+    assert(crt_info);
+    assert(obj_loc);
 
     /* Create the group */
     if (NULL == (grp = H5G__create(f, crt_info)))
@@ -274,9 +259,6 @@ done:
  *
  * Return:	Success:	Pointer to object header location
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -308,9 +290,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              July 12 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -325,11 +304,11 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
-    HDassert(oh);
-    HDassert(bh_info);
+    assert(loc);
+    assert(loc->file);
+    assert(H5_addr_defined(loc->addr));
+    assert(oh);
+    assert(bh_info);
 
     /* Check for "new style" group info */
     if ((exists = H5O_msg_exists_oh(oh, H5O_LINFO_ID)) < 0)
@@ -342,7 +321,7 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't read LINFO message")
 
         /* Check if name index available */
-        if (H5F_addr_defined(linfo.name_bt2_addr)) {
+        if (H5_addr_defined(linfo.name_bt2_addr)) {
             /* Open the name index v2 B-tree */
             if (NULL == (bt2_name = H5B2_open(loc->file, linfo.name_bt2_addr, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
@@ -353,7 +332,7 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
         } /* end if */
 
         /* Check if creation order index available */
-        if (H5F_addr_defined(linfo.corder_bt2_addr)) {
+        if (H5_addr_defined(linfo.corder_bt2_addr)) {
             /* Open the creation order index v2 B-tree */
             if (NULL == (bt2_corder = H5B2_open(loc->file, linfo.corder_bt2_addr, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL,
@@ -366,7 +345,7 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
         } /* end if */
 
         /* Get fractal heap size, if available */
-        if (H5F_addr_defined(linfo.fheap_addr)) {
+        if (H5_addr_defined(linfo.fheap_addr)) {
             /* Open the fractal heap for links */
             if (NULL == (fheap = H5HF_open(loc->file, linfo.fheap_addr)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")

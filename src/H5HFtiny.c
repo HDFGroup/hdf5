@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5HFtiny.c
- *              Aug 14 2006
- *              Quincey Koziol
  *
  * Purpose:     Routines for "tiny" objects in fractal heap
  *
@@ -78,9 +76,6 @@ static herr_t H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operat
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Aug 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -91,7 +86,7 @@ H5HF__tiny_init(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Compute information about 'tiny' objects for the heap */
 
@@ -123,9 +118,6 @@ H5HF__tiny_init(H5HF_hdr_t *hdr)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Aug 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -140,11 +132,11 @@ H5HF__tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(obj_size <= hdr->tiny_max_len);
-    HDassert(obj_size <= (H5HF_TINY_MASK_EXT + 1));
-    HDassert(obj);
-    HDassert(id);
+    assert(hdr);
+    assert(obj_size <= hdr->tiny_max_len);
+    assert(obj_size <= (H5HF_TINY_MASK_EXT + 1));
+    assert(obj);
+    assert(id);
 
     /* Adjust object's size for encoding it */
     enc_obj_size = obj_size - 1;
@@ -160,7 +152,7 @@ H5HF__tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     } /* end else */
 
     H5MM_memcpy(id, obj, obj_size);
-    HDmemset(id + obj_size, 0, (hdr->id_len - ((size_t)1 + (size_t)hdr->tiny_len_extended + obj_size)));
+    memset(id + obj_size, 0, (hdr->id_len - ((size_t)1 + (size_t)hdr->tiny_len_extended + obj_size)));
 
     /* Update statistics about heap */
     hdr->tiny_size += obj_size;
@@ -181,9 +173,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Aug 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -196,9 +185,9 @@ H5HF__tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj_len_p);
+    assert(hdr);
+    assert(id);
+    assert(obj_len_p);
 
     /* Check if 'tiny' object ID is in extended form, and retrieve encoded size */
     if (!hdr->tiny_len_extended)
@@ -222,9 +211,6 @@ H5HF__tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sep 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -238,9 +224,9 @@ H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void 
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(op);
+    assert(hdr);
+    assert(id);
+    assert(op);
 
     /* Get the object's encoded length */
     /* H5HF__tiny_obj_len can't fail */
@@ -272,9 +258,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -287,9 +270,9 @@ H5HF__tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj);
+    assert(hdr);
+    assert(id);
+    assert(obj);
 
     /* Call the internal 'op' routine */
     if (H5HF__tiny_op_real(hdr, id, H5HF__op_read, obj) < 0)
@@ -306,9 +289,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -321,9 +301,9 @@ H5HF__tiny_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_d
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(op);
+    assert(hdr);
+    assert(id);
+    assert(op);
 
     /* Call the internal 'op' routine routine */
     if (H5HF__tiny_op_real(hdr, id, op, op_data) < 0)
@@ -340,9 +320,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Aug 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -356,8 +333,8 @@ H5HF__tiny_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
+    assert(hdr);
+    assert(id);
 
     /* Get the object's encoded length */
     /* H5HF__tiny_obj_len can't fail */

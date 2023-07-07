@@ -81,10 +81,6 @@ CONTAINS
 ! * Return:	Success:	0
 ! *
 ! *		Failure:	number of errors
-! *
-! * Programmer:	M. Scot Breitenfeld
-! *             June 24, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -442,9 +438,6 @@ END SUBROUTINE test_genprop_class_callback
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     April 1, 2014
 !-------------------------------------------------------------------------
 
 SUBROUTINE test_h5p_file_image(total_error)
@@ -514,9 +507,6 @@ END SUBROUTINE test_h5p_file_image
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     January 10, 2012
 !-------------------------------------------------------------------------
 !
 SUBROUTINE external_test_offset(cleanup,total_error)
@@ -662,10 +652,6 @@ END SUBROUTINE external_test_offset
 ! RETURNS:
 !   Success:	0
 !   Failure:	number of errors
-!
-! FORTRAN Programmer:  M. Scot Breitenfeld
-!                      February 1, 2016
-!
 !-------------------------------------------------------------------------
 !
 SUBROUTINE test_vds(total_error)

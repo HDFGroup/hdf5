@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- */
-
 #define H5G_FRIEND /*suppress error about including H5Gpkg      */
 
 /* Define this macro to indicate that the testing APIs should be available */
@@ -23,7 +18,7 @@
 #include "h5test.h"
 #include "H5Gpkg.h" /* Groups                */
 
-const char *FILENAME[] = {"stab", NULL};
+static const char *FILENAME[] = {"stab", NULL};
 
 #define NAME_BUF_SIZE 1024
 
@@ -85,9 +80,6 @@ const char *FILENAME[] = {"stab", NULL};
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -136,7 +128,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
     if (HDstrcmp(comment, "hello world") != 0) {
         H5_FAILED();
         HDputs("    Read the wrong comment string from the group.");
-        HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
+        printf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
         TEST_ERROR;
     }
     if (H5Gclose(g1) < 0)
@@ -178,7 +170,7 @@ error:
         H5Gclose(g3);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -188,8 +180,6 @@ error:
  * Return:      Success:    0
  *
  *         Failure:    number of errors
- *
- * Programmer:  Robb Matzke 2002-03-28
  *
  *-------------------------------------------------------------------------
  */
@@ -213,12 +203,12 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Group names */
-    name1 = (char *)HDmalloc((size_t)LONG_NAME_LEN);
+    name1 = (char *)malloc((size_t)LONG_NAME_LEN);
     for (i = 0; i < LONG_NAME_LEN; i++)
         name1[i] = (char)('A' + i % 26);
     name1[LONG_NAME_LEN - 1] = '\0';
     size_t name2Len          = (2 * LONG_NAME_LEN) + 2;
-    name2                    = (char *)HDmalloc(name2Len);
+    name2                    = (char *)malloc(name2Len);
     HDsnprintf(name2, name2Len, "%s/%s", name1, name1);
 
     /* Create groups */
@@ -246,8 +236,8 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Release name buffers */
-    HDfree(name2);
-    HDfree(name1);
+    free(name2);
+    free(name1);
 
     PASSED();
     return 0;
@@ -258,10 +248,10 @@ error:
         H5Gclose(g1);
         H5Gclose(g2);
         H5Fclose(fid);
-        HDfree(name2);
-        HDfree(name1);
+        free(name2);
+        free(name1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_long() */
 
@@ -273,10 +263,6 @@ error:
  * Return:      Success:    0
  *
  *         Failure:    number of errors
- *
- * Programmer:  Robb Matzke
- *              robb@maya.nuance.com
- *              Aug 29 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -335,7 +321,7 @@ error:
         H5Gclose(cwg);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_large() */
 
@@ -349,9 +335,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -622,7 +605,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end lifecycle() */
 
@@ -635,9 +618,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 18, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -668,9 +648,9 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Construct very long object name template */
-    if (NULL == (objname = (char *)HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))))
+    if (NULL == (objname = (char *)malloc((size_t)(LONG_COMPACT_LENGTH + 1))))
         TEST_ERROR;
-    HDmemset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
+    memset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
     objname[LONG_COMPACT_LENGTH] = '\0';
 
     /* Re-open file */
@@ -752,7 +732,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Free object name */
-    HDfree(objname);
+    free(objname);
     objname = NULL;
 
     /* Close top group */
@@ -785,10 +765,10 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     return 1;
 } /* end long_compact() */
@@ -801,9 +781,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 24, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -895,7 +872,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end read_old() */
 
@@ -908,9 +885,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1036,7 +1010,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end no_compact() */
 
@@ -1048,9 +1022,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1189,7 +1160,7 @@ error:
         H5Gclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end gcpl_on_root() */
 
@@ -1200,9 +1171,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Thursday, August 23, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1293,7 +1261,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end old_api() */
@@ -1306,9 +1274,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Neil Fortner
- *              Wednesday, March 18, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1387,7 +1352,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end corrupt_stab_msg() */
@@ -1400,9 +1365,6 @@ error:
  * Return:    Success:    zero
  *
  *        Failure:    non-zero
- *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */

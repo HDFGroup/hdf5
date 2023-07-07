@@ -13,8 +13,6 @@
 #
 # Tests for the H5check_version function.
 #
-# Programmer: Albert Cheng
-#          Sep 28, 2009
 
 srcdir=@srcdir@
 

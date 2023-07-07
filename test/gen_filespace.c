@@ -114,6 +114,6 @@ error:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }

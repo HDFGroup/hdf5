@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Quincey Koziol
- *	       Thursday, September 30, 2004
- */
-
 /****************/
 /* Module Setup */
 /****************/
@@ -107,9 +102,6 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 22, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -126,8 +118,8 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(dset);
+    assert(f);
+    assert(dset);
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
@@ -158,7 +150,7 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
 
     /* Compute the total size of dataset */
     stmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
-    HDassert(stmp_size >= 0);
+    assert(stmp_size >= 0);
     tmp_size = (hsize_t)stmp_size * dt_size;
     H5_CHECKED_ASSIGN(dset->shared->layout.storage.u.contig.size, hsize_t, tmp_size, hssize_t);
 
@@ -176,9 +168,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -187,7 +176,7 @@ H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(storage);
+    assert(storage);
 
     /* EFL storage is currently always treated as allocated */
     FUNC_LEAVE_NOAPI(TRUE)
@@ -199,9 +188,6 @@ H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  * Purpose:	Performs initialization before any sort of I/O on the raw data
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -229,9 +215,6 @@ H5D__efl_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -252,10 +235,10 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(efl && efl->nused > 0);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(size < SIZE_MAX);
-    HDassert(buf || 0 == size);
+    assert(efl && efl->nused > 0);
+    assert(H5_addr_defined(addr));
+    assert(size < SIZE_MAX);
+    assert(buf || 0 == size);
 
     /* Find the first efl member from which to read */
     for (u = 0, cur = 0; u < efl->nused; u++) {
@@ -268,7 +251,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
 
     /* Read the data */
     while (size) {
-        HDassert(buf);
+        assert(buf);
         if (u >= efl->nused)
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "read past logical end of file")
         if (H5F_OVERFLOW_HSIZET2OFFT((hsize_t)efl->slot[u].offset + skip))
@@ -289,7 +272,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
         if ((n = HDread(fd, buf, to_read)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_READERROR, FAIL, "read error in external raw data file")
         else if ((size_t)n < to_read)
-            HDmemset(buf + n, 0, to_read - (size_t)n);
+            memset(buf + n, 0, to_read - (size_t)n);
         full_name = (char *)H5MM_xfree(full_name);
         HDclose(fd);
         fd = -1;
@@ -318,9 +301,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Wednesday, March  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -340,10 +320,10 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(efl && efl->nused > 0);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(size < SIZE_MAX);
-    HDassert(buf || 0 == size);
+    assert(efl && efl->nused > 0);
+    assert(H5_addr_defined(addr));
+    assert(size < SIZE_MAX);
+    assert(buf || 0 == size);
 
     /* Find the first efl member in which to write */
     for (u = 0, cur = 0; u < efl->nused; u++) {
@@ -356,7 +336,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
 
     /* Write the data */
     while (size) {
-        HDassert(buf);
+        assert(buf);
         if (u >= efl->nused)
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "write past logical end of file")
         if (H5F_OVERFLOW_HSIZET2OFFT((hsize_t)efl->slot[u].offset + skip))
@@ -405,9 +385,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 30, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -436,9 +413,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, May  7, 2003
- *
  *-------------------------------------------------------------------------
  */
 static ssize_t
@@ -452,18 +426,18 @@ H5D__efl_readvv(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_info->store->efl.nused > 0);
-    HDassert(dset_info->buf.vp);
-    HDassert(dset_info->dset);
-    HDassert(dset_info->dset->shared);
-    HDassert(dset_curr_seq);
-    HDassert(dset_len_arr);
-    HDassert(dset_off_arr);
-    HDassert(mem_curr_seq);
-    HDassert(mem_len_arr);
-    HDassert(mem_off_arr);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_info->store->efl.nused > 0);
+    assert(dset_info->buf.vp);
+    assert(dset_info->dset);
+    assert(dset_info->dset->shared);
+    assert(dset_curr_seq);
+    assert(dset_len_arr);
+    assert(dset_off_arr);
+    assert(mem_curr_seq);
+    assert(mem_len_arr);
+    assert(mem_off_arr);
 
     /* Set up user data for H5VM_opvv() */
     udata.efl  = &(dset_info->store->efl);
@@ -485,9 +459,6 @@ done:
  * Purpose:	Callback operator for H5D__efl_writevv().
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 30, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -517,9 +488,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, May  2, 2003
- *
  *-------------------------------------------------------------------------
  */
 static ssize_t
@@ -533,18 +501,18 @@ H5D__efl_writevv(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_d
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_info->store->efl.nused > 0);
-    HDassert(dset_info->buf.cvp);
-    HDassert(dset_info->dset);
-    HDassert(dset_info->dset->shared);
-    HDassert(dset_curr_seq);
-    HDassert(dset_len_arr);
-    HDassert(dset_off_arr);
-    HDassert(mem_curr_seq);
-    HDassert(mem_len_arr);
-    HDassert(mem_off_arr);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_info->store->efl.nused > 0);
+    assert(dset_info->buf.cvp);
+    assert(dset_info->dset);
+    assert(dset_info->dset->shared);
+    assert(dset_curr_seq);
+    assert(dset_len_arr);
+    assert(dset_off_arr);
+    assert(mem_curr_seq);
+    assert(mem_len_arr);
+    assert(mem_off_arr);
 
     /* Set up user data for H5VM_opvv() */
     udata.efl  = &(dset_info->store->efl);
@@ -568,8 +536,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi; August 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -580,10 +546,10 @@ H5D__efl_bh_info(H5F_t *f, H5O_efl_t *efl, hsize_t *heap_size)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f);
-    HDassert(efl);
-    HDassert(H5F_addr_defined(efl->heap_addr));
-    HDassert(heap_size);
+    assert(f);
+    assert(efl);
+    assert(H5_addr_defined(efl->heap_addr));
+    assert(heap_size);
 
     /* Get the size of the local heap for EFL's file list */
     if (H5HL_heapsize(f, efl->heap_addr, heap_size) < 0)

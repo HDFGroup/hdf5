@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Saturday, May 31, 2003
- *
+/*
  * Purpose:	Dataspace selection testing functions.
  */
 
@@ -87,8 +85,8 @@ H5S__get_rebuild_status_test(hid_t space_id, H5S_diminfo_valid_t *status1, H5S_d
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(status1);
-    HDassert(status2);
+    assert(status1);
+    assert(status2);
 
     /* Get dataspace structures */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -134,7 +132,7 @@ H5S__get_diminfo_status_test(hid_t space_id, H5S_diminfo_valid_t *status)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(status);
+    assert(status);
 
     /* Get dataspace structures */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -174,7 +172,7 @@ H5S__check_spans_tail_ptr(const H5S_hyper_span_info_t *span_lst)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(span_lst);
+    assert(span_lst);
 
     cur_elem = span_lst->head;
     while (cur_elem) {
@@ -223,7 +221,7 @@ H5S__check_points_tail_ptr(const H5S_pnt_list_t *pnt_lst)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pnt_lst);
+    assert(pnt_lst);
 
     cur_elem = pnt_lst->head;
     while (cur_elem) {
@@ -268,7 +266,7 @@ H5S__check_internal_consistency(const H5S_t *space)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(space);
+    assert(space);
 
     if (space->select.type->type == H5S_SEL_NONE)
         HGOTO_DONE(ret_value);

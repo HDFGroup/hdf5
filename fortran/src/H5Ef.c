@@ -31,11 +31,6 @@
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -66,12 +61,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- * HISTORY
- *  Bug fix: Added call to close the file with the error messages
- *  EP 11/26/01
  * SOURCE
  */
 int_f
@@ -84,7 +73,7 @@ h5eprint_c1(_fcd name, int_f *namelen)
 
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL)
-    if (NULL == (file = HDfopen(c_name, "a")))
+    if (NULL == (file = fopen(c_name, "a")))
         HGOTO_DONE(FAIL)
 
     /*
@@ -95,9 +84,9 @@ h5eprint_c1(_fcd name, int_f *namelen)
 
 done:
     if (file)
-        HDfclose(file);
+        fclose(file);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -114,10 +103,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- *
  * SOURCE
  */
 int_f
@@ -148,11 +133,6 @@ done:
  *  name - character string describing the error
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -164,7 +144,7 @@ h5eget_major_c(int_f *error_no, _fcd name, size_t_f *namelen)
     int_f  ret_value = 0;
 
     if (c_namelen > 0)
-        c_name = (char *)HDmalloc(c_namelen + 1);
+        c_name = (char *)malloc(c_namelen + 1);
 
     if (!c_name)
         HGOTO_DONE(FAIL)
@@ -174,12 +154,12 @@ h5eget_major_c(int_f *error_no, _fcd name, size_t_f *namelen)
      */
     H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
     HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
-    if (!HDstrcmp(c_name, "Invalid major error number"))
+    if (!strcmp(c_name, "Invalid major error number"))
         HGOTO_DONE(FAIL)
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -196,11 +176,6 @@ done:
  *  name - character string describing the error
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -212,7 +187,7 @@ h5eget_minor_c(int_f *error_no, _fcd name, size_t_f *namelen)
     int_f  ret_value = 0;
 
     if (c_namelen > 0)
-        c_name = (char *)HDmalloc(c_namelen + 1);
+        c_name = (char *)malloc(c_namelen + 1);
 
     if (!c_name)
         HGOTO_DONE(FAIL)
@@ -222,12 +197,12 @@ h5eget_minor_c(int_f *error_no, _fcd name, size_t_f *namelen)
      */
     H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
     HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
-    if (!HDstrcmp(c_name, "Invalid minor error number"))
+    if (!strcmp(c_name, "Invalid minor error number"))
         HGOTO_DONE(FAIL)
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -244,9 +219,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *   M. Scot Breitenfeld
- *  July 22, 2009
  * SOURCE
  */
 /* int_f */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, September 28, 1998
- *
  * Purpose:  Creates a chunked dataset and measures the storage overhead.
  */
 
@@ -59,16 +56,13 @@ typedef enum fill_t { FILL_ALL, FILL_FORWARD, FILL_REVERSE, FILL_INWARD, FILL_OU
  *
  * Return:  never returns
  *
- * Programmer:  Robb Matzke
- *              Wednesday, September 30, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
 usage(const char *prog)
 {
-    HDfprintf(stderr, "usage: %s [STYLE|cache] [LEFT [MIDDLE [RIGHT]]]\n", prog);
-    HDfprintf(stderr, "\
+    fprintf(stderr, "usage: %s [STYLE|cache] [LEFT [MIDDLE [RIGHT]]]\n", prog);
+    fprintf(stderr, "\
     STYLE is the order that the dataset is filled and should be one of:\n\
         forward   --  Fill the dataset from lowest address to highest\n\
                       address. This style tests the right split ratio.\n\
@@ -106,9 +100,6 @@ usage(const char *prog)
  *
  * Return:  void
  *
- * Programmer:  Robb Matzke
- *              Thursday, June  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -127,9 +118,6 @@ cleanup(void)
  * Return:  Success:  0
  *
  *    Failure:  -1
- *
- * Programmer:  Robb Matzke
- *    Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -150,9 +138,6 @@ display_error_cb(hid_t estack, void H5_ATTR_UNUSED *client_data)
  * Return:  Success:  0
  *
  *    Failure:  number of errors
- *
- * Programmer:  Robb Matzke
- *              Wednesday, September 30, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -230,7 +215,7 @@ test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc
                 abort();
             default:
                 /* unknown request */
-                HDfprintf(stderr, "Unknown fill style\n");
+                fprintf(stderr, "Unknown fill style\n");
                 goto error;
                 break;
         }
@@ -286,7 +271,7 @@ test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc
                 abort();
             default:
                 /* unknown request */
-                HDfprintf(stderr, "Unknown fill style\n");
+                fprintf(stderr, "Unknown fill style\n");
                 goto error;
                 break;
         }
@@ -321,9 +306,6 @@ error:
  * Return:  Success:        zero
  *
  *    Failure:  non-zero
- *
- * Programmer:  Robb Matzke
- *              Monday, September 28, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -394,6 +376,6 @@ main(int argc, char *argv[])
     return 0;
 
 error:
-    HDfprintf(stderr, "*** ERRORS DETECTED ***\n");
+    fprintf(stderr, "*** ERRORS DETECTED ***\n");
     return 1;
 }

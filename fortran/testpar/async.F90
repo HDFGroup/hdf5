@@ -1259,7 +1259,11 @@ PROGRAM async_test
   LOGICAL :: registered
   INTEGER :: sum
   INTEGER :: nerrors = 0
+  INTEGER :: len, idx
 
+  CHARACTER(LEN=255) :: vol_connector_string, vol_connector_name
+  INTEGER(C_INT64_T) :: cap_flags
+  INTEGER(HID_T) :: plist_id
   LOGICAL          :: cleanup
   INTEGER          :: ret_total_error = 0
 
@@ -1301,46 +1305,61 @@ PROGRAM async_test
   !
   CALL h5open_f(hdferror)
 
-
   ! CHECK ASYNC VOLS AVAILABILITY
   !
-  ! (1) Check if ASYNC VOL is available
-  CALL H5VLis_connector_registered_by_name_f("async", registered,  hdferror)
-  CALL check("H5VLis_connector_registered_by_name_f", hdferror, total_error)
 
-  IF(.NOT.registered)THEN
+  IF(mpi_rank==0) WRITE(*,'(A)', ADVANCE="NO") "VOL CONNECTOR TESTED: "
 
-     ! (2) check if the DAOS VOL is available
-     CALL H5VLis_connector_registered_by_name_f("daos", registered,  hdferror)
+  CALL get_environment_variable("HDF5_VOL_CONNECTOR", VALUE=vol_connector_string, LENGTH=len)
+  IF(len .EQ. 0)THEN
+
+     ! No VOL connector set; using native VOL connector
+     async_enabled = .FALSE.
+     IF(mpi_rank==0) WRITE(*,'(A,/)') "NATIVE"
+
+  ELSE
+
+     idx = INDEX(vol_connector_string, " ")
+     vol_connector_name = vol_connector_string(1:idx-1)
+
+     ! (1) Check if the VOL is available
+     CALL H5VLis_connector_registered_by_name_f(TRIM(vol_connector_name), registered,  hdferror)
      CALL check("H5VLis_connector_registered_by_name_f", hdferror, total_error)
 
      IF(.NOT.registered)THEN
-        ! No async compatible VOL found
+        ! No VOL found registered
         async_enabled = .FALSE.
+        IF(mpi_rank==0) WRITE(*,'(A)') "NATIVE"
      ELSE
-        CALL H5Vlregister_connector_by_name_f("daos", vol_id, hdferror)
-        CALL check("H5Vlregister_connector_by_name_f", hdferror, total_error)
+        ! (2) Check if the VOL is async compatible
+        CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, hdferror)
+        CALL check("h5pcreate_f", hdferror, total_error)
+        CALL h5pget_vol_cap_flags_f(plist_id, cap_flags, hdferror)
+        CALL check("h5pget_vol_cap_flags_f", hdferror, total_error)
+        CALL h5pclose_f(plist_id, hdferror)
+        CALL check("h5pcreate_f", hdferror, total_error)
+        IF(IAND(cap_flags,H5VL_CAP_FLAG_ASYNC_F).EQ.0_C_INT64_T) async_enabled = .FALSE.
+        IF(async_enabled .EQV. .FALSE.)THEN
+           ! No async compatible VOL found
+           IF(mpi_rank==0) WRITE(*,'(A)') "NATIVE"
+        ELSE
+           IF(mpi_rank==0) WRITE(*,'(A)') TRIM(vol_connector_name)
+           CALL H5Vlregister_connector_by_name_f(TRIM(vol_connector_name), vol_id, hdferror)
+           CALL check("H5Vlregister_connector_by_name_f", hdferror, total_error)
+        ENDIF
      ENDIF
 
-  ELSE
-     CALL H5Vlregister_connector_by_name_f("async", vol_id, hdferror)
-     CALL check("H5Vlregister_connector_by_name_f", hdferror, total_error)
+     IF ( (async_enabled .EQV. .TRUE.) .AND. (mpi_thread_mult .EQV. .FALSE.) ) THEN
+        total_error = -1 ! Skip test
+        IF(mpi_rank==0) CALL write_test_status(total_error, &
+             "No MPI_Init_thread support for MPI_THREAD_MULTIPLE", total_error)
+        CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
+        CALL MPI_Finalize(mpierror)
+        STOP
+     ENDIF
   ENDIF
 
-  IF ( (async_enabled .EQV. .TRUE.) .AND. (mpi_thread_mult .EQV. .FALSE.) ) THEN
-     total_error = -1 ! Skip test
-     IF(mpi_rank==0) CALL write_test_status(total_error, &
-          "No MPI_Init_thread support for MPI_THREAD_MULTIPLE", total_error)
-     CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
-     CALL MPI_Finalize(mpierror)
-     STOP
-  ENDIF
-
-!  IF(total_error.LT.0)THEN
-!     IF(mpi_rank==0) CALL write_test_status(total_error, &
-!          'Testing async APIs', total_error)
-!     STOP
-!  ENDIF
+  IF(mpi_rank==0) WRITE(*,'(A,L1,/)') "VOL SUPPORTS ASYNC OPERATIONS: ", async_enabled
 
   ! H5ES API TESTING
   ret_total_error = 0

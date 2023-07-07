@@ -23,10 +23,6 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 17, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -54,7 +50,7 @@ h5dsset_scale_c(hid_t_f *dsid, _fcd dimname, size_t_f *dimnamelen)
 
 done:
     if (c_dimname)
-        HDfree(c_dimname);
+        free(c_dimname);
 
     return ret_value;
 
@@ -66,10 +62,6 @@ done:
  * Purpose: Calls H5DSattach_scale
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 17, 2011
  *
  * Comments:
  *
@@ -99,10 +91,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 17, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -130,10 +118,6 @@ done:
  * Purpose: Calls H5DSis_attached
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 17, 2011
  *
  * Comments:
  *
@@ -166,10 +150,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -201,10 +181,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -231,7 +207,7 @@ h5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *labellen)
 
 done:
     if (c_label)
-        HDfree(c_label);
+        free(c_label);
 
     return ret_value;
 
@@ -243,10 +219,6 @@ done:
  * Purpose: Calls H5DSget_label
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
  *
  * Comments:
  *
@@ -262,7 +234,7 @@ h5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size)
     /*
      * Allocate buffer to hold label
      */
-    if ((c_label = (char *)HDmalloc((size_t)*size + 1)) == NULL)
+    if ((c_label = (char *)malloc((size_t)*size + 1)) == NULL)
         HGOTO_DONE(FAIL);
 
     /*
@@ -282,7 +254,7 @@ done:
     *size = (size_t_f)size_c; /* Don't subtract '1'  because H5DSget_label doesn't include the
                                * trailing NULL in the length calculation, Ref. HDFFV-7596 */
     if (c_label)
-        HDfree(c_label);
+        free(c_label);
     return ret_value;
 
 } /* end h5dsget_label_c() */
@@ -293,10 +265,6 @@ done:
  * Purpose: Calls H5DSget_scale_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
  *
  * Comments:
  *
@@ -312,7 +280,7 @@ h5dsget_scale_name_c(hid_t_f *did, _fcd name, size_t_f *size)
     /*
      * Allocate buffer to hold name
      */
-    if ((c_scale_name = (char *)HDmalloc((size_t)*size + 1)) == NULL)
+    if ((c_scale_name = (char *)malloc((size_t)*size + 1)) == NULL)
         HGOTO_DONE(FAIL);
 
     /*
@@ -330,7 +298,7 @@ h5dsget_scale_name_c(hid_t_f *did, _fcd name, size_t_f *size)
 
 done:
     if (c_scale_name)
-        HDfree(c_scale_name);
+        free(c_scale_name);
     return ret_value;
 
 } /* end h5dsget_scale_name_c() */
@@ -341,10 +309,6 @@ done:
  * Purpose: Calls H5DSget_num_scales
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
  *
  * Comments:
  *

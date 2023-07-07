@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pocpypl.c
- *			Mar 13 2006
- *			Peter Cao
  *
  * Purpose:		Object copying property list class routines
  *
@@ -145,8 +143,6 @@ H5FL_DEFINE(H5O_copy_dtype_merge_list_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -188,9 +184,6 @@ done:
  *
  * Return:      NULL
  *
- * Programmer:  Neil Fortner
- *              October 27, 2011
- *
  *-------------------------------------------------------------------------
  */
 static H5O_copy_dtype_merge_list_t *
@@ -210,7 +203,7 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
         dt_list = tmp_node;
     } /* end while */
 
-    FUNC_LEAVE_NOAPI(NULL);
+    FUNC_LEAVE_NOAPI(NULL)
 } /* H5P__free_merge_comm_dtype_list */
 
 /*--------------------------------------------------------------------------
@@ -220,9 +213,6 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, September 2, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -238,7 +228,7 @@ H5P__copy_merge_comm_dt_list(H5O_copy_dtype_merge_list_t **value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     src_dt_list = *value;
@@ -287,9 +277,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -301,7 +288,7 @@ H5P__ocpy_merge_comm_dt_list_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
@@ -319,9 +306,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -333,7 +317,7 @@ H5P__ocpy_merge_comm_dt_list_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
@@ -353,9 +337,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -368,8 +349,8 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt_list_ptr);
-    HDassert(size);
+    assert(dt_list_ptr);
+    assert(size);
 
     /* Iterate over merge committed dtype list */
     dt_list = *dt_list_ptr;
@@ -410,9 +391,6 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -429,9 +407,9 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(dt_list);
+    assert(pp);
+    assert(*pp);
+    assert(dt_list);
 
     /* Start off with NULL (default value) */
     *dt_list = NULL;
@@ -445,7 +423,7 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
         if (NULL == (tmp_dt_list->path = H5MM_strdup(*(const char **)pp)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed")
         *pp += len + 1;
-        HDassert(len == HDstrlen(tmp_dt_list->path));
+        assert(len == HDstrlen(tmp_dt_list->path));
 
         /* Add copied node to dtype list */
         if (dt_list_tail) {
@@ -485,9 +463,6 @@ done:
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, September 2, 2015
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -497,7 +472,7 @@ H5P__ocpy_merge_comm_dt_list_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Free the merge named dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
@@ -513,9 +488,6 @@ H5P__ocpy_merge_comm_dt_list_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 31, 2012
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -526,7 +498,7 @@ H5P__ocpy_merge_comm_dt_list_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
@@ -547,9 +519,6 @@ done:
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
  *
- * Programmer:     Neil Fortner
- *                 Friday, October 28, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -563,15 +532,15 @@ H5P__ocpy_merge_comm_dt_list_cmp(const void *_dt_list1, const void *_dt_list2, s
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(_dt_list1);
-    HDassert(_dt_list2);
-    HDassert(size == sizeof(H5O_copy_dtype_merge_list_t *));
+    assert(_dt_list1);
+    assert(_dt_list2);
+    assert(size == sizeof(H5O_copy_dtype_merge_list_t *));
 
     /* Walk through the lists, comparing each path.  For the lists to be the
      * same, the paths must be in the same order. */
     while (dt_list1 && dt_list2) {
-        HDassert(dt_list1->path);
-        HDassert(dt_list2->path);
+        assert(dt_list1->path);
+        assert(dt_list2->path);
 
         /* Compare paths */
         ret_value = HDstrcmp(dt_list1->path, dt_list2->path);
@@ -601,9 +570,6 @@ done:
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 31, 2012
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -611,7 +577,7 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     /* Free the merge named dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
@@ -636,8 +602,6 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              March 13, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -673,8 +637,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              March 13, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -715,8 +677,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              October 27, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -777,8 +737,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              October 27, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -825,7 +783,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; November 28, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -871,8 +828,6 @@ done:
  *		void **op_data;			OUT: The user data
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; November 29, 2011
  *
  *-------------------------------------------------------------------------
  */

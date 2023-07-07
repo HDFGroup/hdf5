@@ -82,7 +82,7 @@
 /* Files for testing file space paging */
 #define FSPACE_OUT "h5repack_fspace_OUT.h5"   /* The output file */
 #define NELMTS(X)  (sizeof(X) / sizeof(X[0])) /* # of elements */
-const char *H5REPACK_FSPACE_FNAMES[] = {
+static const char *H5REPACK_FSPACE_FNAMES[] = {
     "h5repack_latest.h5",             /* 0 */
     "h5repack_default.h5",            /* 1 */
     "h5repack_page_persist.h5",       /* 2 */
@@ -101,7 +101,7 @@ const char *H5REPACK_FSPACE_FNAMES[] = {
 /* obj and region references in attr of compound and vlen type */
 #define FNAME_ATTR_REF "h5repack_attr_refs.h5"
 
-const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
+static const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
 
 #define H5REPACK_EXTFILE "h5repack_ext.bin"
 
@@ -194,8 +194,8 @@ main(void)
     h5tools_init();
 
     /* initialize */
-    HDmemset(&diff_options, 0, sizeof(diff_opt_t));
-    HDmemset(&pack_options, 0, sizeof(pack_opt_t));
+    memset(&diff_options, 0, sizeof(diff_opt_t));
+    memset(&pack_options, 0, sizeof(pack_opt_t));
 
     /* run tests  */
     puts("Testing h5repack:");
@@ -222,7 +222,7 @@ main(void)
      */
     TESTING("    files with file space info setting--no options (-S, -P, -T, -G) are set");
     j = 0; /* #0 */
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     fname = H5REPACK_FSPACE_FNAMES[j];
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
@@ -239,7 +239,7 @@ main(void)
 
     TESTING("    files with file space info setting--all options -S, -P, -T, -G are set");
     ++j; /* #1 */
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     fname = H5REPACK_FSPACE_FNAMES[j];
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
@@ -259,7 +259,7 @@ main(void)
 
     TESTING("    files with file space info setting--options -S and -T are set");
     ++j; /* #2 */
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     fname = H5REPACK_FSPACE_FNAMES[j];
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
@@ -278,7 +278,7 @@ main(void)
     if (h5_using_default_driver(NULL)) {
         TESTING("    files with file space info setting-- options -S and -P are set & -L");
         ++j; /* #3 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, TRUE) < 0)
             GOERROR;
@@ -296,7 +296,7 @@ main(void)
 
         TESTING("    files with file space info setting-- options -P and -T are set & -L");
         ++j; /* #4 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, TRUE) < 0)
             GOERROR;
@@ -314,7 +314,7 @@ main(void)
 
         TESTING("    files with file space info setting-- options -S and -G are set & -L");
         ++j; /* #5 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, TRUE) < 0)
             GOERROR;
@@ -332,7 +332,7 @@ main(void)
 
         TESTING("    files with file space info setting-- options -S, -P, -T, -G are set");
         ++j; /* #6 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, FALSE) < 0)
             GOERROR;
@@ -352,7 +352,7 @@ main(void)
 
         TESTING("    files with file space info setting-- options -S, -T, -G are set & -L");
         ++j; /* #7 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, TRUE) < 0)
             GOERROR;
@@ -2040,7 +2040,7 @@ make_testfiles(void)
      * default: strategy=FSM_AGGR, persist=FALSE, threshold=1
      * default: inpage=4096
      */
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
     if (H5Fclose(fid) < 0)
@@ -2061,7 +2061,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2080,7 +2080,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2103,7 +2103,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_page_size(fcpl, (hsize_t)8192) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2125,7 +2125,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_page_size(fcpl, (hsize_t)FS_PAGESIZE_DEF) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2145,7 +2145,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_AGGR, FALSE, (hsize_t)1) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2168,7 +2168,7 @@ make_testfiles(void)
         return -1;
     if (H5Pset_file_space_page_size(fcpl, (hsize_t)8192) < 0)
         return -1;
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
         return -1;
     if (H5Fclose(fid) < 0)
@@ -2303,7 +2303,7 @@ out:
         H5Tclose(tid);
         H5Pclose(gcplid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2373,7 +2373,7 @@ out:
         H5Gclose(rid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2441,7 +2441,7 @@ out:
         H5Gclose(g2id);
         H5Gclose(g3id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2505,7 +2505,7 @@ make_szip(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2515,9 +2515,9 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2590,7 +2590,7 @@ make_deflate(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2600,9 +2600,9 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2660,7 +2660,7 @@ make_shuffle(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2670,9 +2670,9 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2733,7 +2733,7 @@ make_fletcher32(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2743,9 +2743,9 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2838,7 +2838,7 @@ make_nbit(hid_t loc_id)
     if (H5Tclose(dtid) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2851,9 +2851,9 @@ error:
         H5Sclose(sid);
         H5Dclose(dsid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2940,7 +2940,7 @@ make_scaleoffset(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2953,9 +2953,9 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -3124,7 +3124,7 @@ make_all_filters(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -3137,9 +3137,9 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -3235,7 +3235,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3321,7 +3321,7 @@ make_layout(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -3331,9 +3331,9 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -3404,9 +3404,9 @@ error:
 
         H5Sclose(s_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(s_buf);
+    free(s_buf);
 
     return (ret_value);
 
@@ -3533,8 +3533,8 @@ make_layout3(hid_t loc_id)
     if (H5Pclose(dcpl3) < 0)
         goto error;
 
-    HDfree(buf1);
-    HDfree(buf2);
+    free(buf1);
+    free(buf2);
 
     return 0;
 
@@ -3547,10 +3547,10 @@ error:
         H5Pclose(dcpl2);
         H5Pclose(dcpl3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf1);
-    HDfree(buf2);
+    free(buf1);
+    free(buf2);
 
     return -1;
 }
@@ -3604,7 +3604,7 @@ out:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3656,14 +3656,14 @@ make_big(hid_t loc_id)
         goto out;
 
     /* initialize buffer to 0  */
-    buf = (signed char *)HDcalloc(nelmts, size);
+    buf = (signed char *)calloc(nelmts, size);
 
     if (H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL) < 0)
         goto out;
     if (H5Dwrite(did, H5T_NATIVE_SCHAR, m_sid, f_sid, H5P_DEFAULT, buf) < 0)
         goto out;
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     /* close */
@@ -3686,7 +3686,7 @@ out:
         H5Sclose(m_sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3740,7 +3740,7 @@ out:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3787,7 +3787,7 @@ make_userblock(void)
 
     /* Write userblock data */
     nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
-    HDassert(nwritten == USERBLOCK_SIZE);
+    assert(nwritten == USERBLOCK_SIZE);
 
     /* Close file */
     HDclose(fd);
@@ -3800,7 +3800,7 @@ out:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fd >= 0)
         HDclose(fd);
 
@@ -3852,7 +3852,7 @@ verify_userblock(const char *filename)
 
     /* Read userblock data */
     nread = HDread(fd, ub, (size_t)USERBLOCK_SIZE);
-    HDassert(nread == USERBLOCK_SIZE);
+    assert(nread == USERBLOCK_SIZE);
 
     /* Verify userblock data */
     for (u = 0; u < USERBLOCK_SIZE; u++)
@@ -3870,7 +3870,7 @@ out:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fd >= 0)
         HDclose(fd);
 
@@ -3902,7 +3902,7 @@ make_userblock_file(void)
 
     /* write userblock data */
     nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
-    HDassert(nwritten == USERBLOCK_SIZE);
+    assert(nwritten == USERBLOCK_SIZE);
 
     /* close file */
     HDclose(fd);
@@ -3921,10 +3921,6 @@ out:
  * Function: write_dset_in
  *
  * Purpose: write datasets in LOC_ID
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -4099,9 +4095,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 1, dims, "enum", tid, buf45) < 0)
         goto out;
@@ -4116,10 +4114,10 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -4175,10 +4173,10 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
         /* allocate and initialize array data to write */
         size = (TEST_BUFSIZE / sizeof(double) + 1) * sizeof(double);
-        dbuf = (double *)HDmalloc(size);
+        dbuf = (double *)malloc(size);
         if (NULL == dbuf) {
-            HDprintf("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n",
-                     (int)size / 1000000);
+            printf("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n",
+                   (int)size / 1000000);
             goto out;
         }
 
@@ -4192,16 +4190,16 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
         /* create a type larger than TEST_BUFSIZE */
         if ((tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims)) < 0) {
-            HDfree(dbuf);
+            free(dbuf);
             goto out;
         }
         size = H5Tget_size(tid);
         if ((sid = H5Screate_simple(1, sdims, NULL)) < 0) {
-            HDfree(dbuf);
+            free(dbuf);
             goto out;
         }
         if ((did = H5Dcreate2(loc_id, "arrayd", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-            HDfree(dbuf);
+            free(dbuf);
             goto out;
         }
 #if defined(WRITE_ARRAY)
@@ -4212,7 +4210,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);
-        HDfree(dbuf);
+        free(dbuf);
     }
 
     /*-------------------------------------------------------------------------
@@ -4243,7 +4241,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf12, 'z', sizeof buf12);
+        memset(buf12, 'z', sizeof buf12);
     }
 
     if ((tid = H5Tcopy(H5T_C_S1)) < 0)
@@ -4261,7 +4259,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf22, 0, sizeof buf22);
+        memset(buf22, 0, sizeof buf22);
     }
 
     if ((tid = H5Tcopy(H5T_STD_B8LE)) < 0)
@@ -4290,7 +4288,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf32, 0, sizeof buf32);
+        memset(buf32, 0, sizeof buf32);
     }
 
     if ((tid = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) < 0)
@@ -4323,9 +4321,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 2, dims2, "enum2D", tid, 0) < 0)
         goto out;
@@ -4343,7 +4343,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         for (j = 0; j < 2; j++) {
             unsigned l;
 
-            buf52[i][j].p   = HDmalloc((i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++) {
                 if (make_diffs)
@@ -4377,7 +4377,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf62, 0, sizeof buf62);
+        memset(buf62, 0, sizeof buf62);
     }
 
     if ((tid = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray)) < 0)
@@ -4393,8 +4393,8 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf72, 0, sizeof buf72);
-        HDmemset(buf82, 0, sizeof buf82);
+        memset(buf72, 0, sizeof buf72);
+        memset(buf82, 0, sizeof buf82);
     }
 
     if ((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -4431,7 +4431,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf13, 'z', sizeof buf13);
+        memset(buf13, 'z', sizeof buf13);
     }
 
     if ((tid = H5Tcopy(H5T_C_S1)) < 0)
@@ -4531,9 +4531,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 3, dims3, "enum3D", tid, 0) < 0)
         goto out;
@@ -4552,7 +4554,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
             for (k = 0; k < 2; k++) {
                 unsigned l;
 
-                buf53[i][j][k].p   = HDmalloc((i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++) {
                     if (make_diffs)
@@ -4640,7 +4642,7 @@ out:
         H5Dclose(did);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -4676,8 +4678,8 @@ make_dset_reg_ref(hid_t loc_id)
     int              retval = -1;         /* return value */
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
-    dwbuf = (int *)HDmalloc(sizeof(int) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+    dwbuf = (int *)malloc(sizeof(int) * SPACE2_DIM1 * SPACE2_DIM2);
 
     /* Create dataspace for datasets */
     if ((sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL)) < 0)
@@ -4738,9 +4740,9 @@ make_dset_reg_ref(hid_t loc_id)
 
 out:
     if (wbuf)
-        HDfree(wbuf);
+        free(wbuf);
     if (dwbuf)
-        HDfree(dwbuf);
+        free(dwbuf);
 
     H5E_BEGIN_TRY
     {
@@ -4749,7 +4751,7 @@ out:
         H5Dclose(did1);
         H5Dclose(did2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return retval;
 }
@@ -4758,10 +4760,6 @@ out:
  * Function: write_attr_in
  *
  * Purpose: write attributes in LOC_ID (dataset, group, named datatype)
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -4990,9 +4988,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     */
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 1, dims, "enum", tid, buf45) < 0)
         goto out;
@@ -5008,10 +5008,10 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -5124,7 +5124,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      *-------------------------------------------------------------------------
      */
     if (make_diffs) {
-        HDmemset(buf12, 'z', sizeof buf12);
+        memset(buf12, 'z', sizeof buf12);
     }
 
     /*
@@ -5163,7 +5163,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf22, 0, sizeof buf22);
+        memset(buf22, 0, sizeof buf22);
     }
 
     /*
@@ -5221,7 +5221,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      *-------------------------------------------------------------------------
      */
     if (make_diffs) {
-        HDmemset(buf32, 0, sizeof buf32);
+        memset(buf32, 0, sizeof buf32);
     }
 
     /*
@@ -5293,9 +5293,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 2, dims2, "enum2D", tid, buf452) < 0)
         goto out;
@@ -5314,7 +5316,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         for (j = 0; j < 2; j++) {
             unsigned l;
 
-            buf52[i][j].p   = HDmalloc((i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)
@@ -5366,7 +5368,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf62, 0, sizeof buf62);
+        memset(buf62, 0, sizeof buf62);
     }
     /*
     buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};
@@ -5408,8 +5410,8 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf72, 0, sizeof buf72);
-        HDmemset(buf82, 0, sizeof buf82);
+        memset(buf72, 0, sizeof buf72);
+        memset(buf82, 0, sizeof buf82);
     }
     /*
     Attribute:   <integer2D> and <integer2D>
@@ -5449,7 +5451,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf13, 'z', sizeof buf13);
+        memset(buf13, 'z', sizeof buf13);
     }
 
     /*
@@ -5737,9 +5739,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 3, dims3, "enum3D", tid, buf453) < 0)
         goto out;
@@ -5759,7 +5763,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
             for (k = 0; k < 2; k++) {
                 unsigned l;
 
-                buf53[i][j][k].p   = HDmalloc((i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)i + 1;
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)
@@ -5888,7 +5892,7 @@ out:
         H5Sclose(sid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -5896,10 +5900,6 @@ out:
  * Function: make_dset
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -5941,7 +5941,7 @@ out:
     {
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -5949,10 +5949,6 @@ out:
  * Function: write_dset
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6003,7 +5999,7 @@ out:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6011,10 +6007,6 @@ out:
  * Function: make_attr
  *
  * Purpose: utility function to write an attribute in LOC_ID
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6044,7 +6036,7 @@ out:
         H5Aclose(aid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6170,7 +6162,7 @@ out:
         H5Dclose(did);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end make_named_dtype() */
 
@@ -6185,7 +6177,6 @@ out:
  *  this function depends on locally created objects, however can be modified
  *  to be independent as necessary
  *
- * Programmer: Jonathan Kim (March 23, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 add_attr_with_objref(hid_t file_id, hid_t obj_id)
@@ -6202,7 +6193,7 @@ add_attr_with_objref(hid_t file_id, hid_t obj_id)
     /* ref to dset */
     status = H5Rcreate(&data_attr_objref[0], file_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6210,7 +6201,7 @@ add_attr_with_objref(hid_t file_id, hid_t obj_id)
     /* ref to group */
     status = H5Rcreate(&data_attr_objref[1], file_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6218,7 +6209,7 @@ add_attr_with_objref(hid_t file_id, hid_t obj_id)
     /* ref to datatype */
     status = H5Rcreate(&data_attr_objref[2], file_id, NAME_OBJ_NDTYPE, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6226,7 +6217,7 @@ add_attr_with_objref(hid_t file_id, hid_t obj_id)
     /* create attr with obj ref type */
     status = make_attr(obj_id, 1, dim_attr_objref, "Attr_OBJREF", H5T_STD_REF_OBJ, data_attr_objref);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> make_attr failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> make_attr failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6246,7 +6237,6 @@ out:
  *  this function depends on locally created objects, however can be modified
  *  to be independent as necessary
  *
- * Programmer: Jonathan Kim (March 23, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 add_attr_with_regref(hid_t file_id, hid_t obj_id)
@@ -6266,7 +6256,7 @@ add_attr_with_regref(hid_t file_id, hid_t obj_id)
      */
     sid_regrefed_dset = H5Screate_simple(2, dim_regrefed_dset, NULL);
     if (sid_regrefed_dset < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6274,7 +6264,7 @@ add_attr_with_regref(hid_t file_id, hid_t obj_id)
     /* select elements space for reference */
     status = H5Sselect_elements(sid_regrefed_dset, H5S_SELECT_SET, (size_t)3, coords_regrefed_dset[0]);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6282,7 +6272,7 @@ add_attr_with_regref(hid_t file_id, hid_t obj_id)
     /* create region reference from elements space */
     status = H5Rcreate(&data_attr_regref[0], file_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_regrefed_dset);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6290,7 +6280,7 @@ add_attr_with_regref(hid_t file_id, hid_t obj_id)
     /* create attr with region ref type */
     status = make_attr(obj_id, 1, dim_attr_regref, "Attr_REGREF", H5T_STD_REF_DSETREG, data_attr_regref);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> make_attr failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> make_attr failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6311,7 +6301,6 @@ out:
  * Note:
  *  This function is to use along with gen_obj_ref() gen_region_ref()
  *
- * Programmer: Jonathan Kim (March 23, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_refered_objs(hid_t loc_id)
@@ -6335,21 +6324,21 @@ gen_refered_objs(hid_t loc_id)
      */
     sid = H5Screate_simple(1, dims1, NULL);
     if (sid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     did1 = H5Dcreate2(loc_id, NAME_OBJ_DS1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (did1 < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     status = H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6360,7 +6349,7 @@ gen_refered_objs(hid_t loc_id)
      */
     gid = H5Gcreate2(loc_id, NAME_OBJ_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6372,7 +6361,7 @@ gen_refered_objs(hid_t loc_id)
     tid    = H5Tcopy(H5T_NATIVE_INT);
     status = H5Tcommit2(loc_id, NAME_OBJ_NDTYPE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6383,7 +6372,7 @@ gen_refered_objs(hid_t loc_id)
      */
     sid2 = H5Screate_simple(2, dims2, NULL);
     if (sid2 < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6391,7 +6380,7 @@ gen_refered_objs(hid_t loc_id)
     /* create normal dataset which is referred */
     did2 = H5Dcreate2(loc_id, NAME_OBJ_DS2, H5T_STD_I8LE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (did2 < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6399,7 +6388,7 @@ gen_refered_objs(hid_t loc_id)
     /* write values to dataset */
     status = H5Dwrite(did2, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6430,7 +6419,6 @@ out:
  * Note:
  *  copied from h5copygentest.c and update to create named datatype
  *
- * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_obj_ref(hid_t loc_id)
@@ -6455,7 +6443,7 @@ gen_obj_ref(hid_t loc_id)
     /* obj ref to dataset */
     status = H5Rcreate(&objref_buf[0], loc_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6463,7 +6451,7 @@ gen_obj_ref(hid_t loc_id)
     /* obj ref to group */
     status = H5Rcreate(&objref_buf[1], loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6471,7 +6459,7 @@ gen_obj_ref(hid_t loc_id)
     /* obj ref to named-datatype */
     status = H5Rcreate(&objref_buf[2], loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6481,21 +6469,21 @@ gen_obj_ref(hid_t loc_id)
      */
     sid = H5Screate_simple(1, dims_dset_objref, NULL);
     if (sid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     oid = H5Dcreate2(loc_id, "Dset_OBJREF", H5T_STD_REF_OBJ, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     status = H5Dwrite(oid, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, objref_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6507,7 +6495,7 @@ gen_obj_ref(hid_t loc_id)
     /* add attribute with obj ref */
     status = add_attr_with_objref(loc_id, oid);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> add_attr_with_objref failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> add_attr_with_objref failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6515,7 +6503,7 @@ gen_obj_ref(hid_t loc_id)
     /* add attribute with region ref */
     status = add_attr_with_regref(loc_id, oid);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> add_attr_with_regref failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> add_attr_with_regref failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6537,7 +6525,6 @@ out:
  * Note:
  *  copied from h5copygentest.c
  *
- * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_region_ref(hid_t loc_id)
@@ -6567,7 +6554,7 @@ gen_region_ref(hid_t loc_id)
 
     sid_trg = H5Screate_simple(2, dims_trg, NULL);
     if (sid_trg < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6575,7 +6562,7 @@ gen_region_ref(hid_t loc_id)
     /* select elements space for reference */
     status = H5Sselect_elements(sid_trg, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6583,7 +6570,7 @@ gen_region_ref(hid_t loc_id)
     /* create region reference from elements space */
     status = H5Rcreate(&rr_data[0], loc_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_trg);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6591,7 +6578,7 @@ gen_region_ref(hid_t loc_id)
     /* select hyperslab space for reference */
     status = H5Sselect_hyperslab(sid_trg, H5S_SELECT_SET, start, stride, count, block);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6599,7 +6586,7 @@ gen_region_ref(hid_t loc_id)
     /* create region reference from hyperslab space */
     status = H5Rcreate(&rr_data[1], loc_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_trg);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6607,7 +6594,7 @@ gen_region_ref(hid_t loc_id)
     /* Create dataspace. */
     sid_ref = H5Screate_simple(1, dims1, NULL);
     if (sid_ref < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6616,7 +6603,7 @@ gen_region_ref(hid_t loc_id)
     oid_ref =
         H5Dcreate2(loc_id, REG_REF_DS1, H5T_STD_REF_DSETREG, sid_ref, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid_ref < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6624,7 +6611,7 @@ gen_region_ref(hid_t loc_id)
     /* write data as region references */
     status = H5Dwrite(oid_ref, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6636,7 +6623,7 @@ gen_region_ref(hid_t loc_id)
     /* add attribute with obj ref */
     status = add_attr_with_objref(loc_id, oid_ref);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> add_attr_with_objref failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> add_attr_with_objref failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6644,7 +6631,7 @@ gen_region_ref(hid_t loc_id)
     /* add attribute with region ref */
     status = add_attr_with_regref(loc_id, oid_ref);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> add_attr_with_regref failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> add_attr_with_regref failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6665,7 +6652,6 @@ out:
  *
  * Purpose: create a file with obj and region references
  *
- * Programmer: Jonathan Kim (March 18, 2010)
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6677,21 +6663,21 @@ make_references(hid_t loc_id)
     /* add target objects */
     status = gen_refered_objs(loc_id);
     if (status == FAIL) {
-        HDfprintf(stderr, "Failed to generate referenced object.\n");
+        fprintf(stderr, "Failed to generate referenced object.\n");
         ret = FAIL;
     }
 
     /* add object reference */
     status = gen_obj_ref(loc_id);
     if (status == FAIL) {
-        HDfprintf(stderr, "Failed to generate object reference.\n");
+        fprintf(stderr, "Failed to generate object reference.\n");
         ret = FAIL;
     }
 
     /* add region reference */
     status = gen_region_ref(loc_id);
     if (status == FAIL) {
-        HDfprintf(stderr, "Failed to generate region reference.\n");
+        fprintf(stderr, "Failed to generate region reference.\n");
         ret = FAIL;
     }
 
@@ -6708,7 +6694,6 @@ make_references(hid_t loc_id)
  *   3. obj ref in attribute of vlen type
  *   4. region ref in attribute of vlen type
  *
- * Programmer: Jonathan (March 25, 2010)
  *-------------------------------------------------------------------------
  */
 /* obj dset */
@@ -6811,7 +6796,7 @@ make_complex_attr_references(hid_t loc_id)
     objdid = H5Dcreate2(loc_id, NAME_OBJ_DS1, H5T_NATIVE_INT, objsid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(objdid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_data[0]);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6820,7 +6805,7 @@ make_complex_attr_references(hid_t loc_id)
     objtid = H5Tcopy(H5T_NATIVE_INT);
     status = H5Tcommit2(loc_id, NAME_OBJ_NDTYPE, objtid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6831,7 +6816,7 @@ make_complex_attr_references(hid_t loc_id)
      * compound type which contain obj and region reference */
     main_gid = H5Gcreate2(loc_id, "group_main", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (main_gid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6846,7 +6831,7 @@ make_complex_attr_references(hid_t loc_id)
 
     status = H5Dwrite(main_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_data[0]);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6869,7 +6854,7 @@ make_complex_attr_references(hid_t loc_id)
     /* references to dataset */
     status = H5Rcreate(&(comp_objref_data[0].val_objref), loc_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6878,7 +6863,7 @@ make_complex_attr_references(hid_t loc_id)
     /* references to group */
     status = H5Rcreate(&(comp_objref_data[1].val_objref), loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6887,7 +6872,7 @@ make_complex_attr_references(hid_t loc_id)
     /* references to datatype */
     status = H5Rcreate(&(comp_objref_data[2].val_objref), loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6901,7 +6886,7 @@ make_complex_attr_references(hid_t loc_id)
         H5Acreate2(main_did, "Comp_OBJREF", comp_objref_tid, comp_objref_attr_sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(comp_objref_aid, comp_objref_tid, comp_objref_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Awrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Awrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6922,13 +6907,13 @@ make_complex_attr_references(hid_t loc_id)
      */
     status = H5Sselect_elements(objsid, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
     status = H5Rcreate(&(comp_regref_data[0].val_regref), loc_id, NAME_OBJ_DS1, H5R_DATASET_REGION, objsid);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6942,7 +6927,7 @@ make_complex_attr_references(hid_t loc_id)
         H5Acreate2(main_did, "Comp_REGREF", comp_regref_tid, comp_regref_attr_sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(comp_regref_aid, comp_regref_tid, comp_regref_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Awrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Awrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6954,11 +6939,11 @@ make_complex_attr_references(hid_t loc_id)
      * prepare vlen data
      */
     vlen_objref_data[0].len = LEN0_VLEN_OBJREF;
-    vlen_objref_data[0].p   = HDmalloc(vlen_objref_data[0].len * sizeof(hobj_ref_t));
+    vlen_objref_data[0].p   = malloc(vlen_objref_data[0].len * sizeof(hobj_ref_t));
     vlen_objref_data[1].len = LEN1_VLEN_OBJREF;
-    vlen_objref_data[1].p   = HDmalloc(vlen_objref_data[1].len * sizeof(hobj_ref_t));
+    vlen_objref_data[1].p   = malloc(vlen_objref_data[1].len * sizeof(hobj_ref_t));
     vlen_objref_data[2].len = LEN2_VLEN_OBJREF;
-    vlen_objref_data[2].p   = HDmalloc(vlen_objref_data[2].len * sizeof(hobj_ref_t));
+    vlen_objref_data[2].p   = malloc(vlen_objref_data[2].len * sizeof(hobj_ref_t));
 
     /*
      * create obj references
@@ -6967,7 +6952,7 @@ make_complex_attr_references(hid_t loc_id)
     status =
         H5Rcreate(&((hobj_ref_t *)vlen_objref_data[0].p)[0], loc_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6975,7 +6960,7 @@ make_complex_attr_references(hid_t loc_id)
     status =
         H5Rcreate(&((hobj_ref_t *)vlen_objref_data[1].p)[0], loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6983,7 +6968,7 @@ make_complex_attr_references(hid_t loc_id)
     status =
         H5Rcreate(&((hobj_ref_t *)vlen_objref_data[2].p)[0], loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7001,7 +6986,7 @@ make_complex_attr_references(hid_t loc_id)
                                      H5P_DEFAULT, H5P_DEFAULT);
     status              = H5Awrite(vlen_objref_attr_id, vlen_objref_attr_tid, vlen_objref_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Awrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Awrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7009,7 +6994,7 @@ make_complex_attr_references(hid_t loc_id)
     /* close resource for vlen data */
     status = H5Treclaim(vlen_objref_attr_tid, vlen_objref_attr_sid, H5P_DEFAULT, vlen_objref_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Treclaim failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Treclaim failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7022,21 +7007,21 @@ make_complex_attr_references(hid_t loc_id)
      * prepare vlen data
      */
     vlen_regref_data[0].len = LEN0_VLEN_REGREF;
-    vlen_regref_data[0].p   = HDmalloc(vlen_regref_data[0].len * sizeof(hdset_reg_ref_t));
+    vlen_regref_data[0].p   = malloc(vlen_regref_data[0].len * sizeof(hdset_reg_ref_t));
 
     /*
      * create region reference
      */
     status = H5Sselect_elements(objsid, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
     status = H5Rcreate(&((hdset_reg_ref_t *)vlen_regref_data[0].p)[0], loc_id, NAME_OBJ_DS1,
                        H5R_DATASET_REGION, objsid);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7054,7 +7039,7 @@ make_complex_attr_references(hid_t loc_id)
                                      H5P_DEFAULT, H5P_DEFAULT);
     status              = H5Awrite(vlen_regref_attr_id, vlen_regref_attr_tid, vlen_regref_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Awrite failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Awrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7062,7 +7047,7 @@ make_complex_attr_references(hid_t loc_id)
     /* close resource for vlen data */
     status = H5Treclaim(vlen_regref_attr_tid, vlen_regref_attr_sid, H5P_DEFAULT, vlen_regref_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Treclaim failed.\n", __func__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Treclaim failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }

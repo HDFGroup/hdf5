@@ -79,9 +79,6 @@ H5FL_SEQ_EXTERN(hsize_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, June 20, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -105,17 +102,17 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(_io_info);
-    HDassert(_dset_info);
-    HDassert(_dset_info->dset);
-    HDassert(_dset_info->store);
-    HDassert(iter);
-    HDassert(nelmts > 0);
-    HDassert(_buf);
+    assert(_io_info);
+    assert(_dset_info);
+    assert(_dset_info->dset);
+    assert(_dset_info->store);
+    assert(iter);
+    assert(nelmts > 0);
+    assert(_buf);
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    HDmemcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_WRITE;
     tmp_dset_info.buf.cvp  = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
@@ -183,9 +180,6 @@ done:
  * Return:	Success:	Number of elements copied.
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, June 24, 2002
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -209,17 +203,17 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(_io_info);
-    HDassert(_dset_info);
-    HDassert(_dset_info->dset);
-    HDassert(_dset_info->store);
-    HDassert(iter);
-    HDassert(nelmts > 0);
-    HDassert(_buf);
+    assert(_io_info);
+    assert(_dset_info);
+    assert(_dset_info->dset);
+    assert(_dset_info->store);
+    assert(iter);
+    assert(nelmts > 0);
+    assert(_buf);
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    HDmemcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_READ;
     tmp_dset_info.buf.vp   = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
@@ -281,9 +275,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 8, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -304,10 +295,10 @@ H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, vo
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(tscat_buf);
-    HDassert(iter);
-    HDassert(nelmts > 0);
-    HDassert(buf);
+    assert(tscat_buf);
+    assert(iter);
+    assert(nelmts > 0);
+    assert(buf);
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -366,9 +357,6 @@ done:
  * Return:	Success:	Number of elements copied.
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, June 24, 2002
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -389,10 +377,10 @@ H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_tg
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(buf);
-    HDassert(iter);
-    HDassert(nelmts > 0);
-    HDassert(tgath_buf);
+    assert(buf);
+    assert(iter);
+    assert(nelmts > 0);
+    assert(tgath_buf);
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -446,9 +434,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -468,11 +453,11 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_info->mem_space);
-    HDassert(dset_info->file_space);
-    HDassert(dset_info->buf.vp);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_info->mem_space);
+    assert(dset_info->file_space);
+    assert(dset_info->buf.vp);
 
     /* Set buf pointer */
     buf = dset_info->buf.vp;
@@ -506,7 +491,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
         size_t n; /* Elements operated on */
 
         /* Go figure out how many elements to read from the file */
-        HDassert(H5S_SELECT_ITER_NELMTS(file_iter) == (dset_info->nelmts - smine_start));
+        assert(H5S_SELECT_ITER_NELMTS(file_iter) == (dset_info->nelmts - smine_start));
         smine_nelmts = (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
 
         /*
@@ -591,9 +576,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -613,11 +595,11 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_info->mem_space);
-    HDassert(dset_info->file_space);
-    HDassert(dset_info->buf.vp);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_info->mem_space);
+    assert(dset_info->file_space);
+    assert(dset_info->buf.vp);
 
     /* Set buf pointer */
     buf = dset_info->buf.cvp;
@@ -652,7 +634,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
         size_t n; /* Elements operated on */
 
         /* Go figure out how many elements to read from the file */
-        HDassert(H5S_SELECT_ITER_NELMTS(file_iter) == (dset_info->nelmts - smine_start));
+        assert(H5S_SELECT_ITER_NELMTS(file_iter) == (dset_info->nelmts - smine_start));
         smine_nelmts = (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
 
         /*
@@ -755,13 +737,13 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(io_info->count > 0);
-    HDassert(io_info->mem_spaces || io_info->pieces_added == 0);
-    HDassert(io_info->file_spaces || io_info->pieces_added == 0);
-    HDassert(io_info->addrs || io_info->pieces_added == 0);
-    HDassert(io_info->element_sizes || io_info->pieces_added == 0);
-    HDassert(io_info->rbufs || io_info->pieces_added == 0);
+    assert(io_info);
+    assert(io_info->count > 0);
+    assert(io_info->mem_spaces || io_info->pieces_added == 0);
+    assert(io_info->file_spaces || io_info->pieces_added == 0);
+    assert(io_info->addrs || io_info->pieces_added == 0);
+    assert(io_info->element_sizes || io_info->pieces_added == 0);
+    assert(io_info->rbufs || io_info->pieces_added == 0);
 
     /* Allocate list of buffers (within the tconv buf) */
     if (NULL == (tmp_bufs = H5MM_malloc(io_info->pieces_added * sizeof(void *))))
@@ -782,7 +764,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
     for (i = 0; i < io_info->pieces_added; i++) {
         H5D_dset_io_info_t *dset_info = io_info->sel_pieces[i]->dset_info;
 
-        HDassert(io_info->sel_pieces[i]->piece_points > 0);
+        assert(io_info->sel_pieces[i]->piece_points > 0);
 
         /* Check if this piece is involved in type conversion */
         if (dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
@@ -794,7 +776,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             /* Create block memory space */
             if (NULL ==
                 (tmp_mem_spaces[i] = H5S_create_simple(1, &io_info->sel_pieces[i]->piece_points, NULL))) {
-                HDmemset(&tmp_mem_spaces[i], 0, (io_info->pieces_added - i) * sizeof(tmp_mem_spaces[0]));
+                memset(&tmp_mem_spaces[i], 0, (io_info->pieces_added - i) * sizeof(tmp_mem_spaces[0]));
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
             }
 
@@ -808,7 +790,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                 tconv_bytes_used +=
                     io_info->sel_pieces[i]->piece_points *
                     MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
-                HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
+                assert(tconv_bytes_used <= io_info->tconv_buf_size);
             }
 
             /* Fill background buffer here unless we will use H5D__compound_opt_read().  Must do this before
@@ -816,18 +798,18 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             if (!H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, io_info->sel_pieces[i])) {
                 /* Check for background buffer */
                 if (dset_info->type_info.need_bkg) {
-                    HDassert(io_info->bkg_buf);
+                    assert(io_info->bkg_buf);
 
                     /* Calculate background buffer position */
                     tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
                     bkg_bytes_used +=
                         io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
-                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
+                    assert(bkg_bytes_used <= io_info->bkg_buf_size);
 
                     /* Gather data from read buffer to background buffer if necessary */
                     if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
                         /* Initialize memory iterator */
-                        HDassert(!mem_iter_init);
+                        assert(!mem_iter_init);
                         if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i],
                                                  dset_info->type_info.dst_type_size, 0) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -841,7 +823,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
 
                         /* Reset selection iterator */
-                        HDassert(mem_iter_init);
+                        assert(mem_iter_init);
                         if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
                         mem_iter_init = FALSE;
@@ -864,14 +846,14 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
     for (i = 0; i < io_info->pieces_added; i++) {
         H5D_dset_io_info_t *dset_info = io_info->sel_pieces[i]->dset_info;
 
-        HDassert(tmp_mem_spaces[i]);
+        assert(tmp_mem_spaces[i]);
 
         /* Check if this piece is involved in type conversion */
         if (tmp_mem_spaces[i] != io_info->mem_spaces[i]) {
             H5_CHECK_OVERFLOW(io_info->sel_pieces[i]->piece_points, hsize_t, size_t);
 
             /* Initialize memory iterator */
-            HDassert(!mem_iter_init);
+            assert(!mem_iter_init);
             if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.dst_type_size,
                                      0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -890,13 +872,13 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             else {
                 /* Check for background buffer */
                 if (dset_info->type_info.need_bkg) {
-                    HDassert(io_info->bkg_buf);
+                    assert(io_info->bkg_buf);
 
                     /* Calculate background buffer position */
                     tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
                     bkg_bytes_used +=
                         io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
-                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
+                    assert(bkg_bytes_used <= io_info->bkg_buf_size);
                 }
 
                 /*
@@ -930,7 +912,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             }
 
             /* Release selection iterator */
-            HDassert(mem_iter_init);
+            assert(mem_iter_init);
             if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
             mem_iter_init = FALSE;
@@ -992,13 +974,13 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(io_info->count > 0);
-    HDassert(io_info->mem_spaces || io_info->pieces_added == 0);
-    HDassert(io_info->file_spaces || io_info->pieces_added == 0);
-    HDassert(io_info->addrs || io_info->pieces_added == 0);
-    HDassert(io_info->element_sizes || io_info->pieces_added == 0);
-    HDassert(io_info->wbufs || io_info->pieces_added == 0);
+    assert(io_info);
+    assert(io_info->count > 0);
+    assert(io_info->mem_spaces || io_info->pieces_added == 0);
+    assert(io_info->file_spaces || io_info->pieces_added == 0);
+    assert(io_info->addrs || io_info->pieces_added == 0);
+    assert(io_info->element_sizes || io_info->pieces_added == 0);
+    assert(io_info->wbufs || io_info->pieces_added == 0);
 
     /* Allocate list of buffers (within the tconv buf) */
     if (NULL == (write_bufs = (const void **)H5MM_malloc(io_info->pieces_added * sizeof(const void *))))
@@ -1019,7 +1001,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
     for (i = 0; i < io_info->pieces_added; i++) {
         H5D_dset_io_info_t *dset_info = io_info->sel_pieces[i]->dset_info;
 
-        HDassert(io_info->sel_pieces[i]->piece_points > 0);
+        assert(io_info->sel_pieces[i]->piece_points > 0);
 
         /* Check if this piece is involved in type conversion */
         if (dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
@@ -1035,7 +1017,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             H5_CHECK_OVERFLOW(io_info->sel_pieces[i]->piece_points, hsize_t, size_t);
 
             /* Initialize memory iterator */
-            HDassert(!mem_iter_init);
+            assert(!mem_iter_init);
             if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.src_type_size,
                                      0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -1064,7 +1046,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                 tconv_bytes_used +=
                     io_info->sel_pieces[i]->piece_points *
                     MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
-                HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
+                assert(tconv_bytes_used <= io_info->tconv_buf_size);
 
                 /* Gather data from application buffer into the datatype conversion buffer */
                 if ((size_t)io_info->sel_pieces[i]->piece_points !=
@@ -1098,22 +1080,22 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             else {
                 /* Check for background buffer */
                 if (dset_info->type_info.need_bkg) {
-                    HDassert(io_info->bkg_buf);
+                    assert(io_info->bkg_buf);
 
                     /* Calculate background buffer position */
                     tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
                     bkg_bytes_used +=
                         io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
-                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
+                    assert(bkg_bytes_used <= io_info->bkg_buf_size);
                 }
 
                 /* Set up background buffer read operation if necessary */
                 if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
-                    HDassert(io_info->must_fill_bkg);
+                    assert(io_info->must_fill_bkg);
 
                     /* Allocate arrays of parameters for selection read to background buffer if necessary */
                     if (!bkg_mem_spaces) {
-                        HDassert(!bkg_file_spaces && !bkg_addrs && !bkg_element_sizes && !bkg_bufs);
+                        assert(!bkg_file_spaces && !bkg_addrs && !bkg_element_sizes && !bkg_bufs);
                         if (NULL == (bkg_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory allocation failed for memory space list")
@@ -1133,7 +1115,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
 
                     /* Use same (block) memory space, file space, address, and element size as write operation
                      */
-                    HDassert(bkg_mem_spaces && bkg_file_spaces && bkg_addrs && bkg_element_sizes && bkg_bufs);
+                    assert(bkg_mem_spaces && bkg_file_spaces && bkg_addrs && bkg_element_sizes && bkg_bufs);
                     bkg_mem_spaces[bkg_pieces]    = write_mem_spaces[i];
                     bkg_file_spaces[bkg_pieces]   = io_info->file_spaces[i];
                     bkg_addrs[bkg_pieces]         = io_info->addrs[i];
@@ -1175,14 +1157,14 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             }
 
             /* Release selection iterator */
-            HDassert(mem_iter_init);
+            assert(mem_iter_init);
             if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
             mem_iter_init = FALSE;
         }
     }
 
-    HDassert(spaces_added == io_info->pieces_added);
+    assert(spaces_added == io_info->pieces_added);
 
     /* Gather data to background buffer if necessary */
     if (io_info->must_fill_bkg) {
@@ -1224,7 +1206,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                 /*
                  * Perform datatype conversion.
                  */
-                HDassert(j < bkg_pieces);
+                assert(j < bkg_pieces);
                 if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
                                 dset_info->type_info.dst_type_id,
                                 (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
@@ -1236,7 +1218,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             }
         }
 
-        HDassert(j == bkg_pieces);
+        assert(j == bkg_pieces);
     }
 
     /* Write data to disk */
@@ -1260,7 +1242,7 @@ done:
     /* Clear and free write_mem_spaces */
     if (write_mem_spaces) {
         for (i = 0; i < spaces_added; i++) {
-            HDassert(write_mem_spaces[i]);
+            assert(write_mem_spaces[i]);
             if (write_mem_spaces[i] != io_info->mem_spaces[i] && H5S_close(write_mem_spaces[i]) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace")
         }
@@ -1310,9 +1292,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		11 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1331,13 +1310,13 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(nelmts > 0);
-    HDassert(iter);
-    HDassert(type_info);
-    HDassert(type_info->cmpd_subset);
-    HDassert(H5T_SUBSET_SRC == type_info->cmpd_subset->subset ||
-             H5T_SUBSET_DST == type_info->cmpd_subset->subset);
-    HDassert(user_buf);
+    assert(nelmts > 0);
+    assert(iter);
+    assert(type_info);
+    assert(type_info->cmpd_subset);
+    assert(H5T_SUBSET_SRC == type_info->cmpd_subset->subset ||
+           H5T_SUBSET_DST == type_info->cmpd_subset->subset);
+    assert(user_buf);
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -1390,7 +1369,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
 
             /* Copy the data into the right place. */
             for (i = 0; i < curr_nelmts; i++) {
-                HDmemmove(xubuf, xdbuf, copy_size);
+                memmove(xubuf, xdbuf, copy_size);
 
                 /* Update pointers */
                 xdbuf += src_stride;
@@ -1440,9 +1419,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		11 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1455,8 +1431,8 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, uint8_t
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(nelmts > 0);
-    HDassert(type_info);
+    assert(nelmts > 0);
+    assert(type_info);
 
     /* Initialize values for loop */
     src_stride = type_info->src_type_size;
@@ -1466,7 +1442,7 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, uint8_t
     xsbuf = tconv_buf;
     xdbuf = tconv_buf;
     for (i = 0; i < nelmts; i++) {
-        HDmemmove(xdbuf, xsbuf, dst_stride);
+        memmove(xdbuf, xsbuf, dst_stride);
 
         /* Update pointers */
         xsbuf += src_stride;

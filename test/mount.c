@@ -11,23 +11,21 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Wednesday, October  7, 1998
- *
  * Purpose:	Tests file mounting.
  */
 #include "h5test.h"
 #include "H5Fprivate.h" /* File access				*/
 #include "H5Iprivate.h" /* IDs			  		*/
 
-const char *FILENAME[] = {"mount_1", "mount_2", "mount_3", "mount_4", "mount_5", "mount_6", "mount_7", NULL};
+static const char *FILENAME[] = {"mount_1", "mount_2", "mount_3", "mount_4",
+                                 "mount_5", "mount_6", "mount_7", NULL};
 
 /* For "mount_after_close" test */
 #define RANK          2
 #define NX            4
 #define NY            5
 #define NAME_BUF_SIZE 40
-int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
+static int bm[NX][NY]; /* Data buffers */
 
 /*-------------------------------------------------------------------------
  * Function:	setup
@@ -37,9 +35,6 @@ int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -97,7 +92,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end setup() */
 
@@ -110,9 +105,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -151,7 +143,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_basic() */
 
@@ -164,9 +156,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -197,7 +186,7 @@ test_illegal(hid_t fapl)
     {
         status = H5Fmount(file1, "/mnt1", file1, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Mounting a file on itself should have failed.");
@@ -217,7 +206,7 @@ test_illegal(hid_t fapl)
     {
         status = H5Fmount(mnt, ".", file3, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Mounting two files at one mount point should have failed.");
@@ -242,7 +231,7 @@ test_illegal(hid_t fapl)
     {
         status = H5Fmount(mnt, ".", file3b, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Mounting same file opened twice at one mount point should have failed.");
@@ -260,7 +249,7 @@ test_illegal(hid_t fapl)
     {
         status = H5Fmount(file2, "/mnt1/file2", file1b, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Creating a cycle with mount points should have failed.");
@@ -294,7 +283,7 @@ error:
         H5Fclose(file3);
         H5Fclose(file3b);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_illegal() */
 
@@ -306,9 +295,6 @@ error:
  *
  * Return:	Success:	0
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 15, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -365,7 +351,7 @@ test_samefile(hid_t fapl)
     {
         status = H5Fmount(mnt1b, ".", file3, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Mounting different files at one mount point should have failed.");
     if (H5Funmount(mnt1a, ".") < 0)
@@ -404,7 +390,7 @@ test_samefile(hid_t fapl)
     {
         status = H5Fmount(mnt1b, ".", file2, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Mounting same files at one mount point should have failed.");
     if (H5Funmount(mnt1a, ".") < 0)
@@ -437,7 +423,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_samefile() */
 
@@ -451,9 +437,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -486,7 +469,7 @@ test_hide(hid_t fapl)
     {
         grp = H5Gopen2(file1, "/mnt1/file1", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (grp >= 0) {
         H5_FAILED();
         HDputs("    Name is still accessible under mount point.");
@@ -536,7 +519,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_hide() */
 
@@ -549,9 +532,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -622,7 +602,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_assoc() */
 
@@ -636,9 +616,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -690,7 +667,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_mntlnk() */
 
@@ -704,9 +681,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -735,7 +709,7 @@ test_move(hid_t fapl)
     {
         status = H5Lmove(file1, "/mnt1/rename_b/y", H5L_SAME_LOC, "/y", H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Moving an object across files shouldn't have been possible");
@@ -759,7 +733,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_move() */
 
@@ -772,9 +746,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -825,7 +796,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_preopen() */
 
@@ -839,9 +810,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -898,7 +866,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_postopen() */
 
@@ -912,9 +880,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -965,7 +930,7 @@ test_unlink(hid_t fapl)
     {
         status = H5Oget_info_by_name3(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Incorrect traversal from mount point!");
@@ -986,7 +951,7 @@ test_unlink(hid_t fapl)
     {
         status = H5Oget_info_by_name3(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Traversal through mount point should not have worked!");
@@ -996,7 +961,7 @@ test_unlink(hid_t fapl)
     {
         status = H5Oget_info_by_name3(file2, "/mnt_unlink/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Traversal through mount point should not have worked!");
@@ -1012,20 +977,20 @@ test_unlink(hid_t fapl)
     {
         status = H5Funmount(file1, "/mnt_unlink");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDprintf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
+        printf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     H5E_BEGIN_TRY
     {
         status = H5Funmount(file2, "/");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDprintf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
+        printf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5Funmount(mnt, ".") < 0)
@@ -1052,7 +1017,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_unlink() */
 
@@ -1064,9 +1029,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1113,7 +1075,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_mvmpt() */
 
@@ -1125,9 +1087,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1158,7 +1117,7 @@ test_interlink(hid_t fapl)
     {
         status = H5Lcreate_hard(file1, "/mnt1/file2", H5L_SAME_LOC, "/file2", H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Interfile hard link should not have been allowed!");
@@ -1170,7 +1129,7 @@ test_interlink(hid_t fapl)
     {
         status = H5Lmove(file1, "/mnt1/file2", H5L_SAME_LOC, "/file2", H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Interfile renaming should not have been allowed!");
@@ -1193,7 +1152,7 @@ test_interlink(hid_t fapl)
     {
         dset = H5Dcreate2(file1, "/mnt1/file2/dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0) {
         H5_FAILED();
         HDputs("    Dataset and shared type must be in the same file!");
@@ -1232,7 +1191,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_interlink() */
 
@@ -1245,9 +1204,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1310,7 +1266,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_uniformity() */
 
@@ -1322,9 +1278,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1397,7 +1350,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_close() */
 
@@ -1410,9 +1363,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, May  4, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1630,7 +1580,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_mount_after_close() */
 
@@ -1643,9 +1593,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, June  6, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1897,7 +1844,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -1910,9 +1857,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Thursday, June 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2047,7 +1991,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_missing_unmount() */
 
@@ -2060,9 +2004,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July  5, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2175,7 +2116,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_hold_open_file() */
 
@@ -2188,9 +2129,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 14, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2329,7 +2267,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_hold_open_group() */
 
@@ -2342,9 +2280,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2411,7 +2346,7 @@ test_fcdegree_same(hid_t fapl)
     {
         ret = H5Fmount(gidA, ".", fid2, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2471,7 +2406,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_fcdegree_same() */
 
@@ -2484,9 +2419,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2565,7 +2497,7 @@ test_fcdegree_semi(hid_t fapl)
     {
         ret = H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2578,7 +2510,7 @@ test_fcdegree_semi(hid_t fapl)
     {
         ret = H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2612,7 +2544,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_fcdegree_semi() */
 
@@ -2625,9 +2557,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2717,14 +2646,14 @@ test_fcdegree_strong(hid_t fapl)
     {
         ret = H5Oget_info3(gidA, &oinfo, H5O_INFO_BASIC);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         ret = H5Oget_info3(gidAM, &oinfo, H5O_INFO_BASIC);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2750,7 +2679,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_fcdegree_strong() */
 
@@ -2765,9 +2694,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2859,14 +2785,14 @@ test_acc_perm(hid_t fapl)
     {
         bad_id = H5Gcreate2(gidAM, "Z", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (bad_id >= 0)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (bad_id >= 0)
         TEST_ERROR;
 
@@ -2909,7 +2835,7 @@ test_acc_perm(hid_t fapl)
     {
         bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (bad_id >= 0)
         TEST_ERROR;
 
@@ -2954,7 +2880,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_acc_perm() */
 
@@ -2967,9 +2893,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3175,7 +3098,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_mult_mount() */
 
@@ -3188,9 +3111,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3307,7 +3227,7 @@ test_nested_survive(hid_t fapl)
     {
         gidAMS = H5Gopen2(fid1, "A/M/S", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gidAMS >= 0)
         TEST_ERROR;
 
@@ -3386,7 +3306,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_nested_survive() */
 
@@ -3399,9 +3319,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3520,7 +3437,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_close_parent() */
 
@@ -3568,9 +3485,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3820,7 +3734,7 @@ test_cut_graph(hid_t fapl)
     {
         gidK = H5Gopen2(gidQ, "/A/D/K", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gidK >= 0)
         TEST_ERROR;
 
@@ -3843,7 +3757,7 @@ test_cut_graph(hid_t fapl)
     {
         gidO = H5Gopen2(gidM, "/B/H/O", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gidO >= 0)
         TEST_ERROR;
 
@@ -3945,7 +3859,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_cut_graph() */
 
@@ -3958,9 +3872,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4055,7 +3966,7 @@ test_symlink(hid_t fapl)
     {
         gidL = H5Gopen2(fid1, "L", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gidL >= 0)
         TEST_ERROR;
 
@@ -4109,7 +4020,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_symlink() */
 
@@ -4121,9 +4032,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Neil Fortner
- *              Friday, August 1, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -4212,7 +4120,7 @@ error:
             H5Fclose(fid2[i]);
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_sharedacc() */
 
@@ -4225,9 +4133,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Neil Fortner
- *              Friday, August 6, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -4369,7 +4274,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_sharedclose() */
 
@@ -4382,9 +4287,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Neil Fortner
- *              Friday, November 14, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -4522,7 +4424,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_multisharedclose() */
 
@@ -4534,9 +4436,6 @@ error:
  * Return:	Success:	zero
  *
  *		Failure:	non-zero
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */

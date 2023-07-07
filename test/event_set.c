@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
- *
  * Purpose:    Tests event sets.
  */
 #include "h5test.h"
@@ -21,9 +18,9 @@
 
 #define EVENT_SET_NUM_CONNECTOR_IDS 2
 
-const char *FILENAME[] = {"event_set_1", NULL};
+static const char *FILENAME[] = {"event_set_1", NULL};
 
-hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
+static hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
 
 herr_t fake_wait_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
 herr_t fake_wait_request_free(void *req);
@@ -178,9 +175,6 @@ fake_wait_request_free(void H5_ATTR_UNUSED *req)
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 9, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -238,7 +232,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -249,9 +243,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    number of errors
- *
- * Programmer:  Quincey Koziol
- *              Friday, February 26, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -314,9 +305,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    number of errors
- *
- * Programmer:  Neil Fortner
- *              Wednesday, November 24, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -645,7 +633,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -656,9 +644,6 @@ error:
  *
  * Return:      Success: EXIT_SUCCESS
  *              Failure: EXIT_FAILURE
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -698,9 +683,9 @@ main(void)
     /* Report status */
     HDputs("All event set tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("***** EVENT SET TESTS FAILED *****");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

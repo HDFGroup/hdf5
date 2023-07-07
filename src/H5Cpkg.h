@@ -11,8 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: John Mainzer -- 10/12/04
- *
  * Purpose:	This file contains declarations which are visible only within
  *		the H5C package.  Source files outside the H5C package should
  *		include H5Cprivate.h instead.
@@ -548,7 +546,7 @@ if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))) { \
 ((cache_ptr) == NULL ||                                                   \
     (cache_ptr)->index_size !=                                            \
        ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) || \
-    !H5F_addr_defined(entry_addr) ||                                      \
+    !H5_addr_defined(entry_addr) ||                                      \
     H5C__HASH_FCN(entry_addr) < 0 ||                                      \
     H5C__HASH_FCN(entry_addr) >= H5C__HASH_TABLE_LEN                      \
 )
@@ -570,7 +568,7 @@ if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))) { \
 
 #define H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)           \
 if ((cache_ptr) == NULL ||                                              \
-     (entry_ptr) == NULL || !H5F_addr_defined((entry_ptr)->addr) ||     \
+     (entry_ptr) == NULL || !H5_addr_defined((entry_ptr)->addr) ||     \
      (entry_ptr)->ht_next != NULL || (entry_ptr)->ht_prev != NULL ||    \
      (entry_ptr)->size <= 0 ||                                          \
      H5C__HASH_FCN((entry_ptr)->addr) < 0 ||                            \
@@ -614,7 +612,7 @@ if ((cache_ptr) == NULL ||                                              \
 if ( (cache_ptr) == NULL || (cache_ptr)->index_len < 1 ||               \
      (entry_ptr) == NULL ||                                             \
      (cache_ptr)->index_size < (entry_ptr)->size ||                     \
-     !H5F_addr_defined((entry_ptr)->addr) ||                            \
+     !H5_addr_defined((entry_ptr)->addr) ||                            \
      (entry_ptr)->size <= 0 ||                                          \
      H5C__HASH_FCN((entry_ptr)->addr) < 0 ||                            \
      H5C__HASH_FCN((entry_ptr)->addr) >= H5C__HASH_TABLE_LEN ||         \
@@ -644,7 +642,7 @@ if ( (cache_ptr) == NULL || (cache_ptr)->index_len < 1 ||               \
 
 #define H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)            \
 if ((cache_ptr) == NULL ||                                                \
-     (entry_ptr) == NULL || !H5F_addr_defined((entry_ptr)->addr) ||       \
+     (entry_ptr) == NULL || !H5_addr_defined((entry_ptr)->addr) ||       \
      (entry_ptr)->size <= 0 ||                                            \
      (entry_ptr)->ht_next != NULL ||                                      \
      (entry_ptr)->ht_prev != NULL ||                                      \
@@ -815,7 +813,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 
 
 #define H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, fail_val)                 \
-{                                                                            \
+do {                                                                         \
     int k;                                                                   \
     H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                    \
     k = H5C__HASH_FCN((entry_ptr)->addr);                                    \
@@ -837,17 +835,17 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
     }                                                                        \
     if((entry_ptr)->flush_me_last) {                                         \
         (cache_ptr)->num_last_entries++;                                     \
-        HDassert((cache_ptr)->num_last_entries <= 2);                        \
+        assert((cache_ptr)->num_last_entries <= 2);                        \
     }                                                                        \
     H5C__IL_DLL_APPEND((entry_ptr), (cache_ptr)->il_head,                    \
                        (cache_ptr)->il_tail, (cache_ptr)->il_len,            \
                        (cache_ptr)->il_size, fail_val)                       \
     H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)                            \
     H5C__POST_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                   \
-}
+} while (0)
 
 #define H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, fail_val)               \
-{                                                                            \
+do {                                                                         \
     int k;                                                                   \
     H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)                    \
     k = H5C__HASH_FCN((entry_ptr)->addr);                                    \
@@ -872,14 +870,14 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
     }                                                                        \
     if((entry_ptr)->flush_me_last) {                                         \
         (cache_ptr)->num_last_entries--;                                     \
-        HDassert((cache_ptr)->num_last_entries <= 1);                        \
+        assert((cache_ptr)->num_last_entries <= 1);                        \
     }                                                                        \
     H5C__IL_DLL_REMOVE((entry_ptr), (cache_ptr)->il_head,                    \
                        (cache_ptr)->il_tail, (cache_ptr)->il_len,            \
                        (cache_ptr)->il_size, fail_val)                       \
     H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)                             \
     H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)                   \
-}
+} while (0)
 
 #define H5C__SEARCH_INDEX(cache_ptr, entry_addr, entry_ptr, fail_val)        \
 {                                                                            \
@@ -889,12 +887,12 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
     k = H5C__HASH_FCN(entry_addr);                                           \
     (entry_ptr) = (cache_ptr)->index[k];                                     \
     while(entry_ptr) {                                                       \
-        if(H5F_addr_eq(entry_addr, (entry_ptr)->addr)) {                     \
+        if(H5_addr_eq(entry_addr, (entry_ptr)->addr)) {                     \
             H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k, fail_val)    \
             if((entry_ptr) != (cache_ptr)->index[k]) {                       \
                 if((entry_ptr)->ht_next)                                     \
                     (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;    \
-                HDassert((entry_ptr)->ht_prev != NULL);                      \
+                assert((entry_ptr)->ht_prev != NULL);                      \
                 (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;        \
                 (cache_ptr)->index[k]->ht_prev = (entry_ptr);                \
                 (entry_ptr)->ht_next = (cache_ptr)->index[k];                \
@@ -958,7 +956,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
                                     (old_size), (new_size), (fail_val))     \
     H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,        \
                                       entry_ptr, fail_val)                  \
-}
+} while (0)
 
 
 /**************************************************************************
@@ -1016,28 +1014,26 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  * Note:        This macro is set up so that H5C_DO_SANITY_CHECKS and
  *              H5C_DO_SLIST_SANITY_CHECKS can be selected independently.
  *
- * Programmer:  John Mainzer, 5/10/04
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
-{                                                                              \
-    HDassert(cache_ptr);                                                       \
+do {                                                                           \
+    assert(cache_ptr);                                                       \
                                                                                \
     if((cache_ptr)->slist_enabled) {                                           \
-        HDassert(entry_ptr);                                                   \
-        HDassert((entry_ptr)->size > 0);                                       \
-        HDassert(H5F_addr_defined((entry_ptr)->addr));                         \
-        HDassert(!(entry_ptr)->in_slist);                                      \
-        HDassert(!H5C__ENTRY_IN_SLIST((cache_ptr), (entry_ptr)));              \
-        HDassert((entry_ptr)->ring > H5C_RING_UNDEFINED);                      \
-        HDassert((entry_ptr)->ring < H5C_RING_NTYPES);                         \
-        HDassert((cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=             \
+        assert(entry_ptr);                                                   \
+        assert((entry_ptr)->size > 0);                                       \
+        assert(H5_addr_defined((entry_ptr)->addr));                         \
+        assert(!(entry_ptr)->in_slist);                                      \
+        assert(!H5C__ENTRY_IN_SLIST((cache_ptr), (entry_ptr)));              \
+        assert((entry_ptr)->ring > H5C_RING_UNDEFINED);                      \
+        assert((entry_ptr)->ring < H5C_RING_NTYPES);                         \
+        assert((cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=             \
                  (cache_ptr)->slist_len);                                      \
-        HDassert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=            \
+        assert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=            \
                  (cache_ptr)->slist_size);                                     \
-        HDassert((cache_ptr)->slist_ptr);                                      \
+        assert((cache_ptr)->slist_ptr);                                      \
                                                                                \
         if(H5SL_insert((cache_ptr)->slist_ptr, entry_ptr, &((entry_ptr)->addr)) < 0) \
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't insert entry in skip list") \
@@ -1050,13 +1046,13 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (entry_ptr)->size;\
         H5C__SLIST_INSERT_ENTRY_SC(cache_ptr, entry_ptr)                       \
                                                                                \
-        HDassert((cache_ptr)->slist_len > 0);                                  \
-        HDassert((cache_ptr)->slist_size > 0);                                 \
+        assert((cache_ptr)->slist_len > 0);                                  \
+        assert((cache_ptr)->slist_size > 0);                                 \
     } else { /* slist disabled */                                              \
-        HDassert((cache_ptr)->slist_len == 0);                                 \
-        HDassert((cache_ptr)->slist_size == 0);                                \
+        assert((cache_ptr)->slist_len == 0);                                 \
+        assert((cache_ptr)->slist_size == 0);                                \
     }                                                                          \
-} /* H5C__INSERT_ENTRY_IN_SLIST */
+} while (0) /* H5C__INSERT_ENTRY_IN_SLIST */
 
 
 /*-------------------------------------------------------------------------
@@ -1066,47 +1062,45 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  * Purpose:     Insert a cache entry into a cache's skip list.  Updates
  *              the associated length and size fields.
  *
- * Programmer:  John Mainzer, 5/10/04
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, fail_val) \
 {                                                                              \
-    HDassert(cache_ptr);                                                       \
+    assert(cache_ptr);                                                       \
                                                                                \
     if((cache_ptr)->slist_enabled) {                                           \
-        HDassert(entry_ptr);                                                   \
-        HDassert(!(entry_ptr)->is_read_only);                                  \
-        HDassert((entry_ptr)->ro_ref_count == 0);                              \
-        HDassert((entry_ptr)->size > 0);                                       \
-        HDassert((entry_ptr)->in_slist);                                       \
-        HDassert((cache_ptr)->slist_ptr);                                      \
-        HDassert((entry_ptr)->ring > H5C_RING_UNDEFINED);                      \
-        HDassert((entry_ptr)->ring < H5C_RING_NTYPES);                         \
-        HDassert((cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=             \
+        assert(entry_ptr);                                                   \
+        assert(!(entry_ptr)->is_read_only);                                  \
+        assert((entry_ptr)->ro_ref_count == 0);                              \
+        assert((entry_ptr)->size > 0);                                       \
+        assert((entry_ptr)->in_slist);                                       \
+        assert((cache_ptr)->slist_ptr);                                      \
+        assert((entry_ptr)->ring > H5C_RING_UNDEFINED);                      \
+        assert((entry_ptr)->ring < H5C_RING_NTYPES);                         \
+        assert((cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=             \
                  (cache_ptr)->slist_len);                                      \
-        HDassert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=            \
+        assert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=            \
                  (cache_ptr)->slist_size);                                     \
-        HDassert((cache_ptr)->slist_size >= (entry_ptr)->size);                \
+        assert((cache_ptr)->slist_size >= (entry_ptr)->size);                \
                                                                                \
         if(H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr) != (entry_ptr) ) \
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't delete entry from skip list") \
                                                                                \
-        HDassert((cache_ptr)->slist_len > 0);                                  \
+        assert((cache_ptr)->slist_len > 0);                                  \
         if(!(during_flush))                                                    \
             (cache_ptr)->slist_changed = TRUE;                                 \
         (cache_ptr)->slist_len--;                                              \
-        HDassert((cache_ptr)->slist_size >= (entry_ptr)->size);                \
+        assert((cache_ptr)->slist_size >= (entry_ptr)->size);                \
         (cache_ptr)->slist_size -= (entry_ptr)->size;                          \
         (cache_ptr)->slist_ring_len[(entry_ptr)->ring]--;                      \
-        HDassert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] >= (entry_ptr)->size); \
+        assert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] >= (entry_ptr)->size); \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size;\
         H5C__SLIST_REMOVE_ENTRY_SC(cache_ptr, entry_ptr)                       \
         (entry_ptr)->in_slist = FALSE;                                         \
     } else { /* slist disabled */                                              \
-        HDassert((cache_ptr)->slist_len == 0);                                 \
-        HDassert((cache_ptr)->slist_size == 0);                                \
+        assert((cache_ptr)->slist_len == 0);                                 \
+        assert((cache_ptr)->slist_size == 0);                                \
     }                                                                          \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
@@ -1118,47 +1112,45 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  * Purpose:     Update cache_ptr->slist_size for a change in the size of
  *              and entry in the slist.
  *
- * Programmer:  John Mainzer, 9/07/05
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size)      \
-{                                                                             \
-    HDassert(cache_ptr);                                                      \
+do {                                                                          \
+    assert(cache_ptr);                                                      \
                                                                               \
     if((cache_ptr)->slist_enabled) {                                          \
-        HDassert((old_size) > 0);                                             \
-        HDassert((new_size) > 0);                                             \
-        HDassert((old_size) <= (cache_ptr)->slist_size);                      \
-        HDassert((cache_ptr)->slist_len > 0);                                 \
-        HDassert((cache_ptr)->slist_len > 1 ||                                \
+        assert((old_size) > 0);                                             \
+        assert((new_size) > 0);                                             \
+        assert((old_size) <= (cache_ptr)->slist_size);                      \
+        assert((cache_ptr)->slist_len > 0);                                 \
+        assert((cache_ptr)->slist_len > 1 ||                                \
                  (cache_ptr)->slist_size == (old_size));                      \
-        HDassert((entry_ptr)->ring > H5C_RING_UNDEFINED);                     \
-        HDassert((entry_ptr)->ring < H5C_RING_NTYPES);                        \
-        HDassert((cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+        assert((entry_ptr)->ring > H5C_RING_UNDEFINED);                     \
+        assert((entry_ptr)->ring < H5C_RING_NTYPES);                        \
+        assert((cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
                  (cache_ptr)->slist_len);                                     \
-        HDassert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+        assert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
                  (cache_ptr)->slist_size);                                    \
                                                                               \
         (cache_ptr)->slist_size -= (old_size);                                \
         (cache_ptr)->slist_size += (new_size);                                \
                                                                               \
-        HDassert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] >= (old_size)); \
+        assert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] >= (old_size)); \
                                                                               \
         (cache_ptr)->slist_ring_size[(entry_ptr)->ring] -= (old_size);        \
         (cache_ptr)->slist_ring_size[(entry_ptr)->ring] += (new_size);        \
                                                                               \
         H5C__SLIST_UPDATE_FOR_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size) \
                                                                               \
-        HDassert((new_size) <= (cache_ptr)->slist_size);                      \
-        HDassert((cache_ptr)->slist_len > 1 ||                                \
+        assert((new_size) <= (cache_ptr)->slist_size);                      \
+        assert((cache_ptr)->slist_len > 1 ||                                \
                   (cache_ptr)->slist_size == (new_size));                     \
     } else { /* slist disabled */                                             \
-        HDassert((cache_ptr)->slist_len == 0);                                \
-        HDassert((cache_ptr)->slist_size == 0);                               \
+        assert((cache_ptr)->slist_len == 0);                                \
+        assert((cache_ptr)->slist_size == 0);                               \
     }                                                                         \
-} /* H5C__UPDATE_SLIST_FOR_SIZE_CHANGE */
+} while (0) /* H5C__UPDATE_SLIST_FOR_SIZE_CHANGE */
 
 
 /**************************************************************************
@@ -1378,20 +1370,18 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  * Purpose:     Update the replacement policy data structures for an
  *              eviction of the specified cache entry.
  *
- * Programmer:  John Mainzer, 5/10/04
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
 {                                                                            \
-    HDassert(cache_ptr);                                                     \
-    HDassert(entry_ptr);                                                     \
-    HDassert(!(entry_ptr)->is_protected);                                    \
-    HDassert(!(entry_ptr)->is_read_only);                                    \
-    HDassert((entry_ptr)->ro_ref_count == 0);                                \
-    HDassert(!(entry_ptr)->is_pinned);                                       \
-    HDassert((entry_ptr)->size > 0);                                         \
+    assert(cache_ptr);                                                     \
+    assert(entry_ptr);                                                     \
+    assert(!(entry_ptr)->is_protected);                                    \
+    assert(!(entry_ptr)->is_read_only);                                    \
+    assert((entry_ptr)->ro_ref_count == 0);                                \
+    assert(!(entry_ptr)->is_pinned);                                       \
+    assert((entry_ptr)->size > 0);                                         \
                                                                              \
     /* Remove the entry from the LRU list */                                 \
     H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                  \
@@ -1410,19 +1400,17 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  * Purpose:     Update the replacement policy data structures for a flush
  *              of the specified cache entry.
  *
- * Programmer:  John Mainzer, 5/6/04
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
 {                                                                           \
-    HDassert(cache_ptr);                                                    \
-    HDassert(entry_ptr);                                                    \
-    HDassert(!(entry_ptr)->is_protected);                                   \
-    HDassert(!(entry_ptr)->is_read_only);                                   \
-    HDassert((entry_ptr)->ro_ref_count == 0);                               \
-    HDassert((entry_ptr)->size > 0);                                        \
+    assert(cache_ptr);                                                    \
+    assert(entry_ptr);                                                    \
+    assert(!(entry_ptr)->is_protected);                                   \
+    assert(!(entry_ptr)->is_read_only);                                   \
+    assert((entry_ptr)->ro_ref_count == 0);                               \
+    assert((entry_ptr)->size > 0);                                        \
                                                                             \
     if(!(entry_ptr)->is_pinned) {                                           \
         /* Remove the entry from its location in the LRU list               \
@@ -1455,19 +1443,17 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  *              new entry as the LEAST recently used entry, not the
  *              most recently used.
  *
- * Programmer:  John Mainzer, 8/15/15
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_RP_FOR_INSERT_APPEND(cache_ptr, entry_ptr, fail_val)   \
-{                                                                          \
-    HDassert(cache_ptr);                                                   \
-    HDassert(entry_ptr);                                                   \
-    HDassert(!(entry_ptr)->is_protected);                                  \
-    HDassert(!(entry_ptr)->is_read_only);                                  \
-    HDassert((entry_ptr)->ro_ref_count == 0 );                             \
-    HDassert((entry_ptr)->size > 0 );                                      \
+do {                                                                       \
+    assert(cache_ptr);                                                   \
+    assert(entry_ptr);                                                   \
+    assert(!(entry_ptr)->is_protected);                                  \
+    assert(!(entry_ptr)->is_read_only);                                  \
+    assert((entry_ptr)->ro_ref_count == 0 );                             \
+    assert((entry_ptr)->size > 0 );                                      \
                                                                            \
     if((entry_ptr)->is_pinned) {                                           \
         H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
@@ -1484,7 +1470,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         /* Maintain the clean & dirty LRU lists, if enabled */             \
         H5C__UPDATE_RP_FOR_INSERT_APPEND_CD_LRU(cache_ptr, entry_ptr, fail_val) \
     }                                                                      \
-}
+} while (0)
 
 
 /*-------------------------------------------------------------------------
@@ -1494,19 +1480,17 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  * Purpose:     Update the replacement policy data structures for an
  *              insertion of the specified cache entry.
  *
- * Programmer:  John Mainzer, 5/17/04
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)        \
 {                                                                           \
-    HDassert(cache_ptr);                                                    \
-    HDassert(entry_ptr);                                                    \
-    HDassert(!(entry_ptr)->is_protected);                                   \
-    HDassert(!(entry_ptr)->is_read_only);                                   \
-    HDassert((entry_ptr)->ro_ref_count == 0);                               \
-    HDassert((entry_ptr)->size > 0);                                        \
+    assert(cache_ptr);                                                    \
+    assert(entry_ptr);                                                    \
+    assert(!(entry_ptr)->is_protected);                                   \
+    assert(!(entry_ptr)->is_read_only);                                   \
+    assert((entry_ptr)->ro_ref_count == 0);                               \
+    assert((entry_ptr)->size > 0);                                        \
                                                                             \
     if((entry_ptr)->is_pinned) {                                            \
         H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,            \
@@ -1539,19 +1523,17 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  *              which is outside of the replacement policy), and add the
  *              entry to the protected list.
  *
- * Programmer:  John Mainzer, 5/17/04
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
-    HDassert(cache_ptr);                                                  \
-    HDassert(entry_ptr);                                                  \
-    HDassert(!(entry_ptr)->is_protected);                                 \
-    HDassert(!(entry_ptr)->is_read_only);                                 \
-    HDassert((entry_ptr)->ro_ref_count == 0);                             \
-    HDassert((entry_ptr)->size > 0);                                      \
+    assert(cache_ptr);                                                  \
+    assert(entry_ptr);                                                  \
+    assert(!(entry_ptr)->is_protected);                                 \
+    assert(!(entry_ptr)->is_read_only);                                 \
+    assert((entry_ptr)->ro_ref_count == 0);                             \
+    assert((entry_ptr)->size > 0);                                      \
                                                                           \
     if((entry_ptr)->is_pinned) {                                          \
         H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,           \
@@ -1586,18 +1568,16 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  * Purpose:     Update the replacement policy data structures for a
  *              move of the specified cache entry.
  *
- * Programmer:  John Mainzer, 5/17/04
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, fail_val)   \
-{                                                                            \
-    HDassert(cache_ptr);                                                     \
-    HDassert(entry_ptr);                                                     \
-    HDassert(!(entry_ptr)->is_read_only);                                    \
-    HDassert((entry_ptr)->ro_ref_count == 0);                                \
-    HDassert((entry_ptr)->size > 0);                                         \
+do {                                                                         \
+    assert(cache_ptr);                                                     \
+    assert(entry_ptr);                                                     \
+    assert(!(entry_ptr)->is_read_only);                                    \
+    assert((entry_ptr)->ro_ref_count == 0);                                \
+    assert((entry_ptr)->size > 0);                                         \
                                                                              \
     if(!(entry_ptr)->is_pinned && !(entry_ptr)->is_protected) {              \
         /* Remove the entry from the LRU list, and re-insert it at the head. \
@@ -1615,7 +1595,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         /* Maintain the clean & dirty LRU lists, if enabled */               \
         H5C__UPDATE_RP_FOR_MOVE_CD_LRU(cache_ptr, entry_ptr, was_dirty, fail_val) \
     }                                                                        \
-} /* H5C__UPDATE_RP_FOR_MOVE */
+} while (0) /* H5C__UPDATE_RP_FOR_MOVE */
 
 
 /*-------------------------------------------------------------------------
@@ -1634,8 +1614,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  *
  *              If the entry is accessed with collective operations for
  *              parallel I/O, update that list.
- *
- * Programmer:  John Mainzer, 8/23/06
  *
  *-------------------------------------------------------------------------
  */
@@ -1661,13 +1639,13 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 
 #define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size, fail_val)    \
 {                                                                         \
-    HDassert(cache_ptr);                                                  \
-    HDassert(entry_ptr);                                                  \
-    HDassert(!(entry_ptr)->is_protected);                                 \
-    HDassert(!(entry_ptr)->is_read_only);                                 \
-    HDassert((entry_ptr)->ro_ref_count == 0);                             \
-    HDassert((entry_ptr)->size > 0 );                                     \
-    HDassert(new_size > 0 );                                              \
+    assert(cache_ptr);                                                  \
+    assert(entry_ptr);                                                  \
+    assert(!(entry_ptr)->is_protected);                                 \
+    assert(!(entry_ptr)->is_read_only);                                 \
+    assert((entry_ptr)->ro_ref_count == 0);                             \
+    assert((entry_ptr)->size > 0 );                                     \
+    assert(new_size > 0 );                                              \
                                                                           \
     /* Maintain the collective access list, if enabled */                 \
     H5C__UPDATE_RP_FOR_SIZE_CHANGE_COLL(cache_ptr, entry_ptr, new_size, fail_val) \
@@ -1701,20 +1679,18 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  *              entry list, and re-insert it in the data structures used
  *              by the current replacement policy.
  *
- * Programmer:  John Mainzer, 3/22/06
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
-    HDassert(cache_ptr);                                               \
-    HDassert(entry_ptr);                                               \
-    HDassert(!(entry_ptr)->is_protected);                              \
-    HDassert(!(entry_ptr)->is_read_only);                              \
-    HDassert((entry_ptr)->ro_ref_count == 0 );                         \
-    HDassert((entry_ptr)->is_pinned);                                  \
-    HDassert((entry_ptr)->size > 0);                                   \
+    assert(cache_ptr);                                               \
+    assert(entry_ptr);                                               \
+    assert(!(entry_ptr)->is_protected);                              \
+    assert(!(entry_ptr)->is_read_only);                              \
+    assert((entry_ptr)->ro_ref_count == 0 );                         \
+    assert((entry_ptr)->is_pinned);                                  \
+    assert((entry_ptr)->size > 0);                                   \
                                                                        \
     /* Regardless of the replacement policy, remove the entry from the \
      * pinned entry list.                                              \
@@ -1745,17 +1721,15 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  *              list, and re-insert it in the data structures used by the
  *              current replacement policy.
  *
- * Programmer:  John Mainzer, 5/19/04
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
-{                                                                          \
-    HDassert(cache_ptr);                                                   \
-    HDassert(entry_ptr);                                                   \
-    HDassert((entry_ptr)->is_protected);                                   \
-    HDassert((entry_ptr)->size > 0);                                       \
+do {                                                                       \
+    assert(cache_ptr);                                                   \
+    assert(entry_ptr);                                                   \
+    assert((entry_ptr)->is_protected);                                   \
+    assert((entry_ptr)->size > 0);                                       \
                                                                            \
     /* Regardless of the replacement policy, remove the entry from the     \
      * protected list.                                                     \
@@ -1779,7 +1753,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         /* Maintain the clean & dirty LRU lists, if enabled */             \
         H5C__UPDATE_RP_FOR_UNPROTECT_CD_LRU(cache_ptr, entry_ptr, fail_val) \
     }                                                                      \
-} /* H5C__UPDATE_RP_FOR_UNPROTECT */
+} while (0) /* H5C__UPDATE_RP_FOR_UNPROTECT */
 
 
 #ifdef H5_HAVE_PARALLEL
@@ -1797,15 +1771,13 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  *
  * Purpose:     Insert entry into collective entries list
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)        \
 {                                                                       \
-    HDassert(cache_ptr);                                                \
-    HDassert(entry_ptr);                                                \
+    assert(cache_ptr);                                                \
+    assert(entry_ptr);                                                \
                                                                         \
     /* Insert the entry at the head of the list. */                     \
     H5C__COLL_DLL_PREPEND((entry_ptr), (cache_ptr)->coll_head_ptr,      \
@@ -1821,15 +1793,13 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  *
  * Purpose:     Remove entry from collective entries list
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, fail_val)      \
 {                                                                       \
-    HDassert(cache_ptr);                                                \
-    HDassert(entry_ptr);                                                \
+    assert(cache_ptr);                                                \
+    assert(entry_ptr);                                                \
                                                                         \
     /* Remove the entry from the list. */                               \
     H5C__COLL_DLL_REMOVE((entry_ptr), (cache_ptr)->coll_head_ptr,       \
@@ -1845,15 +1815,13 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  *
  * Purpose:     Update entry position in collective entries list
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)   \
 {                                                                       \
-    HDassert(cache_ptr);                                                \
-    HDassert(entry_ptr);                                                \
+    assert(cache_ptr);                                                \
+    assert(entry_ptr);                                                \
                                                                         \
     /* Remove entry and insert at the head of the list. */              \
     H5C__COLL_DLL_REMOVE((entry_ptr), (cache_ptr)->coll_head_ptr,       \
@@ -2218,7 +2186,7 @@ typedef struct H5C_tag_info_t {
  *        Note: At this time, the this field will only be applied to
  *              two types of entries: the superblock and the file driver info
  *              message.  The code utilizing these flags is protected with
- *              HDasserts to enforce this.
+ *              asserts to enforce this.
  *
  * The cache must deal with the case in which entries may be dirtied, moved,
  * or have their sizes changed during a flush.  To allow sanity checks in this

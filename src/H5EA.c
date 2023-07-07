@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EA.c
- *			Jun 17 2008
- *			Quincey Koziol
  *
  * Purpose:		Implements an "extensible array" for storing elements
  *                      in an array whose high bounds can extend and shrink.
@@ -97,7 +95,7 @@ const H5EA_class_t *const H5EA_client_class_g[] = {
 H5FL_DEFINE_STATIC(H5EA_t);
 
 /* Declare a PQ free list to manage the element */
-H5FL_BLK_DEFINE(ea_native_elmt);
+H5FL_BLK_DEFINE_STATIC(ea_native_elmt);
 
 /*-------------------------------------------------------------------------
  * Function:	H5EA__new
@@ -106,9 +104,6 @@ H5FL_BLK_DEFINE(ea_native_elmt);
  *
  * Return:	Pointer to earray wrapper success
  *              NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 10 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -122,8 +117,8 @@ H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open, void *ctx_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(ea_addr));
+    assert(f);
+    assert(H5_addr_defined(ea_addr));
 
     /* Allocate extensible array wrapper */
     if (NULL == (ea = H5FL_CALLOC(H5EA_t)))
@@ -172,9 +167,6 @@ done:
  * Return:	Pointer to earray wrapper on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Jun 17 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_t *
@@ -187,8 +179,8 @@ H5EA_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
     /* H5EA interface sanity check */
     HDcompile_assert(H5EA_NUM_CLS_ID == NELMTS(H5EA_client_class_g));
@@ -221,9 +213,6 @@ done:
  * Return:	Pointer to array wrapper on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 28 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_t *
@@ -235,8 +224,8 @@ H5EA_open(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(ea_addr));
+    assert(f);
+    assert(H5_addr_defined(ea_addr));
 
     /* Allocate and initialize new extensible array wrapper */
     if (NULL == (ea = H5EA__new(f, ea_addr, TRUE, ctx_udata)))
@@ -261,9 +250,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 21 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -272,8 +258,8 @@ H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
-    HDassert(ea);
-    HDassert(nelmts);
+    assert(ea);
+    assert(nelmts);
 
     /* Retrieve the max. index set */
     *nelmts = ea->hdr->stats.stored.max_idx_set;
@@ -288,9 +274,6 @@ H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts)
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 21 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -299,9 +282,9 @@ H5EA_get_addr(const H5EA_t *ea, haddr_t *addr)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
-    HDassert(ea);
-    HDassert(ea->hdr);
-    HDassert(addr);
+    assert(ea);
+    assert(ea->hdr);
+    assert(addr);
 
     /* Retrieve the address of the extensible array's header */
     *addr = ea->hdr->addr;
@@ -316,9 +299,6 @@ H5EA_get_addr(const H5EA_t *ea, haddr_t *addr)
  *              given element in the array.
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -341,14 +321,14 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(ea);
-    HDassert(hdr);
-    HDassert(thing);
-    HDassert(thing_elmt_buf);
-    HDassert(thing_unprot_func);
+    assert(ea);
+    assert(hdr);
+    assert(thing);
+    assert(thing_elmt_buf);
+    assert(thing_unprot_func);
 
     /* only the H5AC__READ_ONLY_FLAG may be set in thing_acc */
-    HDassert((thing_acc & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((thing_acc & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set the shared array header's file context for this operation */
     hdr->f = ea->f;
@@ -360,12 +340,12 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
     *thing_unprot_func = (H5EA__unprotect_func_t)NULL;
 
     /* Check if we should create the index block */
-    if (!H5F_addr_defined(hdr->idx_blk_addr)) {
+    if (!H5_addr_defined(hdr->idx_blk_addr)) {
         /* Check if we are allowed to create the thing */
         if (0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
             /* Create the index block */
             hdr->idx_blk_addr = H5EA__iblock_create(hdr, &stats_changed);
-            if (!H5F_addr_defined(hdr->idx_blk_addr))
+            if (!H5_addr_defined(hdr->idx_blk_addr))
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL, "unable to create index block")
             hdr_dirty = TRUE;
         } /* end if */
@@ -403,10 +383,10 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
             /* Compute the data block index in index block */
             dblk_idx = (size_t)(hdr->sblk_info[sblk_idx].start_dblk +
                                 (elmt_idx / hdr->sblk_info[sblk_idx].dblk_nelmts));
-            HDassert(dblk_idx < iblock->ndblk_addrs);
+            assert(dblk_idx < iblock->ndblk_addrs);
 
             /* Check if the data block has been allocated on disk yet */
-            if (!H5F_addr_defined(iblock->dblk_addrs[dblk_idx])) {
+            if (!H5_addr_defined(iblock->dblk_addrs[dblk_idx])) {
                 /* Check if we are allowed to create the thing */
                 if (0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t dblk_addr;                         /* Address of data block created */
@@ -417,7 +397,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
                     dblk_addr = H5EA__dblock_create(hdr, iblock, &stats_changed, dblk_off,
                                                     hdr->sblk_info[sblk_idx].dblk_nelmts);
-                    if (!H5F_addr_defined(dblk_addr))
+                    if (!H5_addr_defined(dblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
                                     "unable to create extensible array data block")
 
@@ -462,14 +442,14 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
             sblk_off = sblk_idx - iblock->nsblks;
 
             /* Check if the super block has been allocated on disk yet */
-            if (!H5F_addr_defined(iblock->sblk_addrs[sblk_off])) {
+            if (!H5_addr_defined(iblock->sblk_addrs[sblk_off])) {
                 /* Check if we are allowed to create the thing */
                 if (0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t sblk_addr;                         /* Address of data block created */
 
                     /* Create super block */
                     sblk_addr = H5EA__sblock_create(hdr, iblock, &stats_changed, sblk_idx);
-                    if (!H5F_addr_defined(sblk_addr))
+                    if (!H5_addr_defined(sblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
                                     "unable to create extensible array super block")
 
@@ -490,10 +470,10 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
 
             /* Compute the data block index in super block */
             dblk_idx = (size_t)(elmt_idx / sblock->dblk_nelmts);
-            HDassert(dblk_idx < sblock->ndblks);
+            assert(dblk_idx < sblock->ndblks);
 
             /* Check if the data block has been allocated on disk yet */
-            if (!H5F_addr_defined(sblock->dblk_addrs[dblk_idx])) {
+            if (!H5_addr_defined(sblock->dblk_addrs[dblk_idx])) {
                 /* Check if we are allowed to create the thing */
                 if (0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t dblk_addr;                         /* Address of data block created */
@@ -504,7 +484,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
                     dblk_addr =
                         H5EA__dblock_create(hdr, sblock, &stats_changed, dblk_off, sblock->dblk_nelmts);
-                    if (!H5F_addr_defined(dblk_addr))
+                    if (!H5_addr_defined(dblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
                                     "unable to create extensible array data block")
 
@@ -616,8 +596,8 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
     }         /* end else */
 
     /* Sanity checks */
-    HDassert(*thing != NULL);
-    HDassert(*thing_unprot_func != NULL);
+    assert(*thing != NULL);
+    assert(*thing_unprot_func != NULL);
 
 done:
     /* Reset 'thing' info on error */
@@ -659,9 +639,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -679,8 +656,8 @@ H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(ea);
-    HDassert(hdr);
+    assert(ea);
+    assert(hdr);
 
     /* Set the shared array header's file context for this operation */
     hdr->f = ea->f;
@@ -692,9 +669,9 @@ H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to protect array metadata")
 
     /* Sanity check */
-    HDassert(thing);
-    HDassert(thing_elmt_buf);
-    HDassert(thing_unprot_func);
+    assert(thing);
+    assert(thing_elmt_buf);
+    assert(thing_unprot_func);
 
     /* Set element in thing's element buffer */
     H5MM_memcpy(thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), elmt,
@@ -725,9 +702,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -742,8 +716,8 @@ H5EA_get(const H5EA_t *ea, hsize_t idx, void *elmt)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(ea);
-    HDassert(hdr);
+    assert(ea);
+    assert(hdr);
 
     /* Check for element beyond max. element in array */
     if (idx >= hdr->stats.stored.max_idx_set) {
@@ -791,9 +765,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May 27 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -805,9 +776,9 @@ H5EA_depend(H5EA_t *ea, H5AC_proxy_entry_t *parent)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(ea);
-    HDassert(hdr);
-    HDassert(parent);
+    assert(ea);
+    assert(hdr);
+    assert(parent);
 
     /*
      * Check to see if a flush dependency between the extensible array
@@ -816,7 +787,7 @@ H5EA_depend(H5EA_t *ea, H5AC_proxy_entry_t *parent)
      */
     if (NULL == hdr->parent) {
         /* Sanity check */
-        HDassert(hdr->top_proxy);
+        assert(hdr->top_proxy);
 
         /* Set the shared array header's file context for this operation */
         hdr->f = ea->f;
@@ -838,9 +809,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 21 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -853,7 +821,7 @@ H5EA_close(H5EA_t *ea)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(ea);
+    assert(ea);
 
     /* Close the header, if it was set */
     if (ea->hdr) {
@@ -889,9 +857,9 @@ H5EA_close(H5EA_t *ea)
                                 "unable to check metadata cache status for extensible array header")
 
                 /* Sanity checks on header */
-                HDassert(hdr_status & H5AC_ES__IN_CACHE);
-                HDassert(hdr_status & H5AC_ES__IS_PINNED);
-                HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
+                assert(hdr_status & H5AC_ES__IN_CACHE);
+                assert(hdr_status & H5AC_ES__IS_PINNED);
+                assert(!(hdr_status & H5AC_ES__IS_PROTECTED));
             }
 #endif /* NDEBUG */
 
@@ -940,9 +908,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 28 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -954,8 +919,8 @@ H5EA_delete(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(ea_addr));
+    assert(f);
+    assert(H5_addr_defined(ea_addr));
 
     /* Lock the array header into memory */
     if (NULL == (hdr = H5EA__hdr_protect(f, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
@@ -991,8 +956,6 @@ done:
  *
  * Return:      H5_ITER_CONT/H5_ITER_ERROR
  *
- * Programmer:  Vailin Choi; Feb 2015
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1005,9 +968,9 @@ H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata)
     FUNC_ENTER_NOAPI(H5_ITER_ERROR)
 
     /* Check arguments */
-    HDassert(ea);
-    HDassert(op);
-    HDassert(udata);
+    assert(ea);
+    assert(op);
+    assert(udata);
 
     /* Allocate space for a native array element */
     if (NULL == (elmt = H5FL_BLK_MALLOC(ea_native_elmt, ea->hdr->cparam.cls->nat_elmt_size)))
@@ -1052,8 +1015,8 @@ H5EA_patch_file(H5EA_t *ea, H5F_t *f)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
-    HDassert(ea);
-    HDassert(f);
+    assert(ea);
+    assert(f);
 
     if (ea->f != f || ea->hdr->f != f)
         ea->f = ea->hdr->f = f;

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pdxpl.c
- *			March 16 1998
- *			Robb Matzke
  *
  * Purpose:		Data transfer property list class routines
  *
@@ -30,14 +28,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Cache                                */
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FDprivate.h" /* File drivers				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Ppkg.h"      /* Property lists		  	*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Cache                                    */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FDprivate.h" /* File drivers                             */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5VMprivate.h" /* Vector Functions                         */
 
 /****************/
 /* Local Macros */
@@ -305,8 +304,6 @@ static const hbool_t                 H5D_def_modify_write_buf_g      = H5D_XFER_
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -493,9 +490,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -507,8 +501,8 @@ H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(bkgr_buf_type);
-    HDassert(size);
+    assert(bkgr_buf_type);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode background buffer type */
@@ -530,9 +524,6 @@ H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -544,9 +535,9 @@ H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(bkgr_buf_type);
+    assert(pp);
+    assert(*pp);
+    assert(bkgr_buf_type);
 
     /* Decode background buffer type */
     *bkgr_buf_type = (H5T_bkg_t) * (*pp)++;
@@ -564,9 +555,6 @@ H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -578,23 +566,23 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(btree_split_ratio);
-    HDassert(size);
+    assert(btree_split_ratio);
+    assert(size);
 
     if (NULL != *pp) {
         /* Encode the size of a double*/
         *(*pp)++ = (uint8_t)sizeof(double);
 
         /* Encode the left split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
         btree_split_ratio++;
 
         /* Encode the middle split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
         btree_split_ratio++;
 
         /* Encode the right split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
     } /* end if */
 
     /* Size of B-tree split ratio values */
@@ -613,9 +601,6 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -629,9 +614,9 @@ H5P__dxfr_btree_split_ratio_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(btree_split_ratio);
+    assert(pp);
+    assert(*pp);
+    assert(btree_split_ratio);
 
     /* Decode the size */
     enc_size = *(*pp)++;
@@ -639,9 +624,9 @@ H5P__dxfr_btree_split_ratio_dec(const void **_pp, void *_value)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "double value can't be decoded")
 
     /* Decode the left, middle & left B-tree split ratios */
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[0])
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[1])
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[2])
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[0]);
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[1]);
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[2]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -655,9 +640,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -669,7 +651,7 @@ H5P__dxfr_xform_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
@@ -687,9 +669,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -701,7 +680,7 @@ H5P__dxfr_xform_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
@@ -721,9 +700,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Monday, August 6, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -740,7 +716,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(size);
+    assert(size);
 
     /* Check for data transform set */
     if (NULL != data_xform_prop) {
@@ -759,13 +735,13 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
         /* encode the length of the prefix */
         enc_value = (uint64_t)len;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
         if (NULL != data_xform_prop) {
             /* Sanity check */
-            HDassert(pexp);
+            assert(pexp);
 
             /* Copy the expression into the buffer */
             H5MM_memcpy(*pp, (const uint8_t *)pexp, len);
@@ -793,9 +769,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Monday, August 6, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -811,14 +784,14 @@ H5P__dxfr_xform_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(data_xform_prop);
+    assert(pp);
+    assert(*pp);
+    assert(data_xform_prop);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the length of xform expression */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     len = (size_t)enc_value;
 
@@ -841,10 +814,6 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -855,7 +824,7 @@ H5P__dxfr_xform_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(value);
+    assert(value);
 
     if (H5Z_xform_destroy(*(H5Z_data_xform_t **)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree")
@@ -872,10 +841,6 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -886,7 +851,7 @@ H5P__dxfr_xform_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
@@ -904,9 +869,6 @@ done:
  * Return: positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
  *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -922,9 +884,9 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(xform1);
-    HDassert(xform2);
-    HDassert(size == sizeof(H5Z_data_xform_t *));
+    assert(xform1);
+    assert(xform2);
+    assert(size == sizeof(H5Z_data_xform_t *));
 
     /* Check for a property being set */
     if (*xform1 == NULL && *xform2 != NULL)
@@ -933,7 +895,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
         HGOTO_DONE(1);
 
     if (*xform1) {
-        HDassert(*xform2);
+        assert(*xform2);
 
         /* Get the transform expressions */
         pexp1 = H5Z_xform_extract_xform_str(*xform1);
@@ -946,7 +908,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
             HGOTO_DONE(1);
 
         if (pexp1) {
-            HDassert(pexp2);
+            assert(pexp2);
             ret_value = HDstrcmp(pexp1, pexp2);
         } /* end if */
     }     /* end if */
@@ -962,10 +924,6 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -975,7 +933,7 @@ H5P__dxfr_xform_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED siz
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(value);
+    assert(value);
 
     if (H5Z_xform_destroy(*(H5Z_data_xform_t **)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree")
@@ -990,9 +948,6 @@ done:
  * Purpose:	Sets data transform expression.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Leon Arber
- *              Monday, March 07, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1055,9 +1010,6 @@ done:
  *  If a zero is returned for the name's length, then there is no name
  *  associated with the ID.
  *
- * Programmer:	Leon Arber
- *              August 27, 2004
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1116,9 +1068,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, March 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1158,9 +1107,6 @@ done:
  * Return:	Success:	Buffer size.
  *
  *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Monday, March 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1208,9 +1154,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Tuesday, March 17, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1244,9 +1187,6 @@ done:
  * Return:	Success:	TRUE or FALSE
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Tuesday, March 17, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1285,9 +1225,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1325,9 +1262,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 H5Z_EDC_t
@@ -1359,9 +1293,6 @@ done:
  *              if certain filter fails.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              Jan 14, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1399,9 +1330,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              April 15, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1437,9 +1365,6 @@ done:
  *              if there's exception during datatype conversion.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              April 15, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1478,9 +1403,6 @@ done:
  *				the non-null arguments.
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Monday, September 28, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1529,9 +1451,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, September 28, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1579,9 +1498,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1592,7 +1508,7 @@ H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t alloc_func, void
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(plist);
+    assert(plist);
 
     /* Update property list */
     if (H5P_set(plist, H5D_XFER_VLEN_ALLOC_NAME, &alloc_func) < 0)
@@ -1621,9 +1537,6 @@ done:
  *		call this routine with alloc_func and free_func set to NULL.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1655,9 +1568,6 @@ done:
  * Purpose:	The inverse of H5Pset_vlen_mem_manager()
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1708,9 +1618,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 9, 2001
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1744,9 +1651,6 @@ done:
  * Purpose:	Reads values previously set with H5Pset_hyper_vector_size().
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 9, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1782,9 +1686,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1796,8 +1697,8 @@ H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(xfer_mode);
-    HDassert(size);
+    assert(xfer_mode);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode I/O transfer mode */
@@ -1819,9 +1720,6 @@ H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1833,9 +1731,9 @@ H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(xfer_mode);
+    assert(pp);
+    assert(*pp);
+    assert(xfer_mode);
 
     /* Decode I/O transfer mode */
     *xfer_mode = (H5FD_mpio_xfer_t) * (*pp)++;
@@ -1853,9 +1751,6 @@ H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1868,8 +1763,8 @@ H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(coll_opt);
-    HDassert(size);
+    assert(coll_opt);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode MPI-I/O collective optimization property */
@@ -1891,9 +1786,6 @@ H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1906,9 +1798,9 @@ H5P__dxfr_mpio_collective_opt_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(coll_opt);
+    assert(pp);
+    assert(*pp);
+    assert(coll_opt);
 
     /* Decode MPI-I/O collective optimization mode */
     *coll_opt = (H5FD_mpio_collective_opt_t) * (*pp)++;
@@ -1926,9 +1818,6 @@ H5P__dxfr_mpio_collective_opt_dec(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1941,8 +1830,8 @@ H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(chunk_opt);
-    HDassert(size);
+    assert(chunk_opt);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode MPI-I/O chunk optimization property */
@@ -1964,9 +1853,6 @@ H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1978,9 +1864,9 @@ H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(chunk_opt);
+    assert(pp);
+    assert(*pp);
+    assert(chunk_opt);
 
     /* Decode MPI-I/O chunk optimization mode */
     *chunk_opt = (H5FD_mpio_chunk_opt_t) * (*pp)++;
@@ -1996,9 +1882,6 @@ H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
  * Purpose:	Retrieves the chunked io optimization scheme that library chose
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jacob Gruber
- *              Wednesday, May 4, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2033,9 +1916,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jacob Gruber
- *              Wednesday, May 4, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2067,8 +1947,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jonathan Kim
- *              Aug 3, 2012
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2108,9 +1986,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2122,8 +1997,8 @@ H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(check);
-    HDassert(size);
+    assert(check);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode EDC property */
@@ -2145,9 +2020,6 @@ H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2159,9 +2031,9 @@ H5P__dxfr_edc_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(check);
+    assert(pp);
+    assert(*pp);
+    assert(check);
 
     /* Decode EDC property */
     *check = (H5Z_EDC_t) * (*pp)++;
@@ -2175,9 +2047,6 @@ H5P__dxfr_edc_dec(const void **_pp, void *_value)
  * Purpose:     Creates a copy of the dataset I/O selection.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -2217,9 +2086,6 @@ done:
  * Return:      positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
  *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
  *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2232,9 +2098,9 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(space1);
-    HDassert(space1);
-    HDassert(size == sizeof(H5S_t *));
+    assert(space1);
+    assert(space1);
+    assert(size == sizeof(H5S_t *));
 
     /* Check for a property being set */
     if (*space1 == NULL && *space2 != NULL)
@@ -2243,7 +2109,7 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
         HGOTO_DONE(1);
 
     if (*space1) {
-        HDassert(*space2);
+        assert(*space2);
 
         /* Compare the extents of the dataspaces */
         /* (Error & not-equal count the same) */
@@ -2275,9 +2141,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2306,9 +2169,6 @@ done:
  * Return:      Success:	Non-negative
  *		        Failure:	Negative
  *
- * Programmer:  Vailin Choi
- *              Feb 2023
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2321,8 +2181,8 @@ H5P__dxfr_selection_io_mode_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(select_io_mode);
-    HDassert(size);
+    assert(select_io_mode);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode selection I/O mode property */
@@ -2344,9 +2204,6 @@ H5P__dxfr_selection_io_mode_enc(const void *value, void **_pp, size_t *size)
  * Return:      Success:	Non-negative
  *		        Failure:	Negative
  *
- * Programmer:  Vailin Choi
- *              Feb 2023
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2358,9 +2215,9 @@ H5P__dxfr_selection_io_mode_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(select_io_mode);
+    assert(pp);
+    assert(*pp);
+    assert(select_io_mode);
 
     /* Decode selection I/O mode property */
     *select_io_mode = (H5D_selection_io_mode_t) * (*pp)++;
@@ -2389,17 +2246,14 @@ H5P__dxfr_selection_io_mode_dec(const void **_pp, void *_value)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Saturday, January 30, 2021
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op, const hsize_t start[],
                                       const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5P_genplist_t *plist = NULL;                  /* Property list pointer */
-    H5S_t          *space;                         /* Dataspace to hold selection */
+    H5P_genplist_t *plist               = NULL;    /* Property list pointer */
+    H5S_t          *space               = NULL;    /* Dataspace to hold selection */
     hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
     hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
     herr_t          ret_value           = SUCCEED; /* return value */
@@ -2509,9 +2363,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Vailin Choi
- *              March 5, 2023
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2550,9 +2401,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Vailin Choi
- *              March 5, 2023
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2584,8 +2432,6 @@ done:
  *
  * Return:	    Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi
- *              April 17, 2023
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2631,8 +2477,8 @@ H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp /*out*/, size_t *si
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(modify_write_buf);
-    HDassert(size);
+    assert(modify_write_buf);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode modify write buf property.  Use "!!" so we always get 0 or 1 */
@@ -2665,9 +2511,9 @@ H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value /*out*/)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(modify_write_buf);
+    assert(pp);
+    assert(*pp);
+    assert(modify_write_buf);
 
     /* Decode selection I/O mode property */
     *modify_write_buf = (hbool_t) * (*pp)++;

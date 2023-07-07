@@ -24,7 +24,7 @@ static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const un
                                   size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
+static const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
     H5Z_CLASS_T_VERS,    /* H5Z_class_t version             */
     H5Z_FILTER_DYNLIBUD, /* Filter id number        */
     1, 1,                /* Encoding and decoding enabled   */

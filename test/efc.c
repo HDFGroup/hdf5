@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Neil Fortner
- *              December 16, 2010
- */
-
 #include "h5test.h"
 
 #define H5F_FRIEND /*suppress error about including H5Fpkg	  */
@@ -22,7 +18,7 @@
 #include "H5Iprivate.h"
 #include "H5Pprivate.h" /* Property lists                       */
 
-const char *FILENAME[] = {"efc0", "efc1", "efc2", "efc3", "efc4", "efc5", NULL};
+static const char *FILENAME[] = {"efc0", "efc1", "efc2", "efc3", "efc4", "efc5", NULL};
 
 /* Windows doesn't have PATH_MAX */
 #ifndef PATH_MAX
@@ -45,9 +41,6 @@ hid_t fapl_id = H5I_INVALID_HID;
  *
  * Return:      Success: 0
  *              Failure: Number of errors
- *
- * Programmer:  Neil Fortner
- *              December 16, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -470,9 +463,6 @@ error:
  * Return:      Success: 0
  *              Failure: Number of errors
  *
- * Programmer:  Neil Fortner
- *              January 4, 2011
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -792,9 +782,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: Number of errors
- *
- * Programmer:  Neil Fortner
- *              January 6, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2643,9 +2630,6 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Neil Fortner
- *              December 16, 2010
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2666,7 +2650,7 @@ main(void)
 
     /* Allocate memory for filenames */
     for (i = 0; i < N_FILENAMES; i++) {
-        filename[i] = (char *)HDcalloc(PATH_MAX, sizeof(char));
+        filename[i] = (char *)calloc(PATH_MAX, sizeof(char));
     }
 
     /* Patch filenames */
@@ -2716,7 +2700,7 @@ main(void)
     h5_clean_files(FILENAME, fapl_id);
 
     for (i = 0; i < N_FILENAMES; i++) {
-        HDfree(filename[i]);
+        free(filename[i]);
     }
 
     return EXIT_SUCCESS;
@@ -2734,7 +2718,7 @@ error:
         H5CX_pop(FALSE);
 
     for (i = 0; i < N_FILENAMES; i++) {
-        HDfree(filename[i]);
+        free(filename[i]);
     }
 
     return EXIT_FAILURE;

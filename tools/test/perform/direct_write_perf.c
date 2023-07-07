@@ -45,7 +45,7 @@
 #include <unistd.h>
 #endif
 
-const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
+static const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
 
 /*
  * Print the current location on the standard output stream.
@@ -272,7 +272,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -338,7 +338,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -403,7 +403,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -495,7 +495,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -587,7 +587,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -693,7 +693,7 @@ main(void)
 int
 main(void)
 {
-    HDfprintf(stdout, "No compression IO performance because zlib was not configured\n");
+    fprintf(stdout, "No compression IO performance because zlib was not configured\n");
     return EXIT_SUCCESS;
 }
 

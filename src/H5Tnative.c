@@ -62,9 +62,6 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Oct 3, 2002
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -110,9 +107,6 @@ done:
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Oct 3, 2002
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -141,7 +135,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(dtype);
+    assert(dtype);
 
     if (H5T_NO_CLASS == (h5_class = H5T_get_class(dtype, FALSE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class")
@@ -542,9 +536,6 @@ H5_GCC_DIAG_OFF("duplicated-branches")
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Oct 3, 2002
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -668,7 +659,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
     } /* end switch */
 
     /* Create new native type */
-    HDassert(tid >= 0);
+    assert(tid >= 0);
     if (NULL == (dt = (H5T_t *)H5I_object(tid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
 
@@ -701,9 +692,6 @@ H5_GCC_DIAG_OFF("duplicated-branches")
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Oct 3, 2002
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -724,7 +712,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(size > 0);
+    assert(size > 0);
 
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if (size <= sizeof(float)) {
@@ -782,7 +770,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     } /* end switch */
 
     /* Create new native type */
-    HDassert(tid >= 0);
+    assert(tid >= 0);
     if (NULL == (dt = (H5T_t *)H5I_object(tid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
     if ((ret_value = H5T_copy(dt, H5T_COPY_TRANSIENT)) == NULL)
@@ -814,9 +802,6 @@ H5_GCC_DIAG_OFF("duplicated-branches")
  * Return:      Success:        Returns the native data type if successful.
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              1 December 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -883,7 +868,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
     }
 
     /* Create new native type */
-    HDassert(tid >= 0);
+    assert(tid >= 0);
     if (NULL == (dt = (H5T_t *)H5I_object(tid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
 
@@ -909,9 +894,6 @@ H5_GCC_DIAG_ON("duplicated-branches")
  * Return:    Success:        Non-negative value.
  *
  *            Failure:        Negative value.
- *
- * Programmer:    Raymond Lu
- *        December  10, 2002
  *
  *-------------------------------------------------------------------------
  */

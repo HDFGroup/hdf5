@@ -23,7 +23,7 @@
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 /* Filename: this is the same as the define in accum.c used by test_swmr_write_big() */
-const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
+static const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -88,7 +88,7 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */
-    if (HDmemcmp(buf, rbuf, (size_t)1024) != 0)
+    if (memcmp(buf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
 
     /* CLose the file */
@@ -110,7 +110,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

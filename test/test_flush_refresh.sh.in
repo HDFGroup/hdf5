@@ -22,9 +22,6 @@
 # and doing the verification that individual objects are being
 # correctly flushed).
 #
-# Programmer:
-#   Mike McGreevy
-#   Tuesday, July 20, 2010
 
 ###############################################################################
 ## test variables

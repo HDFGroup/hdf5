@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Raymond Lu
- *              Jan 3, 2003
- */
-
 #include "H5Zmodule.h" /* This source code file is part of the H5Z module */
 
 #include "H5private.h"   /* Generic Functions			*/
@@ -49,9 +44,6 @@ const H5Z_class2_t H5Z_FLETCHER32[1] = {{
  * Return:	Success: Size of buffer filtered
  *		Failure: 0
  *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -68,7 +60,7 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(sizeof(uint32_t) >= 4);
+    assert(sizeof(uint32_t) >= 4);
 
     if (flags & H5Z_FLAG_REVERSE) { /* Read */
         /* Do checksum if it's enabled for read; otherwise skip it

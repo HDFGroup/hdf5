@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Fspace.c
- *			Dec 30 2013
- *			Quincey Koziol
  *
  * Purpose:		Space allocation routines for the file.
  *
@@ -76,9 +74,6 @@
  * Return:      Success:    The format address of the new file memory.
  *              Failure:    The undefined address HADDR_UNDEF
  *
- * Programmer:  Quincey Koziol
- *              Monday, December 30, 2013
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -89,11 +84,11 @@ H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Check whether the file can use temporary addresses */
     if (f->shared->use_tmp_space) {
@@ -104,14 +99,14 @@ H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa")
 
         /* Check for overlapping into file's temporary allocation space */
-        if (H5F_addr_gt((eoa + size), f->shared->tmp_addr))
+        if (H5_addr_gt((eoa + size), f->shared->tmp_addr))
             HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, HADDR_UNDEF,
                         "'normal' file space allocation request will overlap into 'temporary' file space")
     } /* end if */
 
     /* Call the file driver 'alloc' routine */
     ret_value = H5FD_alloc(f->shared->lf, type, f, size, frag_addr, frag_size);
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, HADDR_UNDEF, "file driver 'alloc' request failed")
 
     /* Mark EOA dirty */
@@ -135,9 +130,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, December 30, 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -148,11 +140,11 @@ H5F__free(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Call the file driver 'free' routine */
     if (H5FD_free(f->shared->lf, type, f, addr, size) < 0)
@@ -179,9 +171,6 @@ done:
  *                              FALSE(0) - Block could not be extended
  * 		Failure:	FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, 30 December, 2013
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -192,11 +181,11 @@ H5F__try_extend(H5F_t *f, H5FD_mem_t type, haddr_t blk_end, hsize_t extra_reques
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(extra_requested > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(extra_requested > 0);
 
     /* Extend the object by extending the underlying file */
     if ((ret_value = H5FD_try_extend(f->shared->lf, type, f, blk_end, extra_requested)) < 0)

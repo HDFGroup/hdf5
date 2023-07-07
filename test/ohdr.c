@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- */
 #include "h5test.h"
 
 #include "H5CXprivate.h" /* API Contexts                             */
@@ -40,7 +37,7 @@
 #define H5FD_TESTING
 #include "H5FDpkg.h"
 
-const char *FILENAME[] = {"ohdr", "ohdr_min_a", "ohdr_min_b", NULL};
+static const char *FILENAME[] = {"ohdr", "ohdr_min_a", "ohdr_min_b", NULL};
 
 /* used for object header size comparison */
 #define EQ 1
@@ -82,8 +79,8 @@ test_cont(char *filename, hid_t fapl)
 
     TESTING("object header continuation block");
 
-    HDmemset(&oh_locA, 0, sizeof(oh_locA));
-    HDmemset(&oh_locB, 0, sizeof(oh_locB));
+    memset(&oh_locA, 0, sizeof(oh_locA));
+    memset(&oh_locB, 0, sizeof(oh_locB));
 
     /* Create the file to operate on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -168,7 +165,7 @@ error:
         H5O_close(&oh_locB, NULL);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_cont() */
@@ -230,7 +227,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Create an object header */
-    HDmemset(&oh_loc, 0, sizeof(oh_loc));
+    memset(&oh_loc, 0, sizeof(oh_loc));
     if (H5O_create(f, (size_t)2048, (size_t)1, H5P_GROUP_CREATE_DEFAULT, &oh_loc /*out*/) < 0)
         FAIL_STACK_ERROR;
 
@@ -306,7 +303,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_ohdr_cache() */
@@ -360,7 +357,7 @@ test_ohdr_swmr(hbool_t new_format)
     } /* end else */
 
     /* Initialize data */
-    wbuf = (int *)HDcalloc(compact_size, sizeof(int));
+    wbuf = (int *)calloc(compact_size, sizeof(int));
     n    = 0;
     for (u = 0; u < compact_size; u++)
         wbuf[u] = n++;
@@ -440,7 +437,7 @@ test_ohdr_swmr(hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Free the buffer */
-    HDfree(wbuf);
+    free(wbuf);
 
     PASSED();
 
@@ -455,9 +452,9 @@ error:
         H5Pclose(plist);
         H5Pclose(fapl);
         HDremove(FILE_OHDR_SWMR);
-        HDfree(wbuf);
+        free(wbuf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_ohdr_swmr() */
@@ -496,7 +493,7 @@ test_ohdr_badness(hid_t fapl)
          */
         fid = H5Fopen(CVE_2020_10810_FILENAME, H5F_ACC_RDWR, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (fid >= 0)
         FAIL_PUTS_ERROR("should not have been able to open malformed file");
@@ -510,7 +507,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -615,7 +612,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     {
         did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did >= 0) {
         H5Dclose(did);
         TEST_ERROR;
@@ -782,7 +779,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     {
         did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did >= 0) {
         H5Dclose(did);
         TEST_ERROR;
@@ -797,7 +794,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     {
         did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did >= 0) {
         H5Dclose(did);
         TEST_ERROR;
@@ -825,7 +822,7 @@ error:
         H5Sclose(sid);
         H5Aclose(aid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_unknown() */
@@ -949,9 +946,9 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
      **********************************************/
 
     buf_size = HDstrlen(ATTR_LONG) + 1;
-    if (NULL == (in_buf = (char *)HDcalloc(buf_size, sizeof(char))))
+    if (NULL == (in_buf = (char *)calloc(buf_size, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (out_buf = (char *)HDcalloc(buf_size, sizeof(char))))
+    if (NULL == (out_buf = (char *)calloc(buf_size, sizeof(char))))
         TEST_ERROR;
 
     /* Create a string attribute on the dataset
@@ -982,7 +979,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
         TEST_ERROR;
 
     /* modify the string attribute */
-    HDmemset(in_buf, 0, buf_size);
+    memset(in_buf, 0, buf_size);
     HDstrcpy(in_buf, ATTR_LONG);
     if (H5Awrite(aid, H5T_NATIVE_CHAR, in_buf) < 0)
         TEST_ERROR;
@@ -1052,8 +1049,8 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
         TEST_ERROR;
 
     /* Free memory */
-    HDfree(in_buf);
-    HDfree(out_buf);
+    free(in_buf);
+    free(out_buf);
 
     PASSED();
     return SUCCEED;
@@ -1067,10 +1064,10 @@ error:
         (void)H5Aclose(aid);
         (void)H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(in_buf);
-    HDfree(out_buf);
+    free(in_buf);
+    free(out_buf);
 
     return FAIL;
 } /* test_minimized_dset_ohdr_attribute_addition */
@@ -1298,7 +1295,7 @@ error:
         (void)H5Dclose(dset_F_N_id);
         (void)H5Dclose(dset_F_Y_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_minimized_dset_ohdr_size_comparisons */
 
@@ -1454,7 +1451,7 @@ error:
         (void)H5Dclose(dset_mZ_id);
         (void)H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_minimized_dset_ohdr_with_filter */
 
@@ -1676,7 +1673,7 @@ error:
         (void)H5Fclose(file_id);
         (void)H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_minimized_dset_ohdr_modification_times */
 
@@ -1810,7 +1807,7 @@ error:
         (void)H5Dclose(dset_1_id);
         (void)H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_minimized_dset_ohdr_fillvalue_backwards_compatability */
 
@@ -1821,9 +1818,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: 1
- *
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1874,7 +1868,7 @@ main(void)
             {
                 ret = H5Pset_libver_bounds(fapl, low, high);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
                 continue;
@@ -1905,7 +1899,7 @@ main(void)
              * (using default group creation property list only because it's convenient)
              */
             TESTING("object header creation");
-            HDmemset(&oh_loc, 0, sizeof(oh_loc));
+            memset(&oh_loc, 0, sizeof(oh_loc));
             if (H5O_create(f, (size_t)64, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_loc /*out*/) < 0)
                 FAIL_STACK_ERROR;
             PASSED();
@@ -2070,7 +2064,7 @@ main(void)
             {
                 ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             if (H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE) < 0)
@@ -2163,7 +2157,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

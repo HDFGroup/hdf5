@@ -91,9 +91,6 @@ static const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
  *
  * Return:    ID of the opened object on success/H5I_INVALID_HID on failure
  *
- * Programmer:    James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -124,7 +121,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(p);
+    assert(p);
 
     /* Check external link version & flags */
     if (((*p >> 4) & 0x0F) > H5L_EXT_VERSION)
@@ -268,9 +265,6 @@ done:
  *
  * Return:    Size of buffer on success/Negative on failure
  *
- * Programmer:    James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static ssize_t
@@ -313,9 +307,6 @@ done:
  *              after users change it.
  *
  * Return: Non-negative on success/ negative on failure
- *
- * Programmer:  James Laird
- *              Monday, July 17, 2006
  *
  *-------------------------------------------------------------------------
  */

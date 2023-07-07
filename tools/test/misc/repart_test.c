@@ -22,8 +22,8 @@
 #define FAMILY_H5REPART_SIZE1 20000
 #define FAMILY_H5REPART_SIZE2 (5 * KB)
 
-const char *FILENAME[] = {"fst_family%05d.h5", "scd_family%05d.h5", "family_to_single.h5",
-                          "family_to_sec2.h5", NULL};
+static const char *FILENAME[] = {"fst_family%05d.h5", "scd_family%05d.h5", "family_to_single.h5",
+                                 "family_to_sec2.h5", NULL};
 
 herr_t test_family_h5repart_opens(void);
 herr_t test_single_h5repart_opens(void);
@@ -77,7 +77,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -116,7 +116,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -142,10 +142,10 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d FAMILY FILE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    HDexit(EXIT_FAILURE);
+    printf("***** %d FAMILY FILE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    exit(EXIT_FAILURE);
 } /* end main() */

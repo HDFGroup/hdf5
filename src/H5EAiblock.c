@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAiblock.c
- *			Sep  9 2008
- *			Quincey Koziol
  *
  * Purpose:		Index block routines for extensible arrays.
  *
@@ -85,9 +83,6 @@ H5FL_SEQ_DEFINE_STATIC(haddr_t);
  *
  * Return:	Non-NULL pointer to index block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_iblock_t *
@@ -99,7 +94,7 @@ H5EA__iblock_alloc(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Allocate memory for the index block */
     if (NULL == (iblock = H5FL_CALLOC(H5EA_iblock_t)))
@@ -156,9 +151,6 @@ done:
  *
  * Return:	Valid file address on success/HADDR_UNDEF on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -172,8 +164,8 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, hbool_t *stats_changed)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(stats_changed);
+    assert(hdr);
+    assert(stats_changed);
 
     /* Allocate the index block */
     if (NULL == (iblock = H5EA__iblock_alloc(hdr)))
@@ -228,8 +220,8 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, hbool_t *stats_changed)
     } /* end if */
 
     /* Update extensible array index block statistics */
-    HDassert(0 == hdr->stats.computed.nindex_blks);
-    HDassert(0 == hdr->stats.computed.index_blk_size);
+    assert(0 == hdr->stats.computed.nindex_blks);
+    assert(0 == hdr->stats.computed.index_blk_size);
     hdr->stats.computed.nindex_blks    = 1;
     hdr->stats.computed.index_blk_size = iblock->size;
 
@@ -243,7 +235,7 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, hbool_t *stats_changed)
     ret_value = iblock_addr;
 
 done:
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (iblock) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -252,7 +244,7 @@ done:
                                 "unable to remove extensible array index block from cache")
 
             /* Release index block's disk space */
-            if (H5F_addr_defined(iblock->addr) &&
+            if (H5_addr_defined(iblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_IBLOCK, iblock->addr, (hsize_t)iblock->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
                             "unable to release file space for extensible array index block")
@@ -273,9 +265,6 @@ done:
  *
  * Return:	Non-NULL pointer to index block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_iblock_t *
@@ -287,10 +276,10 @@ H5EA__iblock_protect(H5EA_hdr_t *hdr, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* only the H5AC__READ_ONLY_FLAG may be set */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Protect the index block */
     if (NULL ==
@@ -332,9 +321,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -345,7 +331,7 @@ H5EA__iblock_unprotect(H5EA_iblock_t *iblock, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(iblock);
+    assert(iblock);
 
     /* Unprotect the index block */
     if (H5AC_unprotect(iblock->hdr->f, H5AC_EARRAY_IBLOCK, iblock->addr, iblock, cache_flags) < 0)
@@ -364,9 +350,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -378,8 +361,8 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->idx_blk_addr));
+    assert(hdr);
+    assert(H5_addr_defined(hdr->idx_blk_addr));
 
     /* Protect index block */
     if (NULL == (iblock = H5EA__iblock_protect(hdr, H5AC__NO_FLAGS_SET)))
@@ -397,7 +380,7 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
         sblk_idx = dblk_idx = 0;
         for (u = 0; u < iblock->ndblk_addrs; u++) {
             /* Check for data block existing */
-            if (H5F_addr_defined(iblock->dblk_addrs[u])) {
+            if (H5_addr_defined(iblock->dblk_addrs[u])) {
                 /* Delete data block */
                 if (H5EA__dblock_delete(hdr, iblock, iblock->dblk_addrs[u],
                                         hdr->sblk_info[sblk_idx].dblk_nelmts) < 0)
@@ -424,7 +407,7 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
         /* Iterate over super blocks */
         for (u = 0; u < iblock->nsblk_addrs; u++) {
             /* Check for data block existing */
-            if (H5F_addr_defined(iblock->sblk_addrs[u])) {
+            if (H5_addr_defined(iblock->sblk_addrs[u])) {
                 /* Delete super block */
                 if (H5EA__sblock_delete(hdr, iblock, iblock->sblk_addrs[u], (unsigned)(u + iblock->nsblks)) <
                     0)
@@ -451,9 +434,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -464,21 +444,21 @@ H5EA__iblock_dest(H5EA_iblock_t *iblock)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(iblock);
+    assert(iblock);
 
     /* Check if shared header field has been initialized */
     if (iblock->hdr) {
         /* Check if we've got elements in the index block */
         if (iblock->elmts) {
             /* Free buffer for index block elements */
-            HDassert(iblock->hdr->cparam.idx_blk_elmts > 0);
+            assert(iblock->hdr->cparam.idx_blk_elmts > 0);
             iblock->elmts = H5FL_BLK_FREE(idx_blk_elmt_buf, iblock->elmts);
         } /* end if */
 
         /* Check if we've got data block addresses in the index block */
         if (iblock->dblk_addrs) {
             /* Free buffer for index block data block addresses */
-            HDassert(iblock->ndblk_addrs > 0);
+            assert(iblock->ndblk_addrs > 0);
             iblock->dblk_addrs  = H5FL_SEQ_FREE(haddr_t, iblock->dblk_addrs);
             iblock->ndblk_addrs = 0;
         } /* end if */
@@ -486,7 +466,7 @@ H5EA__iblock_dest(H5EA_iblock_t *iblock)
         /* Check if we've got super block addresses in the index block */
         if (iblock->sblk_addrs) {
             /* Free buffer for index block super block addresses */
-            HDassert(iblock->nsblk_addrs > 0);
+            assert(iblock->nsblk_addrs > 0);
             iblock->sblk_addrs  = H5FL_SEQ_FREE(haddr_t, iblock->sblk_addrs);
             iblock->nsblk_addrs = 0;
         } /* end if */
@@ -499,7 +479,7 @@ H5EA__iblock_dest(H5EA_iblock_t *iblock)
     } /* end if */
 
     /* Sanity check */
-    HDassert(NULL == iblock->top_proxy);
+    assert(NULL == iblock->top_proxy);
 
     /* Free the index block itself */
     iblock = H5FL_FREE(H5EA_iblock_t, iblock);

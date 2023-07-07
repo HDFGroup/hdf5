@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Gint.c
- *		April 5 2007
- *		Quincey Koziol
  *
  * Purpose:	General use, "internal" routines for groups.
  *
@@ -146,9 +144,6 @@ done:
  *				affect other interfaces; zero otherwise.
  * 		Failure:	Negative.
  *
- * Programmer:	Quincey Koziol
- *		Sunday, September	13, 2015
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -178,9 +173,6 @@ H5G_top_term_package(void)
  *				affect other interfaces; zero otherwise.
  * 		Failure:	Negative.
  *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -191,7 +183,7 @@ H5G_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(0 == H5I_nmembers(H5I_GROUP));
+    assert(0 == H5I_nmembers(H5I_GROUP));
 
     /* Destroy the group object id group */
     n += (H5I_dec_type_ref(H5I_GROUP) > 0);
@@ -216,7 +208,7 @@ H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(grp_vol_obj);
+    assert(grp_vol_obj);
 
     /* Close the group */
     if (H5VL_group_close(grp_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
@@ -239,9 +231,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:  Quincey Koziol
- *	        April 5, 2007
- *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -254,15 +243,15 @@ H5G__create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id, hid_t g
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(lcpl_id != H5P_DEFAULT);
-    HDassert(gcpl_id != H5P_DEFAULT);
+    assert(loc);
+    assert(name && *name);
+    assert(lcpl_id != H5P_DEFAULT);
+    assert(gcpl_id != H5P_DEFAULT);
 
     /* Set up group creation info */
     gcrt_info.gcpl_id    = gcpl_id;
     gcrt_info.cache_type = H5G_NOTHING_CACHED;
-    HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+    memset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
 
     /* Set up object creation information */
     ocrt_info.obj_type = H5O_TYPE_GROUP;
@@ -272,7 +261,7 @@ H5G__create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id, hid_t g
     /* Create the new group and link it to its parent group */
     if (H5L_link_object(loc, name, &ocrt_info, lcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create and link to group")
-    HDassert(ocrt_info.new_obj);
+    assert(ocrt_info.new_obj);
 
     /* Set the return value */
     ret_value = (H5G_t *)ocrt_info.new_obj;
@@ -293,9 +282,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *		Aug 11 1997
- *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -308,8 +294,8 @@ H5G__create(H5F_t *file, H5G_obj_create_t *gcrt_info)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(file);
-    HDassert(gcrt_info->gcpl_id != H5P_DEFAULT);
+    assert(file);
+    assert(gcrt_info->gcpl_id != H5P_DEFAULT);
 
     /* create an open group */
     if (NULL == (grp = H5FL_CALLOC(H5G_t)))
@@ -364,9 +350,6 @@ done:
  * Return:	Success:	Ptr to a new group.
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *		Monday, August	27, 2007
- *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -383,8 +366,8 @@ H5G__open_name(const H5G_loc_t *loc, const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(loc);
-    HDassert(name);
+    assert(loc);
+    assert(name);
 
     /* Set up opened group location to fill in */
     grp_loc.oloc = &grp_oloc;
@@ -427,9 +410,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -442,7 +422,7 @@ H5G_open(const H5G_loc_t *loc)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
-    HDassert(loc);
+    assert(loc);
 
     /* Allocate the group structure */
     if (NULL == (grp = H5FL_CALLOC(H5G_t)))
@@ -519,9 +499,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *	    Wednesday, March	17, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -533,7 +510,7 @@ H5G__open_oid(H5G_t *grp)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(grp);
+    assert(grp);
 
     /* Allocate the shared information for the group */
     if (NULL == (grp->shared = H5FL_CALLOC(H5G_shared_t)))
@@ -566,9 +543,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -581,13 +555,13 @@ H5G_close(H5G_t *grp)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(grp && grp->shared);
-    HDassert(grp->shared->fo_count > 0);
+    assert(grp && grp->shared);
+    assert(grp->shared->fo_count > 0);
 
     --grp->shared->fo_count;
 
     if (0 == grp->shared->fo_count) {
-        HDassert(grp != H5G_rootof(H5G_fileof(grp)));
+        assert(grp != H5G_rootof(H5G_fileof(grp)));
 
         /* Uncork cache entries with object address tag */
         if (H5AC_cork(grp->oloc.file, grp->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
@@ -660,9 +634,6 @@ done:
  * Return:	Success:	Ptr to group entry
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *              Tuesday, March 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5O_loc_t *
@@ -681,9 +652,6 @@ H5G_oloc(H5G_t *grp)
  *
  * Return:	Success:	Ptr to hier. name
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Monday, September 12, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -705,9 +673,6 @@ H5G_nameof(H5G_t *grp)
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *              Tuesday, March 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -716,7 +681,7 @@ H5G_fileof(H5G_t *grp)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(grp);
+    assert(grp);
 
     FUNC_LEAVE_NOAPI(grp->oloc.file)
 } /* end H5G_fileof() */
@@ -728,9 +693,6 @@ H5G_fileof(H5G_t *grp)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, July	 5, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -739,7 +701,7 @@ H5G_get_shared_count(H5G_t *grp)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(grp && grp->shared);
+    assert(grp && grp->shared);
 
     FUNC_LEAVE_NOAPI(grp->shared->fo_count)
 } /* end H5G_get_shared_count() */
@@ -751,9 +713,6 @@ H5G_get_shared_count(H5G_t *grp)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -762,8 +721,8 @@ H5G_mount(H5G_t *grp)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(grp && grp->shared);
-    HDassert(grp->shared->mounted == FALSE);
+    assert(grp && grp->shared);
+    assert(grp->shared->mounted == FALSE);
 
     /* Set the 'mounted' flag */
     grp->shared->mounted = TRUE;
@@ -778,9 +737,6 @@ H5G_mount(H5G_t *grp)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, July 15, 2008
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -789,7 +745,7 @@ H5G_mounted(H5G_t *grp)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(grp && grp->shared);
+    assert(grp && grp->shared);
 
     FUNC_LEAVE_NOAPI(grp->shared->mounted)
 } /* end H5G_mounted() */
@@ -801,9 +757,6 @@ H5G_mounted(H5G_t *grp)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -812,8 +765,8 @@ H5G_unmount(H5G_t *grp)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(grp && grp->shared);
-    HDassert(grp->shared->mounted == TRUE);
+    assert(grp && grp->shared);
+    assert(grp->shared->mounted == TRUE);
 
     /* Reset the 'mounted' flag */
     grp->shared->mounted = FALSE;
@@ -829,9 +782,6 @@ H5G_unmount(H5G_t *grp)
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Oct  3, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -843,8 +793,8 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(lnk);
-    HDassert(udata);
+    assert(lnk);
+    assert(udata);
 
     switch (udata->lnk_op.op_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -866,7 +816,7 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
         } break;
 
         default:
-            HDassert(0 && "Unknown link op type?!?");
+            assert(0 && "Unknown link op type?!?");
     } /* end switch */
 
 done:
@@ -879,9 +829,6 @@ done:
  * Purpose:     Private function for iterating over links in a group
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Oct  3, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -897,10 +844,10 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(group_name);
-    HDassert(last_lnk);
-    HDassert(lnk_op && lnk_op->op_func.op_new);
+    assert(loc);
+    assert(group_name);
+    assert(last_lnk);
+    assert(lnk_op && lnk_op->op_func.op_new);
 
     /* Open the group on which to operate.  We also create a group ID which
      * we can pass to the application-defined operator.
@@ -940,9 +887,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *	        Nov  4, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -963,9 +907,6 @@ H5G__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSE
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Nov  4, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -985,8 +926,8 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(lnk);
-    HDassert(udata);
+    assert(lnk);
+    assert(udata);
 
     /* Check if we will need more space to store this link's relative path */
     /* ("+2" is for string terminator and possible '/' for group separator later) */
@@ -1003,7 +944,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
     } /* end if */
 
     /* Build the link's relative path name */
-    HDassert(udata->path[old_path_len] == '\0');
+    assert(udata->path[old_path_len] == '\0');
     HDstrncpy(&(udata->path[old_path_len]), lnk->name, link_name_len + 1);
     udata->curr_path_len += link_name_len;
 
@@ -1068,7 +1009,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
                 htri_t      linfo_exists;               /* Whether the link info message exists */
 
                 /* Add the path separator to the current path */
-                HDassert(udata->path[udata->curr_path_len] == '\0');
+                assert(udata->path[udata->curr_path_len] == '\0');
                 HDstrncpy(&(udata->path[udata->curr_path_len]), "/", (size_t)2);
                 udata->curr_path_len++;
 
@@ -1084,7 +1025,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
                             idx_type = H5_INDEX_NAME;
                     } /* end if */
                     else
-                        HDassert(idx_type == H5_INDEX_NAME);
+                        assert(idx_type == H5_INDEX_NAME);
                 } /* end if */
                 else {
                     /* Can only perform name lookups on groups with symbol tables */
@@ -1157,7 +1098,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_o
     herr_t              ret_value = FAIL;      /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1229,7 +1170,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_o
                 idx_type = H5_INDEX_NAME;
         } /* end if */
         else
-            HDassert(idx_type == H5_INDEX_NAME);
+            assert(idx_type == H5_INDEX_NAME);
     } /* end if */
     else {
         /* Can only perform name lookups on groups with symbol tables */
@@ -1270,9 +1211,6 @@ done:
  *				released by calling H5Pclose().
  *
  *		Failure:	H5I_INVALID_HID
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1361,9 +1299,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 18, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1378,8 +1313,8 @@ H5G__get_info_by_name(const H5G_loc_t *loc, const char *name, H5G_info_t *grp_in
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(grp_info);
+    assert(loc);
+    assert(grp_info);
 
     /* Set up opened group location to fill in */
     grp_loc.oloc = &grp_oloc;
@@ -1410,9 +1345,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 18, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1428,8 +1360,8 @@ H5G__get_info_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(grp_info);
+    assert(loc);
+    assert(grp_info);
 
     /* Set up opened group location to fill in */
     grp_loc.oloc = &grp_oloc;

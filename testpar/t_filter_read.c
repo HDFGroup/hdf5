@@ -14,8 +14,6 @@
  * This verifies the correctness of parallel reading of a dataset that has been
  * written serially using filters.
  *
- * Created by: Christian Chilan
- * Date: 2007/05/15
  */
 
 #include "testphdf5.h"
@@ -41,10 +39,6 @@ static int mpi_size, mpi_rank;
  * Purpose:     Tests parallel reading of a 2D dataset written serially using
  *              filters. During the parallel reading phase, the dataset is
  *              divided evenly among the processors in vertical hyperslabs.
- *
- * Programmer:  Christian Chilan
- *              Tuesday, May 15, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -80,11 +74,11 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     VRFY(sid >= 0, "H5Screate_simple");
 
     /* Create buffers */
-    points = (int *)HDmalloc(size[0] * size[1] * sizeof(int));
-    VRFY(points != NULL, "HDmalloc");
+    points = (int *)malloc(size[0] * size[1] * sizeof(int));
+    VRFY(points != NULL, "malloc");
 
-    check = (int *)HDmalloc(hs_size[0] * hs_size[1] * sizeof(int));
-    VRFY(check != NULL, "HDmalloc");
+    check = (int *)malloc(hs_size[0] * hs_size[1] * sizeof(int));
+    VRFY(check != NULL, "malloc");
 
     /* Initialize writing buffer with random data */
     for (i = 0; i < size[0]; i++)
@@ -146,12 +140,11 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     for (i = 0; i < hs_size[0]; i++) {
         for (j = 0; j < hs_size[1]; j++) {
             if (points[i * size[1] + (size_t)hs_offset[1] + j] != check[i * hs_size[1] + j]) {
-                HDfprintf(stderr, "    Read different values than written.\n");
-                HDfprintf(stderr, "    At index %lu,%lu\n", (unsigned long)(i),
-                          (unsigned long)(hs_offset[1] + j));
-                HDfprintf(stderr, "    At original: %d\n",
-                          (int)points[i * size[1] + (size_t)hs_offset[1] + j]);
-                HDfprintf(stderr, "    At returned: %d\n", (int)check[i * hs_size[1] + j]);
+                fprintf(stderr, "    Read different values than written.\n");
+                fprintf(stderr, "    At index %lu,%lu\n", (unsigned long)(i),
+                        (unsigned long)(hs_offset[1] + j));
+                fprintf(stderr, "    At original: %d\n", (int)points[i * size[1] + (size_t)hs_offset[1] + j]);
+                fprintf(stderr, "    At returned: %d\n", (int)check[i * hs_size[1] + j]);
                 VRFY(FALSE, "");
             }
         }
@@ -177,8 +170,8 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     hrc = H5Fclose(file);
     VRFY(hrc >= 0, "H5Fclose");
 
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -188,10 +181,6 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
  *
  * Purpose:    Tests parallel reading of datasets written serially using
  *              several (combinations of) filters.
- *
- * Programmer:    Christian Chilan
- *              Tuesday, May 15, 2007
- *
  *-------------------------------------------------------------------------
  */
 
@@ -228,7 +217,7 @@ test_filter_read(void)
     filename = GetTestParameters();
 
     if (VERBOSE_MED)
-        HDprintf("Parallel reading of dataset written with filters %s\n", filename);
+        printf("Parallel reading of dataset written with filters %s\n", filename);
 
     /*----------------------------------------------------------
      * STEP 0: Test without filters.

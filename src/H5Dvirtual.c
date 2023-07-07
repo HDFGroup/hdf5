@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              Wednesday, January 28, 2015
- *
  * Purpose:
  *      Virtual Dataset (VDS) functions.  Creates a layout type which allows
  *      definition of a virtual dataset, where the actual dataset is stored in
@@ -150,9 +147,6 @@ H5FL_DEFINE_STATIC(H5D_virtual_held_file_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              August 12, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -224,9 +218,6 @@ done:
  *              legal, after the mapping is otherwise complete.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              August 12, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -301,9 +292,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -320,9 +308,9 @@ H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(layout);
-    HDassert(layout->type == H5D_VIRTUAL);
-    HDassert(idx < virt->list_nalloc);
+    assert(layout);
+    assert(layout->type == H5D_VIRTUAL);
+    assert(idx < virt->list_nalloc);
 
     /* Get type of selection */
     if (H5S_SEL_ERROR == (sel_type = H5S_GET_SELECT_TYPE(ent->source_dset.virtual_select)))
@@ -358,9 +346,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              August 13, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -373,9 +358,9 @@ H5D_virtual_check_min_dims(const H5D_t *dset)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(dset);
-    HDassert(dset->shared);
-    HDassert(dset->shared->layout.type == H5D_VIRTUAL);
+    assert(dset);
+    assert(dset->shared);
+    assert(dset->shared->layout.type == H5D_VIRTUAL);
 
     /* Get rank of dataspace */
     if ((rank = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
@@ -408,9 +393,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sunday, Feberuary 11, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -429,9 +411,9 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
-    HDassert(f);
-    HDassert(layout);
-    HDassert(virt->serial_list_hobjid.addr == HADDR_UNDEF);
+    assert(f);
+    assert(layout);
+    assert(virt->serial_list_hobjid.addr == HADDR_UNDEF);
 
     /* Create block if # of used entries > 0 */
     if (virt->list_nused > 0) {
@@ -455,10 +437,10 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
             H5O_storage_virtual_ent_t *ent = &virt->list[i];
             hssize_t                   select_serial_size; /* Size of serialized selection */
 
-            HDassert(ent->source_file_name);
-            HDassert(ent->source_dset_name);
-            HDassert(ent->source_select);
-            HDassert(ent->source_dset.virtual_select);
+            assert(ent->source_file_name);
+            assert(ent->source_dset_name);
+            assert(ent->source_select);
+            assert(ent->source_dset.virtual_select);
 
             /* Source file name */
             str_size[2 * i] = HDstrlen(ent->source_file_name) + (size_t)1;
@@ -496,7 +478,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Number of entries */
         tmp_nentries = (hsize_t)virt->list_nused;
-        H5F_ENCODE_LENGTH(f, heap_block_p, tmp_nentries)
+        H5F_ENCODE_LENGTH(f, heap_block_p, tmp_nentries);
 
         /* Encode each entry */
         for (i = 0; i < virt->list_nused; i++) {
@@ -520,7 +502,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Checksum */
         chksum = H5_checksum_metadata(heap_block, block_size - (size_t)4, 0);
-        UINT32ENCODE(heap_block_p, chksum)
+        UINT32ENCODE(heap_block_p, chksum);
 
         /* Insert block into global heap */
         if (H5HG_insert(f, block_size, heap_block, &(virt->serial_list_hobjid)) < 0)
@@ -544,9 +526,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -562,8 +541,8 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(layout);
-    HDassert(layout->type == H5D_VIRTUAL);
+    assert(layout);
+    assert(layout->type == H5D_VIRTUAL);
 
     /* Save original entry list and top-level property lists and reset in layout
      * so the originals aren't closed on error */
@@ -576,7 +555,7 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
 
     /* Copy entry list */
     if (virt->list_nused > 0) {
-        HDassert(orig_list);
+        assert(orig_list);
 
         /* Allocate memory for the list */
         if (NULL == (virt->list = H5MM_calloc(virt->list_nused * sizeof(virt->list[0]))))
@@ -630,8 +609,8 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
                 else if (orig_list[i].parsed_source_file_name &&
                          (orig_list[i].source_dset.file_name !=
                           orig_list[i].parsed_source_file_name->name_segment)) {
-                    HDassert(ent->parsed_source_file_name);
-                    HDassert(ent->parsed_source_file_name->name_segment);
+                    assert(ent->parsed_source_file_name);
+                    assert(ent->parsed_source_file_name->name_segment);
                     ent->source_dset.file_name = ent->parsed_source_file_name->name_segment;
                 } /* end if */
                 else if (NULL ==
@@ -644,8 +623,8 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
                 else if (orig_list[i].parsed_source_dset_name &&
                          (orig_list[i].source_dset.dset_name !=
                           orig_list[i].parsed_source_dset_name->name_segment)) {
-                    HDassert(ent->parsed_source_dset_name);
-                    HDassert(ent->parsed_source_dset_name->name_segment);
+                    assert(ent->parsed_source_dset_name);
+                    assert(ent->parsed_source_dset_name->name_segment);
                     ent->source_dset.dset_name = ent->parsed_source_dset_name->name_segment;
                 } /* end if */
                 else if (NULL ==
@@ -707,9 +686,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 11, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -721,8 +697,8 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(layout);
-    HDassert(layout->type == H5D_VIRTUAL);
+    assert(layout);
+    assert(layout->type == H5D_VIRTUAL);
 
     /* Free the list entries.  Note we always attempt to free everything even in
      * the case of a failure.  Because of this, and because we free the list
@@ -759,7 +735,7 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
     virt->list        = H5MM_xfree(virt->list);
     virt->list_nalloc = (size_t)0;
     virt->list_nused  = (size_t)0;
-    (void)HDmemset(virt->min_dims, 0, sizeof(virt->min_dims));
+    (void)memset(virt->min_dims, 0, sizeof(virt->min_dims));
 
     /* Close access property lists */
     if (virt->source_fapl >= 0) {
@@ -787,9 +763,6 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
  * Purpose:     Copy virtual storage raw data from SRC file to DST file.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 6, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -830,9 +803,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 6, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -846,9 +816,9 @@ H5D__virtual_delete(H5F_t *f, H5O_storage_t *storage)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(storage);
-    HDassert(storage->type == H5D_VIRTUAL);
+    assert(f);
+    assert(storage);
+    assert(storage->type == H5D_VIRTUAL);
 
     /* Check for global heap block */
     if (storage->u.virt.serial_list_hobjid.addr != HADDR_UNDEF) {
@@ -878,9 +848,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              March 6, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -894,11 +861,11 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(vdset);
-    HDassert(source_dset);
-    HDassert(!source_dset->dset);
-    HDassert(source_dset->file_name);
-    HDassert(source_dset->dset_name);
+    assert(vdset);
+    assert(source_dset);
+    assert(!source_dset->dset);
+    assert(source_dset->file_name);
+    assert(source_dset->dset_name);
 
     /* Check if we need to open the source file */
     if (HDstrcmp(source_dset->file_name, ".") != 0) {
@@ -972,9 +939,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 20, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -986,7 +950,7 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(source_dset);
+    assert(source_dset);
 
     /* Free dataset */
     if (source_dset->dset) {
@@ -1000,20 +964,20 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
         (source_dset->file_name != virtual_ent->parsed_source_file_name->name_segment))
         source_dset->file_name = (char *)H5MM_xfree(source_dset->file_name);
     else
-        HDassert((source_dset->file_name == virtual_ent->source_file_name) ||
-                 (virtual_ent->parsed_source_file_name &&
-                  (source_dset->file_name == virtual_ent->parsed_source_file_name->name_segment)) ||
-                 !source_dset->file_name);
+        assert((source_dset->file_name == virtual_ent->source_file_name) ||
+               (virtual_ent->parsed_source_file_name &&
+                (source_dset->file_name == virtual_ent->parsed_source_file_name->name_segment)) ||
+               !source_dset->file_name);
 
     /* Free dataset name */
     if (virtual_ent->parsed_source_dset_name &&
         (source_dset->dset_name != virtual_ent->parsed_source_dset_name->name_segment))
         source_dset->dset_name = (char *)H5MM_xfree(source_dset->dset_name);
     else
-        HDassert((source_dset->dset_name == virtual_ent->source_dset_name) ||
-                 (virtual_ent->parsed_source_dset_name &&
-                  (source_dset->dset_name == virtual_ent->parsed_source_dset_name->name_segment)) ||
-                 !source_dset->dset_name);
+        assert((source_dset->dset_name == virtual_ent->source_dset_name) ||
+               (virtual_ent->parsed_source_dset_name &&
+                (source_dset->dset_name == virtual_ent->parsed_source_dset_name->name_segment)) ||
+               !source_dset->dset_name);
 
     /* Free clipped virtual selection */
     if (source_dset->clipped_virtual_select) {
@@ -1040,7 +1004,7 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
 
     /* The projected memory space should never exist when this function is
      * called */
-    HDassert(!source_dset->projected_mem_space);
+    assert(!source_dset->projected_mem_space);
 
     /* Note the lack of a done: label.  This is because there are no HGOTO_ERROR
      * calls.  If one is added, a done: label must also be added */
@@ -1055,9 +1019,6 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 19, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1068,17 +1029,17 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf, s
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(src);
-    HDassert(src_len > 0);
-    HDassert(p);
-    HDassert(buf);
-    HDassert(*p >= *buf);
-    HDassert(buf_size);
+    assert(src);
+    assert(src_len > 0);
+    assert(p);
+    assert(buf);
+    assert(*p >= *buf);
+    assert(buf_size);
 
     /* Allocate or extend buffer if necessary */
     if (!*buf) {
-        HDassert(!*p);
-        HDassert(*buf_size == 0);
+        assert(!*p);
+        assert(*buf_size == 0);
 
         /* Allocate buffer */
         if (NULL == (*buf = (char *)H5MM_malloc(src_len + (size_t)1)))
@@ -1117,7 +1078,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf, s
     **p = '\0';
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_str_append() */
 
 /*-------------------------------------------------------------------------
@@ -1126,9 +1087,6 @@ done:
  * Purpose:     Parses a source file or dataset name.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              May 18, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1150,10 +1108,10 @@ H5D_virtual_parse_source_name(const char *source_name, H5O_storage_virtual_name_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(source_name);
-    HDassert(parsed_name);
-    HDassert(static_strlen);
-    HDassert(nsubs);
+    assert(source_name);
+    assert(parsed_name);
+    assert(static_strlen);
+    assert(nsubs);
 
     /* Initialize p and tmp_static_strlen */
     p                 = source_name;
@@ -1163,7 +1121,7 @@ H5D_virtual_parse_source_name(const char *source_name, H5O_storage_virtual_name_
     /* Note this will not work with UTF-8!  We should support this eventually
      * -NAF 5/18/2015 */
     while ((pct = HDstrchr(p, '%'))) {
-        HDassert(pct >= p);
+        assert(pct >= p);
 
         /* Allocate name segment struct if necessary */
         if (!*tmp_parsed_name_p)
@@ -1204,11 +1162,11 @@ H5D_virtual_parse_source_name(const char *source_name, H5O_storage_virtual_name_
     /* Copy last segment of name, if any, unless the parsed name was not
      * allocated */
     if (tmp_parsed_name) {
-        HDassert(p >= source_name);
+        assert(p >= source_name);
         if (*p == '\0')
-            HDassert((size_t)(p - source_name) == tmp_strlen);
+            assert((size_t)(p - source_name) == tmp_strlen);
         else {
-            HDassert((size_t)(p - source_name) < tmp_strlen);
+            assert((size_t)(p - source_name) < tmp_strlen);
 
             /* Allocate name segment struct if necessary */
             if (!*tmp_parsed_name_p)
@@ -1230,7 +1188,7 @@ H5D_virtual_parse_source_name(const char *source_name, H5O_storage_virtual_name_
 
 done:
     if (tmp_parsed_name) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         H5D_virtual_free_parsed_name(tmp_parsed_name);
     } /* end if */
 
@@ -1243,9 +1201,6 @@ done:
  * Purpose:     Deep copies a parsed source file or dataset name.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              May 19, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1260,7 +1215,7 @@ H5D__virtual_copy_parsed_name(H5O_storage_virtual_name_seg_t **dst, H5O_storage_
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dst);
+    assert(dst);
 
     /* Walk over parsed name, duplicating it */
     while (p_src) {
@@ -1285,7 +1240,7 @@ H5D__virtual_copy_parsed_name(H5O_storage_virtual_name_seg_t **dst, H5O_storage_
 
 done:
     if (tmp_dst) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         H5D_virtual_free_parsed_name(tmp_dst);
     } /* end if */
 
@@ -1298,9 +1253,6 @@ done:
  * Purpose:     Frees the provided parsed name.
  *
  * Return:      void
- *
- * Programmer:  Neil Fortner
- *              May 19, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1330,9 +1282,6 @@ H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 18, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1345,8 +1294,8 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(source_name);
-    HDassert(built_name);
+    assert(source_name);
+    assert(built_name);
 
     /* Check for static name */
     if (nsubs == 0) {
@@ -1365,7 +1314,7 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
         size_t                                seg_len;
         size_t                                nsubs_rem = nsubs;
 
-        HDassert(parsed_name);
+        assert(parsed_name);
 
         /* Calculate length of printed block number */
         do {
@@ -1388,8 +1337,8 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
             /* Add name segment */
             if (name_seg->name_segment) {
                 seg_len = HDstrlen(name_seg->name_segment);
-                HDassert(seg_len > 0);
-                HDassert(seg_len < name_len_rem);
+                assert(seg_len > 0);
+                assert(seg_len < name_len_rem);
                 HDstrncpy(p, name_seg->name_segment, name_len_rem);
                 name_len_rem -= seg_len;
                 p += seg_len;
@@ -1397,7 +1346,7 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
 
             /* Add block number */
             if (nsubs_rem > 0) {
-                HDassert(blockno_len < name_len_rem);
+                assert(blockno_len < name_len_rem);
                 if (HDsnprintf(p, name_len_rem, "%llu", (long long unsigned)blockno) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write block number to string")
                 name_len_rem -= blockno_len;
@@ -1416,7 +1365,7 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
 
 done:
     if (tmp_name) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         H5MM_free(tmp_name);
     } /* end if */
 
@@ -1432,9 +1381,6 @@ done:
  *              virtual mapping selections are not affected.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              April 22, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1453,10 +1399,10 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset);
-    HDassert(dset->shared->layout.storage.type == H5D_VIRTUAL);
+    assert(dset);
+    assert(dset->shared->layout.storage.type == H5D_VIRTUAL);
     storage = &dset->shared->layout.storage.u.virt;
-    HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
+    assert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
     /* Get rank of VDS */
     if ((rank = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
@@ -1518,8 +1464,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                 /* Close previous clipped virtual selection, if
                                  * any */
                                 if (storage->list[i].source_dset.clipped_virtual_select) {
-                                    HDassert(storage->list[i].source_dset.clipped_virtual_select !=
-                                             storage->list[i].source_dset.virtual_select);
+                                    assert(storage->list[i].source_dset.clipped_virtual_select !=
+                                           storage->list[i].source_dset.virtual_select);
                                     if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                                         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                                     "unable to release clipped virtual dataspace")
@@ -1541,8 +1487,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                             /* Close previous clipped source selection, if any
                              */
                             if (storage->list[i].source_dset.clipped_source_select) {
-                                HDassert(storage->list[i].source_dset.clipped_source_select !=
-                                         storage->list[i].source_select);
+                                assert(storage->list[i].source_dset.clipped_source_select !=
+                                       storage->list[i].source_select);
                                 if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                                     HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                                 "unable to release clipped source dataspace")
@@ -1576,7 +1522,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                     0; /* First missing dataset in the current block of missing datasets */
 
                 /* Search for source datasets */
-                HDassert(storage->printf_gap != HSIZE_UNDEF);
+                assert(storage->printf_gap != HSIZE_UNDEF);
                 for (j = 0; j <= (storage->printf_gap + first_missing); j++) {
                     /* Check for running out of space in sub_dset array */
                     if (j >= (hsize_t)storage->list[i].sub_dset_nalloc) {
@@ -1602,9 +1548,9 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                             storage->list[i].sub_dset = tmp_sub_dset;
 
                             /* Clear new space in sub_dset */
-                            (void)HDmemset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
-                                           storage->list[i].sub_dset_nalloc *
-                                               sizeof(H5O_storage_virtual_srcdset_t));
+                            (void)memset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
+                                         storage->list[i].sub_dset_nalloc *
+                                             sizeof(H5O_storage_virtual_srcdset_t));
 
                             /* Update sub_dset_nalloc */
                             storage->list[i].sub_dset_nalloc *= 2;
@@ -1766,8 +1712,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                     /* Non-printf mapping */
                     /* Close previous clipped virtual selection, if any */
                     if (storage->list[i].source_dset.clipped_virtual_select) {
-                        HDassert(storage->list[i].source_dset.clipped_virtual_select !=
-                                 storage->list[i].source_dset.virtual_select);
+                        assert(storage->list[i].source_dset.clipped_virtual_select !=
+                               storage->list[i].source_dset.virtual_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                         "unable to release clipped virtual dataspace")
@@ -1793,8 +1739,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                     if (clip_size != storage->list[i].clip_size_source) {
                         /* Close previous clipped source selection, if any */
                         if (storage->list[i].source_dset.clipped_source_select) {
-                            HDassert(storage->list[i].source_dset.clipped_source_select !=
-                                     storage->list[i].source_select);
+                            assert(storage->list[i].source_dset.clipped_source_select !=
+                                   storage->list[i].source_select);
                             if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                             "unable to release clipped source dataspace")
@@ -1896,7 +1842,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
                 } /* end if */
                 else
-                    HDassert(!storage->list[i].sub_dset[j].clipped_virtual_select);
+                    assert(!storage->list[i].sub_dset[j].clipped_virtual_select);
         } /* end for */
     }     /* end if */
 
@@ -1917,9 +1863,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              August 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1935,10 +1878,10 @@ H5D__virtual_init_all(const H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset);
-    HDassert(dset->shared->layout.storage.type == H5D_VIRTUAL);
+    assert(dset);
+    assert(dset->shared->layout.storage.type == H5D_VIRTUAL);
     storage = &dset->shared->layout.storage.u.virt;
-    HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
+    assert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
     /* Get current VDS dimensions */
     if (H5S_get_simple_extent_dims(dset->shared->space, virtual_dims, NULL) < 0)
@@ -1977,8 +1920,8 @@ H5D__virtual_init_all(const H5D_t *dset)
 
                     /* Close previous clipped virtual selection, if any */
                     if (storage->list[i].source_dset.clipped_virtual_select) {
-                        HDassert(storage->list[i].source_dset.clipped_virtual_select !=
-                                 storage->list[i].source_dset.virtual_select);
+                        assert(storage->list[i].source_dset.clipped_virtual_select !=
+                               storage->list[i].source_dset.virtual_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                         "unable to release clipped virtual dataspace")
@@ -1991,8 +1934,8 @@ H5D__virtual_init_all(const H5D_t *dset)
 
                     /* Close previous clipped source selection, if any */
                     if (storage->list[i].source_dset.clipped_source_select) {
-                        HDassert(storage->list[i].source_dset.clipped_source_select !=
-                                 storage->list[i].source_select);
+                        assert(storage->list[i].source_dset.clipped_source_select !=
+                               storage->list[i].source_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                         "unable to release clipped source dataspace")
@@ -2036,8 +1979,8 @@ H5D__virtual_init_all(const H5D_t *dset)
                     } /* end else */
                 }     /* end if */
                 else {
-                    HDassert(!storage->list[i].source_dset.clipped_virtual_select);
-                    HDassert(!storage->list[i].source_dset.clipped_source_select);
+                    assert(!storage->list[i].source_dset.clipped_virtual_select);
+                    assert(!storage->list[i].source_dset.clipped_source_select);
                 } /* end else */
             }     /* end if */
             else {
@@ -2073,9 +2016,9 @@ H5D__virtual_init_all(const H5D_t *dset)
                     storage->list[i].sub_dset = tmp_sub_dset;
 
                     /* Clear new space in sub_dset */
-                    (void)HDmemset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
-                                   (sub_dset_max - storage->list[i].sub_dset_nalloc) *
-                                       sizeof(H5O_storage_virtual_srcdset_t));
+                    (void)memset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
+                                 (sub_dset_max - storage->list[i].sub_dset_nalloc) *
+                                     sizeof(H5O_storage_virtual_srcdset_t));
 
                     /* Update sub_dset_nalloc */
                     storage->list[i].sub_dset_nalloc = sub_dset_max;
@@ -2153,8 +2096,8 @@ H5D__virtual_init_all(const H5D_t *dset)
         else {
             /* Limited mapping, just make sure the clipped selections were
              * already set.  Again, no need to open the source file. */
-            HDassert(storage->list[i].source_dset.clipped_virtual_select);
-            HDassert(storage->list[i].source_dset.clipped_source_select);
+            assert(storage->list[i].source_dset.clipped_virtual_select);
+            assert(storage->list[i].source_dset.clipped_source_select);
         } /* end else */
 
     /* Mark layout as fully initialized */
@@ -2172,9 +2115,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Thursday, April 30, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2189,9 +2129,9 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset);
+    assert(dset);
     storage = &dset->shared->layout.storage.u.virt;
-    HDassert(storage->list || (storage->list_nused == 0));
+    assert(storage->list || (storage->list_nused == 0));
 
     /* Check that the dimensions of the VDS are large enough */
     if (H5D_virtual_check_min_dims(dset) < 0)
@@ -2208,7 +2148,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
      * source_space_status and virtual_space_status because others will be based
      * on these and should therefore already have been normalized. */
     for (i = 0; i < storage->list_nused; i++) {
-        HDassert(storage->list[i].sub_dset_nalloc == 0);
+        assert(storage->list[i].sub_dset_nalloc == 0);
 
         /* Patch extent */
         if (H5S_extent_copy(storage->list[i].source_dset.virtual_select, dset->shared->space) < 0)
@@ -2270,7 +2210,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
         if (H5P_get(source_fapl, H5F_ACS_CLOSE_DEGREE_NAME, &close_degree) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file close degree")
 
-        HDassert(close_degree == H5F_CLOSE_WEAK);
+        assert(close_degree == H5F_CLOSE_WEAK);
     }  /* end else */
 #endif /* NDEBUG */
 
@@ -2295,9 +2235,6 @@ done:
  * Return:      TRUE if space is allocated
  *              FALSE if it is not
  *              Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 6, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2325,9 +2262,6 @@ H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, March 6, 2016
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -2340,7 +2274,7 @@ H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(shared_dset);
+    assert(shared_dset);
     storage = &shared_dset->layout.storage.u.virt;
 
     /* Iterate over mappings */
@@ -2373,9 +2307,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Sunday, May 22, 2022
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2400,9 +2331,6 @@ H5D__virtual_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t H5_ATTR_UNUSED *
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              June 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2421,10 +2349,10 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(storage);
-    HDassert(mem_space);
-    HDassert(file_space);
-    HDassert(tot_nelmts);
+    assert(storage);
+    assert(mem_space);
+    assert(file_space);
+    assert(tot_nelmts);
 
     /* Initialize layout if necessary */
     if (!storage->init)
@@ -2437,13 +2365,13 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
     /* Iterate over mappings */
     for (i = 0; i < storage->list_nused; i++) {
         /* Sanity check that the virtual space has been patched by now */
-        HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+        assert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
         /* Check for "printf" source dataset resolution */
         if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             hbool_t partial_block;
 
-            HDassert(storage->list[i].unlim_dim_virtual >= 0);
+            assert(storage->list[i].unlim_dim_virtual >= 0);
 
             /* Get selection bounds if necessary */
             if (!bounds_init) {
@@ -2484,12 +2412,12 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                 if (!storage->list[i].sub_dset[j].clipped_virtual_select) {
                     hsize_t start[H5S_MAX_RANK];
                     /* This should only be NULL if this is a partial block */
-                    HDassert((j == (storage->list[i].sub_dset_io_end - 1)) && partial_block);
+                    assert((j == (storage->list[i].sub_dset_io_end - 1)) && partial_block);
 
                     /* If the source space status is not correct, we must try to
                      * open the source dataset to patch it */
                     if (storage->list[i].source_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
-                        HDassert(!storage->list[i].sub_dset[j].dset);
+                        assert(!storage->list[i].sub_dset[j].dset);
                         if (H5D__virtual_open_source_dset(dset, &storage->list[i],
                                                           &storage->list[i].sub_dset[j]) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
@@ -2509,7 +2437,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                                               vbounds_end) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get selection bounds")
 
-                        HDassert(bounds_init);
+                        assert(bounds_init);
 
                         /* Convert bounds to extent (add 1) */
                         for (k = 0; k < (size_t)rank; k++)
@@ -2529,7 +2457,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
 
                         /* Clip virtual selection to real virtual extent */
-                        (void)HDmemset(start, 0, sizeof(start));
+                        (void)memset(start, 0, sizeof(start));
                         if (H5S_select_hyperslab(storage->list[i].sub_dset[j].clipped_virtual_select,
                                                  H5S_SELECT_AND, start, NULL, tmp_dims, NULL) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "unable to clip hyperslab")
@@ -2646,8 +2574,8 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                  * H5Dget_space().  Do not attempt to open it as this might
                  * affect the extent and we are not going to recalculate it
                  * here. */
-                HDassert(storage->list[i].unlim_dim_virtual >= 0);
-                HDassert(!storage->list[i].source_dset.dset);
+                assert(storage->list[i].unlim_dim_virtual >= 0);
+                assert(!storage->list[i].source_dset.dset);
             } /* end else */
         }     /* end else */
     }         /* end for */
@@ -2663,9 +2591,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              June 4, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2677,7 +2602,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(storage);
+    assert(storage);
 
     /* Iterate over mappings */
     for (i = 0; i < storage->list_nused; i++)
@@ -2712,9 +2637,6 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 15, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2726,14 +2648,14 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(source_dset);
+    assert(source_dset);
 
     /* Only perform I/O if there is a projected memory space, otherwise there
      * were no elements in the projection or the source dataset could not be
      * opened */
     if (source_dset->projected_mem_space) {
-        HDassert(source_dset->dset);
-        HDassert(source_dset->clipped_source_select);
+        assert(source_dset->dset);
+        assert(source_dset->clipped_source_select);
 
         /* Project intersection of file space and mapping virtual space onto
          * mapping source space */
@@ -2765,7 +2687,7 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset
 done:
     /* Release allocated resources */
     if (projected_src_space) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space")
     } /* end if */
@@ -2779,9 +2701,6 @@ done:
  * Purpose:     Read from a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 6, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2798,14 +2717,14 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_info->buf.vp);
-    HDassert(dset_info->mem_space);
-    HDassert(dset_info->file_space);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_info->buf.vp);
+    assert(dset_info->mem_space);
+    assert(dset_info->file_space);
 
     storage = &(dset_info->dset->shared->layout.storage.u.virt);
-    HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
+    assert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
     /* Initialize nelmts */
     nelmts = H5S_GET_SELECT_NPOINTS(dset_info->file_space);
@@ -2823,7 +2742,7 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
     /* Iterate over mappings */
     for (i = 0; i < storage->list_nused; i++) {
         /* Sanity check that the virtual space has been patched by now */
-        HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+        assert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
         /* Check for "printf" source dataset resolution */
         if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
@@ -2887,7 +2806,7 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
                 /* Verify number of elements is correct.  Note that since we
                  * don't check for overlap we can't assert that these are equal
                  */
-                HDassert((tot_nelmts + (hsize_t)select_nelmts) >= nelmts);
+                assert((tot_nelmts + (hsize_t)select_nelmts) >= nelmts);
             } /* end block */
 #endif        /* NDEBUG */
         }     /* end if */
@@ -2913,9 +2832,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 15, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2927,13 +2843,13 @@ H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdse
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(source_dset);
+    assert(source_dset);
 
     /* Only perform I/O if there is a projected memory space, otherwise there
      * were no elements in the projection */
     if (source_dset->projected_mem_space) {
-        HDassert(source_dset->dset);
-        HDassert(source_dset->clipped_source_select);
+        assert(source_dset->dset);
+        assert(source_dset->clipped_source_select);
 
         /* In the future we may wish to extent this implementation to extend
          * source datasets if a write to a virtual dataset goes past the current
@@ -2968,7 +2884,7 @@ H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdse
 done:
     /* Release allocated resources */
     if (projected_src_space) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space")
     } /* end if */
@@ -2982,9 +2898,6 @@ done:
  * Purpose:     Write to a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 6, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3000,14 +2913,14 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_info->buf.cvp);
-    HDassert(dset_info->mem_space);
-    HDassert(dset_info->file_space);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_info->buf.cvp);
+    assert(dset_info->mem_space);
+    assert(dset_info->file_space);
 
     storage = &(dset_info->dset->shared->layout.storage.u.virt);
-    HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
+    assert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
     /* Initialize nelmts */
     nelmts = H5S_GET_SELECT_NPOINTS(dset_info->file_space);
@@ -3031,7 +2944,7 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
     /* Iterate over mappings */
     for (i = 0; i < storage->list_nused; i++) {
         /* Sanity check that virtual space has been patched by now */
-        HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+        assert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
         /* Check for "printf" source dataset resolution */
         if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
@@ -3061,9 +2974,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 6, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3076,7 +2986,7 @@ H5D__virtual_flush(H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset);
+    assert(dset);
 
     storage = &dset->shared->layout.storage.u.virt;
 
@@ -3107,9 +3017,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 7, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3123,8 +3030,8 @@ H5D__virtual_hold_source_dset_files(const H5D_t *dset, H5D_virtual_held_file_t *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset);
-    HDassert(head && NULL == *head);
+    assert(dset);
+    assert(head && NULL == *head);
 
     /* Set the convenience pointer */
     storage = &dset->shared->layout.storage.u.virt;
@@ -3181,9 +3088,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 7, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3196,7 +3100,7 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset && *dset);
+    assert(dset && *dset);
 
     /* Get a temporary identifier for this source dataset */
     if ((temp_id = H5VL_wrap_register(H5I_DATASET, *dset, FALSE)) < 0)
@@ -3227,9 +3131,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Dana Robinson
- *              November, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3242,7 +3143,7 @@ H5D__virtual_refresh_source_dsets(H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset);
+    assert(dset);
 
     /* Set convenience pointer */
     storage = &dset->shared->layout.storage.u.virt;
@@ -3278,9 +3179,6 @@ done:
  * Purpose:     Release the hold on source files that are open, during a refresh event
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              November 7, 2015
  *
  *-------------------------------------------------------------------------
  */

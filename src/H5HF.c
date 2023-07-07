@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HF.c
- *			Feb 24 2006
- *			Quincey Koziol
  *
  * Purpose:		Implements a "fractal heap" for storing variable-
  *                      length objects in a file.
@@ -80,9 +78,6 @@ H5FL_DEFINE_STATIC(H5HF_t);
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -102,9 +97,6 @@ H5HF__op_read(const void *obj, size_t obj_len, void *op_data)
  * Purpose:	Performs a 'write' operation for a heap 'op' callback
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -133,9 +125,6 @@ H5HF__op_write(const void *obj, size_t obj_len, void *op_data)
  * Return:	Pointer to heap wrapper on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 24 2006
- *
  *-------------------------------------------------------------------------
  */
 H5HF_t *
@@ -151,8 +140,8 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
     /* Create shared fractal heap header */
     if (HADDR_UNDEF == (fh_addr = H5HF__hdr_create(f, cparam)))
@@ -199,9 +188,6 @@ done:
  * Return:	Pointer to heap wrapper on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Apr 18 2006
- *
  *-------------------------------------------------------------------------
  */
 H5HF_t *
@@ -216,8 +202,8 @@ H5HF_open(H5F_t *f, haddr_t fh_addr)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fh_addr));
+    assert(f);
+    assert(H5_addr_defined(fh_addr));
 
     /* Load the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__READ_ONLY_FLAG)))
@@ -263,9 +249,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -276,8 +259,8 @@ H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id_len_p);
+    assert(fh);
+    assert(id_len_p);
 
     /* Retrieve the ID length for entries in this heap */
     *id_len_p = fh->hdr->id_len;
@@ -292,9 +275,6 @@ H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p)
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 18 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -305,8 +285,8 @@ H5HF_get_heap_addr(const H5HF_t *fh, haddr_t *heap_addr_p)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(heap_addr_p);
+    assert(fh);
+    assert(heap_addr_p);
 
     /* Retrieve the heap header address for this heap */
     *heap_addr_p = fh->hdr->heap_addr;
@@ -322,9 +302,6 @@ H5HF_get_heap_addr(const H5HF_t *fh, haddr_t *heap_addr_p)
  * Return:	Non-negative on success (with heap ID of new object
  *              filled in), negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -336,9 +313,9 @@ H5HF_insert(H5HF_t *fh, size_t size, const void *obj, void *id /*out*/)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(obj);
-    HDassert(id);
+    assert(fh);
+    assert(obj);
+    assert(id);
 
     /* Check arguments */
     if (size == 0)
@@ -391,9 +368,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May  9 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -408,9 +382,9 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(obj_len_p);
+    assert(fh);
+    assert(id);
+    assert(obj_len_p);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -436,7 +410,7 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'tiny' object's length")
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
+        fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
@@ -450,9 +424,6 @@ done:
  * Purpose:	Get the offset of an entry in a fractal heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug 20 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -468,9 +439,9 @@ H5HF_get_obj_off(H5HF_t *fh, const void *_id, hsize_t *obj_off_p)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(obj_off_p);
+    assert(fh);
+    assert(id);
+    assert(obj_off_p);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -496,7 +467,7 @@ H5HF_get_obj_off(H5HF_t *fh, const void *_id, hsize_t *obj_off_p)
         *obj_off_p = (hsize_t)0;
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
+        fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
@@ -510,9 +481,6 @@ done:
  * Purpose:	Read an object from a fractal heap into a buffer
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Mar 18 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -528,9 +496,9 @@ H5HF_read(H5HF_t *fh, const void *_id, void *obj /*out*/)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(obj);
+    assert(fh);
+    assert(id);
+    assert(obj);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -559,7 +527,7 @@ H5HF_read(H5HF_t *fh, const void *_id, void *obj /*out*/)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'tiny' object from fractal heap")
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
+        fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
@@ -586,9 +554,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec 18 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -603,9 +568,9 @@ H5HF_write(H5HF_t *fh, void *_id, hbool_t H5_ATTR_UNUSED *id_changed, const void
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(obj);
+    assert(fh);
+    assert(id);
+    assert(obj);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -635,7 +600,7 @@ H5HF_write(H5HF_t *fh, void *_id, hbool_t H5_ATTR_UNUSED *id_changed, const void
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "modifying 'tiny' object not supported yet")
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
+        fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
@@ -655,9 +620,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -672,9 +634,9 @@ H5HF_op(H5HF_t *fh, const void *_id, H5HF_operator_t op, void *op_data)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(op);
+    assert(fh);
+    assert(id);
+    assert(op);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -703,7 +665,7 @@ H5HF_op(H5HF_t *fh, const void *_id, H5HF_operator_t op, void *op_data)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on 'tiny' object from fractal heap")
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
+        fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
@@ -717,9 +679,6 @@ done:
  * Purpose:	Remove an object from a fractal heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		May 15 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -735,9 +694,9 @@ H5HF_remove(H5HF_t *fh, const void *_id)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(fh->hdr);
-    HDassert(id);
+    assert(fh);
+    assert(fh->hdr);
+    assert(id);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -766,7 +725,7 @@ H5HF_remove(H5HF_t *fh, const void *_id)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'tiny' object from fractal heap")
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
+        fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
@@ -780,9 +739,6 @@ done:
  * Purpose:	Close a fractal heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -798,7 +754,7 @@ H5HF_close(H5HF_t *fh)
     /*
      * Check arguments.
      */
-    HDassert(fh);
+    assert(fh);
 
     /* Decrement file reference & check if this is the last open fractal heap using the shared heap header */
     if (0 == H5HF__hdr_fuse_decr(fh->hdr)) {
@@ -876,9 +832,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  4 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -892,8 +845,8 @@ H5HF_delete(H5F_t *f, haddr_t fh_addr)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fh_addr));
+    assert(f);
+    assert(H5_addr_defined(fh_addr));
 
     /* Lock the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__NO_FLAGS_SET)))

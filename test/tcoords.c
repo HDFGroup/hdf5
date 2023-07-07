@@ -33,7 +33,7 @@
 
 /* Data written to the dataset for single block test.  Global variable
  * for convenience. */
-int da_buffer[2][3][6][2];
+static int da_buffer[2][3][6][2];
 
 /***********************************************************
 **
@@ -86,7 +86,7 @@ test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     }
 
     /* Construct dataset's name */
-    HDmemset(dset_name, 0, (size_t)NAME_LEN);
+    memset(dset_name, 0, (size_t)NAME_LEN);
     HDstrcat(dset_name, SINGLE_END_DSET);
     if (is_chunked)
         HDstrcat(dset_name, "_chunked");
@@ -258,7 +258,7 @@ test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
     hsize_t mem3_block[4]  = {1, 3, 6, 1};
 
     /* Construct dataset's name */
-    HDmemset(dset_name, 0, NAME_LEN);
+    memset(dset_name, 0, NAME_LEN);
     HDstrcat(dset_name, SINGLE_END_DSET);
     if (is_chunked)
         HDstrcat(dset_name, "_chunked");
@@ -435,18 +435,18 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     hsize_t mem5_block[8]  = {4, 5, 1, 4, 2, 1, 6, 2};
 
     /* Initialize dynamic arrays */
-    data_buf = HDcalloc(1, sizeof(*data_buf));
-    CHECK_PTR(data_buf, "HDcalloc");
-    mem1_buffer = HDcalloc(1, sizeof(*mem1_buffer));
-    CHECK_PTR(data_buf, "HDcalloc");
-    mem2_buffer = HDcalloc(1, sizeof(*mem2_buffer));
-    CHECK_PTR(data_buf, "HDcalloc");
-    mem3_buffer = HDcalloc(1, sizeof(*mem3_buffer));
-    CHECK_PTR(data_buf, "HDcalloc");
-    mem4_buffer = HDcalloc(1, sizeof(*mem4_buffer));
-    CHECK_PTR(data_buf, "HDcalloc");
-    mem5_buffer = HDcalloc(1, sizeof(*mem5_buffer));
-    CHECK_PTR(data_buf, "HDcalloc");
+    data_buf = calloc(1, sizeof(*data_buf));
+    CHECK_PTR(data_buf, "calloc");
+    mem1_buffer = calloc(1, sizeof(*mem1_buffer));
+    CHECK_PTR(data_buf, "calloc");
+    mem2_buffer = calloc(1, sizeof(*mem2_buffer));
+    CHECK_PTR(data_buf, "calloc");
+    mem3_buffer = calloc(1, sizeof(*mem3_buffer));
+    CHECK_PTR(data_buf, "calloc");
+    mem4_buffer = calloc(1, sizeof(*mem4_buffer));
+    CHECK_PTR(data_buf, "calloc");
+    mem5_buffer = calloc(1, sizeof(*mem5_buffer));
+    CHECK_PTR(data_buf, "calloc");
 
     /* Create and write the dataset */
     sid = H5Screate_simple(8, da_dims, da_dims);
@@ -461,7 +461,7 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     }
 
     /* Construct dataset's name */
-    HDmemset(dset_name, 0, NAME_LEN);
+    memset(dset_name, 0, NAME_LEN);
     HDstrcat(dset_name, MULTI_ENDS_SEL_HYPER_DSET);
     if (is_chunked)
         HDstrcat(dset_name, "_chunked");
@@ -664,12 +664,12 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     ret = H5Pclose(plid);
     CHECK(ret, FAIL, "H5Pclose");
 
-    HDfree(data_buf);
-    HDfree(mem1_buffer);
-    HDfree(mem2_buffer);
-    HDfree(mem3_buffer);
-    HDfree(mem4_buffer);
-    HDfree(mem5_buffer);
+    free(data_buf);
+    free(mem1_buffer);
+    free(mem2_buffer);
+    free(mem3_buffer);
+    free(mem4_buffer);
+    free(mem5_buffer);
 }
 
 /****************************************************************
@@ -709,9 +709,6 @@ test_coords(void)
  * Purpose:	Cleanup temporary test files
  *
  * Return:	none
- *
- * Programmer:	Raymond Lu
- *              20 Dec. 2007
  *
  *-------------------------------------------------------------------------
  */

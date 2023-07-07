@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Friday, January 23, 1998
- */
-
 /* See H5private.h for how to include headers */
 #undef NDEBUG
 
@@ -24,7 +19,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", NULL};
+static const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", NULL};
 
 const char *DSET_NAME[] = {"contig_src_subset", "chunk_src_subset", "contig_dst_subset", "chunk_dst_subset",
                            NULL};
@@ -124,9 +119,6 @@ typedef struct {
  *
  *        Failure:    1
  *
- * Programmer:    Robb Matzke
- *              Friday, January 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -182,17 +174,17 @@ test_compound(char *filename, hid_t fapl)
     int            ret_code;
 
     /* Allocate buffers for datasets */
-    if (NULL == (s1 = (s1_t *)HDmalloc(sizeof(s1_t) * NX * NY)))
+    if (NULL == (s1 = (s1_t *)malloc(sizeof(s1_t) * NX * NY)))
         goto error;
-    if (NULL == (s2 = (s2_t *)HDmalloc(sizeof(s2_t) * NX * NY)))
+    if (NULL == (s2 = (s2_t *)malloc(sizeof(s2_t) * NX * NY)))
         goto error;
-    if (NULL == (s3 = (s3_t *)HDmalloc(sizeof(s3_t) * NX * NY)))
+    if (NULL == (s3 = (s3_t *)malloc(sizeof(s3_t) * NX * NY)))
         goto error;
-    if (NULL == (s4 = (s4_t *)HDmalloc(sizeof(s4_t) * NX * NY)))
+    if (NULL == (s4 = (s4_t *)malloc(sizeof(s4_t) * NX * NY)))
         goto error;
-    if (NULL == (s5 = (s5_t *)HDmalloc(sizeof(s5_t) * NX * NY)))
+    if (NULL == (s5 = (s5_t *)malloc(sizeof(s5_t) * NX * NY)))
         goto error;
-    if (NULL == (s6 = (s6_t *)HDmalloc(sizeof(s6_t) * NX * NY)))
+    if (NULL == (s6 = (s6_t *)malloc(sizeof(s6_t) * NX * NY)))
         goto error;
 
     /* Create the file */
@@ -209,17 +201,17 @@ test_compound(char *filename, hid_t fapl)
     if ((PRESERVE = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 0) {
-        HDprintf("Preserve status of dataset transfer property list should be"
-                 " 0 (FALSE), got %d\n",
-                 ret_code);
+        printf("Preserve status of dataset transfer property list should be"
+               " 0 (FALSE), got %d\n",
+               ret_code);
         goto error;
     }
     if (H5Pset_preserve(PRESERVE, 1) < 0)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 1) {
-        HDprintf("Preserve status of dataset transfer property list should be"
-                 " 1 (TRUE), got %d\n",
-                 ret_code);
+        printf("Preserve status of dataset transfer property list should be"
+               " 1 (TRUE), got %d\n",
+               ret_code);
         goto error;
     }
 
@@ -520,11 +512,11 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != 8 * i + 3 || s1[i].c[2] != 8 * i + 4 || s1[i].c[3] != 8 * i + 5 ||
             s1[i].d != 8 * i + 6 || s1[i].e != 8 * i + 7) {
             H5_FAILED();
-            HDprintf("    i==%u, row=%u, col=%u\n", i, i / NY, i % NY);
-            HDprintf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", s1[i].a, s1[i].b, s1[i].c[0],
-                     s1[i].c[1], s1[i].c[2], s1[i].c[3], s1[i].d, s1[i].e);
-            HDprintf("    ans: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", 8 * i + 0, 8 * i + 1, 8 * i + 2,
-                     8 * i + 3, 8 * i + 4, 8 * i + 5, 8 * i + 6, 8 * i + 7);
+            printf("    i==%u, row=%u, col=%u\n", i, i / NY, i % NY);
+            printf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", s1[i].a, s1[i].b, s1[i].c[0], s1[i].c[1],
+                   s1[i].c[2], s1[i].c[3], s1[i].d, s1[i].e);
+            printf("    ans: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", 8 * i + 0, 8 * i + 1, 8 * i + 2,
+                   8 * i + 3, 8 * i + 4, 8 * i + 5, 8 * i + 6, 8 * i + 7);
             goto error;
         }
     }
@@ -581,8 +573,8 @@ test_compound(char *filename, hid_t fapl)
         goto error;
 
     /* Read the dataset */
-    s8 = (s1_t *)HDcalloc((size_t)(h_size[0] * h_size[1]), sizeof(s1_t));
-    HDassert(s8);
+    s8 = (s1_t *)calloc((size_t)(h_size[0] * h_size[1]), sizeof(s1_t));
+    assert(s8);
     if (H5Dread(dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8) < 0) {
         goto error;
     }
@@ -602,7 +594,7 @@ test_compound(char *filename, hid_t fapl)
         }
     }
 
-    HDfree(s8);
+    free(s8);
     s8 = NULL;
     PASSED();
 
@@ -714,8 +706,8 @@ test_compound(char *filename, hid_t fapl)
     f_offset[1] = NY / 3;
     h_size[0]   = 2 * NX / 3 - f_offset[0];
     h_size[1]   = 2 * NY / 3 - f_offset[1];
-    s11         = (s4_t *)HDmalloc((size_t)h_size[0] * (size_t)h_size[1] * sizeof(s4_t));
-    HDassert(s11);
+    s11         = (s4_t *)malloc((size_t)h_size[0] * (size_t)h_size[1] * sizeof(s4_t));
+    assert(s11);
 
     /* Initialize */
     for (i = 0; i < h_size[0] * h_size[1]; i++) {
@@ -726,7 +718,7 @@ test_compound(char *filename, hid_t fapl)
     if (H5Dwrite(dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11) < 0) {
         goto error;
     }
-    HDfree(s11);
+    free(s11);
     s11 = NULL;
 
     /* Read the whole thing */
@@ -773,12 +765,12 @@ test_compound(char *filename, hid_t fapl)
     H5Fclose(file);
 
     /* Release buffers */
-    HDfree(s1);
-    HDfree(s2);
-    HDfree(s3);
-    HDfree(s4);
-    HDfree(s5);
-    HDfree(s6);
+    free(s1);
+    free(s2);
+    free(s3);
+    free(s4);
+    free(s5);
+    free(s6);
 
     PASSED();
     return 0;
@@ -788,17 +780,17 @@ error:
 
     /* Release resources */
     if (s1)
-        HDfree(s1);
+        free(s1);
     if (s2)
-        HDfree(s2);
+        free(s2);
     if (s3)
-        HDfree(s3);
+        free(s3);
     if (s4)
-        HDfree(s4);
+        free(s4);
     if (s5)
-        HDfree(s5);
+        free(s5);
     if (s6)
-        HDfree(s6);
+        free(s6);
 
     return 1;
 }
@@ -809,9 +801,6 @@ error:
  * Purpose:    Initialize data buffer.
  *
  * Return:    void
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -850,9 +839,6 @@ initialize_stype1(unsigned char *buf, size_t num)
  * Purpose:    Initialize data buffer.
  *
  * Return:    void
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -896,9 +882,6 @@ initialize_stype2(unsigned char *buf, size_t num)
  *
  * Return:    Success:
  *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -924,9 +907,6 @@ initialize_stype3(unsigned char *buf, size_t num)
  * Purpose:    Initialize data buffer.
  *
  * Return:    void
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -975,9 +955,6 @@ initialize_stype4(unsigned char *buf, size_t num)
  * Return:    Success:        datatype ID
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1029,9 +1006,6 @@ error:
  * Return:    Success:        datatype ID
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1087,9 +1061,6 @@ error:
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -1127,9 +1098,6 @@ error:
  * Return:    Success:        datatype ID
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1188,9 +1156,6 @@ error:
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1220,8 +1185,8 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
             !H5_DBL_ABS_EQUAL(s_ptr->n, d_ptr->n)) {
 
             H5_FAILED();
-            HDprintf("    i=%d\n", i);
-            HDprintf(
+            printf("    i=%d\n", i);
+            printf(
                 "    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                 "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
                 s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2], s_ptr->c[3], s_ptr->c[4],
@@ -1231,7 +1196,7 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
                 (double)s_ptr->h[8], (double)s_ptr->h[9], (double)s_ptr->h[10], (double)s_ptr->h[11],
                 (double)s_ptr->h[12], (double)s_ptr->h[13], (double)s_ptr->h[14], (double)s_ptr->h[15],
                 (double)s_ptr->i, (double)s_ptr->j, s_ptr->k, s_ptr->l, s_ptr->m, s_ptr->n);
-            HDprintf(
+            printf(
                 "    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                 "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
                 d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2], d_ptr->c[3], d_ptr->c[4],
@@ -1270,9 +1235,6 @@ error:
  *
  *        Failure:    1
  *
- * Programmer:    Raymond Lu
- *              Friday, 15 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1306,12 +1268,12 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
         goto error;
 
     /* Allocate space and initialize data */
-    orig = (unsigned char *)HDmalloc(NX * NY * sizeof(stype1));
+    orig = (unsigned char *)malloc(NX * NY * sizeof(stype1));
     initialize_stype1(orig, (size_t)NX * NY);
 
-    rbuf = (unsigned char *)HDmalloc(NX * NY * sizeof(stype2));
+    rbuf = (unsigned char *)malloc(NX * NY * sizeof(stype2));
 
-    rew_buf = (unsigned char *)HDmalloc(NX * NY * sizeof(stype3));
+    rew_buf = (unsigned char *)malloc(NX * NY * sizeof(stype3));
     initialize_stype3(rew_buf, (size_t)NX * NY);
 
     /* Create dataset creation property list */
@@ -1440,17 +1402,17 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
 
-    HDfree(orig);
-    HDfree(rbuf);
-    HDfree(rew_buf);
+    free(orig);
+    free(rbuf);
+    free(rew_buf);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(orig);
-    HDfree(rbuf);
-    HDfree(rew_buf);
+    free(orig);
+    free(rbuf);
+    free(rew_buf);
 
     HDputs("*** DATASET TESTS FAILED ***");
     return 1;
@@ -1475,9 +1437,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    1
- *
- * Programmer:    Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1512,12 +1471,12 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
         goto error;
 
     /* Allocate space and initialize data */
-    orig = (unsigned char *)HDmalloc(NX * NY * sizeof(stype2));
+    orig = (unsigned char *)malloc(NX * NY * sizeof(stype2));
     initialize_stype2(orig, (size_t)NX * NY);
 
-    rbuf = (unsigned char *)HDmalloc(NX * NY * sizeof(stype1));
+    rbuf = (unsigned char *)malloc(NX * NY * sizeof(stype1));
 
-    rew_buf = (unsigned char *)HDmalloc(NX * NY * sizeof(stype4));
+    rew_buf = (unsigned char *)malloc(NX * NY * sizeof(stype4));
     initialize_stype4(rew_buf, (size_t)NX * NY);
 
     /* Create dataset creation property list */
@@ -1646,9 +1605,9 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if (H5Fclose(file) < 0)
         goto error;
 
-    HDfree(orig);
-    HDfree(rbuf);
-    HDfree(rew_buf);
+    free(orig);
+    free(rbuf);
+    free(rew_buf);
 
     PASSED();
     return 0;
@@ -1665,11 +1624,11 @@ error:
         int _i;                                                                                              \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        HDprintf("    Insertion order =");                                                                   \
+        printf("    Insertion order =");                                                                     \
         for (_i = 0; _i < PACK_NMEMBS; _i++)                                                                 \
-            HDprintf(" %d", order[_i]);                                                                      \
-        HDprintf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]); \
-        HDfflush(stdout);                                                                                    \
+            printf(" %d", order[_i]);                                                                        \
+        printf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]);   \
+        fflush(stdout);                                                                                      \
         goto error;                                                                                          \
     }
 
@@ -1683,9 +1642,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    1
- *
- * Programmer:    Neil Fortner
- *              Thursday, 22 January 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1722,7 +1678,7 @@ test_pack_ooo(void)
 
         /* Reshape free_order to remove j (which is no longer free) */
         if (j < (num_free - 1))
-            HDmemmove(&free_order[j], &free_order[j + 1], (num_free - j - 1) * sizeof(free_order[0]));
+            memmove(&free_order[j], &free_order[j + 1], (num_free - j - 1) * sizeof(free_order[0]));
     } /* end for */
 
     /* Generate order to insert inner compound type */
@@ -1958,9 +1914,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    1
- *
- * Programmer:    Neil Fortner
- *              Monday, 19 October 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -2199,9 +2152,6 @@ error:
  *
  *              Failure:         1
  *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2216,8 +2166,8 @@ main(int argc, char *argv[])
     /* Turn off optimized compound converter? */
     if (argc > 1) {
         if (argc > 2 || HDstrcmp("--noopt", argv[1]) != 0) {
-            HDfprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
-            HDexit(EXIT_FAILURE);
+            fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
+            exit(EXIT_FAILURE);
         }
         H5Tunregister(H5T_PERS_DONTCARE, NULL, (hid_t)-1, (hid_t)-1,
                       (H5T_conv_t)((void (*)(void))H5T__conv_struct_opt));
@@ -2249,8 +2199,8 @@ main(int argc, char *argv[])
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
 
     if (nerrors) {
-        HDprintf("***** %u FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        printf("***** %u FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        exit(EXIT_FAILURE);
     }
 
     h5_cleanup(FILENAME, fapl_id);

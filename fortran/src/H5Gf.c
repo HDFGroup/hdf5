@@ -38,9 +38,6 @@
  *  obj_type - type of the object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
  * SOURCE
  */
 int_f
@@ -68,7 +65,7 @@ h5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx, _f
      */
     c_obj_namelen = (size_t)*obj_namelen;
     if (c_obj_namelen)
-        if (NULL == (c_obj_name = (char *)HDmalloc(c_obj_namelen + 1)))
+        if (NULL == (c_obj_name = (char *)malloc(c_obj_namelen + 1)))
             goto DONE;
 
     /* Get a temporary group ID for the group to query */
@@ -100,9 +97,9 @@ DONE:
         H5Gclose(gid);
 
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -119,9 +116,6 @@ DONE:
  *  nmemebers - number of members
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
  * SOURCE
  */
 int_f
@@ -147,7 +141,7 @@ h5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -166,9 +160,6 @@ DONE:
  *  new_namelen - new_name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -227,9 +218,9 @@ h5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name, int_f *current_n
 
 DONE:
     if (c_current_name)
-        HDfree(c_current_name);
+        free(c_current_name);
     if (c_new_name)
-        HDfree(c_new_name);
+        free(c_new_name);
 
     return ret_value;
 }
@@ -252,9 +243,6 @@ DONE:
  *  new_namelen - new_name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, September 25, 2002
  * HISTORY
  *
  * SOURCE
@@ -314,9 +302,9 @@ h5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen, int_f *link_t
 
 DONE:
     if (c_cur_name)
-        HDfree(c_cur_name);
+        free(c_cur_name);
     if (c_new_name)
-        HDfree(c_new_name);
+        free(c_new_name);
     return ret_value;
 }
 
@@ -330,9 +318,6 @@ DONE:
  *  name - name of the object to unlink
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -358,7 +343,7 @@ h5gunlink_c(hid_t_f *loc_id, _fcd name, int_f *namelen)
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -375,9 +360,6 @@ DONE:
  *  dst_namelen - new name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -406,9 +388,9 @@ h5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int
 
 DONE:
     if (c_src_name)
-        HDfree(c_src_name);
+        free(c_src_name);
     if (c_dst_name)
-        HDfree(c_dst_name);
+        free(c_dst_name);
     return ret_value;
 }
 
@@ -426,10 +408,6 @@ DONE:
  *  dst_namelen - new name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, September 25, 2002
- *
  * SOURCE
  */
 
@@ -459,9 +437,9 @@ h5gmove2_c(hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_
 
 DONE:
     if (c_src_name)
-        HDfree(c_src_name);
+        free(c_src_name);
     if (c_dst_name)
-        HDfree(c_dst_name);
+        free(c_dst_name);
     return ret_value;
 }
 
@@ -479,9 +457,6 @@ DONE:
  *  value - name to be returned
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -503,9 +478,9 @@ h5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _fc
      *  Allocate buffer to hold name of the value
      */
     if (*size)
-        c_value = (char *)HDmalloc((size_t)*size);
+        c_value = (char *)malloc((size_t)*size);
     if (c_value == NULL) {
-        HDfree(c_name);
+        free(c_name);
         return ret_value;
     }
 
@@ -523,9 +498,9 @@ h5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _fc
 
 DONE:
     if (c_value)
-        HDfree(c_value);
+        free(c_value);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -542,11 +517,6 @@ DONE:
  *  commentlen - new comment length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
- * HISTORY
- *  Elena Pourmal
  * SOURCE
  */
 int_f
@@ -573,9 +543,9 @@ h5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment, int_f
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     return ret_value;
 }
 
@@ -592,9 +562,6 @@ DONE:
  *  comment - the new comment
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 int_f
@@ -616,7 +583,7 @@ h5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize, 
      */
     c_bufsize = (size_t)*bufsize;
     if (c_bufsize) {
-        if (NULL == (c_comment = (char *)HDmalloc(c_bufsize + 1)))
+        if (NULL == (c_comment = (char *)malloc(c_bufsize + 1)))
             goto DONE;
     } /* end if */
 
@@ -634,9 +601,9 @@ h5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize, 
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     return ret_value;
 }
 
@@ -655,9 +622,6 @@ DONE:
  *  grp_id - group identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 15, 2008
  * SOURCE
  */
 int_f
@@ -687,9 +651,6 @@ done:
  *  gcpl_id - Group creation property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 15, 2008
  * SOURCE
  */
 int_f

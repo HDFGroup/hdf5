@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FSint.c
- *              Fall 2012
- *              Dana Robinson
  *
  * Purpose:     Internal routines for free space managers.
  *
@@ -73,9 +71,6 @@
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -86,8 +81,8 @@ H5FS__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(parent_entry);
-    HDassert(child_entry);
+    assert(parent_entry);
+    assert(child_entry);
 
     /* Create a flush dependency between parent and child entry */
     if (H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
@@ -104,9 +99,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -117,8 +109,8 @@ H5FS__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(parent_entry);
-    HDassert(child_entry);
+    assert(parent_entry);
+    assert(child_entry);
 
     /* Destroy a flush dependency between parent and child entry */
     if (H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)

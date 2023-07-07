@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Friday, March 30, 2012
- *
  * Purpose:     Create a simple file for use with the file image tests.
  *
  */
@@ -31,9 +28,6 @@
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:	Quincey Koziol
- *              Friday, March 30, 2012
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -45,7 +39,7 @@ main(void)
     int    *data = NULL; /* Dataset data */
 
     /* Initialize the data */
-    if (NULL == (data = (int *)HDmalloc(SPACE_DIM1 * SPACE_DIM2 * sizeof(int))))
+    if (NULL == (data = (int *)malloc(SPACE_DIM1 * SPACE_DIM2 * sizeof(int))))
         TEST_ERROR;
 
     for (i = 0; i < SPACE_DIM1; i++)
@@ -80,14 +74,14 @@ main(void)
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     H5E_BEGIN_TRY
     {
         H5Dclose(did);
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return EXIT_FAILURE;
 } /* end main() */

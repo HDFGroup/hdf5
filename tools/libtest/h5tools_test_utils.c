@@ -64,9 +64,6 @@
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *****************************************************************************/
 
 H5_GCC_CLANG_DIAG_OFF("format")
@@ -93,14 +90,11 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *
  *     *FAILED* at somefile.c:12 in function_name()...
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
+        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                              \
     }
 
 /*----------------------------------------------------------------------------
@@ -120,9 +114,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *
  *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
  *     similar to `TEST_ERROR` in h5test.h
- *
- * Programmer: Jacob Smith
- *             2017-10-23
  *
  *----------------------------------------------------------------------------
  */
@@ -148,9 +139,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     `FAIL_UNLESS( 5 == my_op() )`
  *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
  *         (see JSVERIFY)
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -180,19 +168,16 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *       ! Expected 425
  *       ! Actual   3
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSERR_LONG(expected, actual, reason)                                                                 \
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
         if (reason != NULL) {                                                                                \
-            HDprintf("%s\n", (reason));                                                                      \
+            printf("%s\n", (reason));                                                                        \
         }                                                                                                    \
         else {                                                                                               \
-            HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));              \
+            printf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));                \
         }                                                                                                    \
     }
 
@@ -219,19 +204,16 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     !!! Actual:
  *     not what I expected at all
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSERR_STR(expected, actual, reason)                                                                  \
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
         if ((reason) != NULL) {                                                                              \
-            HDprintf("%s\n", (reason));                                                                      \
+            printf("%s\n", (reason));                                                                        \
         }                                                                                                    \
         else {                                                                                               \
-            HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
+            printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                             \
         }                                                                                                    \
     }
 
@@ -247,9 +229,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     If unequal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -270,9 +249,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(expected, actual, reason)                                                               \
@@ -292,9 +268,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
@@ -309,8 +282,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(actual, expected, reason)                                                                   \
@@ -322,8 +293,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(actual, expected, reason)                                                               \
@@ -335,8 +304,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
@@ -368,9 +335,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *
  *     0   Tests passed.
  *     1   Tests failed.
- *
- * Programmer: Jacob Smith
- *             2017-11-11
  *
  *----------------------------------------------------------------------------
  */
@@ -532,11 +496,11 @@ test_parse_tuple(void)
 
         /* SETUP
          */
-        HDassert(parsed == NULL);
-        HDassert(cpy == NULL);
+        assert(parsed == NULL);
+        assert(cpy == NULL);
         tc = cases[i];
         if (show_progress == TRUE) {
-            HDprintf("testing %d: %s...\n", i, tc.test_msg);
+            printf("testing %d: %s...\n", i, tc.test_msg);
         }
 
         /* VERIFY
@@ -551,11 +515,11 @@ test_parse_tuple(void)
                 JSVERIFY_STR(tc.exp_elems[elem_i], parsed[elem_i], (char *)NULL)
             }
             /* TEARDOWN */
-            HDassert(parsed != NULL);
-            HDassert(cpy != NULL);
-            HDfree(parsed);
+            assert(parsed != NULL);
+            assert(cpy != NULL);
+            free(parsed);
             parsed = NULL;
-            HDfree(cpy);
+            free(cpy);
             cpy = NULL;
         }
         else {
@@ -573,9 +537,9 @@ error:
      ***********/
 
     if (parsed != NULL)
-        HDfree(parsed);
+        free(parsed);
     if (cpy != NULL)
-        HDfree(cpy);
+        free(cpy);
 
     return 1;
 
@@ -589,9 +553,6 @@ error:
  *
  * Return:     0 if test passes
  *             1 if failure
- *
- * Programmer: Jacob Smith
- *             2017-11-13
  *
  *----------------------------------------------------------------------------
  */
@@ -616,14 +577,14 @@ test_populate_ros3_fa(void)
 #ifndef H5_HAVE_ROS3_VFD
     HDputs(" -SKIP-");
     HDputs("    Read-Only S3 VFD not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 #else
 #if H5TOOLS_UTILS_TEST_DEBUG > 0
     show_progress = TRUE;
 #endif /* H5TOOLS_UTILS_TEST_DEBUG */
 
-    HDassert(bad_version != H5FD_CURR_ROS3_FAPL_T_VERSION);
+    assert(bad_version != H5FD_CURR_ROS3_FAPL_T_VERSION);
 
     /*********
      * TESTS *
@@ -635,7 +596,7 @@ test_populate_ros3_fa(void)
         const char *values[] = {"x", "y", "z"};
 
         if (show_progress) {
-            HDprintf("NULL fapl pointer\n");
+            printf("NULL fapl pointer\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(NULL, values), "fapl pointer cannot be null")
@@ -660,7 +621,7 @@ test_populate_ros3_fa(void)
         H5FD_ros3_fapl_ext_t fa = {{bad_version, TRUE, "u", "v", "w"}, "x"};
 
         if (show_progress) {
-            HDprintf("NULL values pointer\n");
+            printf("NULL values pointer\n");
         }
 
         JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, NULL), "NULL values pointer yields \"default\" fapl")
@@ -680,7 +641,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"", "", "", ""};
 
         if (show_progress) {
-            HDprintf("all empty values\n");
+            printf("all empty values\n");
         }
 
         JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "empty values yields \"default\" fapl")
@@ -700,7 +661,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"x", "y", "z", "a", "b"};
 
         if (show_progress) {
-            HDprintf("successful full set\n");
+            printf("successful full set\n");
         }
 
         JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "four values")
@@ -720,7 +681,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {NULL, "y", "z", ""};
 
         if (show_progress) {
-            HDprintf("NULL region\n");
+            printf("NULL region\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
@@ -740,7 +701,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"", "y", "z", ""};
 
         if (show_progress) {
-            HDprintf("empty region; non-empty id, key\n");
+            printf("empty region; non-empty id, key\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
@@ -762,10 +723,10 @@ test_populate_ros3_fa(void)
                                 "y", "z", ""};
 
         if (show_progress) {
-            HDprintf("region overflow\n");
+            printf("region overflow\n");
         }
 
-        HDassert(HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
+        assert(HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
@@ -784,7 +745,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"x", NULL, "z", ""};
 
         if (show_progress) {
-            HDprintf("NULL id\n");
+            printf("NULL id\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
@@ -804,7 +765,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"x", "", "z", ""};
 
         if (show_progress) {
-            HDprintf("empty id; non-empty region and key\n");
+            printf("empty id; non-empty region and key\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
@@ -835,10 +796,10 @@ test_populate_ros3_fa(void)
                                 "z", ""};
 
         if (show_progress) {
-            HDprintf("id overflow\n");
+            printf("id overflow\n");
         }
 
-        HDassert(HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
+        assert(HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
@@ -857,7 +818,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"x", "y", NULL, ""};
 
         if (show_progress) {
-            HDprintf("NULL key\n");
+            printf("NULL key\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
@@ -897,7 +858,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"x", "y", "", ""};
 
         if (show_progress) {
-            HDprintf("empty key; non-empty region and id\n");
+            printf("empty key; non-empty region and id\n");
         }
 
         JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
@@ -917,7 +878,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"", "y", "", ""};
 
         if (show_progress) {
-            HDprintf("empty key and region; non-empty id\n");
+            printf("empty key and region; non-empty id\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
@@ -937,7 +898,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"x", "", "", ""};
 
         if (show_progress) {
-            HDprintf("empty key and id; non-empty region\n");
+            printf("empty key and id; non-empty region\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
@@ -968,10 +929,10 @@ test_populate_ros3_fa(void)
                                 ""};
 
         if (show_progress) {
-            HDprintf("key overflow\n");
+            printf("key overflow\n");
         }
 
-        HDassert(HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        assert(HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
@@ -1015,9 +976,6 @@ error:
  *
  * Return:     0 if test passes
  *             1 if failure
- *
- * Programmer: Jacob Smith
- *             2018-07-12
  *
  *----------------------------------------------------------------------------
  */
@@ -1182,7 +1140,7 @@ test_set_configured_fapl(void)
         fapl_id = H5I_INVALID_HID;
 
 #if UTIL_TEST_DEBUG
-        HDfprintf(stderr, "setup test %d\t%s\n", i, C.message);
+        fprintf(stderr, "setup test %d\t%s\n", i, C.message);
         fflush(stderr);
 #endif /* UTIL_TEST_DEBUG */
 
@@ -1196,7 +1154,7 @@ test_set_configured_fapl(void)
         }
 
 #if UTIL_TEST_DEBUG
-        HDfprintf(stderr, "before test\n");
+        fprintf(stderr, "before test\n");
         fflush(stderr);
 #endif /* UTIL_TEST_DEBUG */
 
@@ -1213,7 +1171,7 @@ test_set_configured_fapl(void)
         }
 
 #if UTIL_TEST_DEBUG
-        HDfprintf(stderr, "after test\n");
+        fprintf(stderr, "after test\n");
         fflush(stderr);
 #endif /* UTIL_TEST_DEBUG */
 
@@ -1224,13 +1182,13 @@ test_set_configured_fapl(void)
         fapl_id = H5I_INVALID_HID;
 
 #if UTIL_TEST_DEBUG
-        HDfprintf(stderr, "after cleanup\n");
+        fprintf(stderr, "after cleanup\n");
         fflush(stderr);
 #endif /* UTIL_TEST_DEBUG */
     }
 
 #if UTIL_TEST_DEBUG
-    HDfprintf(stderr, "after loop\n");
+    fprintf(stderr, "after loop\n");
     fflush(stderr);
 #endif /* UTIL_TEST_DEBUG */
 
@@ -1243,7 +1201,7 @@ error:
      ***********/
 
 #if UTIL_TEST_DEBUG
-    HDfprintf(stderr, "ERROR\n");
+    fprintf(stderr, "ERROR\n");
     fflush(stderr);
 #endif /* UTIL_TEST_DEBUG */
 
@@ -1268,9 +1226,6 @@ H5_GCC_CLANG_DIAG_ON("format")
  * Return:     0 iff all test pass
  *             1 iff any failures
  *
- * Programmer: Jacob Smith
- *             2017-11-10
- *
  *----------------------------------------------------------------------------
  */
 int
@@ -1282,18 +1237,18 @@ main(void)
     h5reset(); /* h5test? */
 #endif         /* _H5TEST_ */
 
-    HDfprintf(stdout, "Testing h5tools_utils corpus.\n");
+    fprintf(stdout, "Testing h5tools_utils corpus.\n");
 
     nerrors += test_parse_tuple();
     nerrors += test_populate_ros3_fa();
     nerrors += test_set_configured_fapl();
 
     if (nerrors > 0) {
-        HDfprintf(stdout, "***** %d h5tools_utils TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        fprintf(stdout, "***** %d h5tools_utils TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         nerrors = 1;
     }
     else {
-        HDfprintf(stdout, "All h5tools_utils tests passed\n");
+        fprintf(stdout, "All h5tools_utils tests passed\n");
     }
 
     return (int)nerrors;

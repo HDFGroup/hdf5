@@ -375,9 +375,6 @@ static hid_t H5VL_PASSTHRU_g = H5I_INVALID_HID;
  * Return:      Success:    Pointer to the new pass through object
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Monday, December 3, 2018
- *
  *-------------------------------------------------------------------------
  */
 static H5VL_pass_through_t *
@@ -405,9 +402,6 @@ H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Quincey Koziol
- *              Monday, December 3, 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -434,9 +428,6 @@ H5VL_pass_through_free_obj(H5VL_pass_through_t *obj)
  *
  * Return:      Success:    The ID for the pass-through VOL connector
  *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, November 28, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1796,7 +1787,7 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_args_t *args, hid
     H5VL_pass_through_t       *new_o;
     H5VL_file_specific_args_t  my_args;
     H5VL_file_specific_args_t *new_args;
-    H5VL_pass_through_info_t  *info;
+    H5VL_pass_through_info_t  *info         = NULL;
     hid_t                      under_vol_id = -1;
     herr_t                     ret_value;
 

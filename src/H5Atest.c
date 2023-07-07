@@ -73,9 +73,6 @@
  *
  * Return:      TRUE/FALSE/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 19, 2006
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -104,9 +101,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 19, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -128,7 +122,7 @@ H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
     api_ctx_pushed = TRUE;
 
     /* Sanity check */
-    HDassert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
+    assert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
 
     /* Retrieve ref count for shared or shareable attribute */
     if (H5SM_get_refcount(attr->oloc.file, H5O_ATTR_ID, &attr->sh_loc, ref_count) < 0)

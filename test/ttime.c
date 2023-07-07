@@ -176,13 +176,13 @@ test_time_io(void)
     tid = H5Dget_type(dsid);
     CHECK(tid, FAIL, "H5Dget_type");
     if (H5Tget_class(tid) == H5T_TIME)
-        HDfprintf(stderr, "datatype class is H5T_TIME\n");
+        fprintf(stderr, "datatype class is H5T_TIME\n");
     status = H5Tclose(tid);
     CHECK(status, FAIL, "H5Tclose");
 
     status = H5Dread(dsid, H5T_UNIX_D32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timethen);
     CHECK(status, FAIL, "H5Dread");
-    HDfprintf(stderr, "time written was: %s\n", HDctime(&timethen));
+    fprintf(stderr, "time written was: %s\n", HDctime(&timethen));
 
     status = H5Dclose(dsid);
     CHECK(status, FAIL, "H5Dclose");
@@ -216,9 +216,6 @@ test_time(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Quincey Koziol
- *              October 19, 2000
  *
  *-------------------------------------------------------------------------
  */

@@ -38,6 +38,9 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
                            HDF5 file specified
    --vol-info-2            VOL-specific info to pass to the VOL connector used for
                            opening the second HDF5 file specified
+                           If none of the above options are used to specify a VOL for a file, then
+                           the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,
+                           if that environment variable is unset) will be used
    --vfd-value-1           Value (ID) of the VFL driver to use for opening the
                            first HDF5 file specified
    --vfd-name-1            Name of the VFL driver to use for opening the first

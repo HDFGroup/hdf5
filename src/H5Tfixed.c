@@ -31,9 +31,6 @@
  *
  *		Failure:	H5T_SGN_ERROR (Negative)
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5T_sign_t
@@ -65,9 +62,6 @@ done:
  *
  *		Failure:	H5T_SGN_ERROR (Negative)
  *
- * Programmer:	Raymond Lu
- *		October 8, 2002
- *
  *-------------------------------------------------------------------------
  */
 H5T_sign_t
@@ -77,7 +71,7 @@ H5T_get_sign(H5T_t const *dt)
 
     FUNC_ENTER_NOAPI(H5T_SGN_ERROR)
 
-    HDassert(dt);
+    assert(dt);
 
     /* Defer to parent */
     while (dt->shared->parent)
@@ -100,9 +94,6 @@ done:
  * Purpose:	Sets the sign property for an integer.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
