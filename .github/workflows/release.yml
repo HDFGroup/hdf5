@@ -27,8 +27,10 @@ jobs:
       - name: "Determine tag"
         if: "${{ github.event_name }} == 'push' && ${{ github.ref_type }} == 'tag'"
         run: |
-          "echo \"RELEASE_TAG=${GITHUB_REF#refs/tags/}\" >> $GITHUB_ENV"
-          "echo \"RELEASE_SHA=$(git rev-parse --short \"$GITHUB_SHA\")\" >> $GITHUB_ENV"
+          RELEASE_TAG=${GITHUB_REF#refs/tags/}
+          RELEASE_SHA=$(git rev-parse --short \"$GITHUB_SHA\")
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          echo "RELEASE_SHA=$RELEASE_SHA" >> $GITHUB_ENV
         shell: "bash"
 
 # tarball.yml will be used for releases when pre-tag actions are implemented
