@@ -18,20 +18,14 @@ permissions:
 jobs:
   log-the-inputs:
     runs-on: ubuntu-latest
+    outputs:
+      rel_tag: ${{ steps.get-tag-name.outputs.RELEASE_TAG }}
     steps:
-      - run: |
-          echo "Tag: $TAG"
+    - name: Get tag name
+      id: get-tag-name
         env:
           TAG: ${{ inputs.use_tag }}
-
-#      - name: "Determine tag"
-#        if: "${{ github.event_name }} == 'push' && ${{ github.ref_type }} == 'tag'"
-#        run: |
-#          RELEASE_TAG=${GITHUB_REF#refs/tags/}
-#          RELEASE_SHA=$(git rev-parse --short \"$GITHUB_SHA\")
-#          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
-#          echo "RELEASE_SHA=$RELEASE_SHA" >> $GITHUB_ENV
-#        shell: "bash"
+      run: echo "RELEASE_TAG: $TAG" >> $GITHUB_OUTPUT
 
 # tarball.yml will be used for releases when pre-tag actions are implemented
 #  call-workflow-tarball:
@@ -48,7 +42,7 @@ jobs:
       - name: Set file base name
         id: set-file-base
         run: |
-          FILE_NAME_BASE=$(echo "${{ needs.log-the-inputs.outputs.TAG }}")
+          FILE_NAME_BASE=$(echo "${{ needs.log-the-inputs.outputs.rel_tag }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
 
@@ -97,8 +91,8 @@ jobs:
     uses: ./.github/workflows/release-files.yml
     with:
       file_base: ${{ needs.create-files-ctest.outputs.file_base }}
-      file_branch: ${{ needs.log-the-inputs.outputs.TAG }}
-      file_sha: ${{ needs.log-the-inputs.outputs.TAG }}
-      use_tag: ${{ needs.log-the-inputs.outputs.TAG }}
+      file_branch: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      file_sha: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 
