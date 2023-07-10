@@ -25,7 +25,7 @@ jobs:
       id: get-tag-name
       env:
         TAG: ${{ inputs.use_tag }}
-      run: echo "RELEASE_TAG: $TAG" >> $GITHUB_OUTPUT
+      run: echo "RELEASE_TAG=$TAG" >> $GITHUB_OUTPUT
 
 # tarball.yml will be used for releases when pre-tag actions are implemented
 #  call-workflow-tarball:
