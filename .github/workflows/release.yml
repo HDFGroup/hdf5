@@ -87,7 +87,7 @@ jobs:
 
   call-workflow-release:
     #needs: [call-workflow-tarball, call-workflow-ctest]
-    needs: [log-the-inputs, call-workflow-ctest]
+    needs: [log-the-inputs, create-files-ctest, call-workflow-ctest]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
