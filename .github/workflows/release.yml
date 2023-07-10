@@ -52,12 +52,12 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v3
         with:
-          path: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          path: hdfsrc
 
       - name: Zip Folder
         run: |
-              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./${{ steps.set-file-base.outputs.FILE_BASE }}
-              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./${{ steps.set-file-base.outputs.FILE_BASE }}
+              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
+              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
 
       - name: List files in the repository
         run: |
