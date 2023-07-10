@@ -23,8 +23,8 @@ jobs:
     steps:
     - name: Get tag name
       id: get-tag-name
-        env:
-          TAG: ${{ inputs.use_tag }}
+      env:
+        TAG: ${{ inputs.use_tag }}
       run: echo "RELEASE_TAG: $TAG" >> $GITHUB_OUTPUT
 
 # tarball.yml will be used for releases when pre-tag actions are implemented
