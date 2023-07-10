@@ -98,7 +98,7 @@ jobs:
     with:
       file_base: ${{ needs.create-files-ctest.outputs.file_base }}
       file_branch: ${{ needs.log-the-inputs.outputs.TAG }}
-      file_sha: ${{ needs.log-the-inputs.outputs.RELEASE_SHA }}
+      file_sha: ${{ needs.log-the-inputs.outputs.TAG }}
       use_tag: ${{ needs.log-the-inputs.outputs.TAG }}
       use_environ: release
 
