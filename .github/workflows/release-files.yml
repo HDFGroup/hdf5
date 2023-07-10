@@ -137,7 +137,7 @@ jobs:
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: false
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          #body_path: ${{ github.workspace }}-CHANGELOG.txt
           files: |
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
