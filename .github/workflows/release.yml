@@ -82,12 +82,10 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   call-workflow-ctest:
-    needs: [log-the-inputs, create-files-ctest]
+    needs: create-files-ctest
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       file_base: ${{ needs.create-files-ctest.outputs.file_base }}
-      use_tag: ${{ needs.log-the-inputs.outputs.TAG }}
-      use_environ: release
 
   call-workflow-release:
     #needs: [call-workflow-tarball, call-workflow-ctest]
