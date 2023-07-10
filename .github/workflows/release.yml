@@ -38,6 +38,8 @@ jobs:
   create-files-ctest:
     needs: log-the-inputs
     runs-on: ubuntu-latest
+    outputs:
+      file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
     steps:
       - name: Set file base name
         id: set-file-base
@@ -54,8 +56,8 @@ jobs:
 
       - name: Zip Folder
         run: |
-              zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.zip ./${{ steps.get-file-base.outputs.FILE_BASE }}
-              tar -zcvf ${{ steps.get-file-base.outputs.FILE_BASE }}.tag.gz ./${{ steps.get-file-base.outputs.FILE_BASE }}
+              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./${{ steps.set-file-base.outputs.FILE_BASE }}
+              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tag.gz ./${{ steps.set-file-base.outputs.FILE_BASE }}
 
       - name: List files in the repository
         run: |
