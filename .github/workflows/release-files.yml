@@ -115,7 +115,8 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: PreRelease tag
-        id: create_release
+        id: create_prerelease
+        if: ${{ (inputs.use_environ == 'snapshots') }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "${{ inputs.use_tag }}"
@@ -129,9 +130,32 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
+      - name: Release tag
+        id: create_release
+        if: ${{ (inputs.use_environ == 'release') }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "${{ inputs.use_tag }}"
+          prerelease: false
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          files: |
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
       - name: Store Release url
         run: |
-          echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          then
+            UPLOAD_URL=${{ steps.create_prerelease.outputs.upload_url }}
+          else
+            UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}
+          fi
+          echo "$UPLOAD_URL" > ./upload_url
 
 #      - uses: actions/upload-artifact@v3
 #        with:
