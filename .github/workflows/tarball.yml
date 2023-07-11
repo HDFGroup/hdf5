@@ -13,7 +13,7 @@ on:
         description: 'Environment to locate files'
         type: string
         required: true
-        default: snapshots-1.14
+        default: snapshots
     outputs:
       has_changes:
         description: "Whether there were changes the previous day"
