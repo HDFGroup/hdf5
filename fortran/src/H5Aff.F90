@@ -70,9 +70,8 @@
 
 MODULE H5A
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_NULL_CHAR, C_LOC, C_INT
-
   USE H5GLOBAL
+  IMPLICIT NONE
 
   PRIVATE h5awrite_char_scalar, h5awrite_ptr
   PRIVATE h5aread_char_scalar, h5aread_ptr
