@@ -85,10 +85,10 @@
 
 MODULE H5D
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
   USE H5LIB, ONLY : h5kind_to_type
   USE H5S, ONLY : H5Sget_simple_extent_ndims_f, H5Sclose_f
+  IMPLICIT NONE
 
   PRIVATE h5dread_vl_integer, h5dread_vl_real, h5dread_vl_string
   PRIVATE h5dwrite_vl_integer, h5dwrite_vl_real, h5dwrite_vl_string
