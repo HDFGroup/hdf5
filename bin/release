@@ -19,14 +19,14 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--private] <methods> ...
+Usage: $0 -d <dir> [-h] [--private] [--revision [--branch BRANCHNAME]] <methods> ...
    -d DIR       The name of the directory where the release(s) should be
                 placed.
-   --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
-                        version of documentation files from the hdf5docs
+   --branch BRANCHNAME  This is to get the correct version of the branch name from the
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
    -h           print the help page.
    --private    Make a private release with today's date in version information.
+   --revision   Make a private release with the code revision number in version information.
 
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
@@ -407,8 +407,8 @@ verbose=yes
 release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
+revmode='no'
 tmpdir="../#release_tmp.$$"     # tmp work directory
-DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 MAINT_MODE_ENABLED=""
 
@@ -449,8 +449,11 @@ while [ -n "$1" ]; do
         --private)
             pmode=yes
             ;;
-        --docver)
-            DOCVERSION=$1
+        --revision)
+            revmode=yes
+            ;;
+        --branch)
+            BRANCHNAME=$1
             shift
             ;;
         -*)
@@ -490,12 +493,34 @@ if [ X$pmode = Xyes ]; then
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-of$today
     echo Private release of $VERS
-else
     bin/h5vers -s $VERS
 fi
 
-# Store hdf5-$VERS ("hdf5-1.7.51", e.g.) to a variable to avoid typos
-HDF5_VERS=hdf5-$VERS
+if [ X$revmode = Xyes ]; then
+    VERS_OLD=$VERS
+    echo "Save old version $VERS_OLD for restoration later."
+    # Copy old version of config/lt_vers.am, since it's hard to
+    # "undo" changes to it.
+    cp config/lt_vers.am $tmpdir
+    if [ "${BRANCHNAME}" = "" ]; then
+        BRANCHNAME=`git symbolic-ref -q --short HEAD`
+    fi
+    revision=`git rev-parse --short HEAD`
+    # Set version information to m.n.r-r$revision.
+    # (h5vers does not correctly handle just m.n.r-$today.)
+    VERS=`echo $VERS | sed -e s/-.*//`-$revision
+    echo Private release of $VERS
+    HDF5_VERS=hdf5-$BRANCHNAME-$revision
+    echo file base of $HDF5_VERS
+    bin/h5vers -s $VERS
+    # use a generic directory name for revision releases
+    HDF5_IN_VERS=hdfsrc
+else
+    # Store hdf5-$VERS ("hdf5-1.7.51", e.g.) to a variable to avoid typos
+    HDF5_VERS=hdf5-$VERS
+    # directory name matches tar file name for non-revision releases
+    HDF5_IN_VERS=$HDF5_VERS
+fi
 
 test "$verbose" && echo "Releasing $HDF5_VERS to $DEST" 1>&2
 if [ ! -d $DEST ]; then
@@ -505,7 +530,7 @@ fi
 
 # Create a symlink to the source so files in the tarball have the prefix
 # we want (gnu's --transform isn't portable)
-ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
+ln -s `pwd` $tmpdir/$HDF5_IN_VERS || exit 1
 
 # Save a backup copy of Makefile if exists.
 test -f Makefile && mv Makefile $tmpdir/Makefile.x
@@ -521,14 +546,9 @@ for f in README.md release_docs/RELEASE.txt; do
     chmod 644 $f
 done
 
-# develop is different than branches.
-if [ "${DOCVERSION}" ]; then
-    DOC_URL="$DOC_URL -b ${DOCVERSION}"
-fi
-
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
-(cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_VERS" || exit 1 )
+(cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_IN_VERS" || exit 1 )
 
 # Compress
 SHA256=$HDF5_VERS.sha256
@@ -561,7 +581,7 @@ for comp in $methods; do
             ;;
         zip)
             test "$verbose" && echo "   Creating zip ball..." 1>&2
-            tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
+            tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
             (cd $DEST; sha256sum $HDF5_VERS.zip >> $SHA256)
             ;;
         cmake-zip)
@@ -607,7 +627,8 @@ rm -f Makefile
 test -f $tmpdir/Makefile.x && mv $tmpdir/Makefile.x Makefile
 
 # Restore OLD version information, then no need for trap.
-if [ X$pmode = Xyes ]; then
+if [ X$pmode = Xyes ] || [ X$revmode = Xyes ]; then
+    echo "Restore the original version $VERS_OLD"
     RESTORE_VERSION
     trap 0
 fi
