@@ -1077,6 +1077,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
         }
 
         case SELECT_IOC_WITH_CONFIG:
+        case ioc_selection_options:
         default:
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid IOC selection strategy");
             break;
@@ -1705,6 +1706,7 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
         }
 
         case SELECT_IOC_WITH_CONFIG:
+        case ioc_selection_options:
         default:
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid IOC selection strategy");
             break;

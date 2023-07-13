@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2013-2022 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2022-2023 Intel Corporation.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -150,6 +151,7 @@ hg_thread_setaffinity(hg_thread_t thread, const hg_cpu_set_t *cpu_mask)
 #if defined(_WIN32)
     if (!SetThreadAffinityMask(thread, *cpu_mask))
         return HG_UTIL_FAIL;
+    return HG_UTIL_SUCCESS;
 #elif defined(__APPLE__)
     (void)thread;
     (void)cpu_mask;

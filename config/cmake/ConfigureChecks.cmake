@@ -665,6 +665,15 @@ if (MINGW OR NOT WINDOWS)
     list (APPEND LINK_LIBS posix4)
   endif ()
 endif ()
+
+# Check for clock_gettime() CLOCK_MONOTONIC_COARSE
+set (CMAKE_EXTRA_INCLUDE_FILES time.h)
+check_type_size(CLOCK_MONOTONIC_COARSE CLOCK_MONOTONIC_COARSE_SIZE)
+if (HAVE_CLOCK_MONOTONIC_COARSE_SIZE)
+  set (${HDF_PREFIX}_HAVE_CLOCK_MONOTONIC_COARSE 1)
+endif ()
+unset (CMAKE_EXTRA_INCLUDE_FILES)
+
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------

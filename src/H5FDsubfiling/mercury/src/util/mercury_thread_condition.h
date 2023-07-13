@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2013-2022 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2022-2023 Intel Corporation.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -12,9 +13,9 @@
 #ifdef _WIN32
 typedef CONDITION_VARIABLE hg_thread_cond_t;
 #else
-#if defined(HG_UTIL_HAS_PTHREAD_CONDATTR_SETCLOCK) && defined(HG_UTIL_HAS_CLOCK_MONOTONIC_COARSE)
+#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
 #include <time.h>
-#elif defined(HG_UTIL_HAS_SYSTIME_H)
+#elif defined(H5_HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
 #include <stdlib.h>
@@ -134,7 +135,7 @@ hg_thread_cond_timedwait(hg_thread_cond_t *cond, hg_thread_mutex_t *mutex, unsig
     if (!SleepConditionVariableCS(cond, mutex, timeout))
         return HG_UTIL_FAIL;
 #else
-#if defined(HG_UTIL_HAS_PTHREAD_CONDATTR_SETCLOCK) && defined(HG_UTIL_HAS_CLOCK_MONOTONIC_COARSE)
+#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
     struct timespec now;
 #else
     struct timeval now;
@@ -143,13 +144,13 @@ hg_thread_cond_timedwait(hg_thread_cond_t *cond, hg_thread_mutex_t *mutex, unsig
     ldiv_t          ld;
 
     /* Need to convert timeout (ms) to absolute time */
-#if defined(HG_UTIL_HAS_PTHREAD_CONDATTR_SETCLOCK) && defined(HG_UTIL_HAS_CLOCK_MONOTONIC_COARSE)
+#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
     clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
 
     /* Get sec / nsec */
     ld                  = ldiv(now.tv_nsec + timeout * 1000000L, 1000000000L);
     abs_timeout.tv_nsec = ld.rem;
-#elif defined(HG_UTIL_HAS_SYSTIME_H)
+#elif defined(H5_HAVE_SYS_TIME_H)
     gettimeofday(&now, NULL);
 
     /* Get sec / usec */

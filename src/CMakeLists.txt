@@ -278,33 +278,11 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDsplitter.h
     ${HDF5_SRC_DIR}/H5FDstdio.h
     ${HDF5_SRC_DIR}/H5FDwindows.h
-    ${H5FD_SUBFILING_DIR}/H5FDsubfiling.h
-    ${H5FD_SUBFILING_DIR}/H5FDioc.h
 )
 
 # Append Subfiling VFD and Mercury sources to H5FD interface if Subfiling VFD is built
 if (HDF5_ENABLE_SUBFILING_VFD)
-  set (MERCURY_UTIL_SOURCES
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_dlog.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_log.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_condition.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_pool.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_mutex.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_util.c
-  )
-
-  set (H5FD_SUBFILING_SOURCES
-      ${H5FD_SUBFILING_DIR}/H5FDioc.c
-      ${H5FD_SUBFILING_DIR}/H5FDioc_int.c
-      ${H5FD_SUBFILING_DIR}/H5FDioc_threads.c
-      ${H5FD_SUBFILING_DIR}/H5FDsubfiling.c
-      ${H5FD_SUBFILING_DIR}/H5FDsubfile_int.c
-      ${H5FD_SUBFILING_DIR}/H5subfiling_common.c
-      ${MERCURY_UTIL_SOURCES}
-  )
-
-  list (APPEND H5FD_SOURCES ${H5FD_SUBFILING_SOURCES})
+  add_subdirectory (${H5FD_SUBFILING_DIR})
 endif()
 
 IDE_GENERATED_PROPERTIES ("H5FD" "${H5FD_HDRS}" "${H5FD_SOURCES}" )
@@ -864,7 +842,6 @@ set (H5_PUBLIC_HEADERS
     ${H5TS_HDRS}
     ${H5VL_HDRS}
     ${H5Z_HDRS}
-    ${subfile_HDRS}
 )
 
 set (H5_PRIVATE_HEADERS
