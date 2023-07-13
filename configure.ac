@@ -3072,6 +3072,23 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     AC_SEARCH_LIBS([shm_open], [rt])
     AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
 
+    # Perform various checks for Mercury util code
+    AC_CHECK_DECL([PTHREAD_MUTEX_ADAPTIVE_NP],
+                  [AC_DEFINE([HAVE_PTHREAD_MUTEX_ADAPTIVE_NP], [1],
+                      [Define if has PTHREAD_MUTEX_ADAPTIVE_NP])],
+                  [],
+                  [[#include <pthread.h>]])
+    AC_CHECK_DECL([pthread_condattr_setclock],
+                  [AC_DEFINE([HAVE_PTHREAD_CONDATTR_SETCLOCK], [1],
+                      [Define if has pthread_condattr_setclock()])],
+                  [],
+                  [[#include <pthread.h>]])
+    AC_CHECK_DECL([CLOCK_MONOTONIC_COARSE],
+                  [AC_DEFINE([HAVE_CLOCK_MONOTONIC_COARSE], [1],
+                      [Define if has CLOCK_MONOTONIC_COARSE])],
+                  [],
+                  [[#include <time.h>]])
+
 else
     AC_MSG_RESULT([no])
 fi

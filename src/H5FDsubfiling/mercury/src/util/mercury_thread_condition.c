@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2013-2022 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2022-2023 Intel Corporation.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -16,7 +17,7 @@ hg_thread_cond_init(hg_thread_cond_t *cond)
     pthread_condattr_t attr;
 
     pthread_condattr_init(&attr);
-#if defined(HG_UTIL_HAS_PTHREAD_CONDATTR_SETCLOCK) && defined(HG_UTIL_HAS_CLOCK_MONOTONIC_COARSE)
+#if defined(H5_HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(H5_HAVE_CLOCK_MONOTONIC_COARSE)
     /* Must set clock ID if using different clock
      * (CLOCK_MONOTONIC_COARSE not supported here) */
     pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
