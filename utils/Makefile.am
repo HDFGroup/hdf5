@@ -41,4 +41,6 @@ endif
 # All subdirectories
 SUBDIRS=$(MIRROR_VFD_DIR) $(TESTUTIL_DIR) $(TOOLS_DIR)
 
+bin_SCRIPTS = subfiling_vfd/h5fuse.sh
+
 include $(top_srcdir)/config/conclude.am
