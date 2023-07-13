@@ -581,7 +581,7 @@ for comp in $methods; do
             ;;
         zip)
             test "$verbose" && echo "   Creating zip ball..." 1>&2
-            tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
+            tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
             (cd $DEST; sha256sum $HDF5_VERS.zip >> $SHA256)
             ;;
         cmake-zip)
