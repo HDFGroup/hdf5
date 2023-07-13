@@ -115,7 +115,7 @@ jobs:
         if: ${{ (inputs.use_environ == 'snapshots') && (needs.check_commits.outputs.has_changes == 'true') }}
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          bin/bbrelease -d $GITHUB_WORKSPACE --branch ${{ needs.check_commits.outputs.branch_ref }} --revision gzip zip
+          bin/release -d $GITHUB_WORKSPACE --branch ${{ needs.check_commits.outputs.branch_ref }} --revision gzip zip
         shell: bash
 
       - name: Create release file base name
