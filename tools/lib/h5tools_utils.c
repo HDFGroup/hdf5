@@ -1144,7 +1144,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 
     if (fa->token == NULL) {
         if (show_progress) {
-            HDprintf("  ERROR: null pointer to token\n");
+            printf("  ERROR: null pointer to token\n");
         }
         ret_value = 0;
         goto done;
@@ -1186,7 +1186,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
         }
         if (values[3] == NULL) {
             if (show_progress) {
-                HDprintf("  ERROR: token value cannot be NULL\n");
+                printf("  ERROR: token value cannot be NULL\n");
             }
             ret_value = 0;
             goto done;
@@ -1234,14 +1234,14 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 
             if (HDstrlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
                 if (show_progress) {
-                    HDprintf("  ERROR: token value too long\n");
+                    printf("  ERROR: token value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->token, values[3], (HDstrlen(values[3]) + 1));
+            memcpy(fa->token, values[3], (HDstrlen(values[3]) + 1));
             if (show_progress) {
-                HDprintf("  token set\n");
+                printf("  token set\n");
             }
 
             fa->fa.authenticate = TRUE;

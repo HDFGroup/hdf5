@@ -1382,7 +1382,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set x-amz-security-token header")
             if (headers == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-            HDassert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
+            assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
         }
 
         if (rangebytesstr != NULL) {

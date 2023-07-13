@@ -600,7 +600,7 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", fapl_id, token);
+    H5TRACE3("e", "izx", fapl_id, size, token_dst);
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5Pget_fapl_ros3_token() called.\n");
@@ -728,7 +728,7 @@ H5FD__ros3_str_token_close(const char *name, size_t size, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     if (*value)
-        HDfree(*value);
+        free(*value);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__ros3_str_token_close */
@@ -757,7 +757,7 @@ H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *
     FUNC_ENTER_PACKAGE_NOERR
 
     if (*value)
-        HDfree(*value);
+        free(*value);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__ros3_str_token_delete */
@@ -808,13 +808,13 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
         if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value")
 
-        HDmemcpy(token_src, token, HDstrlen(token) + 1);
+        memcpy(token_src, token, HDstrlen(token) + 1);
     }
     else {
-        token_src = (char *)HDmalloc(sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1));
+        token_src = (char *)malloc(sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1));
         if (token_src == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for token_src variable.");
-        HDmemcpy(token_src, token, HDstrlen(token) + 1);
+        memcpy(token_src, token, HDstrlen(token) + 1);
         if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char *), &token_src, NULL, NULL, NULL, NULL,
                        H5FD__ros3_str_token_delete, H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp,
                        H5FD__ros3_str_token_close) < 0)
