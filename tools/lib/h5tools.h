@@ -649,6 +649,7 @@ H5TOOLS_DLLVAR int enable_error_stack; /* re-enable error stack; disable=0 enabl
 #define H5_TOOLS_DATASET   "DATASET"
 #define H5_TOOLS_DATATYPE  "DATATYPE"
 #define H5_TOOLS_ATTRIBUTE "ATTRIBUTE"
+#define H5_TOOLS_MAP       "MAP"
 #define H5_TOOLS_UNKNOWN   "UNKNOWN"
 
 /* Definitions of useful routines */

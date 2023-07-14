@@ -229,6 +229,8 @@ H5FD__mem_t_to_str(H5FD_mem_t mem_type)
             return "H5FD_MEM_LHEAP";
         case H5FD_MEM_OHDR:
             return "H5FD_MEM_OHDR";
+        case H5FD_MEM_NTYPES:
+            return "H5FD_MEM_NTYPES";
         default:
             return "(Unknown)";
     }

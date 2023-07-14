@@ -36,7 +36,6 @@
 
 #define ONION_TEST_PAGE_SIZE_1                    4
 #define ONION_TEST_PAGE_SIZE_5                    32
-#define ONION_TEST_BASENAME_SIZE                  32
 #define ONION_TEST_FIXNAME_SIZE                   1024
 #define ONION_TEST_EXPECTED_HISTORY_REVISIONS_MAX 16
 #define ONION_TEST_REV_REV_WRITES_MAX             8
@@ -1309,6 +1308,7 @@ test_revision_record_encode_decode(void)
     uint64_t                     size_ret;
     H5FD_onion_revision_record_t r_out;
     uint32_t                     checksum    = 0;
+    hbool_t                      badness     = FALSE;
     char                         comment[25] = "Example comment message.";
     H5FD_onion_revision_record_t record      = {
         H5FD_ONION_REVISION_RECORD_VERSION_CURR,
@@ -1384,7 +1384,6 @@ test_revision_record_encode_decode(void)
     if (H5FD__onion_revision_record_encode(&record, buf, &checksum) != exp_size)
         TEST_ERROR;
 
-    hbool_t badness = FALSE;
     for (i = 0; i < exp_size; i++) {
         if (exp[i] != buf[i]) {
             badness = TRUE;

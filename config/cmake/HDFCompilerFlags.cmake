@@ -197,6 +197,19 @@ else ()
   endif ()
 endif ()
 
+# Turn off -Winline warning for Developer builds as this flag
+# appears to conflict specifically with the -Og optimization
+# flag and will produce warnings about functions not being
+# considered for inlining under at least GNU compilers
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
+    list (FIND H5_CFLAGS "-Winline" h5_have_winline_flag)
+    if (NOT h5_have_winline_flag EQUAL -1)
+      list (REMOVE_ITEM H5_CFLAGS "-Winline")
+    endif ()
+  endif ()
+endif ()
+
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   # Technically, variable-length arrays are part of the C99 standard, but
   #   we should approach them a bit cautiously... Only needed for gcc 4.X
