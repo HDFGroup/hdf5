@@ -37,11 +37,8 @@
 
 MODULE H5L
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_INT
   USE H5GLOBAL
-
   IMPLICIT NONE
-
 
   TYPE, bind(c) :: union_t
      TYPE(H5O_TOKEN_T_F) :: token !< Type for object tokens

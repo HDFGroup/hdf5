@@ -710,7 +710,7 @@ H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
 H5_DLL herr_t H5free_memory(void *mem);
 /**
  * \ingroup H5
- * \brief Frees memory allocated by the HDF5 library
+ * \brief Allocates memory that will be freed later internally.
  *
  * \param[in] size The size in bytes of the buffer to be allocated
  * \param[in] clear Flag whether the new buffer is to be initialized with 0

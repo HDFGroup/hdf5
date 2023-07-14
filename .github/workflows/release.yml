@@ -9,14 +9,6 @@ on:
         type: string
         required: false
         default: snapshot
-      use_environ:
-        description: 'Environment to locate files'
-        type: choice
-        required: true
-        default: snapshots
-        options:
-        - snapshots
-        - release
 
 permissions:
   contents: read
@@ -26,38 +18,83 @@ permissions:
 jobs:
   log-the-inputs:
     runs-on: ubuntu-latest
+    outputs:
+      rel_tag: ${{ steps.get-tag-name.outputs.RELEASE_TAG }}
     steps:
-      - run: |
-          echo "Tag: $TAG"
-          echo "Environment: $ENVIRONMENT"
-        env:
-          TAG: ${{ inputs.tag }}
-          ENVIRONMENT: ${{ inputs.environment }}
+    - name: Get tag name
+      id: get-tag-name
+      env:
+        TAG: ${{ inputs.use_tag }}
+      run: echo "RELEASE_TAG=$TAG" >> $GITHUB_OUTPUT
 
-  call-workflow-tarball:
+# tarball.yml will be used for releases when pre-tag actions are implemented
+#  call-workflow-tarball:
+#    needs: log-the-inputs
+#    uses: ./.github/workflows/tarball.yml
+#    with:
+#      use_tag: ${{ inputs.use_tag }}
+#      use_environ: release
+
+  create-files-ctest:
     needs: log-the-inputs
-    uses: ./.github/workflows/tarball.yml
-    with:
-      use_tag: ${{ inputs.use_tag }}
-      use_environ: ${{ inputs.use_environ }}
+    runs-on: ubuntu-latest
+    outputs:
+      file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
+    steps:
+      - name: Set file base name
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ needs.log-the-inputs.outputs.rel_tag }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v3
+        with:
+          path: hdfsrc
+
+      - name: Zip Folder
+        run: |
+              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
+              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
+
+      - name: List files in the repository
+        run: |
+              ls -l ${{ github.workspace }}
+              ls $GITHUB_WORKSPACE
+
+      # Save files created by release script
+      - name: Save tgz-tarball
+        uses: actions/upload-artifact@v3
+        with:
+              name: tgz-tarball
+              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save zip-tarball
+        uses: actions/upload-artifact@v3
+        with:
+              name: zip-tarball
+              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   call-workflow-ctest:
-    needs: call-workflow-tarball
+    needs: create-files-ctest
     uses: ./.github/workflows/cmake-ctest.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_tag: ${{ inputs.use_tag }}
-      use_environ: ${{ inputs.use_environ }}
+      file_base: ${{ needs.create-files-ctest.outputs.file_base }}
 
   call-workflow-release:
-    needs: [call-workflow-tarball, call-workflow-ctest]
+    #needs: [call-workflow-tarball, call-workflow-ctest]
+    needs: [log-the-inputs, create-files-ctest, call-workflow-ctest]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
-      file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
-      use_tag: ${{ inputs.use_tag }}
-      use_environ: ${{ inputs.use_environ }}
+      file_base: ${{ needs.create-files-ctest.outputs.file_base }}
+      file_branch: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      file_sha: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_environ: release
 

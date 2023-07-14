@@ -46,8 +46,9 @@
 !
 
 MODULE H5R
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_SIGNED_CHAR
+
   USE H5GLOBAL
+  IMPLICIT NONE
 
   ! If you change the value of these parameters, do not forget to change corresponding
   ! values in the H5f90.h file.
