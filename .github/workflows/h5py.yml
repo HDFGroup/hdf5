@@ -1,8 +1,8 @@
 name: h5py
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "6 0 * * *"
+#  schedule:
+#    - cron: "6 0 * * *"
 
 permissions:
   contents: read
