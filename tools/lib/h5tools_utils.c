@@ -1142,14 +1142,6 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
         goto done;
     }
 
-    if (fa->token == NULL) {
-        if (show_progress) {
-            printf("  ERROR: null pointer to token\n");
-        }
-        ret_value = 0;
-        goto done;
-    }
-
     if (show_progress) {
         printf("  preset fapl with default values\n");
     }

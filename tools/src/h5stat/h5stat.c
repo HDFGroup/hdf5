@@ -129,7 +129,6 @@ static H5FD_ros3_fapl_ext_t ros3_fa = {
     },
     "", /* Session/security token */
 };
-static char token[H5FD_ROS3_MAX_SECRET_TOK_LEN]; /* Session/security token */
 #endif                                           /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS

@@ -647,7 +647,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ros3_str_token_copy(const char *name, size_t size, void *_value)
+H5FD__ros3_str_token_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
 {
     char **value     = (char **)_value;
     herr_t ret_value = SUCCEED;
@@ -681,7 +681,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t size)
+H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t H5_ATTR_UNUSED size)
 {
     char *const *value1    = (char *const *)_value1;
     char *const *value2    = (char *const *)_value2;
@@ -720,7 +720,7 @@ H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ros3_str_token_close(const char *name, size_t size, void *_value)
+H5FD__ros3_str_token_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
 {
     char **value     = (char **)_value;
     herr_t ret_value = SUCCEED;
@@ -749,7 +749,8 @@ H5FD__ros3_str_token_close(const char *name, size_t size, void *_value)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *_value)
+H5FD__ros3_str_token_delete(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                            size_t H5_ATTR_UNUSED size, void *_value)
 {
     char **value     = (char **)_value;
     herr_t ret_value = SUCCEED;

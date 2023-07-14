@@ -22,10 +22,6 @@
 
 #define UTIL_TEST_DEBUG 0
 
-#ifndef __js_test__
-
-#define __js_test__ 1L
-
 /*****************************************************************************
  *
  * FILE-LOCAL TESTING MACROS
@@ -59,7 +55,6 @@
  *
  *         JSVERIFY_EXP_ACT - ifdef flag, configures comparison order
  *         FAIL_IF()        - check condition
- *         FAIL_UNLESS()    - check _not_ condition
  *         JSVERIFY()       - long-int equality check; prints reason/comparison
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
@@ -119,31 +114,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  */
 #define FAIL_IF(condition)                                                                                   \
     if (condition) {                                                                                         \
-        JSFAILED_AT()                                                                                        \
-        goto error;                                                                                          \
-    }
-
-/*----------------------------------------------------------------------------
- *
- * Macro: FAIL_UNLESS()
- *
- * Purpose:
- *
- *     TEST_ERROR wrapper to reduce cognitive overhead from "negative tests",
- *     e.g., "a != b".
- *
- *     Opposite of FAIL_IF; fails if the given condition is _not_ true.
- *
- *     `FAIL_IF( 5 != my_op() )`
- *     is equivalent to
- *     `FAIL_UNLESS( 5 == my_op() )`
- *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
- *         (see JSVERIFY)
- *
- *----------------------------------------------------------------------------
- */
-#define FAIL_UNLESS(condition)                                                                               \
-    if (!(condition)) {                                                                                      \
         JSFAILED_AT()                                                                                        \
         goto error;                                                                                          \
     }
@@ -313,8 +283,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
     } /* JSVERIFY_STR */
 
 #endif /* ifdef/else JSVERIFY_EXP_ACT */
-
-#endif /* __js_test__ */
 
 /* if > 0, be very verbose when performing tests */
 #define H5TOOLS_UTILS_TEST_DEBUG 0
@@ -602,19 +570,6 @@ test_populate_ros3_fa(void)
         JSVERIFY(0, h5tools_populate_ros3_fapl(NULL, values), "fapl pointer cannot be null")
     }
 
-    /* NULL token pointer fails
-     */
-    {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, TRUE, "u", "v", "w"}, 0};
-        const char          *values[] = {"x", "y", "z"};
-
-        if (show_progress) {
-            HDprintf("NULL token pointer\n");
-        }
-
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "token pointer cannot be null")
-    }
-
     /* NULL values pointer yields default fapl
      */
     {
@@ -838,7 +793,7 @@ test_populate_ros3_fa(void)
         const char          *values[] = {"x", "y", "z", NULL};
 
         if (show_progress) {
-            HDprintf("NULL key\n");
+            printf("NULL key\n");
         }
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill token")
@@ -1011,13 +966,6 @@ test_set_configured_fapl(void)
     other_fa_t wrong_fa = {0x432, 0xf82, 0x9093};
 #ifdef H5_HAVE_ROS3_VFD
     H5FD_ros3_fapl_ext_t ros3_anon_fa = {{1, FALSE, "", "", ""}, ""};
-    H5FD_ros3_fapl_t     ros3_auth_fa = {
-        1,                            /* fapl version           */
-        TRUE,                         /* authenticate           */
-        "us-east-1",                  /* aws region             */
-        "12345677890abcdef",          /* simulate access key ID */
-        "oiwnerwe9u0234nJw0-aoj+dsf", /* simulate secret key    */
-    };
 #endif /* H5_HAVE_ROS3_VFD */
 #ifdef H5_HAVE_LIBHDFS
     H5FD_hdfs_fapl_t hdfs_fa = {
@@ -1162,7 +1110,17 @@ test_set_configured_fapl(void)
         vfd_info.type   = VFD_BY_NAME;
         vfd_info.info   = C.conf_fa;
         vfd_info.u.name = C.vfdname;
-        result          = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
+
+        if (C.expected == 1)
+            result = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
+        else {
+            H5E_BEGIN_TRY
+            {
+                result = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
+            }
+            H5E_END_TRY;
+        }
+
         if (C.expected == 0) {
             JSVERIFY(result, H5I_INVALID_HID, C.message)
         }
