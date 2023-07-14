@@ -129,7 +129,7 @@ static H5FD_ros3_fapl_ext_t ros3_fa = {
     },
     "", /* Session/security token */
 };
-#endif                                           /* H5_HAVE_ROS3_VFD */
+#endif /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS
 /* "Default" HDFS configuration */
