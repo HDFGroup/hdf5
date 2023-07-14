@@ -169,6 +169,15 @@ New Features
 
     Library:
     --------
+    - Implemented support for temporary security credentials for the Read-Only
+      S3 (ROS3) file driver.
+      
+      When using temporary security credentials, one also needs to specify a
+      session/security token next to the access key id and secret access key.
+      This token can be specified by the new API function H5Pset_fapl_ros3_token().
+      The API function H5Pget_fapl_ros3_token() can be used to retrieve
+      the currently set token.
+
     - Added a Subfiling VFD configuration file prefix environment variable
 
       The Subfiling VFD now checks for values set in a new environment
