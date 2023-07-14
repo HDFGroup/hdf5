@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.3af8bb2</span>
+   &#160;<span id="projectnumber">1.15.0.26059fc</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -217,7 +217,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga71872bf6445cba956da86d4762b662cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees memory allocated by the HDF5 library.  <a href="group___h5.html#ga71872bf6445cba956da86d4762b662cf">More...</a><br /></td></tr>
 <tr class="separator:ga71872bf6445cba956da86d4762b662cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3af36230b61a287112c0cd23962b9ec4"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4">H5allocate_memory</a> (size_t size, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> clear)</td></tr>
-<tr class="memdesc:ga3af36230b61a287112c0cd23962b9ec4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees memory allocated by the HDF5 library.  <a href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4">More...</a><br /></td></tr>
+<tr class="memdesc:ga3af36230b61a287112c0cd23962b9ec4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates memory that will be freed later internally.  <a href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4">More...</a><br /></td></tr>
 <tr class="separator:ga3af36230b61a287112c0cd23962b9ec4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0441a941df53f301a9be12fc4548990d"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5.html#ga0441a941df53f301a9be12fc4548990d">H5resize_memory</a> (void *mem, size_t size)</td></tr>
 <tr class="memdesc:ga0441a941df53f301a9be12fc4548990d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resizes and, if required, re-allocates memory that will later be freed internally by the HDF5 library.  <a href="group___h5.html#ga0441a941df53f301a9be12fc4548990d">More...</a><br /></td></tr>
@@ -250,7 +250,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Frees memory allocated by the HDF5 library. </p>
+<p>Allocates memory that will be freed later internally. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>The size in bytes of the buffer to be allocated </td></tr>
@@ -260,7 +260,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>On success, returns pointer to newly allocated buffer or returns NULL if size is 0 (zero).<br  />
  Returns NULL on failure.</dd></dl>
-<p><a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Frees memory allocated by the HDF5 library.">H5allocate_memory()</a> allocates a memory buffer of size bytes that will later be freed internally by the HDF5 library.</p>
+<p><a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Allocates memory that will be freed later internally.">H5allocate_memory()</a> allocates a memory buffer of size bytes that will later be freed internally by the HDF5 library.</p>
 <p>The boolean <code>clear</code> parameter specifies whether the buffer should be initialized. If clear is <code>TRUE</code>, all bits in the buffer are to be set to 0 (zero); if clear is <code>FALSE</code>, the buffer will not be initialized.</p>
 <p>This function is intended to have the semantics of malloc() and calloc(). However, unlike malloc() and calloc(), which allow for a "special" pointer to be returned instead of NULL, this function always returns NULL on failure or when size is set to 0 (zero).</p>
 <dl class="section note"><dt>Note</dt><dd>At this time, the only intended use for this function is to allocate memory that will be returned to the library as a data buffer from a third-party filter.</dd></dl>
@@ -441,12 +441,12 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a> frees the memory that has been allocated by the caller with <a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Frees memory allocated by the HDF5 library.">H5allocate_memory()</a> or by the HDF5 library on behalf of the caller.</p>
+<p><a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a> frees the memory that has been allocated by the caller with <a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Allocates memory that will be freed later internally.">H5allocate_memory()</a> or by the HDF5 library on behalf of the caller.</p>
 <p><a class="el" href="group___c_o_m_p_e_n_u_m.html#gaef6b68436eba0fca751968ebf057ade3" title="Retrieves the name of a compound or enumeration datatype member.">H5Tget_member_name()</a> provides an example of memory allocation on behalf of the caller: The function returns a buffer containing the name of a compound datatype member. It is the caller’s responsibility to eventually free that buffer with <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a>.</p>
 <dl class="section attention"><dt>Attention</dt><dd>It is especially important to use this function to free memory allocated by the library on Windows. The C standard library is implemented in dynamic link libraries (DLLs) known as the C run-time (CRT). Each version of Visual Studio comes with two CRT DLLs (debug and release) and allocating and freeing across DLL boundaries can cause resource leaks and subtle bugs due to heap corruption.<br  />
  Only use this function to free memory allocated by the HDF5 Library. It will generally not be safe to use this function to free memory allocated by any other means.<br  />
  Even when using this function, it is still best to ensure that all components of a C application are built with the same version of Visual Studio and build (debug or release) and thus linked against the same CRT.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Frees memory allocated by the HDF5 library.">H5allocate_memory()</a>, <a class="el" href="group___h5.html#ga0441a941df53f301a9be12fc4548990d" title="Resizes and, if required, re-allocates memory that will later be freed internally by the HDF5 library...">H5resize_memory()</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Allocates memory that will be freed later internally.">H5allocate_memory()</a>, <a class="el" href="group___h5.html#ga0441a941df53f301a9be12fc4548990d" title="Resizes and, if required, re-allocates memory that will later be freed internally by the HDF5 library...">H5resize_memory()</a></dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.13 </dd></dl>
 
 </div>
@@ -692,7 +692,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>On success, returns pointer to resized or reallocated buffer or returns NULL if size is 0 (zero).<br  />
  Returns NULL on failure.</dd></dl>
 <p><a class="el" href="group___h5.html#ga0441a941df53f301a9be12fc4548990d" title="Resizes and, if required, re-allocates memory that will later be freed internally by the HDF5 library...">H5resize_memory()</a> takes a pointer to an existing buffer and resizes the buffer to match the value in <code>size</code>. If necessary, the buffer is reallocated. If <code>size</code> is 0, the buffer is released.</p>
-<p>The input buffer must either be NULL or have been allocated by <a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Frees memory allocated by the HDF5 library.">H5allocate_memory()</a> since the input buffer may be freed by the library.</p>
+<p>The input buffer must either be NULL or have been allocated by <a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Allocates memory that will be freed later internally.">H5allocate_memory()</a> since the input buffer may be freed by the library.</p>
 <p>For certain behaviors, the pointer <code>mem</code> may be passed in as NULL.</p>
 <p>This function is intended to have the semantics of realloc():</p>
 <table class="doxtable">
@@ -711,7 +711,7 @@ Functions</h2></td></tr>
  It is particularly important to use this function to resize memory on Microsoft Windows systems. In Windows, the C standard library is implemented in dynamic link libraries (DLLs) known as the C run-time (CRT). Each version of Visual Studio comes with multiple versions of the CRT DLLs (debug, release, et cetera) and allocating and freeing memory across DLL boundaries can cause resource leaks and subtle bugs due to heap corruption.<br  />
  Even when using this function, it is still best to ensure that all components of a C application are built with the same version of Visual Studio and the same configuration (Debug or Release), and thus linked against the same CRT.<br  />
  Only use this function to resize memory inside third-party HDF5 filters. It will generally not be safe to use this function to resize memory for any other purpose.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Frees memory allocated by the HDF5 library.">H5allocate_memory()</a>, <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Allocates memory that will be freed later internally.">H5allocate_memory()</a>, <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a></dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.15 </dd></dl>
 
 </div>
@@ -798,7 +798,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 12 2023 00:40:56 for HDF5 by
+    <li class="footer">Generated on Fri Jul 14 2023 00:36:52 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

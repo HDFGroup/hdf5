@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.3af8bb2</span>
+   &#160;<span id="projectnumber">1.15.0.26059fc</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -439,7 +439,7 @@ Functions</h2></td></tr>
 <p>The parameter <code>buf</code> points to the input buffer which has a size of <code>buf_size</code> bytes, <code>nbytes</code> of which are valid data.</p>
 <p>The filter should perform the transformation in place if possible. If the transformation cannot be done in place, then the filter should allocate a new buffer and assign it to <code>buf</code>, assigning the allocated size of that buffer to <code>buf_size</code>. The old buffer should be freed by the filter.</p>
 <p>Some care must be taken with the functions that allocate and free memory. Standard C library functions like malloc(3) and free(3) will work in many cases, but if there is a mismatch between the memory allocators used in the library and any filter that reallocates a buffer, there could be problems. This is most often the case with Windows and/or when debugging memory allocators are being used. In both cases, the "state" of the memory allocator lies in different libraries and will get corrupted if you allocate in one library and free in another. Windows adds the C standard library via dlls that can vary with Visual Studio version and debug vs. release builds. Static links to the MSVC CRT can also introduce a new memory allocator state.</p>
-<p>The library does provide <a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Frees memory allocated by the HDF5 library.">H5allocate_memory()</a> and <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a> functions that will use the library's allocation and free functions, however using these functions will require linking your filter to a particular version of the library, which may be inconvenient.</p>
+<p>The library does provide <a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Allocates memory that will be freed later internally.">H5allocate_memory()</a> and <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a> functions that will use the library's allocation and free functions, however using these functions will require linking your filter to a particular version of the library, which may be inconvenient.</p>
 <p>If successful, the <em>filter operation</em> callback function returns the number of valid bytes of data contained in <code>buf</code>. In the case of failure, the return value is 0 (zero) and all pointer arguments are left unchanged.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.6 Return type for the <em>can apply</em> callback function, <a class="el" href="_h5_zdevelop_8h.html#af2d1e20aeb92b2712ebc2d9b5fcbf510">H5Z_can_apply_func_t</a>, changed to <a class="el" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a>. </dd>
 <dd>
@@ -491,7 +491,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 12 2023 00:40:53 for HDF5 by
+    <li class="footer">Generated on Fri Jul 14 2023 00:36:50 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
