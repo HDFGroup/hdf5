@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.26059fc</span>
+   &#160;<span id="projectnumber">1.15.0.305ac88</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -176,8 +176,8 @@ Functions</h2></td></tr>
 <tr class="separator:a40b3e063377b40d76348d4f4ee873cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1453ac2d713f1e27c6204968c91cd652"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a1453ac2d713f1e27c6204968c91cd652">H5FD_s3comms_s3r_get_filesize</a> (<a class="el" href="structs3r__t.html">s3r_t</a> *handle)</td></tr>
 <tr class="separator:a1453ac2d713f1e27c6204968c91cd652"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a913e7fd2ba2c914e916644bd830487"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structs3r__t.html">s3r_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a7a913e7fd2ba2c914e916644bd830487">H5FD_s3comms_s3r_open</a> (const char url[], const char region[], const char id[], const unsigned char signing_key[])</td></tr>
-<tr class="separator:a7a913e7fd2ba2c914e916644bd830487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc2d2a6ce9ec82a00400a29a783ee02b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structs3r__t.html">s3r_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#acc2d2a6ce9ec82a00400a29a783ee02b">H5FD_s3comms_s3r_open</a> (const char url[], const char region[], const char id[], const unsigned char signing_key[], const char token[])</td></tr>
+<tr class="separator:acc2d2a6ce9ec82a00400a29a783ee02b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a339a2b7ea2c68a66d4c3eebb5b541993"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a339a2b7ea2c68a66d4c3eebb5b541993">H5FD_s3comms_s3r_read</a> (<a class="el" href="structs3r__t.html">s3r_t</a> *handle, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offset, size_t len, void *dest)</td></tr>
 <tr class="separator:a339a2b7ea2c68a66d4c3eebb5b541993"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82fc58de1cac2697cedb59ede01efe89"><td class="memItemLeft" align="right" valign="top">struct tm *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_ds3comms_8h.html#a82fc58de1cac2697cedb59ede01efe89">gmnow</a> (void)</td></tr>
@@ -852,8 +852,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a7a913e7fd2ba2c914e916644bd830487"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7a913e7fd2ba2c914e916644bd830487">&#9670;&nbsp;</a></span>H5FD_s3comms_s3r_open()</h2>
+<a id="acc2d2a6ce9ec82a00400a29a783ee02b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc2d2a6ce9ec82a00400a29a783ee02b">&#9670;&nbsp;</a></span>H5FD_s3comms_s3r_open()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -880,7 +880,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const unsigned char&#160;</td>
-          <td class="paramname"><em>signing_key</em>[]&#160;</td>
+          <td class="paramname"><em>signing_key</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char&#160;</td>
+          <td class="paramname"><em>token</em>[]&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1104,7 +1110,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="_h5_f_ds3comms_8h.html">H5FDs3comms.h</a></li>
-    <li class="footer">Generated on Fri Jul 14 2023 00:36:46 for HDF5 by
+    <li class="footer">Generated on Sat Jul 15 2023 00:37:48 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
