@@ -1364,6 +1364,83 @@ test_operator(H5File &file)
 } // test_operator
 
 /*-------------------------------------------------------------------------
+ * Function:    test_read_string
+ *
+ * Purpose      Tests DataSet::read(H5std_string ...)
+ *
+ * Return       Success: 0
+ *
+ *              Failure: -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_read_string(H5File &file)
+{
+    SUBTEST("DataSet::read(H5std_string)");
+    try {
+        const H5std_string  DATASET_NAME("test_read_string");
+        const unsigned long NX           = 8;
+        const char          DATA[NX]     = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
+        const H5std_string  EXPECTED_STR = H5std_string(DATA, NX);
+        H5std_string        str;
+
+        /*
+         * Write characters with internal null bytes
+         */
+
+        PredType  datatype(PredType::NATIVE_INT8);
+        hsize_t   dimsf[RANK1] = {NX};
+        DataSpace dataspace(RANK1, dimsf);
+        DataSet   dataset = file.createDataSet(DATASET_NAME, datatype, dataspace);
+        dataset.write(DATA, datatype);
+        dataset.close();
+
+        /*
+         * Read characters with internal null bytes as a string.
+         * The read std::string should NOT be truncated at the first null byte.
+         */
+
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.read(str, datatype);
+        dataset.close();
+        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__);
+        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__);
+
+        /*
+         * Write the H5std_string back to the dataset.
+         */
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.write(str, datatype);
+        dataset.close();
+
+        /*
+         * Read characters with internal null bytes as a string, after rewrite.
+         * The read std::string should NOT be truncated at the first null byte.
+         */
+
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.read(str, datatype);
+        dataset.close();
+        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__);
+        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__);
+
+        /*
+         * Success
+         */
+        PASSED();
+        return 0;
+    }
+    catch (Exception &E) {
+        // H5_FAILED should probably be invoked before verify_val
+        H5_FAILED();
+        issue_fail_msg("test_read_string", __LINE__, __FILE__);
+
+        // clean up and return with failure
+        return -1;
+    }
+} // test_read_string
+
+/*-------------------------------------------------------------------------
  * Function:    test_dset
  *
  * Purpose      Tests the dataset interface (H5D)
@@ -1403,6 +1480,7 @@ test_dset()
         nerrors += test_virtual() < 0 ? 1 : 0;
         nerrors += test_operator(file) < 0 ? 1 : 0;
         nerrors += test_chunk_cache(fapl) < 0 ? 1 : 0;
+        nerrors += test_read_string(file) < 0 ? 1 : 0;
 
         // Close group "emit diagnostics".
         grp.close();

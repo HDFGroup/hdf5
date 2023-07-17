@@ -169,6 +169,15 @@ New Features
 
     Library:
     --------
+    - Implemented support for temporary security credentials for the Read-Only
+      S3 (ROS3) file driver.
+      
+      When using temporary security credentials, one also needs to specify a
+      session/security token next to the access key id and secret access key.
+      This token can be specified by the new API function H5Pset_fapl_ros3_token().
+      The API function H5Pget_fapl_ros3_token() can be used to retrieve
+      the currently set token.
+
     - Added a Subfiling VFD configuration file prefix environment variable
 
       The Subfiling VFD now checks for values set in a new environment
@@ -468,6 +477,13 @@ Bug Fixes since HDF5-1.14.0 release
 
       Fixes GitHub issue #2432
 
+    - Reading a H5std_string (std::string) via a C++ DataSet previously
+      truncated the string at the first null byte as if reading a C string.
+      Fixed length datasets are now read into H5std_string as a fixed length
+      string of the appropriate size. Variable length datasets will still be
+      truncated at the first null byte.
+
+      Fixes Github issue #3034
 
     Java Library
     ------------
