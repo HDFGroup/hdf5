@@ -189,24 +189,24 @@ if (HDF5_ENABLE_DEV_WARNINGS)
   elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/clang-warnings/developer-general")
   endif ()
+
+  # Turn on -Winline warnings now only for non-Debug and
+  # non-Developer builds. For at least GNU compilers this
+  # flag appears to conflict specifically with the -Og
+  # optimization flag and will produce warnings about functions
+  # not being considered for inlining
+  if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      list (APPEND H5_CFLAGS "-Winline")
+    elseif (CMAKE_C_COMPILER_ID STREQUAL "Intel" AND NOT _INTEL_WINDOWS)
+      list (APPEND H5_CFLAGS "-Winline")
+    endif ()
+  endif ()
 else ()
   if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-general")
   elseif (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/clang-warnings/no-developer-general")
-  endif ()
-endif ()
-
-# Turn off -Winline warning for Developer builds as this flag
-# appears to conflict specifically with the -Og optimization
-# flag and will produce warnings about functions not being
-# considered for inlining under at least GNU compilers
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
-    list (FIND H5_CFLAGS "-Winline" h5_have_winline_flag)
-    if (NOT h5_have_winline_flag EQUAL -1)
-      list (REMOVE_ITEM H5_CFLAGS "-Winline")
-    endif ()
   endif ()
 endif ()
 
