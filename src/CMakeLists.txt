@@ -280,10 +280,10 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDwindows.h
 )
 
-# Append Subfiling VFD and Mercury sources to H5FD interface if Subfiling VFD is built
-if (HDF5_ENABLE_SUBFILING_VFD)
-  add_subdirectory (${H5FD_SUBFILING_DIR})
-endif()
+# Append Subfiling VFD and Mercury sources to H5FD
+# interface if Subfiling VFD is built. Append Subfiling
+# VFD public headers to H5FD_HDRS regardless.
+add_subdirectory (${H5FD_SUBFILING_DIR})
 
 IDE_GENERATED_PROPERTIES ("H5FD" "${H5FD_HDRS}" "${H5FD_SOURCES}" )
 
