@@ -532,7 +532,7 @@ do {                                                          \
 #else /* H5C_COLLECT_CACHE_STATS */
 
 #define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
-#define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+#define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr) {}
 #define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
 #define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)
