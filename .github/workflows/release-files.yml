@@ -53,7 +53,7 @@ jobs:
           commit_sha: ${{ inputs.file_sha }}
           tag: "${{ inputs.use_tag }}"
           force_push_tag: true
-          message: "Latest snapshot"
+          message: "Latest snapshot-1.10"
         if: ${{ inputs.use_environ == 'snapshots' }}
 
       # Print result using the action output.
@@ -114,13 +114,19 @@ jobs:
               name: tgz-ubuntu-2204-binary
               path: ${{ github.workspace }}
 
+      - name: Store snapshot name
+        run: |
+          echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
+
       - name: PreRelease tag
-        id: create_release
+        id: create_prerelease
+        if: ${{ (inputs.use_environ == 'snapshots') }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
           files: |
+              last-file.txt
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
@@ -129,14 +135,22 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      - name: Store Release url
-        run: |
-          echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-
-#      - uses: actions/upload-artifact@v3
-#        with:
-#          path: ./upload_url
-#          name: upload_url
+      - name: Release tag
+        id: create_release
+        if: ${{ (inputs.use_environ == 'release') }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "${{ inputs.use_tag }}"
+          prerelease: false
+          #body_path: ${{ github.workspace }}-CHANGELOG.txt
+          files: |
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: List files for the space (Linux)
         run: |
