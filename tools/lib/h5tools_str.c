@@ -1218,6 +1218,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                 h5tools_str_append(str, H5_TOOLS_DATATYPE);
                                 break;
 
+                            case H5O_TYPE_MAP:
+                                h5tools_str_append(str, H5_TOOLS_MAP);
+                                break;
+
                             case H5O_TYPE_UNKNOWN:
                             case H5O_TYPE_NTYPES:
                             default:
