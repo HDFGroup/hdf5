@@ -1,5 +1,4 @@
 * text=auto !eol
-bin/bbrelease -text
 bin/genparser -text
 bin/switch_maint_mode -text
 c++/src/H5OcreatProp.cpp -text
