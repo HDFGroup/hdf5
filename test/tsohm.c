@@ -3266,7 +3266,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_VDE_VERIFY_SPACES(dims)                                                                        \
-do {                                                                                                        \
+    do {                                                                                                     \
         /* Open dataspaces                                                                                   \
          */                                                                                                  \
         space1_id = H5Dget_space(dset1_id);                                                                  \
@@ -3315,7 +3315,7 @@ do {                                                                            
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(n)                                                             \
-do {                                                                                                        \
+    do {                                                                                                     \
         CHECK_I(H5Dclose(dset1_id), "H5Dclose");                                                             \
         if ((n) > 1)                                                                                         \
             CHECK_I(H5Dclose(dset2_id), "H5Dclose");                                                         \

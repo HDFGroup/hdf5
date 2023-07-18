@@ -66,23 +66,23 @@
 static FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
-do {                                                                                                        \
-        errorfile = fopen(ERRFILE, "w+");                                                                  \
-        fprintf(errorfile, "Error occurred in flushrefresh.\n");                                           \
-        fflush(errorfile);                                                                                 \
-        fclose(errorfile);                                                                                 \
+    do {                                                                                                     \
+        errorfile = fopen(ERRFILE, "w+");                                                                    \
+        fprintf(errorfile, "Error occurred in flushrefresh.\n");                                             \
+        fflush(errorfile);                                                                                   \
+        fclose(errorfile);                                                                                   \
         TEST_ERROR;                                                                                          \
-} while (0)
+    } while (0)
 
 #define CLEANUP_FILES                                                                                        \
-do {                                                                                                        \
+    do {                                                                                                     \
         HDremove(ERRFILE);                                                                                   \
         HDremove(FILENAME);                                                                                  \
         HDremove(SIGNAL_TO_SCRIPT);                                                                          \
         HDremove(SIGNAL_BETWEEN_PROCESSES_1);                                                                \
         HDremove(SIGNAL_BETWEEN_PROCESSES_2);                                                                \
         HDremove(SIGNAL_FROM_SCRIPT);                                                                        \
-} while (0)
+    } while (0)
 
 /* ===================== */
 /* Function Declarations */

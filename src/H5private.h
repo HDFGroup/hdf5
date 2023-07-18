@@ -1080,8 +1080,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)                                                            \
     do {                                                                                                     \
         casttype _tmp_overflow = (casttype)(var);                                                            \
-        assert((var) == (vartype)_tmp_overflow);                                                           \
-    } while(0)
+        assert((var) == (vartype)_tmp_overflow);                                                             \
+    } while (0)
 #else /* NDEBUG */
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)
 #endif /* NDEBUG */

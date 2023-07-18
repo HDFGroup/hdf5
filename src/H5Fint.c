@@ -718,7 +718,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
          */
         if (olist->max_nobjs > 0 && olist->list_index >= olist->max_nobjs)
             HGOTO_DONE(H5_ITER_STOP); /* Indicate that the iterator should stop */
-    }                                /* end if */
+    }                                 /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
