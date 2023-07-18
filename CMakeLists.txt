@@ -778,9 +778,9 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 
-#option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")
-set (DEFAULT_API_VERSION "v114" CACHE STRING "Enable v1.14 API (v16, v18, v110, v112, v114)")
-set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114)
+#option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114, v116)" "v116")
+set (DEFAULT_API_VERSION "v116" CACHE STRING "Enable v1.14 API (v16, v18, v110, v112, v114, v116)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
