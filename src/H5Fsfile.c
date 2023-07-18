@@ -138,7 +138,7 @@ H5F__sfile_search(H5FD_t *lf)
     while (curr) {
         /* Check for match */
         if (0 == H5FD_cmp(curr->shared->lf, lf))
-            HGOTO_DONE(curr->shared)
+            HGOTO_DONE(curr->shared);
 
         /* Advance to next shared file node */
         curr = curr->next;

@@ -781,7 +781,7 @@ H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size)
                         if (FAIL == H5HL__minimize_heap_space(f, heap))
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed");
                     }
-                    HGOTO_DONE(SUCCEED)
+                    HGOTO_DONE(SUCCEED);
                 }
                 fl2 = fl2->next;
             }
@@ -789,7 +789,7 @@ H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size)
                 if (FAIL == H5HL__minimize_heap_space(f, heap))
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed");
             }
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
         else if (fl->offset + fl->size == offset) {
             fl->size += size;
@@ -804,7 +804,7 @@ H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size)
                         if (FAIL == H5HL__minimize_heap_space(f, heap))
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed");
                     }
-                    HGOTO_DONE(SUCCEED)
+                    HGOTO_DONE(SUCCEED);
                 }
                 fl2 = fl2->next;
             }
@@ -812,7 +812,7 @@ H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size)
                 if (FAIL == H5HL__minimize_heap_space(f, heap))
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed");
             }
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
         fl = fl->next;
     }
@@ -828,7 +828,7 @@ H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size)
             fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes\n", (unsigned long)size);
         }
 #endif
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 
     /* Add an entry to the free list */

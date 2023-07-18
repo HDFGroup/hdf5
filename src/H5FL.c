@@ -1367,7 +1367,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 
     /* The H5MM_xfree code allows obj to null */
     if (!obj)
-        HGOTO_DONE(NULL)
+        HGOTO_DONE(NULL);
 
     /* Double check parameters */
     assert(head);

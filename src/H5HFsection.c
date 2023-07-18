@@ -840,7 +840,7 @@ H5HF__sect_single_can_merge(const H5FS_section_info_t *_sect1, const H5FS_sectio
      *  are actually within the same direct block)
      */
     if (H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr))
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -939,14 +939,14 @@ H5HF__sect_single_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
         dblock_size     = hdr->man_dtable.cparam.start_block_size;
         dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
         if ((dblock_size - dblock_overhead) == sect->sect_info.size)
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
     } /* end if */
     else {
         /* We shouldn't have a situation where the 'next block' iterator
          *      is moved before a direct block that still has objects within it.
          */
         assert(hdr->man_iter_off > sect->sect_info.addr);
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     } /* end else */
 
 done:
@@ -1645,7 +1645,7 @@ H5HF__sect_row_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_i
             /* Check if second section adjoins first section */
             if (H5_addr_eq((top_indir_sect1->sect_info.addr + top_indir_sect1->u.indirect.span_size),
                            top_indir_sect2->sect_info.addr))
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1732,7 +1732,7 @@ H5HF__sect_row_can_shrink(const H5FS_section_info_t *_sect, void H5_ATTR_UNUSED 
 
     /* Check if section is past end of "next block" iterator */
     if (sect->sect_info.addr >= hdr->man_iter_off)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

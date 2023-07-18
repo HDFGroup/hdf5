@@ -142,7 +142,7 @@ H5VM_vector_reduce_product(unsigned n, const hsize_t *v)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (n && !v)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     while (n--)
         ret_value *= *v++;
 
@@ -172,10 +172,10 @@ H5VM_vector_zerop_u(int n, const hsize_t *v)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     while (n--)
         if (*v++)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -204,10 +204,10 @@ H5VM_vector_zerop_s(int n, const hssize_t *v)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     while (n--)
         if (*v++)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -239,16 +239,16 @@ H5VM_vector_cmp_u(unsigned n, const hsize_t *v1, const hsize_t *v2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (v1 == v2)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     if (v1 == NULL)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (v2 == NULL)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     while (n--) {
         if (*v1 < *v2)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (*v1 > *v2)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
         v1++;
         v2++;
     }
@@ -283,16 +283,16 @@ H5VM_vector_cmp_s(unsigned n, const hssize_t *v1, const hssize_t *v2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (v1 == v2)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     if (v1 == NULL)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (v2 == NULL)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     while (n--) {
         if (*v1 < *v2)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (*v1 > *v2)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
         v1++;
         v2++;
     }

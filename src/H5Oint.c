@@ -1689,7 +1689,7 @@ H5O__obj_class_real(const H5O_t *oh)
         if ((isa = (H5O_obj_class_g[i - 1]->isa)(oh)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to determine object type")
         else if (isa)
-            HGOTO_DONE(H5O_obj_class_g[i - 1])
+            HGOTO_DONE(H5O_obj_class_g[i - 1]);
     }
 
     if (0 == i)

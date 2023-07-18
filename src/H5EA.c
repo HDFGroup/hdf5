@@ -350,7 +350,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
             hdr_dirty = TRUE;
         } /* end if */
         else
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Protect index block */
@@ -406,7 +406,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                     iblock_cache_flags |= H5AC__DIRTIED_FLAG;
                 } /* end if */
                 else
-                    HGOTO_DONE(SUCCEED)
+                    HGOTO_DONE(SUCCEED);
             } /* end if */
 
             /* Protect data block */
@@ -458,7 +458,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                     iblock_cache_flags |= H5AC__DIRTIED_FLAG;
                 } /* end if */
                 else
-                    HGOTO_DONE(SUCCEED)
+                    HGOTO_DONE(SUCCEED);
             } /* end if */
 
             /* Protect super block */
@@ -505,7 +505,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                     } /* end if */
                 }     /* end if */
                 else
-                    HGOTO_DONE(SUCCEED)
+                    HGOTO_DONE(SUCCEED);
             } /* end if */
 
             /* Adjust index to offset in data block */
@@ -543,7 +543,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                         sblock_cache_flags |= H5AC__DIRTIED_FLAG;
                     } /* end if */
                     else
-                        HGOTO_DONE(SUCCEED)
+                        HGOTO_DONE(SUCCEED);
                 } /* end if */
 
                 /* Protect data block page */

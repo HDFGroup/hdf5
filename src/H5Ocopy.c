@@ -281,7 +281,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
             } /* end if */
 
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
     }     /* end if */
 
@@ -1122,9 +1122,9 @@ H5O__copy_comm_dt_cmp(const void *_key1, const void *_key2)
      * first so only one comparison needs to be made. */
     if (key1->fileno != key2->fileno) {
         if (key1->fileno < key2->fileno)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (key1->fileno > key2->fileno)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
     } /* end if */
 
     ret_value = H5T_cmp(key1->dt, key2->dt, FALSE);

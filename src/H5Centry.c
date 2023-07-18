@@ -131,7 +131,7 @@ H5C__pin_entry_from_client(H5C_t
     else {
         entry_ptr->is_pinned = TRUE;
 
-        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
+        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr);
     } /* end else */
 
     /* Mark that the entry was pinned through an explicit pin from a client */
@@ -168,13 +168,13 @@ H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, hbool_t up
 
     /* If requested, update the replacement policy if the entry is not protected */
     if (update_rp && !entry_ptr->is_protected)
-        H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL)
+        H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL);
 
     /* Unpin the entry now */
     entry_ptr->is_pinned = FALSE;
 
     /* Update the stats for an unpin operation */
-    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr);
 
 #ifdef H5C_DO_SANITY_CHECKS
 done:
@@ -349,13 +349,13 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
          */
         if (serialize_flags & H5C__SERIALIZE_MOVED_FLAG) {
             /* Update stats and entries relocated counter */
-            H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
+            H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr);
 
             /* We must update cache data structures for the change in address */
             if (entry_ptr->addr == old_addr) {
                 /* Delete the entry from the hash table and the slist */
                 H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL);
-                H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
+                H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL);
 
                 /* Update the entry for its new address */
                 entry_ptr->addr = new_addr;
@@ -631,13 +631,13 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
     if (clear_only) {
         /* only log a clear if the entry was dirty */
         if (was_dirty)
-            H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
+            H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr);
     }
     else if (write_entry) {
         assert(was_dirty);
 
         /* only log a flush if we actually wrote to disk */
-        H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)
+        H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr);
     } /* end else if */
 
     /* Note that the algorithm below is (very) similar to the set of operations
@@ -656,7 +656,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
         assert(!entry_ptr->is_pinned);
 
         /* Update stats, while entry is still in the cache */
-        H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership)
+        H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership);
 
         /* If the entry's type has a 'notify' callback and the entry is about
          * to be removed from the cache, send a 'before eviction' notice while
@@ -685,17 +685,17 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
         H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL);
 
         if (entry_ptr->in_slist && del_from_slist_on_destroy)
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL);
 
 #ifdef H5_HAVE_PARALLEL
         /* Check for collective read access flag */
         if (entry_ptr->coll_access) {
             entry_ptr->coll_access = FALSE;
-            H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+            H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
         } /* end if */
 #endif    /* H5_HAVE_PARALLEL */
 
-        H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL)
+        H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL);
 
         /* Remove entry from tag list */
         if (H5C__untag_entry(cache_ptr, entry_ptr) < 0)
@@ -716,8 +716,8 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          * view of the replacement policy and the slist.
          * Hence no differentiation between them.
          */
-        H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, FAIL)
-        H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL)
+        H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, FAIL);
+        H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL);
 
         /* mark the entry as clean and update the index for
          * entry clean.  Also, call the clear callback
@@ -2001,7 +2001,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
     if (ds_entry_ptr->is_dirty)
         H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, ds_entry_ptr, FAIL);
 
-    H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, ds_entry_ptr, FAIL)
+    H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, ds_entry_ptr, FAIL);
 
     /* Deserializing a prefetched entry is the conceptual equivalent of
      * loading it from file.  If the deserialized entry has a notify callback,
@@ -2019,7 +2019,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
      */
     i = 0;
     if (fd_children != NULL) {
-        H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, ds_entry_ptr, FAIL)
+        H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, ds_entry_ptr, FAIL);
         ds_entry_ptr->is_protected = TRUE;
         while (fd_children[i] != NULL) {
             /* Sanity checks */
@@ -2056,7 +2056,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
     assert((unsigned)i == ds_entry_ptr->fd_child_count);
 
     ds_entry_ptr->fd_child_count = 0;
-    H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr)
+    H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr);
 
     /* finally, pass ds_entry_ptr back to the caller */
     *entry_ptr_ptr = ds_entry_ptr;
@@ -2137,7 +2137,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
      * and die if it is.
      */
 
-    H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL);
 
     if (test_entry_ptr != NULL) {
         if (test_entry_ptr == entry_ptr)
@@ -2238,7 +2238,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag metadata entry")
     entry_tagged = TRUE;
 
-    H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
+    H5C__RESET_CACHE_ENTRY_STATS(entry_ptr);
 
     if (cache_ptr->flash_size_increase_possible &&
         (entry_ptr->size > cache_ptr->flash_size_increase_threshold))
@@ -2302,7 +2302,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     assert(entry_ptr->is_dirty);
     entry_ptr->flush_marker = set_flush_marker;
     H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
-    H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, FAIL)
+    H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, FAIL);
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
@@ -2316,7 +2316,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     if (entry_ptr->type->notify && (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry inserted into cache")
 
-    H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
+    H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr);
 
 #ifdef H5_HAVE_PARALLEL
     if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
@@ -2324,7 +2324,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
 
     entry_ptr->coll_access = coll_access;
     if (coll_access) {
-        H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+        H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, FAIL);
 
         /* Make sure the size of the collective entries in the cache remain in check */
         if (H5P_USER_TRUE == H5F_COLL_MD_READ(f)) {
@@ -2421,12 +2421,12 @@ H5C_mark_entry_dirty(void *thing)
 
         /* Modify cache data structures */
         if (was_clean)
-            H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
+            H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL);
         if (!entry_ptr->in_slist)
             H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
 
         /* Update stats for entry being marked dirty */
-        H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+        H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr);
 
         /* Check for entry changing status and do notifications, etc. */
         if (was_clean) {
@@ -2500,12 +2500,12 @@ H5C_mark_entry_clean(void *_thing)
 
         /* Modify cache data structures */
         if (was_dirty)
-            H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr, FAIL)
+            H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr, FAIL);
         if (entry_ptr->in_slist)
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL);
 
         /* Update stats for entry being marked clean */
-        H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
+        H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr);
 
         /* Check for entry changing status and do notifications, etc. */
         if (was_dirty) {
@@ -2649,11 +2649,11 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    H5C__SEARCH_INDEX(cache_ptr, old_addr, entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, old_addr, entry_ptr, FAIL);
 
     if (entry_ptr == NULL || entry_ptr->type != type)
         /* the old item doesn't exist in the cache, so we are done. */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     assert(entry_ptr->addr == old_addr);
     assert(entry_ptr->type == type);
@@ -2665,7 +2665,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
     if (entry_ptr->is_read_only)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, "can't move R/O entry")
 
-    H5C__SEARCH_INDEX(cache_ptr, new_addr, test_entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, new_addr, test_entry_ptr, FAIL);
 
     if (test_entry_ptr != NULL) { /* we are hosed */
         if (test_entry_ptr->type == type)
@@ -2694,7 +2694,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
 
         if (entry_ptr->in_slist) {
             assert(cache_ptr->slist_ptr);
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL);
         } /* end if */
     }     /* end if */
 
@@ -2746,7 +2746,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
         }     /* end if */
     }         /* end if */
 
-    H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
+    H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr);
 
 done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -2863,7 +2863,7 @@ H5C_resize_entry(void *thing, size_t new_size)
             H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
 
         if (entry_ptr->is_pinned)
-            H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+            H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr);
 
         /* Check for entry changing status and do notifications, etc. */
         if (was_clean) {
@@ -3014,7 +3014,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 #endif /* H5_HAVE_PARALLEL */
 
     /* first check to see if the target is in cache */
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, NULL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, NULL);
 
     if (entry_ptr != NULL) {
         if (entry_ptr->ring != ring)
@@ -3080,10 +3080,10 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 
                 /* Mark the entry as collective and insert into the collective list */
                 entry_ptr->coll_access = TRUE;
-                H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, NULL)
+                H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, NULL);
             } /* end if */
             else if (entry_ptr->coll_access)
-                H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, NULL)
+                H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, NULL);
         } /* end if */
 #endif    /* H5_HAVE_PARALLEL */
 
@@ -3127,7 +3127,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
         entry_ptr->ring = ring;
 #ifdef H5_HAVE_PARALLEL
         if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI) && entry_ptr->coll_access)
-            H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, NULL)
+            H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, NULL);
 #endif /* H5_HAVE_PARALLEL */
 
         /* Apply tag to newly protected entry */
@@ -3229,7 +3229,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
          * the replacement policy for a protect, but this simplifies the
          * code.  If we do this often enough, we may want to optimize this.
          */
-        H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, NULL)
+        H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, NULL);
 
         /* Record that the entry was loaded, to trigger a notify callback later */
         /* (After the entry is fully added to the cache) */
@@ -3248,7 +3248,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "Target already protected & not read only?!?")
     } /* end if */
     else {
-        H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, NULL)
+        H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, NULL);
 
         entry_ptr->is_protected = TRUE;
         if (read_only) {
@@ -3258,8 +3258,8 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
         entry_ptr->dirtied = FALSE;
     } /* end else */
 
-    H5C__UPDATE_CACHE_HIT_RATE_STATS(cache_ptr, hit)
-    H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)
+    H5C__UPDATE_CACHE_HIT_RATE_STATS(cache_ptr, hit);
+    H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit);
 
     ret_value = thing;
 
@@ -3561,7 +3561,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
         /* Check for newly dirtied entry */
         if (was_clean && entry_ptr->is_dirty) {
             /* Update index for newly dirtied entry */
-            H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
+            H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL);
 
             /* If the entry's type has a 'notify' callback send a
              * 'entry dirtied' notice now that the entry is fully
@@ -3636,7 +3636,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
             unsigned flush_flags = (H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__FLUSH_INVALIDATE_FLAG);
 
             /* verify that the target entry is in the cache. */
-            H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
+            H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL);
 
             if (test_entry_ptr == NULL)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "entry not in hash table?!?")
@@ -3663,7 +3663,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 #ifdef H5_HAVE_PARALLEL
         else if (clear_entry) {
             /* Verify that the target entry is in the cache. */
-            H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
+            H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL);
 
             if (test_entry_ptr == NULL)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "entry not in hash table?!?")
@@ -3678,7 +3678,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 #endif    /* H5_HAVE_PARALLEL */
     }
 
-    H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
+    H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr);
 
 done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -3820,7 +3820,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
 
         /* Pin the parent entry */
         parent_entry->is_pinned = TRUE;
-        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, parent_entry)
+        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, parent_entry);
     } /* end else */
 
     /* Mark the entry as pinned from the cache's action (possibly redundantly) */
@@ -4053,10 +4053,10 @@ H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flag
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     /* Look for entry in cache */
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
     if ((entry_ptr == NULL) || (entry_ptr->type != type))
         /* the target doesn't exist in the cache, so we are done. */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     assert(entry_ptr->addr == addr);
     assert(entry_ptr->type == type);
@@ -4146,7 +4146,7 @@ H5C_remove_entry(void *_entry)
      */
 
     /* Update stats, as if we are "destroying" and taking ownership of the entry */
-    H5C__UPDATE_STATS_FOR_EVICTION(cache, entry, TRUE)
+    H5C__UPDATE_STATS_FOR_EVICTION(cache, entry, TRUE);
 
     /* If the entry's type has a 'notify' callback, send a 'before eviction'
      * notice while the entry is still fully integrated in the cache.
@@ -4168,15 +4168,15 @@ H5C_remove_entry(void *_entry)
     /* Check for collective read access flag */
     if (entry->coll_access) {
         entry->coll_access = FALSE;
-        H5C__REMOVE_FROM_COLL_LIST(cache, entry, FAIL)
+        H5C__REMOVE_FROM_COLL_LIST(cache, entry, FAIL);
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-    H5C__UPDATE_RP_FOR_EVICTION(cache, entry, FAIL)
+    H5C__UPDATE_RP_FOR_EVICTION(cache, entry, FAIL);
 
     /* Remove entry from tag list */
     if (H5C__untag_entry(cache, entry) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry from tag list")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry from tag list");
 
     /* Increment entries_removed_counter and set last_entry_removed_ptr.
      * As we me be about to free the entry, recall that last_entry_removed_ptr

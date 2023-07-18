@@ -1691,13 +1691,13 @@ H5O__dtype_can_share(const void *_mesg)
 
     /* Don't share immutable datatypes */
     if ((tri_ret = H5T_is_immutable(mesg)) > 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     else if (tri_ret < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")
 
     /* Don't share committed datatypes */
     if ((tri_ret = H5T_is_named(mesg)) > 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     else if (tri_ret < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is shared")
 

@@ -307,17 +307,17 @@ H5VM_hyper_eq(unsigned n, const hsize_t *offset1, const hsize_t *size1, const hs
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (n == 0)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
 
     for (i = 0; i < n; i++) {
         if ((offset1 ? offset1[i] : 0) != (offset2 ? offset2[i] : 0))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if ((size1 ? size1[i] : 0) != (size2 ? size2[i] : 0))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (0 == (nelmts1 *= (size1 ? size1[i] : 0)))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (0 == (nelmts2 *= (size2 ? size2[i] : 0)))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     }
 
 done:

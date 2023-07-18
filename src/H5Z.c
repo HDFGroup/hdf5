@@ -86,7 +86,7 @@ H5Z_init(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     if (H5_TERM_GLOBAL)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Internal filters */
     if (H5Z_register(H5Z_SHUFFLE) < 0)
@@ -681,13 +681,13 @@ H5Z_filter_avail(H5Z_filter_t id)
     /* Is the filter already registered? */
     for (i = 0; i < H5Z_table_used_g; i++)
         if (H5Z_table_g[i].id == id)
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
 
     key.id = (int)id;
     if (NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, &key))) {
         if (H5Z_register(filter_info) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register loaded filter")
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     } /* end if */
 
 done:
@@ -1225,7 +1225,7 @@ H5Z__find_idx(H5Z_filter_t id)
 
     for (i = 0; i < H5Z_table_used_g; i++)
         if (H5Z_table_g[i].id == id)
-            HGOTO_DONE((int)i)
+            HGOTO_DONE((int)i);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1557,7 +1557,7 @@ H5Z_all_filters_avail(const H5O_pline_t *pline)
 
         /* Check if we didn't find the filter */
         if (j == H5Z_table_used_g)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end for */
 
 done:
@@ -1587,7 +1587,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
 
     /* if the pipeline has no filters, just return */
     if (pline->nused == 0)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Delete all filters */
     if (H5Z_FILTER_ALL == filter) {

@@ -333,7 +333,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
          */
         if (entry_ptr->coll_access) {
             entry_ptr->coll_access = FALSE;
-            H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+            H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
         } /* end if */
     }     /* end for */
 
@@ -690,7 +690,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
                it so it can be cleared */
             if (TRUE == entry_ptr->coll_access) {
                 entry_ptr->coll_access = FALSE;
-                H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+                H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
             } /* end if */
 
             entry_ptr->clear_on_unprotect = TRUE;
@@ -837,7 +837,7 @@ H5C_clear_coll_entries(H5C_t *cache_ptr, hbool_t partial)
 
         /* Mark entry as independent */
         entry_ptr->coll_access = FALSE;
-        H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+        H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
 
         /* Decrement entry count */
         clear_cnt--;
@@ -1283,7 +1283,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
             restart_scan = FALSE;
             entry_ptr    = cache_ptr->LRU_tail_ptr;
 
-            H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr)
+            H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr);
         } /* end if */
     }     /* end while */
 

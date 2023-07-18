@@ -728,7 +728,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
      * the entry and let the second rewrite happen (see HDFFV-10635).  In the future, it'd be nice to handle
      * this situation in H5T_conv_vlen in H5Tconv.c instead of this level (HDFFV-10648). */
     if (heap->obj[hobj->idx].nrefs == 0 && heap->obj[hobj->idx].size == 0 && !heap->obj[hobj->idx].begin)
-        HGOTO_DONE(ret_value)
+        HGOTO_DONE(ret_value);
 
     obj_start = heap->obj[hobj->idx].begin;
     /* Include object header size */

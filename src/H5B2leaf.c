@@ -470,7 +470,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_update_s
                 *status = H5B2_UPDATE_INSERT_CHILD_FULL;
 
                 /* Let calling routine handle insertion */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             } /* end if */
 
             /* Adjust index to leave room for record to insert */

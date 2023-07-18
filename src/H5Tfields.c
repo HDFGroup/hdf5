@@ -216,12 +216,12 @@ H5Tget_member_index(hid_t type_id, const char *name)
         case H5T_COMPOUND:
             for (i = 0; i < dt->shared->u.compnd.nmembs; i++)
                 if (!HDstrcmp(dt->shared->u.compnd.memb[i].name, name))
-                    HGOTO_DONE((int)i)
+                    HGOTO_DONE((int)i);
             break;
         case H5T_ENUM:
             for (i = 0; i < dt->shared->u.enumer.nmembs; i++)
                 if (!HDstrcmp(dt->shared->u.enumer.name[i], name))
-                    HGOTO_DONE((int)i)
+                    HGOTO_DONE((int)i);
             break;
 
         case H5T_NO_CLASS:

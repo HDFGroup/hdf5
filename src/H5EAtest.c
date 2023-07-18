@@ -416,34 +416,34 @@ H5EA__cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2
 
     /* Compare creation parameters for array */
     if (cparam1->raw_elmt_size < cparam2->raw_elmt_size)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->raw_elmt_size > cparam2->raw_elmt_size)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->max_nelmts_bits < cparam2->max_nelmts_bits)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->max_nelmts_bits > cparam2->max_nelmts_bits)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->idx_blk_elmts < cparam2->idx_blk_elmts)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->idx_blk_elmts > cparam2->idx_blk_elmts)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->sup_blk_min_data_ptrs < cparam2->sup_blk_min_data_ptrs)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->sup_blk_min_data_ptrs > cparam2->sup_blk_min_data_ptrs)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->data_blk_min_elmts < cparam2->data_blk_min_elmts)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->data_blk_min_elmts > cparam2->data_blk_min_elmts)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->max_dblk_page_nelmts_bits < cparam2->max_dblk_page_nelmts_bits)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->max_dblk_page_nelmts_bits > cparam2->max_dblk_page_nelmts_bits)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

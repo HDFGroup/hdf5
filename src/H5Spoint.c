@@ -958,9 +958,9 @@ H5S__point_is_valid(const H5S_t *space)
         /* Bounds check the selected point + offset against the extent */
         if ((space->select.sel_info.pnt_lst->high_bounds[u] + (hsize_t)space->select.offset[u]) >
             space->extent.size[u])
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] + space->select.offset[u]) < 0)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end for */
 
 done:
@@ -1988,7 +1988,7 @@ H5S__point_shape_same(H5S_t *space1, H5S_t *space2)
         /* Compare locations in common dimensions, including relative offset */
         while (space2_dim >= 0) {
             if ((hsize_t)((hssize_t)pnt1->pnt[space1_dim] + offset[space1_dim]) != pnt2->pnt[space2_dim])
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
             space1_dim--;
             space2_dim--;
@@ -1998,7 +1998,7 @@ H5S__point_shape_same(H5S_t *space1, H5S_t *space2)
         while (space1_dim >= 0) {
             /* Compare the absolute offset in the remaining dimensions */
             if ((hssize_t)pnt1->pnt[space1_dim] != offset[space1_dim])
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
             space1_dim--;
         } /* end while */
@@ -2057,7 +2057,7 @@ H5S__point_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
 
         /* Check if point was within block for all dimensions */
         if (u == space->extent.rank)
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
 
         /* Advance to next point */
         pnt = pnt->next;

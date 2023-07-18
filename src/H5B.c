@@ -570,7 +570,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     if (H5B_INS_NOOP == my_ins) {
         /* The root node did not split - just return */
         assert(!split_bt_ud.bt);
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     assert(H5B_INS_RIGHT == my_ins);
     assert(split_bt_ud.bt);

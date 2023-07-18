@@ -318,7 +318,7 @@ H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx)
 
     /* Do not update min_dims for "all" or "none" selections */
     if ((sel_type == H5S_SEL_ALL) || (sel_type == H5S_SEL_NONE))
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Get rank of vspace */
     if ((rank = H5S_GET_EXTENT_NDIMS(ent->source_dset.virtual_select)) < 0)
