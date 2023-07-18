@@ -54,29 +54,6 @@
 #define H5D_MULTI_CHUNK_IO             1
 #define H5D_ONE_LINK_CHUNK_IO_MORE_OPT 2
 #define H5D_MULTI_CHUNK_IO_MORE_OPT    3
-#define H5D_NO_IO                      4
-
-/***** Macros for One linked collective IO case. *****/
-/* The default value to do one linked collective IO for all chunks.
- * If the average number of chunks per process is greater than this
- * value, the library will create an MPI derived datatype to link all
- * chunks to do collective IO.  The user can set this value through an
- * API.
- */
-
-/* Macros to represent options on how to obtain chunk address for one linked-chunk IO case */
-#define H5D_OBTAIN_ONE_CHUNK_ADDR_IND 0
-#define H5D_OBTAIN_ALL_CHUNK_ADDR_COL 2
-
-/* Macros to define the default ratio of obtaining all chunk addresses for one linked-chunk IO case */
-#define H5D_ALL_CHUNK_ADDR_THRES_COL     30
-#define H5D_ALL_CHUNK_ADDR_THRES_COL_NUM 10000
-
-/***** Macros for multi-chunk collective IO case. *****/
-/* The default value of the threshold to do collective IO for this
- *  chunk.  If the average number of processes per chunk is greater
- *  than the default value, collective IO is done for this chunk.
- */
 
 /* Macros to represent different IO modes(NONE, Independent or collective)for multiple chunk IO case */
 #define H5D_CHUNK_IO_MODE_COL 1

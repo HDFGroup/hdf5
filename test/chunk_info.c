@@ -114,10 +114,6 @@ const char *FILENAME[] = {"tchunk_info_earliest", "tchunk_info_v18",  "tchunk_in
 /* For compressed data */
 #define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s)) * 1.001) + 12.0)
 
-/* For use in error reporting */
-#define MSG_CHK_ADDR "Chunk address should not be HADDR_UNDEF because of H5D_ALLOC_TIME_EARLY."
-#define MSG_CHK_SIZE "Chunk size should not be 0 because of H5D_ALLOC_TIME_EARLY."
-
 /* Utility function to initialize arguments */
 void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
 

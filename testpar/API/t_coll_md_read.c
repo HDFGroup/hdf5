@@ -369,36 +369,6 @@ test_multi_chunk_io_addrmap_issue(void)
  * I/O with collective metadata reads enabled doesn't cause issues due to
  * collective metadata reads being made only by process 0 in H5D__sort_chunk().
  *
- * NOTE: Due to the way that the threshold value which pertains to this test
- * is currently calculated within HDF5, the following two conditions must be
- * true to trigger the issue:
- *
- * Condition 1: A certain threshold ratio must be met in order to have HDF5
- * obtain all chunk addresses collectively inside H5D__sort_chunk(). This is
- * given by the following:
- *
- *     (sum_chunk * 100) / (dataset_nchunks * mpi_size) >= 30%
- *
- * where:
- *     * `sum_chunk` is the combined sum of the number of chunks selected in
- *       the dataset by all ranks (chunks selected by more than one rank count
- *       individually toward the sum for each rank selecting that chunk)
- *     * `dataset_nchunks` is the number of chunks in the dataset (selected
- *       or not)
- *     * `mpi_size` is the size of the MPI Communicator
- *
- * Condition 2: `sum_chunk` divided by `mpi_size` must exceed or equal a certain
- * threshold (as of this writing, 10000).
- *
- * To satisfy both these conditions, we #define a macro,
- * LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM, which corresponds to the
- * value of the H5D_ALL_CHUNK_ADDR_THRES_COL_NUM macro in H5Dmpio.c (the
- * 10000 threshold from condition 2). We then create a dataset of that many
- * chunks and have each MPI rank write to and read from a piece of every single
- * chunk in the dataset. This ensures chunk utilization is the max possible
- * and exceeds our 30% target ratio, while always exactly matching the numeric
- * chunk threshold value of condition 2.
- *
  * Failure in this test may either cause a hang, or, due to how the MPI calls
  * pertaining to this issue might mistakenly match up, may cause an MPI error
  * message similar to:

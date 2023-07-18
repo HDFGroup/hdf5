@@ -1517,6 +1517,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
             status = H5Sselect_all(file_dataspace);
             VRFY_G((status >= 0), "H5Sselect_all succeeded");
             break;
+
+        default:
+            break;
     }
 
     switch (mem_selection) {
@@ -1539,6 +1542,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
         case ALL:
             status = H5Sselect_all(mem_dataspace);
             VRFY_G((status >= 0), "H5Sselect_all succeeded");
+            break;
+
+        default:
             break;
     }
 
@@ -1777,6 +1783,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
             status = H5Sselect_all(file_dataspace);
             VRFY_G((status >= 0), "H5Sselect_all succeeded");
             break;
+
+        default:
+            break;
     }
 
     switch (mem_selection) {
@@ -1799,6 +1808,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
         case ALL:
             status = H5Sselect_all(mem_dataspace);
             VRFY_G((status >= 0), "H5Sselect_all succeeded");
+            break;
+
+        default:
             break;
     }
 
