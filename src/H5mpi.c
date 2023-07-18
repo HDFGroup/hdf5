@@ -662,7 +662,7 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
 
         /* If our buffer size is 0, there's nothing to do */
         if (buf_size == 0)
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
 
         if (NULL == (recv_buf = H5MM_malloc(buf_size)))
             /* Push an error, but still participate in collective gather operation */

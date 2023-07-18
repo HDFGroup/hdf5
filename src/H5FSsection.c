@@ -1536,7 +1536,7 @@ H5FS_sect_try_merge(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigne
     /* Check if section is shrunk and/or merged away completely */
     if (!sect) {
         sinfo_modified = TRUE;
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     } /* end if */
     else {
         /* Check if section is merged */
@@ -1545,7 +1545,7 @@ H5FS_sect_try_merge(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigne
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL,
                             "can't insert free space section into skip list")
             sinfo_modified = TRUE;
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
         } /* end if */
     }     /* end else */
 
@@ -1621,7 +1621,7 @@ H5FS__sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL,
                                     "can't remove section from non-size tracking data structures")
                     /* Indicate that we found a node for the request */
-                    HGOTO_DONE(TRUE)
+                    HGOTO_DONE(TRUE);
                 }  /* end if */
             }      /* end if */
             else { /* alignment is set */
@@ -1687,7 +1687,7 @@ H5FS__sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node
                                 assert(request <= (*node)->size);
                             } /* end if */
                             /* Indicate that we found a node for the request */
-                            HGOTO_DONE(TRUE)
+                            HGOTO_DONE(TRUE);
                         } /* end if */
 
                         /* Get the next section node in the list */

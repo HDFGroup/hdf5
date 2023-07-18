@@ -230,7 +230,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
      * collective transfer.
      */
     if (0 == size)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     /* If the file is open for SWMR read access, allow access to data past
@@ -292,7 +292,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
      * collective transfer.
      */
     if (0 == size)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
@@ -386,7 +386,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -601,7 +601,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
      * collective transfer.
      */
     if (0 == count)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     if (file->base_addr > 0) {
@@ -993,7 +993,7 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
 
     /* Issue vector read call if appropriate */
     if (use_vector) {
-        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
         if ((file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed")
@@ -1115,7 +1115,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1277,7 +1277,7 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1634,7 +1634,7 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
 
     /* Issue vector write call if appropriate */
     if (use_vector) {
-        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
         if ((file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed")
@@ -1754,7 +1754,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1907,7 +1907,7 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 

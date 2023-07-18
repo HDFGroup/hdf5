@@ -3266,7 +3266,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_VDE_VERIFY_SPACES(dims)                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         /* Open dataspaces                                                                                   \
          */                                                                                                  \
         space1_id = H5Dget_space(dset1_id);                                                                  \
@@ -3300,7 +3300,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
         CHECK_I(H5Sclose(space1_id), "H5Sclose");                                                            \
         CHECK_I(H5Sclose(space2_id), "H5Sclose");                                                            \
         CHECK_I(H5Sclose(space3_id), "H5Sclose");                                                            \
-    } /* define TSOHM_VDE_VERIFY_SPACES */
+    } while (0) /* define TSOHM_VDE_VERIFY_SPACES */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Macro:      TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS()
@@ -3315,7 +3315,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(n)                                                             \
-    {                                                                                                        \
+    do {                                                                                                     \
         CHECK_I(H5Dclose(dset1_id), "H5Dclose");                                                             \
         if ((n) > 1)                                                                                         \
             CHECK_I(H5Dclose(dset2_id), "H5Dclose");                                                         \
@@ -3335,7 +3335,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
             dset3_id = H5Dopen2(file_id, "dataset3", H5P_DEFAULT);                                           \
             CHECK_I(dset3_id, "H5Dopen2");                                                                   \
         }                                                                                                    \
-    } /* define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS */
+    } while (0) /* define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS */
 
     /* Remember the current # of reported errors */
     old_nerrs = GetTestNumErrs();

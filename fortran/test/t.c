@@ -46,15 +46,15 @@ nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_n
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_base_name = (char *)HD5f2cstring(base_name, (size_t)*base_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_full_name = (char *)malloc((size_t)*full_namelen + 1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call h5_fixname function.
      */
     if (NULL == h5_fixname(c_base_name, (hid_t)*fapl, c_full_name, (size_t)*full_namelen + 1))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     HD5packFstring(c_full_name, _fcdtocp(full_name), (size_t)*full_namelen);
 
 done:

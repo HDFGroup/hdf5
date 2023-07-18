@@ -1591,10 +1591,10 @@ H5I__find_id(hid_t id)
     /* Check arguments */
     type = H5I_TYPE(id);
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_DONE(NULL)
+        HGOTO_DONE(NULL);
     type_info = H5I_type_info_array_g[type];
     if (!type_info || type_info->init_count <= 0)
-        HGOTO_DONE(NULL)
+        HGOTO_DONE(NULL);
 
     /* Check for same ID as we have looked up last time */
     if (type_info->last_id_info && type_info->last_id_info->id == id)
@@ -1615,13 +1615,13 @@ H5I__find_id(hid_t id)
 
         /* Invoke the realize callback, to get the actual object */
         if ((id_info->realize_cb)((void *)id_info->object, &actual_id) < 0)
-            HGOTO_DONE(NULL)
+            HGOTO_DONE(NULL);
 
         /* Verify that we received a valid ID, of the same type */
         if (H5I_INVALID_HID == actual_id)
-            HGOTO_DONE(NULL)
+            HGOTO_DONE(NULL);
         if (H5I_TYPE(id) != H5I_TYPE(actual_id))
-            HGOTO_DONE(NULL)
+            HGOTO_DONE(NULL);
 
         /* Swap the actual object in for the future object */
         future_object = (void *)id_info->object;
@@ -1631,7 +1631,7 @@ H5I__find_id(hid_t id)
 
         /* Discard the future object */
         if ((id_info->discard_cb)(future_object) < 0)
-            HGOTO_DONE(NULL)
+            HGOTO_DONE(NULL);
         future_object = NULL;
 
         /* Change the ID from 'future' to 'actual' */

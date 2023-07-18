@@ -3009,16 +3009,16 @@ H5S__hyper_cmp_spans(const H5S_hyper_span_info_t *span_info1, const H5S_hyper_sp
     if (span_info1 != span_info2) {
         /* Check for one span being NULL */
         if (span_info1 == NULL || span_info2 == NULL)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         else {
             /* Compare low & high bounds for this span list */
             /* (Could compare lower dimensions also, but not certain if
              *      that's worth it. - QAK, 2019/01/23)
              */
             if (span_info1->low_bounds[0] != span_info2->low_bounds[0])
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
             else if (span_info1->high_bounds[0] != span_info2->high_bounds[0])
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
             else {
                 const H5S_hyper_span_t *span1;
                 const H5S_hyper_span_t *span2;
@@ -3035,19 +3035,19 @@ H5S__hyper_cmp_spans(const H5S_hyper_span_info_t *span_info1, const H5S_hyper_sp
                 while (1) {
                     /* Check for both spans being NULL */
                     if (span1 == NULL && span2 == NULL)
-                        HGOTO_DONE(TRUE)
+                        HGOTO_DONE(TRUE);
                     else {
                         /* Check for one span being NULL */
                         if (span1 == NULL || span2 == NULL)
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
                         else {
                             /* Check if the actual low & high span information is the same */
                             if (span1->low != span2->low || span1->high != span2->high)
-                                HGOTO_DONE(FALSE)
+                                HGOTO_DONE(FALSE);
                             else {
                                 if (span1->down != NULL || span2->down != NULL) {
                                     if (!H5S__hyper_cmp_spans(span1->down, span2->down))
-                                        HGOTO_DONE(FALSE)
+                                        HGOTO_DONE(FALSE);
                                     else {
                                         /* Keep going... */
                                     } /* end else */
@@ -3283,7 +3283,7 @@ H5S__hyper_is_valid(const H5S_t *space)
 
     /* Check for unlimited selection */
     if (space->select.sel_info.hslab->unlim_dim >= 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check which set of low & high bounds we should be using */
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
@@ -3299,9 +3299,9 @@ H5S__hyper_is_valid(const H5S_t *space)
     for (u = 0; u < space->extent.rank; u++) {
         /* Bounds check the selected point + offset against the extent */
         if (((hssize_t)low_bounds[u] + space->select.offset[u]) < 0)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if ((high_bounds[u] + (hsize_t)space->select.offset[u]) >= space->extent.size[u])
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end for */
 
 done:
@@ -5331,7 +5331,7 @@ H5S__hyper_is_single(const H5S_t *space)
         /* Check for a single block */
         for (u = 0; u < space->extent.rank; u++)
             if (space->select.sel_info.hslab->diminfo.opt[u].count > 1)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
     } /* end if */
     else {
         H5S_hyper_span_info_t *spans; /* Hyperslab span info node */
@@ -5350,7 +5350,7 @@ H5S__hyper_is_single(const H5S_t *space)
 
             /* Check that this is the only span and it spans the entire dimension */
             if (span->next != NULL)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
             else
                 /* Walk down to the next span */
                 spans = span->down;
@@ -5450,9 +5450,9 @@ H5S__hyper_spans_shape_same_helper(const H5S_hyper_span_info_t *span_info1,
      *      that's worth it. - QAK, 2019/01/23)
      */
     if ((hsize_t)((hssize_t)span_info1->low_bounds[0] + offset[0]) != span_info2->low_bounds[0])
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     else if ((hsize_t)((hssize_t)span_info1->high_bounds[0] + offset[0]) != span_info2->high_bounds[0])
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     else {
         const H5S_hyper_span_t *span1;
         const H5S_hyper_span_t *span2;
@@ -5469,23 +5469,23 @@ H5S__hyper_spans_shape_same_helper(const H5S_hyper_span_info_t *span_info1,
         while (1) {
             /* Check for both spans being NULL */
             if (span1 == NULL && span2 == NULL)
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
 
             /* Check for one span being NULL */
             if (span1 == NULL || span2 == NULL)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
             /* Check if the actual low & high span information is the same */
             if ((hsize_t)((hssize_t)span1->low + offset[0]) != span2->low ||
                 (hsize_t)((hssize_t)span1->high + offset[0]) != span2->high)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
             /* Check for down tree for this span */
             if (span1->down != NULL || span2->down != NULL) {
                 /* If the rest of the span trees have a zero offset, use the faster comparison routine */
                 if (rest_zeros[0]) {
                     if (!H5S__hyper_cmp_spans(span1->down, span2->down))
-                        HGOTO_DONE(FALSE)
+                        HGOTO_DONE(FALSE);
                     else {
                         /* Keep going... */
                     } /* end else */
@@ -5493,7 +5493,7 @@ H5S__hyper_spans_shape_same_helper(const H5S_hyper_span_info_t *span_info1,
                 else {
                     if (!H5S__hyper_spans_shape_same_helper(span1->down, span2->down, &offset[1],
                                                             &rest_zeros[1]))
-                        HGOTO_DONE(FALSE)
+                        HGOTO_DONE(FALSE);
                     else {
                         /* Keep going... */
                     } /* end else */
@@ -5679,15 +5679,15 @@ H5S__hyper_shape_same(H5S_t *space1, H5S_t *space2)
         while (space2_dim >= 0) {
             if (space1->select.sel_info.hslab->diminfo.opt[space1_dim].stride !=
                 space2->select.sel_info.hslab->diminfo.opt[space2_dim].stride)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
             if (space1->select.sel_info.hslab->diminfo.opt[space1_dim].count !=
                 space2->select.sel_info.hslab->diminfo.opt[space2_dim].count)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
             if (space1->select.sel_info.hslab->diminfo.opt[space1_dim].block !=
                 space2->select.sel_info.hslab->diminfo.opt[space2_dim].block)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
             space1_dim--;
             space2_dim--;
@@ -5695,7 +5695,7 @@ H5S__hyper_shape_same(H5S_t *space1, H5S_t *space2)
 
         while (space1_dim >= 0) {
             if (space1->select.sel_info.hslab->diminfo.opt[space1_dim].block != 1)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
             space1_dim--;
         } /* end while */
@@ -5731,11 +5731,11 @@ H5S__hyper_shape_same(H5S_t *space1, H5S_t *space2)
 
                 /* Check for more spans in this dimension */
                 if (span->next)
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
 
                 /* Check for span size > 1 element */
                 if (span->low != span->high)
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
 
                 /* Walk down to the next dimension */
                 spans1 = span->down;
@@ -6254,7 +6254,7 @@ H5S__hyper_intersect_block_helper(H5S_hyper_span_info_t *spans, unsigned rank, c
          */
         for (u = 0; u < rank; u++)
             if (start[u] > spans->high_bounds[u] || end[u] < spans->low_bounds[u])
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
         /* Get the span list for spans in this tree */
         curr = spans->head;
@@ -6267,12 +6267,12 @@ H5S__hyper_intersect_block_helper(H5S_hyper_span_info_t *spans, unsigned rank, c
                 curr = curr->next;
             /* If this span is past the end of the block, then we're done in this dimension */
             else if (curr->low > *end)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
             /* block & span overlap */
             else {
                 /* If this is the bottom dimension, then the span tree overlaps the block */
                 if (curr->down == NULL)
-                    HGOTO_DONE(TRUE)
+                    HGOTO_DONE(TRUE);
                 /* Recursively check spans in next dimension down */
                 else {
                     /* If there is an intersection in the "down" dimensions,
@@ -6280,7 +6280,7 @@ H5S__hyper_intersect_block_helper(H5S_hyper_span_info_t *spans, unsigned rank, c
                      */
                     if (H5S__hyper_intersect_block_helper(curr->down, rank - 1, start + 1, end + 1, op_info_i,
                                                           op_gen))
-                        HGOTO_DONE(TRUE)
+                        HGOTO_DONE(TRUE);
 
                     /* No intersection in down dimensions, advance to next span */
                     curr = curr->next;
@@ -6357,7 +6357,7 @@ H5S__hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
          * would have been rejected earlier, if they didn't intersect.
          */
         if (single_block)
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
         else {
             /* Loop over the dimensions, checking for an intersection */
             for (u = 0; u < space->extent.rank; u++) {
@@ -6402,7 +6402,7 @@ H5S__hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
                          *  it doesn't intersect.
                          */
                         if (adj_end < space->select.sel_info.hslab->diminfo.opt[u].stride)
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
                     } /* end if */
                 }     /* end if */
             }         /* end for */
@@ -6410,7 +6410,7 @@ H5S__hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
             /* If we've looped through all dimensions and none of them didn't
              *  overlap, then all of them do, so we report TRUE.
              */
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
         } /* end else */
     }     /* end if */
     else {
@@ -8977,7 +8977,7 @@ H5S__hyper_rebuild_helper(const H5S_hyper_span_info_t *spans, H5S_hyper_dim_t sp
     if (span->down)
         /* Go to the next down span and check whether the selection can be rebuilt */
         if (!H5S__hyper_rebuild_helper(span->down, &span_slab_info[1]))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
     /* Assign the initial starting point & block size for this dimension */
     start = span->low;
@@ -8997,7 +8997,7 @@ H5S__hyper_rebuild_helper(const H5S_hyper_span_info_t *spans, H5S_hyper_dim_t sp
             /* (Can skip check if previous span's down pointer is same as current one) */
             if (span->down && prev_span->down != span->down)
                 if (!H5S__hyper_cmp_spans(span->down, prev_span->down))
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
 
             /* Obtain values for stride and block */
             curr_stride = span->low - prev_low;
@@ -9007,10 +9007,10 @@ H5S__hyper_rebuild_helper(const H5S_hyper_span_info_t *spans, H5S_hyper_dim_t sp
              * three spans are needed.  Account for the first two spans.
              */
             if (curr_block != block)
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
             if (spancount > 1) {
                 if (stride != curr_stride)
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
             } /* end if */
             else
                 stride = curr_stride;

@@ -306,7 +306,7 @@ H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id)
      */
     for (x = 0; x < table->num_indexes; ++x)
         if (table->indexes[x].mesg_types & type_flag)
-            HGOTO_DONE((ssize_t)x)
+            HGOTO_DONE((ssize_t)x);
 
     /* At this point, ret_value is either the location of the correct
      * index or it's still FAIL because we didn't find an index.
@@ -351,14 +351,14 @@ H5SM_type_shared(H5F_t *f, unsigned type_id)
     } /* end if */
     else
         /* No shared messages of any type */
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Search the indexes until we find one that matches this flag or we've
      * searched them all.
      */
     for (u = 0; u < table->num_indexes; u++)
         if (table->indexes[u].mesg_types & type_flag)
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
 
 done:
     /* Release the master SOHM table */
@@ -876,13 +876,13 @@ H5SM__can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
     /* Check whether this message ought to be shared or not */
     /* If sharing is disabled in this file, don't share the message */
     if (!H5_addr_defined(H5F_SOHM_ADDR(f)))
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Type-specific check */
     if ((ret_value = H5O_msg_can_share(type_id, mesg)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "can_share callback returned error")
     if (ret_value == FALSE)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* At this point, the message passes the "trivial" checks and is worth
      *  further checks.
@@ -922,7 +922,7 @@ H5SM_can_share(H5F_t *f, H5SM_master_table_t *table, ssize_t *sohm_index_num, un
     if ((tri_ret = H5SM__can_share_common(f, type_id, mesg)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'trivial' sharing checks returned error")
     if (tri_ret == FALSE)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Look up the master SOHM table */
     /* (use incoming master SOHM table if possible) */
@@ -944,14 +944,14 @@ H5SM_can_share(H5F_t *f, H5SM_master_table_t *table, ssize_t *sohm_index_num, un
      */
     if ((index_num = H5SM__get_index(my_table, type_id)) < 0) {
         H5E_clear_stack(NULL); /*ignore error*/
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     } /* end if */
 
     /* If the message isn't big enough, don't bother sharing it */
     if (0 == (mesg_size = H5O_msg_raw_size(f, type_id, TRUE, mesg)))
         HGOTO_ERROR(H5E_SOHM, H5E_BADMESG, FAIL, "unable to get OH message size")
     if (mesg_size < my_table->indexes[index_num].min_mesg_size)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* At this point, the message will be shared, set the index number if requested. */
     if (sohm_index_num)
@@ -1054,11 +1054,11 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags, unsigned type_id,
 
     /* "trivial" sharing checks */
     if (mesg_flags && (*mesg_flags & H5O_MSG_FLAG_DONTSHARE))
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     if ((tri_ret = H5SM__can_share_common(f, type_id, mesg)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'trivial' sharing checks returned error")
     if (tri_ret == FALSE)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Set up user data for callback */
     cache_udata.f = f;
@@ -1072,7 +1072,7 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags, unsigned type_id,
     if ((tri_ret = H5SM_can_share(f, table, &index_num, type_id, mesg)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'complex' sharing checks returned error")
     if (tri_ret == FALSE)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* At this point, the message will be shared. */
 
@@ -1631,7 +1631,7 @@ H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *
 
             if (0 == cmp) {
                 *pos = x;
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             }
         }
         else if (empty_pos && list->messages[x].location == H5SM_NO_LOC) {

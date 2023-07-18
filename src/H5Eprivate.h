@@ -66,7 +66,7 @@ typedef struct H5E_t H5E_t;
 #define HGOTO_ERROR(maj, min, ret_val, ...)                                                                  \
     {                                                                                                        \
         HCOMMON_ERROR(maj, min, __VA_ARGS__);                                                                \
-        HGOTO_DONE(ret_val)                                                                                  \
+        HGOTO_DONE(ret_val);                                                                                 \
     }
 
 /*
@@ -77,7 +77,7 @@ typedef struct H5E_t H5E_t;
     {                                                                                                        \
         H5AC_tag(prv_tag, NULL);                                                                             \
         HCOMMON_ERROR(maj, min, __VA_ARGS__);                                                                \
-        HGOTO_DONE(ret_val)                                                                                  \
+        HGOTO_DONE(ret_val);                                                                                 \
     }
 
 /*
@@ -87,10 +87,10 @@ typedef struct H5E_t H5E_t;
  * the `done' label.
  */
 #define HGOTO_DONE(ret_val)                                                                                  \
-    {                                                                                                        \
+    do {                                                                                                     \
         ret_value = ret_val;                                                                                 \
         goto done;                                                                                           \
-    }
+    } while (0)
 
 /*
  * HGOTO_DONE_TAG macro, used like HGOTO_DONE between H5_BEGIN_TAG and
@@ -99,7 +99,7 @@ typedef struct H5E_t H5E_t;
 #define HGOTO_DONE_TAG(ret_val)                                                                              \
     {                                                                                                        \
         H5AC_tag(prv_tag, NULL);                                                                             \
-        HGOTO_DONE(ret_val)                                                                                  \
+        HGOTO_DONE(ret_val);                                                                                 \
     }
 
 /*

@@ -591,7 +591,7 @@ H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage
 
     /* Allocate dataspace and initialize it if it hasn't been. */
     if (!(*layout->ops->is_space_alloc)(&layout->storage))
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Calculate the index of this chunk */
     H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, scaled);
@@ -1894,7 +1894,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
 
             /* Leave if we are done */
             if (sel_points == 0)
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
         } /* end if */
 
         /* Increment chunk index */
@@ -2740,7 +2740,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Issue selection I/O call (we can skip the page buffer because we've
              * already verified it won't be used, and the metadata accumulator
              * because this is raw data) */
-            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t)
+            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t);
             if (H5F_shared_select_read(H5F_SHARED(dset_info->dset->oloc.file), H5FD_MEM_DRAW,
                                        (uint32_t)num_chunks, chunk_mem_spaces, chunk_file_spaces, chunk_addrs,
                                        element_sizes, bufs) < 0)
@@ -3126,7 +3126,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Issue selection I/O call (we can skip the page buffer because we've
              * already verified it won't be used, and the metadata accumulator
              * because this is raw data) */
-            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t)
+            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t);
             if (H5F_shared_select_write(H5F_SHARED(dset_info->dset->oloc.file), H5FD_MEM_DRAW,
                                         (uint32_t)num_chunks, chunk_mem_spaces, chunk_file_spaces,
                                         chunk_addrs, element_sizes, bufs) < 0)
@@ -3552,7 +3552,7 @@ H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *uda
         /* Check that the scaled offset is the same */
         for (u = 0; u < udata->common.layout->ndims; u++)
             if (last->scaled[u] != udata->common.scaled[u])
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
 
         /* Retrieve the information from the cache */
         udata->chunk_block.offset = last->addr;
@@ -3561,7 +3561,7 @@ H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *uda
         udata->filter_mask        = last->filter_mask;
 
         /* Indicate that the data was found */
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     } /* end if */
 
 done:
@@ -4845,7 +4845,7 @@ H5D__chunk_allocate(const H5D_t *dset, hbool_t full_overwrite, const hsize_t old
         if (space_dim[op_dim] == 0) {
             /* Reset any cached chunk info for this dataset */
             H5D__chunk_cinfo_cache_reset(&dset->shared->cache.chunk.last);
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
@@ -5300,7 +5300,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
         if ((space_dim[op_dim] < chunk_dim[op_dim]) || old_dim[op_dim] == 0) {
             /* Reset any cached chunk info for this dataset */
             H5D__chunk_cinfo_cache_reset(&dset->shared->cache.chunk.last);
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
 
     /* Set up chunked I/O info object, for operations on chunks (in callback).
@@ -5736,7 +5736,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
 
     /* If this chunk does not exist in cache or on disk, no need to do anything */
     if (!H5_addr_defined(chk_udata.chunk_block.offset) && UINT_MAX == chk_udata.idx_hint)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Initialize the fill value buffer, if necessary */
     if (!udata->fb_info_init) {
@@ -5964,7 +5964,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
         if (old_dim[op_dim] == 0) {
             /* Reset any cached chunk info for this dataset */
             H5D__chunk_cinfo_cache_reset(&dset->shared->cache.chunk.last);
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
 
     /* Round up to the next integer # of chunks, to accommodate partial chunks */
@@ -7224,7 +7224,7 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
     FUNC_ENTER_PACKAGE_NOERR
 
     if (!H5DEBUG(AC))
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     if (headers) {
         fprintf(H5DEBUG(AC), "H5D: raw data cache statistics\n");

@@ -3332,7 +3332,7 @@ H5P_exist_plist(const H5P_genplist_t *plist, const char *name)
             tclass = plist->pclass;
             while (tclass != NULL) {
                 if (H5SL_search(tclass->props, name) != NULL)
-                    HGOTO_DONE(TRUE)
+                    HGOTO_DONE(TRUE);
 
                 /* Go up to parent class */
                 tclass = tclass->parent;
@@ -3387,7 +3387,7 @@ H5P__exist_pclass(H5P_genclass_t *pclass, const char *name)
         tclass = pclass->parent;
         while (tclass != NULL) {
             if (H5SL_search(tclass->props, name) != NULL)
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
 
             /* Go up to parent class */
             tclass = tclass->parent;

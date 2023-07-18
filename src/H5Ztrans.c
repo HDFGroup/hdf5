@@ -613,10 +613,10 @@ H5Z__parse_expression(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
             case H5Z_XFORM_RPAREN:
                 H5Z__unget_token(current);
-                HGOTO_DONE(expr)
+                HGOTO_DONE(expr);
 
             case H5Z_XFORM_END:
-                HGOTO_DONE(expr)
+                HGOTO_DONE(expr);
 
             case H5Z_XFORM_ERROR:
             case H5Z_XFORM_INTEGER:
@@ -701,10 +701,10 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
             case H5Z_XFORM_RPAREN:
                 H5Z__unget_token(current);
-                HGOTO_DONE(term)
+                HGOTO_DONE(term);
 
             case H5Z_XFORM_END:
-                HGOTO_DONE(term)
+                HGOTO_DONE(term);
 
             case H5Z_XFORM_INTEGER:
             case H5Z_XFORM_FLOAT:
@@ -713,7 +713,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             case H5Z_XFORM_MINUS:
             case H5Z_XFORM_LPAREN:
                 H5Z__unget_token(current);
-                HGOTO_DONE(term)
+                HGOTO_DONE(term);
 
             case H5Z_XFORM_ERROR:
             default:
@@ -1130,46 +1130,46 @@ H5Z__xform_find_type(const H5T_t *type)
 
     /* Check for SHORT type */
     if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SHORT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_SHORT)
+        HGOTO_DONE(H5T_NATIVE_SHORT);
     /* Check for INT type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_INT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_INT)
+        HGOTO_DONE(H5T_NATIVE_INT);
     /* Check for LONG type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LONG)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_LONG)
+        HGOTO_DONE(H5T_NATIVE_LONG);
     /* Check for LONGLONG type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LLONG)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_LLONG)
+        HGOTO_DONE(H5T_NATIVE_LLONG);
     /* Check for UCHAR type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_UCHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_UCHAR)
+        HGOTO_DONE(H5T_NATIVE_UCHAR);
     /* Check for CHAR type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_CHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_CHAR)
+        HGOTO_DONE(H5T_NATIVE_CHAR);
     /* Check for SCHAR type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_SCHAR)
+        HGOTO_DONE(H5T_NATIVE_SCHAR);
     /* Check for USHORT type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_USHORT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_USHORT)
+        HGOTO_DONE(H5T_NATIVE_USHORT);
     /* Check for UINT type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_UINT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_UINT)
+        HGOTO_DONE(H5T_NATIVE_UINT);
     /* Check for ULONG type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_ULONG)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_ULONG)
+        HGOTO_DONE(H5T_NATIVE_ULONG);
     /* Check for ULONGLONG type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_ULLONG)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_ULLONG)
+        HGOTO_DONE(H5T_NATIVE_ULLONG);
     /* Check for FLOAT type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_FLOAT)
+        HGOTO_DONE(H5T_NATIVE_FLOAT);
     /* Check for DOUBLE type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_DOUBLE)
+        HGOTO_DONE(H5T_NATIVE_DOUBLE);
     /* Check for LONGDOUBLE type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_LDOUBLE)
+        HGOTO_DONE(H5T_NATIVE_LDOUBLE);
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type")
 

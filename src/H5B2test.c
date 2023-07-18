@@ -526,7 +526,7 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
             ninfo->nrec  = curr_node_ptr.node_nrec;
 
             /* Indicate success */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end else */
 
         /* Decrement depth we're at in B-tree */

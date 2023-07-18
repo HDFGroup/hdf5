@@ -145,7 +145,7 @@ H5_init_library(void)
 
     /* Run the library initialization routine, if it hasn't already run */
     if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
@@ -881,7 +881,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
     /* Don't check again, if we already have */
     if (checked)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     {
         const char *s; /* Environment string for disabling version check */
