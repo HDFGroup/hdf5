@@ -2903,7 +2903,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
     } /* end while */
 
     /* Gather all the information */
-    H5_CHECK_OVERFLOW(total_chunks, size_t, int)
+    H5_CHECK_OVERFLOW(total_chunks, size_t, int);
     if (MPI_SUCCESS != (mpi_code = MPI_Gather(io_mode_info, (int)total_chunks, MPI_BYTE, recv_io_mode_info,
                                               (int)total_chunks, MPI_BYTE, root, comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
@@ -3865,7 +3865,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
              * future, this may become a problem and derived datatypes
              * will need to be used.
              */
-            H5_CHECK_OVERFLOW(mod_data_size, size_t, int)
+            H5_CHECK_OVERFLOW(mod_data_size, size_t, int);
 
             /* Send modification data to new owner */
             if (MPI_SUCCESS !=
@@ -3905,8 +3905,8 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                     "too many shared chunks in parallel filtered write operation")
 
-    H5_CHECK_OVERFLOW(num_send_requests, size_t, int)
-    H5_CHECK_OVERFLOW(num_msgs_incoming, size_t, int)
+    H5_CHECK_OVERFLOW(num_send_requests, size_t, int);
+    H5_CHECK_OVERFLOW(num_msgs_incoming, size_t, int);
 
     /*
      * Allocate receive buffer and MPI_Request arrays for non-blocking
@@ -3942,7 +3942,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&status, MPI_BYTE, &msg_size)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements_x failed", mpi_code)
 
-            H5_CHECK_OVERFLOW(msg_size, MPI_Count, int)
+            H5_CHECK_OVERFLOW(msg_size, MPI_Count, int);
 #else
             int msg_size = 0;
 
