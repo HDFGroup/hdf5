@@ -741,9 +741,9 @@ done:
     /* Cleanup on error */
     if (ret_value < 0) {
         if (file_vol_obj && H5VL_free_object(file_vol_obj) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object")
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object");
         if (file_type_id >= 0 && H5I_dec_ref(file_type_id) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to close file datatype")
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to close file datatype");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)

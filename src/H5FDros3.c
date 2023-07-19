@@ -1006,7 +1006,7 @@ done:
     if (ret_value == NULL) {
         if (handle != NULL)
             if (FAIL == H5FD_s3comms_s3r_close(handle))
-                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle")
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
         if (file != NULL)
             file = H5FL_FREE(H5FD_ros3_t, file);
         curl_global_cleanup(); /* early cleanup because open failed */

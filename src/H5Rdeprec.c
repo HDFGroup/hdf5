@@ -150,7 +150,7 @@ H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref
 
 done:
     if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode_token_compat() */
 
@@ -483,7 +483,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
 
 done:
     if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file");
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate() */
 
@@ -702,7 +702,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 
 done:
     if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement refcount on file")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement refcount on file");
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rget_region1() */
 

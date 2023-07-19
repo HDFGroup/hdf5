@@ -130,7 +130,7 @@ H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_shared_rc_test() */

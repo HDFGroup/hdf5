@@ -299,7 +299,7 @@ H5S_create(H5S_class_t type)
 done:
     if (ret_value == NULL)
         if (new_ds && H5S_close(new_ds) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_create() */
@@ -345,7 +345,7 @@ H5Screate(H5S_class_t type)
 done:
     if (ret_value < 0)
         if (new_ds && H5S_close(new_ds) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Screate() */
@@ -482,7 +482,7 @@ H5Scopy(hid_t space_id)
 done:
     if (ret_value < 0)
         if (dst && H5S_close(dst) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Scopy() */
@@ -1331,7 +1331,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/], const hsize_t maxdims[/
 done:
     if (ret_value < 0)
         if (space && H5S_close(space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Screate_simple() */
@@ -1471,7 +1471,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 done:
     /* Release fake file structure */
     if (f && H5F_fake_free(f) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_encode() */
@@ -1586,7 +1586,7 @@ H5S_decode(const unsigned char **p)
 done:
     /* Release fake file structure */
     if (f && H5F_fake_free(f) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release fake file struct")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release fake file struct");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_decode() */

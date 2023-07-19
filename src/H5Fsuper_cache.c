@@ -604,7 +604,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
 
     /* Size check */
     if ((size_t)(image - (const uint8_t *)_image) > len)
-        HDONE_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad decoded superblock size")
+        HDONE_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad decoded superblock size");
 
     ret_value = sblock;
 
@@ -612,7 +612,7 @@ done:
     /* Release the [possibly partially initialized] superblock on error */
     if (!ret_value && sblock)
         if (H5F__super_free(sblock) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTFREE, NULL, "unable to destroy superblock data")
+            HDONE_ERROR(H5E_FILE, H5E_CANTFREE, NULL, "unable to destroy superblock data");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__cache_superblock_deserialize() */

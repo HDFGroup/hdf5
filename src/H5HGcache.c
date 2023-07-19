@@ -390,7 +390,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
 done:
     if (!ret_value && heap)
         if (H5HG__free(heap) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG__cache_heap_deserialize() */

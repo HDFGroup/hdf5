@@ -476,7 +476,7 @@ done:
     /* Release the object location if we failed after copying it */
     if (ret_value < 0 && obj_loc_valid)
         if (H5G_loc_free(udata->loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location");
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */

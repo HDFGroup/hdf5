@@ -920,7 +920,7 @@ done:
     /* Clean up on error */
     if (ret_value < 0) {
         if (driver_id >= 0 && driver_ref_inc && H5I_dec_app_ref(driver_id) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "unable to unregister VFL driver")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "unable to unregister VFL driver");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1258,7 +1258,7 @@ H5P_set_driver_by_name(H5P_genplist_t *plist, const char *driver_name, const cha
 done:
     if (ret_value < 0) {
         if (new_driver_id >= 0 && H5I_dec_app_ref(new_driver_id) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement count on VFD ID")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement count on VFD ID");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1346,7 +1346,7 @@ H5P_set_driver_by_value(H5P_genplist_t *plist, H5FD_class_value_t driver_value, 
 done:
     if (ret_value < 0) {
         if (new_driver_id >= 0 && H5I_dec_app_ref(new_driver_id) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement count on VFD ID")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement count on VFD ID");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)

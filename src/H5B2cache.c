@@ -298,7 +298,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
 done:
     if (!ret_value && hdr)
         if (H5B2__hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, NULL, "can't release v2 B-tree header")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, NULL, "can't release v2 B-tree header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__cache_hdr_deserialize() */
@@ -691,7 +691,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
 done:
     if (!ret_value && internal)
         if (H5B2__internal_free(internal) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree internal node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree internal node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__cache_int_deserialize() */
@@ -1064,7 +1064,7 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void
 done:
     if (!ret_value && leaf)
         if (H5B2__leaf_free(leaf) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree leaf node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree leaf node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__cache_leaf_deserialize() */

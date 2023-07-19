@@ -190,11 +190,11 @@ done:
     /* Release section node on error */
     if (ret_value < 0)
         if (sec_node && H5HF__sect_single_free((H5FS_section_info_t *)sec_node) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release section node");
 
     /* Release the direct block (marked as dirty) */
     if (dblock && H5AC_unprotect(hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__DIRTIED_FLAG) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__man_insert() */
@@ -407,7 +407,7 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
 done:
     /* Unlock direct block */
     if (dblock && H5AC_unprotect(hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, dblock_cache_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__man_op_real() */
@@ -634,12 +634,12 @@ done:
     if (ret_value < 0) {
         /* Release section node */
         if (sec_node && H5HF__sect_single_free((H5FS_section_info_t *)sec_node) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release section node");
     } /* end if */
 
     /* Unlock indirect block */
     if (iblock && H5HF__man_iblock_unprotect(iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__man_remove() */

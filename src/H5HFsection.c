@@ -2172,7 +2172,7 @@ H5HF__sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, H5HF_free_
 done:
     if (!ret_value && sect)
         if (H5HF__sect_indirect_free(sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_for_row() */
@@ -2496,7 +2496,7 @@ H5HF__sect_indirect_add(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, unsigned start
 done:
     if (ret_value < 0 && sect)
         if (H5HF__sect_indirect_free(sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_add() */
@@ -2585,7 +2585,7 @@ H5HF__sect_indirect_revive_row(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 done:
     /* Unlock indirect block */
     if (sec_iblock && H5HF__man_iblock_unprotect(sec_iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_revive_row() */
@@ -2902,7 +2902,7 @@ done:
         assert(ret_value < 0);
 
         if (H5HF__sect_indirect_free(peer_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3136,7 +3136,7 @@ done:
         assert(ret_value < 0);
 
         if (H5HF__sect_indirect_free(peer_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3562,7 +3562,7 @@ H5HF__sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 done:
     if (ret_value < 0)
         if (par_sect && H5HF__sect_indirect_free(par_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_build_parent() */

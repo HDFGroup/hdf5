@@ -110,7 +110,7 @@ H5Tarray_create2(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */])
 done:
     if (ret_value < 0)
         if (dt && H5T_close_real(dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "can't release datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "can't release datatype");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tarray_create2() */
@@ -342,7 +342,7 @@ H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
 done:
     if (ret_value < 0)
         if (dt && H5T_close_real(dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "can't release datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "can't release datatype");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tarray_create1() */

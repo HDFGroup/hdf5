@@ -164,10 +164,10 @@ H5B2_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header");
     if (!ret_value && bt2)
         if (H5B2_close(bt2) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_create() */
@@ -226,10 +226,10 @@ H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header");
     if (!ret_value && bt2)
         if (H5B2_close(bt2) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_open() */
@@ -665,7 +665,7 @@ done:
     if (parent) {
         assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -861,7 +861,7 @@ done:
     if (parent) {
         assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1332,7 +1332,7 @@ done:
     if (parent) {
         assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1491,7 +1491,7 @@ H5B2_delete(H5F_t *f, haddr_t addr, void *ctx_udata, H5B2_remove_t op, void *op_
 done:
     /* Unprotect the header, if an error occurred */
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_delete() */

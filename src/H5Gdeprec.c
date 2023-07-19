@@ -222,11 +222,11 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 done:
     if (H5I_INVALID_HID != tmp_gcpl && tmp_gcpl != H5P_GROUP_CREATE_DEFAULT)
         if (H5I_dec_ref(tmp_gcpl) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release property list")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release property list");
 
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate1() */
@@ -280,7 +280,7 @@ H5Gopen1(hid_t loc_id, const char *name)
 done:
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */

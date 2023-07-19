@@ -553,7 +553,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
 done:
     if (!ret_value && hdr)
         if (H5HF__hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_hdr_deserialize() */
@@ -1070,7 +1070,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 done:
     if (!ret_value && iblock)
         if (H5HF__man_iblock_dest(iblock) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap indirect block")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap indirect block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_iblock_deserialize() */
@@ -1813,7 +1813,7 @@ done:
     /* Cleanup on error */
     if (!ret_value && dblock)
         if (H5HF__man_dblock_dest(dblock) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap direct block")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap direct block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_dblock_deserialize() */

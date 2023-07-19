@@ -645,7 +645,7 @@ H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 done:
     /* Release the file ID */
     if (file_id > 0 && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "can't close file");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_link_delete() */

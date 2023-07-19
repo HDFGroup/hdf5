@@ -603,7 +603,7 @@ done:
     /* Release selection iterator */
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
         sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
 
@@ -960,7 +960,7 @@ done:
     /* Release selection iterator */
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
         sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
 

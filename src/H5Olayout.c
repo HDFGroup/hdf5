@@ -763,7 +763,7 @@ done:
         if (mesg) {
             if (mesg->type == H5D_VIRTUAL)
                 if (H5D__virtual_reset_layout(mesg) < 0)
-                    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to reset virtual layout")
+                    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to reset virtual layout");
             H5FL_FREE(H5O_layout_t, mesg);
         }
 

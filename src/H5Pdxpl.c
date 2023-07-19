@@ -988,7 +988,7 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
 done:
     if (ret_value < 0)
         if (data_xform_prop && H5Z_xform_destroy(data_xform_prop) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
+            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_data_transform() */
@@ -2343,9 +2343,9 @@ done:
     /* Cleanup on failure */
     if (ret_value < 0) {
         if (reset_prop_on_error && plist && H5P_poke(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection");
         if (space_created && H5S_close(space) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)

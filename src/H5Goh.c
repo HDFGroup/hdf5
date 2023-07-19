@@ -202,7 +202,7 @@ H5O__group_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 done:
     if (NULL == ret_value)
         if (grp && H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__group_open() */
@@ -247,7 +247,7 @@ H5O__group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
 done:
     if (ret_value == NULL)
         if (grp && H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__group_create() */
@@ -370,11 +370,11 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close fractal heap");
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index");
     if (bt2_corder && H5B2_close(bt2_corder) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__group_bh_info() */

@@ -385,7 +385,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (hdr && H5EA__hdr_dest(hdr) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array header")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_hdr_deserialize() */
@@ -756,7 +756,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (iblock && H5EA__iblock_dest(iblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array index block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array index block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_iblock_deserialize() */
@@ -1153,7 +1153,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (sblock && H5EA__sblock_dest(sblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array super block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array super block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_sblock_deserialize() */
@@ -1559,7 +1559,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (dblock && H5EA__dblock_dest(dblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_dblock_deserialize() */
@@ -1950,7 +1950,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (dblk_page && H5EA__dblk_page_dest(dblk_page) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block page")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block page");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_dblk_page_deserialize() */
 

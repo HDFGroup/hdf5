@@ -226,7 +226,7 @@ H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5
 done:
     /* Release link table */
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__compact_get_name_by_idx() */
@@ -343,7 +343,7 @@ H5G__compact_remove_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5RS
 done:
     /* Release link table */
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__compact_remove_by_idx() */
@@ -383,7 +383,7 @@ H5G__compact_iterate(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_index_t
 done:
     /* Release link table */
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__compact_iterate() */
@@ -507,7 +507,7 @@ H5G__compact_lookup_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_i
 done:
     /* Release link table */
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__compact_lookup_by_idx() */

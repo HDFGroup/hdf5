@@ -402,20 +402,20 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
 
 done:
     if (buf_space && (H5S_close(buf_space) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't close dataspace")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't close dataspace");
     /* Don't decrement ID, we want to keep underlying datatype */
     if (reg_tid_src && (tid_src > 0) && (NULL == H5I_remove(tid_src)))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if ((tid_mem > 0) && H5I_dec_ref(tid_mem) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if ((tid_dst > 0) && H5I_dec_ref(tid_dst) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (reclaim_buf)
         reclaim_buf = H5FL_BLK_FREE(type_conv, reclaim_buf);
     if (conv_buf)
         conv_buf = H5FL_BLK_FREE(type_conv, conv_buf);
     if ((dst_loc_id != H5I_INVALID_HID) && (H5I_dec_ref(dst_loc_id) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement refcount on location id")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement refcount on location id");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy_expand_ref_object2() */

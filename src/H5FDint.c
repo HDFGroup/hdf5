@@ -1175,7 +1175,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
             if ((file_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, file_spaces[num_spaces], TRUE)) <
                 0) {
                 if (NULL == H5I_remove(mem_space_ids[num_spaces]))
-                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
                 HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
             }
         }
@@ -1209,9 +1209,9 @@ done:
      */
     for (i = 0; i < num_spaces; i++) {
         if (NULL == H5I_remove(mem_space_ids[i]))
-            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
         if (NULL == H5I_remove(file_space_ids[i]))
-            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
     }
     if (mem_space_ids != mem_space_ids_local)
         mem_space_ids = H5MM_xfree(mem_space_ids);
@@ -1808,7 +1808,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
             if ((file_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, file_spaces[num_spaces], TRUE)) <
                 0) {
                 if (NULL == H5I_remove(mem_space_ids[num_spaces]))
-                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
                 HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
             }
         }
@@ -1842,9 +1842,9 @@ done:
      */
     for (i = 0; i < num_spaces; i++) {
         if (NULL == H5I_remove(mem_space_ids[i]))
-            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
         if (NULL == H5I_remove(file_space_ids[i]))
-            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
     }
     if (mem_space_ids != mem_space_ids_local)
         mem_space_ids = H5MM_xfree(mem_space_ids);

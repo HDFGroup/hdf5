@@ -152,7 +152,7 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx)
 done:
     if (!ret_value)
         if (sblock && H5EA__sblock_dest(sblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array super block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array super block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__sblock_alloc() */
@@ -232,18 +232,18 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(sblock) < 0)
                     HDONE_ERROR(H5E_EARRAY, H5E_CANTREMOVE, HADDR_UNDEF,
-                                "unable to remove extensible array super block from cache")
+                                "unable to remove extensible array super block from cache");
 
             /* Release super block's disk space */
             if (H5_addr_defined(sblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_SBLOCK, sblock->addr, (hsize_t)sblock->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
-                            "unable to release extensible array super block")
+                            "unable to release extensible array super block");
 
             /* Destroy super block */
             if (H5EA__sblock_dest(sblock) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
-                            "unable to destroy extensible array super block")
+                            "unable to destroy extensible array super block");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -308,7 +308,7 @@ done:
             H5AC_unprotect(hdr->f, H5AC_EARRAY_SBLOCK, sblock->addr, sblock, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, NULL,
                         "unable to unprotect extensible array super block, address = %llu",
-                        (unsigned long long)sblock->addr)
+                        (unsigned long long)sblock->addr);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -386,7 +386,7 @@ done:
     /* Finished deleting super block in metadata cache */
     if (sblock && H5EA__sblock_unprotect(sblock, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG |
                                                      H5AC__FREE_FILE_SPACE_FLAG) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array super block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array super block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__sblock_delete() */

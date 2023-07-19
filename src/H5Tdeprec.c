@@ -186,7 +186,7 @@ done:
     /* Cleanup on error */
     if (H5I_INVALID_HID == ret_value)
         if (dt && H5VL_datatype_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to close datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to close datatype");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen1() */

@@ -459,11 +459,11 @@ done:
     if (ret_value < 0) {
         if (vol_info)
             if (H5VL_free_connector_info(connector_id, vol_info) < 0)
-                HDONE_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "can't free VOL connector info")
+                HDONE_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "can't free VOL connector info");
         if (connector_id >= 0)
             /* The H5VL_class_t struct will be freed by this function */
             if (H5I_dec_ref(connector_id) < 0)
-                HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister VOL connector")
+                HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister VOL connector");
     } /* end if */
 
     /* Clean up */
@@ -568,7 +568,7 @@ done:
     /* Cleanup on error */
     if (NULL == ret_value) {
         if (conn_rc_incr && H5VL_conn_dec_rc(vol_connector) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -782,7 +782,7 @@ done:
     if (NULL == ret_value) {
         /* Decrement VOL connector ID ref count on error */
         if (conn_id_incr && H5I_dec_ref(connector_id) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector");
 
         /* Free VOL connector struct */
         if (NULL != connector)
@@ -916,7 +916,7 @@ done:
     if (!ret_value) {
         /* Decrement VOL connector ID ref count on error */
         if (conn_id_incr && H5I_dec_ref(connector_id) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector");
 
         /* Free VOL connector struct */
         if (NULL != connector)

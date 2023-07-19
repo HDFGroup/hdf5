@@ -306,7 +306,7 @@ done:
     /* Release resources */
     if (!ret_value && fspace)
         if (H5FS__hdr_dest(fspace) < 0)
-            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_hdr_deserialize() */
@@ -1056,7 +1056,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 done:
     if (!ret_value && sinfo)
         if (H5FS__sinfo_dest(sinfo) < 0)
-            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info")
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_sinfo_deserialize() */

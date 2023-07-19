@@ -1532,7 +1532,7 @@ done:
 
     if (ret_value < 0) {
         if (space && H5S_close(space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -2150,7 +2150,7 @@ done:
     /* (Even on failure, so there's not a mangled layout struct in the list) */
     if (retrieved_layout) {
         if (H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0) {
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout");
             if (old_list != virtual_layout.storage.u.virt.list)
                 free_list = TRUE;
         } /* end if */
@@ -2164,10 +2164,10 @@ done:
             ent->source_file_name = (char *)H5MM_xfree(ent->source_file_name);
             ent->source_dset_name = (char *)H5MM_xfree(ent->source_dset_name);
             if (ent->source_dset.virtual_select && H5S_close(ent->source_dset.virtual_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection");
             ent->source_dset.virtual_select = NULL;
             if (ent->source_select && H5S_close(ent->source_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection");
             ent->source_select = NULL;
             H5D_virtual_free_parsed_name(ent->parsed_source_file_name);
             ent->parsed_source_file_name = NULL;
@@ -2273,7 +2273,7 @@ done:
     /* Free space on failure */
     if ((ret_value < 0) && space)
         if (H5S_close(space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_vspace() */
@@ -2361,7 +2361,7 @@ done:
     /* Free space on failure */
     if ((ret_value < 0) && space)
         if (H5S_close(space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_srcspace() */
@@ -3148,9 +3148,9 @@ done:
     if (bkg != value)
         H5MM_xfree(bkg);
     if (src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID")
+        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID");
     if (dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID")
+        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_get_fill_value() */

@@ -1019,7 +1019,7 @@ done:
 
     /* Release the superblock */
     if (sblock && H5AC_unprotect(f, H5AC_SUPERBLOCK, (haddr_t)0, sblock, sblock_flags) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTUNPROTECT, FAIL, "unable to close superblock")
+        HDONE_ERROR(H5E_FILE, H5E_CANTUNPROTECT, FAIL, "unable to close superblock");
 
     /* If we have failed, make sure no entries are left in the
      * metadata cache, so that it can be shut down and discarded.
@@ -1028,12 +1028,12 @@ done:
         /* Unpin and discard drvinfo cache entry */
         if (f->shared->drvinfo) {
             if (H5AC_unpin_entry(f->shared->drvinfo) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin driver info")
+                HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin driver info");
 
             /* Evict the driver info block from the cache */
             if (sblock) {
                 if (H5AC_expunge_entry(f, H5AC_DRVRINFO, sblock->driver_addr, H5AC__NO_FLAGS_SET) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block");
                 f->shared->drvinfo = NULL;
             }
         } /* end if */
@@ -1042,11 +1042,11 @@ done:
         if (sblock) {
             /* Unpin superblock in cache */
             if (H5AC_unpin_entry(sblock) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+                HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock");
 
             /* Evict the superblock from the cache */
             if (H5AC_expunge_entry(f, H5AC_SUPERBLOCK, (haddr_t)0, H5AC__NO_FLAGS_SET) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock")
+                HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock");
             f->shared->sblock = NULL;
         } /* end if */
     }     /* end if */
@@ -1445,7 +1445,7 @@ done:
 
     /* Close superblock extension, if it was created */
     if (ext_created && H5F__super_ext_close(f, &ext_loc, ext_created) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
+        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension");
 
     /* Cleanup on failure */
     if (ret_value < 0) {
@@ -1455,11 +1455,11 @@ done:
             if (drvinfo_in_cache) {
                 /* Unpin drvinfo in cache */
                 if (H5AC_unpin_entry(drvinfo) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin driver info")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin driver info");
 
                 /* Evict the driver info block from the cache */
                 if (H5AC_expunge_entry(f, H5AC_DRVRINFO, sblock->driver_addr, H5AC__NO_FLAGS_SET) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block");
             } /* end if */
             else
                 /* Free driver info block */
@@ -1472,16 +1472,16 @@ done:
             if (sblock_in_cache) {
                 /* Unpin superblock in cache */
                 if (H5AC_unpin_entry(sblock) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock");
 
                 /* Evict the superblock from the cache */
                 if (H5AC_expunge_entry(f, H5AC_SUPERBLOCK, (haddr_t)0, H5AC__NO_FLAGS_SET) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock");
             } /* end if */
             else
                 /* Free superblock */
                 if (H5F__super_free(sblock) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock");
 
             /* Reset variables in file structure */
             f->shared->sblock = NULL;
@@ -1726,11 +1726,11 @@ done:
 
     /* Close the superblock extension, if it was opened */
     if (ext_opened && H5F__super_ext_close(f, &ext_loc, ext_created) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
+        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension");
 
     /* Mark superblock dirty in cache, if superblock extension was created */
     if (ext_created && H5AC_mark_entry_dirty(f->shared->sblock) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+        HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__super_ext_write_msg() */
@@ -1802,7 +1802,7 @@ done:
 
     /* Close superblock extension object header, if opened */
     if (ext_opened && H5F__super_ext_close(f, &ext_loc, FALSE) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
+        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__super_ext_remove_msg() */

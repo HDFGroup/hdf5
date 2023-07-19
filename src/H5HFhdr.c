@@ -473,7 +473,7 @@ H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 done:
     if (!H5_addr_defined(ret_value) && hdr)
         if (H5HF__hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release fractal heap header")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release fractal heap header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__hdr_create() */
@@ -1421,7 +1421,7 @@ H5HF__hdr_delete(H5HF_hdr_t *hdr)
 done:
     /* Unprotect the header with appropriate flags */
     if (H5AC_unprotect(hdr->f, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, cache_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__hdr_delete() */

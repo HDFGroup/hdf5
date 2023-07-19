@@ -238,7 +238,7 @@ H5O__dset_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 done:
     if (NULL == ret_value)
         if (dset && H5D_close(dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataset");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_open() */
@@ -284,7 +284,7 @@ H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
 done:
     if (ret_value == NULL)
         if (dset && H5D_close(dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataset");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_create() */
@@ -393,9 +393,9 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
 done:
     /* Free messages, if they've been read in */
     if (layout_read && H5O_msg_reset(H5O_LAYOUT_ID, &layout) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset data storage layout message")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset data storage layout message");
     if (efl_read && H5O_msg_reset(H5O_EFL_ID, &efl) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset external file list message")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset external file list message");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_bh_info() */
@@ -429,7 +429,7 @@ H5O__dset_flush(void *_obj_ptr)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if (H5D__flush_real(dset) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
+        HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

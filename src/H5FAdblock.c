@@ -152,7 +152,7 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr)
 done:
     if (!ret_value)
         if (dblock && H5FA__dblock_dest(dblock) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__dblock_alloc() */
@@ -228,16 +228,16 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(dblock) < 0)
                     HDONE_ERROR(H5E_FARRAY, H5E_CANTREMOVE, HADDR_UNDEF,
-                                "unable to remove fixed array data block from cache")
+                                "unable to remove fixed array data block from cache");
 
             /* Release data block's disk space */
             if (H5_addr_defined(dblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_FARRAY_DBLOCK, dblock->addr, (hsize_t)dblock->size) < 0)
-                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to release fixed array data block")
+                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to release fixed array data block");
 
             /* Destroy data block */
             if (H5FA__dblock_dest(dblock) < 0)
-                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy fixed array data block")
+                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy fixed array data block");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -383,7 +383,7 @@ done:
     /* Finished deleting data block in metadata cache */
     if (dblock && H5FA__dblock_unprotect(dblock, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG |
                                                      H5AC__FREE_FILE_SPACE_FLAG) < 0)
-        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block")
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__dblock_delete() */

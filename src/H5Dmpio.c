@@ -1319,7 +1319,7 @@ done:
     if (debug_log_file) {
         fprintf(debug_log_file, "##############\n\n");
         if (EOF == fclose(debug_log_file))
-            HDONE_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "couldn't close debugging log file")
+            HDONE_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "couldn't close debugging log file");
         debug_stream = H5DEBUG(D);
     }
 #endif
@@ -2127,7 +2127,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
 done:
     /* Reset collective opt mode */
     if (H5CX_set_mpio_coll_opt(orig_coll_opt_mode) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't reset MPI-I/O collective_op property")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't reset MPI-I/O collective_op property");
 
     /* Free memory */
     if (chunk_io_option)
@@ -3409,7 +3409,7 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
         if (NULL == (counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*counts_disps_array)))) {
             /* Push an error, but still participate in collective gather operation */
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate receive counts and displacements array")
+                        "couldn't allocate receive counts and displacements array");
         }
         else {
             /* Set the receive counts from the assigned chunks map */
@@ -4067,7 +4067,7 @@ done:
 
     if (mem_iter) {
         if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release dataspace selection iterator")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release dataspace selection iterator");
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
     }
 
@@ -4288,7 +4288,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
 
         if (NULL == (chunk_list[i].buf = H5MM_malloc(chunk_list[i].chunk_buf_size))) {
             /* Push an error, but participate in collective read */
-            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer");
             break;
         }
 
@@ -4407,9 +4407,9 @@ done:
 
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info");
     if (fill_space && (H5S_close(fill_space) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space")
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);
@@ -4526,7 +4526,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
         if (NULL == chunk_list[i].buf) {
             /* Push an error, but participate in collective read */
-            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer");
             break;
         }
 
@@ -4738,17 +4738,17 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 done:
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator");
         sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
     if (dataspace && (H5S_close(dataspace) < 0))
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace");
     if (fill_space && (H5S_close(fill_space) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space")
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
 
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info");
 
     /* On failure, try to free all resources used by entries in the chunk list */
     if (ret_value < 0) {
@@ -4841,7 +4841,7 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
         if (NULL == (counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*counts_disps_array)))) {
             /* Push an error, but still participate in collective gather operation */
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate receive counts and displacements array")
+                        "couldn't allocate receive counts and displacements array");
         }
         else {
             /* Set the receive counts from the assigned chunks map */
@@ -5035,7 +5035,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         if (NULL == (counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*counts_disps_array)))) {
             /* Push an error, but still participate in collective gather operation */
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate receive counts and displacements array")
+                        "couldn't allocate receive counts and displacements array");
         }
         else {
             /* Set the receive counts from the assigned chunks map */

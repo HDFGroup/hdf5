@@ -160,7 +160,7 @@ H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag)
 done:
     /* Unprotect object header on failure */
     if (oh && H5O_unprotect(oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__oh_tag() */

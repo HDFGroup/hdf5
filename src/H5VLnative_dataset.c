@@ -215,13 +215,13 @@ H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_s
         if (H5S_BLOCK == mem_space_id[i] && dinfo[i].mem_space)
             if (H5S_close(dinfo[i].mem_space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
-                            "unable to release temporary memory dataspace for H5S_BLOCK")
+                            "unable to release temporary memory dataspace for H5S_BLOCK");
 
         /* Reset file dataspace selection if it was copied from the property list */
         if (H5S_PLIST == file_space_id[i] && dinfo[i].file_space)
             if (H5S_select_all(dinfo[i].file_space, TRUE) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
-                            "unable to release file dataspace selection for H5S_PLIST")
+                            "unable to release file dataspace selection for H5S_PLIST");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -280,12 +280,12 @@ done:
 
             /* Get the new dataset's object location */
             if (NULL == (oloc = H5D_oloc(dset)))
-                HDONE_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get object location of dataset")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get object location of dataset");
 
             /* Decrement refcount on dataset's object header in memory */
             if (H5O_dec_rc_by_loc(oloc) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL,
-                            "unable to decrement refcount on newly created object")
+                            "unable to decrement refcount on newly created object");
         } /* end if */
     }     /* end if */
 
@@ -364,7 +364,7 @@ H5VL__native_dataset_read(size_t count, void *obj[], hid_t mem_type_id[], hid_t 
 done:
     /* Clean up */
     if (H5VL__native_dataset_io_cleanup(count, mem_space_id, file_space_id, dinfo) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataset info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataset info");
 
     if (dinfo != &dinfo_local)
         H5MM_xfree(dinfo);
@@ -411,7 +411,7 @@ H5VL__native_dataset_write(size_t count, void *obj[], hid_t mem_type_id[], hid_t
 done:
     /* Clean up */
     if (H5VL__native_dataset_io_cleanup(count, mem_space_id, file_space_id, dinfo) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataset info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataset info");
 
     if (dinfo != &dinfo_local)
         H5MM_xfree(dinfo);

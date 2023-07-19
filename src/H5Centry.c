@@ -1077,7 +1077,7 @@ H5C__load_entry(H5F_t *f,
                     if (coll_access) {
                         /* Push an error, but still participate in following MPI_Bcast */
                         memset(image, 0, len);
-                        HDONE_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
+                        HDONE_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*");
                     }
                     else
 #endif
@@ -1135,7 +1135,7 @@ H5C__load_entry(H5F_t *f,
                                 if (coll_access) {
                                     /* Push an error, but still participate in following MPI_Bcast */
                                     memset(image + len, 0, actual_len - len);
-                                    HDONE_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+                                    HDONE_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image");
                                 }
                                 else
 #endif
@@ -1306,7 +1306,7 @@ done:
     if (NULL == ret_value) {
         /* Release resources */
         if (thing && type->free_icr(thing) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed");
         if (image)
             image = (uint8_t *)H5MM_xfree(image);
     } /* end if */
@@ -2068,7 +2068,7 @@ done:
     /* Release resources on error */
     if (FAIL == ret_value)
         if (thing && type->free_icr(thing) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "free_icr callback failed")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "free_icr callback failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__deserialize_prefetched_entry() */
@@ -2346,12 +2346,12 @@ done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C__validate_lru_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     if (ret_value < 0 && entry_tagged)
         if (H5C__untag_entry(cache_ptr, entry_ptr) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry from tag list")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry from tag list");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_insert_entry() */
@@ -2752,7 +2752,7 @@ done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C__validate_lru_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2884,7 +2884,7 @@ H5C_resize_entry(void *thing, size_t new_size)
 done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2933,7 +2933,7 @@ done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C__validate_lru_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3070,7 +3070,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
                         /* If image generation fails, push an error but
                          * still participate in the following MPI_Bcast
                          */
-                        HDONE_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't generate entry's image")
+                        HDONE_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't generate entry's image");
                 } /* end if */
                 assert(entry_ptr->image_ptr);
 
@@ -3345,7 +3345,7 @@ done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C__validate_lru_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "an extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "an extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3389,7 +3389,7 @@ done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C__validate_lru_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3684,7 +3684,7 @@ done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C__validate_lru_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4084,7 +4084,7 @@ H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flag
 done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_lru_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)

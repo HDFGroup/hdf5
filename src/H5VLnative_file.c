@@ -99,7 +99,7 @@ H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t 
 done:
     if (NULL == ret_value && new_file)
         if (H5F__close(new_file) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_file_create() */
@@ -132,7 +132,7 @@ H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t H5
 
 done:
     if (NULL == ret_value && new_file && H5F_try_close(new_file, NULL) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_file_open() */
