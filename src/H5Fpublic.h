@@ -1172,7 +1172,7 @@ H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 /**
  * \ingroup H5F
  *
- * \brief Retrieves name of file to which object belongs
+ * \brief Retrieves global file information
  *
  * \fgdta_obj_id
  * \param[out] file_info Buffer for global file information
@@ -1845,7 +1845,7 @@ typedef struct H5F_info1_t {
 /**
  * \ingroup H5F
  *
- * \brief Retrieves name of file to which object belongs
+ * \brief Retrieves global file information
  *
  * \fgdta_obj_id
  * \param[out] file_info Buffer for global file information
