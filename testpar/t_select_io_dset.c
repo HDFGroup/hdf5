@@ -129,9 +129,9 @@ typedef enum {
 #define TEST_IN_PLACE_TCONV                    0x010
 
 /* Definitions used by test_bug_optimized_bufs() and test_bug_api_library() */
-#define DIMS                10000
-#define BIG_X_FACTOR        1048576
-#define BIG_Y_FACTOR        32
+#define DIMS         10000
+#define BIG_X_FACTOR 1048576
+#define BIG_Y_FACTOR 32
 
 /*
  * Helper routine to set dxpl
@@ -3520,14 +3520,13 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
 
 } /* test_no_selection_io_cause_mode() */
 
-
 /*
  * Test for causes of not performing selection I/O
  */
 static void
 test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 {
-    hid_t dxpl = H5I_INVALID_HID;
+    hid_t                   dxpl = H5I_INVALID_HID;
     H5D_selection_io_mode_t selection_io_mode;
 
     if (MAINPROCESS) {
@@ -3562,12 +3561,11 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
     return;
 } /* test_get_no_selection_io_cause() */
 
-
-/* 
+/*
  * This bug is exposed when running testpar/t_coll_md.c via testphdf5.
  *
- * Optimized bufs (bufs[1] is NULL) is used when passing as a parameter to the mpio driver 
- * for selection I/O.  When computing mpi_bufs_base in that routine, it is not accounted 
+ * Optimized bufs (bufs[1] is NULL) is used when passing as a parameter to the mpio driver
+ * for selection I/O.  When computing mpi_bufs_base in that routine, it is not accounted
  * for and therefore causing segmentation fault when running the test.
  *
  * Fix:
@@ -3576,19 +3574,19 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 static void
 test_bug_optimized_bufs(const char *filename, hid_t fapl)
 {
-    hid_t dxpl = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t fid  = H5I_INVALID_HID;
-    hid_t did  = H5I_INVALID_HID;
-    hid_t fspace_id = H5I_INVALID_HID;
-    hid_t mspace_id = H5I_INVALID_HID;
+    hid_t   dxpl      = H5I_INVALID_HID;
+    hid_t   dcpl      = H5I_INVALID_HID;
+    hid_t   fid       = H5I_INVALID_HID;
+    hid_t   did       = H5I_INVALID_HID;
+    hid_t   fspace_id = H5I_INVALID_HID;
+    hid_t   mspace_id = H5I_INVALID_HID;
     hsize_t dims[1];
     hsize_t cdims[1];
     hsize_t start[1];
     hsize_t stride[1];
     hsize_t count[1];
     hsize_t block[1];
-    int *wbuf;
+    int    *wbuf;
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         P_TEST_ERROR;
@@ -3605,7 +3603,8 @@ test_bug_optimized_bufs(const char *filename, hid_t fapl)
     if (H5Pset_chunk(dcpl, 1, cdims) < 0)
         P_TEST_ERROR;
 
-    if ((did = H5Dcreate2(fid, "bug_optimized_bufs", H5T_NATIVE_INT, fspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, "bug_optimized_bufs", H5T_NATIVE_INT, fspace_id, H5P_DEFAULT, dcpl,
+                          H5P_DEFAULT)) < 0)
         P_TEST_ERROR;
 
     start[0]  = (hsize_t)mpi_rank;
@@ -3658,7 +3657,7 @@ test_bug_optimized_bufs(const char *filename, hid_t fapl)
 
 } /* test_bug_optimized_bufs() */
 
-/* 
+/*
  * The bug is exposed when running testpar/t_pread.c.
  *
  * The file is created with userblock.  Before pasing down to the mpio driver for
@@ -3675,17 +3674,17 @@ test_bug_optimized_bufs(const char *filename, hid_t fapl)
 static void
 test_bug_base_addr(const char *filename, hid_t fapl)
 {
-    hid_t    dxpl = H5I_INVALID_HID;
-    hid_t    dxpl_read = H5I_INVALID_HID;
-    hid_t    fid  = H5I_INVALID_HID;
-    hid_t    did  = H5I_INVALID_HID;
-    hid_t    sid  = H5I_INVALID_HID;
-    hid_t    fcpl = H5I_INVALID_HID;
-    hsize_t  dims[1];
-    hid_t    tid                                  = H5T_NATIVE_INT;
-    int      wbuf[DSET_SELECT_DIM];
-    int      rbuf[DSET_SELECT_DIM];
-    int      i;
+    hid_t   dxpl      = H5I_INVALID_HID;
+    hid_t   dxpl_read = H5I_INVALID_HID;
+    hid_t   fid       = H5I_INVALID_HID;
+    hid_t   did       = H5I_INVALID_HID;
+    hid_t   sid       = H5I_INVALID_HID;
+    hid_t   fcpl      = H5I_INVALID_HID;
+    hsize_t dims[1];
+    hid_t   tid = H5T_NATIVE_INT;
+    int     wbuf[DSET_SELECT_DIM];
+    int     rbuf[DSET_SELECT_DIM];
+    int     i;
 
     /* Create user block */
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -3707,8 +3706,8 @@ test_bug_base_addr(const char *filename, hid_t fapl)
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         P_TEST_ERROR;
 
-    if ((did = H5Dcreate2(fid, "bug_base_addr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
-                          H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, "bug_base_addr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
         P_TEST_ERROR;
 
     /* Initialize data */
@@ -3752,66 +3751,66 @@ test_bug_base_addr(const char *filename, hid_t fapl)
         P_TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
-        P_TEST_ERROR; 
+        P_TEST_ERROR;
     return;
 
 } /* test_bug_base_addr() */
 
-/* 
+/*
  * This bug is exposed when running testpar/t_2Gio.c with at least 2 processes.
  *
  * The root problem is from calling an API function from within the library i.e.
  * calling H5FDread/write_vector_from_selection() for independent access in the
  * mpio driver for selection I/O.
  *
- * The test scenario is described below with the test writing to a dataset 
+ * The test scenario is described below with the test writing to a dataset
  * via H5Dwrite():
- * --running with 2 processes 
+ * --running with 2 processes
  * --with selection I/O on
  * --with COLLECTIVE xfer mode
  *
  * For process 1:
  * The library internal calls H5D__write():
  * --io_info.use_select_io is ON
- * --io_info.use_select_io is OFF after calling H5D__typeinfo_init_phase2() 
+ * --io_info.use_select_io is OFF after calling H5D__typeinfo_init_phase2()
  *   due to H5D_SEL_IO_TCONV_BUF_TOO_SMALL
- * --H5D__mpio_opt_possible() returns 0 so xfer mode is set to 
+ * --H5D__mpio_opt_possible() returns 0 so xfer mode is set to
  *   H5FD_MPIO_INDEPENDENT
  * The library eventually calls H5FD__mpio_write() performing scalar calls for the writes
  *
  * For process 0:
  * The library internal calls H5D__write():
  * --io_info.use_select_io is ON
- * --H5D__mpio_opt_possible() returns 0 so xfer mode is set to 
+ * --H5D__mpio_opt_possible() returns 0 so xfer mode is set to
  *   H5FD_MPIO_INDEPENDENT
- * The library eventually calls H5FD__mpio_write_selection(): 
+ * The library eventually calls H5FD__mpio_write_selection():
  * --since the xfer mode is INDEPENDENT it calls the API
  *   H5FDwrite_vector_from_selection(), which eventually calls
- *   H5FD__mpio_write_vector().  This routine obtains the 
+ *   H5FD__mpio_write_vector().  This routine obtains the
  *   xfer mode via API context which returns COLLECTIVE.
  *   Then the test hangs when trying to do MPI_File_set_view().
  *
  * Fix:
- * Create wrapper functions for the API H5FDread/write_vector_from_selection() and 
+ * Create wrapper functions for the API H5FDread/write_vector_from_selection() and
  * they will be called by H5FD__mpio_read/write_selection() for independent access.
  *
  */
 static void
 test_bug_api_library(const char *filename, hid_t fapl)
 {
-    hid_t dxpl = H5I_INVALID_HID;
-    hid_t fid  = H5I_INVALID_HID;
-    hid_t did  = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hid_t fspace_id = H5I_INVALID_HID;
-    hid_t mspace_id = H5I_INVALID_HID;
+    hid_t   dxpl      = H5I_INVALID_HID;
+    hid_t   fid       = H5I_INVALID_HID;
+    hid_t   did       = H5I_INVALID_HID;
+    hid_t   sid       = H5I_INVALID_HID;
+    hid_t   fspace_id = H5I_INVALID_HID;
+    hid_t   mspace_id = H5I_INVALID_HID;
     hsize_t dims[2];
     hsize_t start[2];
     hsize_t stride[2];
     hsize_t count[2];
     hsize_t block[2];
-    int *wbuf;
-    hsize_t   i, j;
+    int    *wbuf;
+    hsize_t i, j;
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         P_TEST_ERROR;
@@ -3822,7 +3821,8 @@ test_bug_api_library(const char *filename, hid_t fapl)
     if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
         P_TEST_ERROR;
 
-    if ((did = H5Dcreate2(fid, "bug_coll_to_ind", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, "bug_coll_to_ind", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
+                          H5P_DEFAULT)) < 0)
         P_TEST_ERROR;
 
     if ((wbuf = malloc((size_t)dims[0] * (size_t)dims[1] * sizeof(int))) == NULL)
@@ -3837,7 +3837,6 @@ test_bug_api_library(const char *filename, hid_t fapl)
     count[1]  = 1;
     start[0]  = (hsize_t)mpi_rank * block[0];
     start[1]  = 0;
-
 
     if ((fspace_id = H5Dget_space(did)) < 0)
         P_TEST_ERROR;

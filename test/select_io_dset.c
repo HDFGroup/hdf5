@@ -3060,9 +3060,9 @@ static herr_t
 test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 {
 
-    hid_t dxpl = H5I_INVALID_HID;
+    hid_t                   dxpl = H5I_INVALID_HID;
     H5D_selection_io_mode_t selection_io_mode;
-    int errs = 0;
+    int                     errs = 0;
 
     printf("\n");
     TESTING("H5Pget_no_selection_io_cause()");
@@ -3076,7 +3076,7 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
     if (H5Pclose(dxpl) < 0)
         FAIL_STACK_ERROR;
 
-    /* The following tests are based on H5D_SELECTION_IO_MODE_DEFAULT as the 
+    /* The following tests are based on H5D_SELECTION_IO_MODE_DEFAULT as the
        default setting in the library; skip the tests if that is not true */
     if (selection_io_mode != H5D_SELECTION_IO_MODE_DEFAULT) {
         SKIPPED();
