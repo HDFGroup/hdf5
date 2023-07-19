@@ -124,17 +124,17 @@ typedef enum H5F_close_degree_t {
 //! <!-- [H5F_info2_t_snip] -->
 typedef struct H5F_info2_t {
     struct {
-        unsigned version;        /**< Superblock version # */
+        unsigned version;        /**< Superblock version number */
         hsize_t  super_size;     /**< Superblock size */
         hsize_t  super_ext_size; /**< Superblock extension size */
     } super;
     struct {
-        unsigned version;   /**< Version # of file free space management */
+        unsigned version;   /**< Version number of file free space management */
         hsize_t  meta_size; /**< Free space manager metadata size */
         hsize_t  tot_space; /**< Amount of free space in the file */
     } free;
     struct {
-        unsigned     version;   /**< Version # of shared object header info */
+        unsigned     version;   /**< Version number of shared object header info */
         hsize_t      hdr_size;  /**< Shared object header message header size */
         H5_ih_info_t msgs_info; /**< Shared object header message index & heap size */
     } sohm;

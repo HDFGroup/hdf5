@@ -293,7 +293,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_SIGNATURE     "\211HDF\r\n\032\n"
 #define H5F_SIGNATURE_LEN 8
 
-/* Version #'s of the major components of the file format */
+/* Version number's of the major components of the file format */
 #define HDF5_SUPERBLOCK_VERSION_DEF 0 /* The default super block format      */
 #define HDF5_SUPERBLOCK_VERSION_1   1 /* Version with non-default B-tree 'K' value */
 #define HDF5_SUPERBLOCK_VERSION_2   2 /* Revised version with superblock extension and checksum */
