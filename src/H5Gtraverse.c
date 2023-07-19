@@ -813,7 +813,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Go perform "real" traversal */
     if (H5G__traverse_real(loc, name, target, op, op_data) < 0)
-        HGOTO_ERROR_TAG(H5E_SYM, H5E_NOTFOUND, FAIL, "internal path traversal failed")
+        HGOTO_ERROR_TAG(H5E_SYM, H5E_NOTFOUND, FAIL, "internal path traversal failed");
 
     /* Reset tag after traversal */
     H5_END_TAG

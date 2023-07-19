@@ -2473,7 +2473,7 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
 
     /* Insert attribute into dense storage */
     if (H5A__dense_insert(udata->file, udata->ainfo, attr_dst) < 0)
-        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage");
 
     /* Reset metadata tag */
     H5_END_TAG

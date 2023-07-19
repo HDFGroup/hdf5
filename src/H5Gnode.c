@@ -1253,7 +1253,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
         /* (Don't increment the link count - that's already done above for hard links) */
         if (H5G__stab_insert_real(udata->dst_file, udata->dst_stab, name, &lnk, obj_type,
                                   (obj_type == H5O_TYPE_GROUP ? &gcrt_info : NULL)) < 0)
-            HGOTO_ERROR_TAG(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name")
+            HGOTO_ERROR_TAG(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name");
 
         /* Reset metadata tag */
         H5_END_TAG
