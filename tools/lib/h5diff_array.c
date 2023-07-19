@@ -83,7 +83,7 @@
 static hbool_t not_comparable;
 
 #define PER(A, B)                                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         per            = -1;                                                                                 \
         not_comparable = FALSE;                                                                              \
         both_zero      = FALSE;                                                                              \
@@ -93,7 +93,7 @@ static hbool_t not_comparable;
             per = (double)ABS((double)((B) - (A)) / (double)(A));                                            \
         else                                                                                                 \
             not_comparable = TRUE;                                                                           \
-    }
+    } while(0)
 
 #define PER_UNSIGN(TYPE, A, B)                                                                               \
     do {                                                                                                     \
