@@ -4138,7 +4138,7 @@ main(int argc, char **argv)
     int provided = 0;
 #endif
     int mpi_size;
-    int mpi_rank;
+    int mpi_rank = 0;
 
 #ifdef H5_HAVE_SUBFILING_VFD
     if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
