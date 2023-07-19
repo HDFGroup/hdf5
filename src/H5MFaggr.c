@@ -534,7 +534,7 @@ done:
                     *shrink = H5MF_SHRINK_AGGR_ABSORB_SECT;
 
                 /* Indicate success */
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
             } /* end if */
         }     /* end if */
 

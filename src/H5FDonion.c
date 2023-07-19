@@ -911,6 +911,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     const H5FD_onion_fapl_info_t *fa                    = NULL;
     H5FD_onion_fapl_info_t       *new_fa                = NULL;
     const char                   *config_str            = NULL;
+    double                        log2_page_size        = 0.0;
     hid_t                         backing_fapl_id       = H5I_INVALID_HID;
     char                         *name_onion            = NULL;
     char                         *recovery_file_nameery = NULL;
@@ -994,7 +995,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "page size is not a power of two")
 
     /* Assign the page size */
-    double log2_page_size                               = HDlog2((double)(fa->page_size));
+    log2_page_size                                      = HDlog2((double)(fa->page_size));
     file->curr_rev_record.archival_index.page_size_log2 = (uint32_t)log2_page_size;
 
     /* Proceed with open. */

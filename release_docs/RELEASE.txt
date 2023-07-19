@@ -842,5 +842,5 @@ The issues with the gif tool are:
     HDFFV-11048 CVE-2020-10809
 These CVE issues have not yet been addressed and are avoided by not building
 the gif tool by default. Enable building the High-Level tools with these options:
-    autotools:   --enable-hltools
-    cmake:       HDF5_BUILD_HL_TOOLS=ON
+    autotools:   --enable-hlgiftools
+    cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON

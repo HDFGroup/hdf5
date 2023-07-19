@@ -1613,7 +1613,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
     /* Check for different number of elements selected */
     if (H5S_GET_SELECT_NPOINTS(space1) != H5S_GET_SELECT_NPOINTS(space2))
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check special cases if both dataspaces aren't scalar */
     /* (If only one is, the number of selected points check is sufficient) */
@@ -1683,7 +1683,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
                 /* Verify that the ranges are the same */
                 if ((high_a[space_a_dim] - low_a[space_a_dim]) != (high_b[space_b_dim] - low_b[space_b_dim]))
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
 
                 /* Go to next dimension */
                 space_a_dim--;
@@ -1697,7 +1697,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
                 /* This range should be flat to be the same in a lower dimension */
                 if (low_a[space_a_dim] != high_a[space_a_dim])
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
 
                 space_a_dim--;
             } /* end while */
@@ -1708,7 +1708,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                  * the same, then the selections are the same, even if the
                  * selection types are different.
                  */
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
             } /* end if */
         }     /* end if */
 
@@ -1767,7 +1767,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                     while (space_b_dim >= 0) {
                         if ((end_a[space_a_dim] - start_a[space_a_dim]) !=
                             (end_b[space_b_dim] - start_b[space_b_dim]))
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         /* Set the relative locations of the selections */
                         offset[space_a_dim] = (hssize_t)start_b[space_b_dim] - (hssize_t)start_a[space_a_dim];
@@ -1781,7 +1781,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                      */
                     while (space_a_dim >= 0) {
                         if (start_a[space_a_dim] != end_a[space_a_dim])
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         space_a_dim--;
                     } /* end while */
@@ -1796,12 +1796,12 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                         /* Check if the blocks are in the same relative location */
                         if ((hsize_t)((hssize_t)start_a[space_a_dim] + offset[space_a_dim]) !=
                             start_b[space_b_dim])
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         /* If the block sizes from each selection doesn't match, get out */
                         if ((end_a[space_a_dim] - start_a[space_a_dim]) !=
                             (end_b[space_b_dim] - start_b[space_b_dim]))
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         space_a_dim--;
                         space_b_dim--;
@@ -1811,7 +1811,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                     while (space_a_dim >= 0) {
                         /* If the block size isn't 1, get out */
                         if (start_a[space_a_dim] != end_a[space_a_dim])
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         space_a_dim--;
                     } /* end while */
@@ -1828,7 +1828,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                 if ((status_a == FALSE) && (status_b == FALSE))
                     break;
                 else if (status_a != status_b)
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
                 else {
                     /* Advance to next block in selection iterators */
                     if (H5S_SELECT_ITER_NEXT_BLOCK(iter_a) < 0)
@@ -1946,7 +1946,7 @@ H5S_select_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
         for (u = 0; u < space->extent.rank; u++)
             /* If selection bounds & block don't overlap, can leave now */
             if (!H5S_RANGE_OVERLAP(low[u], high[u], start[u], end[u]))
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
     } /* end if */
 
     /* Call selection type's intersect routine */

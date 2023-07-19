@@ -171,13 +171,13 @@ H5O__dset_isa(const H5O_t *oh)
     if ((exists = H5O_msg_exists_oh(oh, H5O_DTYPE_ID)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
     else if (!exists)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Layout */
     if ((exists = H5O_msg_exists_oh(oh, H5O_SDSPACE_ID)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
     else if (!exists)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

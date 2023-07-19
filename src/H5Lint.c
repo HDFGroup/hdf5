@@ -261,7 +261,7 @@ H5L__find_class_idx(H5L_type_t id)
 
     for (i = 0; i < H5L_table_used_g; i++)
         if (H5L_table_g[i].id == id)
-            HGOTO_DONE((int)i)
+            HGOTO_DONE((int)i);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

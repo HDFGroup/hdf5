@@ -825,9 +825,9 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
 
     /* Check for different layout type */
     if (layout1->type < layout2->type)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (layout1->type > layout2->type)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     /* Compare non-dataset-specific fields in layout info */
     switch (layout1->type) {
@@ -840,16 +840,16 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
 
             /* Check the number of dimensions */
             if (layout1->u.chunk.ndims < layout2->u.chunk.ndims)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             if (layout1->u.chunk.ndims > layout2->u.chunk.ndims)
-                HGOTO_DONE(1)
+                HGOTO_DONE(1);
 
             /* Compare the chunk dims */
             for (u = 0; u < layout1->u.chunk.ndims - 1; u++) {
                 if (layout1->u.chunk.dim[u] < layout2->u.chunk.dim[u])
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (layout1->u.chunk.dim[u] > layout2->u.chunk.dim[u])
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
             } /* end for */
         }     /* end case */
         break;
@@ -861,9 +861,9 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
 
             /* Compare number of mappings */
             if (layout1->storage.u.virt.list_nused < layout2->storage.u.virt.list_nused)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             if (layout1->storage.u.virt.list_nused > layout2->storage.u.virt.list_nused)
-                HGOTO_DONE(1)
+                HGOTO_DONE(1);
 
             /* Iterate over mappings */
             for (u = 0; u < layout1->storage.u.virt.list_nused; u++) {
@@ -873,45 +873,45 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
                 if ((equal = H5S_extent_equal(layout1->storage.u.virt.list[u].source_dset.virtual_select,
                                               layout2->storage.u.virt.list[u].source_dset.virtual_select)) <
                     0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (!equal)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
                 if ((equal = H5S_SELECT_SHAPE_SAME(
                          layout1->storage.u.virt.list[u].source_dset.virtual_select,
                          layout2->storage.u.virt.list[u].source_dset.virtual_select)) < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (!equal)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
 
                 /* Compare source file names */
                 strcmp_ret = HDstrcmp(layout1->storage.u.virt.list[u].source_file_name,
                                       layout2->storage.u.virt.list[u].source_file_name);
                 if (strcmp_ret < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (strcmp_ret > 0)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
 
                 /* Compare source dataset names */
                 strcmp_ret = HDstrcmp(layout1->storage.u.virt.list[u].source_dset_name,
                                       layout2->storage.u.virt.list[u].source_dset_name);
                 if (strcmp_ret < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (strcmp_ret > 0)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
 
                 /* Compare source spaces.  Note we cannot tell which is
                  * "greater", so just return 1 if different, -1 on failure.
                  */
                 if ((equal = H5S_extent_equal(layout1->storage.u.virt.list[u].source_select,
                                               layout2->storage.u.virt.list[u].source_select)) < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (!equal)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
                 if ((equal = H5S_SELECT_SHAPE_SAME(layout1->storage.u.virt.list[u].source_select,
                                                    layout2->storage.u.virt.list[u].source_select)) < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (!equal)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
             } /* end for */
         }     /* end block */
         break;

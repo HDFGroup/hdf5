@@ -705,7 +705,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
          */
         if (NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type) ||
             (bypass_pb && H5FD_MEM_DRAW == type))
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Update statistics */
@@ -1003,13 +1003,13 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
          */
         if (NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type) ||
             (bypass_pb && H5FD_MEM_DRAW == type))
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
 
 #ifdef H5_HAVE_PARALLEL
         if (bypass_pb) {
             if (H5PB_update_entry(page_buf, addr, size, buf) > 0)
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTUPDATE, FAIL, "failed to update PB with metadata cache")
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
 #endif
     } /* end if */
@@ -1424,7 +1424,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
            metadata, then we can't make space for raw data */
         if (0 == page_buf->raw_count && page_buf->min_meta_count == page_buf->meta_count) {
             assert(page_buf->meta_count * page_buf->page_size == page_buf->max_size);
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         } /* end if */
 
         /* check the metadata threshold before evicting metadata items */
@@ -1441,7 +1441,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
            raw data, then we can't make space for meta data */
         if (0 == page_buf->meta_count && page_buf->min_raw_count == page_buf->raw_count) {
             assert(page_buf->raw_count * page_buf->page_size == page_buf->max_size);
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         } /* end if */
 
         /* check the raw data threshold before evicting raw data items */

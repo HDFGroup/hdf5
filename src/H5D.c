@@ -1127,7 +1127,7 @@ H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spac
     H5TRACE7("e", "z*i*i*i*iix", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
     if (count == 0)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Read the data */
     if (H5D__read_api_common(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, NULL,
@@ -1438,7 +1438,7 @@ H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spa
     H5TRACE7("e", "z*i*i*i*ii**x", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
     if (count == 0)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Write the data */
     if (H5D__write_api_common(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, NULL,
@@ -2264,7 +2264,7 @@ H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_n
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get storage size of chunk")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* H5Dget_chunk_storage_size() */
 
 /*-------------------------------------------------------------------------
@@ -2313,7 +2313,7 @@ H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks /*out*/)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of chunks")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* H5Dget_num_chunks() */
 
 /*-------------------------------------------------------------------------
@@ -2384,7 +2384,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by index")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* H5Dget_chunk_info() */
 
 /*-------------------------------------------------------------------------

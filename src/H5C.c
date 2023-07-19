@@ -404,7 +404,7 @@ H5C_prep_for_file_close(H5F_t *f)
 
     /* It is possible to receive the close warning more than once */
     if (cache_ptr->close_warning_received)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     cache_ptr->close_warning_received = TRUE;
 
     /* Make certain there aren't any protected entries */
@@ -1124,7 +1124,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
                 node_ptr = H5SL_first(cache_ptr->slist_ptr);
                 while (node_ptr != NULL) {
                     entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
+                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL);
                     node_ptr = H5SL_first(cache_ptr->slist_ptr);
                 }
             }

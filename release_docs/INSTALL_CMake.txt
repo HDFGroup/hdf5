@@ -779,7 +779,6 @@ HDF5_BUILD_FORTRAN      "Build FORTRAN support"           OFF
 HDF5_BUILD_JAVA         "Build JAVA support"              OFF
 HDF5_BUILD_HL_LIB       "Build HIGH Level HDF5 Library"   ON
 HDF5_BUILD_TOOLS        "Build HDF5 Tools"                ON
-HDF5_BUILD_HL_TOOLS     "Build HIGH Level HDF5 Tools"     ON
 HDF5_BUILD_HL_GIF_TOOLS "Build HIGH Level HDF5 GIF Tools" OFF
 
 ---------------- HDF5 Folder Build Options ---------------------
@@ -832,7 +831,7 @@ HDF5_BUILD_FRAMEWORKS          "TRUE to build as frameworks libraries,
                                 FALSE to build according to BUILD_SHARED_LIBS"                   FALSE
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                              OFF
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                    OFF
-DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114)"                 "v114"
+DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114, v116)"           "v116"
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                     ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"          ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON

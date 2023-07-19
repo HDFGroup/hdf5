@@ -450,12 +450,12 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     } /* end if */
     else {
         /* Shrinking can't occur if the 'eoa_shrink_only' flag is set and we're not shrinking the EOA */
         if (udata->allow_eoa_shrink_only)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
         /* Check if this section is allowed to merge with metadata aggregation block */
         if (udata->f->shared->fs_aggr_merge[udata->alloc_type] & H5F_FS_MERGE_METADATA) {
@@ -474,7 +474,7 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
             } /* end if */
         }     /* end if */
 
@@ -496,7 +496,7 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
             } /* end if */
         }     /* end if */
     }         /* end else */
@@ -858,7 +858,7 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     } /* end if */
 
 done:

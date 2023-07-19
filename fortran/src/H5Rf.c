@@ -50,13 +50,13 @@ h5rcreate_region_c(int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Rcreate function.
      */
     if (H5Rcreate(&ref_c, (hid_t)*loc_id, c_name, H5R_DATASET_REGION, (hid_t)*space_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Copy the reference created */
     memcpy(ref, &ref_c, H5R_DSET_REG_REF_BUF_SIZE);
@@ -170,7 +170,7 @@ h5rget_region_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
      * Call H5Rget_region function.
      */
     if ((c_space_id = H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, &ref_c)) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Copy the dataspace ID */
     *space_id = (hid_t_f)c_space_id;
@@ -204,7 +204,7 @@ h5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
      * Call H5Rget_region function.
      */
     if ((c_space_id = H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, ref)) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Copy the dataspace ID */
     *space_id = (hid_t_f)c_space_id;
@@ -240,7 +240,7 @@ h5rget_object_type_obj_c(hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
      * Call H5Rget_object_type function.
      */
     if (H5Rget_obj_type2((hid_t)*dset_id, H5R_OBJECT, &ref_c, &c_obj_type) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Copy the object type */
     *obj_type = (int_f)c_obj_type;

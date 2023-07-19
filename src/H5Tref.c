@@ -170,7 +170,7 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
     /* Only change the location if it's different */
     if (loc == dt->shared->u.atomic.u.r.loc && file == dt->shared->u.atomic.u.r.file)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     switch (loc) {
         case H5T_LOC_MEMORY: /* Memory based reference datatype */
@@ -1004,8 +1004,10 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     src_size -= H5R_ENCODE_HEADER_SIZE;
 
 #ifndef NDEBUG
-    size_t buf_size_left = dst_size - sizeof(uint32_t);
-    assert(buf_size_left > sizeof(uint32_t));
+    {
+        size_t buf_size_left = dst_size - sizeof(uint32_t);
+        assert(buf_size_left > sizeof(uint32_t));
+    }
 #endif
 
     /* Set the size */

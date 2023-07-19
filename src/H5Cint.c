@@ -111,7 +111,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
      */
     if (cache_ptr->resize_in_progress) {
         reentrant_call = TRUE;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     cache_ptr->resize_in_progress = TRUE;
@@ -593,7 +593,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitte
                     restart_scan = FALSE;
                     entry_ptr    = cache_ptr->LRU_tail_ptr;
 
-                    H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr)
+                    H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr);
                 } /* end else-if */
                 else
                     entry_ptr = prev_ptr;
@@ -1357,7 +1357,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                          */
                         restart_slist_scan       = TRUE;
                         cache_ptr->slist_changed = FALSE;
-                        H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr)
+                        H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr);
                     } /* end if */
                 }     /* end else */
             }         /* end if */
@@ -1474,7 +1474,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                         cache_ptr->entries_inserted_counter  = 0;
                         cache_ptr->entries_relocated_counter = 0;
 
-                        H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr)
+                        H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr);
                     } /* end if */
                     else
                         cache_ptr->entry_watched_for_removal = NULL;
@@ -1509,7 +1509,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         if ((cur_ring_pel_len > 0) && (cur_ring_pel_len >= old_ring_pel_len)) {
             /* Don't error if allowed to have pinned entries remaining */
             if (evict_flags)
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
 
             HGOTO_ERROR(
                 H5E_CACHE, H5E_CANTFLUSH, FAIL,
@@ -1767,7 +1767,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                          */
                         restart_slist_scan       = TRUE;
                         cache_ptr->slist_changed = FALSE;
-                        H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr)
+                        H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr);
                     } /* end if */
 
                     flushed_entries_last_pass = TRUE;
@@ -1982,7 +1982,7 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
                      */
                     restart_scan = FALSE;
                     entry_ptr    = cache_ptr->LRU_tail_ptr;
-                    H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr)
+                    H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr);
                 }
                 else
                     entry_ptr = prev_ptr;

@@ -48,29 +48,6 @@
 #define H5D_MULTI_CHUNK_IO             1
 #define H5D_ONE_LINK_CHUNK_IO_MORE_OPT 2
 #define H5D_MULTI_CHUNK_IO_MORE_OPT    3
-#define H5D_NO_IO                      4
-
-/***** Macros for One linked collective IO case. *****/
-/* The default value to do one linked collective IO for all chunks.
- * If the average number of chunks per process is greater than this
- * value, the library will create an MPI derived datatype to link all
- * chunks to do collective IO.  The user can set this value through an
- * API.
- */
-
-/* Macros to represent options on how to obtain chunk address for one linked-chunk IO case */
-#define H5D_OBTAIN_ONE_CHUNK_ADDR_IND 0
-#define H5D_OBTAIN_ALL_CHUNK_ADDR_COL 2
-
-/* Macros to define the default ratio of obtaining all chunk addresses for one linked-chunk IO case */
-#define H5D_ALL_CHUNK_ADDR_THRES_COL     30
-#define H5D_ALL_CHUNK_ADDR_THRES_COL_NUM 10000
-
-/***** Macros for multi-chunk collective IO case. *****/
-/* The default value of the threshold to do collective IO for this
- *  chunk.  If the average number of processes per chunk is greater
- *  than the default value, collective IO is done for this chunk.
- */
 
 /* Macros to represent different IO modes(NONE, Independent or collective)for multiple chunk IO case */
 #define H5D_CHUNK_IO_MODE_COL 1
@@ -2878,7 +2855,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
         for (ic = 0; ic < total_chunks; ic++)
             assign_io_mode[ic] = H5D_CHUNK_IO_MODE_COL;
 
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     threshold_nproc_per_chunk = (unsigned)mpi_size * percent_nproc_per_chunk / 100;
@@ -2903,7 +2880,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
     } /* end while */
 
     /* Gather all the information */
-    H5_CHECK_OVERFLOW(total_chunks, size_t, int)
+    H5_CHECK_OVERFLOW(total_chunks, size_t, int);
     if (MPI_SUCCESS != (mpi_code = MPI_Gather(io_mode_info, (int)total_chunks, MPI_BYTE, recv_io_mode_info,
                                               (int)total_chunks, MPI_BYTE, root, comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
@@ -3865,7 +3842,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
              * future, this may become a problem and derived datatypes
              * will need to be used.
              */
-            H5_CHECK_OVERFLOW(mod_data_size, size_t, int)
+            H5_CHECK_OVERFLOW(mod_data_size, size_t, int);
 
             /* Send modification data to new owner */
             if (MPI_SUCCESS !=
@@ -3905,8 +3882,8 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                     "too many shared chunks in parallel filtered write operation")
 
-    H5_CHECK_OVERFLOW(num_send_requests, size_t, int)
-    H5_CHECK_OVERFLOW(num_msgs_incoming, size_t, int)
+    H5_CHECK_OVERFLOW(num_send_requests, size_t, int);
+    H5_CHECK_OVERFLOW(num_msgs_incoming, size_t, int);
 
     /*
      * Allocate receive buffer and MPI_Request arrays for non-blocking
@@ -3942,7 +3919,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&status, MPI_BYTE, &msg_size)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements_x failed", mpi_code)
 
-            H5_CHECK_OVERFLOW(msg_size, MPI_Count, int)
+            H5_CHECK_OVERFLOW(msg_size, MPI_Count, int);
 #else
             int msg_size = 0;
 
@@ -4185,7 +4162,7 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
      */
     if (num_chunks == 0) {
         if (mpi_size == 1)
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         else {
             if (io_info->op_type == H5D_IO_OP_WRITE)
                 coll_io_info.base_maddr.cvp = &fake_buf;

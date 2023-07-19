@@ -261,7 +261,7 @@ H5G__compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, vo
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get object type")
 
         /* Stop the iteration, we found the correct link */
-        HGOTO_DONE(H5_ITER_STOP)
+        HGOTO_DONE(H5_ITER_STOP);
     } /* end if */
 
 done:
@@ -423,7 +423,7 @@ H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_ud
         *udata->found = TRUE;
 
         /* Stop iteration now */
-        HGOTO_DONE(H5_ITER_STOP)
+        HGOTO_DONE(H5_ITER_STOP);
     } /* end if */
 
 done:

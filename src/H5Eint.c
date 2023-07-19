@@ -198,7 +198,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 
     /* Check for bad pointer(s), but can't issue error, just leave */
     if (!maj_ptr || !min_ptr)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     if (maj_ptr->msg)
         maj_str = maj_ptr->msg;
@@ -317,7 +317,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 
     /* Check for bad pointer(s), but can't issue error, just leave */
     if (!maj_ptr || !min_ptr)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     if (maj_ptr->msg)
         maj_str = maj_ptr->msg;
@@ -330,7 +330,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 
     /* Check for bad pointer(s), but can't issue error, just leave */
     if (!cls_ptr)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Print error class header if new class */
     if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
@@ -652,11 +652,11 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if (HDvasprintf(&tmp, fmt, ap) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Push the error on the stack */
     if (H5E__push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (va_started)
@@ -711,7 +711,7 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
     if (estack == NULL)
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
                                                        non-threaded case */
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
 
     /*
      * Don't fail if arguments are bad.  Instead, substitute some default
@@ -732,13 +732,13 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
     if (estack->nused < H5E_NSLOTS) {
         /* Increment the IDs to indicate that they are used in this stack */
         if (H5I_inc_ref(cls_id, FALSE) < 0)
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
         estack->slot[estack->nused].cls_id = cls_id;
         if (H5I_inc_ref(maj_id, FALSE) < 0)
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
         estack->slot[estack->nused].maj_num = maj_id;
         if (H5I_inc_ref(min_id, FALSE) < 0)
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
         estack->slot[estack->nused].min_num = min_id;
         /* The 'func' & 'file' strings are statically allocated (by the compiler)
          * there's no need to duplicate them.
@@ -747,7 +747,7 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
         estack->slot[estack->nused].file_name = file;
         estack->slot[estack->nused].line      = line;
         if (NULL == (estack->slot[estack->nused].desc = H5MM_xstrdup(desc)))
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
         estack->nused++;
     } /* end if */
 

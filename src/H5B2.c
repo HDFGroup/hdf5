@@ -455,7 +455,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
     /* Check for empty tree */
     if (curr_node_ptr.node_nrec == 0) {
         *found = FALSE;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 
     /* Check record against min & max records in tree, to attempt to quickly
@@ -466,14 +466,14 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         if (cmp < 0) {
             *found = FALSE; /* Less than the least record--not found */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
         else if (cmp == 0) { /* Record is found */
             if (op && (op)(hdr->min_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
                             "'found' callback failed for B-tree find operation")
             *found = TRUE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
     }     /* end if */
     if (hdr->max_native_rec != NULL) {
@@ -481,14 +481,14 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         if (cmp > 0) {
             *found = FALSE; /* Greater than the largest record--not found */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
         else if (cmp == 0) { /* Record is found */
             if (op && (op)(hdr->max_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
                             "'found' callback failed for B-tree find operation")
             *found = TRUE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
     }     /* end if */
 
@@ -580,7 +580,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
 
             /* Indicate record found */
             *found = TRUE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end else */
 
         /* Decrement depth we're at in B-tree */
@@ -616,7 +616,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
 
             /* Record not found */
             *found = FALSE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
         else {
             /* Make callback for current record */
@@ -1280,7 +1280,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
              *       since many times the B-tree is searched in order to determine
              *       if an object exists in the B-tree or not.
              */
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
         }
         else {
             /* Make callback for current record */
