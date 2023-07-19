@@ -141,11 +141,11 @@ static struct dispatch_t {
 } dispatch_g[H5O_TYPE_NTYPES];
 
 #define DISPATCH(TYPE, NAME, LIST1, LIST2)                                                                   \
-    {                                                                                                        \
+    do {                                                                                                     \
         dispatch_g[TYPE].name  = (NAME);                                                                     \
         dispatch_g[TYPE].list1 = (LIST1);                                                                    \
         dispatch_g[TYPE].list2 = (LIST2);                                                                    \
-    }
+    } while(0)
 
 static void    print_type(h5tools_str_t *buffer, hid_t type, int ind);
 static hbool_t print_int_type(h5tools_str_t *buffer, hid_t type, int ind);
