@@ -50,7 +50,7 @@
     } while (0)
 
 #define CHECK_I(ret, where)                                                                                  \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %ld\n", (where), (int)__LINE__,  \
                        __FILE__, (long)(ret));                                                               \
@@ -60,7 +60,7 @@
                           (int)__LINE__, __FILE__);                                                          \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    }
+    } while (0)
 
 /* Check that a pointer is valid (i.e.: not NULL) */
 #define CHECK_PTR(ret, where)                                                                                \
