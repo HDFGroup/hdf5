@@ -427,7 +427,7 @@
  * INTEL
  *       </td>
  *       <td span='3'>
- * All Intel and compatible CPU's.
+ * All Intel and compatible CPUs.
  * These are little-endian systems with IEEE floating-point.
  *       </td>
  *     </tr>
@@ -436,7 +436,7 @@
  * MIPS
  *       </td>
  *       <td span='3'>
- * All MIPS CPU's commonly used in SGI systems. These are big-endian
+ * All MIPS CPUs commonly used in SGI systems. These are big-endian
  * systems with IEEE floating-point.
  *       </td>
  *     </tr>
@@ -445,7 +445,7 @@
  * ALPHA
  *       </td>
  *       <td span='3'>
- * All DEC Alpha CPU's, little-endian systems with IEEE floating-point.
+ * All DEC Alpha CPUs, little-endian systems with IEEE floating-point.
  *       </td>
  *     </tr>
  *   </table>
