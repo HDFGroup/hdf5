@@ -3660,7 +3660,7 @@ test_bug_optimized_bufs(const char *filename, hid_t fapl)
 /*
  * The bug is exposed when running testpar/t_pread.c.
  *
- * The file is created with userblock.  Before pasing down to the mpio driver for
+ * The file is created with userblock.  Before passing down to the mpio driver for
  * selection I/O, the parameter offsets[] is added by base_addr (size of the uesrblock).
  * For the independent case in the mpio driver for selection I/O,
  * the intermediate routine for the API H5FDread/write_vector_from_selection() is called.
