@@ -84,7 +84,6 @@ StatementMacros:
   - H5_GCC_DIAG_OFF
   - H5_GCC_DIAG_ON
   - H5_LEAVE
-  - HDONE_ERROR
   - HGOTO_DONE
   - HGOTO_ERROR
   - HMPI_DONE_ERROR

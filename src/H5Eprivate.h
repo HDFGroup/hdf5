@@ -55,10 +55,10 @@ do {                                                                            
  *      without jumping to any labels)
  */
 #define HDONE_ERROR(maj, min, ret_val, ...)                                                                  \
-    {                                                                                                        \
+    do {                                                                                                     \
         HCOMMON_ERROR(maj, min, __VA_ARGS__);                                                                \
         ret_value = ret_val;                                                                                 \
-    }
+    } while(0)
 
 /*
  * HGOTO_ERROR macro, used to facilitate error reporting between a
