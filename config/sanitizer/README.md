@@ -53,7 +53,7 @@ These obviously force the standard to be required, and also disables compiler-sp
 
 ## Sanitizer Builds [`sanitizers.cmake`](sanitizers.cmake)
 
-Sanitizers are tools that perform checks during a program's runtime and returns issues, and as such, along with unit testing, code coverage and static analysis, is another tool to add to the programmers toolbox. And of course, like the previous tools, are tragically simple to add into any project using CMake, allowing any project and developer to quickly and easily use.
+Sanitizers are tools that perform checks during a program's runtime and return issues, and as such, along with unit testing, code coverage and static analysis, are another tool to add to the programmer's toolbox. And, of course, like the previous tools, they are simple to add to any project using CMake, allowing any project and developer to quickly and easily use them.
 
 A quick rundown of the tools available, and what they do:
 - [LeakSanitizer](https://clang.llvm.org/docs/LeakSanitizer.html) detects memory leaks, or issues where memory is allocated and never deallocated, causing programs to slowly consume more and more memory, eventually leading to a crash.
