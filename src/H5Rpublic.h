@@ -647,10 +647,10 @@ H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *          that can be determined with three preliminary calls:
  *
  *          \li Call H5Dget_type() on the dataset containing the reference to
- *              get a datatype identifier for the dataset’s datatype.
+ *              get a datatype identifier for the dataset's datatype.
  *          \li Using that datatype identifier, H5Tget_class() returns a datatype
  *              class.\n If the datatype class is #H5T_REFERENCE, H5Tequal() can
- *              then be used to determine whether the reference’s datatype is
+ *              then be used to determine whether the reference's datatype is
  *              #H5T_STD_REF_OBJ or #H5T_STD_REF_DSETREG:
  *              - If the datatype is #H5T_STD_REF_OBJ, the reference object type
  *                is #H5R_OBJECT.
@@ -784,10 +784,10 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  *          that can be determined with three preliminary calls:
  *
  *          \li Call H5Dget_type() on the dataset containing the reference to
- *              get a datatype identifier for the dataset’s datatype.
+ *              get a datatype identifier for the dataset's datatype.
  *          \li Using that datatype identifier, H5Tget_class() returns a datatype
  *              class.\n If the datatype class is #H5T_REFERENCE, H5Tequal() can
- *              then be used to determine whether the reference’s datatype is
+ *              then be used to determine whether the reference's datatype is
  *              #H5T_STD_REF_OBJ or #H5T_STD_REF_DSETREG:
  *              - If the datatype is #H5T_STD_REF_OBJ, the reference object type
  *                is #H5R_OBJECT.
@@ -905,7 +905,7 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *          include the following:
  *          \snippet this H5R_type_t_snip
  *
- *          \p ref is the reference for which the target object’s name is
+ *          \p ref is the reference for which the target object's name is
  *          sought.
  *
  *          If \p ref is an object reference, \p name will be returned with a

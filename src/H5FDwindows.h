@@ -44,7 +44,7 @@ extern "C" {
  *          comes.
  *
  *          Only the Windows driver is tested on Windows systems; other drivers
- *          are used at the application’s and the user’s risk.
+ *          are used at the application's and the user's risk.
  *
  *          Furthermore, the Windows driver is tested and available only on
  *          Windows systems; it is not available on non-Windows systems.

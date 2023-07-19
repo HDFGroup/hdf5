@@ -957,7 +957,7 @@ H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
  * \file_id
  * \param[out] buf_ptr Pointer to the buffer into which the image of the
  *                     HDF5 file is to be copied. If \p buf_ptr is NULL,
- *                     no data will be copied but the function’s return value
+ *                     no data will be copied but the function's return value
  *                     will still indicate the buffer size required (or a
  *                     negative value on error).
  * \param[out] buf_len Size of the supplied buffer
@@ -974,7 +974,7 @@ H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
  *          file image. So if the file size is unknown, it can be safely
  *          determined with an initial H5Fget_file_image() call with buf_ptr
  *          set to NULL. The file image can then be retrieved with a second
- *          H5Fget_file_image() call with \p buf_len set to the initial call’s
+ *          H5Fget_file_image() call with \p buf_len set to the initial call's
  *          return value.
  *
  *          While the current file size can also be retrieved with
@@ -1320,7 +1320,7 @@ H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *i
  *              on a system that is not atomic.
  *          \li Turn off usage of the library's accumulator to avoid possible
  *              ordering problem on a system that is not atomic.
- *          \li Perform a flush of the file’s data buffers and metadata to set
+ *          \li Perform a flush of the file's data buffers and metadata to set
  *              a consistent state for starting SWMR write operations.
  *
  *          Library objects are groups, datasets, and committed datatypes. For
@@ -1390,7 +1390,7 @@ H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects
  * \return \herr_t
  *
  * \details H5Fclear_elink_file_cache() evicts all the cached child files in
- *          the specified file’s external file cache, causing them to be closed
+ *          the specified file's external file cache, causing them to be closed
  *          if there is nothing else holding them open.
  *
  *          H5Fclear_elink_file_cache() does not close the cache itself;

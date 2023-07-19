@@ -388,7 +388,7 @@
  *       </td>
  *       <td span='3'>
  * This is an architecture that contains semi-standard datatypes like signed
- * two’s complement integers, unsigned integers, and bitfields in various
+ * two's complement integers, unsigned integers, and bitfields in various
  * byte orders.
  *       </td>
  *     </tr>
@@ -427,7 +427,7 @@
  * INTEL
  *       </td>
  *       <td span='3'>
- * All Intel and compatible CPU’s.
+ * All Intel and compatible CPU's.
  * These are little-endian systems with IEEE floating-point.
  *       </td>
  *     </tr>
@@ -436,7 +436,7 @@
  * MIPS
  *       </td>
  *       <td span='3'>
- * All MIPS CPU’s commonly used in SGI systems. These are big-endian
+ * All MIPS CPU's commonly used in SGI systems. These are big-endian
  * systems with IEEE floating-point.
  *       </td>
  *     </tr>
@@ -445,7 +445,7 @@
  * ALPHA
  *       </td>
  *       <td span='3'>
- * All DEC Alpha CPU’s, little-endian systems with IEEE floating-point.
+ * All DEC Alpha CPU's, little-endian systems with IEEE floating-point.
  *       </td>
  *     </tr>
  *   </table>
@@ -569,7 +569,7 @@
  * #H5T_STD_I32LE
  *       </td>
  *       <td span='3'>
- * Four-byte, little-endian, signed two’s complement integer
+ * Four-byte, little-endian, signed two's complement integer
  *       </td>
  *     </tr>
  *     <tr>
@@ -1174,7 +1174,7 @@
  * \ref H5T_sign_t \ref H5Tget_sign (\ref hid_t type)
  *       </td>
  *       <td>
- * (INTEGER)Integer data can be signed two’s complement (#H5T_SGN_2) or unsigned (#H5T_SGN_NONE).
+ * (INTEGER)Integer data can be signed two's complement (#H5T_SGN_2) or unsigned (#H5T_SGN_NONE).
  *       </td>
  *     </tr>
  *     <tr>
@@ -1212,7 +1212,7 @@
  * mantissa after the radix point are stored. </li>
  * <li>#H5T_NORM_IMPLIED: the mantissa is shifted left \(if non-zero) until the first
  * bit after the radix point is set and the exponent is adjusted accordingly. The first
- * bit after the radix point is not stored since it’s always set. </li>
+ * bit after the radix point is not stored since it's always set. </li>
  * <li>#H5T_NORM_NONE: the fractional part of the mantissa is stored without normalizing it.</li></ul>
  *       </td>
  *     </tr>
@@ -1565,7 +1565,7 @@
  *  \ref herr_t  \ref H5Tset_sign (\ref hid_t type, \ref H5T_sign_t sign)
  *       </td>
  *       <td>
- * (INTEGER)Integer data can be signed two’s complement (#H5T_SGN_2) or unsigned (#H5T_SGN_NONE).
+ * (INTEGER)Integer data can be signed two's complement (#H5T_SGN_2) or unsigned (#H5T_SGN_NONE).
  *       </td>
  *     </tr>
  *     <tr>
@@ -1909,7 +1909,7 @@ filled according to the value of this property. The padding can be:
  * Usually a C struct or Fortran derived type will be defined to hold a data point in memory, and the
  * offsets of the members in memory will be the offsets of the struct members from the beginning
  * of an instance of the struct. The HDF5 C library provides a macro #HOFFSET (s,m)to calculate
- * the member’s offset. The HDF5 Fortran applications have to calculate offsets by using sizes of
+ * the member's offset. The HDF5 Fortran applications have to calculate offsets by using sizes of
  * members datatypes and by taking in consideration the order of members in the Fortran derived type.
  * \code
  * HOFFSET(s,m)
@@ -2378,7 +2378,7 @@ filled according to the value of this property. The padding can be:
  *
  * Reading datasets with compound datatypes may be a challenge. For general applications there is
  * no way to know a priori the corresponding C structure. Also, C structures cannot be allocated on
- * the fly during discovery of the dataset’s datatype. For general C, C++, Fortran and Java
+ * the fly during discovery of the dataset's datatype. For general C, C++, Fortran and Java
  * application the following steps will be required to read and to interpret data from the dataset with
  * compound datatype:
  * \li 1. Get the identifier of the compound datatype in the file with the #H5Dget_type call
@@ -2492,7 +2492,7 @@ filled according to the value of this property. The padding can be:
  *
  * The example below shows how to read float and double members of a compound datatype into a
  * structure that has those fields in a different order. Please notice that #H5Tinsert calls can be used
- * in an order different from the order of the structure’s members.
+ * in an order different from the order of the structure's members.
  *
  * <em>Read float and double members of a compound datatype</em>
  * \code

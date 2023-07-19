@@ -54,7 +54,7 @@ H5_DLL hid_t H5FD_direct_init(void);
  *          cached by the system.
  *
  *          File systems usually require the data address in memory, the file
- *          address, and the size of the data to be aligned. The HDF5 library’s
+ *          address, and the size of the data to be aligned. The HDF5 library's
  *          direct I/O driver is able to handle unaligned data, though that will
  *          consume some additional memory resources and may slow
  *          performance. To get better performance, use the system function \p
@@ -67,7 +67,7 @@ H5_DLL hid_t H5FD_direct_init(void);
  *          \p alignment specifies the required alignment boundary in memory.
  *
  *          \p block_size specifies the file system block size. A value of 0
- *          (zero) means to use HDF5 library’s default value of 4KB.
+ *          (zero) means to use HDF5 library's default value of 4KB.
  *
  *          \p cbuf_size specifies the copy buffer size.
  *

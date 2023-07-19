@@ -154,9 +154,9 @@ H5_DLL herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t
  *          the conversion function.
  *
  *          If a user is trying to remove a conversion function he registered,
- *          all parameters can be used. If he is trying to remove a library’s
+ *          all parameters can be used. If he is trying to remove a library's
  *          default conversion function, there is no guarantee the \p name and
- *          \p func parameters will match the user’s chosen values. Passing in
+ *          \p func parameters will match the user's chosen values. Passing in
  *          some values may cause this function to fail. A good practice is to
  *          pass in NULL as their values.
  *
@@ -194,17 +194,17 @@ H5_DLL H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
 /**
  * \ingroup CONV
  *
- * \brief Check whether the library’s default conversion is hard conversion
+ * \brief Check whether the library's default conversion is hard conversion
  *
  * \type_id{src_id} of source datatype
  * \type_id{dst_id} of destination datatype
  *
  * \return \htri_t
  *
- * \details H5Tcompiler_conv() determines whether the library’s conversion
+ * \details H5Tcompiler_conv() determines whether the library's conversion
  *          function from type \p src_id to type \p dst_id is a compiler (hard)
- *          conversion or not. A compiler conversion uses compiler’s casting; a
- *          library (soft) conversion uses the library’s own conversion
+ *          conversion or not. A compiler conversion uses compiler's casting; a
+ *          library (soft) conversion uses the library's own conversion
  *          function.
  *
  * \since 1.8.0
