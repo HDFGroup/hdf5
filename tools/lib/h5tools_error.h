@@ -222,11 +222,11 @@ catch_except:;                                                                  
  * it.
  */
 #define H5_LEAVE(v)                                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         ret_value = v;                                                                                       \
         if (!past_catch)                                                                                     \
             goto catch_except;                                                                               \
-    }
+    } while(0)
 
 /*
  * H5TOOLS_THROW macro, used to facilitate error reporting within a function body.
@@ -238,7 +238,7 @@ catch_except:;                                                                  
     do {                                                                                                     \
         H5TOOLS_PUSH_ERROR(H5tools_ERR_STACK_g, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g,          \
                            __VA_ARGS__);                                                                     \
-        H5_LEAVE(ret_val)                                                                                    \
+        H5_LEAVE(ret_val);                                                                                   \
     } while (0)
 
 #endif /* H5TOOLS_ERROR_H */
