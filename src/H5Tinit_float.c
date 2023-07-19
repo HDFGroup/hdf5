@@ -228,7 +228,7 @@ H5T__byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_ma
             HGOTO_DONE(i);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -276,7 +276,7 @@ H5T__bit_cmp(unsigned nbytes, int *perm, void *_a, void *_b, const unsigned char
     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "didn't find a value for `first`")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -332,7 +332,7 @@ H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -422,7 +422,7 @@ H5T__find_bias(unsigned epos, unsigned esize, int *perm, void *_a)
         epos += nbits;
     }
 
-    FUNC_LEAVE_NOAPI(bias);
+    FUNC_LEAVE_NOAPI(bias)
 }
 
 /*-------------------------------------------------------------------------
@@ -568,5 +568,5 @@ done:
         }
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__init_native_float_types() */
