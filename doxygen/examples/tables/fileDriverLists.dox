@@ -94,8 +94,8 @@ version of the file can be written back to disk or abandoned.</td>
 <tr>
 <td>Family</td>
 <td>#H5FD_FAMILY</td>
-<td>With this driver, the HDF5 file’s address space is partitioned into pieces and sent to
-separate storage files using an underlying driver of the user’s choice. This driver is for
+<td>With this driver, the HDF5 file's address space is partitioned into pieces and sent to
+separate storage files using an underlying driver of the user's choice. This driver is for
 systems that do not support files larger than 2 gigabytes.</td>
 <td>#H5Pset_fapl_family</td>
 </tr>
