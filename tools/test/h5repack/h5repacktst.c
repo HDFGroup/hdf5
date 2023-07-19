@@ -17,10 +17,10 @@
 #include "h5tools_utils.h"
 
 #define GOERROR                                                                                              \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         goto error;                                                                                          \
-    }
+    } while(0)
 
 /* fill value test */
 #define FNAME0    "h5repack_fill.h5"
