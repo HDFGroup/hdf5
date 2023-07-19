@@ -58,7 +58,7 @@
  *-------------------------------------------------------------------------
  */
 #define DETECT_F(TYPE, VAR, INFO)                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         TYPE          _v1, _v2, _v3;                                                                         \
         unsigned char _buf1[sizeof(TYPE)], _buf3[sizeof(TYPE)];                                              \
         unsigned char _pad_mask[sizeof(TYPE)];                                                               \
@@ -138,7 +138,7 @@
         INFO.ebias = H5T__find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                 \
         H5T__set_precision(&(INFO));                                                                         \
         COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                               \
-    }
+    } while(0)
 
 /* Detect alignment for C structure */
 #define COMP_ALIGNMENT(TYPE, COMP_ALIGN)                                                                     \
