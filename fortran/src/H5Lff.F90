@@ -830,8 +830,8 @@ CONTAINS
 !! \param link_loc_id File or group identifier.
 !! \param link_name   Name of the link for which information is being sought.
 !!                     NOTE: In C these are contained in the structure H5L_info_t
-!! \param cset         Indicates the character set used for link’s name.
-!! \param corder       Specifies the link’s creation order position.
+!! \param cset         Indicates the character set used for link&apos;s name.
+!! \param corder       Specifies the link&apos;s creation order position.
 !! \param f_corder_valid Indicates whether the value in corder is valid.
 !! \param link_type    Specifies the link class:
 !!                     \li H5L_TYPE_HARD_F     - Hard link
@@ -926,7 +926,7 @@ CONTAINS
 !!                       \li H5L_TYPE_ERROR _F    - Error
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute.
 !! \param corder         Is a positive integer containing the creation order of the attribute.
-!! \param cset           Indicates the character set used for the attribute’s name.
+!! \param cset           Indicates the character set used for the attribute&apos;s name.
 !! \param token          If the link is a hard link, token specifies the object token that the link points to.
 !! \param val_size       If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                       the length of the name of the pointed-to object with a null terminator.

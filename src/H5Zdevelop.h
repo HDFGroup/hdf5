@@ -218,10 +218,10 @@ extern "C" {
  *          used instead of the literal values.
  *
  *          \c encoder_present is a library-defined value indicating whether
- *          the filter’s encoding capability is available to the application.
+ *          the filter's encoding capability is available to the application.
  *
  *          \c decoder_present is a library-defined value indicating whether
- *          the filter’s encoding capability is available to the application.
+ *          the filter's encoding capability is available to the application.
  *
  *          \c name is a descriptive comment used for debugging, may contain a
  *          descriptive name for the filter, and may be the null pointer.

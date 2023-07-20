@@ -150,8 +150,8 @@ done:
  * OUTPUTS
  *
  *
- *  cset - indicates the character set used for link’s name.
- *  corder - specifies the link’s creation order position.
+ *  cset - indicates the character set used for link's name.
+ *  corder - specifies the link's creation order position.
  *  corder_valid - indicates whether the value in corder is valid.
  *  link_type -  specifies the link class:
  *     	                H5L_LINK_HARD_F      - Hard link
@@ -221,7 +221,7 @@ done:
  *
  *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
- *  cset - Indicates the character set used for the attribute’s name
+ *  cset - Indicates the character set used for the attribute's name
  *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
