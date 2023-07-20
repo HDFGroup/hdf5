@@ -5775,7 +5775,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!                      unlimited selection.
 !! \param src_file_name The name of the HDF5 file where the source dataset is located.
 !! \param src_dset_name The path to the HDF5 dataset in the file specified by src_file_name.
-!! \param src_space_id  The source dataset’s dataspace identifier with a selection applied, possibly an unlimited selection.
+!! \param src_space_id  The source dataset&apos;s dataspace identifier with a selection applied, possibly an unlimited selection.
 !! \param hdferr        \fortran_error
 !!
 !! See C API: @ref H5Pset_virtual()

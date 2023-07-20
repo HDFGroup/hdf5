@@ -684,7 +684,7 @@ H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
  *
  *          H5Tget_member_name() provides an example of memory allocation on
  *          behalf of the caller: The function returns a buffer containing the
- *          name of a compound datatype member. It is the caller’s
+ *          name of a compound datatype member. It is the caller's
  *          responsibility to eventually free that buffer with H5free_memory().
  *
  * \attention It is especially important to use this function to free memory

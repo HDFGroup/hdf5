@@ -10,7 +10,7 @@ usage: h5clear [OPTIONS] file_name
                              C is >= 0; C is optional and will default to 1M when not set.
                              This option helps to repair a crashed file where the stored EOA
                              in the superblock is different from the actual EOF.
-                             The file’s EOA and EOF will be the same after applying
+                             The file's EOA and EOF will be the same after applying
                              this option to the file.
 
 Examples of use:

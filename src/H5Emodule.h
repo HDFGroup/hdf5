@@ -44,7 +44,7 @@
  *
  * \ref subsec_error_adv talks about the advanced concepts of error
  * class and error stack handle and talks about the related functions. With these concepts and functions, an
- * application library or program using the HDF5 Library can have its own error report blended with HDF5’s
+ * application library or program using the HDF5 Library can have its own error report blended with HDF5's
  * error report.
  *
  * Starting with Release 1.8, we have a new set of Error Handling API functions. For the purpose of backward
@@ -76,8 +76,8 @@
  * \subsubsection subsubsec_error_ops_stack Error Stack and Error Message
  * In normal circumstances, an error causes the stack to be printed on the standard error stream
  * automatically.
- * This automatic error stack is the library’s default stack. For all the functions in this section, whenever
- * an error stack ID is needed as a parameter, \ref H5E_DEFAULT can be used to indicate the library’s default
+ * This automatic error stack is the library's default stack. For all the functions in this section, whenever
+ * an error stack ID is needed as a parameter, \ref H5E_DEFAULT can be used to indicate the library's default
  * stack. The first error record of the error stack, number #000, is produced by the API function itself and
  * is usually sufficient to indicate to the application what went wrong.
  *  <table>
@@ -164,7 +164,7 @@
  *      H5Eget_auto2(error_stack, &old_func, &old_client_data);
  *      ***  Turn off error handling  ***
  *      H5Eset_auto2(error_stack, NULL, NULL);
- *      ***  Probe. Likely to fail, but that’s okay  ***
+ *      ***  Probe. Likely to fail, but that's okay  ***
  *      status = H5Fopen (......);
  *      ***  Restore previous error handler  ***
  *      H5Eset_auto2(error_stack, old_func, old_client_data);
@@ -300,7 +300,7 @@
  *   <caption align=top>Example:  An Error Report</caption>
  *   <tr>
  *     <td>
- *       <p>An error report shows both the library’s error record and the application’s error records.
+ *       <p>An error report shows both the library's error record and the application's error records.
  *          See the example below.
  *       <p><code><pre>
  * Error Test-DIAG: Error detected in Error Program (1.0)
@@ -323,9 +323,9 @@
  *   </tr>
  * </table>
  * In the line above error record #002 in the example above, the starting phrase is HDF5. This is the error
- * class name of the HDF5 Library. All of the library’s error messages (major and minor) are in this default
+ * class name of the HDF5 Library. All of the library's error messages (major and minor) are in this default
  * error class. The Error Test in the beginning of the line above error record #000 is the name of the
- * application’s error class. The first two error records, #000 and #001, are from application’s error class.
+ * application's error class. The first two error records, #000 and #001, are from application's error class.
  * By definition, an error class is a group of major and minor error messages for a library (the HDF5 Library
  * or an application library built on top of the HDF5 Library) or an application program. The error class can
  * be registered for a library or program through the HDF5 Error API. Major and minor messages can be defined
