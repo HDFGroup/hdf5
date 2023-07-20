@@ -43,7 +43,6 @@ MODULE H5F
   ! Number of objects opened in H5open_f
   INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ
 
-
 #ifndef H5_DOXYGEN
   INTERFACE
      INTEGER(C_INT) FUNCTION h5fis_accessible(name, &
@@ -57,6 +56,40 @@ MODULE H5F
      END FUNCTION h5fis_accessible
   END INTERFACE
 #endif
+
+!> @brief h5f_info_t derived type.
+  TYPE, BIND(C) :: H5F_info_t_super
+     INTEGER(C_INT)   :: version        !< Superblock version number
+     INTEGER(HSIZE_T) :: super_size     !< Superblock size
+     INTEGER(HSIZE_T) :: super_ext_size !< Superblock extension size
+  END TYPE H5F_info_t_super
+
+!> @brief h5f_info_t derived type.
+  TYPE, BIND(C) :: H5F_info_t_free
+     INTEGER(C_INT)   :: version;   !< Version # of file free space management
+     INTEGER(HSIZE_T) :: meta_size; !< Free space manager metadata size
+     INTEGER(HSIZE_T) :: tot_space; !< Amount of free space in the file
+  END TYPE H5F_info_t_free
+
+!> @brief h5f_info_t derived type.
+  TYPE, BIND(C) :: H5_ih_info_t
+     INTEGER(HSIZE_T) :: heap_size
+     INTEGER(HSIZE_T) :: index_size !< btree and/or list
+  END TYPE H5_ih_info_t
+
+!> @brief h5f_info_t derived type.
+  TYPE, BIND(C) :: H5F_info_t_sohm
+        INTEGER(C_INT)     :: unsigned  !< Version # of shared object header info
+        INTEGER(HSIZE_T)   :: hdr_size  !< Shared object header message header size
+        TYPE(H5_ih_info_t) :: msgs_info !< Shared object header message index & heap size
+  END TYPE H5F_info_t_sohm
+
+!> @brief h5f_info_t derived type.
+  TYPE, BIND(C) :: h5f_info_t
+     TYPE(H5F_info_t_super) :: super
+     TYPE(H5F_info_t_free)  :: free
+     TYPE(H5F_info_t_sohm)  :: sohm
+  END TYPE h5f_info_t
 
 CONTAINS
 !>
@@ -1092,6 +1125,36 @@ CONTAINS
     hdferr = INT(h5fset_dset_no_attrs_hint_c(file_id, c_minimize))
 
   END SUBROUTINE h5fset_dset_no_attrs_hint_f
+
+!>
+!! \ingroup FH5F
+!!
+!! \brief Retrieves global file information
+!!
+!! \param obj_id    Object identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
+!! \param file_info Buffer for global file information
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Fget_info2()
+!!
+  SUBROUTINE H5Fget_info_f(obj_id, file_info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: obj_id
+    TYPE(H5F_INFO_T), INTENT(OUT) :: file_info
+    INTEGER         , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION  H5Fget_info(obj_id, file_info) BIND(C, NAME='H5Fget_info2')
+         IMPORT :: HID_T, C_INT, H5F_INFO_T
+         IMPLICIT NONE
+         INTEGER(HID_T)     , VALUE :: obj_id
+         TYPE(H5F_INFO_T), VALUE :: file_info
+       END FUNCTION H5Fget_info
+    END INTERFACE
+
+    hdferr = INT(H5Fget_info(obj_id, file_info))
+
+  END SUBROUTINE H5Fget_info_f
 
 END MODULE H5F
 

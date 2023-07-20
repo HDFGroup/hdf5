@@ -76,7 +76,7 @@ MODULE H5LIB
   !
   ! H5D flags declaration
   !
-  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 32
+  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 57
   INTEGER, DIMENSION(1:H5D_FLAGS_LEN) :: H5D_flags
   INTEGER, PARAMETER :: H5D_SIZE_FLAGS_LEN = 2
   INTEGER(SIZE_T), DIMENSION(1:H5D_SIZE_FLAGS_LEN) :: H5D_size_flags
@@ -168,7 +168,7 @@ MODULE H5LIB
   INTEGER, DIMENSION(1:H5LIB_FLAGS_LEN) :: H5LIB_flags
 
   PUBLIC :: h5open_f, h5close_f, h5get_libversion_f, h5dont_atexit_f, h5kind_to_type, h5offsetof, h5gmtime
-  PUBLIC :: h5garbage_collect_f, h5check_version_f
+  PUBLIC :: h5garbage_collect_f, h5check_version_f, h5get_free_list_sizes_f
 
 CONTAINS
 !>
@@ -439,6 +439,31 @@ CONTAINS
     H5D_SELECTION_IO_MODE_DEFAULT_F = H5D_flags(30)
     H5D_SELECTION_IO_MODE_OFF_F     = H5D_flags(31)
     H5D_SELECTION_IO_MODE_ON_F      = H5D_flags(32)
+    H5D_MPIO_COLLECTIVE_F                               = H5D_flags(33)
+    H5D_MPIO_SET_INDEPENDENT_F                          = H5D_flags(34)
+    H5D_MPIO_DATATYPE_CONVERSION_F                      = H5D_flags(35)
+    H5D_MPIO_DATA_TRANSFORMS_F                          = H5D_flags(36)
+    H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED_F           = H5D_flags(37)
+    H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES_F          = H5D_flags(38)
+    H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_F        = H5D_flags(39)
+    H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED_F        = H5D_flags(40)
+    H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE_F = H5D_flags(41)
+    H5D_MPIO_NO_SELECTION_IO_F                          = H5D_flags(42)
+    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE_F                  = H5D_flags(43)
+    H5D_SEL_IO_DISABLE_BY_API_F                         = H5D_flags(44)
+    H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_F      = H5D_flags(45)
+    H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER_F                = H5D_flags(46)
+    H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB_F           = H5D_flags(47)
+    H5D_SEL_IO_PAGE_BUFFER_F                            = H5D_flags(48)
+    H5D_SEL_IO_DATASET_FILTER_F                         = H5D_flags(49)
+    H5D_SEL_IO_CHUNK_CACHE_F                            = H5D_flags(50)
+    H5D_SEL_IO_TCONV_BUF_TOO_SMALL_F                    = H5D_flags(51)
+    H5D_SEL_IO_BKG_BUF_TOO_SMALL_F                      = H5D_flags(52)
+    H5D_SEL_IO_DEFAULT_OFF_F                            = H5D_flags(53)
+    H5D_MPIO_NO_SELECTION_IO_CAUSES_F                   = H5D_flags(54)
+    H5D_MPIO_NO_CHUNK_OPTIMIZATION_F                    = H5D_flags(55)
+    H5D_MPIO_LINK_CHUNK_F                               = H5D_flags(56)
+    H5D_MPIO_MULTI_CHUNK_F                              = H5D_flags(57)
 
     H5D_CHUNK_CACHE_NSLOTS_DFLT_F = H5D_size_flags(1)
     H5D_CHUNK_CACHE_NBYTES_DFLT_F = H5D_size_flags(2)
@@ -801,6 +826,8 @@ CONTAINS
 !! \param relnum  Release version of the library.
 !! \param error   \fortran_error
 !!
+!! See C API: @ref H5get_libversion()
+!!
   SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: majnum, minnum, relnum, error
@@ -826,6 +853,8 @@ CONTAINS
 !! \param relnum Release version of the library.
 !! \param error  \fortran_error
 !!
+!! See C API: @ref H5check_version()
+!!
   SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: majnum, minnum, relnum
@@ -848,6 +877,8 @@ CONTAINS
 !!
 !! \param error \fortran_error
 !!
+!! See C API: @ref H5garbage_collect()
+!!
   SUBROUTINE h5garbage_collect_f(error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
@@ -867,6 +898,8 @@ CONTAINS
 !!
 !! \param error \fortran_error
 !!
+!! See C API: @ref H5dont_atexit()
+!!
   SUBROUTINE h5dont_atexit_f(error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
@@ -879,6 +912,41 @@ CONTAINS
     error = h5dont_atexit_c()
 
   END SUBROUTINE h5dont_atexit_f
+
+!>
+!! \ingroup FH5
+!! \brief Gets the current size of the free lists used to manage memory
+!!
+!! \param reg_size The current size of all "regular" free list memory used
+!! \param arr_size The current size of all "array" free list memory used
+!! \param blk_size The current size of all "block" free list memory used
+!! \param fac_size The current size of all "factory" free list memory used
+!! \param error \fortran_error
+!!
+!! See C API: @ref H5get_free_list_sizes()
+!!
+  SUBROUTINE h5get_free_list_sizes_f(reg_size, arr_size, blk_size, fac_size, error)
+    IMPLICIT NONE
+    INTEGER(C_SIZE_T), INTENT(OUT) :: reg_size
+    INTEGER(C_SIZE_T), INTENT(OUT) :: arr_size
+    INTEGER(C_SIZE_T), INTENT(OUT) :: blk_size
+    INTEGER(C_SIZE_T), INTENT(OUT) :: fac_size
+    INTEGER, INTENT(OUT) :: error
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) BIND(C,NAME='H5get_free_list_sizes')
+         IMPORT :: C_INT, C_SIZE_T
+         IMPLICIT NONE
+         INTEGER(C_SIZE_T), INTENT(OUT) :: reg_size
+         INTEGER(C_SIZE_T), INTENT(OUT) :: arr_size
+         INTEGER(C_SIZE_T), INTENT(OUT) :: blk_size
+         INTEGER(C_SIZE_T), INTENT(OUT) :: fac_size
+       END FUNCTION H5get_free_list_sizes
+    END INTERFACE
+
+    error = INT(H5get_free_list_sizes(reg_size, arr_size, blk_size, fac_size))
+
+  END SUBROUTINE h5get_free_list_sizes_f
 
 !>
 !! \ingroup FH5

@@ -514,7 +514,7 @@ CONTAINS
 !!
 !! \brief Retrieves the version information of various objects for a file creation property list.
 !!
-!! \param prp_id   File createion property list identifier.
+!! \param prp_id   File creation property list identifier.
 !! \param boot     Super block version number.
 !! \param freelist Global freelist version number.
 !! \param stab     Symbol table version number.
@@ -5322,6 +5322,41 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_fapl_ioc(prp_id, f_ptr)
 
   END SUBROUTINE h5pget_fapl_ioc_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves local and global causes that broke collective I/O on the last parallel I/O call.
+!!
+!! \param plist_id                   Dataset transfer property list identifier
+!! \param local_no_collective_cause  An enumerated set value indicating the causes that prevented collective I/O in the local process 
+!! \param global_no_collective_cause An enumerated set value indicating the causes across all processes that prevented collective I/O
+!! \param hdferr                     \fortran_error
+!!
+!! See C API: @ref H5Pget_mpio_no_collective_cause()
+!!
+   SUBROUTINE h5pget_mpio_no_collective_cause_f(plist_id, local_no_collective_cause, global_no_collective_cause, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)    , INTENT(IN)  :: plist_id
+     INTEGER(C_INT32_T), INTENT(OUT) :: local_no_collective_cause
+     INTEGER(C_INT32_T), INTENT(OUT) :: global_no_collective_cause
+     INTEGER           , INTENT(OUT) :: hdferr
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_mpio_no_collective_cause(plist_id, local_no_collective_cause, global_no_collective_cause) &
+             BIND(C, NAME='H5Pget_mpio_no_collective_cause')
+          IMPORT :: HID_T, C_INT, C_INT32_T
+          IMPLICIT NONE
+          INTEGER(HID_T)    , VALUE :: plist_id
+          INTEGER(C_INT32_T), VALUE :: local_no_collective_cause
+          INTEGER(C_INT32_T), VALUE :: global_no_collective_cause
+        END FUNCTION H5Pget_mpio_no_collective_cause
+     END INTERFACE
+
+     hdferr = INT(H5Pget_mpio_no_collective_cause(plist_id, local_no_collective_cause, global_no_collective_cause))
+
+   END SUBROUTINE h5pget_mpio_no_collective_cause_f
+
 #endif
 
 !>
@@ -5775,7 +5810,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!                      unlimited selection.
 !! \param src_file_name The name of the HDF5 file where the source dataset is located.
 !! \param src_dset_name The path to the HDF5 dataset in the file specified by src_file_name.
-!! \param src_space_id  The source dataset’s dataspace identifier with a selection applied, possibly an unlimited selection.
+!! \param src_space_id  The source dataset&apos;s dataspace identifier with a selection applied, possibly an unlimited selection.
 !! \param hdferr        \fortran_error
 !!
 !! See C API: @ref H5Pset_virtual()
@@ -6273,6 +6308,37 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     hdferr = INT(H5Pset_file_locking(fapl_id, c_use_flag, c_ignore_flag))
 
   END SUBROUTINE h5pset_file_locking_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call.
+!!
+!! \param plist_id              Dataset transfer property list identifier
+!! \param no_selection_io_cause	A bitwise set value indicating the relevant causes that prevented selection I/O from being performed
+!! \param hdferr                \fortran_error
+!!
+!! See C API: @ref H5Pget_no_selection_io_cause()
+!!
+   SUBROUTINE h5pget_no_selection_io_cause_f(plist_id, no_selection_io_cause, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)    , INTENT(IN)  :: plist_id
+     INTEGER(C_INT32_T), INTENT(OUT) :: no_selection_io_cause
+     INTEGER           , INTENT(OUT) :: hdferr
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause) &
+             BIND(C, NAME='H5Pget_no_selection_io_cause')
+          IMPORT :: HID_T, C_INT, C_INT32_T
+          IMPLICIT NONE
+          INTEGER(HID_T)    , VALUE :: plist_id
+          INTEGER(C_INT32_T), VALUE :: no_selection_io_cause
+        END FUNCTION H5Pget_no_selection_io_cause
+     END INTERFACE
+
+     hdferr = INT( H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause))
+
+   END SUBROUTINE h5pget_no_selection_io_cause_f
 
 END MODULE H5P
 

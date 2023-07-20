@@ -439,6 +439,91 @@ CONTAINS
 !>
 !! \ingroup FH5S
 !!
+!! \brief Checks if two selections are the same shape.
+!!
+!! \param space1_id Dataspace identifier
+!! \param space2_id Dataspace identifier
+!! \param same      Value of check
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Sselect_shape_same()
+!!
+  SUBROUTINE H5Sselect_shape_same_f(space1_id, space2_id, same, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: space1_id
+    INTEGER(HID_T), INTENT(IN)  :: space2_id
+    LOGICAL       , INTENT(OUT) :: same
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT) :: c_same
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Sselect_shape_same(space1_id, space2_id) BIND(C,NAME='H5Sselect_shape_same')
+         IMPORT :: C_INT, HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: space1_id
+         INTEGER(HID_T), VALUE :: space2_id
+       END FUNCTION H5Sselect_shape_same
+    END INTERFACE
+
+    c_same = H5Sselect_shape_same(space1_id, space2_id)
+
+    same = .FALSE.
+    IF(c_same .GT. 0_C_INT) same = .TRUE.
+
+    hdferr = 0
+    IF(c_same .LT. 0_C_INT) hdferr = -1
+
+  END SUBROUTINE H5Sselect_shape_same_f
+
+!>
+!! \ingroup FH5S
+!!
+!! \brief Checks if current selection intersects with a block.
+!!
+!! \param space_id   Dataspace identifier
+!! \param istart     Starting coordinate of the block
+!! \param iend	     Opposite ("ending") coordinate of the block
+!! \param intersects Dataspace intersects with the block specified
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Sselect_intersect_block()
+!!
+
+  SUBROUTINE H5Sselect_intersect_block_f(space_id, istart, iend, intersects, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  ,               INTENT(IN)  :: space_id
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: istart
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: iend
+    LOGICAL, INTENT(OUT) :: intersects
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT) :: c_intersects
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Sselect_intersect_block(space_id, istart, iend) &
+            BIND(C,NAME='H5Sselect_intersect_block')
+         IMPORT :: C_INT, HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE  :: space_id
+         INTEGER(HSIZE_T), DIMENSION(*) :: istart
+         INTEGER(HSIZE_T), DIMENSION(*) :: iend
+       END FUNCTION H5Sselect_intersect_block
+    END INTERFACE
+
+    c_intersects = H5Sselect_intersect_block(space_id, istart, iend)
+
+    intersects = .FALSE.
+    IF(c_intersects .GT. 0_C_INT) intersects = .TRUE.
+
+    hdferr = 0
+    IF(c_intersects .LT. 0_C_INT) hdferr = -1
+
+  END SUBROUTINE H5Sselect_intersect_block_f
+
+!>
+!! \ingroup FH5S
+!!
 !! \brief Resets the selection region to include no elements.
 !!
 !! \param space_id The identifier for the dataspace in which the selection is being reset.

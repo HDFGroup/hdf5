@@ -2283,6 +2283,8 @@ CONTAINS
 !! \param hdferr        \fortran_error
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
 !!
+!! See C API: @ref H5Dread_multi()
+!!
   SUBROUTINE h5dread_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
     IMPLICIT NONE
 
@@ -2320,6 +2322,7 @@ CONTAINS
     hdferr = H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
   END SUBROUTINE h5dread_multi_f
+
 !>
 !! \ingroup FH5D
 !!
@@ -2333,6 +2336,8 @@ CONTAINS
 !! \param buf           Buffer with data to be written to the file.
 !! \param hdferr        \fortran_error
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
+!!
+!! See C API: @ref H5Dwrite_multi()
 !!
   SUBROUTINE h5dwrite_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
     IMPLICIT NONE
@@ -2371,6 +2376,105 @@ CONTAINS
     hdferr = H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
   END SUBROUTINE h5dwrite_multi_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Reads a raw data chunk directly from a dataset in a file into a buffer.
+!!
+!! \param dset_id   Identifier of the dataset to read from
+!! \param offset    Logical position of the chunk&apos;s first element in the dataspace
+!! \param filters   Mask for identifying the filters in use
+!! \param buf       Buffer containing data to be read from the chunk
+!! \param hdferr    \fortran_error
+!! \param dxpl_id   Dataset transfer property list identifier
+!!
+!! See C API: @ref H5Dread_chunk()
+!!
+  SUBROUTINE h5dread_chunk_f(dset_id, filters, offset, buf, hdferr, dxpl_id)
+    IMPLICIT NONE
+
+    INTEGER(HID_T)    , INTENT(IN)  :: dset_id
+    INTEGER(C_INT32_T), INTENT(IN)  :: filters
+    INTEGER(HSIZE_T)  , INTENT(IN)  :: offset
+    TYPE(C_PTR)                     :: buf
+    INTEGER           , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
+
+    INTEGER(HID_T) :: dxpl_id_default
+
+    INTERFACE
+       INTEGER FUNCTION H5Dread_chunk(dset_id, dxpl_id, filters, offset, buf, hdferr) &
+            BIND(C, NAME='H5Dread_chunk')
+         IMPORT :: SIZE_T, HSIZE_T, HID_T
+         IMPORT :: C_PTR, C_INT32_T
+         IMPLICIT NONE
+         INTEGER(HID_T)    , VALUE :: dset_id
+         INTEGER(HID_T)    , VALUE :: dxpl_id
+         INTEGER(C_INT32_T), VALUE :: filters
+         INTEGER(HSIZE_T)  , VALUE :: offset
+         TYPE(C_PTR)               :: buf
+         INTEGER           , VALUE :: hdferr
+       END FUNCTION H5Dread_chunk
+    END INTERFACE
+
+    dxpl_id_default = H5P_DEFAULT_F
+    IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
+
+    hdferr = H5Dread_chunk(dset_id, dxpl_id_default, filters, offset, buf, hdferr)
+
+  END SUBROUTINE h5dread_chunk_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Writes a raw data chunk from a buffer directly to a dataset in a file.
+!!
+!! \param dset_id   Identifier of the dataset to write to
+!! \param filters   Mask for identifying the filters in use
+!! \param offset    Logical position of the chunk&apos;s first element in the dataspace
+!! \param data_size Size of the actual data to be written in bytes
+!! \param buf       Buffer containing data to be written to the chunk
+!! \param hdferr    \fortran_error
+!! \param dxpl_id   Dataset transfer property list identifier
+!!
+!! See C API: @ref H5Dwrite_chunk()
+!!
+  SUBROUTINE h5dwrite_chunk_f(dset_id, filters, offset, data_size, buf, hdferr, dxpl_id)
+    IMPLICIT NONE
+
+    INTEGER(HID_T)    , INTENT(IN) :: dset_id
+    INTEGER(C_INT32_T), INTENT(IN) :: filters
+    INTEGER(HSIZE_T)  , INTENT(IN) :: offset
+    INTEGER(SIZE_T)   , INTENT(IN) :: data_size
+    TYPE(C_PTR) :: buf
+    INTEGER, INTENT(OUT)              :: hdferr
+    INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: dxpl_id
+
+    INTEGER(HID_T) :: dxpl_id_default
+
+    INTERFACE
+       INTEGER FUNCTION H5Dwrite_chunk(dset_id, dxpl_id, filters, offset, data_size, buf, hdferr) &
+            BIND(C, NAME='H5Dwrite_chunk')
+         IMPORT :: SIZE_T, HSIZE_T, HID_T
+         IMPORT :: C_PTR, C_INT32_T
+         IMPLICIT NONE
+         INTEGER(HID_T)    , VALUE :: dset_id
+         INTEGER(HID_T)    , VALUE :: dxpl_id
+         INTEGER(C_INT32_T), VALUE :: filters
+         INTEGER(HSIZE_T)  , VALUE :: offset
+         INTEGER(SIZE_T)   , VALUE :: data_size
+         TYPE(C_PTR)               :: buf
+         INTEGER           , VALUE :: hdferr
+       END FUNCTION H5Dwrite_chunk
+    END INTERFACE
+
+    dxpl_id_default = H5P_DEFAULT_F
+    IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
+
+    hdferr = H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset, data_size, buf, hdferr)
+
+  END SUBROUTINE h5dwrite_chunk_f
 
 END MODULE H5D
 
