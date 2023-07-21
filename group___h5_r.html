@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -911,7 +911,7 @@ Functions</h2></td></tr>
 <div class="line">    <a class="code" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056eae63b3cfa3688767f46335fad6db981a5">H5R_ATTR</a>            = 4,    </div>
 <div class="line">    <a class="code" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056eaa89d43156d194e6538203cf7f4b6bda0">H5R_MAXTYPE</a>         = 5     </div>
 <div class="line">} <a class="code" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056e">H5R_type_t</a>;</div>
-</div><!-- fragment --><p> <code>ref</code> is the reference for which the target object’s name is sought.</p>
+</div><!-- fragment --><p> <code>ref</code> is the reference for which the target object's name is sought.</p>
 <p>If <code>ref</code> is an object reference, <code>name</code> will be returned with a name for the referenced object. If <code>ref</code> is a dataset region reference, <code>name</code> will contain a name for the object containing the referenced region.</p>
 <p>Up to <code>size</code> characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application.</p>
 <p>If the length of the name, which determines the required value of <code>size</code>, is unknown, a preliminary <a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name()</a> call can be made. The return value of this call will be the size of the object name. That value can then be assigned to <code>size</code> for a second <a class="el" href="group___h5_r.html#ga4c112c388f697324270fd085100dccaa" title="Retrieves a name for a referenced object.">H5Rget_name()</a> call, which will retrieve the actual name.</p>
@@ -1038,9 +1038,9 @@ Functions</h2></td></tr>
 <div class="line">} <a class="code" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056e">H5R_type_t</a>;</div>
 </div><!-- fragment --><p> If the application does not already know the object reference type, that can be determined with three preliminary calls:</p>
 <ul>
-<li>Call <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type()</a> on the dataset containing the reference to get a datatype identifier for the dataset’s datatype. </li>
+<li>Call <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type()</a> on the dataset containing the reference to get a datatype identifier for the dataset's datatype. </li>
 <li>Using that datatype identifier, <a class="el" href="group___h5_t.html#ga364545c053f925fec65880b235e37898" title="Returns a datatype class.">H5Tget_class()</a> returns a datatype class.<br  />
- If the datatype class is <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a>, <a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f" title="Determines whether two datatype identifiers refer to the same datatype.">H5Tequal()</a> can then be used to determine whether the reference’s datatype is <a class="el" href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a> or <a class="el" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>:<ul>
+ If the datatype class is <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a>, <a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f" title="Determines whether two datatype identifiers refer to the same datatype.">H5Tequal()</a> can then be used to determine whether the reference's datatype is <a class="el" href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a> or <a class="el" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>:<ul>
 <li>If the datatype is <a class="el" href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a>, the reference object type is <a class="el" href="_h5_rpublic_8h.html#ae1ffa09875ca6778df3a577592dacbd2">H5R_OBJECT</a>.</li>
 <li>If the datatype is <a class="el" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>, the reference object type is <a class="el" href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a>.</li>
 </ul>
@@ -1139,9 +1139,9 @@ Functions</h2></td></tr>
 <div class="line">} <a class="code" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056e">H5R_type_t</a>;</div>
 </div><!-- fragment --><p> If the application does not already know the object reference type, that can be determined with three preliminary calls:</p>
 <ul>
-<li>Call <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type()</a> on the dataset containing the reference to get a datatype identifier for the dataset’s datatype. </li>
+<li>Call <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type()</a> on the dataset containing the reference to get a datatype identifier for the dataset's datatype. </li>
 <li>Using that datatype identifier, <a class="el" href="group___h5_t.html#ga364545c053f925fec65880b235e37898" title="Returns a datatype class.">H5Tget_class()</a> returns a datatype class.<br  />
- If the datatype class is <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a>, <a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f" title="Determines whether two datatype identifiers refer to the same datatype.">H5Tequal()</a> can then be used to determine whether the reference’s datatype is <a class="el" href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a> or <a class="el" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>:<ul>
+ If the datatype class is <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a>, <a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f" title="Determines whether two datatype identifiers refer to the same datatype.">H5Tequal()</a> can then be used to determine whether the reference's datatype is <a class="el" href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a> or <a class="el" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>:<ul>
 <li>If the datatype is <a class="el" href="group___p_d_t_s_t_d.html#gadc17e0960dc7ef08e029bf17201670e1">H5T_STD_REF_OBJ</a>, the reference object type is <a class="el" href="_h5_rpublic_8h.html#ae1ffa09875ca6778df3a577592dacbd2">H5R_OBJECT</a>.</li>
 <li>If the datatype is <a class="el" href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a>, the reference object type is <a class="el" href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a>.</li>
 </ul>
@@ -1482,7 +1482,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:07 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:49 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

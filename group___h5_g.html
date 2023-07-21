@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -311,9 +311,9 @@ $(document).ready(function(){initNavTree('group___h5_g.html',''); initResizable(
 <p><b>Locating objects in the HDF5 file hierarchy:</b> An object name consists of one or more components separated from one another by slashes. An absolute name begins with a slash, and the object is located by looking for the first component in the root object, then looking for the second component in the first object, etc., until the entire name is traversed. A relative name does not begin with a slash, and the traversal begins at the location specified by the create or access function.</p>
 <p><b>Group implementations in HDF5:</b> The original HDF5 group implementation provided a single-indexed structure for link storage. A new group implementation, in HDF5 Release 1.8.0, enables more efficient compact storage for very small groups, improved link indexing for large groups, and other advanced features.</p>
 <ul>
-<li>The <em>original indexed</em> format remains the default. Links are stored in a B-tree in the group’s local heap. </li>
+<li>The <em>original indexed</em> format remains the default. Links are stored in a B-tree in the group's local heap. </li>
 <li>Groups created in the new <em>compact-or-indexed</em> format, the implementation introduced with Release 1.8.0, can be tuned for performance, switching between the compact and indexed formats at thresholds set in the user application.<ul>
-<li>The <em>compact</em> format will conserve file space and processing overhead when working with small groups and is particularly valuable when a group contains no links. Links are stored as a list of messages in the group’s header.</li>
+<li>The <em>compact</em> format will conserve file space and processing overhead when working with small groups and is particularly valuable when a group contains no links. Links are stored as a list of messages in the group's header.</li>
 <li>The <em>indexed</em> format will yield improved performance when working with large groups, e.g., groups containing thousands to millions of members. Links are stored in a fractal heap and indexed with an improved B-tree. </li>
 </ul>
 </li>
@@ -360,7 +360,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gadedd0c73c98f2ada69305f2992c3300e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves information about a group by its name.  <a href="group___h5_g.html#gadedd0c73c98f2ada69305f2992c3300e">More...</a><br /></td></tr>
 <tr class="separator:gadedd0c73c98f2ada69305f2992c3300e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga985f27ad1a164d99fa1f58c6de60ab00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00">H5Gget_info_by_idx</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, const char *group_name, <a class="el" href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3">H5_index_t</a> idx_type, <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9">H5_iter_order_t</a> order, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> n, <a class="el" href="struct_h5_g__info__t.html">H5G_info_t</a> *ginfo, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> lapl_id)</td></tr>
-<tr class="memdesc:ga985f27ad1a164d99fa1f58c6de60ab00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves information about a group, according to the group’s position within an index.  <a href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00">More...</a><br /></td></tr>
+<tr class="memdesc:ga985f27ad1a164d99fa1f58c6de60ab00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves information about a group, according to the group's position within an index.  <a href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00">More...</a><br /></td></tr>
 <tr class="separator:ga985f27ad1a164d99fa1f58c6de60ab00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1d55dbf931f8003bb329c4340b8fe4d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_g.html#ga1d55dbf931f8003bb329c4340b8fe4d6">H5Gflush</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> group_id)</td></tr>
 <tr class="memdesc:ga1d55dbf931f8003bb329c4340b8fe4d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flushes all buffers associated with a group to disk.  <a href="group___h5_g.html#ga1d55dbf931f8003bb329c4340b8fe4d6">More...</a><br /></td></tr>
@@ -697,13 +697,13 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a group identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_g.html#gab52641f0736281faaaae4e3039bbb344" title="Creates a new empty group without linking it into the file structure.">H5Gcreate_anon()</a> creates a new empty group in the file specified by <code>loc_id</code>. With default settings, <a class="el" href="group___h5_g.html#gab52641f0736281faaaae4e3039bbb344" title="Creates a new empty group without linking it into the file structure.">H5Gcreate_anon()</a> provides similar functionality to that provided by <a class="el" href="group___h5_g.html#ga7397440085510728a2e2d22199e81980" title="Creates a new group and links it into the file.">H5Gcreate1()</a>, with the differences described in the list below.</p>
-<p>The new group’s creation and access properties are specified in <code>gcpl_id</code> and <code>gapl_id</code>, respectively.</p>
+<p>The new group's creation and access properties are specified in <code>gcpl_id</code> and <code>gapl_id</code>, respectively.</p>
 <p><a class="el" href="group___h5_g.html#gab52641f0736281faaaae4e3039bbb344" title="Creates a new empty group without linking it into the file structure.">H5Gcreate_anon()</a> returns a new group identifier. This identifier must be linked into the HDF5 file structure with <a class="el" href="group___h5_o.html#ga2c97dd58e64b67d16325fceb7e02113f" title="Creates a hard link to an object in an HDF5 file.">H5Olink()</a> or it will be deleted from the file when the file is closed.</p>
 <p>The differences between this function and <a class="el" href="group___h5_g.html#ga7397440085510728a2e2d22199e81980" title="Creates a new group and links it into the file.">H5Gcreate1()</a> are as follows:</p>
 <ul>
 <li><a class="el" href="group___h5_g.html#ga7397440085510728a2e2d22199e81980" title="Creates a new group and links it into the file.">H5Gcreate1()</a> does not provide for the use of custom property lists; <a class="el" href="group___h5_g.html#ga7397440085510728a2e2d22199e81980" title="Creates a new group and links it into the file.">H5Gcreate1()</a> always uses default properties. </li>
-<li><a class="el" href="group___h5_g.html#gab52641f0736281faaaae4e3039bbb344" title="Creates a new empty group without linking it into the file structure.">H5Gcreate_anon()</a> neither provides the new group’s name nor links it into the HDF5 file structure; those actions must be performed separately through a call to <a class="el" href="group___h5_o.html#ga2c97dd58e64b67d16325fceb7e02113f" title="Creates a hard link to an object in an HDF5 file.">H5Olink()</a>, which offers greater control over linking. </li>
-<li><a class="el" href="group___h5_g.html#gab52641f0736281faaaae4e3039bbb344" title="Creates a new empty group without linking it into the file structure.">H5Gcreate_anon()</a> does not directly provide a hint mechanism for the group’s heap size. Comparable information can be included in the group creation property list <code>gcpl_id</code> through a <a class="el" href="group___g_c_p_l.html#ga870728af2bf3c0b16edafd762a1c44d6" title="Specifies the anticipated maximum size of a local heap.">H5Pset_local_heap_size_hint()</a> call.</li>
+<li><a class="el" href="group___h5_g.html#gab52641f0736281faaaae4e3039bbb344" title="Creates a new empty group without linking it into the file structure.">H5Gcreate_anon()</a> neither provides the new group's name nor links it into the HDF5 file structure; those actions must be performed separately through a call to <a class="el" href="group___h5_o.html#ga2c97dd58e64b67d16325fceb7e02113f" title="Creates a hard link to an object in an HDF5 file.">H5Olink()</a>, which offers greater control over linking. </li>
+<li><a class="el" href="group___h5_g.html#gab52641f0736281faaaae4e3039bbb344" title="Creates a new empty group without linking it into the file structure.">H5Gcreate_anon()</a> does not directly provide a hint mechanism for the group's heap size. Comparable information can be included in the group creation property list <code>gcpl_id</code> through a <a class="el" href="group___g_c_p_l.html#ga870728af2bf3c0b16edafd762a1c44d6" title="Specifies the anticipated maximum size of a local heap.">H5Pset_local_heap_size_hint()</a> call.</li>
 </ul>
 <p>A group created with this function should be closed with <a class="el" href="group___h5_g.html#ga8dbe20b390d2504f0bd3589ed8f4e221" title="Closes the specified group.">H5Gclose()</a> when the group is no longer needed so that resource leaks will not develop.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_o.html#ga2c97dd58e64b67d16325fceb7e02113f" title="Creates a hard link to an object in an HDF5 file.">H5Olink()</a>, <a class="el" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate()</a></dd></dl>
@@ -796,7 +796,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_g.html#gac5a1c3e1ed4264d92cc02ca20afc57f4" title="Retrieves comment for specified object.">H5Gget_comment()</a> retrieves the comment for the object specified by <code>loc_id</code> and <code>name</code>. The comment is returned in the buffer <code>buf</code>.</p>
 <p><code>loc_id</code> can specify any object in the file. name can be one of the following: </p><ul>
 <li>The name of the object relative to <code>loc_id</code> </li>
-<li>An absolute name of the object, starting from <code>/</code>, the file’s root group </li>
+<li>An absolute name of the object, starting from <code>/</code>, the file's root group </li>
 <li>A dot (<code></code>.), if <code>loc_id</code> fully specifies the object</li>
 </ul>
 <p>At most bufsize characters, including a null-terminator, are returned in <code>buf</code>. The returned value is not null-terminated if the comment is longer than the supplied buffer. If the size of the comment is unknown, a preliminary <code><a class="el" href="group___h5_g.html#gac5a1c3e1ed4264d92cc02ca20afc57f4" title="Retrieves comment for specified object.">H5Gget_comment()</a></code> call will return the size of the comment, including space for the null-terminator.</p>
@@ -954,7 +954,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Retrieves information about a group, according to the group’s position within an index. </p>
+<p>Retrieves information about a group, according to the group's position within an index. </p>
 <hr  />
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -973,7 +973,7 @@ Functions</h2></td></tr>
 <li>0 if no name is associated with the group identifier, or </li>
 <li>negative value, if failure occurred</li>
 </ul>
-<a class="el" href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00" title="Retrieves information about a group, according to the group’s position within an index.">H5Gget_info_by_idx()</a> retrieves the same information about a group as retrieved by the function <a class="el" href="group___h5_g.html#gad4be126ab7bbf2001435e8e70089f3d3" title="Retrieves information about a group.">H5Gget_info()</a>, but the means of identifying the group differs; the group is identified by position in an index rather than by name.</dd></dl>
+<a class="el" href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00" title="Retrieves information about a group, according to the group&#39;s position within an index.">H5Gget_info_by_idx()</a> retrieves the same information about a group as retrieved by the function <a class="el" href="group___h5_g.html#gad4be126ab7bbf2001435e8e70089f3d3" title="Retrieves information about a group.">H5Gget_info()</a>, but the means of identifying the group differs; the group is identified by position in an index rather than by name.</dd></dl>
 <p><code>loc_id</code> and <code>group_name</code> specify the group containing the group for which information is sought. The groups in <code>group_name</code> are indexed by <code>idx_type</code>; the group for which information is retrieved is identified in that index by index order, <code>order</code>, and index position, <code>n</code>.</p>
 <p>If <code>loc_id</code> specifies the group containing the group for which information is queried, <code>group_name</code> can be a dot (.).</p>
 <p>Valid values for <code>index_type</code> are as follows: </p><table class="doxtable">
@@ -1852,7 +1852,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_g.html#ga7a615715ea68fc1bf11484a8278fe682" title="Sets comment for specified object.">H5Gset_comment()</a> sets the comment for the object specified by <code>loc_id</code> and name to comment. Any previously existing comment is overwritten.</p>
 <p><code>loc_id</code> can specify any object in the file. name can be one of the following: </p><ul>
 <li>The name of the object relative to <code>loc_id</code> </li>
-<li>An absolute name of the object, starting from <code>/</code>, the file’s root group </li>
+<li>An absolute name of the object, starting from <code>/</code>, the file's root group </li>
 <li>A dot (<code></code>.), if <code>loc_id</code> fully specifies the object</li>
 </ul>
 <p>If <code>comment</code> is the empty string or a null pointer, the comment message is removed from the object.</p>
@@ -1913,7 +1913,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:04 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:47 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

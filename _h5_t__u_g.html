@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -227,7 +227,7 @@ Predefined Datatypes</h3>
 <tr>
 <td>IEEE  </td><td span="3">IEEE-754 standard floating point types in various byte orders.   </td></tr>
 <tr>
-<td>STD  </td><td span="3">This is an architecture that contains semi-standard datatypes like signed two’s complement integers, unsigned integers, and bitfields in various byte orders.   </td></tr>
+<td>STD  </td><td span="3">This is an architecture that contains semi-standard datatypes like signed two's complement integers, unsigned integers, and bitfields in various byte orders.   </td></tr>
 <tr>
 <td>C &lt;br &gt; FORTRAN  </td><td span="3">Types which are specific to the C or Fortran programming languages are defined in these architectures. For instance, <a class="el" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a> defines a base string type with null termination which can be used to derive string types of other lengths.   </td></tr>
 <tr>
@@ -235,11 +235,11 @@ Predefined Datatypes</h3>
 <tr>
 <td>CRAY  </td><td span="3">Cray architectures. These are word-addressable, big-endian systems with non-IEEE floating point.   </td></tr>
 <tr>
-<td>INTEL  </td><td span="3">All Intel and compatible CPU’s. These are little-endian systems with IEEE floating-point.   </td></tr>
+<td>INTEL  </td><td span="3">All Intel and compatible CPUs. These are little-endian systems with IEEE floating-point.   </td></tr>
 <tr>
-<td>MIPS  </td><td span="3">All MIPS CPU’s commonly used in SGI systems. These are big-endian systems with IEEE floating-point.   </td></tr>
+<td>MIPS  </td><td span="3">All MIPS CPUs commonly used in SGI systems. These are big-endian systems with IEEE floating-point.   </td></tr>
 <tr>
-<td>ALPHA  </td><td span="3">All DEC Alpha CPU’s, little-endian systems with IEEE floating-point.   </td></tr>
+<td>ALPHA  </td><td span="3">All DEC Alpha CPUs, little-endian systems with IEEE floating-point.   </td></tr>
 </table>
 <table class="doxtable">
 <caption align="top">Table 3. Base types</caption>
@@ -276,7 +276,7 @@ Predefined Datatypes</h3>
 <tr>
 <td><a class="el" href="group___p_d_t_i_e_e_e.html#ga71d24a7d4c373ed9a003d7a0d8133f1e">H5T_IEEE_F32BE</a>  </td><td span="3">Four-byte, big-endian, IEEE floating point   </td></tr>
 <tr>
-<td><a class="el" href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a>  </td><td span="3">Four-byte, little-endian, signed two’s complement integer   </td></tr>
+<td><a class="el" href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a>  </td><td span="3">Four-byte, little-endian, signed two's complement integer   </td></tr>
 <tr>
 <td><a class="el" href="group___p_d_t_s_t_d.html#ga10e46ab72ac0330c51ed6cf709db4697">H5T_STD_U16BE</a>  </td><td span="3">Two-byte, big-endian, unsigned integer   </td></tr>
 <tr>
@@ -500,7 +500,7 @@ Discovery of Datatype Properties</h3>
 <tr>
 <th>API Function  </th><th>Description   </th></tr>
 <tr>
-<td><a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71">H5T_sign_t</a> <a class="el" href="group___a_t_o_m.html#ga636f7655e706ccf7a3f23566ca561e90">H5Tget_sign</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)  </td><td>(INTEGER)Integer data can be signed two’s complement (<a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71a1152d5238ff7af5c9d50edfea1ed1357">H5T_SGN_2</a>) or unsigned (<a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71aca59fce1697506dd3cbc7955eca77a12">H5T_SGN_NONE</a>).   </td></tr>
+<td><a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71">H5T_sign_t</a> <a class="el" href="group___a_t_o_m.html#ga636f7655e706ccf7a3f23566ca561e90">H5Tget_sign</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)  </td><td>(INTEGER)Integer data can be signed two's complement (<a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71a1152d5238ff7af5c9d50edfea1ed1357">H5T_SGN_2</a>) or unsigned (<a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71aca59fce1697506dd3cbc7955eca77a12">H5T_SGN_NONE</a>).   </td></tr>
 <tr>
 <td><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___a_t_o_m.html#ga42e62cb497fdec8f08cb9ac3c6de0e14">H5Tget_fields</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type, size_t *spos, size_t *epos, size_t *esize, size_t*mpos, size_t *msize)  </td><td>(FLOAT)A floating-point data element has bit fields which are the exponent and mantissa as well as a mantissa sign bit. These properties define the location (bit position of least significant bit of the field) and size (in bits) of each field. The sign bit is always of length one and none of the fields are allowed to overlap.   </td></tr>
 <tr>
@@ -510,7 +510,7 @@ Discovery of Datatype Properties</h3>
 <li>
 <a class="el" href="_h5_tpublic_8h.html#a609b101af0343a4a76d8c3e182cdda80a9dc5e01d17abf41c619e154150de8dde">H5T_NORM_MSBSET</a>: the mantissa is shifted left (if non-zero) until the first bit after the radix point is set and the exponent is adjusted accordingly. All bits of the mantissa after the radix point are stored.  </li>
 <li>
-<a class="el" href="_h5_tpublic_8h.html#a609b101af0343a4a76d8c3e182cdda80a5b649062dea480101917cc2d6b58f65d">H5T_NORM_IMPLIED</a>: the mantissa is shifted left (if non-zero) until the first bit after the radix point is set and the exponent is adjusted accordingly. The first bit after the radix point is not stored since it’s always set.  </li>
+<a class="el" href="_h5_tpublic_8h.html#a609b101af0343a4a76d8c3e182cdda80a5b649062dea480101917cc2d6b58f65d">H5T_NORM_IMPLIED</a>: the mantissa is shifted left (if non-zero) until the first bit after the radix point is set and the exponent is adjusted accordingly. The first bit after the radix point is not stored since it's always set.  </li>
 <li>
 <a class="el" href="_h5_tpublic_8h.html#a609b101af0343a4a76d8c3e182cdda80ab1a219215c45144cf317f2ea846a861c">H5T_NORM_NONE</a>: the fractional part of the mantissa is stored without normalizing it.</li>
 </ul>
@@ -627,7 +627,7 @@ Definition of Datatypes</h3>
 <tr>
 <th>Functions  </th><th>Description   </th></tr>
 <tr>
-<td><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___a_t_o_m.html#ga3ac9a4781cd3c4a8b5df4ff549ec8aec">H5Tset_sign</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type, <a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71">H5T_sign_t</a> sign)  </td><td>(INTEGER)Integer data can be signed two’s complement (<a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71a1152d5238ff7af5c9d50edfea1ed1357">H5T_SGN_2</a>) or unsigned (<a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71aca59fce1697506dd3cbc7955eca77a12">H5T_SGN_NONE</a>).   </td></tr>
+<td><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___a_t_o_m.html#ga3ac9a4781cd3c4a8b5df4ff549ec8aec">H5Tset_sign</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type, <a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71">H5T_sign_t</a> sign)  </td><td>(INTEGER)Integer data can be signed two's complement (<a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71a1152d5238ff7af5c9d50edfea1ed1357">H5T_SGN_2</a>) or unsigned (<a class="el" href="_h5_tpublic_8h.html#af7bfee2db210a12b9290eba85d730a71aca59fce1697506dd3cbc7955eca77a12">H5T_SGN_NONE</a>).   </td></tr>
 <tr>
 <td><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___a_t_o_m.html#gafbdc98b45749e5cfbaf1a8689f3c403d">H5Tset_fields</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type, size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize)  </td><td>(FLOAT)Set the properties define the location (bit position of least significant bit of the field) and size (in bits) of each field. The sign bit is always of length one and none of the fields are allowed to overlap.   </td></tr>
 <tr>
@@ -771,7 +771,7 @@ A user-defined floating point datatype</div></div>
 <p>The subsections below describe how to create a compound datatype and how to write and read data of a compound datatype.</p>
 <h4>Defining Compound Datatypes</h4>
 <p>Compound datatypes are conceptually similar to a C struct or Fortran derived types. The compound datatype defines a contiguous sequence of bytes, which are formatted using one up to 2^16 datatypes (members). A compound datatype may have any number of members, in any order, and the members may have any datatype, including compound. Thus, complex nested compound datatypes can be created. The total size of the compound datatype is greater than or equal to the sum of the size of its members, up to a maximum of 2^32 bytes. HDF5 does not support datatypes with distinguished records or the equivalent of C unions or Fortran EQUIVALENCE statements.</p>
-<p>Usually a C struct or Fortran derived type will be defined to hold a data point in memory, and the offsets of the members in memory will be the offsets of the struct members from the beginning of an instance of the struct. The HDF5 C library provides a macro <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> (s,m)to calculate the member’s offset. The HDF5 Fortran applications have to calculate offsets by using sizes of members datatypes and by taking in consideration the order of members in the Fortran derived type. </p><div class="fragment"><div class="line"><a class="code" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a>(s,m)</div>
+<p>Usually a C struct or Fortran derived type will be defined to hold a data point in memory, and the offsets of the members in memory will be the offsets of the struct members from the beginning of an instance of the struct. The HDF5 C library provides a macro <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> (s,m)to calculate the member's offset. The HDF5 Fortran applications have to calculate offsets by using sizes of members datatypes and by taking in consideration the order of members in the Fortran derived type. </p><div class="fragment"><div class="line"><a class="code" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a>(s,m)</div>
 <div class="ttc" id="a_h5_tpublic_8h_html_af5242159129a7f37ab85d33d85a1ccac"><div class="ttname"><a href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a></div><div class="ttdeci">#define HOFFSET(S, M)</div><div class="ttdef"><b>Definition:</b> H5Tpublic.h:22</div></div>
 </div><!-- fragment --><p> This macro computes the offset of member m within a struct s </p><div class="fragment"><div class="line">offsetof(s,m)</div>
 </div><!-- fragment --><p> This macro defined in stddef.h does exactly the same thing as the <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET()</a>macro.</p>
@@ -1118,7 +1118,7 @@ Memory layout of a compound datatype that requires padding</div></div>
 <div class="ttc" id="agroup___f_h5_p_html_ga30ca2403048c0f2c3bd561b7b9a81760"><div class="ttname"><a href="group___f_h5_p.html#ga30ca2403048c0f2c3bd561b7b9a81760">h5p::h5pset_preserve_f</a></div><div class="ttdeci">subroutine h5pset_preserve_f(prp_id, flag, hdferr)</div><div class="ttdoc">Sets the dataset transfer property list status to TRUE or FALSE for initializing compound datatype me...</div><div class="ttdef"><b>Definition:</b> H5Pff.F90:274</div></div>
 <div class="ttc" id="agroup___f_h5_p_html_gae34064e5081802ef4c8e3c84e279b6c8"><div class="ttname"><a href="group___f_h5_p.html#gae34064e5081802ef4c8e3c84e279b6c8">h5p::h5pcreate_f</a></div><div class="ttdeci">subroutine h5pcreate_f(class, prp_id, hdferr)</div><div class="ttdoc">Creates a new property as an instance of a property list class.</div><div class="ttdef"><b>Definition:</b> H5Pff.F90:244</div></div>
 </div><!-- fragment --><h4>Reading Datasets with Compound Datatypes</h4>
-<p>Reading datasets with compound datatypes may be a challenge. For general applications there is no way to know a priori the corresponding C structure. Also, C structures cannot be allocated on the fly during discovery of the dataset’s datatype. For general C, C++, Fortran and Java application the following steps will be required to read and to interpret data from the dataset with compound datatype: </p><ul>
+<p>Reading datasets with compound datatypes may be a challenge. For general applications there is no way to know a priori the corresponding C structure. Also, C structures cannot be allocated on the fly during discovery of the dataset's datatype. For general C, C++, Fortran and Java application the following steps will be required to read and to interpret data from the dataset with compound datatype: </p><ul>
 <li>1. Get the identifier of the compound datatype in the file with the <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type</a> call </li>
 <li>2. Find the number of the compound datatype members with the <a class="el" href="group___c_o_m_p_e_n_u_m.html#ga21bdfc706f71ebe298a433e74b5bc626" title="Retrieves the number of elements in a compound or enumeration datatype.">H5Tget_nmembers</a> call </li>
 <li>3. Iterate through compound datatype members <ul>
@@ -1226,7 +1226,7 @@ If class is <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93
 <div class="line"> </div>
 <div class="line">data = (sf_t *) malloc (<span class="keyword">sizeof</span>(sf_t) * LENGTH);</div>
 <div class="line"><a class="code" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a>(dataset_id, sf_tid, <a class="code" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, data);</div>
-</div><!-- fragment --><p>The example below shows how to read float and double members of a compound datatype into a structure that has those fields in a different order. Please notice that <a class="el" href="group___c_o_m_p_o_u_n_d.html#ga487d8f64a76f48b6eeb7f402d3b8b081" title="Adds a new member to a compound datatype.">H5Tinsert</a> calls can be used in an order different from the order of the structure’s members.</p>
+</div><!-- fragment --><p>The example below shows how to read float and double members of a compound datatype into a structure that has those fields in a different order. Please notice that <a class="el" href="group___c_o_m_p_o_u_n_d.html#ga487d8f64a76f48b6eeb7f402d3b8b081" title="Adds a new member to a compound datatype.">H5Tinsert</a> calls can be used in an order different from the order of the structure's members.</p>
 <p><em>Read float and double members of a compound datatype</em> </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span>sdf_t {</div>
 <div class="line">  <span class="keywordtype">double</span> c;</div>
 <div class="line">  <span class="keywordtype">float</span> b;</div>
@@ -2095,7 +2095,7 @@ Text Descriptions of Datatypes: Conversion to and from</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:00 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:45 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

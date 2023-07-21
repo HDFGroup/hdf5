@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -111,7 +111,7 @@ Introduction</h2>
 <p>In the simple and most common case, the file structure is a tree structure; in the general case, the file structure may be a directed graph with a designated entry point. The tree structure is very similar to the file system structures employed on UNIX systems, directories and files, and on Apple and Microsoft Windows systems, folders and files. HDF5 groups are analogous to the directories and folders; HDF5 datasets are analogous to the files.</p>
 <p>The one very important difference between the HDF5 file structure and the above-mentioned file system analogs is that HDF5 groups are linked as a directed graph, allowing circular references; the file systems are strictly hierarchical, allowing no circular references. The figures below illustrate the range of possibilities.</p>
 <p>In the first figure below, the group structure is strictly hierarchical, identical to the file system analogs.</p>
-<p>In the next two figures below, the structure takes advantage of the directed graph’s allowance of circular references. In the second figure, GroupA is not only a member of the root group, /, but a member of GroupC. Since Group C is a member of Group B and Group B is a member of Group A, Dataset1 can be accessed by means of the circular reference /Group A/Group B/Group C/Group A/Dataset1. The third figure below illustrates an extreme case in which GroupB is a member of itself, enabling a reference to a member dataset such as /Group A/Group B/Group B/Group B/Dataset2.</p>
+<p>In the next two figures below, the structure takes advantage of the directed graph's allowance of circular references. In the second figure, GroupA is not only a member of the root group, /, but a member of GroupC. Since Group C is a member of Group B and Group B is a member of Group A, Dataset1 can be accessed by means of the circular reference /Group A/Group B/Group C/Group A/Dataset1. The third figure below illustrates an extreme case in which GroupB is a member of itself, enabling a reference to a member dataset such as /Group A/Group B/Group B/Group B/Dataset2.</p>
 <table class="doxtable">
 <tr>
 <td><div class="image">
@@ -194,7 +194,7 @@ The Hierarchy of Data Objects</h3>
 <p>It is important to note that, just like the UNIX file system, HDF5 objects do not have names, the names are associated with paths. An object has an object identifier that is unique within the file, but a single object may have many names because there may be many paths to the same object. An object can be renamed, or moved to another group, by adding and deleting links. In this case, the object itself never moves. For that matter, membership in a group has no implication for the physical location of the stored object.</p>
 <p>Deleting a link to an object does not necessarily delete the object. The object remains available as long as there is at least one link to it. After all links to an object are deleted, it can no longer be opened, and the storage may be reclaimed.</p>
 <p>It is also important to realize that the linking mechanism can be used to construct very complex graphs of objects. For example, it is possible for an object to be shared between several groups and even to have more than one name in the same group. It is also possible for a group to be a member of itself, or to create other cycles in the graph, such as in the case where a child group is linked to one of its ancestors.</p>
-<p>HDF5 also has soft links similar to UNIX soft links. A soft link is an object that has a name and a path name for the target object. The soft link can be followed to open the target of the link just like a regular or hard link. The differences are that the hard link cannot be created if the target object does not exist and it always points to the same object. A soft link can be created with any path name, whether or not the object exists; it may or may not, therefore, be possible to follow a soft link. Furthermore, a soft link’s target object may be changed.</p>
+<p>HDF5 also has soft links similar to UNIX soft links. A soft link is an object that has a name and a path name for the target object. The soft link can be followed to open the target of the link just like a regular or hard link. The differences are that the hard link cannot be created if the target object does not exist and it always points to the same object. A soft link can be created with any path name, whether or not the object exists; it may or may not, therefore, be possible to follow a soft link. Furthermore, a soft link's target object may be changed.</p>
 <h3><a class="anchor" id="subsubsec_group_descr_path"></a>
 HDF5 Path Names</h3>
 <p>The structure of the HDF5 file constitutes the name space for the objects in the file. A path name is a string of components separated by slashes (/). Each component is the name of a hard or soft link which points to an object in the file. The slash not only separates the components, but indicates their hierarchical relationship; the component indicated by the link name following a slash is a always a member of the component indicated by the link name preceding that slash.</p>
@@ -230,11 +230,11 @@ A file with a circular reference</div></div>
 Group Implementations in HDF5</h3>
 <p>The original HDF5 group implementation provided a single indexed structure for link storage. A new group implementation, as of HDF5 Release 1.8.0, enables more efficient compact storage for very small groups, improved link indexing for large groups, and other advanced features. </p><ul>
 <li>
-The original indexed format remains the default. Links are stored in a B-tree in the group’s local heap. </li>
+The original indexed format remains the default. Links are stored in a B-tree in the group's local heap. </li>
 <li>
 Groups created in the new compact-or-indexed format, the implementation introduced with Release 1.8.0, can be tuned for performance, switching between the compact and indexed formats at thresholds set in the user application. <ul>
 <li>
-The compact format will conserve file space and processing overhead when working with small groups and is particularly valuable when a group contains no links. Links are stored as a list of messages in the group’s header. </li>
+The compact format will conserve file space and processing overhead when working with small groups and is particularly valuable when a group contains no links. Links are stored as a list of messages in the group's header. </li>
 <li>
 The indexed format will yield improved performance when working with large groups. A large group may contain thousands to millions of members. Links are stored in a fractal heap and indexed with an improved B-tree. </li>
 </ul>
@@ -297,7 +297,7 @@ Group Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___h5_g.html#gad4be126ab7bbf2001435e8e70089f3d3" title="Retrieves information about a group.">H5Gget_info</a> </td><td>Retrieves information about a group. Use instead of H5Gget_num_objs.  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00" title="Retrieves information about a group, according to the group’s position within an index.">H5Gget_info_by_idx</a> </td><td>Retrieves information about a group according to the group’s position within an index.  </td></tr>
+<td><a class="el" href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00" title="Retrieves information about a group, according to the group&#39;s position within an index.">H5Gget_info_by_idx</a> </td><td>Retrieves information about a group according to the group's position within an index.  </td></tr>
 <tr>
 <td><a class="el" href="group___h5_g.html#gadedd0c73c98f2ada69305f2992c3300e" title="Retrieves information about a group by its name.">H5Gget_info_by_name</a> </td><td>Retrieves information about a group.  </td></tr>
 </table>
@@ -430,7 +430,7 @@ Terminate access to the group (Close the group).</li>
 <h3><a class="anchor" id="subsubsec_group_program_create"></a>
 Creating a Group</h3>
 <p>To create a group, use <a class="el" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a>, specifying the location and the path of the new group. The location is the identifier of the file or the group in a file with respect to which the new group is to be identified. The path is a string that provides either an absolute path or a relative path to the new group. For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_g__u_g.html#subsubsec_group_descr_path">HDF5 Path Names</a>.</dd></dl>
-<p>A path that begins with a slash (/) is an absolute path indicating that it locates the new group from the root group of the HDF5 file. A path that begins with any other character is a relative path. When the location is a file, a relative path is a path from that file’s root group; when the location is a group, a relative path is a path from that group.</p>
+<p>A path that begins with a slash (/) is an absolute path indicating that it locates the new group from the root group of the HDF5 file. A path that begins with any other character is a relative path. When the location is a file, a relative path is a path from that file's root group; when the location is a group, a relative path is a path from that group.</p>
 <p>The sample code in the example below creates three groups. The group Data is created in the root directory; two groups are then created in /Data, one with absolute path, the other with a relative path.</p>
 <p><em>Creating three new groups</em> </p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file;</div>
 <div class="line">file = <a class="code" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(....);</div>
@@ -512,14 +512,14 @@ Creating Links</h3>
 </div><!-- fragment --><p>With the soft links defined in the example above, the dataset CData in the group /Data can now be opened with any of the names /Data/CData, /Soft2/CData, or /Soft3/CData.</p>
 <p>In release 1.8.7, a cache was added to hold the names of files accessed via external links. The size of this cache can be changed to help improve performance. For more information, see the entry in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a> for the <a class="el" href="group___f_a_p_l.html#gac21a815e9b133802df625c9f766ef325" title="Sets the number of files that can be held open in an external link open file cache.">H5Pset_elink_file_cache_size</a> function call.</p>
 <h4>Note Regarding Hard Links and Soft Links</h4>
-<p>Note that an object’s existence in a file is governed by the presence of at least one hard link to that object. If the last hard link to an object is removed, the object is removed from the file and any remaining soft link becomes a dangling link, a link whose target object does not exist.</p>
+<p>Note that an object's existence in a file is governed by the presence of at least one hard link to that object. If the last hard link to an object is removed, the object is removed from the file and any remaining soft link becomes a dangling link, a link whose target object does not exist.</p>
 <h4>Moving or Renaming Objects, and a Warning</h4>
 <p>An object can be renamed by changing the name of a link to it with <a class="el" href="group___h5_l.html#ga0bbc7f9bf25c8aca9dd8433a325c8acb" title="Moves a link within an HDF5 file.">H5Lmove</a>. This has the same effect as creating a new link with the new name and deleting the link with the old name.</p>
 <p>Exercise caution in the use of <a class="el" href="group___h5_l.html#ga0bbc7f9bf25c8aca9dd8433a325c8acb" title="Moves a link within an HDF5 file.">H5Lmove</a> and <a class="el" href="group___h5_l.html#ga5b4e7f59f5d4bdae94fd8ce6875295cf" title="Removes a link from a group.">H5Ldelete</a> as these functions each include a step that unlinks a pointer to an HDF5 object. If the link that is removed is on the only path leading to an HDF5 object, that object will become permanently inaccessible in the file.</p>
 <h5>Scenario 1: Removing the Last Link</h5>
 <p>To avoid removing the last link to an object or otherwise making an object inaccessible, use the <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a> function. Make sure that the value of the reference count field (rc) is greater than 1.</p>
 <h5>Scenario 2: Moving a Link that Isolates an Object</h5>
-<p>Consider the following example: assume that the group group2 can only be accessed via the following path, where top_group is a member of the file’s root group: <em>/top_group/group1/group2/</em></p>
+<p>Consider the following example: assume that the group group2 can only be accessed via the following path, where top_group is a member of the file's root group: <em>/top_group/group1/group2/</em></p>
 <p>Using <a class="el" href="group___h5_l.html#ga0bbc7f9bf25c8aca9dd8433a325c8acb" title="Moves a link within an HDF5 file.">H5Lmove</a>, top_group is renamed to be a member ofgroup2. At this point, since top_group was the only route from the root group to group1, there is no longer a path by which one can access group1, group2, or any member datasets. And since top_group is now a member of group2, top_group itself and any member datasets have thereby also become inaccessible.</p>
 <h4>Mounting a File</h4>
 <p>An external link is a permanent connection between two files. A temporary connection can be set up with the <a class="el" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b" title="Mounts an HDF5 file.">H5Fmount</a> function. For more information, </p><dl class="section see"><dt>See also</dt><dd>sec_file. For more information, see the <a class="el" href="group___h5_f.html#ga7c4865fd36ee25d839725252150bb53b" title="Mounts an HDF5 file.">H5Fmount</a> function in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</dd></dl>
@@ -560,7 +560,7 @@ c) A link named dset2 to the same dataset is created in /group2.</div></div>
 d) The link from /group1 to dset1 is removed. The dataset is</div></div>
  still in the file, but can be accessed only as /group2/dset2."   </td></tr>
 </table>
-<p>Figure 10 illustrates loops in an HDF5 file structure. The file in part a contains three groups and a dataset; group2 is a member of the root group and of the root group’s other member group, group1. group2 thus can be accessed by either of two paths: /group2 or /group1/GXX. Similarly, the dataset can be accessed either as /group2/dset1 or as /group1/GXX/dset1.</p>
+<p>Figure 10 illustrates loops in an HDF5 file structure. The file in part a contains three groups and a dataset; group2 is a member of the root group and of the root group's other member group, group1. group2 thus can be accessed by either of two paths: /group2 or /group1/GXX. Similarly, the dataset can be accessed either as /group2/dset1 or as /group1/GXX/dset1.</p>
 <p>Part b illustrates a different case: the dataset is a member of a single group but with two links, or names, in that group. In this case, the dataset again has two names, /group1/dset1 and /group1/dset2.</p>
 <p>In part c, the dataset dset1 is a member of two groups, one of which can be accessed by either of two names. The dataset thus has three path names: /group1/dset1, /group2/dset2, and /group1/GXX/dset2.</p>
 <p>And in part d, two of the groups are members of each other and the dataset is a member of both groups. In this case, there are an infinite number of paths to the dataset because GXX and GYY can be traversed any number of times on the way from the root group, /, to the dataset. This can yield a path name such as /group1/GXX/GYY/GXX/GYY/GXX/dset2.</p>
@@ -620,7 +620,7 @@ d) The target of the soft link is created or linked.</div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:00 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:44 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

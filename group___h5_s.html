@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1766,7 +1766,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d" title="Selects array elements to be included in the selection for a dataspace.">H5Sselect_elements()</a> selects array elements to be included in the selection for the <code>space_id</code> dataspace. This is referred to as a point selection.</p>
 <p>The number of elements selected is set in the <code>num_elements</code> parameter.</p>
-<p>The <code>coord</code> parameter is a pointer to a buffer containing a serialized 2-dimensional array of size <code>num_elements</code> by the rank of the dataspace. The array lists dataset elements in the point selection; that is, it’s a list of zero-based values specifying the coordinates in the dataset of the selected elements. The order of the element coordinates in the <code>coord</code> array specifies the order in which the array elements are iterated through when I/O is performed. Duplicate coordinate locations are not checked for. See below for examples of the mapping between the serialized contents of the buffer and the point selection array that it represents.</p>
+<p>The <code>coord</code> parameter is a pointer to a buffer containing a serialized 2-dimensional array of size <code>num_elements</code> by the rank of the dataspace. The array lists dataset elements in the point selection; that is, it's a list of zero-based values specifying the coordinates in the dataset of the selected elements. The order of the element coordinates in the <code>coord</code> array specifies the order in which the array elements are iterated through when I/O is performed. Duplicate coordinate locations are not checked for. See below for examples of the mapping between the serialized contents of the buffer and the point selection array that it represents.</p>
 <p>The selection operator <code>op</code> determines how the new selection is to be combined with the previously existing selection for the dataspace. The following operators are supported:</p>
 <table class="doxtable">
 <tr>
@@ -2178,7 +2178,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:01 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:45 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

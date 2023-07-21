@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -544,7 +544,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5_l_r.html#gabb053f246fd0cfcb588bafe98278b9b8" title="Retrieves information about the data a region reference points to.">H5LRget_region_info()</a> queries information about the data pointed by a region reference <code>ref</code>. It returns one of the absolute paths to a dataset, length of the path, dataset’s rank and datatype, description of the referenced region and type of the referenced region. Any output argument can be NULL if that argument does not need to be returned.</p>
+<p><a class="el" href="group___h5_l_r.html#gabb053f246fd0cfcb588bafe98278b9b8" title="Retrieves information about the data a region reference points to.">H5LRget_region_info()</a> queries information about the data pointed by a region reference <code>ref</code>. It returns one of the absolute paths to a dataset, length of the path, dataset's rank and datatype, description of the referenced region and type of the referenced region. Any output argument can be NULL if that argument does not need to be returned.</p>
 <p>The parameter <code>obj_id</code> is an identifier for any object in the HDF5 file containing the referenced object. For example, it can be an identifier of a dataset the region reference belongs to or an identifier of an HDF5 file the dataset with region references is stored in.</p>
 <p>The parameter <code>ref</code> is a region reference to query.</p>
 <p>The parameter <code>path</code> is a pointer to application allocated buffer of size <code>len+1</code> to return an absolute path to a dataset the region reference points to.</p>
@@ -909,7 +909,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:02 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:46 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

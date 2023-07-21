@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -301,7 +301,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative reference count of the object ID after decrementing it, if successful; otherwise a negative value is returned.</dd></dl>
 <p><a class="el" href="group___h5_i.html#gaea2aa78caea892edf2a6a6ac70486ed9" title="Decrements the reference count for an object.">H5Idec_ref()</a> decrements the reference count of the object identified by <code>id</code>.</p>
 <p>The reference count for an object ID is attached to the information about an object in memory and has no relation to the number of links to an object on disk.</p>
-<p>The reference count for a newly created object will be 1. Reference counts for objects may be explicitly modified with this function or with <a class="el" href="group___h5_i.html#ga3fd0c157704573965cafd6e1aa7f368f" title="Increments the reference count for an object.">H5Iinc_ref()</a>. When an object identifier’s reference count reaches zero, the object will be closed. Calling an object identifier’s <code>close</code> function decrements the reference count for the identifier, which normally closes the object, but if the reference count for the identifier has been incremented with <a class="el" href="group___h5_i.html#ga3fd0c157704573965cafd6e1aa7f368f" title="Increments the reference count for an object.">H5Iinc_ref()</a>, the object will only be closed when the reference count reaches zero with further calls to this function or the object identifier’s <code>close</code> function.</p>
+<p>The reference count for a newly created object will be 1. Reference counts for objects may be explicitly modified with this function or with <a class="el" href="group___h5_i.html#ga3fd0c157704573965cafd6e1aa7f368f" title="Increments the reference count for an object.">H5Iinc_ref()</a>. When an object identifier's reference count reaches zero, the object will be closed. Calling an object identifier's <code>close</code> function decrements the reference count for the identifier, which normally closes the object, but if the reference count for the identifier has been incremented with <a class="el" href="group___h5_i.html#ga3fd0c157704573965cafd6e1aa7f368f" title="Increments the reference count for an object.">H5Iinc_ref()</a>, the object will only be closed when the reference count reaches zero with further calls to this function or the object identifier's <code>close</code> function.</p>
 <p>If the object ID was created by a collective parallel call (such as <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a>, <a class="el" href="group___h5_g.html#ga3eca6807deff4f9e51fc5fe0befc2245">H5Gopen()</a>, etc.), the reference count should be modified by all the processes which have copies of the ID. Generally, this means that group, dataset, attribute, file and named datatype IDs should be modified by all the processes and that all other types of IDs are safe to modify by individual processes.</p>
 <p>This function is of particular value when an application maintains multiple copies of an object ID. The object ID can be incremented when a copy is made. Each copy of the ID can then be safely closed or decremented and the HDF5 object will be closed when the reference count for that object drops to zero.</p>
 <dl class="section since"><dt>Since</dt><dd>1.6.2 </dd></dl>
@@ -587,7 +587,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:04 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:47 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

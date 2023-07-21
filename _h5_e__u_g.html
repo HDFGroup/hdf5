@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -110,7 +110,7 @@ HDF5 Error Handling</h1>
 Introduction</h2>
 <p>The HDF5 Library provides an error reporting mechanism for both the library itself and for user application programs. It can trace errors through function stack and error information like file name, function name, line number, and error description.</p>
 <p><a class="el" href="_h5_e__u_g.html#subsec_error_ops">Basic Error Handling Operations</a> discusses the basic error concepts such as error stack, error record, and error message and describes the related API functions. These concepts and functions are sufficient for application programs to trace errors inside the HDF5 Library.</p>
-<p><a class="el" href="_h5_e__u_g.html#subsec_error_adv">Advanced Error Handling Operations</a> talks about the advanced concepts of error class and error stack handle and talks about the related functions. With these concepts and functions, an application library or program using the HDF5 Library can have its own error report blended with HDF5’s error report.</p>
+<p><a class="el" href="_h5_e__u_g.html#subsec_error_adv">Advanced Error Handling Operations</a> talks about the advanced concepts of error class and error stack handle and talks about the related functions. With these concepts and functions, an application library or program using the HDF5 Library can have its own error report blended with HDF5's error report.</p>
 <p>Starting with Release 1.8, we have a new set of Error Handling API functions. For the purpose of backward compatibility with version 1.6 and before, we still keep the old API functions, <a class="el" href="group___h5_e.html#ga7e2d223ad3bf68fe35f343b97edf0e92">H5Epush1</a>, <a class="el" href="group___h5_e.html#ga9c71eb8e5b7261668e2e8926f1822365">H5Eprint1</a>, <a class="el" href="group___h5_e.html#ga8d54a0f62f9ea625bdeab8e5e0c894c4">H5Ewalk1</a>, <a class="el" href="group___h5_e.html#ga0f2ee26cbe35c5dde49d615fc31ea2f6">H5Eclear1</a>, <a class="el" href="group___h5_e.html#ga0ca4dd7ed560882a7da176a0e2325707">H5Eget_auto1</a>, <a class="el" href="group___h5_e.html#gab7e1c2db4a0811b70227833b5462eea8">H5Eset_auto1</a>. These functions do not have the error stack as a parameter. The library allows them to operate on the default error stack. (The H5E compatibility macros will choose the correct function based on the parameters)</p>
 <p>The old API is similar to functionality discussed in <a class="el" href="_h5_e__u_g.html#subsec_error_ops">Basic Error Handling Operations</a>. The functionality discussed in <a class="el" href="_h5_e__u_g.html#subsec_error_adv">Advanced Error Handling Operations</a>,the ability of allowing applications to add their own error records, is the new design for the Error Handling API.</p>
 <h2><a class="anchor" id="subsec_error_H5E"></a>
@@ -124,7 +124,7 @@ Basic Error Handling Operations</h2>
 <p>Let us first try to understand the error stack. An error stack is a collection of error records. Error records can be pushed onto or popped off the error stack. By default, when an error occurs deep within the HDF5 Library, an error record is pushed onto an error stack and that function returns a failure indication. Its caller detects the failure, pushes another record onto the stack, and returns a failure indication. This continues until the API function called by the application returns a failure indication. The next API function being called will reset the error stack. All HDF5 Library error records belong to the same error class. For more information, see <a class="el" href="_h5_e__u_g.html#subsec_error_adv">Advanced Error Handling Operations</a>.</p>
 <h3><a class="anchor" id="subsubsec_error_ops_stack"></a>
 Error Stack and Error Message</h3>
-<p>In normal circumstances, an error causes the stack to be printed on the standard error stream automatically. This automatic error stack is the library’s default stack. For all the functions in this section, whenever an error stack ID is needed as a parameter, <a class="el" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a> can be used to indicate the library’s default stack. The first error record of the error stack, number #000, is produced by the API function itself and is usually sufficient to indicate to the application what went wrong. </p><table class="doxtable">
+<p>In normal circumstances, an error causes the stack to be printed on the standard error stream automatically. This automatic error stack is the library's default stack. For all the functions in this section, whenever an error stack ID is needed as a parameter, <a class="el" href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a> can be used to indicate the library's default stack. The first error record of the error stack, number #000, is produced by the API function itself and is usually sufficient to indicate to the application what went wrong. </p><table class="doxtable">
 <caption align="top">Example: An Error Message</caption>
 <tr>
 <td><p class="starttd"></p>
@@ -166,13 +166,12 @@ Mute Error Stack</h3>
 <div class="line"> <a class="code" href="group___h5_e.html#ga2eda33cbadd9be5bfddbaa91e863c936">H5Eget_auto2</a>(error_stack, &amp;old_func, &amp;old_client_data);</div>
 <div class="line"> ***  Turn off error handling  ***</div>
 <div class="line"> <a class="code" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2</a>(error_stack, NULL, NULL);</div>
-<div class="line"> ***  Probe. Likely to fail, but that’s okay  ***</div>
-<div class="line"> status = <a class="code" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a> (......);</div>
-<div class="line"> ***  Restore previous error handler  ***</div>
-<div class="line"> <a class="code" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2</a>(error_stack, old_func, old_client_data);</div>
+<div class="line"> ***  Probe. Likely to fail, but that<span class="stringliteral">&#39;s okay  ***</span></div>
+<div class="line"><span class="stringliteral"> status = H5Fopen (......);</span></div>
+<div class="line"><span class="stringliteral"> ***  Restore previous error handler  ***</span></div>
+<div class="line"><span class="stringliteral"> H5Eset_auto2(error_stack, old_func, old_client_data);</span></div>
 <div class="ttc" id="a_h5_epublic_8h_html_a0109c84ac574ac24abe6f7c7acab3fca"><div class="ttname"><a href="_h5_epublic_8h.html#a0109c84ac574ac24abe6f7c7acab3fca">H5E_auto2_t</a></div><div class="ttdeci">herr_t(* H5E_auto2_t)(hid_t estack, void *client_data)</div><div class="ttdoc">Callback function for H5Eset_auto2()</div><div class="ttdef"><b>Definition:</b> H5Epublic.h:192</div></div>
 <div class="ttc" id="agroup___h5_e_html_ga2eda33cbadd9be5bfddbaa91e863c936"><div class="ttname"><a href="group___h5_e.html#ga2eda33cbadd9be5bfddbaa91e863c936">H5Eget_auto2</a></div><div class="ttdeci">herr_t H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)</div><div class="ttdoc">Returns the settings for the automatic error stack traversal function and its data.</div></div>
-<div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
 </div><!-- fragment --><p>Or automatic printing can be disabled altogether and error messages can be explicitly printed.</p>
 <p><em>Example: Disable automatic printing and explicitly print error messages</em> </p><div class="fragment"><div class="line">***  Turn off error handling permanently  ***</div>
 <div class="line"><a class="code" href="group___h5_e.html#gaf0d6b18cd5160517fe5165b9a8443c69">H5Eset_auto2</a>(error_stack, NULL, NULL);</div>
@@ -182,6 +181,7 @@ Mute Error Stack</h3>
 <div class="line">    exit (1);</div>
 <div class="line">}</div>
 <div class="ttc" id="a_h5_epublic_8h_html_ad7ca07d2b387a59c7e8bcab22fa57455"><div class="ttname"><a href="_h5_epublic_8h.html#ad7ca07d2b387a59c7e8bcab22fa57455">H5E_DEFAULT</a></div><div class="ttdeci">#define H5E_DEFAULT</div><div class="ttdef"><b>Definition:</b> H5Epublic.h:25</div></div>
+<div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_error_ops_custom_print"></a>
 Customized Printing of an Error Stack</h3>
 <p>Applications are allowed to define an automatic error traversal function other than the default <a class="el" href="group___h5_e.html#gaa7e93cb96b399e5853721258872435a8">H5Eprint()</a>. For instance, one can define a function that prints a simple, one‐line error message to the standard error stream and then exits. The first example below defines a such a function. The second example below installs the function as the error handler.</p>
@@ -262,7 +262,7 @@ Advanced Error Handling Operations</h2>
 <caption align="top">Example: An Error Report</caption>
 <tr>
 <td><p class="starttd"></p>
-<p class="intertd">An error report shows both the library’s error record and the application’s error records. See the example below. </p>
+<p class="intertd">An error report shows both the library's error record and the application's error records. See the example below. </p>
 <p class="endtd"><code></p><pre>
 Error Test-DIAG: Error detected in Error Program (1.0)
         thread 8192:
@@ -282,7 +282,7 @@ Error Test-DIAG: Error detected in Error Program (1.0)
       </pre><p></code>   </p>
 </td></tr>
 </table>
-<p>In the line above error record #002 in the example above, the starting phrase is HDF5. This is the error class name of the HDF5 Library. All of the library’s error messages (major and minor) are in this default error class. The Error Test in the beginning of the line above error record #000 is the name of the application’s error class. The first two error records, #000 and #001, are from application’s error class. By definition, an error class is a group of major and minor error messages for a library (the HDF5 Library or an application library built on top of the HDF5 Library) or an application program. The error class can be registered for a library or program through the HDF5 Error API. Major and minor messages can be defined in an error class. An application will have object handles for the error class and for major and minor messages for further operation. See the example below.</p>
+<p>In the line above error record #002 in the example above, the starting phrase is HDF5. This is the error class name of the HDF5 Library. All of the library's error messages (major and minor) are in this default error class. The Error Test in the beginning of the line above error record #000 is the name of the application's error class. The first two error records, #000 and #001, are from application's error class. By definition, an error class is a group of major and minor error messages for a library (the HDF5 Library or an application library built on top of the HDF5 Library) or an application program. The error class can be registered for a library or program through the HDF5 Error API. Major and minor messages can be defined in an error class. An application will have object handles for the error class and for major and minor messages for further operation. See the example below.</p>
 <p><em>Example: The user‐defined error handler</em> </p><div class="fragment"><div class="line">\#define MSG_SIZE 64</div>
 <div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div>
 <div class="line">custom_print_cb(<span class="keywordtype">unsigned</span> n, <span class="keyword">const</span> <a class="code" href="struct_h5_e__error2__t.html">H5E_error2_t</a> *err_desc,</div>
@@ -409,7 +409,7 @@ Pushing an Application Error Message onto Error Stack</h3>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:57:59 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:44 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

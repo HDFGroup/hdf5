@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -169,7 +169,7 @@ Low-level File Drivers</h2>
 <li>Single file on a standard file system </li>
 <li>Multiple files on a standard file system </li>
 <li>Multiple files on a parallel file system </li>
-<li>Block of memory within an application’s memory space </li>
+<li>Block of memory within an application's memory space </li>
 <li>More abstract situations such as virtual files</li>
 </ul>
 <p>This HDF5 address space is generally referred to as an HDF5 file regardless of its organization at the storage level.</p>
@@ -293,7 +293,7 @@ File Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___m_d_c.html#gaa67f127242d4aaf244ae8ac4a1fe6a59" title="Obtains current metadata cache configuration for target file.">H5Fget_mdc_config</a> </td><td>Obtains current metadata cache configuration for target file.  </td></tr>
 <tr>
-<td><a class="el" href="group___m_d_c.html#gabea066c3fd924d2cf868ecee66a7c41f" title="Obtains target file&#39;s metadata cache hit rate.">H5Fget_mdc_hit_rate</a> </td><td>Obtains target file’s metadata cache hit rate.  </td></tr>
+<td><a class="el" href="group___m_d_c.html#gabea066c3fd924d2cf868ecee66a7c41f" title="Obtains target file&#39;s metadata cache hit rate.">H5Fget_mdc_hit_rate</a> </td><td>Obtains target file's metadata cache hit rate.  </td></tr>
 <tr>
 <td><a class="el" href="group___m_d_c.html#gacda6cbd60d3c50b59f801eba4e5a335f" title="Obtains current metadata cache size data for specified file.">H5Fget_mdc_size</a> </td><td>Obtains current metadata cache size data for specified file.  </td></tr>
 <tr>
@@ -483,7 +483,7 @@ Creating or Opening an HDF5 File</h2>
 <p>To create a new file, call <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate</a>: </p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="code" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a> (<span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keywordtype">unsigned</span> flags, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fcpl_id, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id)</div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition:</b> H5Ipublic.h:60</div></div>
 </div><!-- fragment --><p><a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate</a> creates a new file named name in the current directory. The file is opened with read and write access; if the <a class="el" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a> flag is set, any pre-existing file of the same name in the same directory is truncated. If <a class="el" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a> is not set or <a class="el" href="_h5_fpublic_8h.html#a7a47250dc1435705233dca7297ba3d90">H5F_ACC_EXCL</a> is set and if a file of the same name exists, <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate</a> will fail.</p>
-<p>The new file is created with the properties specified in the property lists fcpl_id and fapl_id. fcpl is short for file creation property list. fapl is short for file access property list. Specifying <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> for either the creation or access property list will use the library’s default creation or access properties.</p>
+<p>The new file is created with the properties specified in the property lists fcpl_id and fapl_id. fcpl is short for file creation property list. fapl is short for file access property list. Specifying <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> for either the creation or access property list will use the library's default creation or access properties.</p>
 <p>If <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate</a> successfully creates the file, it returns a file identifier for the new file. This identifier will be used by the application any time an object identifier, an OID, for the file is required. Once the application has finished working with a file, the identifier should be released and the file closed with <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose</a>.</p>
 <p>To open an existing file, call <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen</a>: </p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="code" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a> (<span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keywordtype">unsigned</span> flags, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id)</div>
 </div><!-- fragment --><p><a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen</a> opens an existing file with read-write access if <a class="el" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a> is set and read-only access if <a class="el" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a> is set.</p>
@@ -562,7 +562,7 @@ File Access Properties</h3>
 <p>Data sieve buffering is used by certain file drivers to speed data I/O and is most commonly when working with dataset hyperslabs. For example, using a buffer large enough to hold several pieces of a dataset as it is read in for hyperslab selections will boost performance noticeably.</p>
 <p><a class="el" href="group___f_a_p_l.html#ga24fd737955839194bf5605d5f47928ee" title="Sets the maximum size of the data sieve buffer.">H5Pset_sieve_buf_size</a> sets the maximum size in bytes of the data sieve buffer. <a class="el" href="group___f_a_p_l.html#gac2321d0c34bb2b3cf33cd7bf02ca8e66" title="Returns maximum data sieve buffer size.">H5Pget_sieve_buf_size</a> retrieves the current maximum size of the data sieve buffer.</p>
 <h4>Garbage Collection References</h4>
-<p>Dataset region references and other reference types use space in an HDF5 file’s global heap. If garbage collection is on (1) and the user passes in an uninitialized value in a reference structure, the heap might become corrupted. When garbage collection is off (0), however, and the user reuses a reference, the previous heap block will be orphaned and not returned to the free heap space. When garbage collection is on, the user must initialize the reference structures to 0 or risk heap corruption.</p>
+<p>Dataset region references and other reference types use space in an HDF5 file's global heap. If garbage collection is on (1) and the user passes in an uninitialized value in a reference structure, the heap might become corrupted. When garbage collection is off (0), however, and the user reuses a reference, the previous heap block will be orphaned and not returned to the free heap space. When garbage collection is on, the user must initialize the reference structures to 0 or risk heap corruption.</p>
 <p><a class="el" href="group___f_a_p_l.html#ga61f01a12d5392ccf1321168f3c28f36f" title="Sets garbage collecting references flag.">H5Pset_gc_references</a> sets the garbage collecting references flag.</p>
 <h2><a class="anchor" id="subsec_file_alternate_drivers"></a>
 Alternate File Storage Layouts and Low-level File Drivers</h2>
@@ -570,7 +570,7 @@ Alternate File Storage Layouts and Low-level File Drivers</h2>
 <li>Single file on standard file system </li>
 <li>Multiple files on standard file system </li>
 <li>Multiple files on parallel file system </li>
-<li>Block of memory within application’s memory space </li>
+<li>Block of memory within application's memory space </li>
 <li>More abstract situations such as virtual files</li>
 </ul>
 <p>This HDF5 address space is generally referred to as an HDF5 file regardless of its organization at the storage level.</p>
@@ -603,7 +603,7 @@ I/O path from application to VFL and low-level drivers to storage</div></div>
 <tr>
 <td>Memory </td><td><a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a> </td><td>With this driver, an application can work with a file in memory for faster reads and writes. File contents are kept in memory until the file is closed. At closing, the memory version of the file can be written back to disk or abandoned. </td><td><a class="el" href="group___f_a_p_l.html#ga6e6628f620a1c58c704129cf07282849" title="Modifies the file access property list to use the H5FD_CORE driver.">H5Pset_fapl_core</a>  </td></tr>
 <tr>
-<td>Family </td><td><a class="el" href="_h5_f_dfamily_8h.html#adbf24f060712550a2a9649589a6060c6">H5FD_FAMILY</a> </td><td>With this driver, the HDF5 file’s address space is partitioned into pieces and sent to separate storage files using an underlying driver of the user’s choice. This driver is for systems that do not support files larger than 2 gigabytes. </td><td><a class="el" href="group___f_a_p_l.html#ga95d19da25f196ce1ace10af00f49ab53" title="Sets the file access property list to use the family driver.">H5Pset_fapl_family</a>  </td></tr>
+<td>Family </td><td><a class="el" href="_h5_f_dfamily_8h.html#adbf24f060712550a2a9649589a6060c6">H5FD_FAMILY</a> </td><td>With this driver, the HDF5 file's address space is partitioned into pieces and sent to separate storage files using an underlying driver of the user's choice. This driver is for systems that do not support files larger than 2 gigabytes. </td><td><a class="el" href="group___f_a_p_l.html#ga95d19da25f196ce1ace10af00f49ab53" title="Sets the file access property list to use the family driver.">H5Pset_fapl_family</a>  </td></tr>
 <tr>
 <td>Multi </td><td><a class="el" href="_h5_f_dmulti_8h.html#a754e05ae5e0f2d86f64002b338c0fd5c">H5FD_MULTI</a> </td><td>With this driver, data can be stored in multiple files according to the type of the data. I/O might work better if data is stored in separate files based on the type of data. The Split driver is a special case of this driver. </td><td><a class="el" href="group___f_a_p_l.html#ga296bd22cc1e462351f8f0a00a46baf58" title="Sets up use of the multi-file driver.">H5Pset_fapl_multi</a>  </td></tr>
 <tr>
@@ -772,7 +772,7 @@ The Split Driver</h3>
 <p>Additional parameters may be added to these functions in the future. Since there are no additional variable settings associated with the Split driver, there is no H5Pget_fapl_split function.</p>
 <h3><a class="anchor" id="subsubsec_file_alternate_drivers_par"></a>
 The Parallel Driver</h3>
-<p>Parallel environments require a parallel low-level driver. HDF5’s default driver for parallel systems is called the Parallel driver, <a class="el" href="_h5_f_dmpio_8h.html#a7a231bc1d78744088a4e1d297284cabf">H5FD_MPIO</a>. This driver uses the MPI standard for both communication and file I/O.</p>
+<p>Parallel environments require a parallel low-level driver. HDF5's default driver for parallel systems is called the Parallel driver, <a class="el" href="_h5_f_dmpio_8h.html#a7a231bc1d78744088a4e1d297284cabf">H5FD_MPIO</a>. This driver uses the MPI standard for both communication and file I/O.</p>
 <p>The functions <a class="el" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff" title="Stores MPI IO communicator information to the file access property list.">H5Pset_fapl_mpio</a> and <a class="el" href="group___f_a_p_l.html#ga5d9e4b9f27791ccf19484a898f3fd6fa" title="Returns MPI IO communicator information.">H5Pget_fapl_mpio</a> are used to manage file access properties for the <a class="el" href="_h5_f_dmpio_8h.html#a7a231bc1d78744088a4e1d297284cabf">H5FD_MPIO</a> driver. See the example below.</p>
 <p><em>Managing parallel file access properties</em> </p><div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff">H5Pset_fapl_mpio</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, MPI_Comm comm, MPI_info info)</div>
 <div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code" href="group___f_a_p_l.html#ga5d9e4b9f27791ccf19484a898f3fd6fa">H5Pget_fapl_mpio</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, MPI_Comm *comm, MPI_info *info)</div>
@@ -867,7 +867,7 @@ File2 mounted on File1</div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:57:59 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:44 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

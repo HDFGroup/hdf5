@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -120,7 +120,7 @@ Definition of Dataspace Objects and the Dataspace Programming Model</h2>
 <p>This section introduces the notion of the HDF5 dataspace object and a programming model for creating and working with dataspaces.</p>
 <h3><a class="anchor" id="subsubsec_dataspace_program_object"></a>
 Dataspace Objects</h3>
-<p>An HDF5 dataspace is a required component of an HDF5 dataset or attribute. A dataspace defines the size and the shape of a dataset’s or an attribute’s raw data. Currently, HDF5 supports the following types of the dataspaces: </p><ul>
+<p>An HDF5 dataspace is a required component of an HDF5 dataset or attribute. A dataspace defines the size and the shape of a dataset's or an attribute's raw data. Currently, HDF5 supports the following types of the dataspaces: </p><ul>
 <li>Scalar dataspaces </li>
 <li>Simple dataspaces </li>
 <li>Null dataspaces</li>
@@ -170,7 +170,7 @@ Dataspace Programming Model</h3>
 <div class="ttc" id="a_h5_spublic_8h_html_ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5"><div class="ttname"><a href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5">H5S_NULL</a></div><div class="ttdeci">@ H5S_NULL</div><div class="ttdef"><b>Definition:</b> H5Spublic.h:79</div></div>
 </div><!-- fragment --><p> As mentioned above, the dataspace will contain no elements.</p>
 <h4>Creating a Simple Dataspace</h4>
-<p>Let’s assume that an application wants to store a two‐dimensional array of data, A(20,100). During the life of the application, the first dimension of the array can grow up to 30; there is no restriction on the size of the second dimension. The following steps are used to declare a dataspace for the dataset in which the array data will be stored. </p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id;</div>
+<p>Let's assume that an application wants to store a two‐dimensional array of data, A(20,100). During the life of the application, the first dimension of the array can grow up to 30; there is no restriction on the size of the second dimension. The following steps are used to declare a dataspace for the dataset in which the array data will be stored. </p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id;</div>
 <div class="line"><span class="keywordtype">int</span> rank = 2;</div>
 <div class="line"><a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> current_dims[2] = {20, 100};</div>
 <div class="line"><a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> max_dims[2] = {30, <a class="code" href="_h5_spublic_8h.html#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a>};</div>
@@ -889,7 +889,7 @@ Reading References to Regions</h3>
 </table>
 <h2><a class="anchor" id="subsec_dataspace_sample"></a>
 Sample Programs</h2>
-<p>This section contains the full programs from which several of the code examples in this chapter were derived. The h5dump output from the program’s output file immediately follows each program.</p>
+<p>This section contains the full programs from which several of the code examples in this chapter were derived. The h5dump output from the program's output file immediately follows each program.</p>
 <p><em>h5_write.c</em> </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;hdf5.h&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor">#define H5FILE_NAME &quot;SDS.h5&quot;</span></div>
@@ -1182,7 +1182,7 @@ Sample Programs</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:00 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:44 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

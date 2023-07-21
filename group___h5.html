@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -442,7 +442,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a> frees the memory that has been allocated by the caller with <a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Allocates memory that will be freed later internally.">H5allocate_memory()</a> or by the HDF5 library on behalf of the caller.</p>
-<p><a class="el" href="group___c_o_m_p_e_n_u_m.html#gaef6b68436eba0fca751968ebf057ade3" title="Retrieves the name of a compound or enumeration datatype member.">H5Tget_member_name()</a> provides an example of memory allocation on behalf of the caller: The function returns a buffer containing the name of a compound datatype member. It is the caller’s responsibility to eventually free that buffer with <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a>.</p>
+<p><a class="el" href="group___c_o_m_p_e_n_u_m.html#gaef6b68436eba0fca751968ebf057ade3" title="Retrieves the name of a compound or enumeration datatype member.">H5Tget_member_name()</a> provides an example of memory allocation on behalf of the caller: The function returns a buffer containing the name of a compound datatype member. It is the caller's responsibility to eventually free that buffer with <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory()</a>.</p>
 <dl class="section attention"><dt>Attention</dt><dd>It is especially important to use this function to free memory allocated by the library on Windows. The C standard library is implemented in dynamic link libraries (DLLs) known as the C run-time (CRT). Each version of Visual Studio comes with two CRT DLLs (debug and release) and allocating and freeing across DLL boundaries can cause resource leaks and subtle bugs due to heap corruption.<br  />
  Only use this function to free memory allocated by the HDF5 Library. It will generally not be safe to use this function to free memory allocated by any other means.<br  />
  Even when using this function, it is still best to ensure that all components of a C application are built with the same version of Visual Studio and build (debug or release) and thus linked against the same CRT.</dd></dl>
@@ -798,7 +798,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:05 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:48 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

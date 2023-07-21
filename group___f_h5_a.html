@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1093,7 +1093,7 @@ Functions/Subroutines</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">loc_id</td><td>Location identifier </td></tr>
-    <tr><td class="paramname">obj_name</td><td>Object name either relative to loc_id, absolute from the file’s root group, or '. '(a dot) </td></tr>
+    <tr><td class="paramname">obj_name</td><td>Object name either relative to loc_id, absolute from the file's root group, or '. '(a dot) </td></tr>
     <tr><td class="paramname">attr_name</td><td>Attribute name </td></tr>
     <tr><td class="paramname">attr_exists</td><td>Pointer to attribute exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE. </td></tr>
     <tr><td class="paramname">es_id</td><td>Event set identifier </td></tr>
@@ -1163,7 +1163,7 @@ Functions/Subroutines</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">loc_id</td><td>Location identifier </td></tr>
-    <tr><td class="paramname">obj_name</td><td>Object name either relative to loc_id, absolute from the file’s root group, or '. '(a dot) </td></tr>
+    <tr><td class="paramname">obj_name</td><td>Object name either relative to loc_id, absolute from the file's root group, or '. '(a dot) </td></tr>
     <tr><td class="paramname">attr_name</td><td>Attribute name </td></tr>
     <tr><td class="paramname">attr_exists</td><td>Attribute exists status </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
@@ -1263,7 +1263,7 @@ Functions/Subroutines</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">attr_id</td><td>Identifier of the attribute </td></tr>
-    <tr><td class="paramname">creation_prop_id</td><td>Identifier for the attribute’s creation property </td></tr>
+    <tr><td class="paramname">creation_prop_id</td><td>Identifier for the attribute's creation property </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
   </table>
   </dd>
@@ -1359,10 +1359,10 @@ Functions/Subroutines</h2></td></tr>
     <tr><td class="paramname">obj_name</td><td>Name of object to which attribute is attached, relative to location </td></tr>
     <tr><td class="paramname">idx_type</td><td>Type of index </td></tr>
     <tr><td class="paramname">order</td><td>Index traversal order </td></tr>
-    <tr><td class="paramname">n</td><td>Attribute’s position in index </td></tr>
+    <tr><td class="paramname">n</td><td>Attribute's position in index </td></tr>
     <tr><td class="paramname">f_corder_valid</td><td>Indicates whether the creation order data is valid for this attribute </td></tr>
     <tr><td class="paramname">corder</td><td>Is a positive integer containing the creation order of the attribute </td></tr>
-    <tr><td class="paramname">cset</td><td>Indicates the character set used for the attribute’s name </td></tr>
+    <tr><td class="paramname">cset</td><td>Indicates the character set used for the attribute's name </td></tr>
     <tr><td class="paramname">data_size</td><td>Indicates the size, in the number of characters, of the attribute </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
     <tr><td class="paramname">lapl_id</td><td>Link access property list</td></tr>
@@ -1449,7 +1449,7 @@ Functions/Subroutines</h2></td></tr>
     <tr><td class="paramname">attr_name</td><td>Attribute name </td></tr>
     <tr><td class="paramname">f_corder_valid</td><td>Indicates whether the creation order data is valid for this attribute </td></tr>
     <tr><td class="paramname">corder</td><td>Is a positive integer containing the creation order of the attribute </td></tr>
-    <tr><td class="paramname">cset</td><td>Indicates the character set used for the attribute’s name </td></tr>
+    <tr><td class="paramname">cset</td><td>Indicates the character set used for the attribute's name </td></tr>
     <tr><td class="paramname">data_size</td><td>Indicates the size, in the number of characters, of the attribute </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
     <tr><td class="paramname">lapl_id</td><td>Link access property list</td></tr>
@@ -1516,7 +1516,7 @@ Functions/Subroutines</h2></td></tr>
     <tr><td class="paramname">attr_id</td><td>Attribute identifier. NOTE: In C it is defined as a structure: <a class="el" href="struct_h5_a__info__t.html">H5A_info_t</a>. </td></tr>
     <tr><td class="paramname">f_corder_valid</td><td>Indicates whether the creation order data is valid for this attribute. </td></tr>
     <tr><td class="paramname">corder</td><td>Is a positive integer containing the creation order of the attribute. </td></tr>
-    <tr><td class="paramname">cset</td><td>Indicates the character set used for the attribute’s name. </td></tr>
+    <tr><td class="paramname">cset</td><td>Indicates the character set used for the attribute's name. </td></tr>
     <tr><td class="paramname">data_size</td><td>Indicates the size, in the number of characters, of the attribute. </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
   </table>
@@ -1614,7 +1614,7 @@ Functions/Subroutines</h2></td></tr>
 <li>H5_ITER_N_F - Number of iteration orders </li>
 </ul>
 </td></tr>
-    <tr><td class="paramname">n</td><td>Attribute’s position in index </td></tr>
+    <tr><td class="paramname">n</td><td>Attribute's position in index </td></tr>
     <tr><td class="paramname">name</td><td>Attribute name </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
     <tr><td class="paramname">size</td><td>Size, in bytes, of attribute name </td></tr>
@@ -2057,7 +2057,7 @@ Functions/Subroutines</h2></td></tr>
 <li>H5_ITER_N_F - Number of iteration orders </li>
 </ul>
 </td></tr>
-    <tr><td class="paramname">n</td><td>Attribute’s position in index. </td></tr>
+    <tr><td class="paramname">n</td><td>Attribute's position in index. </td></tr>
     <tr><td class="paramname">attr_id</td><td>Attribute identifier. </td></tr>
     <tr><td class="paramname">es_id</td><td>Event set identifier </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
@@ -2161,7 +2161,7 @@ Functions/Subroutines</h2></td></tr>
 <li>H5_ITER_N_F - Number of iteration orders </li>
 </ul>
 </td></tr>
-    <tr><td class="paramname">n</td><td>Attribute’s position in index. </td></tr>
+    <tr><td class="paramname">n</td><td>Attribute's position in index. </td></tr>
     <tr><td class="paramname">attr_id</td><td>Attribute identifier. </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
     <tr><td class="paramname">aapl_id</td><td>Attribute access property list. </td></tr>
@@ -2257,7 +2257,7 @@ Functions/Subroutines</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">loc_id</td><td>Location from which to find object to which attribute is attached </td></tr>
-    <tr><td class="paramname">obj_name</td><td>Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot) </td></tr>
+    <tr><td class="paramname">obj_name</td><td>Object name either relative to loc_id, absolute from the file's root group, or '.' (a dot) </td></tr>
     <tr><td class="paramname">attr_name</td><td>Attribute name </td></tr>
     <tr><td class="paramname">attr_id</td><td>Attribute identifier </td></tr>
     <tr><td class="paramname">es_id</td><td>Event set identifier </td></tr>
@@ -2334,7 +2334,7 @@ Functions/Subroutines</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">loc_id</td><td>Location from which to find object to which attribute is attached </td></tr>
-    <tr><td class="paramname">obj_name</td><td>Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot) </td></tr>
+    <tr><td class="paramname">obj_name</td><td>Object name either relative to loc_id, absolute from the file's root group, or '.' (a dot) </td></tr>
     <tr><td class="paramname">attr_name</td><td>Attribute name </td></tr>
     <tr><td class="paramname">attr_id</td><td>Attribute identifier </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
@@ -3194,7 +3194,7 @@ Functions/Subroutines</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:02 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:46 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

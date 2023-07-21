@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -851,7 +851,7 @@ Functions</h2></td></tr>
 <br  />
  This flag should not be set for the Fletcher32 checksum filter as it will bypass the checksum filter without reporting checksum errors to an application.  </td></tr>
 <tr>
-<td><a class="el" href="_h5_zpublic_8h.html#a7c50fa9c17a3e84280b3624e3e2515db">H5Z_FLAG_MANDATORY</a> </td><td>If the filter is required, that is, set to mandatory, and the filter fails, the library’s behavior depends on whether the chunk cache is in use: <ul>
+<td><a class="el" href="_h5_zpublic_8h.html#a7c50fa9c17a3e84280b3624e3e2515db">H5Z_FLAG_MANDATORY</a> </td><td>If the filter is required, that is, set to mandatory, and the filter fails, the library's behavior depends on whether the chunk cache is in use: <ul>
 <li>If the chunk cache is enabled, data chunks will be flushed to the file during <a class="el" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a> and the library will return the failure in <a class="el" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a>. </li>
 <li>When the chunk cache is disabled or not big enough, or the chunk is being evicted from the cache, the failure will happen during <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite()</a>.</li>
 </ul>
@@ -877,9 +877,9 @@ In each case, the library will still write to the file all data chunks that were
 <td><a class="el" href="_h5_zpublic_8h.html#a745d2ccb4f7712ed78ef5e562e27d2ca">H5Z_FILTER_SCALEOFFSET</a> </td><td>Data compression filter, employing the scale-offset algorithm  </td></tr>
 </table>
 <p>Also see <a class="el" href="group___d_x_p_l.html#ga0d95dfa506784acc9aed850c99713609" title="Sets the dataset transfer property list to enable or disable error detection when reading data.">H5Pset_edc_check()</a> and <a class="el" href="group___d_x_p_l.html#ga1890e730c34efa20cd6a5d1d2a0e8caa" title="Sets user-defined filter callback function.">H5Pset_filter_callback()</a>.</p>
-<dl class="section note"><dt>Note</dt><dd>When a non-empty filter pipeline is used with a group creation property list, the group will be created with the new group file format. The filters will come into play only when dense storage is used (see <a class="el" href="group___g_c_p_l.html#gab463ac9355728469eddfd973b4a5964f" title="Sets the parameters for conversion between compact and dense groups.">H5Pset_link_phase_change()</a>) and will be applied to the group’s fractal heap. The fractal heap will contain most of the group’s link metadata, including link names.</dd>
+<dl class="section note"><dt>Note</dt><dd>When a non-empty filter pipeline is used with a group creation property list, the group will be created with the new group file format. The filters will come into play only when dense storage is used (see <a class="el" href="group___g_c_p_l.html#gab463ac9355728469eddfd973b4a5964f" title="Sets the parameters for conversion between compact and dense groups.">H5Pset_link_phase_change()</a>) and will be applied to the group's fractal heap. The fractal heap will contain most of the group's link metadata, including link names.</dd>
 <dd>
-When working with group creation property lists, if you are adding a filter that is not in HDF5’s set of predefined filters, i.e., a user-defined or third-party filter, you must first determine that the filter will work for a group. See the discussion of the set local and can apply callback functions in <a class="el" href="group___h5_z.html#ga93145acc38c2c60d832b7a9b0123706b" title="Registers a new filter with the HDF5 library.">H5Zregister()</a>.</dd>
+When working with group creation property lists, if you are adding a filter that is not in HDF5's set of predefined filters, i.e., a user-defined or third-party filter, you must first determine that the filter will work for a group. See the discussion of the set local and can apply callback functions in <a class="el" href="group___h5_z.html#ga93145acc38c2c60d832b7a9b0123706b" title="Registers a new filter with the HDF5 library.">H5Zregister()</a>.</dd>
 <dd>
 If multiple filters are set for a property list, they will be applied to each chunk of raw data for datasets or each block of the fractal heap for groups in the order in which they were set.</dd>
 <dd>
@@ -1024,7 +1024,7 @@ As a result of this fix, an HDF5 library of Release 1.6.0 through Release 1.6.2 
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:06 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:48 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

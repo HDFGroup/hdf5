@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -116,7 +116,7 @@ Introduction</h2>
 Application view of a dataset</div></div>
    </td></tr>
 </table>
-<p>A dataset object is stored in a file in two parts: a header and a data array. The header contains information that is needed to interpret the array portion of the dataset, as well as metadata (or pointers to metadata) that describes or annotates the dataset. Header information includes the name of the object, its dimensionality, its number-type, information about how the data itself is stored on disk (the storage layout), and other information used by the library to speed up access to the dataset or maintain the file’s integrity.</p>
+<p>A dataset object is stored in a file in two parts: a header and a data array. The header contains information that is needed to interpret the array portion of the dataset, as well as metadata (or pointers to metadata) that describes or annotates the dataset. Header information includes the name of the object, its dimensionality, its number-type, information about how the data itself is stored on disk (the storage layout), and other information used by the library to speed up access to the dataset or maintain the file's integrity.</p>
 <p>The HDF5 dataset interface, comprising the <a class="el" href="group___h5_d.html">Datasets (H5D)</a> functions, provides a mechanism for managing HDF5 datasets including the transfer of data between memory and disk and the description of dataset properties.</p>
 <p>A dataset is used by other HDF5 APIs, either by name or by an identifier. For more information, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="api-compat-macros.html">API Compatibility Macros</a>.</dd></dl>
 <h3><a class="anchor" id="subsubsec_dataset_intro_link"></a>
@@ -178,7 +178,7 @@ Dataset Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___h5_d.html#ga8d4a57e2b2b8c95cfecf6f75bdaa8343" title="Fills dataspace elements with a fill value in a memory buffer.">H5Dfill</a> </td><td>Fills dataspace elements with a fill value in a memory buffer.  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset’s dimensions.">H5Dset_extent</a> </td><td>Changes the sizes of a dataset’s dimensions.  </td></tr>
+<td><a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent</a> </td><td>Changes the sizes of a dataset's dimensions.  </td></tr>
 </table>
 <p><a class="anchor" id="dcpl_table_tag"></a>Dataset creation property list functions (H5P) <a class="anchor" id="table_dcpl_id"></a>
 <table class="doxtable">
@@ -272,7 +272,7 @@ Dataset Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___d_x_p_l.html#ga1278b9979cc833e77d699cc878c6dab4" title="Reads buffer settings.">H5Pget_buffer</a> </td><td>Reads buffer settings.  </td></tr>
 <tr>
-<td><a class="el" href="group___d_a_p_l.html#ga2f685a7b3f3a4fa35ddcd1659ab4a835" title="Sets two actions to perform when the size of a dataset’s dimension being appended reaches a specified...">H5Pset_append_flush</a>/<a class="el" href="group___d_a_p_l.html#gacd6803640eebd20e408c330192b09fa6" title="Retrieves the values of the append property that is set up in the dataset access property list.">H5Pget_append_flush</a> </td><td>Sets/gets the values of the append property that is set up in the dataset access property list.  </td></tr>
+<td><a class="el" href="group___d_a_p_l.html#ga2f685a7b3f3a4fa35ddcd1659ab4a835" title="Sets two actions to perform when the size of a dataset&#39;s dimension being appended reaches a specified...">H5Pset_append_flush</a>/<a class="el" href="group___d_a_p_l.html#gacd6803640eebd20e408c330192b09fa6" title="Retrieves the values of the append property that is set up in the dataset access property list.">H5Pget_append_flush</a> </td><td>Sets/gets the values of the append property that is set up in the dataset access property list.  </td></tr>
 <tr>
 <td><a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1" title="Sets the raw data chunk cache parameters.">H5Pset_chunk_cache</a>/<a class="el" href="group___d_a_p_l.html#gaeda015dfee4167cc60baab1d1f0560fe" title="Retrieves the raw data chunk cache parameters.">H5Pget_chunk_cache</a> </td><td>Sets/gets the raw data chunk cache parameters.  </td></tr>
 <tr>
@@ -334,7 +334,7 @@ Create Dataset</h3>
 <h4>Name</h4>
 <p>A dataset name is a sequence of alphanumeric ASCII characters. The full name would include a tracing of the group hierarchy from the root group of the file. An example is /rootGroup/groupA/subgroup23/dataset1. The local name or relative name within the lowest- level group containing the dataset would include none of the group hierarchy. An example is Dataset1.</p>
 <h4>Dataspace</h4>
-<p>The dataspace of a dataset defines the number of dimensions and the size of each dimension. The dataspace defines the number of dimensions, and the maximum dimension sizes and current size of each dimension. The maximum dimension size can be a fixed value or the constant <a class="el" href="_h5_spublic_8h.html#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a>, in which case the actual dimension size can be changed with calls to <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset’s dimensions.">H5Dset_extent</a>, up to the maximum set with the maxdims parameter in the <a class="el" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae" title="Creates a new simple dataspace and opens it for access.">H5Screate_simple</a> call that established the dataset’s original dimensions. The maximum dimension size is set when the dataset is created and cannot be changed.</p>
+<p>The dataspace of a dataset defines the number of dimensions and the size of each dimension. The dataspace defines the number of dimensions, and the maximum dimension sizes and current size of each dimension. The maximum dimension size can be a fixed value or the constant <a class="el" href="_h5_spublic_8h.html#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a>, in which case the actual dimension size can be changed with calls to <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent</a>, up to the maximum set with the maxdims parameter in the <a class="el" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae" title="Creates a new simple dataspace and opens it for access.">H5Screate_simple</a> call that established the dataset's original dimensions. The maximum dimension size is set when the dataset is created and cannot be changed.</p>
 <h4>Datatype</h4>
 <p>Raw data has a datatype which describes the layout of the raw data stored in the file. The datatype is set when the dataset is created and can never be changed. When data is transferred to and from the dataset, the HDF5 library will assure that the data is transformed to and from the stored format.</p>
 <h4>Storage Properties</h4>
@@ -640,9 +640,9 @@ The Data Pipeline</h3>
 <tr>
 <th>Layers </th><th>Description  </th></tr>
 <tr>
-<td>I/O initiation </td><td>Initiation of HDF5 I/O activities (<a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite</a> and <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread</a>) in a user’s application program.  </td></tr>
+<td>I/O initiation </td><td>Initiation of HDF5 I/O activities (<a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite</a> and <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread</a>) in a user's application program.  </td></tr>
 <tr>
-<td>Memory hyperslab operation </td><td>Data is scattered to (for read), or gathered from (for write) the application’s memory buffer (bypassed if no datatype conversion is needed).  </td></tr>
+<td>Memory hyperslab operation </td><td>Data is scattered to (for read), or gathered from (for write) the application's memory buffer (bypassed if no datatype conversion is needed).  </td></tr>
 <tr>
 <td>Datatype conversion </td><td>Datatype is converted if it is different between memory and storage (bypassed if no datatype conversion is needed).  </td></tr>
 <tr>
@@ -688,7 +688,7 @@ Data Pipeline Filters</h3>
 <td>Fletcher32 </td><td>Fletcher32 checksum for error-detection.  </td></tr>
 </table>
 <p>Filters may be used only for chunked data and are applied to chunks of data between the file hyperslab stage and the virtual file layer. At this stage in the pipeline, the data is organized as fixed-size blocks of elements, and the filter stage processes each chunk separately.</p>
-<p>Filters are selected by dataset creation properties, and some behavior may be controlled by data transfer properties. The library determines what filters must be applied and applies them in the order in which they were set by the application. That is, if an application calls <a class="el" href="group___d_c_p_l.html#ga31e09cb0bf2da2893eed8a72220e6521" title="Sets up use of the shuffle filter.">H5Pset_shuffle</a> and then <a class="el" href="group___d_c_p_l.html#gaf1f569bfc54552bdb9317d2b63318a0d" title="Sets deflate (GNU gzip) compression method and compression level.">H5Pset_deflate</a> when creating a dataset’s creation property list, the library will apply the shuffle filter first and then the deflate filter.</p>
+<p>Filters are selected by dataset creation properties, and some behavior may be controlled by data transfer properties. The library determines what filters must be applied and applies them in the order in which they were set by the application. That is, if an application calls <a class="el" href="group___d_c_p_l.html#ga31e09cb0bf2da2893eed8a72220e6521" title="Sets up use of the shuffle filter.">H5Pset_shuffle</a> and then <a class="el" href="group___d_c_p_l.html#gaf1f569bfc54552bdb9317d2b63318a0d" title="Sets deflate (GNU gzip) compression method and compression level.">H5Pset_deflate</a> when creating a dataset's creation property list, the library will apply the shuffle filter first and then the deflate filter.</p>
 <p>For more information, </p><ul>
 <li><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_d__u_g.html#subsubsec_dataset_filters_nbit">Using the N‐bit Filter</a> </dd></dl>
 </li>
@@ -868,9 +868,9 @@ A two dimensional array stored in chunks</div></div>
    </td></tr>
 </table>
 <h4>Changing Dataset Dimensions</h4>
-<p><a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset’s dimensions.">H5Dset_extent</a> is used to change the current dimensions of the dataset within the limits of the dataspace. Each dimension can be extended up to its maximum or unlimited. Extending the dataspace may or may not allocate space in the file and may or may not write fill values, if they are defined. See the example code below.</p>
-<p>The dimensions of the dataset can also be reduced. If the sizes specified are smaller than the dataset’s current dimension sizes, <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset’s dimensions.">H5Dset_extent</a> will reduce the dataset’s dimension sizes to the specified values. It is the user’s responsibility to ensure that valuable data is not lost; <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset’s dimensions.">H5Dset_extent</a> does not check.</p>
-<p><em>Using <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset’s dimensions.">H5Dset_extent</a> to increase the size of a dataset</em> </p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, dataset_id;</div>
+<p><a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent</a> is used to change the current dimensions of the dataset within the limits of the dataspace. Each dimension can be extended up to its maximum or unlimited. Extending the dataspace may or may not allocate space in the file and may or may not write fill values, if they are defined. See the example code below.</p>
+<p>The dimensions of the dataset can also be reduced. If the sizes specified are smaller than the dataset's current dimension sizes, <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent</a> will reduce the dataset's dimension sizes to the specified values. It is the user's responsibility to ensure that valuable data is not lost; <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent</a> does not check.</p>
+<p><em>Using <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent</a> to increase the size of a dataset</em> </p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_id, dataset_id;</div>
 <div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> status;</div>
 <div class="line"><span class="keywordtype">size_t</span> newdims[2];</div>
 <div class="line"> </div>
@@ -889,7 +889,7 @@ A two dimensional array stored in chunks</div></div>
 <div class="line"><span class="comment">// dataset is now 2 x 7</span></div>
 <div class="line"> </div>
 <div class="line">status = <a class="code" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609">H5Dclose</a>(dataset_id);</div>
-<div class="ttc" id="agroup___h5_d_html_gad31e1e0129f4520c531ce524de2a056f"><div class="ttname"><a href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f">H5Dset_extent</a></div><div class="ttdeci">herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[])</div><div class="ttdoc">Changes the sizes of a dataset’s dimensions.</div></div>
+<div class="ttc" id="agroup___h5_d_html_gad31e1e0129f4520c531ce524de2a056f"><div class="ttname"><a href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f">H5Dset_extent</a></div><div class="ttdeci">herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[])</div><div class="ttdoc">Changes the sizes of a dataset's dimensions.</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_dataset_allocation_store"></a>
 Storage Allocation in the File: Early, Incremental, Late</h3>
 <p>The HDF5 Library implements several strategies for when storage is allocated if and when it is filled with fill values for elements not yet written by the user. Different strategies are recommended for different storage layouts and file drivers. In particular, a parallel program needs storage allocated during a collective call (for example, create or extend), while serial programs may benefit from delaying the allocation until the data is written.</p>
@@ -947,7 +947,7 @@ Storage Allocation in the File: Early, Incremental, Late</h3>
 <tr>
 <td>User-defined </td><td>The application specifies the fill value.  </td></tr>
 </table>
-<p>Together these three properties control the library’s behavior. The table below summarizes the possibilities during the dataset create-write-close cycle.</p>
+<p>Together these three properties control the library's behavior. The table below summarizes the possibilities during the dataset create-write-close cycle.</p>
 <table class="doxtable">
 <caption>Storage allocation and fill summary</caption>
 <tr>
@@ -1163,12 +1163,12 @@ Datatype size, precision, offset, and byte order</li>
 <li>A flag indicating whether compression is needed</li>
 </ul>
 <p>The first and second parameters can be obtained using the HDF5 dataspace and datatype interface calls.</p>
-<p>A compound datatype can have members of array or compound datatype. An array datatype’s base datatype can be a complex compound datatype. Recursive calls are required to set parameters for these complex situations.</p>
+<p>A compound datatype can have members of array or compound datatype. An array datatype's base datatype can be a complex compound datatype. Recursive calls are required to set parameters for these complex situations.</p>
 <p>Before setting the parameters, the number of parameters should be calculated to dynamically allocate the array cd_values[], which will be passed to the HDF5 Library. This also requires recursive calls.</p>
-<p>For an atomic datatype (integer or floating-point), parameters that will be stored include the datatype’s size, endianness, precision, and offset.</p>
+<p>For an atomic datatype (integer or floating-point), parameters that will be stored include the datatype's size, endianness, precision, and offset.</p>
 <p>For a no-op datatype, only the size is required.</p>
-<p>For a compound datatype, parameters that will be stored include the datatype’s total size and number of members. For each member, its member offset needs to be stored. Other parameters for members will depend on the respective datatype class.</p>
-<p>For an array datatype, the total size parameter should be stored. Other parameters for the array’s base type depend on the base type’s datatype class.</p>
+<p>For a compound datatype, parameters that will be stored include the datatype's total size and number of members. For each member, its member offset needs to be stored. Other parameters for members will depend on the respective datatype class.</p>
+<p>For an array datatype, the total size parameter should be stored. Other parameters for the array's base type depend on the base type's datatype class.</p>
 <p>Further, to correctly retrieve the parameter for use of n-bit compression or decompression later, parameters for distinguishing between datatype classes should be stored.</p>
 <h4>Implementation</h4>
 <p>Three filter callback functions were written for the n-bit filter: </p><ul>
@@ -1231,7 +1231,7 @@ For none of the above, call H5Z__set_parms_noopdatatype</li>
 <li>
 2. Get the size of the array datatype and store in cd_value[i]; increment i </li>
 <li>
-3. Get the class of the array’s base datatype. <ul>
+3. Get the class of the array's base datatype. <ul>
 <li>
 For an integer or floating-point datatype, call H5Z__set_parms_atomic </li>
 <li>
@@ -1877,7 +1877,7 @@ Using the Szip Filter</h3>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:57:59 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:44 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

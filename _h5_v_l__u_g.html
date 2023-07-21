@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -107,7 +107,7 @@ $(document).ready(function(){initNavTree('_h5_v_l__u_g.html',''); initResizable(
 The HDF5 Virtual Object Layer (VOL)</h1>
 <h2><a class="anchor" id="subsec_vol_intro"></a>
 Introduction</h2>
-<p>The virtual object layer is an abstraction layer in the HDF5 library that intercepts all API calls that could potentially access objects in an HDF5 container and forwards those calls to a VOL connector, which implements the storage. The user or application gets the benefit of using the familiar and widely-used HDF5 data model and API, but can map the physical storage of the HDF5 file and objects to storage that better meets the application’s data needs.</p>
+<p>The virtual object layer is an abstraction layer in the HDF5 library that intercepts all API calls that could potentially access objects in an HDF5 container and forwards those calls to a VOL connector, which implements the storage. The user or application gets the benefit of using the familiar and widely-used HDF5 data model and API, but can map the physical storage of the HDF5 file and objects to storage that better meets the application's data needs.</p>
 <h2><a class="anchor" id="subsec_vol_abstract_layer"></a>
 The VOL Abstraction Layer</h2>
 <p>The VOL lies just under the public API. When a storage-oriented public APIcall is made, the library performs a few sanity checks on the input parameters and then immediately invokes a VOL callback, which resolves to an implementation in the VOL connector that was selected when opening or creating the file. The VOL connector then performs whatever operations are needed before control returns to the library, where any final library operations such as assigning IDs for newly created/opened datasets are performed before returning. This means that, for calls that utilize the VOL, all of the functionality is deferred to the VOL connector and the HDF5 library does very little work. An important consideration of this is that most of the HDF5 caching layers (metadata and chunk caches, page buffering, etc.) will not be available as those are implemented in the HDF5 native VOL connector and cannot be easily reused by external connectors.</p>
@@ -146,7 +146,7 @@ Read The Documentation For The New VOL Connector</h3>
 <h3><a class="anchor" id="subsubsec_vol_quick_use"></a>
 Use A VOL-Enabled HDF5 Library</h3>
 <p>The virtual object layer was introduced in HDF5 1.12.0, however that version of the VOL is deprecated due to inadequate support for pass-through connectors. These deficiencies have been addressed in HDF5 1.14.0, so VOL users and connector authors should target the 1.14.0 VOL API.</p>
-<p>On Windows, it’s probably best to use the same debug vs release configuration for the application and all libraries in order to avoid C runtime (CRT) issues. Pre-2015 versions of Visual Studio are not supported.</p>
+<p>On Windows, it's probably best to use the same debug vs release configuration for the application and all libraries in order to avoid C runtime (CRT) issues. Pre-2015 versions of Visual Studio are not supported.</p>
 <h3><a class="anchor" id="subsubsec_vol_quick_set"></a>
 Determine How You Will Set The VOL Connector</h3>
 <p>Fundamentally, setting a VOL connector involves modifying the file access property list (fapl) that will be used to open or create the file.</p>
@@ -155,7 +155,7 @@ Determine How You Will Set The VOL Connector</h3>
 <li>Library-specific API calls that call <a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol()</a> for you </li>
 <li>Use the VOL environment variable, which will also call <a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol()</a> for you</li>
 </ul>
-<p>Exactly how you go about setting a VOL connector in a fapl, will depend on the complexity of the VOL connector and how much control you have over the application’s source code. Note that the environment variable method, though convenient, has some limitations in its implementation, which are discussed below.</p>
+<p>Exactly how you go about setting a VOL connector in a fapl, will depend on the complexity of the VOL connector and how much control you have over the application's source code. Note that the environment variable method, though convenient, has some limitations in its implementation, which are discussed below.</p>
 <h3><a class="anchor" id="subsubsec_vol_quick_update"></a>
 If Needed: Update Your Code To Load And Use A VOL Connector</h3>
 <p>There are two concerns when modifying the application: </p><ul>
@@ -173,7 +173,7 @@ Optional: Set The VOL Connector Via The Environment Variable</h3>
 <p>In place of modifying the source code of your application, you may be able to simply set the <a class="el" href="_h5public_8h.html#a8d21b0c065a27e1b6ea46efb966c7394">HDF5_VOL_CONNECTOR</a> environment variable (see below). This will automatically use the specified VOL in place of the native VOL connector.</p>
 <h2><a class="anchor" id="subsec_vol_use"></a>
 Connector Use</h2>
-<p>Before a VOL connector can be set in a fapl, it must be registered with the library (<a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol</a> requires the connector’s <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> ID) and, if a plugin, it must be discoverable by the library at run time.</p>
+<p>Before a VOL connector can be set in a fapl, it must be registered with the library (<a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol</a> requires the connector's <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> ID) and, if a plugin, it must be discoverable by the library at run time.</p>
 <h3><a class="anchor" id="subsubsec_vol_connect_register"></a>
 Registration</h3>
 <p>Before a connector can be used, it must be registered. This loads the connector into the library and give it an HDF5 hid_t ID. The <a class="el" href="group___h5_v_l_d_e_v.html#ga439c150299522a0e0f401a86d083097b">H5VLregister_connector</a> API calls are used for this. </p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="code" href="group___h5_v_l.html#gaf48d1225927e1e701656346b832ee6b1">H5VLregister_connector_by_name</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *connector_name, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> vipl_id)</div>
@@ -183,23 +183,23 @@ Registration</h3>
 <div class="ttc" id="agroup___h5_v_l_html_ga11e69930e47f654805a265f417412ea8"><div class="ttname"><a href="group___h5_v_l.html#ga11e69930e47f654805a265f417412ea8">H5VLregister_connector_by_value</a></div><div class="ttdeci">hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id)</div><div class="ttdoc">Registers a new VOL connector by value.</div></div>
 <div class="ttc" id="agroup___h5_v_l_html_gaf48d1225927e1e701656346b832ee6b1"><div class="ttname"><a href="group___h5_v_l.html#gaf48d1225927e1e701656346b832ee6b1">H5VLregister_connector_by_name</a></div><div class="ttdeci">hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id)</div><div class="ttdoc">Registers a new VOL connector by name.</div></div>
 </div><!-- fragment --><p> When used with a plugin, these functions will check to see if an appropriate plugin with a matching name, value, etc. is already loaded and check the plugin path (see above) for matching plugins if this is not true. The functions return <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a> if they are unable to register the connector. Many VOL connectors will provide a connector-specific init call that will load and register the connector for you.</p>
-<p>Note the two ways that a VOL connector can be identified: by a name or by a connector-specific numerical value (<a class="el" href="group___h5_v_l_d_e_f.html#ga81b40d59b53c498f8aa9d92d0afdde2c" title="VOL connector identifiers.">H5VL_class_value_t</a> is typedef’d to an integer). The name and value for a connector can be found in the connector’s documentation or public header file.</p>
+<p>Note the two ways that a VOL connector can be identified: by a name or by a connector-specific numerical value (<a class="el" href="group___h5_v_l_d_e_f.html#ga81b40d59b53c498f8aa9d92d0afdde2c" title="VOL connector identifiers.">H5VL_class_value_t</a> is typedef’d to an integer). The name and value for a connector can be found in the connector's documentation or public header file.</p>
 <p>Each call also takes a VOL initialization property list (vipl). The library adds no properties to this list, so it is entirely for use by connector authors. Set this to <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> unless instructed differently by the documentation for the VOL connector.</p>
-<p>As far as the library is concerned, connectors do not need to be explicitly unregistered as the library will unload the plugin and close the ID when the library is closed. If you want to close a VOL connector ID, either <a class="el" href="group___h5_v_l.html#gaffbdc22f724c2c818f3be3845145d73e">H5VLunregister_connector()</a> or <a class="el" href="group___h5_v_l.html#gaa3324ac7aedf9362b498226903288094">H5VLclose()</a> can be used (they have the same internal code path). The library maintains a reference count on all open IDs and will not do the actual work of closing an ID until its reference count drops to zero, so it’s safe to close IDs anytime after they are used, even while an HDF5 file that was opened with that connector is still open.</p>
-<p>Note that it’s considered an error to unload the native VOL connector. The library will prevent this. This means that, for the time being, the native VOL connector will always be available. This may change in the future so that the memory footprint of the native VOL connector goes away when not in use.</p>
+<p>As far as the library is concerned, connectors do not need to be explicitly unregistered as the library will unload the plugin and close the ID when the library is closed. If you want to close a VOL connector ID, either <a class="el" href="group___h5_v_l.html#gaffbdc22f724c2c818f3be3845145d73e">H5VLunregister_connector()</a> or <a class="el" href="group___h5_v_l.html#gaa3324ac7aedf9362b498226903288094">H5VLclose()</a> can be used (they have the same internal code path). The library maintains a reference count on all open IDs and will not do the actual work of closing an ID until its reference count drops to zero, so it's safe to close IDs anytime after they are used, even while an HDF5 file that was opened with that connector is still open.</p>
+<p>Note that it's considered an error to unload the native VOL connector. The library will prevent this. This means that, for the time being, the native VOL connector will always be available. This may change in the future so that the memory footprint of the native VOL connector goes away when not in use.</p>
 <h3><a class="anchor" id="subsubsec_vol_connect_version"></a>
 Connector Versioning</h3>
 <p>The VOL connector struct provides a <b>conn_version</b> field for versioning connectors. The library developers are working on some best practices for versioning connectors.</p>
 <h3><a class="anchor" id="subsubsec_vol_connect_reg_calls"></a>
 Connector-Specific Registration Calls</h3>
-<p>Most connectors will provide a special API call which will set the connector in the fapl. These will often be in the form of <b>H5Pset_fapl_&lt;name&gt;()</b>. For example, the <a href="https://github.com/HDFGroup/vol-daos">DAOS VOL</a> connector provides a <b>H5Pset_fapl_daos()</b> API call which will take MPI parameters and make this call. See the connector’s documentation or public header file(s) for more information.</p>
+<p>Most connectors will provide a special API call which will set the connector in the fapl. These will often be in the form of <b>H5Pset_fapl_&lt;name&gt;()</b>. For example, the <a href="https://github.com/HDFGroup/vol-daos">DAOS VOL</a> connector provides a <b>H5Pset_fapl_daos()</b> API call which will take MPI parameters and make this call. See the connector's documentation or public header file(s) for more information.</p>
 <h3><a class="anchor" id="subsubsec_vol_connect_set_vol"></a>
 H5Pset_vol()</h3>
 <p>The is the main library API call for setting the VOL connector in a file access property list. Its signature is: </p><div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol</a>(<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> new_vol_id, <span class="keyword">const</span> <span class="keywordtype">void</span> new_vol_info)</div>
 <div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition:</b> H5public.h:235</div></div>
 <div class="ttc" id="agroup___f_a_p_l_html_ga8aaa97e70b2544c3d95d908e1ae5b0f0"><div class="ttname"><a href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol</a></div><div class="ttdeci">herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)</div><div class="ttdoc">Set the file VOL connector for a file access property list.</div></div>
-</div><!-- fragment --><p>It takes the ID of the file access property list, the ID of the registered VOL connector, and a pointer to whatever connector-specific data the connector is expecting. This will usually be a data struct specified in the connector’s header or a NULL pointer if the connecter requires no special information (as in the native VOL connector).</p>
-<p>As mentioned above, many connectors will provide their own replacement for this call. See the connector’s documentation for more information.</p>
+</div><!-- fragment --><p>It takes the ID of the file access property list, the ID of the registered VOL connector, and a pointer to whatever connector-specific data the connector is expecting. This will usually be a data struct specified in the connector's header or a NULL pointer if the connecter requires no special information (as in the native VOL connector).</p>
+<p>As mentioned above, many connectors will provide their own replacement for this call. See the connector's documentation for more information.</p>
 <h3><a class="anchor" id="subsubsec_vol_connect_search"></a>
 VOL Connector Search Path</h3>
 <p>Dynamically loaded VOL connector plugins are discovered and loaded by the library using the same mechanism as dataset/group filter plugins. The default locations are:</p>
@@ -226,7 +226,7 @@ Environment Variable</h3>
 <a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol()</a> on the default fapl using the obtained ID and info. </li>
 </ol>
 <p>The environment variable is parsed once, at library startup. Since the environment variable scheme just changes the default connector, it can be overridden by subsequent calls to <a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol()</a>. The <em>&lt;parameters&gt;</em> is optional, so for connectors which do not require any special configuration parameters you can just set the environment variable to the name.</p>
-<p>NOTE: Implementing the environment variable in this way means that setting the native VOL connector becomes somewhat awkward as there is no explicit HDF5 API call to do this. Instead you will need to get the native VOL connector’s ID via <a class="el" href="group___h5_v_l.html#ga8f6d366bc6b8323bbffe1e5a5ba18bee">H5VLget_connector_id_by_value</a>(<a class="el" href="group___h5_v_l_d_e_f.html#ga5768c946c69994f8269b509838a87d89">H5_VOL_NATIVE</a>) and set it manually in the fapl using <a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol()</a>.</p>
+<p>NOTE: Implementing the environment variable in this way means that setting the native VOL connector becomes somewhat awkward as there is no explicit HDF5 API call to do this. Instead you will need to get the native VOL connector's ID via <a class="el" href="group___h5_v_l.html#ga8f6d366bc6b8323bbffe1e5a5ba18bee">H5VLget_connector_id_by_value</a>(<a class="el" href="group___h5_v_l_d_e_f.html#ga5768c946c69994f8269b509838a87d89">H5_VOL_NATIVE</a>) and set it manually in the fapl using <a class="el" href="group___f_a_p_l.html#ga8aaa97e70b2544c3d95d908e1ae5b0f0">H5Pset_vol()</a>.</p>
 <h2><a class="anchor" id="subsec_vol_adapt"></a>
 Adapting HDF5 Software to Use the VOL</h2>
 <p>The VOL was engineered to be as unobtrusive as possible and, when a connector which implements most/all of the data model functionality is in use, many applications will require little, if any, modification. As mentioned in the quick start section, most modifications will probably consist of connector setup code (which can usually be accomplished via the environment variable), adapting code to use the new token-based API calls, and protecting native-VOL-connector-specific functions.</p>
@@ -459,7 +459,7 @@ Using VOL Connectors With The HDF5 Command-Line Tools</h2>
 <li>h5repack</li>
 </ul>
 <p>The VOL connector can be set either using the <a class="el" href="_h5public_8h.html#a8d21b0c065a27e1b6ea46efb966c7394">HDF5_VOL_CONNECTOR</a> environment variable (see above) or via the command line. Each of the above tools takes command-line options to set the VOL connector by name or value and the VOL connector string, usually in the form of </p><div class="fragment"><div class="line">--vol-(name|value|info)</div>
-</div><!-- fragment --><p> See the individual tool’s help for the options specific to that tool.</p>
+</div><!-- fragment --><p> See the individual tool's help for the options specific to that tool.</p>
 <h2><a class="anchor" id="subsec_vol_compat"></a>
 Compatibility</h2>
 <h3><a class="anchor" id="subsubsec_vol_compat_native"></a>
@@ -471,7 +471,7 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td><a class="el" href="group___h5_a.html#gaadd809fc16238754105bbddd20bcdde1" title="Determines the number of attributes attached to an object.">H5Aget_num_attrs</a> </td><td>deprecated  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user’s function for each attribute on an object.">H5Aiterate1</a> </td><td>deprecated  </td></tr>
+<td><a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user&#39;s function for each attribute on an object.">H5Aiterate1</a> </td><td>deprecated  </td></tr>
 <tr>
 <td><a class="el" href="group___h5_d.html#gac482c2386aa3aea4c44730a627a7adb8" title="Iterate over all chunks of a chunked dataset.">H5Dchunk_iter</a> </td><td></td></tr>
 <tr>
@@ -513,9 +513,9 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td><a class="el" href="group___h5_f.html#ga3ef2673183567543346668a8f1eca2e9" title="Returns the amount of free space in a file (in bytes)">H5Fget_freespace</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#ga660153029322fa6b77f5473cedc2d72f" title="Retrieves name of file to which object belongs.">H5Fget_info1</a> </td><td>deprecated  </td></tr>
+<td><a class="el" href="group___h5_f.html#ga660153029322fa6b77f5473cedc2d72f" title="Retrieves global file information.">H5Fget_info1</a> </td><td>deprecated  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#gaced8c09c1559636a9c3f33dff3f4520e" title="Retrieves name of file to which object belongs.">H5Fget_info2</a> </td><td></td></tr>
+<td><a class="el" href="group___h5_f.html#gaced8c09c1559636a9c3f33dff3f4520e" title="Retrieves global file information.">H5Fget_info2</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___m_d_c.html#gaa67f127242d4aaf244ae8ac4a1fe6a59" title="Obtains current metadata cache configuration for target file.">H5Fget_mdc_config</a> </td><td></td></tr>
 <tr>
@@ -567,7 +567,7 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td><a class="el" href="group___h5_g.html#gadedd0c73c98f2ada69305f2992c3300e" title="Retrieves information about a group by its name.">H5Gget_info_by_name</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00" title="Retrieves information about a group, according to the group’s position within an index.">H5Gget_info_by_idx</a> </td><td></td></tr>
+<td><a class="el" href="group___h5_g.html#ga985f27ad1a164d99fa1f58c6de60ab00" title="Retrieves information about a group, according to the group&#39;s position within an index.">H5Gget_info_by_idx</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___h5_g.html#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo</a> </td><td>deprecated  </td></tr>
 <tr>
@@ -593,7 +593,7 @@ List of HDF5 Native VOL API Calls</h3>
 <tr>
 <td><a class="el" href="group___h5_o.html#ga0908be309da1fb4f771c1e264fac22ae" title="Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage.">H5Odisable_mdc_flushes</a> </td><td></td></tr>
 <tr>
-<td><a class="el" href="group___h5_o.html#ga21014920bdabf6973e233796d7174156" title="Enables flushing of dirty metadata entries from a file’s metadata cache.">H5Oenable_mdc_flushes</a> </td><td></td></tr>
+<td><a class="el" href="group___h5_o.html#ga21014920bdabf6973e233796d7174156" title="Enables flushing of dirty metadata entries from a file&#39;s metadata cache.">H5Oenable_mdc_flushes</a> </td><td></td></tr>
 <tr>
 <td><a class="el" href="group___h5_o.html#gaa1511ce5e2fe01ce7ea58f2f851d694b" title="Retrieves comment for specified object.">H5Oget_comment</a> </td><td></td></tr>
 <tr>
@@ -717,7 +717,7 @@ List of Native VOL Optional Operation Values By Subclass</h3>
 <tr>
 <td><a class="el" href="group___h5_f.html#ga3ef2673183567543346668a8f1eca2e9" title="Returns the amount of free space in a file (in bytes)">H5Fget_freespace</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a9146c2e04ab8c75a6808927bad8b9505">H5VL_NATIVE_FILE_GET_FREE_SPACE</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_f.html#ga660153029322fa6b77f5473cedc2d72f" title="Retrieves name of file to which object belongs.">H5Fget_info1</a> / <a class="el" href="group___h5_f.html#gaced8c09c1559636a9c3f33dff3f4520e" title="Retrieves name of file to which object belongs.">H5Fget_info2</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#ac0ff62fa52184866b231d3d314fba88e">H5VL_NATIVE_FILE_GET_INFO</a>  </td></tr>
+<td><a class="el" href="group___h5_f.html#ga660153029322fa6b77f5473cedc2d72f" title="Retrieves global file information.">H5Fget_info1</a> / <a class="el" href="group___h5_f.html#gaced8c09c1559636a9c3f33dff3f4520e" title="Retrieves global file information.">H5Fget_info2</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#ac0ff62fa52184866b231d3d314fba88e">H5VL_NATIVE_FILE_GET_INFO</a>  </td></tr>
 <tr>
 <td><a class="el" href="group___m_d_c.html#gaa67f127242d4aaf244ae8ac4a1fe6a59" title="Obtains current metadata cache configuration for target file.">H5Fget_mdc_config</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#af4c416a95c1c2989493918f37d5796aa">H5VL_NATIVE_FILE_GET_MDC_CONF</a>  </td></tr>
 <tr>
@@ -777,7 +777,7 @@ List of Native VOL Optional Operation Values By Subclass</h3>
 <tr>
 <td><a class="el" href="group___h5_o.html#ga0908be309da1fb4f771c1e264fac22ae" title="Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage.">H5Odisable_mdc_flushes</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a099b9e6c4e1f46a11ede40e95e58e39e">H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES</a>  </td></tr>
 <tr>
-<td><a class="el" href="group___h5_o.html#ga21014920bdabf6973e233796d7174156" title="Enables flushing of dirty metadata entries from a file’s metadata cache.">H5Oenable_mdc_flushes</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a844314a5498935a7570fc69779a6eff3">H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES</a>  </td></tr>
+<td><a class="el" href="group___h5_o.html#ga21014920bdabf6973e233796d7174156" title="Enables flushing of dirty metadata entries from a file&#39;s metadata cache.">H5Oenable_mdc_flushes</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a844314a5498935a7570fc69779a6eff3">H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES</a>  </td></tr>
 <tr>
 <td><a class="el" href="group___h5_o.html#gab2fa388aadd1ff154ee150cbb4884c1c" title="Retrieves comment for specified object.">H5Oare_mdc_flushes_disabled</a> </td><td><a class="el" href="_h5_v_lnative_8h.html#a6a27db65f6b7711c13b46d6e9f98d18b">H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED</a>  </td></tr>
 <tr>
@@ -791,7 +791,7 @@ List of Native VOL Optional Operation Values By Subclass</h3>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:00 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:45 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

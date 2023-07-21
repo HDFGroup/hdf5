@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1376,8 +1376,8 @@ See <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___d_c_p_l.html#ga8e60618d9030dc1b99ad9c8ff7867873" title="Sets the edge chunk option in a dataset creation property list.">H5Pset_chunk_opts()</a> sets the edge chunk option in the dataset creation property list <code>dcpl_id</code>.</p>
-<p>The available option is detailed in the parameters section. Only chunks that are not completely filled by the dataset’s dataspace are affected by this option. Such chunks are referred to as partial edge chunks.</p>
-<p><b>Motivation:</b> <a class="el" href="group___d_c_p_l.html#ga8e60618d9030dc1b99ad9c8ff7867873" title="Sets the edge chunk option in a dataset creation property list.">H5Pset_chunk_opts()</a> is used to specify storage options for chunks on the edge of a dataset’s dataspace. This capability allows the user to tune performance in cases where the dataset size may not be a multiple of the chunk size and the handling of partial edge chunks can impact performance.</p>
+<p>The available option is detailed in the parameters section. Only chunks that are not completely filled by the dataset's dataspace are affected by this option. Such chunks are referred to as partial edge chunks.</p>
+<p><b>Motivation:</b> <a class="el" href="group___d_c_p_l.html#ga8e60618d9030dc1b99ad9c8ff7867873" title="Sets the edge chunk option in a dataset creation property list.">H5Pset_chunk_opts()</a> is used to specify storage options for chunks on the edge of a dataset's dataspace. This capability allows the user to tune performance in cases where the dataset size may not be a multiple of the chunk size and the handling of partial edge chunks can impact performance.</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
@@ -1925,7 +1925,7 @@ See <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5
 <p><b>Limitations:</b> </p>
 <ul>
 <li>SZIP compression cannot be applied to compound, array, variable-length, enumeration, or any other user-defined datatypes. If an SZIP filter is set in a dataset creation property list used to create a dataset containing a non-allowed datatype, the call to <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a> will fail; the conflict can be detected only when the property list is used.</li>
-<li>Users should be aware that there are factors that affect one’s rights and ability to use SZIP compression by reviewing the SZIP copyright notice.</li>
+<li>Users should be aware that there are factors that affect one's rights and ability to use SZIP compression by reviewing the SZIP copyright notice.</li>
 </ul>
 <dl class="section note"><dt>Note</dt><dd><b>For</b> <b>Users</b> <b>Familiar</b> <b>with</b> <b>SZIP</b> <b>in</b> <b>Other</b> <b>Contexts:</b> </dd>
 <dd>
@@ -2009,7 +2009,7 @@ HDF5 always modifies the options mask provided by the user to set up usage of RA
     <tr><td class="paramdir">[in]</td><td class="paramname">vspace_id</td><td>The dataspace identifier with the selection within the virtual dataset applied, possibly an unlimited selection </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src_file_name</td><td>The name of the HDF5 file where the source dataset is located or a <code>"."</code> (period) for a source dataset in the same file. The file might not exist yet. The name can be specified using a C-style <code>printf</code> statement as described below. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src_dset_name</td><td>The path to the HDF5 dataset in the file specified by <code>src_file_name</code>. The dataset might not exist yet. The dataset name can be specified using a C-style <code>printf</code> statement as described below. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src_space_id</td><td>The source dataset’s dataspace identifier with a selection applied, possibly an unlimited selection </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src_space_id</td><td>The source dataset's dataspace identifier with a selection applied, possibly an unlimited selection </td></tr>
   </table>
   </dd>
 </dl>
@@ -2021,7 +2021,7 @@ HDF5 always modifies the options mask provided by the user to set up usage of RA
 <tr>
 <td><code>"%&lt;d&gt;b"</code> </td><td>Where <code>"&lt;d&gt;"</code> is the virtual dataset dimension axis (0-based) and <code>"b"</code> indicates that the block count of the selection in that dimension should be used. The full expression (for example, <code>"%0b"</code>) is replaced with a single numeric value when the mapping is evaluated at VDS access time. Example code for many source and virtual dataset mappings is available in the "Examples of Source to Virtual Dataset Mapping" chapter in the <a href="https://portal.hdfgroup.org/display/HDF5/RFC+HDF5+Virtual+Dataset">RFC: HDF5 Virtual Dataset</a>.   </td></tr>
 </table>
-If the printf form is used for the source file or dataset names, the selection in the source dataset’s dataspace must be fixed-size.</dd></dl>
+If the printf form is used for the source file or dataset names, the selection in the source dataset's dataspace must be fixed-size.</dd></dl>
 <dl class="section user"><dt>Source File Resolutions:</dt><dd>When a source dataset residing in a different file is accessed, the library will search for the source file <code>src_file_name</code> as described below: <ul>
 <li>If <code>src_file_name</code> is a <code>"."</code> (period) then it refers to the file containing the virtual dataset. </li>
 <li>If <code>src_file_name</code> is a relative pathname, the following steps are performed:<ul>
@@ -2067,7 +2067,7 @@ VDS Functions: <a class="el" href="group___d_c_p_l.html#ga83dcce1ce110d1ff6eae0f
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:01 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:45 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -203,7 +203,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gaadd809fc16238754105bbddd20bcdde1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the number of attributes attached to an object.  <a href="group___h5_a.html#gaadd809fc16238754105bbddd20bcdde1">More...</a><br /></td></tr>
 <tr class="separator:gaadd809fc16238754105bbddd20bcdde1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabdb2cf7368eec0ad998cbe6a3f61aa41"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41">H5Aiterate1</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, unsigned *idx, <a class="el" href="_h5_apublic_8h.html#ae42c937252ed79a1ad4672f04adba750">H5A_operator1_t</a> op, void *op_data)</td></tr>
-<tr class="memdesc:gabdb2cf7368eec0ad998cbe6a3f61aa41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls a user’s function for each attribute on an object.  <a href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41">More...</a><br /></td></tr>
+<tr class="memdesc:gabdb2cf7368eec0ad998cbe6a3f61aa41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls a user's function for each attribute on an object.  <a href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41">More...</a><br /></td></tr>
 <tr class="separator:gabdb2cf7368eec0ad998cbe6a3f61aa41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadaa85276f2731ad78462a6fd27118470"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_a.html#gadaa85276f2731ad78462a6fd27118470">H5Aopen_idx</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, unsigned idx)</td></tr>
 <tr class="memdesc:gadaa85276f2731ad78462a6fd27118470"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens the attribute specified by its index.  <a href="group___h5_a.html#gadaa85276f2731ad78462a6fd27118470">More...</a><br /></td></tr>
@@ -240,7 +240,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p><a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate()</a> is a macro that is mapped to either <a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user’s function for each attribute on an object.">H5Aiterate1()</a> or <a class="el" href="group___h5_a.html#ga9315a22b60468b6e996559b1b8a77251" title="Calls a user-defined function for each attribute on an object.">H5Aiterate2()</a>.<br  />
+<p><a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate()</a> is a macro that is mapped to either <a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user&#39;s function for each attribute on an object.">H5Aiterate1()</a> or <a class="el" href="group___h5_a.html#ga9315a22b60468b6e996559b1b8a77251" title="Calls a user-defined function for each attribute on an object.">H5Aiterate2()</a>.<br  />
 </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="api-compat-macros.html">API Compatibility Macros</a> </dd></dl>
 
 </div>
@@ -472,7 +472,7 @@ Functions</h2></td></tr>
 <p>The attribute is created with the specified datatype and dataspace, <code>type_id</code> and <code>space_id</code>.</p>
 <dl class="section note"><dt>Note</dt><dd>The <code>acpl</code> parameter is currently not used; specify <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>.</dd></dl>
 <p>The attribute identifier returned by this function must be released with <a class="el" href="group___h5_a.html#gaef4394b661e2c930879e9868e122bdda" title="Closes the specified attribute.">H5Aclose()</a> resource leaks will develop.</p>
-<dl class="section note"><dt>Note</dt><dd>If <code>loc_id</code> is a file identifier, the attribute will be attached to that file’s root group.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>If <code>loc_id</code> is a file identifier, the attribute will be attached to that file's root group.</dd></dl>
 <dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line">    {</div>
 <div class="line">        __label__ fail_acpl, fail_attr, fail_file;</div>
 <div class="line">        <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file, acpl, fspace, attr;</div>
@@ -1031,7 +1031,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">obj_name</td><td>Name of object to which attribute is attached, relative to location </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">idx_type</td><td>Type of index </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">order</td><td>Index traversal order </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Attribute’s position in index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Attribute's position in index </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">ainfo</td><td>Struct containing returned attribute information </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lapl_id</td><td>Link access property list identifier</td></tr>
   </table>
@@ -1224,7 +1224,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">obj_name</td><td>Name of object to which attribute is attached, relative to location </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">idx_type</td><td>Type of index </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">order</td><td>Index traversal order </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Attribute’s position in index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Attribute's position in index </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">name</td><td>Attribute name </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size, in bytes, of attribute name </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lapl_id</td><td>Link access property list identifier</td></tr>
@@ -1234,7 +1234,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns attribute name size, in bytes, if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga4c552b2db32371f8ea20d87475313fb6" title="Gets an attribute name by attribute index position.">H5Aget_name_by_idx()</a> retrieves the name of an attribute that is attached to an object, which is specified by its location and name, <code>loc_id</code> and <code>obj_name</code>, respectively. The attribute is located by its index position, the size of the name is specified in <code>size</code>, and the attribute name is returned in <code>name</code>.</p>
 <p>The attribute is located by means of an index type, an index traversal order, and a position in the index, <code>idx_type</code>, <code>order</code> and <code>n</code>, respectively.</p>
-<p>If the attribute name’s size is unknown, the values 0 and NULL can be passed in for the parameters <code>size</code> and <code>name</code>. The function’s return value will provide the correct value for <code>size</code>.</p>
+<p>If the attribute name's size is unknown, the values 0 and NULL can be passed in for the parameters <code>size</code> and <code>name</code>. The function's return value will provide the correct value for <code>size</code>.</p>
 <p>The link access property list, <code>lapl_id</code>, may provide information regarding the properties of links required to access the object, <code>obj_name</code>.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
@@ -1396,7 +1396,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calls a user’s function for each attribute on an object. </p>
+<p>Calls a user's function for each attribute on an object. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier </td></tr>
@@ -1408,9 +1408,9 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000012">Deprecated:</a></b></dt><dd>Superseded by <a class="el" href="group___h5_a.html#ga9315a22b60468b6e996559b1b8a77251" title="Calls a user-defined function for each attribute on an object.">H5Aiterate2()</a>.</dd></dl>
-<p><a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user’s function for each attribute on an object.">H5Aiterate1()</a> iterates over the attributes of the object specified by its identifier, <code>loc_id</code>. The object can be a group, dataset, or named datatype. For each attribute of the object, the <code>op_data</code> and some additional information specified below are passed to the operator function <code>op</code>. The iteration begins with the attribute specified by its index, <code>idx</code>; the index for the next attribute to be processed by the operator, <code>op</code>, is returned in <code>idx</code>. If <code>idx</code> is the null pointer, then all attributes are processed.</p>
+<p><a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user&#39;s function for each attribute on an object.">H5Aiterate1()</a> iterates over the attributes of the object specified by its identifier, <code>loc_id</code>. The object can be a group, dataset, or named datatype. For each attribute of the object, the <code>op_data</code> and some additional information specified below are passed to the operator function <code>op</code>. The iteration begins with the attribute specified by its index, <code>idx</code>; the index for the next attribute to be processed by the operator, <code>op</code>, is returned in <code>idx</code>. If <code>idx</code> is the null pointer, then all attributes are processed.</p>
 <dl class="section warning"><dt>Warning</dt><dd>Adding or removing attributes to the object during iteration will lead to undefined behavior.</dd></dl>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 The function <code>H5Aiterate</code> was renamed to <a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user’s function for each attribute on an object.">H5Aiterate1()</a> and deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 The function <code>H5Aiterate</code> was renamed to <a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user&#39;s function for each attribute on an object.">H5Aiterate1()</a> and deprecated in this release. </dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
@@ -1479,7 +1479,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value. Further note that this function returns the return value of the last operator if it was non-zero, which can be a negative value, zero if all attributes were processed, or a positive value indicating short-circuit success.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga9315a22b60468b6e996559b1b8a77251" title="Calls a user-defined function for each attribute on an object.">H5Aiterate2()</a> iterates over the attributes attached to a dataset, named datatype, or group, as specified by <code>loc_id</code>. For each attribute, user-provided data, <code>op_data</code>, with additional information as defined below, is passed to a user-defined function, <code>op</code>, which operates on that attribute.</p>
-<p>The order of the iteration and the attributes iterated over are specified by three parameters: the index type, <code>idx_type</code>; the order in which the index is to be traversed, <code>order</code>; and the attribute’s position in the index, <code>idx</code>. The next attribute to be operated on is specified by <code>idx</code>, a position in the index.</p>
+<p>The order of the iteration and the attributes iterated over are specified by three parameters: the index type, <code>idx_type</code>; the order in which the index is to be traversed, <code>order</code>; and the attribute's position in the index, <code>idx</code>. The next attribute to be operated on is specified by <code>idx</code>, a position in the index.</p>
 <p>For example, if <code>idx_type</code>, <code>order</code>, and <code>idx</code> are set to <a class="el" href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3a644e6701706be4d37660864336c7bd3e">H5_INDEX_NAME</a>, <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a80c3e083c0a77063b1a66553decfcb08">H5_ITER_INC</a>, and 5, respectively, the attribute in question is the fifth attribute from the beginning of the alphanumeric index of attribute names. If <code>order</code> were set to <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a2f123d7a4d68054e8aa2d0f1d0a3fcd2">H5_ITER_DEC</a>, it would be the fifth attribute from the end of the index.</p>
 <p>The parameter <code>idx</code> is passed in on an <a class="el" href="group___h5_a.html#ga9315a22b60468b6e996559b1b8a77251" title="Calls a user-defined function for each attribute on an object.">H5Aiterate2()</a> call with one value and may be returned with another value. The value passed in identifies the parameter to be operated on first; the value returned identifies the parameter to be operated on in the next step of the iteration.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is also available through the <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate()</a> macro.</dd></dl>
@@ -1566,7 +1566,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value. Further note that this function returns the return value of the last operator if it is non-zero, which can be a negative value, zero if all attributes were processed, or a positive value indicating short-circuit success.</dd></dl>
 <p><a class="el" href="group___h5_a.html#ga75db973d69b61f673f5cdf21ac624cef" title="Calls user-defined function for each attribute on an object.">H5Aiterate_by_name()</a> iterates over the attributes attached to the dataset or group specified with <code>loc_id</code> and <code>obj_name</code>. For each attribute, user-provided data, <code>op_data</code>, with additional information as defined below, is passed to a user-defined function, <code>op</code>, which operates on that attribute.</p>
-<p>The order of the iteration and the attributes iterated over are specified by three parameters: the index type, <code>idx_type</code>; the order in which the index is to be traversed, <code>order</code>; and the attribute’s position in the index, <code>idx</code>. The next attribute to be operated on is specified by <code>idx</code>, a position in the index.</p>
+<p>The order of the iteration and the attributes iterated over are specified by three parameters: the index type, <code>idx_type</code>; the order in which the index is to be traversed, <code>order</code>; and the attribute's position in the index, <code>idx</code>. The next attribute to be operated on is specified by <code>idx</code>, a position in the index.</p>
 <p>For example, if <code>idx_type</code>, <code>order</code>, and <code>idx</code> are set to <a class="el" href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3a644e6701706be4d37660864336c7bd3e">H5_INDEX_NAME</a>, <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a80c3e083c0a77063b1a66553decfcb08">H5_ITER_INC</a>, and 5, respectively, the attribute in question is the fifth attribute from the beginning of the alphanumeric index of attribute names. If <code>order</code> were set to <a class="el" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a2f123d7a4d68054e8aa2d0f1d0a3fcd2">H5_ITER_DEC</a>, it would be the fifth attribute from the end of the index.</p>
 <p>The parameter <code>idx</code> is passed in on an <a class="el" href="group___h5_a.html#ga75db973d69b61f673f5cdf21ac624cef" title="Calls user-defined function for each attribute on an object.">H5Aiterate_by_name()</a> call with one value and may be returned with another value. The value passed in identifies the parameter to be operated on first; the value returned identifies the parameter to be operated on in the next step of the iteration.</p>
 <p>The link access property list, <code>lapl_id</code>, may provide information regarding the properties of links required to access the object, <code>obj_name</code>.</p>
@@ -1722,7 +1722,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">obj_name</td><td>Name of object to which attribute is attached, relative to location </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">idx_type</td><td>Type of index </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">order</td><td>Index traversal order </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Attribute’s position in index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Attribute's position in index </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">aapl_id</td><td>Attribute access property list identifier </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lapl_id</td><td>Link access property list identifier</td></tr>
   </table>
@@ -2160,7 +2160,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:01 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:45 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

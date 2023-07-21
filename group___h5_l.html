@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -451,7 +451,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5_l.html#gafd4624f1c040d5f1df36cb1e6986aac6" title="Creates an identical copy of a link with the same creation time and target. The new link can have a d...">H5Lcopy()</a> copies the link specified by <code>src_name</code> from the location specified by <code>src_loc_id</code> to the location specified by <code>dst_loc_id</code>. The new copy of the link is created with the name <code>dst_name</code>.</p>
-<p>If <code>dst_loc_id</code> is a file identifier, <code>dst_name</code> will be interpreted relative to that file’s root group.</p>
+<p>If <code>dst_loc_id</code> is a file identifier, <code>dst_name</code> will be interpreted relative to that file's root group.</p>
 <p>The new link is created with the creation and access property lists specified by <code>lcpl_id</code> and <code>lapl_id</code>. The interpretation of <code>lcpl_id</code> is limited in the manner described in the next paragraph.</p>
 <p><a class="el" href="group___h5_l.html#gafd4624f1c040d5f1df36cb1e6986aac6" title="Creates an identical copy of a link with the same creation time and target. The new link can have a d...">H5Lcopy()</a> retains the creation time and the target of the original link. However, since the link may be renamed, the character encoding is specified in <code>lcpl_id</code> rather than in that of the original link. Other link creation properties are ignored.</p>
 <p>If the link is a soft link, also known as a symbolic link, its target is interpreted relative to the location of the copy.</p>
@@ -527,7 +527,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683" title="Creates an external link, a soft link to an object in a different file.">H5Lcreate_external()</a> creates a new external link. An external link is a soft link to an object in a different HDF5 file from the location of the link, i.e., to an external object.</p>
-<p><code>file_name</code> identifies the target file containing the target object; <code>obj_name</code> specifies the path of the target object within that file. <code>obj_name</code> must be an absolute pathname in <code>file_name</code>, i.e., it must start at the target file’s root group, but it is not interpreted until an application attempts to traverse it.</p>
+<p><code>file_name</code> identifies the target file containing the target object; <code>obj_name</code> specifies the path of the target object within that file. <code>obj_name</code> must be an absolute pathname in <code>file_name</code>, i.e., it must start at the target file's root group, but it is not interpreted until an application attempts to traverse it.</p>
 <p><code>link_loc_id</code> and <code>link_name</code> specify the location and name, respectively, of the new link. <code>link_name</code> is interpreted relative to <code>link_loc_id</code>.</p>
 <p><code>lcpl_id</code> is the link creation property list used in creating the new link.</p>
 <p><code>lapl_id</code> is the link access property list used in traversing the new link. Note that an external file opened by the traversal of an external link is always opened with the weak file close degree property setting, <a class="el" href="_h5_fpublic_8h.html#aa85fa00d037d2b0401cf72edf9a6475faea1127311a219b44e4af3cb12609035f">H5F_CLOSE_WEAK</a> (see <a class="el" href="group___f_a_p_l.html#ga60e3567f677fd3ade75b909b636d7b9c" title="Sets the file close degree.">H5Pset_fclose_degree()</a>); any file close degree property setting in <code>lapl_id</code> is ignored.</p>
@@ -704,7 +704,7 @@ The new link may be one of many that point to that object.</dd></dl>
 <p>For instance, if target_path is <code></code>./foo, <code>link_loc_id</code> specifies <code></code>./x/y/bar, and the name of the new link is <code>new_link</code>, then a subsequent request for <code></code>./x/y/bar/new_link will return the same object as would be found at <code></code>./foo.</p>
 <dl class="section note"><dt>Note</dt><dd><a class="el" href="group___h5_l.html#ga894444623b58ce1ac3bd35538245ac78" title="Creates a soft link.">H5Lcreate_soft()</a> is for use only if the target object is in the current file. If the desired target object is in a different file from the new link, use <a class="el" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683" title="Creates an external link, a soft link to an object in a different file.">H5Lcreate_external()</a> to create an external link.</dd>
 <dd>
-Soft links and external links are also known as symbolic links as they use a name to point to an object; hard links employ an object’s address in the file.</dd>
+Soft links and external links are also known as symbolic links as they use a name to point to an object; hard links employ an object's address in the file.</dd>
 <dd>
 Unlike hard links, a soft link in an HDF5 file is allowed to dangle, meaning that the target object need not exist at the time that the link is created.</dd>
 <dd>
@@ -968,7 +968,7 @@ The new link may be one of many that point to that object.</dd></dl>
 <li>If <code>group2</code> exists, use <a class="el" href="group___h5_l.html#ga171be6e41dc1a464edc402df0ebdf801" title="Determines whether a link with the specified name exists in a group.">H5Lexists()</a> with name set to <code>group1/group2/softlink_to_group3</code> to verify that <code>softlink_to_group3</code> exists.</li>
 <li>If <code>softlink_to_group3</code> exists, you can now safely use <a class="el" href="group___h5_l.html#ga171be6e41dc1a464edc402df0ebdf801" title="Determines whether a link with the specified name exists in a group.">H5Lexists()</a> with <code>name</code> set to <code>group1/group2/softlink_to_group3/datasetD</code> to verify that the target link, <code>datasetD</code>, exists.</li>
 </ol>
-<p>If the link to be verified is specified with an absolute path, the same approach should be used, but starting with the first link in the file’s root group. For instance, if <code>datasetD</code> were in <code>/group1/group2/softlink_to_group3</code>, the first call to <a class="el" href="group___h5_l.html#ga171be6e41dc1a464edc402df0ebdf801" title="Determines whether a link with the specified name exists in a group.">H5Lexists()</a> would have name set to <code>/group1</code>.</p>
+<p>If the link to be verified is specified with an absolute path, the same approach should be used, but starting with the first link in the file's root group. For instance, if <code>datasetD</code> were in <code>/group1/group2/softlink_to_group3</code>, the first call to <a class="el" href="group___h5_l.html#ga171be6e41dc1a464edc402df0ebdf801" title="Determines whether a link with the specified name exists in a group.">H5Lexists()</a> would have name set to <code>/group1</code>.</p>
 <p>Note that this is an outline and does not include all the necessary details. Depending on circumstances, for example, you may need to verify that an intermediate link points to a group and that a soft link points to an existing target.</p>
 <dl class="section note"><dt>Note</dt><dd>The behavior of <a class="el" href="group___h5_l.html#ga171be6e41dc1a464edc402df0ebdf801" title="Determines whether a link with the specified name exists in a group.">H5Lexists()</a> was changed in the 1.10 release in the case where the root group, <code>"/"</code>, is the name of the link. This change is described below: <ol>
 <li>
@@ -1067,9 +1067,9 @@ Note that the function accepts link names and path names. This is potentially mi
 <td><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a4a582d434de3ee2c583384c4d3a3273d">H5L_TYPE_ERROR</a></td><td>Error</td></tr>
 </table>
 <p>There will be additional valid values if user-defined links have been registered.</p>
-<p><code>corder</code> specifies the link’s creation order position while <code>corder_valid</code> indicates whether the value in <code>corder</code> is valid.</p>
+<p><code>corder</code> specifies the link's creation order position while <code>corder_valid</code> indicates whether the value in <code>corder</code> is valid.</p>
 <p>If <code>corder_valid</code> is <code>TRUE</code>, the value in <code>corder</code> is known to be valid; if <code>corder_valid</code> is <code>FALSE</code>, the value in <code>corder</code> is presumed to be invalid;</p>
-<p><code>corder</code> starts at zero (0) and is incremented by one (1) as new links are created. But higher-numbered entries are not adjusted when a lower-numbered link is deleted; the deleted link’s creation order position is simply left vacant. In such situations, the value of <code>corder</code> for the last link created will be larger than the number of links remaining in the group.</p>
+<p><code>corder</code> starts at zero (0) and is incremented by one (1) as new links are created. But higher-numbered entries are not adjusted when a lower-numbered link is deleted; the deleted link's creation order position is simply left vacant. In such situations, the value of <code>corder</code> for the last link created will be larger than the number of links remaining in the group.</p>
 <p><code>cset</code> specifies the character set in which the link name is encoded. Valid values include the following: </p><table class="doxtable">
 <tr>
 <td><a class="el" href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71aa27383e03d1cad9b4c32d8611a145d663">H5T_CSET_ASCII</a></td><td>US ASCII</td></tr>
@@ -1164,7 +1164,7 @@ Note that the function accepts link names and path names. This is potentially mi
 <td><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a4a582d434de3ee2c583384c4d3a3273d">H5L_TYPE_ERROR</a></td><td>Error</td></tr>
 </table>
 <p>There will be additional valid values if user-defined links have been registered.</p>
-<p><code>corder</code> specifies the link’s creation order position, while <code>corder_valid</code> indicates whether the value in corder is valid.</p>
+<p><code>corder</code> specifies the link's creation order position, while <code>corder_valid</code> indicates whether the value in corder is valid.</p>
 <p>If <code>corder_valid</code> is <code>TRUE</code>, the value in <code>corder</code> is known to be valid; if <code>corder_valid</code> is <code>FALSE</code>, the value in <code>corder</code> is presumed to be invalid; <code>corder</code> starts at zero (0) and is incremented by one (1) as new links are created. But higher-numbered entries are not adjusted when a lower-numbered link is deleted; the deleted link's creation order position is simply left vacant. In such situations, the value of <code>corder</code> for the last link created will be larger than the number of links remaining in the group.</p>
 <p><code>cset</code> specifies the character set in which the link name is encoded. Valid values include the following: </p><table class="doxtable">
 <tr>
@@ -1774,7 +1774,7 @@ Call <a class="el" href="group___h5_l.html#gade0c3b274c185d148f000172fbdc3220" t
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:05 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:48 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -130,7 +130,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga71940c1637a309748fe93b6dceabd02f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds a conversion function.  <a href="group___c_o_n_v.html#ga71940c1637a309748fe93b6dceabd02f">More...</a><br /></td></tr>
 <tr class="separator:ga71940c1637a309748fe93b6dceabd02f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga13fc42ad63ffd1e40e6672d30c8dd1cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___c_o_n_v.html#ga13fc42ad63ffd1e40e6672d30c8dd1cf">H5Tcompiler_conv</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> src_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dst_id)</td></tr>
-<tr class="memdesc:ga13fc42ad63ffd1e40e6672d30c8dd1cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether the library’s default conversion is hard conversion.  <a href="group___c_o_n_v.html#ga13fc42ad63ffd1e40e6672d30c8dd1cf">More...</a><br /></td></tr>
+<tr class="memdesc:ga13fc42ad63ffd1e40e6672d30c8dd1cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether the library's default conversion is hard conversion.  <a href="group___c_o_n_v.html#ga13fc42ad63ffd1e40e6672d30c8dd1cf">More...</a><br /></td></tr>
 <tr class="separator:ga13fc42ad63ffd1e40e6672d30c8dd1cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9442478475a03357ee47fa035df0228a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___c_o_n_v.html#ga9442478475a03357ee47fa035df0228a">H5Tconvert</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> src_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dst_id, size_t nelmts, void *buf, void *background, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id)</td></tr>
 <tr class="memdesc:ga9442478475a03357ee47fa035df0228a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts data from one specified datatype to another.  <a href="group___c_o_n_v.html#ga9442478475a03357ee47fa035df0228a">More...</a><br /></td></tr>
@@ -163,7 +163,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Check whether the library’s default conversion is hard conversion. </p>
+<p>Check whether the library's default conversion is hard conversion. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src_id</td><td>Datatype identifier of source datatype </td></tr>
@@ -172,7 +172,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns zero (false), a positive (true) or a negative (failure) value.</dd></dl>
-<p><a class="el" href="group___c_o_n_v.html#ga13fc42ad63ffd1e40e6672d30c8dd1cf" title="Check whether the library’s default conversion is hard conversion.">H5Tcompiler_conv()</a> determines whether the library’s conversion function from type <code>src_id</code> to type <code>dst_id</code> is a compiler (hard) conversion or not. A compiler conversion uses compiler’s casting; a library (soft) conversion uses the library’s own conversion function.</p>
+<p><a class="el" href="group___c_o_n_v.html#ga13fc42ad63ffd1e40e6672d30c8dd1cf" title="Check whether the library&#39;s default conversion is hard conversion.">H5Tcompiler_conv()</a> determines whether the library's conversion function from type <code>src_id</code> to type <code>dst_id</code> is a compiler (hard) conversion or not. A compiler conversion uses compiler's casting; a library (soft) conversion uses the library's own conversion function.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
@@ -438,7 +438,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___c_o_n_v.html#gacc791af473dd1de512dacf0e8d6554f1" title="Removes a conversion function.">H5Tunregister()</a> removes a conversion function matching criteria such as soft or hard conversion, source and destination types, and the conversion function.</p>
-<p>If a user is trying to remove a conversion function he registered, all parameters can be used. If he is trying to remove a library’s default conversion function, there is no guarantee the <code>name</code> and <code>func</code> parameters will match the user’s chosen values. Passing in some values may cause this function to fail. A good practice is to pass in NULL as their values.</p>
+<p>If a user is trying to remove a conversion function he registered, all parameters can be used. If he is trying to remove a library's default conversion function, there is no guarantee the <code>name</code> and <code>func</code> parameters will match the user's chosen values. Passing in some values may cause this function to fail. A good practice is to pass in NULL as their values.</p>
 <p>All parameters are optional. The missing parameters will be used to generalize the search criteria.</p>
 <p>The conversion function pointer type declaration is described in <a class="el" href="group___c_o_n_v.html#ga0a23a3cb9f24bd79fae7d2d8c412a25a" title="Registers a datatype conversion function.">H5Tregister()</a>.</p>
 <dl class="section version"><dt>Version</dt><dd>1.6.3 The following change occurred in the <a class="el" href="_h5_tdevelop_8h.html#a5dcae1e3122cc65cb9553ce72d9ddc54">H5T_conv_t</a> function: the <code>nelmts</code> parameter type changed to size_t. </dd></dl>
@@ -450,7 +450,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:01 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:45 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

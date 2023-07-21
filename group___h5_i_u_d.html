@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -393,7 +393,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p>H5Idestroy_type deletes an entire identifier type <code>type</code>. All identifiers of this type are destroyed and no new identifiers of this type can be registered.</p>
-<p>The type’s free function is called on all of the identifiers which are deleted by this function, freeing their memory. In addition, all memory used by this type’s hash table is freed.</p>
+<p>The type's free function is called on all of the identifiers which are deleted by this function, freeing their memory. In addition, all memory used by this type's hash table is freed.</p>
 <p>Since the H5I_type_t values of destroyed identifier types are reused when new types are registered, it is a good idea to set the variable holding the value of the destroyed type to <a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832bac3bd281c14f862130b9dc14ceb8acbf0">H5I_UNINIT</a>. </p>
 
 </div>
@@ -583,7 +583,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Pointer to the object referenced by <code>id</code> on success, NULL on failure.</dd></dl>
 <p><a class="el" href="group___h5_i_u_d.html#gaafb1c684673762bc83546e1216fa6b10" title="Returns the object referenced by an ID.">H5Iobject_verify()</a> returns a pointer to the memory referenced by id after verifying that <code>id</code> is of type <code>type</code>. This function is analogous to dereferencing a pointer in C with type checking.</p>
-<dl class="section note"><dt>Note</dt><dd><a class="el" href="group___h5_i_u_d.html#gaafb1c684673762bc83546e1216fa6b10" title="Returns the object referenced by an ID.">H5Iobject_verify()</a> does not change the ID it is called on in any way (as opposed to <a class="el" href="group___h5_i_u_d.html#ga7ba6445e056849a3fe331f64e84a1709" title="Removes an ID from its type.">H5Iremove_verify()</a>, which removes the ID from its type’s hash table).</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="group___h5_i_u_d.html#gaafb1c684673762bc83546e1216fa6b10" title="Returns the object referenced by an ID.">H5Iobject_verify()</a> does not change the ID it is called on in any way (as opposed to <a class="el" href="group___h5_i_u_d.html#ga7ba6445e056849a3fe331f64e84a1709" title="Removes an ID from its type.">H5Iremove_verify()</a>, which removes the ID from its type's hash table).</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_i_u_d.html#gab90ab765fa23e8ffbafa228d3c8e82c5" title="Registers an object under a type and returns an ID for it.">H5Iregister()</a> </dd></dl>
 
 </div>
@@ -804,7 +804,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:07 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:49 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

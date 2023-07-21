@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -200,7 +200,7 @@ Create and initialize the dataset</li>
 <div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition:</b> H5Tpublic.h:767</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_program_model_close"></a>
 Closing an Object</h3>
-<p>An application should close an object such as a datatype, dataspace, or dataset once the object is no longer needed. Since each is an independent object, each must be released (or closed) separately. This action is frequently referred to as releasing the object’s identifier. The code in the example below closes the datatype, dataspace, and dataset that were created in the preceding section.</p>
+<p>An application should close an object such as a datatype, dataspace, or dataset once the object is no longer needed. Since each is an independent object, each must be released (or closed) separately. This action is frequently referred to as releasing the object's identifier. The code in the example below closes the datatype, dataspace, and dataset that were created in the preceding section.</p>
 <p><em>Close an object</em> </p><div class="fragment"><div class="line"><a class="code" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a>(datatype);</div>
 <div class="line"><a class="code" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609">H5Dclose</a>(dataset);</div>
 <div class="line"><a class="code" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1">H5Sclose</a>(dataspace);</div>
@@ -208,7 +208,7 @@ Closing an Object</h3>
 <div class="ttc" id="agroup___h5_s_html_ga2b53128a39c8f104c1c9c2a91590fcc1"><div class="ttname"><a href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1">H5Sclose</a></div><div class="ttdeci">herr_t H5Sclose(hid_t space_id)</div><div class="ttdoc">Releases and terminates access to a dataspace.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gafcba4db244f6a4d71e99c6e72b8678f0"><div class="ttname"><a href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a></div><div class="ttdeci">herr_t H5Tclose(hid_t type_id)</div><div class="ttdoc">Releases a datatype.</div></div>
 </div><!-- fragment --><p>There is a long list of HDF5 library items that return a unique identifier when the item is created or opened. Each time that one of these items is opened, a unique identifier is returned. Closing a file does not mean that the groups, datasets, or other open items are also closed. Each opened item must be closed separately.</p>
-<p>For more information, </p><dl class="section see"><dt>See also</dt><dd><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/UsingIdentifiers/index.html">Using Identifiers</a> in the HDF5 Application Developer’s Guide under General Topics in HDF5.</dd></dl>
+<p>For more information, </p><dl class="section see"><dt>See also</dt><dd><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/UsingIdentifiers/index.html">Using Identifiers</a> in the HDF5 Application Developer's Guide under General Topics in HDF5.</dd></dl>
 <h4>How Closing a File Effects Other Open Structural Elements</h4>
 <p>Every structural element in an HDF5 file can be opened, and these elements can be opened more than once. Elements range in size from the entire file down to attributes. When an element is opened, the HDF5 library returns a unique identifier to the application. Every element that is opened must be closed. If an element was opened more than once, each identifier that was returned to the application must be closed. For example, if a dataset was opened twice, both dataset identifiers must be released (closed) before the dataset can be considered closed. Suppose an application has opened a file, a group in the file, and two datasets in the group. In order for the file to be totally closed, the file, group, and datasets must each be closed. Closing the file before the group or the datasets will not affect the state of the group or datasets: the group and datasets will still be open.</p>
 <p>There are several exceptions to the above general rule. One is when the <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close</a> function is used. <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close</a> causes a general shutdown of the library: all data is written to disk, all identifiers are closed, and all memory used by the library is cleaned up. Another exception occurs on parallel processing systems. Suppose on a parallel system an application has opened a file, a group in the file, and two datasets in the group. If the application uses the <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose</a> function to close the file, the call will fail with an error. The open group and datasets must be closed before the file can be closed. A third exception is when the file access property list includes the property <a class="el" href="_h5_fpublic_8h.html#aa85fa00d037d2b0401cf72edf9a6475fae6af53249bfe320745828497f28b6390">H5F_CLOSE_STRONG</a>. This property closes any open elements when the file is closed with <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose</a>. For more information, see the <a class="el" href="group___f_a_p_l.html#ga60e3567f677fd3ade75b909b636d7b9c" title="Sets the file close degree.">H5Pset_fclose_degree</a> function in the HDF5 Reference Manual.</p>
@@ -224,7 +224,7 @@ Writing or Reading a Dataset to or from a File</h3>
 <h3><a class="anchor" id="subsubsec_program_model_partial"></a>
 Reading and Writing a Portion of a Dataset</h3>
 <p>The previous section described writing or reading an entire dataset. HDF5 also supports access to portions of a dataset. These parts of datasets are known as selections.</p>
-<p>The simplest type of selection is a simple hyperslab. This is an n-dimensional rectangular sub-set of a dataset where n is equal to the dataset’s rank. Other available selections include a more complex hyperslab with user-defined stride and block size, a list of independent points, or the union of any of these.</p>
+<p>The simplest type of selection is a simple hyperslab. This is an n-dimensional rectangular sub-set of a dataset where n is equal to the dataset's rank. Other available selections include a more complex hyperslab with user-defined stride and block size, a list of independent points, or the union of any of these.</p>
 <p>The figure below shows several sample selections.</p>
 <table class="doxtable">
 <caption align="top">Dataset selections</caption>
@@ -253,14 +253,14 @@ Reading and Writing a Portion of a Dataset</h3>
    </td></tr>
 </table>
 <p>Note: In the figure above, selections can take the form of a simple hyperslab, a hyperslab with user-defined stride and block, a selection of points, or a union of any of these forms.</p>
-<p>Selections and hyperslabs are portions of a dataset. As described above, a simple hyperslab is a rectangular array of data elements with the same rank as the dataset’s dataspace. Thus, a simple hyperslab is a logically contiguous collection of points within the dataset.</p>
+<p>Selections and hyperslabs are portions of a dataset. As described above, a simple hyperslab is a rectangular array of data elements with the same rank as the dataset's dataspace. Thus, a simple hyperslab is a logically contiguous collection of points within the dataset.</p>
 <p>The more general case of a hyperslab can also be a regular pattern of points or blocks within the dataspace. Four parameters are required to describe a general hyperslab: the starting coordinates, the block size, the stride or space between blocks, and the number of blocks. These parameters are each expressed as a one-dimensional array with length equal to the rank of the dataspace and are described in the table below.</p>
 <table class="doxtable">
 <caption></caption>
 <tr>
 <th>Parameter </th><th>Definition  </th></tr>
 <tr>
-<td>start </td><td>The coordinates of the starting location of the hyperslab in the dataset’s dataspace.  </td></tr>
+<td>start </td><td>The coordinates of the starting location of the hyperslab in the dataset's dataspace.  </td></tr>
 <tr>
 <td>block </td><td>The size of each block to be selected from the dataspace. If the block parameter is set to NULL, the block size defaults to a single element in each dimension, as if the block array was set to all 1s (all ones). This will result in the selection of a uniformly spaced set of count points starting at start and on the interval defined by stride.  </td></tr>
 <tr>
@@ -306,7 +306,7 @@ Reading and Writing a Portion of a Dataset</h3>
 <div class="line">status = <a class="code" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a>(memspace, <a class="code" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, offset_out, NULL, count_out, NULL);</div>
 </div><!-- fragment --><p>The hyperslab defined in the code above has the following parameters: start=(3,0,0), count=(3,4,1), stride and block size are NULL.</p>
 <h4>Writing Data into a Differently Shaped Disk Storage Block</h4>
-<p>Now let’s consider the opposite process of writing a selection from memory to a selection in a dataset in a file. Suppose that the source dataspace in memory is a 50-element, one-dimensional array called vector and that the source selection is a 48-element simple hyperslab that starts at the second element of vector. See the figure below.</p>
+<p>Now let's consider the opposite process of writing a selection from memory to a selection in a dataset in a file. Suppose that the source dataspace in memory is a 50-element, one-dimensional array called vector and that the source selection is a 48-element simple hyperslab that starts at the second element of vector. See the figure below.</p>
 <table class="doxtable">
 <tr>
 <td><div class="image">
@@ -561,7 +561,7 @@ Working with Attributes</h3>
 <h2><a class="anchor" id="subsec_program_transfer_pipeline"></a>
 The Data Transfer Pipeline</h2>
 <p>The HDF5 library implements data transfers between different storage locations. At the lowest levels, the HDF5 Library reads and writes blocks of bytes to and from storage using calls to the virtual file layer (VFL) drivers. In addition to this, the HDF5 library manages caches of metadata and a data I/O pipeline. The data I/O pipeline applies compression to data blocks, transforms data elements, and implements selections.</p>
-<p>A substantial portion of the HDF5 library’s work is in transferring data from one environment or media to another. This most often involves a transfer between system memory and a storage medium. Data transfers are affected by compression, encryption, machine-dependent differences in numerical representation, and other features. So, the bit-by-bit arrangement of a given dataset is often substantially different in the two environments.</p>
+<p>A substantial portion of the HDF5 library's work is in transferring data from one environment or media to another. This most often involves a transfer between system memory and a storage medium. Data transfers are affected by compression, encryption, machine-dependent differences in numerical representation, and other features. So, the bit-by-bit arrangement of a given dataset is often substantially different in the two environments.</p>
 <p>Consider the representation on disk of a compressed and encrypted little-endian array as compared to the same array after it has been read from disk, decrypted, decompressed, and loaded into memory on a big-endian system. HDF5 performs all of the operations necessary to make that transition during the I/O process with many of the operations being handled by the VFL and the data transfer pipeline.</p>
 <p>The figure below provides a simplified view of a sample data transfer with four stages. Note that the modules are used only when needed. For example, if the data is not compressed, the compression stage is omitted.</p>
 <table class="doxtable">
@@ -572,10 +572,10 @@ The Data Transfer Pipeline</h2>
 A data transfer from storage to memory</div></div>
    </td></tr>
 </table>
-<p>For a given I/O request, different combinations of actions may be performed by the pipeline. The library automatically sets up the pipeline and passes data through the processing steps. For example, for a read request (from disk to memory), the library must determine which logical blocks contain the requested data elements and fetch each block into the library’s cache. If the data needs to be decompressed, then the compression algorithm is applied to the block after it is read from disk. If the data is a selection, the selected elements are extracted from the data block after it is decompressed. If the data needs to be transformed (for example, byte swapped), then the data elements are transformed after decompression and selection.</p>
+<p>For a given I/O request, different combinations of actions may be performed by the pipeline. The library automatically sets up the pipeline and passes data through the processing steps. For example, for a read request (from disk to memory), the library must determine which logical blocks contain the requested data elements and fetch each block into the library's cache. If the data needs to be decompressed, then the compression algorithm is applied to the block after it is read from disk. If the data is a selection, the selected elements are extracted from the data block after it is decompressed. If the data needs to be transformed (for example, byte swapped), then the data elements are transformed after decompression and selection.</p>
 <p>While an application must sometimes set up some elements of the pipeline, use of the pipeline is normally transparent to the user program. The library determines what must be done based on the metadata for the file, the object, and the specific request. An example of when an application might be required to set up some elements in the pipeline is if the application used a custom error-checking algorithm.</p>
 <p>In some cases, it is necessary to pass parameters to and from modules in the pipeline or among other parts of the library that are not directly called through the programming API. This is accomplished through the use of dataset transfer and data access property lists.</p>
-<p>The VFL provides an interface whereby user applications can add custom modules to the data transfer pipeline. For example, a custom compression algorithm can be used with the HDF5 Library by linking an appropriate module into the pipeline through the VFL. This requires creating an appropriate wrapper for the compression module and registering it with the library with <a class="el" href="group___h5_z.html#ga93145acc38c2c60d832b7a9b0123706b" title="Registers a new filter with the HDF5 library.">H5Zregister</a>. The algorithm can then be applied to a dataset with an <a class="el" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> call which will add the algorithm to the selected dataset’s transfer property list.</p>
+<p>The VFL provides an interface whereby user applications can add custom modules to the data transfer pipeline. For example, a custom compression algorithm can be used with the HDF5 Library by linking an appropriate module into the pipeline through the VFL. This requires creating an appropriate wrapper for the compression module and registering it with the library with <a class="el" href="group___h5_z.html#ga93145acc38c2c60d832b7a9b0123706b" title="Registers a new filter with the HDF5 library.">H5Zregister</a>. The algorithm can then be applied to a dataset with an <a class="el" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> call which will add the algorithm to the selected dataset's transfer property list.</p>
 <p>Previous Chapter <a class="el" href="_h5_d_m__u_g.html#sec_data_model">The HDF5 Data Model and File Structure</a> - Next Chapter <a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
@@ -583,7 +583,7 @@ A data transfer from storage to memory</div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:00 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:44 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

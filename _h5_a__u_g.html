@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -140,7 +140,7 @@ The UML model for an HDF5 attribute</div></div>
 </table>
 <p>Creating an attribute is similar to creating a dataset. To create an attribute, the application must specify the object to which the attribute is attached, the datatype and dataspace of the attribute data, and the attribute creation property list.</p>
 <p>The following steps are required to create and write an HDF5 attribute: </p><ul>
-<li>Obtain the object identifier for the attribute’s primary data object </li>
+<li>Obtain the object identifier for the attribute's primary data object </li>
 <li>Define the characteristics of the attribute and specify the attribute creation property list <ul>
 <li>
 Define the datatype </li>
@@ -155,12 +155,12 @@ Specify the attribute creation property list</li>
 <li>Close the attribute (and datatype, dataspace, and attribute creation property list, if necessary) </li>
 <li>Close the primary data object (if appropriate)</li>
 </ul>
-<p>The following steps are required to open and read/write an existing attribute. Since HDF5 attributes allow no partial I/O, you need specify only the attribute and the attribute’s memory datatype to read it: </p><ul>
-<li>Obtain the object identifier for the attribute’s primary data object </li>
-<li>Obtain the attribute’s name or index </li>
+<p>The following steps are required to open and read/write an existing attribute. Since HDF5 attributes allow no partial I/O, you need specify only the attribute and the attribute's memory datatype to read it: </p><ul>
+<li>Obtain the object identifier for the attribute's primary data object </li>
+<li>Obtain the attribute's name or index </li>
 <li>Open the attribute </li>
 <li>Get attribute dataspace and datatype (optional) </li>
-<li>Specify the attribute’s memory type </li>
+<li>Specify the attribute's memory type </li>
 <li>Read and/or write the attribute data </li>
 <li>Close the attribute </li>
 <li>Close the primary data object (if appropriate)</li>
@@ -325,7 +325,7 @@ Working with Attributes</h2>
 The Structure of an Attribute</h3>
 <p>An attribute has two parts: name and value(s).</p>
 <p>HDF5 attributes are sometimes discussed as name/value pairs in the form name=value.</p>
-<p>An attribute’s name is a null-terminated ASCII or UTF-8 character string. Each attribute attached to an object has a unique name.</p>
+<p>An attribute's name is a null-terminated ASCII or UTF-8 character string. Each attribute attached to an object has a unique name.</p>
 <p>The value portion of the attribute contains one or more data elements of the same datatype.</p>
 <p>HDF5 attributes have all the characteristics of HDF5 datasets except that there is no partial I/O capability. In other words, attributes can be written and read only in full with no sub-setting.</p>
 <h3><a class="anchor" id="subsubsec_attribute_work_create"></a>
@@ -335,7 +335,7 @@ Creating, Writing, and Reading Attributes</h3>
 <div class="line">                <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> create_plist,</div>
 <div class="line">                <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> access_plist)</div>
 <div class="ttc" id="agroup___h5_a_html_ga4a76e4e5ab6eb0fd2aa7990d38d55f24"><div class="ttname"><a href="group___h5_a.html#ga4a76e4e5ab6eb0fd2aa7990d38d55f24">H5Acreate</a></div><div class="ttdeci">#define H5Acreate</div><div class="ttdef"><b>Definition:</b> H5version.h:868</div></div>
-</div><!-- fragment --><p> loc_id identifies the object (dataset, group, or committed datatype) to which the attribute is to be attached. name, type_id, space_id, and create_plist convey, respectively, the attribute’s name, datatype, dataspace, and attribute creation property list. The attribute’s name must be locally unique: it must be unique within the context of the object to which it is attached.</p>
+</div><!-- fragment --><p> loc_id identifies the object (dataset, group, or committed datatype) to which the attribute is to be attached. name, type_id, space_id, and create_plist convey, respectively, the attribute's name, datatype, dataspace, and attribute creation property list. The attribute's name must be locally unique: it must be unique within the context of the object to which it is attached.</p>
 <p><a class="el" href="group___h5_a.html#ga4a76e4e5ab6eb0fd2aa7990d38d55f24">H5Acreate</a> creates the attribute in memory. The attribute does not exist in the file until <a class="el" href="group___h5_a.html#gab70871e205d57450c83efd9912be2b5c">H5Awrite</a> writes it there.</p>
 <p>To write or read an attribute, call H5Awrite or H5Aread, respectively: </p><div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code" href="group___h5_a.html#gab70871e205d57450c83efd9912be2b5c">H5Awrite</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> attr_id, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_type_id, <span class="keyword">const</span> <span class="keywordtype">void</span> *buf)</div>
 <div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code" href="group___h5_a.html#gaacb27a997f7c98e8a833d0fd63b58f1c">H5Aread</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> attr_id, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_type_id, <span class="keywordtype">void</span> *buf)</div>
@@ -346,20 +346,20 @@ Creating, Writing, and Reading Attributes</h3>
 <h3><a class="anchor" id="subsubsec_attribute_work_access"></a>
 Accessing Attributes by Name or Index</h3>
 <p>Attributes can be accessed by name or index value. The use of an index value makes it possible to iterate through all of the attributes associated with a given object.</p>
-<p>To access an attribute by its name, use the <a class="el" href="group___h5_a.html#gadb49a0b5b9798d2e944d877adba8ae10">H5Aopen_by_name</a> function. <a class="el" href="group___h5_a.html#gadb49a0b5b9798d2e944d877adba8ae10">H5Aopen_by_name</a> returns an attribute identifier that can then be used by any function that must access an attribute such as <a class="el" href="group___h5_a.html#gaacb27a997f7c98e8a833d0fd63b58f1c">H5Aread</a>. Use the function <a class="el" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> to determine an attribute’s name.</p>
+<p>To access an attribute by its name, use the <a class="el" href="group___h5_a.html#gadb49a0b5b9798d2e944d877adba8ae10">H5Aopen_by_name</a> function. <a class="el" href="group___h5_a.html#gadb49a0b5b9798d2e944d877adba8ae10">H5Aopen_by_name</a> returns an attribute identifier that can then be used by any function that must access an attribute such as <a class="el" href="group___h5_a.html#gaacb27a997f7c98e8a833d0fd63b58f1c">H5Aread</a>. Use the function <a class="el" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> to determine an attribute's name.</p>
 <p>To access an attribute by its index value, use the <a class="el" href="group___h5_a.html#gab1451cdff4f77dcf9feaee83c8179b2d">H5Aopen_by_idx</a> function. To determine an attribute index value when it is not already known, use the H5Oget_info function. <a class="el" href="group___h5_a.html#gab1451cdff4f77dcf9feaee83c8179b2d">H5Aopen_by_idx</a> is generally used in the course of opening several attributes for later access. Use <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> if the intent is to perform the same operation on every attribute attached to an object.</p>
 <h3><a class="anchor" id="subsubsec_attribute_work_info"></a>
-Obtaining Information Regarding an Object’s Attributes</h3>
+Obtaining Information Regarding an Object's Attributes</h3>
 <p>In the course of working with HDF5 attributes, one may need to obtain any of several pieces of information: </p><ul>
 <li>An attribute name </li>
 <li>The dataspace of an attribute </li>
 <li>The datatype of an attribute </li>
 <li>The number of attributes attached to an object</li>
 </ul>
-<p>To obtain an attribute’s name, call H5Aget_name with an attribute identifier, attr_id: </p><div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a> <a class="code" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> attr_id, <span class="keywordtype">size_t</span> buf_size, <span class="keywordtype">char</span> *buf)</div>
+<p>To obtain an attribute's name, call H5Aget_name with an attribute identifier, attr_id: </p><div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a> <a class="code" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> attr_id, <span class="keywordtype">size_t</span> buf_size, <span class="keywordtype">char</span> *buf)</div>
 <div class="ttc" id="a_h5public_8h_html_af629ed855824cf5955b54529adf78ad6"><div class="ttname"><a href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a></div><div class="ttdeci">int ssize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:273</div></div>
 <div class="ttc" id="agroup___h5_a_html_ga05e195aabab8c623b1c52009aeb99674"><div class="ttname"><a href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a></div><div class="ttdeci">ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)</div><div class="ttdoc">Gets an attribute name.</div></div>
-</div><!-- fragment --><p> As with other attribute functions, attr_id identifies the attribute; buf_size defines the size of the buffer; and buf is the buffer to which the attribute’s name will be read.</p>
+</div><!-- fragment --><p> As with other attribute functions, attr_id identifies the attribute; buf_size defines the size of the buffer; and buf is the buffer to which the attribute's name will be read.</p>
 <p>If the length of the attribute name, and hence the value required for buf_size, is unknown, a first call to <a class="el" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> will return that size. If the value of buf_size used in that first call is too small, the name will simply be truncated in buf. A second <a class="el" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> call can then be used to retrieve the name in an appropriately-sized buffer.</p>
 <p>To determine the dataspace or datatype of an attribute, call <a class="el" href="group___h5_a.html#ga9e21e544119d03f9342530b45a71d74d">H5Aget_space</a> or <a class="el" href="group___h5_a.html#ga0b070b714b2e535df2e1cb3005026a44">H5Aget_type</a>, respectively:</p><div class="fragment"><div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="code" href="group___h5_a.html#ga9e21e544119d03f9342530b45a71d74d">H5Aget_space</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> attr_id) <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="code" href="group___h5_a.html#ga0b070b714b2e535df2e1cb3005026a44">H5Aget_type</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> attr_id) </div>
 <div class="ttc" id="agroup___h5_a_html_ga0b070b714b2e535df2e1cb3005026a44"><div class="ttname"><a href="group___h5_a.html#ga0b070b714b2e535df2e1cb3005026a44">H5Aget_type</a></div><div class="ttdeci">hid_t H5Aget_type(hid_t attr_id)</div><div class="ttdoc">Gets an attribute's datatype.</div></div>
@@ -370,7 +370,7 @@ Obtaining Information Regarding an Object’s Attributes</h3>
 <div class="ttc" id="agroup___h5_o_html_gaf4f302a33faba9e1c2b5f64c62ca4ed5"><div class="ttname"><a href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a></div><div class="ttdeci">#define H5Oget_info</div><div class="ttdef"><b>Definition:</b> H5version.h:1097</div></div>
 </div><!-- fragment --><p> The number of attributes will be returned in the object_info buffer. This is generally the preferred first step in determining attribute index values. If the call returns N, the attributes attached to the object object_id have index values of 0 through N-1.</p>
 <h3><a class="anchor" id="subsubsec_attribute_work_iterate"></a>
-Iterating across an Object’s Attributes</h3>
+Iterating across an Object's Attributes</h3>
 <p>It is sometimes useful to be able to perform the identical operation across all of the attributes attached to an object. At the simplest level, you might just want to open each attribute. At a higher level, you might wish to perform a rather complex operation on each attribute as you iterate across the set.</p>
 <p>To iterate an operation across the attributes attached to an object, one must make a series of calls to <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> </p><div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id, <a class="code" href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3">H5_index_t</a> index_type,</div>
 <div class="line">                  <a class="code" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9">H5_iter_order_t</a> order, <a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *n, <a class="code" href="_h5_apublic_8h.html#a28fef0ded9a6c0eb12334c0d15dc3e74">H5A_operator2_t</a> op,</div>
@@ -382,7 +382,7 @@ Iterating across an Object’s Attributes</h3>
 <div class="ttc" id="agroup___h5_a_html_gab9dcfc543cd4282f32b8ea19e08ffa6c"><div class="ttname"><a href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a></div><div class="ttdeci">#define H5Aiterate</div><div class="ttdef"><b>Definition:</b> H5version.h:879</div></div>
 </div><!-- fragment --><p> <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> successively marches across all of the attributes attached to the object specified in loc_id, performing the operation(s) specified in op_func with the data specified in op_data on each attribute.</p>
 <p>When <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> is called, index contains the index of the attribute to be accessed in this call. When <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> returns, index will contain the index of the next attribute. If the returned index is the null pointer, then all attributes have been processed, and the iterative process is complete.</p>
-<p>op_func is a user-defined operation that adheres to the <a class="el" href="_h5version_8h.html#a04b85ea47893cb5538a75130533900a9">H5A_operator_t</a> prototype. This prototype and certain requirements imposed on the operator’s behavior are described in the <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> entry in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</p>
+<p>op_func is a user-defined operation that adheres to the <a class="el" href="_h5version_8h.html#a04b85ea47893cb5538a75130533900a9">H5A_operator_t</a> prototype. This prototype and certain requirements imposed on the operator's behavior are described in the <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> entry in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</p>
 <p>op_data is also user-defined to meet the requirements of op_func. Beyond providing a parameter with which to pass this data, HDF5 provides no tools for its management and imposes no restrictions.</p>
 <h3><a class="anchor" id="subsubsec_attribute_work_delete"></a>
 Deleting an Attribute</h3>
@@ -489,7 +489,7 @@ A large or shared HDF5 attribute and its associated dataset(s)</div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:57:59 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:44 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

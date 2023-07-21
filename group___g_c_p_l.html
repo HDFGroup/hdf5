@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -337,10 +337,10 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___g_c_p_l.html#gacab66461dca6c2beafd624c2e4d9f94d" title="Queries the settings for conversion between compact and dense groups.">H5Pget_link_phase_change()</a> queries the maximum number of entries for a compact group and the minimum number of links to require before converting a group to a dense form.</p>
-<p>In the compact format, links are stored as messages in the group’s header. In the dense format, links are stored in a fractal heap and indexed with a version 2 B-tree.</p>
+<p>In the compact format, links are stored as messages in the group's header. In the dense format, links are stored in a fractal heap and indexed with a version 2 B-tree.</p>
 <p><code>max_compact</code> is the maximum number of links to store as header messages in the group header before converting the group to the dense format. Groups that are in the compact format and exceed this number of links are automatically converted to the dense format.</p>
 <p><code>min_dense</code> is the minimum number of links to store in the dense format. Groups which are in dense format and in which the number of links falls below this number are automatically converted back to the compact format.</p>
-<p>In the compact format, links are stored as messages in the group’s header. In the dense format, links are stored in a fractal heap and indexed with a version 2 B-tree.</p>
+<p>In the compact format, links are stored as messages in the group's header. In the dense format, links are stored in a fractal heap and indexed with a version 2 B-tree.</p>
 <p>See <a class="el" href="group___g_c_p_l.html#gab463ac9355728469eddfd973b4a5964f" title="Sets the parameters for conversion between compact and dense groups.">H5Pset_link_phase_change()</a> for a discussion of traditional, compact, and dense group storage.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
@@ -579,10 +579,10 @@ Functions</h2></td></tr>
 <div class="line">            (average_length_of_group_member_link_names + 2)</div>
 </div><!-- fragment --><p> If it is known that there will be groups with zero members, the use of a group creation property list with <code>size_hint</code> set to to 1 (one) will guarantee the smallest possible local heap for each of those groups.</p>
 <p>Setting <code>size_hint</code> to zero (0) causes the library to make a reasonable estimate for the default local heap size.</p>
-<dl class="section user"><dt>Motivation:</dt><dd>In situations where backward-compatibility is required, specifically, when libraries prior to HDF5 Release 1.8.0 may be used to read the file, groups must be created and maintained in the original style. This is HDF5’s default behavior. If backward compatibility with pre-1.8.0 libraries is not a concern, greater efficiencies can be obtained with the new-format compact and indexed groups. See <a href="https://portal.hdfgroup.org/display/HDF5/Groups">Group implementations in HDF5</a> in the <a class="el" href="group___h5_g.html">Groups (H5G)</a> API introduction (at the bottom).<br  />
+<dl class="section user"><dt>Motivation:</dt><dd>In situations where backward-compatibility is required, specifically, when libraries prior to HDF5 Release 1.8.0 may be used to read the file, groups must be created and maintained in the original style. This is HDF5's default behavior. If backward compatibility with pre-1.8.0 libraries is not a concern, greater efficiencies can be obtained with the new-format compact and indexed groups. See <a href="https://portal.hdfgroup.org/display/HDF5/Groups">Group implementations in HDF5</a> in the <a class="el" href="group___h5_g.html">Groups (H5G)</a> API introduction (at the bottom).<br  />
  <a class="el" href="group___g_c_p_l.html#ga870728af2bf3c0b16edafd762a1c44d6" title="Specifies the anticipated maximum size of a local heap.">H5Pset_local_heap_size_hint()</a> is useful for tuning file size when files contain original-style groups with either zero members or very large numbers of members.<br  />
  The original style of HDF5 groups, the only style available prior to HDF5 Release 1.8.0, was well-suited for moderate-sized groups but was not optimized for either very small or very large groups. This original style remains the default, but two new group implementations were introduced in HDF5 Release 1.8.0: compact groups to accommodate zero to small numbers of members and indexed groups for thousands or tens of thousands of members ... or millions, if that's what your application requires.<br  />
- The local heap size hint, <code>size_hint</code>, is a performance tuning parameter for original-style groups. As indicated above, an HDF5 group may have zero, a handful, or tens of thousands of members. Since the original style of HDF5 groups stores the metadata for all of these group members in a uniform format in a local heap, the size of that metadata (and hence, the size of the local heap) can vary wildly from group to group. To intelligently allocate space and to avoid unnecessary fragmentation of the local heap, it can be valuable to provide the library with a hint as to the local heap’s likely eventual size. This can be particularly valuable when it is known that a group will eventually have a great many members. It can also be useful in conserving space in a file when it is known that certain groups will never have any members.</dd></dl>
+ The local heap size hint, <code>size_hint</code>, is a performance tuning parameter for original-style groups. As indicated above, an HDF5 group may have zero, a handful, or tens of thousands of members. Since the original style of HDF5 groups stores the metadata for all of these group members in a uniform format in a local heap, the size of that metadata (and hence, the size of the local heap) can vary wildly from group to group. To intelligently allocate space and to avoid unnecessary fragmentation of the local heap, it can be valuable to provide the library with a hint as to the local heap's likely eventual size. This can be particularly valuable when it is known that a group will eventually have a great many members. It can also be useful in conserving space in a file when it is known that certain groups will never have any members.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
@@ -592,7 +592,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:04 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:47 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

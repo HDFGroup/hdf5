@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -127,7 +127,7 @@ Remarks</h2>
 <li>An unlimited dimension dataspace is specified with the <a class="el" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae" title="Creates a new simple dataspace and opens it for access.">H5Screate_simple</a> call, by passing in <a class="el" href="_h5_spublic_8h.html#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a> as an element of the maxdims array. </li>
 <li>The <a class="el" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa" title="Creates a new property list as an instance of a property list class.">H5Pcreate</a> call creates a new property as an instance of a property list class. For creating an extendible array dataset, pass in <a class="el" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a> for the property list class. </li>
 <li>The <a class="el" href="group___d_c_p_l.html#ga3584d592e377da3604b7604e266dcf5b" title="Sets the size of the chunks used to store a chunked layout dataset.">H5Pset_chunk</a> call modifies a Dataset Creation Property List instance to store a chunked layout dataset and sets the size of the chunks used. </li>
-<li>To extend an unlimited dimension dataset use the <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset’s dimensions.">H5Dset_extent</a> call. Please be aware that after this call, the dataset's dataspace must be refreshed with <a class="el" href="group___h5_d.html#gad42a46be153d895d8c28a11ebf5a0d0a" title="Returns an identifier for a copy of the dataspace for a dataset.">H5Dget_space</a> before more data can be accessed. </li>
+<li>To extend an unlimited dimension dataset use the <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent</a> call. Please be aware that after this call, the dataset's dataspace must be refreshed with <a class="el" href="group___h5_d.html#gad42a46be153d895d8c28a11ebf5a0d0a" title="Returns an identifier for a copy of the dataspace for a dataset.">H5Dget_space</a> before more data can be accessed. </li>
 <li>The <a class="el" href="group___d_c_p_l.html#ga4ef814034f601f48ab1ed6db79b4354c" title="Retrieves the size of chunks for the raw data of a chunked layout dataset.">H5Pget_chunk</a> call retrieves the size of chunks for the raw data of a chunked layout dataset. </li>
 <li>Once there is no longer a need for a Property List instance, it should be closed with the <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose</a> call.</li>
 </ul>
@@ -139,7 +139,7 @@ Remarks</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:57:58 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:43 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.800edda</span>
+   &#160;<span id="projectnumber">1.15.0.1706355</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -198,16 +198,16 @@ First search the list of suggested paths in the object copy property list. </li>
 Then, if no match has been found, search all the committed datatypes in the destination file. </li>
 </ol>
 <p>The default Step 2 in this search process can be changed by setting a callback function (see <a class="el" href="group___o_c_p_y_p_l.html#ga9e0448885990a1b9ebd4493b7604f0c1" title="Sets the callback function that H5Ocopy() will invoke before searching the entire destination file fo...">H5Pset_mcdt_search_cb()</a>).</p>
-<p>Two datatypes are determined equal if their descriptions are identical, in a manner similar to <a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f" title="Determines whether two datatype identifiers refer to the same datatype.">H5Tequal()</a>. If either committed datatype has one or more attributes, then all attributes must be present in both committed datatypes and they must be identical. Two attributes are considered identical if their datatype description, dataspace, and raw data values are the same. However, if an attribute uses a committed datatype, that committed datatype’s attributes will not be compared.</p>
+<p>Two datatypes are determined equal if their descriptions are identical, in a manner similar to <a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f" title="Determines whether two datatype identifiers refer to the same datatype.">H5Tequal()</a>. If either committed datatype has one or more attributes, then all attributes must be present in both committed datatypes and they must be identical. Two attributes are considered identical if their datatype description, dataspace, and raw data values are the same. However, if an attribute uses a committed datatype, that committed datatype's attributes will not be compared.</p>
 <p>If a match is found, <a class="el" href="group___h5_o.html#gaa94449be6f67f499be5ddd3fc44f4225" title="Copies an object in an HDF5 file.">H5Ocopy()</a> will perform the following in the destination file: </p><ul>
 <li>For a committed datatype, the library will create a hard link to the found datatype. </li>
 <li>For a dataset that uses a committed datatype, the library will modify the copied dataset to use the found committed datatype as its datatype. </li>
-<li>For an object with an attribute of a committed datatype, the library will modify the copied object’s attribute to use the found committed datatype as its datatype.</li>
+<li>For an object with an attribute of a committed datatype, the library will modify the copied object's attribute to use the found committed datatype as its datatype.</li>
 </ul>
 <p>If no match is found, <a class="el" href="group___h5_o.html#gaa94449be6f67f499be5ddd3fc44f4225" title="Copies an object in an HDF5 file.">H5Ocopy()</a> will perform the following in the destination file: </p><ul>
 <li>For a committed datatype, the library will copy it as it would any other object, creating a named committed datatype at the destination. That is, the library will create a committed datatype that is accessible in the file by a unique path. </li>
-<li>For a dataset that uses a committed datatype, the library will copy the datatype as an anonymous committed datatype and use that as the dataset’s datatype. </li>
-<li>For an object with an attribute of a committed datatype, the library will copy the datatype as an anonymous committed datatype and use that as the attribute’s datatype.</li>
+<li>For a dataset that uses a committed datatype, the library will copy the datatype as an anonymous committed datatype and use that as the dataset's datatype. </li>
+<li>For an object with an attribute of a committed datatype, the library will copy the datatype as an anonymous committed datatype and use that as the attribute's datatype.</li>
 </ul>
 <p><b>Motivation:</b> <a class="el" href="group___o_c_p_y_p_l.html#gab89c9debe50afca848151ff046afc82f" title="Adds a path to the list of paths that will be searched in the destination file for a matching committ...">H5Padd_merge_committed_dtype_path()</a> provides a means to override the default behavior of <a class="el" href="group___h5_o.html#gaa94449be6f67f499be5ddd3fc44f4225" title="Copies an object in an HDF5 file.">H5Ocopy()</a> when <a class="el" href="_h5_opublic_8h.html#a11355b69cd246ae15e7d4c53cd210bd8">H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG</a> is set in an object copy property list. <a class="el" href="group___o_c_p_y_p_l.html#gab89c9debe50afca848151ff046afc82f" title="Adds a path to the list of paths that will be searched in the destination file for a matching committ...">H5Padd_merge_committed_dtype_path()</a> is the mechanism for suggesting search paths where <a class="el" href="group___h5_o.html#gaa94449be6f67f499be5ddd3fc44f4225" title="Copies an object in an HDF5 file.">H5Ocopy()</a> will look for a matching committed datatype. This can be substantially faster than the default approach of searching the entire destination file for a match.</p>
 <p><b>Example</b> <b>Usage:</b> This example adds two paths to the object copy property list. <a class="el" href="group___h5_o.html#gaa94449be6f67f499be5ddd3fc44f4225" title="Copies an object in an HDF5 file.">H5Ocopy()</a> will search the two suggested paths for a match before searching all the committed datatypes in the destination file.</p>
@@ -568,7 +568,7 @@ mcdt_search_cb(void *_udata)
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jul 19 2023 00:58:06 for HDF5 by
+    <li class="footer">Generated on Fri Jul 21 2023 00:33:48 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
