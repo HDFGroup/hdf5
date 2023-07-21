@@ -858,7 +858,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     VRFY((acc_plist >= 0), "MPIO creation property list succeeded");
 
     file = H5Fopen(filename, H5F_ACC_RDONLY, acc_plist);
-    VRFY((file >= 0), "H5Fcreate succeeded");
+    VRFY((file >= 0), "H5Fopen succeeded");
 
     status = H5Pclose(acc_plist);
     VRFY((status >= 0), "");
