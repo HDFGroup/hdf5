@@ -30,20 +30,20 @@ typedef struct H5E_t H5E_t;
  * error number, the minor error number, and a description of the error.
  */
 #define HERROR(maj_id, min_id, ...)                                                                          \
-do {                                                                                                         \
-    H5E_printf_stack(NULL, __FILE__, __func__, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, __VA_ARGS__);        \
-} while(0)
+    do {                                                                                                     \
+        H5E_printf_stack(NULL, __FILE__, __func__, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, __VA_ARGS__);    \
+    } while (0)
 
 /*
  * HCOMMON_ERROR macro, used by HDONE_ERROR and HGOTO_ERROR
  * (Shouldn't need to be used outside this header file)
  */
 #define HCOMMON_ERROR(maj, min, ...)                                                                         \
-do {                                                                                                         \
-    HERROR(maj, min, __VA_ARGS__);                                                                           \
-    err_occurred = TRUE;                                                                                     \
-    err_occurred = err_occurred; /* Shut GCC warnings up! */                                                 \
-} while(0)
+    do {                                                                                                     \
+        HERROR(maj, min, __VA_ARGS__);                                                                       \
+        err_occurred = TRUE;                                                                                 \
+        err_occurred = err_occurred; /* Shut GCC warnings up! */                                             \
+    } while (0)
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a
@@ -58,7 +58,7 @@ do {                                                                            
     do {                                                                                                     \
         HCOMMON_ERROR(maj, min, __VA_ARGS__);                                                                \
         ret_value = ret_val;                                                                                 \
-    } while(0)
+    } while (0)
 
 /*
  * HGOTO_ERROR macro, used to facilitate error reporting between a
@@ -82,7 +82,7 @@ do {                                                                            
         H5AC_tag(prv_tag, NULL);                                                                             \
         HCOMMON_ERROR(maj, min, __VA_ARGS__);                                                                \
         HGOTO_DONE(ret_val);                                                                                 \
-    } while(0)
+    } while (0)
 
 /*
  * HGOTO_DONE macro, used to facilitate normal return between a FUNC_ENTER()
@@ -104,7 +104,7 @@ do {                                                                            
     do {                                                                                                     \
         H5AC_tag(prv_tag, NULL);                                                                             \
         HGOTO_DONE(ret_val);                                                                                 \
-    } while(0)
+    } while (0)
 
 /*
  * Macros handling system error messages as described in C standard.

@@ -233,11 +233,13 @@ done:
             /* Release data block's disk space */
             if (H5_addr_defined(dblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_FARRAY_DBLOCK, dblock->addr, (hsize_t)dblock->size) < 0)
-                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to release fixed array data block");
+                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF,
+                            "unable to release fixed array data block");
 
             /* Destroy data block */
             if (H5FA__dblock_dest(dblock) < 0)
-                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy fixed array data block");
+                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF,
+                            "unable to destroy fixed array data block");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

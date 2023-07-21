@@ -235,7 +235,7 @@
             X->forward[_lvl + 1] = PREV->forward[_lvl + 1];                                                  \
         }                                                                                                    \
         PREV->forward[_lvl + 1] = X;                                                                         \
-    } while(0)
+    } while (0)
 
 /* Macro used to reduce the level of a node by 1.  Does not update the head node
  * "current level".  PREV is the previous node of the current height of X. */

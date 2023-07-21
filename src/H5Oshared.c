@@ -575,7 +575,8 @@ H5O__shared_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, H5F_t *file_dst,
         H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
         if (H5SM_try_share(file_dst, NULL, H5SM_DEFER, mesg_type->id, _native_dst, mesg_flags) < 0)
-            HGOTO_ERROR_TAG(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to determine if message should be shared");
+            HGOTO_ERROR_TAG(H5E_OHDR, H5E_WRITEERROR, FAIL,
+                            "unable to determine if message should be shared");
 
         /* Reset metadata tag */
         H5_END_TAG

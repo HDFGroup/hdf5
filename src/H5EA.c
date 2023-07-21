@@ -627,7 +627,8 @@ done:
     if (dblock && *thing != dblock && H5EA__dblock_unprotect(dblock, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block");
     if (dblk_page && *thing != dblk_page && H5EA__dblk_page_unprotect(dblk_page, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block page");
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
+                    "unable to release extensible array data block page");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__lookup_elmt() */

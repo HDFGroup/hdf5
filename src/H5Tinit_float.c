@@ -138,7 +138,7 @@
         INFO.ebias = H5T__find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                 \
         H5T__set_precision(&(INFO));                                                                         \
         COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                               \
-    } while(0)
+    } while (0)
 
 /* Detect alignment for C structure */
 #define COMP_ALIGNMENT(TYPE, COMP_ALIGN)                                                                     \

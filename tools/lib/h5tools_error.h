@@ -226,7 +226,7 @@ catch_except:;                                                                  
         ret_value = v;                                                                                       \
         if (!past_catch)                                                                                     \
             goto catch_except;                                                                               \
-    } while(0)
+    } while (0)
 
 /*
  * H5TOOLS_THROW macro, used to facilitate error reporting within a function body.
