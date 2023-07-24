@@ -11,8 +11,6 @@
 # This contains function definitions of output filtering.
 # This file should only be sourced in by another shell script.
 #
-# Programmer: Albert Cheng
-# Created Date: 2011/5/3
 
 
 # Comment added to address HDFFV-8270:
