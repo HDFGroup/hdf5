@@ -1140,7 +1140,7 @@ H5_DLL herr_t H5Tlock(hid_t type_id);
  *
  * \fg_loc_id
  * \param[in] name Name given to committed datatype
- * \type_id Identifier of datatype to be committed and, upon function’s
+ * \type_id Identifier of datatype to be committed and, upon function's
  *          return, identifier for the committed datatype
  * \lcpl_id
  * \tcpl_id
@@ -1266,7 +1266,7 @@ H5_DLL hid_t  H5Topen_async(hid_t loc_id, const char *name, hid_t tapl_id, hid_t
  *              which provides for greater control of the creation process
  *              and of the properties of the new named datatype. H5Tcommit()
  *              always uses default properties.
- *          \li H5Tcommit_anon() neither provides the new named datatype’s
+ *          \li H5Tcommit_anon() neither provides the new named datatype's
  *              name nor links it into the HDF5 file structure; those actions
  *              must be performed separately through a call to H5Olink(),
  *              which offers greater control over linking.
@@ -1585,7 +1585,7 @@ H5_DLL herr_t H5Tenum_nameof(hid_t type, const void *value, char *name /*out*/, 
  * \details H5Tenum_valueof() finds the value that corresponds to the
  *          specified name of the enumeration datatype \p dtype_id.
  *
- *          Values returned in \p value will be of the enumerated type’s
+ *          Values returned in \p value will be of the enumerated type's
  *          base type, that is, the datatype used by H5Tenum_create() when
  *          the enumerated type was created.
  *
@@ -2196,7 +2196,7 @@ H5_DLL hid_t H5Tget_member_type(hid_t type_id, unsigned membno);
  *
  *          The member value is returned in a user-supplied buffer pointed to
  *          by \p value. Values returned in \p value will be of the enumerated
- *          type’s base type, that is, the datatype used by H5Tenum_create()
+ *          type's base type, that is, the datatype used by H5Tenum_create()
  *          when the enumerated type was created.
  *
  *          The value buffer must be at least large enough to hold a value

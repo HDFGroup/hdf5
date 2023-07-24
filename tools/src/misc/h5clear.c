@@ -75,7 +75,7 @@ usage(const char *prog)
     fprintf(stdout,
             "                             This option helps to repair a crashed file where the stored EOA\n");
     fprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
-    fprintf(stdout, "                             The file’s EOA and EOF will be the same after applying\n");
+    fprintf(stdout, "                             The file's EOA and EOF will be the same after applying\n");
     fprintf(stdout, "                             this option to the file.\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "Examples of use:\n");

@@ -456,7 +456,7 @@ CONTAINS
 !!                 \li H5_ITER_DEC_F       - Decreasing order
 !!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
 !!                 \li H5_ITER_N_F         - Number of iteration orders
-!! \param n        Attribute’s position in index
+!! \param n        Attribute&apos;s position in index
 !! \param name     Attribute name
 !! \param hdferr   \fortran_error
 !!
@@ -687,7 +687,7 @@ CONTAINS
 !! \brief Gets an attribute creation property list identifier
 !!
 !! \param attr_id          Identifier of the attribute
-!! \param creation_prop_id Identifier for the attribute’s creation property
+!! \param creation_prop_id Identifier for the attribute&apos;s creation property
 !! \param hdferr           \fortran_error
 !!
 !! See C API: @ref H5Aget_create_plist()
@@ -1080,7 +1080,7 @@ CONTAINS
 !!                 \li H5_ITER_DEC_F       - Decreasing order
 !!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
 !!                 \li H5_ITER_N_F         - Number of iteration orders
-!! \param n        Attribute’s position in index.
+!! \param n        Attribute&apos;s position in index.
 !! \param attr_id  Attribute identifier.
 !! \param hdferr   \fortran_error
 !! \param aapl_id  Attribute access property list.
@@ -1152,7 +1152,7 @@ CONTAINS
 !!                 \li H5_ITER_DEC_F       - Decreasing order
 !!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
 !!                 \li H5_ITER_N_F         - Number of iteration orders
-!! \param n        Attribute’s position in index.
+!! \param n        Attribute&apos;s position in index.
 !! \param attr_id  Attribute identifier.
 !! \param es_id    \fortran_es_id
 !! \param hdferr   \fortran_error
@@ -1237,7 +1237,7 @@ CONTAINS
 !!                       NOTE: In C it is defined as a structure: H5A_info_t.
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute.
 !! \param corder         Is a positive integer containing the creation order of the attribute.
-!! \param cset           Indicates the character set used for the attribute’s name.
+!! \param cset           Indicates the character set used for the attribute&apos;s name.
 !! \param data_size      Indicates the size, in the number of characters, of the attribute.
 !! \param hdferr         \fortran_error
 !!
@@ -1283,10 +1283,10 @@ CONTAINS
 !! \param obj_name       Name of object to which attribute is attached, relative to location
 !! \param idx_type       Type of index
 !! \param order          Index traversal order
-!! \param n              Attribute’s position in index
+!! \param n              Attribute&apos;s position in index
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute
 !! \param corder         Is a positive integer containing the creation order of the attribute
-!! \param cset           Indicates the character set used for the attribute’s name
+!! \param cset           Indicates the character set used for the attribute&apos;s name
 !! \param data_size      Indicates the size, in the number of characters, of the attribute
 !! \param hdferr         \fortran_error
 !! \param lapl_id        Link access property list
@@ -1359,7 +1359,7 @@ CONTAINS
 !! \param attr_name      Attribute name
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute
 !! \param corder         Is a positive integer containing the creation order of the attribute
-!! \param cset           Indicates the character set used for the attribute’s name
+!! \param cset           Indicates the character set used for the attribute&apos;s name
 !! \param data_size      Indicates the size, in the number of characters, of the attribute
 !! \param hdferr         \fortran_error
 !! \param lapl_id        Link access property list
@@ -1701,7 +1701,7 @@ CONTAINS
 !! \brief Determines whether an attribute with a given name exists on an object
 !!
 !! \param loc_id      Location identifier
-!! \param obj_name    Object name either relative to loc_id, absolute from the file’s root group, or &apos;. &apos;(a dot)
+!! \param obj_name    Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;. &apos;(a dot)
 !! \param attr_name   Attribute name
 !! \param attr_exists Attribute exists status
 !! \param hdferr      \fortran_error
@@ -1758,7 +1758,7 @@ CONTAINS
 !! \brief Asynchronously determines whether an attribute with a given name exists on an object
 !!
 !! \param loc_id      Location identifier
-!! \param obj_name    Object name either relative to loc_id, absolute from the file’s root group, or &apos;. &apos;(a dot)
+!! \param obj_name    Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;. &apos;(a dot)
 !! \param attr_name   Attribute name
 !! \param attr_exists Pointer to attribute exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
 !! \param es_id       \fortran_es_id
@@ -1829,7 +1829,7 @@ CONTAINS
 !! \brief Opens an attribute for an object by object name and attribute name.
 !!
 !! \param loc_id    Location from which to find object to which attribute is attached
-!! \param obj_name  Object name either relative to loc_id, absolute from the file’s root group, or &apos;.&apos; (a dot)
+!! \param obj_name  Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;.&apos; (a dot)
 !! \param attr_name Attribute name
 !! \param attr_id   Attribute identifier
 !! \param hdferr    \fortran_error
@@ -1888,7 +1888,7 @@ CONTAINS
 !! \brief Asynchronously opens an attribute for an object by object name and attribute name.
 !!
 !! \param loc_id    Location from which to find object to which attribute is attached
-!! \param obj_name  Object name either relative to loc_id, absolute from the file’s root group, or &apos;.&apos; (a dot)
+!! \param obj_name  Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;.&apos; (a dot)
 !! \param attr_name Attribute name
 !! \param attr_id   Attribute identifier
 !! \param es_id     \fortran_es_id

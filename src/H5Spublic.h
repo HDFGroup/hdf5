@@ -1026,7 +1026,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *          The \p coord parameter is a pointer to a buffer containing a
  *          serialized 2-dimensional array of size \p num_elements by the
  *          rank of the dataspace. The array lists dataset elements in the
- *          point selection; that is, it’s a list of zero-based values
+ *          point selection; that is, it's a list of zero-based values
  *          specifying the coordinates in the dataset of the selected
  *          elements. The order of the element coordinates in the \p coord
  *          array specifies the order in which the array elements are

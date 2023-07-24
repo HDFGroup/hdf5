@@ -63,7 +63,7 @@
  * \subsubsection subsubsec_dataspace_program_object Dataspace Objects
  *
  * An HDF5 dataspace is a required component of an HDF5 dataset or attribute. A dataspace defines the size
- * and the shape of a dataset’s or an attribute’s raw data. Currently, HDF5 supports the following types of
+ * and the shape of a dataset's or an attribute's raw data. Currently, HDF5 supports the following types of
  * the dataspaces:
  * \li Scalar dataspaces
  * \li Simple dataspaces
@@ -165,7 +165,7 @@
  *
  * <h4>Creating a Simple Dataspace</h4>
  *
- * Let’s assume that an application wants to store a two‐dimensional array of data, A(20,100). During the
+ * Let's assume that an application wants to store a two‐dimensional array of data, A(20,100). During the
  * life of the application, the first dimension of the array can grow up to 30; there is no restriction on
  * the size of the second dimension. The following steps are used to declare a dataspace for the dataset
  * in which the array data will be stored.
@@ -1221,7 +1221,7 @@
  * \subsection subsec_dataspace_sample Sample Programs
  *
  * This section contains the full programs from which several of the code examples in this chapter were
- * derived. The h5dump output from the program’s output file immediately follows each program.
+ * derived. The h5dump output from the program's output file immediately follows each program.
  *
  * <em>h5_write.c</em>
  * \code
