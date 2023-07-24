@@ -192,14 +192,14 @@ done:
         if (H5_addr_defined(addr)) {
             /* Release the space on disk */
             if (H5MF_xfree(f, H5FD_MEM_GHEAP, addr, (hsize_t)size) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free global heap")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free global heap");
 
             /* Check if the heap object was allocated */
             if (heap)
                 /* Destroy the heap object */
                 if (H5HG__free(heap) < 0)
                     HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF,
-                                "unable to destroy global heap collection")
+                                "unable to destroy global heap collection");
         } /* end if */
     }     /* end if */
 
@@ -439,7 +439,7 @@ H5HG_extend(H5F_t *f, haddr_t addr, size_t need)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG_extend() */
@@ -521,7 +521,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap.")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap.");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5HG_insert() */
@@ -587,7 +587,7 @@ H5HG_read(H5F_t *f, H5HG_t *hobj, void *object /*out*/, size_t *buf_size)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release object header");
 
     if (NULL == ret_value && NULL == orig_object && object)
         H5MM_free(object);
@@ -645,7 +645,7 @@ H5HG_link(H5F_t *f, const H5HG_t *hobj, int adjust)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, heap_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5HG_link() */
@@ -685,7 +685,7 @@ H5HG_get_obj_size(H5F_t *f, H5HG_t *hobj, size_t *obj_size)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5HG_get_obj_size() */
@@ -777,7 +777,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5HG_remove() */

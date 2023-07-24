@@ -447,7 +447,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 done:
     /* Release the copy of the driver info, if it was set up */
     if (driver_prop_copied && H5FD_free_driver_info(driver_prop.driver_id, driver_prop.driver_info) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close copy of driver info")
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close copy of driver info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_access_plist() */
@@ -1008,7 +1008,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
 done:
     if ((NULL == ret_value) && src_file)
         if (H5F_efc_close(primary_file, src_file) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close source file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close source file");
     if (full_name)
         full_name = (char *)H5MM_xfree(full_name);
     if (temp_file_name)
@@ -1063,7 +1063,7 @@ done:
     /* Close the file */
     if (file)
         if (H5FD_close(file) < 0 && TRUE == ret_value)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__is_hdf5() */
@@ -1328,10 +1328,10 @@ done:
             /* Attempt to clean up some of the shared file structures */
             if (f->shared->efc)
                 if (H5F__efc_destroy(f->shared->efc) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, NULL, "can't destroy external file cache")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, NULL, "can't destroy external file cache");
             if (f->shared->fcpl_id > 0)
                 if (H5I_dec_ref(f->shared->fcpl_id) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list");
 
             f->shared = H5FL_FREE(H5F_shared_t, f->shared);
         }
@@ -1377,7 +1377,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         if ((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
             if (H5F__flush_phase1(f) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 1)")
+                HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 1)");
 
         /* Notify the metadata cache that the file is about to be closed.
          * This allows the cache to set up for creating a metadata cache
@@ -1385,7 +1385,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
          */
         if (H5AC_prep_for_file_close(f) < 0)
             /* Push error, but keep going */
-            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "metadata cache prep for close failed")
+            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "metadata cache prep for close failed");
 
         /* Flush at this point since the file will be closed (phase 2).
          * Only try to flush the file if it was opened with write access, and if
@@ -1394,7 +1394,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         if ((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
             if (H5F__flush_phase2(f, TRUE) < 0)
                 /* Push error, but keep going */
-                HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 2)")
+                HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 2)");
 
         /* With the shutdown modifications, the contents of the metadata cache
          * should be clean at this point, with the possible exception of the
@@ -1408,7 +1408,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         if (f->shared->efc) {
             if (H5F__efc_destroy(f->shared->efc) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't destroy external file cache")
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't destroy external file cache");
             f->shared->efc = NULL;
         } /* end if */
 
@@ -1441,7 +1441,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
             if (H5F_ACC_RDWR & H5F_INTENT(f)) {
                 if (H5MF_close(f) < 0)
                     /* Push error, but keep going*/
-                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info");
 
                 /* at this point, only the superblock and superblock
                  * extension should be dirty.
@@ -1459,7 +1459,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
                     /* Mark EOA info dirty in cache, so change will get encoded */
                     if (H5F_eoa_dirty(f) < 0)
                         /* Push error, but keep going*/
-                        HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+                        HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty");
 
                     /* Release any space allocated to space aggregators,
                      * so that the eoa value corresponds to the end of the
@@ -1470,12 +1470,12 @@ H5F__dest(H5F_t *f, hbool_t flush)
                      */
                     if (H5MF_free_aggrs(f) < 0)
                         /* Push error, but keep going*/
-                        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
+                        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space");
 
                     /* Truncate the file to the current allocated size */
                     if (H5FD_truncate(f->shared->lf, TRUE) < 0)
                         /* Push error, but keep going*/
-                        HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+                        HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed");
 
                     /* at this point, only the superblock and superblock
                      * extension should be dirty.
@@ -1490,12 +1490,12 @@ H5F__dest(H5F_t *f, hbool_t flush)
             if (f->shared->drvinfo)
                 if (H5AC_unpin_entry(f->shared->drvinfo) < 0)
                     /* Push error, but keep going*/
-                    HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin drvinfo")
+                    HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin drvinfo");
 
             /* Unpin the superblock, since we're about to destroy the cache */
             if (H5AC_unpin_entry(f->shared->sblock) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+                HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock");
             f->shared->sblock = NULL;
         } /* end if */
 
@@ -1509,7 +1509,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         /* Remove shared file struct from list of open files */
         if (H5F__sfile_remove(f->shared) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
 
         /* Shutdown the metadata cache */
         /* (Flushes any remaining dirty entries, which should only be the
@@ -1517,12 +1517,12 @@ H5F__dest(H5F_t *f, hbool_t flush)
          */
         if (H5AC_dest(f))
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
 
         /* Shutdown the page buffer cache */
         if (H5PB_dest(f->shared) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing page buffer cache")
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing page buffer cache");
 
         /* Clean up the metadata cache log location string */
         if (f->shared->mdc_log_location)
@@ -1536,45 +1536,45 @@ H5F__dest(H5F_t *f, hbool_t flush)
             /* Free the root group */
             if (H5G_root_free(f->shared->root_grp) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
             f->shared->root_grp = NULL;
         } /* end if */
 
         /* Destroy other components of the file */
         if (H5F__accum_reset(f->shared, TRUE) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
         if (H5FO_dest(f) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
         f->shared->cwfs = (struct H5HG_heap_t **)H5MM_xfree(f->shared->cwfs);
         if (H5G_node_close(f) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
 
         /* Destroy file creation properties */
         if (H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id))
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a property list")
+            HDONE_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a property list");
         if (H5I_dec_ref(f->shared->fcpl_id) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list");
 
         /* Clean up the cached VOL connector ID & info */
         if (f->shared->vol_info)
             if (H5VL_free_connector_info(f->shared->vol_id, f->shared->vol_info) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object");
         if (f->shared->vol_id > 0)
             if (H5I_dec_ref(f->shared->vol_id) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close VOL connector ID")
+                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close VOL connector ID");
         f->shared->vol_cls = NULL;
 
         /* Close the file */
         if (H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
         /* Free mount table */
         f->shared->mtab.child  = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
@@ -1609,16 +1609,16 @@ H5F__dest(H5F_t *f, hbool_t flush)
          * and unwrap file VOL object
          */
         if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
+            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL object wrap context");
         if (vol_wrap_ctx && (NULL == H5VL_object_unwrap(f->vol_obj)))
-            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't unwrap VOL object")
+            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't unwrap VOL object");
 
         if (H5VL_free_object(f->vol_obj) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object");
         f->vol_obj = NULL;
     }
     if (H5FO_top_dest(f) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
+        HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file");
     f->shared = NULL;
 
     if (ret_value >= 0)
@@ -1904,7 +1904,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             if (H5FD_lock(lf, (hbool_t)((flags & H5F_ACC_RDWR) ? TRUE : FALSE)) < 0) {
                 /* Locking failed - Closing will remove the lock */
                 if (H5FD_close(lf) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "unable to close low-level file info")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "unable to close low-level file info");
                 HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, NULL, "unable to lock the file")
             } /* end if */
 
@@ -1915,7 +1915,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
              * so we have to close lf here before heading to the error handling.
              */
             if (H5FD_close(lf) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
+                HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info");
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to initialize file structure")
         } /* end if */
 
@@ -2119,7 +2119,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 done:
     if ((NULL == ret_value) && file)
         if (H5F__dest(file, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
@@ -2174,7 +2174,7 @@ H5F__flush_phase1(H5F_t *f)
     /* Flush any cached dataset storage raw data */
     if (H5D_flush_all(f) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache");
 
     /* Release any space allocated to space aggregators, so that the eoa value
      *  corresponds to the end of the space written to in the file.
@@ -2184,7 +2184,7 @@ H5F__flush_phase1(H5F_t *f)
      */
     if (H5MF_free_aggrs(f) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
+        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase1() */
@@ -2211,12 +2211,12 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     /* Inform the metadata cache that we are about to flush */
     if (H5AC_prep_for_file_flush(f) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed")
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed");
 
     /* Flush the entire metadata cache */
     if (H5AC_flush(f) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache");
 
 #ifdef H5_HAVE_PARALLEL
     if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
@@ -2232,12 +2232,12 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     /* Truncate the file to the current allocated size */
     if (H5FD_truncate(f->shared->lf, closing) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+        HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed");
 
     /* Flush the entire metadata cache again since the EOA could have changed in the truncate call. */
     if (H5AC_flush(f) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache");
 
 #ifdef H5_HAVE_PARALLEL
     if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
@@ -2248,22 +2248,22 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     /* Inform the metadata cache that we are done with the flush */
     if (H5AC_secure_from_file_flush(f) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed")
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed");
 
     /* Flush out the metadata accumulator */
     if (H5F__accum_flush(f->shared) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator");
 
     /* Flush the page buffer */
     if (H5PB_flush(f->shared) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "page buffer flush failed")
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "page buffer flush failed");
 
     /* Flush file buffers to disk. */
     if (H5FD_flush(f->shared->lf, closing) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "low level flush failed")
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "low level flush failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase2() */
@@ -2290,12 +2290,12 @@ H5F__flush(H5F_t *f)
     /* First phase of flushing data */
     if (H5F__flush_phase1(f) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data")
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data");
 
     /* Second phase of flushing data */
     if (H5F__flush_phase2(f, FALSE) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data")
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush() */
@@ -2789,7 +2789,7 @@ done:
     /* Close the property list */
     if (new_fapl_id > 0)
         if (H5I_dec_app_ref(new_fapl_id) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close duplicated FAPL")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close duplicated FAPL");
 #ifdef H5_HAVE_SYMLINK
     if (realname)
         realname = (char *)H5MM_xfree(realname);
@@ -3850,12 +3850,12 @@ done:
         /* Re-enable accumulator */
         f->shared->feature_flags |= (unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
         if (H5FD_set_feature_flags(f->shared->lf, f->shared->feature_flags) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set feature_flags in VFD")
+            HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set feature_flags in VFD");
 
         /* Reset the # of read attempts */
         f->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
         if (H5F_set_retries(f) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't set retries and retries_nbins")
+            HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't set retries and retries_nbins");
 
         /* Un-set H5F_ACC_SWMR_WRITE in shared open flags */
         f->shared->flags &= ~H5F_ACC_SWMR_WRITE;
@@ -3865,17 +3865,17 @@ done:
 
         /* Mark superblock as dirty */
         if (H5F_super_dirty(f) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+            HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty");
 
         /* Flush the superblock */
         if (H5F_flush_tagged_metadata(f, H5AC__SUPERBLOCK_TAG) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush superblock")
+            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush superblock");
     } /* end if */
 
     /* Unlock the file */
     if (H5F_USE_FILE_LOCKING(f))
         if (H5FD_unlock(f->shared->lf) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock the file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock the file");
 
     /* Free memory */
     if (obj_ids)
@@ -3891,7 +3891,7 @@ done:
     if (obj_apl_ids) {
         for (u = 0; u < grp_dset_count; u++)
             if (obj_apl_ids[u] != H5P_DEFAULT && obj_apl_ids[u] >= 0 && H5I_dec_ref(obj_apl_ids[u]) < 0)
-                HDONE_ERROR(H5E_ID, H5E_CANTDEC, FAIL, "decrementing property list ID failed")
+                HDONE_ERROR(H5E_ID, H5E_CANTDEC, FAIL, "decrementing property list ID failed");
         H5MM_xfree(obj_apl_ids);
     }
 
@@ -4022,7 +4022,7 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_file_id() */

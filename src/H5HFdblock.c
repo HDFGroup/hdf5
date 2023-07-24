@@ -188,7 +188,7 @@ done:
     if (ret_value < 0)
         if (dblock)
             if (H5HF__man_dblock_dest(dblock) < 0)
-                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap direct block")
+                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap direct block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__man_dblock_create() */
@@ -300,7 +300,7 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
 done:
     /* Unprotect the indirect block, with appropriate flags */
     if (H5AC_unprotect(hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, cache_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__man_dblock_destroy() */

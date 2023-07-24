@@ -217,7 +217,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
 done:
     if (!ret_value && bt)
         if (H5B__node_dest(bt) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__cache_deserialize() */

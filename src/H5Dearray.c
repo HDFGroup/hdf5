@@ -612,7 +612,7 @@ done:
         /* Close object header */
         if (obj_opened)
             if (H5O_close(&obj_loc, NULL) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -700,7 +700,7 @@ H5D__earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
 done:
     /* Release the object header from the cache */
     if (oh && H5O_unprotect(&oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__earray_idx_depend() */

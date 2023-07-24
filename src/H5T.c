@@ -1411,7 +1411,7 @@ done:
                 (void)H5T_close_real(dt);
             else {
                 if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
-                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object");
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
                 dt         = H5FL_FREE(H5T_t, dt);
             } /* end else */
@@ -1861,7 +1861,7 @@ done:
     /* Close the new datatype on errors */
     if (H5I_INVALID_HID == ret_value)
         if (new_dt && H5T_close_real(new_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release datatype info")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release datatype info");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcopy() */
@@ -1953,7 +1953,7 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tclose_async() */
@@ -3115,7 +3115,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 done:
     /* Release fake file structure */
     if (f && H5F_fake_free(f) < 0)
-        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct")
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_encode() */
@@ -3165,7 +3165,7 @@ H5T_decode(size_t buf_size, const unsigned char *buf)
 done:
     /* Release fake file structure */
     if (f && H5F_fake_free(f) < 0)
-        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release fake file struct")
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release fake file struct");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_decode() */
@@ -3283,7 +3283,7 @@ done:
     if (NULL == ret_value) {
         if (dt) {
             if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
             dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
             dt         = H5FL_FREE(H5T_t, dt);
         }
@@ -3338,7 +3338,7 @@ done:
         if (new_dt) {
             if (new_dt->shared) {
                 if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
-                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
                 new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             } /* end if */
             new_dt = H5FL_FREE(H5T_t, new_dt);
@@ -3665,7 +3665,7 @@ done:
         if (new_dt) {
             assert(new_dt->shared);
             if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
             new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             new_dt         = H5FL_FREE(H5T_t, new_dt);
         } /* end if */
@@ -3769,7 +3769,7 @@ done:
         if (new_dt) {
             assert(new_dt->shared);
             if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
             new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             new_dt         = H5FL_FREE(H5T_t, new_dt);
         } /* end if */

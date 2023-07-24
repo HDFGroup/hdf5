@@ -456,7 +456,7 @@ H5A__dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR
     H5MM_memcpy(nrecord->id.id, raw, (size_t)H5O_FHEAP_ID_LEN);
     raw += H5O_FHEAP_ID_LEN;
     nrecord->flags = *raw++;
-    UINT32DECODE(raw, nrecord->corder)
+    UINT32DECODE(raw, nrecord->corder);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_corder_decode() */

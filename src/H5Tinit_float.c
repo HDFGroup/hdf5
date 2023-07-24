@@ -58,7 +58,7 @@
  *-------------------------------------------------------------------------
  */
 #define DETECT_F(TYPE, VAR, INFO)                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         TYPE          _v1, _v2, _v3;                                                                         \
         unsigned char _buf1[sizeof(TYPE)], _buf3[sizeof(TYPE)];                                              \
         unsigned char _pad_mask[sizeof(TYPE)];                                                               \
@@ -138,7 +138,7 @@
         INFO.ebias = H5T__find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                 \
         H5T__set_precision(&(INFO));                                                                         \
         COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                               \
-    }
+    } while (0)
 
 /* Detect alignment for C structure */
 #define COMP_ALIGNMENT(TYPE, COMP_ALIGN)                                                                     \
@@ -228,7 +228,7 @@ H5T__byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_ma
             HGOTO_DONE(i);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -276,7 +276,7 @@ H5T__bit_cmp(unsigned nbytes, int *perm, void *_a, void *_b, const unsigned char
     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "didn't find a value for `first`")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -332,7 +332,7 @@ H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -422,7 +422,7 @@ H5T__find_bias(unsigned epos, unsigned esize, int *perm, void *_a)
         epos += nbits;
     }
 
-    FUNC_LEAVE_NOAPI(bias);
+    FUNC_LEAVE_NOAPI(bias)
 }
 
 /*-------------------------------------------------------------------------
@@ -568,5 +568,5 @@ done:
         }
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__init_native_float_types() */

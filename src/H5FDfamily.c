@@ -190,7 +190,7 @@ H5FD__family_get_default_config(H5FD_family_fapl_t *fa_out)
 done:
     if (ret_value < 0 && fa_out->memb_fapl_id >= 0) {
         if (H5I_dec_ref(fa_out->memb_fapl_id) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't decrement ref. count on member FAPL ID")
+            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't decrement ref. count on member FAPL ID");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -820,7 +820,7 @@ done:
         if (file->memb)
             H5MM_xfree(file->memb);
         if (H5I_dec_ref(file->memb_fapl_id) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, NULL, "can't close driver ID")
+            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, NULL, "can't close driver ID");
         if (file->name)
             H5MM_xfree(file->name);
         H5MM_xfree(file);
@@ -865,12 +865,12 @@ H5FD__family_close(H5FD_t *_file)
     }     /* end for */
     if (nerrors)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close member files")
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close member files");
 
     /* Clean up other stuff */
     if (H5I_dec_ref(file->memb_fapl_id) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
+        HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID");
     H5MM_xfree(file->memb);
     H5MM_xfree(file->name);
     H5MM_xfree(file);
@@ -1365,7 +1365,7 @@ H5FD__family_lock(H5FD_t *_file, hbool_t rw)
         for (v = 0; v < u; v++) {
             if (H5FD_unlock(file->memb[v]) < 0)
                 /* Push error, but keep going */
-                HDONE_ERROR(H5E_IO, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock member files")
+                HDONE_ERROR(H5E_IO, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock member files");
         } /* end for */
         HGOTO_ERROR(H5E_IO, H5E_CANTLOCKFILE, FAIL, "unable to lock member files")
     } /* end if */
@@ -1512,7 +1512,7 @@ done:
 
     /* Only close memb_fapl_id if we created one from the default configuration */
     if (default_fa.memb_fapl_id >= 0 && H5I_dec_ref(default_fa.memb_fapl_id) < 0)
-        HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't decrement ref. count on member FAPL ID")
+        HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't decrement ref. count on member FAPL ID");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__family_delete() */

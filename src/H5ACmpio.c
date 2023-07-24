@@ -288,7 +288,7 @@ H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, unsigned *num_entries_ptr, had
          */
         if (H5AC__copy_candidate_list_to_buffer(cache_ptr, &chk_num_entries, &haddr_buf_ptr) < 0) {
             /* Push an error, but still participate in following MPI_Bcast */
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate buffer.")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate buffer.");
         }
         assert(chk_num_entries == num_entries);
         assert(haddr_buf_ptr != NULL);
@@ -409,7 +409,7 @@ H5AC__broadcast_clean_list(H5AC_t *cache_ptr)
         buf_size = sizeof(haddr_t) * num_entries;
         if (NULL == (addr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size))) {
             /* Push an error, but still participate in following MPI_Bcast */
-            HDONE_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for addr buffer")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for addr buffer");
         }
         else {
             /* Set up user data for callback */
@@ -421,7 +421,7 @@ H5AC__broadcast_clean_list(H5AC_t *cache_ptr)
             /* (Callback also removes the matching entries from the dirtied list) */
             if (H5SL_free(aux_ptr->c_slist_ptr, H5AC__broadcast_clean_list_cb, &udata) < 0) {
                 /* Push an error, but still participate in following MPI_Bcast */
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "Can't build address list for clean entries")
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "Can't build address list for clean entries");
             }
         }
 
@@ -1396,7 +1396,7 @@ H5AC__receive_haddr_list(MPI_Comm mpi_comm, unsigned *num_entries_ptr, haddr_t *
         buf_size = sizeof(haddr_t) * num_entries;
         if (NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size))) {
             /* Push an error, but still participate in following MPI_Bcast */
-            HDONE_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for haddr buffer")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for haddr buffer");
         }
 
         /* Now receive the list of candidate entries */
@@ -1740,7 +1740,7 @@ H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f)
              */
             if (H5AC__construct_candidate_list(cache_ptr, aux_ptr, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) <
                 0)
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.")
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.");
         }
 
         /* propagate and apply candidate list -- all processes */
@@ -1833,7 +1833,7 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
              * in collective operations during following cache entry
              * propagation
              */
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.");
         }
         else {
             /* this code exists primarily for the test bed -- it allows us to
@@ -1955,7 +1955,7 @@ H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f)
                  * in collective operations during following cache entry
                  * propagation
                  */
-                HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_flush_to_min_clean() failed.")
+                HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_flush_to_min_clean() failed.");
             }
             else {
                 /* this call exists primarily for the test code -- it is used

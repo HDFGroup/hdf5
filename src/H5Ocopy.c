@@ -166,9 +166,9 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const 
 
 done:
     if (loc_found && H5G_loc_free(&src_loc) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location");
     if (obj_open && H5O_close(&src_oloc, NULL) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy() */
@@ -743,7 +743,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     /* Insert destination object header in cache */
     if (H5AC_insert_entry(oloc_dst->file, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header");
     oh_dst   = NULL;
     inserted = TRUE;
 
@@ -764,15 +764,15 @@ done:
 
     /* Release pointer to source object header and its derived objects */
     if (oh_src && H5O_unprotect(oloc_src, oh_src, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     /* Free destination object header on failure */
     if (ret_value < 0) {
         if (oh_dst && !inserted) {
             if (H5O__free(oh_dst, TRUE) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data");
             if (H5O_loc_reset(oloc_dst) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data");
         } /* end if */
 
         if (addr_map == NULL && cpy_udata) {
@@ -1378,7 +1378,7 @@ H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const 
 done:
     /* Release resources */
     if (obj_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy_search_comm_dt_cb */

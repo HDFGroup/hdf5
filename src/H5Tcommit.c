@@ -274,22 +274,22 @@ done:
         if (dt->shared->state == H5T_STATE_OPEN && dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
             /* Remove the datatype from the list of opened objects in the file */
             if (H5FO_top_decr(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object");
             if (H5FO_delete(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
-                            "can't remove dataset from list of open objects")
+                            "can't remove dataset from list of open objects");
 
             /* Close the datatype object */
             if (H5O_close(&(dt->oloc), NULL) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header");
 
             /* Remove the datatype's object header from the file */
             if (H5O_delete(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header");
 
             /* Mark datatype as being back in memory */
             if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY))
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to return datatype to memory")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to return datatype to memory");
             dt->sh_loc.type   = H5O_SHARE_TYPE_UNSHARED;
             dt->shared->state = old_state;
         } /* end if */
@@ -520,11 +520,11 @@ done:
             (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED)) {
             if (H5O_dec_rc_by_loc(&(type->oloc)) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL,
-                            "unable to decrement refcount on newly created object")
+                            "unable to decrement refcount on newly created object");
             if (H5O_close(&(type->oloc), NULL) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header");
             if (H5O_delete(file, type->sh_loc.u.loc.oh_addr) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header");
             type->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
         } /* end if */
     }     /* end if */
@@ -637,7 +637,7 @@ done:
     /* Cleanup on error */
     if (H5I_INVALID_HID == ret_value)
         if (dt && H5VL_datatype_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__open_api_common() */
@@ -924,7 +924,7 @@ done:
     if (ret_value < 0)
         if (new_tcpl_id > 0)
             if (H5I_dec_app_ref(new_tcpl_id) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, H5I_INVALID_HID, "unable to close temporary object")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, H5I_INVALID_HID, "unable to close temporary object");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_create_plist() */
@@ -986,7 +986,7 @@ done:
     if (NULL == ret_value)
         if (obj_found && H5_addr_defined(type_loc.oloc->addr))
             if (H5G_loc_free(&type_loc) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "can't free location")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__open_name() */
@@ -1091,7 +1091,7 @@ done:
         if (dt) {
             if (shared_fo == NULL) { /* Need to free shared file object */
                 if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
-                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
             } /* end if */
 

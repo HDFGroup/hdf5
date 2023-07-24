@@ -139,7 +139,7 @@ done:
     if (ret_value < 0)
         /* Release newly created connector */
         if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5ESinsert_request() */

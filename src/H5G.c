@@ -190,7 +190,7 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
 done:
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__create_api_common() */
@@ -273,7 +273,7 @@ H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
                         H5ARG_TRACE9(__func__, "*s*sIui*siiii", app_file, app_func, app_line, loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID")
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID");
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -360,7 +360,7 @@ done:
     /* Cleanup on failure */
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate_anon() */
@@ -409,7 +409,7 @@ H5G__open_api_common(hid_t loc_id, const char *name, hid_t gapl_id, void **token
 done:
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__open_api_common() */
@@ -482,7 +482,7 @@ H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
                         H5ARG_TRACE7(__func__, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, gapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID")
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID");
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -952,7 +952,7 @@ H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gclose_async() */

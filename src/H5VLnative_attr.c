@@ -123,7 +123,7 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
 done:
     /* Release resources */
     if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_attr_create() */

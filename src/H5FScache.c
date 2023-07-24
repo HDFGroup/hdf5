@@ -306,7 +306,7 @@ done:
     /* Release resources */
     if (!ret_value && fspace)
         if (H5FS__hdr_dest(fspace) < 0)
-            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_hdr_deserialize() */
@@ -519,7 +519,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                 H5_BEGIN_TAG(tag)
                 if (H5AC_insert_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo,
                                       H5AC__NO_FLAGS_SET) < 0)
-                    HGOTO_ERROR_TAG(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
+                    HGOTO_ERROR_TAG(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache");
                 H5_END_TAG
 
                 assert(fspace->sinfo->cache_info.size == fspace->alloc_sect_size);
@@ -1056,7 +1056,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 done:
     if (!ret_value && sinfo)
         if (H5FS__sinfo_dest(sinfo) < 0)
-            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info")
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_sinfo_deserialize() */

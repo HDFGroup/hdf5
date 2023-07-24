@@ -441,7 +441,7 @@ done:
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, region_elmt_counter, elmt_counter);
     /* Render the region } element end */
 
-    H5_LEAVE(dimension_break)
+    H5_LEAVE(dimension_break);
 
     CATCH
 
@@ -843,7 +843,7 @@ done:
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, region_elmt_counter, elmt_counter);
     /* Render the region } element end */
 
-    H5_LEAVE(dimension_break)
+    H5_LEAVE(dimension_break);
 
     CATCH
 
@@ -1198,7 +1198,7 @@ done:
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, region_elmt_counter, elmt_counter);
     /* Render the region } element end */
 
-    H5_LEAVE(dimension_break)
+    H5_LEAVE(dimension_break);
     CATCH
 
     H5TOOLS_ENDDEBUG(" ");

@@ -116,7 +116,7 @@ done:
 
     if (!ret_value)
         if (dblk_page && H5FA__dblk_page_dest(dblk_page) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block page")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block page");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__dblk_page_alloc() */
@@ -183,11 +183,11 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(dblk_page) < 0)
                     HDONE_ERROR(H5E_FARRAY, H5E_CANTREMOVE, FAIL,
-                                "unable to remove fixed array data block page from cache")
+                                "unable to remove fixed array data block page from cache");
 
             /* Destroy data block page */
             if (H5FA__dblk_page_dest(dblk_page) < 0)
-                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "unable to destroy fixed array data block page")
+                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "unable to destroy fixed array data block page");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -256,7 +256,7 @@ done:
             H5AC_unprotect(hdr->f, H5AC_FARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, NULL,
                         "unable to unprotect fixed array data block page, address = %llu",
-                        (unsigned long long)dblk_page->addr)
+                        (unsigned long long)dblk_page->addr);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

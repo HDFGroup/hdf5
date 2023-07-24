@@ -399,7 +399,7 @@ H5O__alloc_null(H5F_t *f, H5O_t *oh, size_t null_idx, const H5O_msg_class_t *new
 done:
     /* Release chunk */
     if (chk_proxy && H5O__chunk_unprotect(f, chk_proxy, chk_dirtied) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__alloc_null() */
@@ -666,7 +666,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size, size
 done:
     /* Release chunk */
     if (chk_proxy && H5O__chunk_unprotect(f, chk_proxy, chk_dirtied) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__alloc_extend_chunk() */
@@ -1369,7 +1369,7 @@ H5O__release_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg, hbool_t adj_link)
 done:
     /* Release chunk, if not already done */
     if (chk_proxy && H5O__chunk_unprotect(f, chk_proxy, chk_dirtied) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__release_mesg() */
@@ -1535,7 +1535,7 @@ H5O__move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
 done:
     /* Release chunk, if not already done */
     if (chk_proxy && H5O__chunk_unprotect(f, chk_proxy, chk_dirtied) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__move_cont() */
@@ -1899,12 +1899,12 @@ H5O__move_msgs_forward(H5F_t *f, H5O_t *oh)
 done:
     if (ret_value < 0) {
         if (null_chk_proxy && H5O__chunk_unprotect(f, null_chk_proxy, null_chk_dirtied) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect null object header chunk")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect null object header chunk");
         if (curr_chk_proxy && H5O__chunk_unprotect(f, curr_chk_proxy, curr_chk_dirtied) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect current object header chunk")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect current object header chunk");
         if (cont_targ_chk_proxy && H5O__chunk_unprotect(f, cont_targ_chk_proxy, FALSE) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL,
-                        "unable to unprotect continuation message target object header chunk")
+                        "unable to unprotect continuation message target object header chunk");
     } /* end if */
     else
         assert(!null_chk_proxy && !curr_chk_proxy && !cont_targ_chk_proxy);
@@ -2489,7 +2489,7 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
 done:
     /* Release chunk, marking it dirty */
     if (chk_proxy && H5O__chunk_unprotect(f, chk_proxy, TRUE) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__alloc_shrink_chunk() */

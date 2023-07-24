@@ -141,7 +141,7 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
 done:
     if (H5I_INVALID_HID == ret_value)
         if (dset && H5VL_dataset_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_api_common() */
@@ -229,7 +229,7 @@ H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
                         H5ARG_TRACE11(__func__, "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name, type_id, space_id, lcpl_id, dcpl_id, dapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on dataset ID")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on dataset ID");
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -320,7 +320,7 @@ done:
     /* Cleanup on failure */
     if (H5I_INVALID_HID == ret_value)
         if (dset && H5VL_dataset_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate_anon() */
@@ -370,7 +370,7 @@ H5D__open_api_common(hid_t loc_id, const char *name, hid_t dapl_id, void **token
 done:
     if (H5I_INVALID_HID == ret_value)
         if (dset && H5VL_dataset_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__open_api_common() */
@@ -443,7 +443,7 @@ H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
                         H5ARG_TRACE7(__func__, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, dapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on dataset ID")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on dataset ID");
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -540,7 +540,7 @@ H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dclose_async() */
@@ -654,7 +654,7 @@ H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line
             /* clang-format on */
             if (H5I_dec_app_ref(ret_value) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, H5I_INVALID_HID,
-                            "can't decrement count on dataspace ID")
+                            "can't decrement count on dataspace ID");
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -1639,7 +1639,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_
 done:
     /* Release selection iterator */
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release selection iterator");
     if (iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
 
@@ -1735,7 +1735,7 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
 done:
     /* Release selection iterator */
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release selection iterator");
     if (iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
 

@@ -505,7 +505,7 @@ H5T__enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/)
 done:
     if (copied_dt)
         if (H5T_close_real(copied_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close data type")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close data type");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }

@@ -204,7 +204,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
 done:
     if (ret_value < 0)
         if (H5B2__hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free shared v2 B-tree info")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free shared v2 B-tree info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__hdr_init() */
@@ -312,16 +312,16 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(hdr) < 0)
                     HDONE_ERROR(H5E_BTREE, H5E_CANTREMOVE, HADDR_UNDEF,
-                                "unable to remove v2 B-tree header from cache")
+                                "unable to remove v2 B-tree header from cache");
 
             /* Release header's disk space */
             if (H5_addr_defined(hdr->addr) &&
                 H5MF_xfree(f, H5FD_MEM_BTREE, hdr->addr, (hsize_t)hdr->hdr_size) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free v2 B-tree header")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free v2 B-tree header");
 
             /* Destroy header */
             if (H5B2__hdr_free(hdr) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release v2 B-tree header")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release v2 B-tree header");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -520,7 +520,7 @@ done:
         /* Release the header, if it was protected */
         if (hdr && H5AC_unprotect(hdr->f, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL,
-                        "unable to unprotect v2 B-tree header, address = %llu", (unsigned long long)hdr_addr)
+                        "unable to unprotect v2 B-tree header, address = %llu", (unsigned long long)hdr_addr);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -674,7 +674,7 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr)
 done:
     /* Unprotect the header with appropriate flags */
     if (H5B2__hdr_unprotect(hdr, cache_flags) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__hdr_delete() */

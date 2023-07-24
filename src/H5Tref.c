@@ -741,7 +741,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
 
 done:
     if ((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on location id")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on location id");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__ref_mem_write() */
 

@@ -516,7 +516,7 @@ H5Z__check_unregister_group_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void 
 done:
     if (ocpl_id > 0)
         if (H5I_dec_app_ref(ocpl_id) < 0)
-            HDONE_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release plist")
+            HDONE_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__check_unregister_group_cb() */
@@ -566,7 +566,7 @@ H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *
 done:
     if (ocpl_id > 0)
         if (H5I_dec_app_ref(ocpl_id) < 0)
-            HDONE_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release plist")
+            HDONE_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__check_unregister_dset_cb() */
@@ -851,7 +851,7 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
 
 done:
     if (space_id > 0 && H5I_dec_ref(space_id) < 0)
-        HDONE_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace")
+        HDONE_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace");
 
     if (dcpl_layout)
         dcpl_layout = (H5O_layout_t *)H5MM_xfree(dcpl_layout);

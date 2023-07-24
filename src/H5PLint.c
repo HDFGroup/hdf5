@@ -462,7 +462,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
 done:
     if (!(*success) && handle)
         if (H5PL__close(handle) < 0)
-            HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+            HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */

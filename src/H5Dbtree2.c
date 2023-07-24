@@ -623,7 +623,7 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
 done:
     /* Release the object header from the cache */
     if (oh && H5O_unprotect(&oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree2_idx_depend() */
@@ -1360,7 +1360,7 @@ H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 done:
     /* Close v2 B-tree index */
     if (bt2_cdset && H5B2_close(bt2_cdset) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for tracking chunked dataset")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for tracking chunked dataset");
     idx_info->storage->u.btree2.bt2 = NULL;
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -125,7 +125,7 @@ H5EA__dblock_alloc(H5EA_hdr_t *hdr, void *parent, size_t nelmts)
 done:
     if (!ret_value)
         if (dblock && H5EA__dblock_dest(dblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__dblock_alloc() */
@@ -211,18 +211,18 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(dblock) < 0)
                     HDONE_ERROR(H5E_EARRAY, H5E_CANTREMOVE, HADDR_UNDEF,
-                                "unable to remove extensible array data block from cache")
+                                "unable to remove extensible array data block from cache");
 
             /* Release data block's disk space */
             if (H5_addr_defined(dblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dblock->addr, (hsize_t)dblock->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
-                            "unable to release extensible array data block")
+                            "unable to release extensible array data block");
 
             /* Destroy data block */
             if (H5EA__dblock_dest(dblock) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
-                            "unable to destroy extensible array data block")
+                            "unable to destroy extensible array data block");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -319,7 +319,7 @@ done:
             H5AC_unprotect(hdr->f, H5AC_EARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, NULL,
                         "unable to unprotect extensible array data block, address = %llu",
-                        (unsigned long long)dblock->addr)
+                        (unsigned long long)dblock->addr);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -412,7 +412,7 @@ done:
     /* Finished deleting data block in metadata cache */
     if (dblock && H5EA__dblock_unprotect(dblock, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG |
                                                      H5AC__FREE_FILE_SPACE_FLAG) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__dblock_delete() */

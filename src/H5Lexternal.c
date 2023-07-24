@@ -239,15 +239,15 @@ done:
     /* Release resources */
     if (fapl_id > 0 && H5I_dec_ref(fapl_id) < 0)
         HDONE_ERROR(H5E_ID, H5E_CANTRELEASE, H5I_INVALID_HID,
-                    "unable to close ID for file access property list")
+                    "unable to close ID for file access property list");
     if (ext_file && H5F_efc_close(loc.oloc->file, ext_file) < 0)
-        HDONE_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problem closing external file")
+        HDONE_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problem closing external file");
     if (parent_group_name && parent_group_name != local_group_name)
         parent_group_name = (char *)H5MM_xfree(parent_group_name);
     if (ret_value < 0) {
         /* Close object if it's open and something failed */
         if (ext_obj_id >= 0 && H5I_dec_ref(ext_obj_id) < 0)
-            HDONE_ERROR(H5E_ID, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to close ID for external object")
+            HDONE_ERROR(H5E_ID, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to close ID for external object");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

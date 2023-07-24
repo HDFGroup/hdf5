@@ -124,7 +124,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
 
 done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_debug() */

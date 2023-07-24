@@ -140,7 +140,7 @@ H5EA__iblock_alloc(H5EA_hdr_t *hdr)
 done:
     if (!ret_value)
         if (iblock && H5EA__iblock_dest(iblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array index block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array index block");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__iblock_alloc() */
 
@@ -241,18 +241,18 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(iblock) < 0)
                     HDONE_ERROR(H5E_EARRAY, H5E_CANTREMOVE, HADDR_UNDEF,
-                                "unable to remove extensible array index block from cache")
+                                "unable to remove extensible array index block from cache");
 
             /* Release index block's disk space */
             if (H5_addr_defined(iblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_IBLOCK, iblock->addr, (hsize_t)iblock->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
-                            "unable to release file space for extensible array index block")
+                            "unable to release file space for extensible array index block");
 
             /* Destroy index block */
             if (H5EA__iblock_dest(iblock) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
-                            "unable to destroy extensible array index block")
+                            "unable to destroy extensible array index block");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -308,7 +308,7 @@ done:
             H5AC_unprotect(hdr->f, H5AC_EARRAY_IBLOCK, iblock->addr, iblock, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, NULL,
                         "unable to unprotect extensible array index block, address = %llu",
-                        (unsigned long long)iblock->addr)
+                        (unsigned long long)iblock->addr);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -422,7 +422,7 @@ done:
     /* Finished deleting index block in metadata cache */
     if (iblock && H5EA__iblock_unprotect(iblock, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG |
                                                      H5AC__FREE_FILE_SPACE_FLAG) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array index block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array index block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__iblock_delete() */

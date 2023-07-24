@@ -194,7 +194,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_
 done:
     if (!ret_value)
         if (sym && H5G__node_free(sym) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__cache_node_deserialize() */

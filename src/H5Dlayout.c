@@ -552,7 +552,7 @@ done:
         if (layout_init)
             /* Destroy any cached layout information for the dataset */
             if (dset->shared->layout.ops->dest && (dset->shared->layout.ops->dest)(dset) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__layout_oh_create() */
@@ -647,13 +647,13 @@ done:
     if (ret_value < 0) {
         if (pline_copied)
             if (H5O_msg_reset(H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset pipeline info")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset pipeline info");
         if (layout_copied)
             if (H5O_msg_reset(H5O_LAYOUT_ID, &dataset->shared->layout) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset layout info")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset layout info");
         if (efl_copied)
             if (H5O_msg_reset(H5O_EFL_ID, &dataset->shared->dcpl_cache.efl) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset efl message")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset efl message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_oh_read() */

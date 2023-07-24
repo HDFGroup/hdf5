@@ -134,17 +134,17 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(leaf) < 0)
                     HDONE_ERROR(H5E_BTREE, H5E_CANTREMOVE, FAIL,
-                                "unable to remove v2 B-tree leaf node from cache")
+                                "unable to remove v2 B-tree leaf node from cache");
 
             /* Release leaf node's disk space */
             if (H5_addr_defined(node_ptr->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_BTREE, node_ptr->addr, (hsize_t)hdr->node_size) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL,
-                            "unable to release file space for v2 B-tree leaf node")
+                            "unable to release file space for v2 B-tree leaf node");
 
             /* Destroy leaf node */
             if (H5B2__leaf_free(leaf) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree leaf node")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree leaf node");
         } /* end if */
     }     /* end if */
 
@@ -213,7 +213,7 @@ done:
                 if (H5AC_proxy_entry_remove_child(leaf->top_proxy, leaf) < 0)
                     HDONE_ERROR(
                         H5E_BTREE, H5E_CANTUNDEPEND, NULL,
-                        "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
+                        "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy");
                 leaf->top_proxy = NULL;
             } /* end if */
 
@@ -221,7 +221,7 @@ done:
             if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, node_ptr->addr, leaf, H5AC__NO_FLAGS_SET) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL,
                             "unable to unprotect v2 B-tree leaf node, address = %llu",
-                            (unsigned long long)node_ptr->addr)
+                            (unsigned long long)node_ptr->addr);
         } /* end if */
     }     /* end if */
 
@@ -304,7 +304,7 @@ H5B2__neighbor_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, void *neigh
 done:
     /* Release the B-tree leaf node */
     if (leaf && H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__neighbor_leaf() */
@@ -407,11 +407,11 @@ done:
         /* Shadow the node if doing SWMR writes */
         if (hdr->swmr_write && (leaf_flags & H5AC__DIRTIED_FLAG))
             if (H5B2__shadow_leaf(leaf, curr_node_ptr) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf B-tree node")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf B-tree node");
 
         /* Unprotect leaf node */
         if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, leaf_flags) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -555,7 +555,7 @@ done:
         if (hdr->swmr_write && (leaf_flags & H5AC__DIRTIED_FLAG)) {
             /* Attempt to shadow the node if doing SWMR writes */
             if (H5B2__shadow_leaf(leaf, curr_node_ptr) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf B-tree node")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf B-tree node");
 
             /* Change the state to "shadowed" if only modified currently */
             /* (Triggers parent to be marked dirty) */
@@ -565,7 +565,7 @@ done:
 
         /* Unprotect leaf node */
         if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, leaf_flags) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -654,7 +654,7 @@ H5B2__swap_leaf(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, unsi
 done:
     /* Unlock child node */
     if (child && H5AC_unprotect(hdr->f, child_class, child_addr, child, H5AC__DIRTIED_FLAG) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__swap_leaf() */
@@ -823,7 +823,7 @@ H5B2__remove_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
 done:
     /* Release the B-tree leaf node */
     if (leaf && H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_flags) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__remove_leaf() */
@@ -921,7 +921,7 @@ H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_n
 done:
     /* Release the B-tree leaf node */
     if (leaf && H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_flags) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__remove_leaf_by_idx() */

@@ -896,7 +896,7 @@ H5FS_sect_remove(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect)
 done:
     /* Release the section info */
     if (sinfo_valid && H5FS__sinfo_unlock(f, fspace, TRUE) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_remove() */
@@ -990,7 +990,7 @@ done:
         if (fspace_node && fspace_node_alloc) {
             if (fspace_node->sect_list && H5SL_close(fspace_node->sect_list) < 0)
                 HDONE_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL,
-                            "can't destroy size free space node's skip list")
+                            "can't destroy size free space node's skip list");
             fspace_node = H5FL_FREE(H5FS_node_t, fspace_node);
         } /* end if */
 
@@ -1348,7 +1348,7 @@ H5FS_sect_add(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flag
 done:
     /* Release the section info */
     if (sinfo_valid && H5FS__sinfo_unlock(f, fspace, sinfo_modified) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info");
 
 #ifdef H5FS_DEBUG_ASSERT
     if (!(flags & (H5FS_ADD_DESERIALIZING | H5FS_ADD_SKIP_VALID)))
@@ -1490,7 +1490,7 @@ H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size, hsize
 done:
     /* Release the section info */
     if (sinfo_valid && H5FS__sinfo_unlock(f, fspace, sinfo_modified) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_try_extend() */
@@ -1552,7 +1552,7 @@ H5FS_sect_try_merge(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigne
 done:
     /* Release the section info */
     if (sinfo_valid && H5FS__sinfo_unlock(f, fspace, sinfo_modified) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_try_merge() */
@@ -1753,7 +1753,7 @@ H5FS_sect_find(H5F_t *f, H5FS_t *fspace, hsize_t request, H5FS_section_info_t **
 done:
     /* Release the section info */
     if (sinfo_valid && H5FS__sinfo_unlock(f, fspace, sinfo_modified) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info");
 
 #ifdef H5FS_DEBUG_ASSERT
     H5FS__assert(fspace);
@@ -1876,7 +1876,7 @@ H5FS_sect_iterate(H5F_t *f, H5FS_t *fspace, H5FS_operator_t op, void *op_data)
 done:
     /* Release the section info */
     if (sinfo_valid && H5FS__sinfo_unlock(f, fspace, FALSE) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_iterate() */
@@ -2052,7 +2052,7 @@ H5FS_sect_change_class(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, uint
 done:
     /* Release the section info */
     if (sinfo_valid && H5FS__sinfo_unlock(f, fspace, TRUE) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_change_class() */
@@ -2261,7 +2261,7 @@ H5FS_sect_try_shrink_eoa(H5F_t *f, H5FS_t *fspace, void *op_data)
 done:
     /* Release the section info */
     if (sinfo_valid && H5FS__sinfo_unlock(f, fspace, section_removed) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_try_shrink_eoa() */

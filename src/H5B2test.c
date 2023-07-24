@@ -568,7 +568,7 @@ done:
     if (parent) {
         assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -370,7 +370,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_create() */
@@ -504,12 +504,12 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, NULL, "unable to release object header");
 
     /* Release any resources, on error */
     if (NULL == ret_value && opened_attr)
         if (H5A__close(opened_attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__attr_open_by_name() */
@@ -605,7 +605,7 @@ done:
     /* Release any resources, on error */
     if (NULL == ret_value && opened_attr)
         if (H5A__close(opened_attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_open_by_idx() */
@@ -831,7 +831,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
 done:
     /* Release chunk, if not already done */
     if (chk_proxy && H5O__chunk_unprotect(udata->f, chk_proxy, chk_dirtied) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_write_cb() */
@@ -902,7 +902,7 @@ H5O__attr_write(const H5O_loc_t *loc, H5A_t *attr)
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_write */
@@ -1067,7 +1067,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
 done:
     /* Release chunk, if not already done */
     if (chk_proxy && H5O__chunk_unprotect(udata->f, chk_proxy, chk_dirtied) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_rename_mod_cb() */
@@ -1150,7 +1150,7 @@ H5O__attr_rename(const H5O_loc_t *loc, const char *old_name, const char *new_nam
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__attr_rename() */
@@ -1231,9 +1231,9 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H
 done:
     /* Release resources */
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
     if (atable.attrs && H5A__attr_release_table(&atable) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_attr_iterate_real() */
@@ -1388,7 +1388,7 @@ H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
 done:
     /* Release resources */
     if (atable.attrs && H5A__attr_release_table(&atable) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_remove_update() */
@@ -1509,7 +1509,7 @@ H5O__attr_remove(const H5O_loc_t *loc, const char *name)
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__attr_remove() */
@@ -1595,9 +1595,9 @@ H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
     if (atable.attrs && H5A__attr_release_table(&atable) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__attr_remove_by_idx() */
@@ -1745,7 +1745,7 @@ H5O__attr_exists(const H5O_loc_t *loc, const char *name, hbool_t *attr_exists)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__attr_exists() */
@@ -1821,11 +1821,11 @@ H5O__attr_bh_info(H5F_t *f, H5O_t *oh, H5_ih_info_t *bh_info)
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "can't close fractal heap");
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index");
     if (bt2_corder && H5B2_close(bt2_corder) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__attr_bh_info() */
