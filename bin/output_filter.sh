@@ -59,26 +59,26 @@ STDOUT_FILTER() {
 # Remove them from the stderr result file.
 # $1 is the file name of the file to be filtered.
 # Cases of filter needed:
-# 1. MPE:
+# * MPE:
 # In parallel mode and if MPE library is used, it prints the following
 # two message lines whether the MPE tracing is used or not.
 #    Writing logfile.
 #    Finished writing logfile.
-# 2. LANL MPI:
+# * LANL MPI:
 # The LANL MPI will print some messages like the following,
 #    LA-MPI: *** mpirun (1.5.10)
 #    LA-MPI: *** 3 process(es) on 2 host(s): 2*fln21 1*fln22
 #    LA-MPI: *** libmpi (1.5.10)
 #    LA-MPI: *** Copyright 2001-2004, ACL, Los Alamos National Laboratory
-# 3. h5diff debug output:
+# * h5diff debug output:
 #    Debug output all have prefix "h5diff debug: ".
-# 4. AIX system prints messages like these when it is aborting:
+# * AIX system prints messages like these when it is aborting:
 #    ERROR: 0031-300  Forcing all remote tasks to exit due to exit code 1 in task 0
 #    ERROR: 0031-250  task 4: Terminated
 #    ERROR: 0031-250  task 3: Terminated
 #    ERROR: 0031-250  task 2: Terminated
 #    ERROR: 0031-250  task 1: Terminated
-# 5. LLNL Blue-Gene mpirun prints messages like there when it exit non-zero:
+# * LLNL Blue-Gene mpirun prints messages like there when it exit non-zero:
 #    <Apr 12 15:01:49.075658> BE_MPI (ERROR): The error message in the job record is as follows:
 #    <Apr 12 15:01:49.075736> BE_MPI (ERROR):   "killed by exit(1) on node 0"
 STDERR_FILTER() {
