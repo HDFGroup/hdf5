@@ -12,8 +12,6 @@
 #
 # Build HDF5 library by doing configure, make, and tests.
 # Usage: See USAGE()
-# Programmer: Albert Cheng
-# Creation date: Jul  9, 2003
 
 # Some handy definitions
 USAGE()

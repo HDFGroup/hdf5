@@ -12,8 +12,6 @@
 #
 # Switch AM_MAINTAINER_MODE value in configure.ac
 # Usage: See USAGE()
-# Programmer: Dana Robinson
-# Creation date: January 2016
 
 USAGE()
 {
