@@ -3962,7 +3962,7 @@ void       *old_client_data; /* previous error handler arg.*/
 
 #ifdef USE_PAUSE
 /* pause the process for a moment to allow debugger to attach if desired. */
-/* Will pause more if greenlight file is not persent but will eventually */
+/* Will pause more if greenlight file is not present but will eventually */
 /* continue. */
 #include <sys/types.h>
 #include <sys/stat.h>
