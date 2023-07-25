@@ -16,8 +16,6 @@ use strict;
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# Robb Matzke
-# 17 July 1998
 
 ### Purpose
 # Increments the hdf5 version number by changing the value of
@@ -118,8 +116,9 @@ Usage: $prog [OPTS] [FILE]
         as \"version 1.1 release 0 (pre1)\" will be printed.
     FILE
         The name of the file that contains version information.  This is
-        seldom necessary since files H5public.h, src/H5public.h and
-        ../src/H5public.h are automatically checked.
+        seldom necessary since the file H5public.h is checked for current
+        working directory at the top level, one level down, or in the src 
+        directory where H5public.h resides.
 EOF
   exit 1;
 }
