@@ -1,10 +1,5 @@
-#! /bin/sh
+#!/bin/sh
 # Build and Test HDF5 using cmake.
-# Author: Allen Byrne
-#         Albert Cheng
-# Creation Date: Nov 2012
-# Modified:
-#	Changed to use the quick steps described in INSTALL_CMake.txt. (AKC 2014/1/1)
 
 # Copyright: The HDF Group, 2012-14
 
@@ -365,7 +360,7 @@ STEP "Configure..." \
     $with_zlib \
     $with_szlib \
     $srcdir" $configlog &&\
-    cat $config_summary >> $configlog
+    cat src/$config_summary >> $configlog
 
 #      5. Build the C library, tools and tests with this command:
 STEP "Build the library, tools and tests, ..." "cmake --build . --config Release -- $njobs" $makelog

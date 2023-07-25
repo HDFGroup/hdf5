@@ -14,10 +14,6 @@
 # Check that all the files have the proper copyright notice.
 # It goes down directories recursively.
 #
-# Programmer: Albert Cheng
-# Created Data: 2003/07/22
-# Modification:
-#	Rewrote most of it. Albert Cheng, 2005/10/10.
 
 # Setup
 #
@@ -363,7 +359,7 @@ MATCH_COPYRIGHT()
 	false
     else
 	if [ $begin -gt 1 ]; then
-	    begin=`expr $begin - 1`
+	    begin=`expr $begin`
 	fi
 	end=`expr $begin + $nlines - 1`
 	sed -n -e "${begin},${end}p" < $f > ${EXTRACTEDFILE}
