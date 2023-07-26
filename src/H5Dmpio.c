@@ -5341,9 +5341,9 @@ static herr_t
 H5D__mpio_collective_filtered_vec_io(H5F_shared_t *f_sh, H5D_filtered_collective_io_info_t *chunk_list,
                                      size_t num_entries, H5D_io_op_type_t op_type)
 {
-    const void **io_wbufs    = NULL;
-    void       **io_rbufs    = NULL;
-    H5FD_mem_t  *io_types    = NULL;
+    const void **io_wbufs = NULL;
+    void       **io_rbufs = NULL;
+    H5FD_mem_t   io_types[2];
     uint32_t     iovec_count = 0;
     haddr_t     *io_addrs    = NULL;
     size_t      *io_sizes    = NULL;
@@ -5391,9 +5391,6 @@ H5D__mpio_collective_filtered_vec_io(H5F_shared_t *f_sh, H5D_filtered_collective
          * making use of H5FD_MEM_NOLIST to signal that all the memory types
          * are the same across the I/O vectors
          */
-        if (NULL == (io_types = H5MM_malloc(2 * sizeof(*io_types))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate space for I/O memory types vector")
         io_types[0] = H5FD_MEM_DRAW;
         io_types[1] = H5FD_MEM_NOLIST;
 
@@ -5441,7 +5438,6 @@ H5D__mpio_collective_filtered_vec_io(H5F_shared_t *f_sh, H5D_filtered_collective
     }
 
 done:
-    H5MM_free(io_types);
     H5MM_free(io_wbufs);
     H5MM_free(io_rbufs);
     H5MM_free(io_sizes);
