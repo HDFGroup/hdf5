@@ -424,11 +424,11 @@ done:
     for (i = 0; i < io_op_init; i++)
         if (!dset_info[i].skip_io && dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
 
     /* Shut down datatype info for operation */
     if (H5D__typeinfo_term(&io_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info");
 
     /* Discard projected mem spaces and restore originals */
     if (orig_mem_space) {
@@ -436,7 +436,7 @@ done:
             if (orig_mem_space[i]) {
                 if (H5S_close(dset_info[i].mem_space) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL,
-                                "unable to shut down projected memory dataspace")
+                                "unable to shut down projected memory dataspace");
                 dset_info[i].mem_space = orig_mem_space[i];
             }
 
@@ -833,12 +833,12 @@ done:
         assert(!dset_info[i].skip_io);
         if (dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
     }
 
     /* Shut down datatype info for operation */
     if (H5D__typeinfo_term(&io_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info");
 
     /* Discard projected mem spaces and restore originals */
     if (orig_mem_space) {
@@ -846,7 +846,7 @@ done:
             if (orig_mem_space[i]) {
                 if (H5S_close(dset_info[i].mem_space) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL,
-                                "unable to shut down projected memory dataspace")
+                                "unable to shut down projected memory dataspace");
                 dset_info[i].mem_space = orig_mem_space[i];
             }
 

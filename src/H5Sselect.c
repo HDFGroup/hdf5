@@ -1496,7 +1496,7 @@ done:
 
     /* Release selection iterator */
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     if (iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
 
@@ -1845,11 +1845,11 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
 done:
     if (iter_a_init && H5S_SELECT_ITER_RELEASE(iter_a) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator a")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator a");
     if (iter_a)
         iter_a = H5FL_FREE(H5S_sel_iter_t, iter_a);
     if (iter_b_init && H5S_SELECT_ITER_RELEASE(iter_b) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator b")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator b");
     if (iter_b)
         iter_b = H5FL_FREE(H5S_sel_iter_t, iter_b);
 
@@ -2262,7 +2262,7 @@ done:
     /* Cleanup on error */
     if (ret_value < 0)
         if (new_space && H5S_close(new_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_construct_projection() */
@@ -2368,7 +2368,7 @@ done:
 
     /* Release selection iterator */
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     if (iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
 
@@ -2609,15 +2609,15 @@ done:
     /* Cleanup on error */
     if (ret_value < 0)
         if (new_space && H5S_close(new_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
     /* General cleanup */
     if (tmp_src_intersect_space && H5S_close(tmp_src_intersect_space) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release temporary dataspace")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release temporary dataspace");
     if (ss_iter_init && H5S_SELECT_ITER_RELEASE(ss_iter) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release source selection iterator")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release source selection iterator");
     if (ds_iter_init && H5S_SELECT_ITER_RELEASE(ds_iter) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release destination selection iterator")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release destination selection iterator");
 
     ss_iter = H5FL_FREE(H5S_sel_iter_t, ss_iter);
     ds_iter = H5FL_FREE(H5S_sel_iter_t, ds_iter);
@@ -2697,7 +2697,7 @@ H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id, hid_t src
 done:
     if (ret_value < 0)
         if (proj_space && H5S_close(proj_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sselect_project_intersection() */
@@ -2996,7 +2996,7 @@ H5S_select_contig_block(H5S_t *space, hbool_t *is_contig, hsize_t *off, size_t *
 
 done:
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
 

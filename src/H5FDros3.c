@@ -603,7 +603,7 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
     H5TRACE3("e", "izx", fapl_id, size, token_dst);
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5Pget_fapl_ros3_token() called.\n");
+    fprintf(stdout, "H5Pget_fapl_ros3_token() called.\n");
 #endif
 
     if (size == 0)
@@ -655,7 +655,7 @@ H5FD__ros3_str_token_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_str_token_copy() called.\n");
+    fprintf(stdout, "H5FD__ros3_str_token_copy() called.\n");
 #endif
 
     if (*value)
@@ -663,7 +663,7 @@ H5FD__ros3_str_token_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy string property token")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__ros3_str_token_copy() */
 
 /*-------------------------------------------------------------------------
@@ -789,7 +789,7 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
     H5TRACE2("e", "i*s", fapl_id, token);
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5Pset_fapl_ros3_token() called.\n");
+    fprintf(stdout, "H5Pset_fapl_ros3_token() called.\n");
 #endif
 
     if (fapl_id == H5P_DEFAULT)
@@ -1006,7 +1006,7 @@ done:
     if (ret_value == NULL) {
         if (handle != NULL)
             if (FAIL == H5FD_s3comms_s3r_close(handle))
-                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle")
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
         if (file != NULL)
             file = H5FL_FREE(H5FD_ros3_t, file);
         curl_global_cleanup(); /* early cleanup because open failed */

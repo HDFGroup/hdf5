@@ -321,7 +321,7 @@ done:
     /* Release the [possibly partially initialized] object header on errors */
     if (!ret_value && oh)
         if (H5O__free(oh, FALSE) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_deserialize() */
@@ -720,7 +720,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
 done:
     if (NULL == ret_value)
         if (chk_proxy && H5O__chunk_dest(chk_proxy) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header chunk")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_chk_deserialize() */
@@ -1165,7 +1165,7 @@ done:
     /* Release the [possibly partially initialized] object header on errors */
     if (ret_value < 0 && oh)
         if (H5O__free(oh, FALSE) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header data")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header data");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__prefix_deserialize() */

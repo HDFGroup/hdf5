@@ -285,7 +285,7 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc
 
 done:
     if ((FAIL == ret_value) && (NULL != oh) && (H5O__free(oh, TRUE) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't delete object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't delete object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_create() */
@@ -346,7 +346,7 @@ H5O_create_ohdr(H5F_t *f, hid_t ocpl_id)
 
 done:
     if ((NULL == ret_value) && (NULL != oh) && (H5O__free(oh, TRUE) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "can't delete object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "can't delete object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_create_ohdr() */
@@ -510,7 +510,7 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
 
     /* Cache object header */
     if (H5AC_insert_entry(f, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
-        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header");
 
     /* Reset object header pointer, now that it's been inserted into the cache */
     oh = NULL;
@@ -605,7 +605,7 @@ H5O_open_name(const H5G_loc_t *loc, const char *name, H5I_type_t *opened_type)
 done:
     if (NULL == ret_value)
         if (loc_found && H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open_name() */
@@ -653,7 +653,7 @@ done:
     /* Release the object location if we failed after copying it */
     if (NULL == ret_value)
         if (loc_found && H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__open_by_idx() */
@@ -938,9 +938,9 @@ H5O_link(const H5O_loc_t *loc, int adjust)
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
     if (ret_value >= 0 && deleted && H5O_delete(loc->file, loc->addr) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_link() */
@@ -1128,7 +1128,7 @@ done:
             cont_msg_info.msgs = (H5O_cont_t *)H5FL_SEQ_FREE(H5O_cont_t, cont_msg_info.msgs);
 
         if (H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header");
     }
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -1173,7 +1173,7 @@ H5O_pin(const H5O_loc_t *loc)
 done:
     /* Release the object header from the cache */
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_pin() */
@@ -1348,7 +1348,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
 done:
     /* Release chunk */
     if (chk_proxy && H5O__chunk_unprotect(f, chk_proxy, chk_dirtied) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_touch_oh() */
@@ -1390,7 +1390,7 @@ H5O_touch(const H5O_loc_t *loc, hbool_t force)
 
 done:
     if (oh && H5O_unprotect(loc, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_touch() */
@@ -1513,7 +1513,7 @@ H5O_delete(H5F_t *f, haddr_t addr)
 
 done:
     if (oh && H5O_unprotect(&loc, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_delete() */
@@ -1586,7 +1586,7 @@ H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_obj_type() */
@@ -1655,7 +1655,7 @@ H5O__obj_class(const H5O_loc_t *loc)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__obj_class() */
@@ -1976,7 +1976,7 @@ H5O_get_hdr_info(const H5O_loc_t *loc, H5O_hdr_info_t *hdr)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_hdr_info() */
@@ -2159,7 +2159,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info2_t *oinfo, unsigned fields)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_get_info() */
@@ -2218,7 +2218,7 @@ H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fie
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_get_native_info() */
@@ -2273,7 +2273,7 @@ H5O_get_create_plist(const H5O_loc_t *loc, H5P_genplist_t *oc_plist)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_create_plist() */
@@ -2309,7 +2309,7 @@ H5O_get_nlinks(const H5O_loc_t *loc, hsize_t *nlinks)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_nlinks() */
@@ -2464,7 +2464,7 @@ H5O_get_rc_and_type(const H5O_loc_t *loc, unsigned *rc, H5O_type_t *otype)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_rc_and_type() */
@@ -2571,7 +2571,7 @@ H5O__visit_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t *l
 done:
     /* Release resources */
     if (obj_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__visit_cb() */
@@ -2716,10 +2716,10 @@ done:
     /* XXX (VOL MERGE): Probably also want to consider closing obj here on failures */
     if (obj_id != H5I_INVALID_HID) {
         if (H5I_dec_app_ref(obj_id) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object");
     }
     else if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location");
 
     if (udata.visited)
         H5SL_destroy(udata.visited, H5O__free_visit_visited, NULL);
@@ -2823,7 +2823,7 @@ H5O_dec_rc_by_loc(const H5O_loc_t *loc)
 done:
     /* Release the object header from the cache */
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dec_rc_by_loc() */

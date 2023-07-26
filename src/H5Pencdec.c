@@ -722,7 +722,7 @@ done:
     if (ret_value < 0) {
         if (plist_id > 0 && H5I_dec_ref(plist_id) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL,
-                        "unable to close partially initialized property list")
+                        "unable to close partially initialized property list");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

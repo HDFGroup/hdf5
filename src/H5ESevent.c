@@ -94,7 +94,7 @@ H5ES__event_new(H5VL_t *connector, void *token)
     /* Create vol object for token */
     if (NULL == (request = H5VL_create_object(token, connector))) {
         if (H5VL_request_free(token) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTFREE, NULL, "can't free request")
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTFREE, NULL, "can't free request");
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, NULL, "can't create vol object for request token")
     } /* end if */
 

@@ -4494,7 +4494,7 @@ done:
     /* Free temporary space if not passed to caller (only happens on error) */
     if (!*space && tmp_space)
         if (H5S_close(tmp_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_deserialize() */
@@ -5860,7 +5860,7 @@ H5S__hyper_coord_to_span(unsigned rank, const hsize_t *coords)
 done:
     if (ret_value == NULL && down != NULL)
         if (H5S__hyper_free_span_info(down) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_coord_to_span() */
@@ -6204,7 +6204,7 @@ done:
     if (ret_value < 0)
         if (head)
             if (H5S__hyper_free_span_info(head) < 0)
-                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_add_span_element() */
@@ -6778,7 +6778,7 @@ done:
     if (ret_value < 0 && new_space->select.sel_info.hslab->span_lst) {
         if (new_space->select.sel_info.hslab->span_lst->head)
             if (H5S__hyper_free_span(new_space->select.sel_info.hslab->span_lst->head) < 0)
-                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span")
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span");
 
         new_space->select.sel_info.hslab->span_lst =
             (H5S_hyper_span_info_t *)H5FL_ARR_FREE(hbounds_t, new_space->select.sel_info.hslab->span_lst);
@@ -7338,7 +7338,7 @@ done:
     if (ret_value < 0)
         if (new_span)
             if (H5S__hyper_free_span(new_span) < 0)
-                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span")
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_append_span() */
@@ -8342,7 +8342,7 @@ done:
     if (ret_value == NULL)
         if (merged_spans)
             if (H5S__hyper_free_span_info(merged_spans) < 0)
-                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info")
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_merge_spans_helper() */
@@ -9519,13 +9519,13 @@ done:
     /* Free resources */
     if (a_not_b)
         if (H5S__hyper_free_span_info(a_not_b) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
     if (a_and_b)
         if (H5S__hyper_free_span_info(a_and_b) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
     if (b_not_a)
         if (H5S__hyper_free_span_info(b_not_a) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__fill_in_new_space() */
@@ -9613,7 +9613,7 @@ H5S__generate_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], c
 done:
     if (new_spans)
         if (H5S__hyper_free_span_info(new_spans) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__generate_hyperslab() */
@@ -11352,7 +11352,7 @@ done:
     if (copied_span_info) {
         assert(ret_value < 0);
         if (H5S__hyper_free_span_info(copied_span_info) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
         copied_span_info = NULL;
     }
 
@@ -11778,14 +11778,14 @@ done:
     /* Free ss_span_info_buf */
     if (ss_span_info_buf) {
         if (H5S__hyper_free_span_info(ss_span_info_buf) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
         ss_span_info_buf = NULL;
     }
 
     /* Free ds_span_info_buf */
     if (ds_span_info_buf) {
         if (H5S__hyper_free_span_info(ds_span_info_buf) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
         ds_span_info_buf = NULL;
     }
 
@@ -11797,7 +11797,7 @@ done:
         for (u = 0; u < udata.ds_rank; u++)
             if (udata.ps_span_info[u]) {
                 if (H5S__hyper_free_span_info(udata.ps_span_info[u]) < 0)
-                    HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                    HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info");
                 udata.ps_span_info[u] = NULL;
             }
     }
@@ -12278,7 +12278,7 @@ done:
     /* Free space on error */
     if (!ret_value)
         if (space_out && H5S_close(space_out) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_unlim_block */

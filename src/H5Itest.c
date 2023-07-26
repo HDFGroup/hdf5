@@ -100,10 +100,10 @@ H5I__get_name_test(hid_t id, char *name /*out*/, size_t size, hbool_t *cached)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_ID, H5E_CANTRESET, (-1), "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_ID, H5E_CANTRESET, (-1), "can't reset VOL wrapper info");
 
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, (-1), "can't reset API context")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, (-1), "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__get_name_test() */

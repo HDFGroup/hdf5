@@ -326,11 +326,11 @@ done:
         if (oloc_init) {
             if (H5O_dec_rc_by_loc(&(grp->oloc)) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL,
-                            "unable to decrement refcount on newly created object")
+                            "unable to decrement refcount on newly created object");
             if (H5O_close(&(grp->oloc), NULL) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release object header")
+                HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release object header");
             if (H5O_delete(file, grp->oloc.addr) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, NULL, "unable to delete object header")
+                HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, NULL, "unable to delete object header");
         } /* end if */
         if (grp != NULL) {
             if (grp->shared != NULL)
@@ -395,7 +395,7 @@ H5G__open_name(const H5G_loc_t *loc, const char *name)
 done:
     if (!ret_value)
         if (loc_found && H5G_loc_free(&grp_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, NULL, "can't free location")
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, NULL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__open_name() */
@@ -872,10 +872,10 @@ done:
     /* Release the group opened */
     if (gid != H5I_INVALID_HID) {
         if (H5I_dec_app_ref(gid) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group");
     }
     else if (grp && H5G_close(grp) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_iterate() */
@@ -1054,7 +1054,7 @@ done:
 
     /* Release resources */
     if (obj_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__visit_cb() */
@@ -1193,10 +1193,10 @@ done:
     /* Release the group opened */
     if (gid != H5I_INVALID_HID) {
         if (H5I_dec_app_ref(gid) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group");
     }
     else if (grp && H5G_close(grp) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_visit() */
@@ -1286,7 +1286,7 @@ done:
     if (ret_value < 0) {
         if (new_gcpl_id > 0)
             if (H5I_dec_app_ref(new_gcpl_id) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't free")
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't free");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1333,7 +1333,7 @@ H5G__get_info_by_name(const H5G_loc_t *loc, const char *name, H5G_info_t *grp_in
 done:
     /* Clean up */
     if (loc_found && H5G_loc_free(&grp_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_info_by_name() */
@@ -1380,7 +1380,7 @@ H5G__get_info_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
 done:
     /* Clean up */
     if (loc_found && H5G_loc_free(&grp_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_info_by_idx() */

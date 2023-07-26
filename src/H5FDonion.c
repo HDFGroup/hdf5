@@ -585,13 +585,13 @@ done:
     /* Destroy things as best we can, even if there were earlier errors */
     if (file->original_file)
         if (H5FD_close(file->original_file) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing canon file")
+            HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing canon file");
     if (file->onion_file)
         if (H5FD_close(file->onion_file) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing onion file")
+            HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing onion file");
     if (file->recovery_file) {
         if (H5FD_close(file->recovery_file) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing recovery file")
+            HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing recovery file");
         /* TODO: Use the VFD's del callback instead of remove (this requires
          *       storing a copy of the fapl that was used to open it)
          */
@@ -599,7 +599,7 @@ done:
     }
     if (file->rev_index)
         if (H5FD__onion_revision_index_destroy(file->rev_index) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close revision index")
+            HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close revision index");
 
     H5MM_xfree(file->recovery_file_name);
     H5MM_xfree(file->history.record_locs);
@@ -1216,17 +1216,17 @@ done:
 
         if (file->original_file)
             if (H5FD_close(file->original_file) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing canon")
+                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing canon");
         if (file->onion_file)
             if (H5FD_close(file->onion_file) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing onion")
+                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing onion");
         if (file->recovery_file)
             if (H5FD_close(file->recovery_file) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing recov")
+                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing recov");
 
         if (file->rev_index)
             if (H5FD__onion_revision_index_destroy(file->rev_index) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy revision index")
+                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy revision index");
 
         H5MM_xfree(file->history.record_locs);
 
@@ -1309,13 +1309,13 @@ done:
     if (FAIL == ret_value) {
         if (file->recovery_file != NULL) {
             if (H5FD_close(file->recovery_file) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "can't close recovery file")
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "can't close recovery file");
             file->recovery_file = NULL;
         }
 
         if (file->rev_index != NULL) {
             if (H5FD__onion_revision_index_destroy(file->rev_index) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't destroy revision index")
+                HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't destroy revision index");
             file->rev_index = NULL;
         }
     }

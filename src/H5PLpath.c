@@ -681,7 +681,7 @@ done:
     if (dirp)
         if (HDclosedir(dirp) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, H5_ITER_ERROR, "can't close directory: %s",
-                        HDstrerror(errno))
+                        HDstrerror(errno));
 
     path = (char *)H5MM_xfree(path);
 
@@ -906,7 +906,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 done:
     if (dirp)
         if (HDclosedir(dirp) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", HDstrerror(errno))
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", HDstrerror(errno));
 
     path = (char *)H5MM_xfree(path);
 

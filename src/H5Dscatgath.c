@@ -554,15 +554,15 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
 done:
     /* Release selection iterators */
     if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (file_iter)
         file_iter = H5FL_FREE(H5S_sel_iter_t, file_iter);
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (mem_iter)
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
     if (bkg_iter_init && H5S_SELECT_ITER_RELEASE(bkg_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (bkg_iter)
         bkg_iter = H5FL_FREE(H5S_sel_iter_t, bkg_iter);
 
@@ -697,15 +697,15 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
 done:
     /* Release selection iterators */
     if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (file_iter)
         file_iter = H5FL_FREE(H5S_sel_iter_t, file_iter);
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (mem_iter)
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
     if (bkg_iter_init && H5S_SELECT_ITER_RELEASE(bkg_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (bkg_iter)
         bkg_iter = H5FL_FREE(H5S_sel_iter_t, bkg_iter);
 
@@ -922,7 +922,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
 done:
     /* Release and free selection iterator */
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (mem_iter)
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
 
@@ -935,7 +935,7 @@ done:
         for (i = 0; i < io_info->pieces_added; i++)
             if (tmp_mem_spaces[i] != io_info->mem_spaces[i] && tmp_mem_spaces[i] &&
                 H5S_close(tmp_mem_spaces[i]) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace");
         H5MM_free(tmp_mem_spaces);
         tmp_mem_spaces = NULL;
     }
@@ -1231,7 +1231,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
 done:
     /* Release and free selection iterator */
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (mem_iter)
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
 
@@ -1244,7 +1244,7 @@ done:
         for (i = 0; i < spaces_added; i++) {
             assert(write_mem_spaces[i]);
             if (write_mem_spaces[i] != io_info->mem_spaces[i] && H5S_close(write_mem_spaces[i]) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace");
         }
         H5MM_free(write_mem_spaces);
         write_mem_spaces = NULL;

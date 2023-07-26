@@ -172,10 +172,10 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
 
 done:
     if (hdr && H5AC_unprotect(f, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header");
     if (!ret_value && fh)
         if (H5HF_close(fh) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, NULL, "unable to close fractal heap")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, NULL, "unable to close fractal heap");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_create() */
@@ -234,10 +234,10 @@ H5HF_open(H5F_t *f, haddr_t fh_addr)
 
 done:
     if (hdr && H5AC_unprotect(f, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header");
     if (!ret_value && fh)
         if (H5HF_close(fh) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, NULL, "unable to close fractal heap")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, NULL, "unable to close fractal heap");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_open() */
@@ -865,7 +865,7 @@ H5HF_delete(H5F_t *f, haddr_t fh_addr)
 done:
     /* Unprotect the header, if an error occurred */
     if (hdr && H5AC_unprotect(f, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_delete() */

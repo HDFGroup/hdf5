@@ -223,11 +223,11 @@ done:
     if (ret_value < 0) {
         if (mount_point) {
             if (H5G_close(mount_point) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close mounted group")
+                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close mounted group");
         }
         else {
             if (H5G_loc_free(&mp_loc) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free mount location")
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free mount location");
         }
     }
 

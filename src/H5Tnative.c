@@ -93,7 +93,7 @@ done:
     /* Error cleanup */
     if (ret_value < 0)
         if (new_dt && H5T_close_real(new_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_native_type() */
@@ -493,13 +493,13 @@ done:
     if (NULL == ret_value) {
         if (new_type)
             if (H5T_close_real(new_type) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, NULL, "unable to release datatype")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, NULL, "unable to release datatype");
 
         /* Free lists for members */
         if (memb_list) {
             for (u = 0; u < nmemb; u++)
                 if (memb_list[u] && H5T_close_real(memb_list[u]) < 0)
-                    HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype")
+                    HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
 
             memb_list = (H5T_t **)H5MM_xfree(memb_list);
         } /* end if */

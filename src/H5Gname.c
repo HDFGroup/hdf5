@@ -1082,7 +1082,7 @@ H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo, 
 
 done:
     if (obj_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_name_by_addr_cb() */

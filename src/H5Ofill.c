@@ -758,7 +758,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
 
 done:
     if (fill_type_id > 0 && H5I_dec_ref(fill_type_id) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fill_reset_dyn() */
@@ -1029,9 +1029,9 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
 
 done:
     if (src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID");
     if (dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID");
     if (bkg)
         H5MM_xfree(bkg);
 

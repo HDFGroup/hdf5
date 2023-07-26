@@ -2168,7 +2168,7 @@ done:
     if (dtype > 0 && H5Tclose(dtype) < 0)
         H5TOOLS_ERROR(FALSE, "H5Tclose failed");
 
-    H5_LEAVE(TRUE)
+    H5_LEAVE(TRUE);
 
     CATCH
     H5TOOLS_ENDDEBUG(" ");
@@ -2283,7 +2283,7 @@ done:
     if (dtype > 0 && H5Tclose(dtype) < 0)
         H5TOOLS_ERROR(FALSE, "H5Tclose failed");
 
-    H5_LEAVE(ret_value)
+    H5_LEAVE(ret_value);
     CATCH
     H5TOOLS_ENDDEBUG(" ");
     return ret_value;

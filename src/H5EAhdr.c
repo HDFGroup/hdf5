@@ -127,7 +127,7 @@ H5EA__hdr_alloc(H5F_t *f)
 done:
     if (!ret_value)
         if (hdr && H5EA__hdr_dest(hdr) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array header")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__hdr_alloc() */
@@ -431,17 +431,17 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(hdr) < 0)
                     HDONE_ERROR(H5E_EARRAY, H5E_CANTREMOVE, HADDR_UNDEF,
-                                "unable to remove extensible array header from cache")
+                                "unable to remove extensible array header from cache");
 
             /* Release header's disk space */
             if (H5_addr_defined(hdr->addr) &&
                 H5MF_xfree(f, H5FD_MEM_EARRAY_HDR, hdr->addr, (hsize_t)hdr->size) < 0)
-                HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to free extensible array header")
+                HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to free extensible array header");
 
             /* Destroy header */
             if (H5EA__hdr_dest(hdr) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
-                            "unable to destroy extensible array header")
+                            "unable to destroy extensible array header");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -131,7 +131,7 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release v2 B-tree header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__hdr_debug() */
@@ -227,9 +227,9 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release v2 B-tree header");
     if (internal && H5AC_unprotect(f, H5AC_BT2_INT, addr, internal, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree internal node")
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree internal node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__int_debug() */
@@ -312,9 +312,9 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header");
     if (leaf && H5AC_unprotect(f, H5AC_BT2_LEAF, addr, leaf, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__leaf_debug() */

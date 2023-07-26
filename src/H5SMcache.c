@@ -284,7 +284,7 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 done:
     if (!ret_value && table)
         if (H5SM__table_free(table) < 0)
-            HDONE_ERROR(H5E_SOHM, H5E_CANTFREE, NULL, "unable to destroy sohm table")
+            HDONE_ERROR(H5E_SOHM, H5E_CANTFREE, NULL, "unable to destroy sohm table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__cache_table_deserialize() */

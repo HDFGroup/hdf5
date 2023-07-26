@@ -225,7 +225,7 @@ H5ES__create(void)
 done:
     if (!ret_value)
         if (es && H5ES__close(es) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, NULL, "unable to free event set")
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, NULL, "unable to free event set");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__create() */
@@ -297,7 +297,7 @@ done:
             if (ev_inserted)
                 H5ES__list_remove(&es->active, ev);
             if (H5ES__event_free(ev) < 0)
-                HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release event")
+                HDONE_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "unable to release event");
         }
 
     FUNC_LEAVE_NOAPI(ret_value)

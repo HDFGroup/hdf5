@@ -1138,7 +1138,7 @@ done:
         if (curlh != NULL)
             curl_easy_cleanup(curlh);
         if (FAIL == H5FD_s3comms_free_purl(purl))
-            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to free parsed url structure")
+            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to free parsed url structure");
         if (handle != NULL) {
             H5MM_xfree(handle->region);
             H5MM_xfree(handle->secret_id);
@@ -1542,21 +1542,21 @@ done:
     if (request != NULL) {
         while (headers != NULL)
             if (FAIL == H5FD_s3comms_hrb_node_set(&headers, headers->name, NULL))
-                HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header node")
+                HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header node");
         assert(NULL == headers);
         if (FAIL == H5FD_s3comms_hrb_destroy(&request))
-            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header request structure")
+            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header request structure");
         assert(NULL == request);
     }
 
     if (curlh != NULL) {
         /* clear any Range */
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_RANGE, NULL))
-            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_RANGE")
+            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_RANGE");
 
         /* clear headers */
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HTTPHEADER, NULL))
-            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_HTTPHEADER")
+            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_HTTPHEADER");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2116,7 +2116,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
 done:
     if (credfile != NULL)
         if (fclose(credfile) == EOF)
-            HDONE_ERROR(H5E_ARGS, H5E_ARGS, FAIL, "problem error-closing aws configuration file")
+            HDONE_ERROR(H5E_ARGS, H5E_ARGS, FAIL, "problem error-closing aws configuration file");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_load_aws_profile() */

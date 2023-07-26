@@ -467,10 +467,10 @@ done:
     if (ret_value != SUCCEED) {
         if (comm)
             if (H5_mpi_comm_free(comm) < 0)
-                HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI communicator")
+                HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI communicator");
         if (info)
             if (H5_mpi_info_free(info) < 0)
-                HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI info object")
+                HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI info object");
     }
 
     FUNC_LEAVE_API(ret_value)
@@ -985,9 +985,9 @@ done:
         if (file_opened)
             MPI_File_close(&fh);
         if (H5_mpi_comm_free(&comm) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, NULL, "unable to free MPI communicator")
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, NULL, "unable to free MPI communicator");
         if (H5_mpi_info_free(&info) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, NULL, "unable to free MPI info object")
+            HDONE_ERROR(H5E_VFL, H5E_CANTFREE, NULL, "unable to free MPI info object");
         if (file)
             H5MM_xfree(file);
     } /* end if */
@@ -3867,9 +3867,9 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
 done:
     /* Free duplicated MPI Communicator and Info objects */
     if (H5_mpi_comm_free(&comm) < 0)
-        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI communicator")
+        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI communicator");
     if (H5_mpi_info_free(&info) < 0)
-        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object")
+        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mpio_delete() */

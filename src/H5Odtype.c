@@ -448,7 +448,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                     dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
                         H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                     if (H5T_close_real(temp_type) < 0)
-                        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+                        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info");
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode member type")
                 }
                 if (temp_type->shared->size == 0)
@@ -472,7 +472,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                                 H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                             if (H5T_close_real(temp_type) < 0)
                                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL,
-                                            "can't release datatype info")
+                                            "can't release datatype info");
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                                         "unable to create array datatype")
                         }
@@ -777,7 +777,7 @@ done:
         /* Release (reset) dt but do not free it - leave it as an empty datatype as was the case on
          * function entry */
         if (H5T__free(dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dtype_decode_helper() */
@@ -1344,7 +1344,7 @@ done:
     if (!ret_value)
         /* Free dt */
         if (H5T_close_real(dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "can't release datatype info")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "can't release datatype info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dtype_decode() */

@@ -200,7 +200,7 @@ H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
                         H5ARG_TRACE7(__func__, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID");
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         }
 
@@ -330,7 +330,7 @@ H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
                         H5ARG_TRACE10(__func__, "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, lapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID");
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         }
 
@@ -2002,7 +2002,7 @@ H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oclose_async() */

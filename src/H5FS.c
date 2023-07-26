@@ -142,7 +142,7 @@ H5FS_create(H5F_t *f, haddr_t *fs_addr, const H5FS_create_t *fs_create, uint16_t
 done:
     if (!ret_value && fspace)
         if (H5FS__hdr_dest(fspace) < 0)
-            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header");
 
 #ifdef H5FS_DEBUG
     fprintf(stderr, "%s: Leaving, ret_value = %p\n", __func__, (void *)ret_value);
@@ -362,7 +362,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 done:
     if (fspace && H5AC_unprotect(f, H5AC_FSPACE_HDR, fs_addr, fspace,
                                  H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space header")
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_delete() */

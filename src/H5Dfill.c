@@ -269,19 +269,19 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
 
 done:
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (mem_iter)
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
     if (src_id != (-1) && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (dst_id != (-1) && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (tmp_buf)
         tmp_buf = H5FL_BLK_FREE(type_conv, tmp_buf);
     if (elem_wb && H5WB_unwrap(elem_wb) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
     if (bkg_elem_wb && H5WB_unwrap(bkg_elem_wb) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
     if (bkg_buf)
         bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
 
@@ -480,7 +480,7 @@ done:
     /* Cleanup on error */
     if (ret_value < 0)
         if (H5D__fill_term(fb_info) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__fill_init() */
@@ -548,11 +548,11 @@ done:
         /* Free dynamically allocated VL elements in fill buffer */
         if (fb_info->fill->type) {
             if (H5T_vlen_reclaim_elmt(buf, fb_info->fill->type) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't reclaim vlen element")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't reclaim vlen element");
         } /* end if */
         else {
             if (H5T_vlen_reclaim_elmt(buf, fb_info->mem_type) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't reclaim vlen element")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't reclaim vlen element");
         } /* end else */
 
         /* Free temporary fill buffer */

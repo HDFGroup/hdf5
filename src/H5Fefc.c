@@ -311,7 +311,7 @@ done:
             if (open_file) {
                 ent->file->nopen_objs--;
                 if (H5F_try_close(ent->file, NULL) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file");
             } /* end if */
             ent->name = (char *)H5MM_xfree(ent->name);
             ent       = H5FL_FREE(H5F_efc_ent_t, ent);

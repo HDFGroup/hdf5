@@ -382,7 +382,7 @@ done:
         candidate_assignment_table = (unsigned *)H5MM_xfree((void *)candidate_assignment_table);
     if (cache_ptr->coll_write_list) {
         if (H5SL_close(cache_ptr->coll_write_list) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "failed to destroy skip list")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "failed to destroy skip list");
         cache_ptr->coll_write_list = NULL;
     } /* end if */
 
@@ -798,7 +798,7 @@ done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C__validate_lru_list(cache_ptr) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -967,7 +967,7 @@ done:
     /* Reset transfer mode in API context, if changed */
     if (orig_xfer_mode != H5FD_MPIO_COLLECTIVE)
         if (H5CX_set_io_xfer_mode(orig_xfer_mode) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5C__collective_write() */

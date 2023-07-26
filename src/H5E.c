@@ -449,7 +449,7 @@ H5E__register_class(const char *cls_name, const char *lib_name, const char *vers
 done:
     if (!ret_value)
         if (cls && H5E__free_class(cls) < 0)
-            HDONE_ERROR(H5E_ERROR, H5E_CANTRELEASE, NULL, "unable to free error class")
+            HDONE_ERROR(H5E_ERROR, H5E_CANTRELEASE, NULL, "unable to free error class");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E__register_class() */
@@ -752,7 +752,7 @@ H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
 done:
     if (!ret_value)
         if (msg && H5E__close_msg(msg, NULL) < 0)
-            HDONE_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, NULL, "unable to close error message")
+            HDONE_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, NULL, "unable to close error message");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E__create_msg() */

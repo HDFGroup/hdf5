@@ -113,12 +113,12 @@ done:
 
             /* Get the new group's object location */
             if (NULL == (oloc = H5G_oloc(grp)))
-                HDONE_ERROR(H5E_SYM, H5E_CANTGET, NULL, "unable to get object location of group")
+                HDONE_ERROR(H5E_SYM, H5E_CANTGET, NULL, "unable to get object location of group");
 
             /* Decrement refcount on group's object header in memory */
             if (H5O_dec_rc_by_loc(oloc) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL,
-                            "unable to decrement refcount on newly created object")
+                            "unable to decrement refcount on newly created object");
         } /* end if */
     }     /* end if */
 

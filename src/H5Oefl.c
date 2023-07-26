@@ -181,7 +181,7 @@ done:
         }
         if (heap != NULL)
             if (H5HL_unprotect(heap) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect local heap")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect local heap");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -489,7 +489,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
 done:
     /* Release resources */
     if (heap && H5HL_unprotect(heap) < 0)
-        HDONE_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to unprotect EFL file name heap")
+        HDONE_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to unprotect EFL file name heap");
     if (!ret_value)
         if (efl_dst)
             H5MM_xfree(efl_dst);

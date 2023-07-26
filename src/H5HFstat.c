@@ -156,7 +156,7 @@ H5HF_size(const H5HF_t *fh, hsize_t *heap_size)
 done:
     /* Release resources */
     if (bt2 && H5B2_close(bt2) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for tracking 'huge' objects")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for tracking 'huge' objects");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_size() */

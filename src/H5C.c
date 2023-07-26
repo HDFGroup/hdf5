@@ -542,7 +542,7 @@ done:
          * and the cache still exist.  JRM -- 5/15/20
          */
         if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed")
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_dest() */

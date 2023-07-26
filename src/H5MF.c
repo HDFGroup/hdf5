@@ -967,7 +967,7 @@ done:
     /* Release section node, if allocated and not added to section list or merged */
     if (node)
         if (H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free section node")
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__alloc_pagefs() */
@@ -1197,7 +1197,7 @@ done:
     /* Release section node, if allocated and not added to section list or merged */
     if (node)
         if (H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node");
 
 #ifdef H5MF_ALLOC_DEBUG
     fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
@@ -1469,7 +1469,7 @@ done:
 
     /* Free section node allocated */
     if (node && H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-        HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
+        HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node");
 
 #ifdef H5MF_ALLOC_DEBUG
     fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);

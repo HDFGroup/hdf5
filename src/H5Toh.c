@@ -130,7 +130,7 @@ H5O__dtype_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 done:
     if (NULL == ret_value)
         if (type && H5T_close(type) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, NULL, "unable to release datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, NULL, "unable to release datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dtype_open() */

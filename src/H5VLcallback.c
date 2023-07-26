@@ -368,7 +368,7 @@ H5VL__common_optional_op(hid_t id, H5I_type_t id_type, H5VL_reg_opt_oper_t reg_o
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__common_optional_op() */
@@ -1036,7 +1036,7 @@ H5VL_attr_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_para
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_create() */
@@ -1140,7 +1140,7 @@ H5VL_attr_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_open() */
@@ -1238,7 +1238,7 @@ H5VL_attr_read(const H5VL_object_t *vol_obj, hid_t mem_type_id, void *buf, hid_t
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_read() */
@@ -1336,7 +1336,7 @@ H5VL_attr_write(const H5VL_object_t *vol_obj, hid_t mem_type_id, const void *buf
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_write() */
@@ -1434,7 +1434,7 @@ H5VL_attr_get(const H5VL_object_t *vol_obj, H5VL_attr_get_args_t *args, hid_t dx
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_get() */
@@ -1538,7 +1538,7 @@ H5VL_attr_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_specific() */
@@ -1639,7 +1639,7 @@ H5VL_attr_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_optional() */
@@ -1878,7 +1878,7 @@ H5VL_dataset_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_p
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_create() */
@@ -1982,7 +1982,7 @@ H5VL_dataset_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_par
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_open() */
@@ -2094,7 +2094,7 @@ H5VL_dataset_read_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_read_direct() */
@@ -2154,7 +2154,7 @@ H5VL_dataset_read(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_i
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     /* Free memory */
     if (obj != &obj_local)
@@ -2284,7 +2284,7 @@ H5VL_dataset_write_direct(size_t count, void *obj[], H5VL_t *connector, hid_t me
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_write_direct() */
@@ -2344,7 +2344,7 @@ H5VL_dataset_write(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     /* Free memory */
     if (obj != &obj_local)
@@ -2460,7 +2460,7 @@ H5VL_dataset_get(const H5VL_object_t *vol_obj, H5VL_dataset_get_args_t *args, hi
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_get() */
@@ -2560,7 +2560,7 @@ H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_args_t
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_specific() */
@@ -2659,7 +2659,7 @@ H5VL_dataset_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, 
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_optional() */
@@ -2810,7 +2810,7 @@ H5VL_dataset_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_close() */
@@ -2912,7 +2912,7 @@ H5VL_datatype_commit(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_commit() */
@@ -3016,7 +3016,7 @@ H5VL_datatype_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_open() */
@@ -3115,7 +3115,7 @@ H5VL_datatype_get(const H5VL_object_t *vol_obj, H5VL_datatype_get_args_t *args, 
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_get() */
@@ -3215,7 +3215,7 @@ H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype_specific_args
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_specific() */
@@ -3314,7 +3314,7 @@ H5VL_datatype_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args,
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_optional() */
@@ -3358,7 +3358,7 @@ H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hi
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_optional_op() */
@@ -3503,7 +3503,7 @@ H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_close() */
@@ -3785,9 +3785,9 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
 done:
     if (ret_value != H5_ITER_STOP) {
         if (fapl_id >= 0 && H5I_dec_app_ref(fapl_id) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close fapl")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close fapl");
         if (connector_id >= 0 && H5I_dec_app_ref(connector_id) < 0)
-            HDONE_ERROR(H5E_ID, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close VOL connector ID")
+            HDONE_ERROR(H5E_ID, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close VOL connector ID");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3968,7 +3968,7 @@ H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_args_t *args, hid_t dx
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_get() */
@@ -4100,7 +4100,7 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_specific() */
@@ -4198,7 +4198,7 @@ H5VL_file_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_optional() */
@@ -4343,7 +4343,7 @@ H5VL_file_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_close() */
@@ -4444,7 +4444,7 @@ H5VL_group_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_par
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_create() */
@@ -4547,7 +4547,7 @@ H5VL_group_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_param
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_open() */
@@ -4645,7 +4645,7 @@ H5VL_group_get(const H5VL_object_t *vol_obj, H5VL_group_get_args_t *args, hid_t 
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_get() */
@@ -4743,7 +4743,7 @@ H5VL_group_specific(const H5VL_object_t *vol_obj, H5VL_group_specific_args_t *ar
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_specific() */
@@ -4844,7 +4844,7 @@ H5VL_group_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hi
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_optional() */
@@ -4990,7 +4990,7 @@ H5VL_group_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_close() */
@@ -5102,7 +5102,7 @@ H5VL_link_create(H5VL_link_create_args_t *args, const H5VL_object_t *vol_obj,
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_create() */
@@ -5207,7 +5207,7 @@ H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_copy() */
@@ -5314,7 +5314,7 @@ H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_move() */
@@ -5416,7 +5416,7 @@ H5VL_link_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_get() */
@@ -5519,7 +5519,7 @@ H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_specific() */
@@ -5620,7 +5620,7 @@ H5VL_link_optional(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_optional() */
@@ -5715,7 +5715,7 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLlink_optional_op() */
@@ -5782,7 +5782,7 @@ H5VL_object_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *params, 
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_open() */
@@ -5891,7 +5891,7 @@ H5VL_object_copy(const H5VL_object_t *src_obj, const H5VL_loc_params_t *src_loc_
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_copy() */
@@ -5994,7 +5994,7 @@ H5VL_object_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_param
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_get() */
@@ -6097,7 +6097,7 @@ H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_specific() */
@@ -6198,7 +6198,7 @@ H5VL_object_optional(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_optional() */
@@ -6294,7 +6294,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLobject_optional_op() */
@@ -6368,7 +6368,7 @@ H5VL_introspect_get_conn_cls(const H5VL_object_t *vol_obj, H5VL_get_conn_lvl_t l
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_introspect_get_conn_cls() */
@@ -6544,7 +6544,7 @@ H5VL_introspect_opt_query(const H5VL_object_t *vol_obj, H5VL_subclass_t subcls, 
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_introspect_opt_query() */
@@ -6649,7 +6649,7 @@ H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_s
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_wait() */
@@ -6753,7 +6753,7 @@ H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_notify() */
@@ -6856,7 +6856,7 @@ H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_cancel() */
@@ -6960,7 +6960,7 @@ H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_specific() */
@@ -7065,7 +7065,7 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_optional() */
@@ -7205,7 +7205,7 @@ H5VL_request_free(const H5VL_object_t *vol_obj)
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_free() */
@@ -8016,7 +8016,7 @@ H5VL_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dx
 done:
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_optional() */

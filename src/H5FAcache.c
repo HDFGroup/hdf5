@@ -317,7 +317,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (hdr && H5FA__hdr_dest(hdr) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array header")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_hdr_deserialize() */
@@ -687,7 +687,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (dblock && H5FA__dblock_dest(dblock) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_dblock_deserialize() */
@@ -1063,7 +1063,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (dblk_page && H5FA__dblk_page_dest(dblk_page) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block page")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block page");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_dblk_page_deserialize() */

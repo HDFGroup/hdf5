@@ -156,7 +156,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
 
 done:
     if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file");
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate_object() */
 
@@ -258,7 +258,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
 
 done:
     if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file");
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate_region() */
 
@@ -356,7 +356,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
 
 done:
     if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file");
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate_attr() */
 
@@ -708,10 +708,10 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
 
 done:
     if ((opened_obj_id != H5I_INVALID_HID) && (H5I_dec_ref(opened_obj_id) < 0))
-        HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close object")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close object");
     if (H5I_INVALID_HID == ret_value) /* Cleanup on failure */
         if ((space_id != H5I_INVALID_HID) && (H5I_dec_ref(space_id) < 0))
-            HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close dataspace")
+            HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__open_region_api_common() */
@@ -878,10 +878,10 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
 
 done:
     if ((opened_obj_id != H5I_INVALID_HID) && (H5I_dec_ref(opened_obj_id) < 0))
-        HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close object")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close object");
     if (H5I_INVALID_HID == ret_value) /* Cleanup on failure */
         if (opened_attr && H5VL_attr_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
+            HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__open_attr_api_common() */
