@@ -37,11 +37,8 @@
 
 MODULE H5L
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_INT
   USE H5GLOBAL
-
   IMPLICIT NONE
-
 
   TYPE, bind(c) :: union_t
      TYPE(H5O_TOKEN_T_F) :: token !< Type for object tokens
@@ -57,7 +54,7 @@ MODULE H5L
                             !< \li H5L_TYPE_SOFT_F     Soft link
                             !< \li H5L_TYPE_EXTERNAL_F External link
                             !< \li H5L_TYPE_ERROR_F    Invalid link type id
- !   LOGICAL(c_bool) :: corder_valid ! hbool_t corder_valid
+ !   LOGICAL(c_bool) :: corder_valid ! bool corder_valid
      INTEGER(c_int64_t) :: corder !< Creation order
      INTEGER(c_int)     :: cset   !< Character set of link name is encoded. Valid values include the following:
                                   !< \li H5T_CSET_ASCII  US ASCII

@@ -54,13 +54,13 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_name1 = (char *)HD5f2cstring(name1, (size_t)*namelen1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_field_offset = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_field_types = (hid_t *)malloc(sizeof(hid_t) * (size_t)c_nfields)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     for (i = 0; i < num_elem; i++) {
         c_field_offset[i] = (size_t)field_offset[i];
@@ -71,19 +71,19 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
      * allocate array of character pointers
      */
     if (NULL == (c_field_names = (char **)calloc((size_t)num_elem, sizeof(char *))))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* copy data to long C string */
     if (NULL ==
         (tmp = (char *)HD5f2cstring(field_names, (size_t) * (max_char_size_field_names) * (size_t)num_elem)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     /*
      * move data from temporary buffer
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {
         if (NULL == (c_field_names[i] = (char *)malloc((size_t)char_len_field_names[i] + 1)))
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
         memcpy(c_field_names[i], tmp_p, (size_t)char_len_field_names[i]);
         c_field_names[i][char_len_field_names[i]] = '\0';
         tmp_p                                     = tmp_p + *max_char_size_field_names;
@@ -95,7 +95,7 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
     if (H5TBmake_table(c_name1, (hid_t)*loc_id, c_name, c_nfields, (hsize_t)*nrecords, (size_t)*type_size,
                        (const char **)c_field_names, c_field_offset, c_field_types, (hsize_t)*chunk_size,
                        NULL, *compress, NULL) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -155,13 +155,13 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_name1 = (char *)HD5f2cstring(name1, (size_t)*namelen1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_field_offset = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_field_types = (hid_t *)malloc(sizeof(hid_t) * (size_t)c_nfields)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     for (i = 0; i < num_elem; i++) {
         c_field_offset[i] = (size_t)field_offset[i];
@@ -172,19 +172,19 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
      * allocate array of character pointers
      */
     if (NULL == (c_field_names = (char **)calloc((size_t)num_elem, sizeof(char *))))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* copy data to long C string */
     if (NULL ==
         (tmp = (char *)HD5f2cstring(field_names, (size_t) * (max_char_size_field_names) * (size_t)num_elem)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     /*
      * move data from temporary buffer
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {
         if (NULL == (c_field_names[i] = (char *)malloc((size_t)char_len_field_names[i] + 1)))
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
         memcpy(c_field_names[i], tmp_p, (size_t)char_len_field_names[i]);
         c_field_names[i][char_len_field_names[i]] = '\0';
         tmp_p                                     = tmp_p + *max_char_size_field_names;
@@ -196,7 +196,7 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
     if (H5TBmake_table(c_name1, (hid_t)*loc_id, c_name, c_nfields, (hsize_t)*nrecords, (size_t)*type_size,
                        (const char **)c_field_names, c_field_offset, c_field_types, (hsize_t)*chunk_size,
                        fill_data, *compress, data) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -246,12 +246,12 @@ h5tbread_table_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hsize_t_f *nfiel
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     if (NULL == (c_dst_offset = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_dst_sizes = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     for (i = 0; i < c_nfields; i++) {
         c_dst_offset[i] = (size_t)dst_offset[i];
@@ -262,7 +262,7 @@ h5tbread_table_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hsize_t_f *nfiel
      * call H5TBread_table function.
      */
     if (H5TBread_table((hid_t)*loc_id, c_name, (size_t)*dst_size, c_dst_offset, c_dst_sizes, dst_buf) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -300,16 +300,16 @@ h5tbwrite_field_name_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_name1 = (char *)HD5f2cstring(field_name, (size_t)*namelen1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * call H5TBwrite_fields_name function.
      */
     if (H5TBwrite_fields_name((hid_t)*loc_id, c_name, c_name1, (hsize_t)*start, (hsize_t)*nrecords,
                               c_type_size[0], 0, c_type_size, buf) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -344,16 +344,16 @@ h5tbread_field_name_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *n
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_name1 = (char *)HD5f2cstring(field_name, (size_t)*namelen1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * call H5TBread_fields_name function.
      */
     if (H5TBread_fields_name((hid_t)*loc_id, c_name, c_name1, (hsize_t)*start, (hsize_t)*nrecords,
                              c_type_size[0], 0, c_type_size, buf) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -388,14 +388,14 @@ h5tbwrite_field_index_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *fi
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * call H5TBwrite_fields_name function.
      */
     if (H5TBwrite_fields_index((hid_t)*loc_id, c_name, (hsize_t)1, &c_field_index, (hsize_t)*start,
                                (hsize_t)*nrecords, c_type_size, 0, &c_type_size, buf) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -428,14 +428,14 @@ h5tbread_field_index_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *fie
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * call H5TBread_fields_index function.
      */
     if (H5TBread_fields_index((hid_t)*loc_id, c_name, (hsize_t)1, &c_field_index, (hsize_t)*start,
                               (hsize_t)*nrecords, c_type_size, 0, &c_type_size, buf) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -467,16 +467,16 @@ h5tbinsert_field_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *name
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_name1 = (char *)HD5f2cstring(field_name, (size_t)*namelen1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     /*
      * call H5TBinsert_field function.
      */
 
     if (H5TBinsert_field((hid_t)*loc_id, c_name, c_name1, (hid_t)*field_type, (hsize_t)*position, NULL, buf) <
         0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -509,15 +509,15 @@ h5tbdelete_field_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *name
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_name1 = (char *)HD5f2cstring(field_name, (size_t)*namelen1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * call H5TBinsert_field function.
      */
     if (H5TBdelete_field((hid_t)*loc_id, c_name, c_name1) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -551,14 +551,14 @@ h5tbget_table_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * call H5TBread_fields_index function.
      */
 
     if (H5TBget_table_info((hid_t)*loc_id, c_name, &c_nfields, &c_nrecords) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     *nfields  = (hsize_t_f)c_nfields;
     *nrecords = (hsize_t_f)c_nrecords;
 
@@ -610,35 +610,35 @@ h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_field_offsets = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_field_sizes = (size_t *)malloc(sizeof(size_t) * (size_t)c_nfields)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_field_names = (char **)calloc((size_t)c_nfields, sizeof(char *))))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     for (i = 0; i < c_nfields; i++)
         if (NULL == (c_field_names[i] = (char *)malloc(sizeof(char) * HLTB_MAX_FIELD_LEN)))
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
 
     /*
      * call H5TBget_field_info function.
      */
     if (H5TBget_field_info((hid_t)*loc_id, c_name, c_field_names, c_field_sizes, c_field_offsets,
                            &c_type_size) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* return values */
 
     /* names array */
     if (NULL == (tmp = (char *)malloc((c_lenmax * (size_t)c_nfields) + 1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     tmp_p = tmp;
     memset(tmp, ' ', c_lenmax * (size_t)c_nfields);
     tmp[c_lenmax * c_nfields] = '\0';
     for (i = 0; i < c_nfields; i++) {
-        size_t field_name_len = HDstrlen(c_field_names[i]);
+        size_t field_name_len = strlen(c_field_names[i]);
 
         memcpy(tmp_p, c_field_names[i], field_name_len);
         namelen2[i] = (size_t_f)field_name_len;

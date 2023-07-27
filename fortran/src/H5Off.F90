@@ -37,10 +37,8 @@
 
 MODULE H5O
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_LONG, C_INT, C_LOC
   USE H5GLOBAL
   IMPLICIT NONE
-
 
 !> @brief h5o_info_t derived type. The time values are an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
   TYPE, BIND(C) :: h5o_info_t

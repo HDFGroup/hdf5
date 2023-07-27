@@ -43,7 +43,7 @@ h5eclear_c(hid_t_f *estack_id)
      * Call H5Eclear function.
      */
     if (H5Eclear2((hid_t)*estack_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     return ret_value;
@@ -72,19 +72,19 @@ h5eprint_c1(_fcd name, int_f *namelen)
     int_f ret_value = 0;
 
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (file = fopen(c_name, "a")))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Eprint2 function.
      */
     if (H5Eprint2(H5E_DEFAULT, file) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (file)
-        HDfclose(file);
+        fclose(file);
     if (c_name)
         free(c_name);
 
@@ -115,7 +115,7 @@ h5eprint_c2(void)
      * Call H5Eprint2 function.
      */
     if (H5Eprint2(H5E_DEFAULT, NULL) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     return ret_value;
@@ -147,15 +147,15 @@ h5eget_major_c(int_f *error_no, _fcd name, size_t_f *namelen)
         c_name = (char *)malloc(c_namelen + 1);
 
     if (!c_name)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Eget_msg function.
      */
     H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
     HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
-    if (!HDstrcmp(c_name, "Invalid major error number"))
-        HGOTO_DONE(FAIL)
+    if (!strcmp(c_name, "Invalid major error number"))
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
@@ -190,15 +190,15 @@ h5eget_minor_c(int_f *error_no, _fcd name, size_t_f *namelen)
         c_name = (char *)malloc(c_namelen + 1);
 
     if (!c_name)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Eget_msg function.
      */
     H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
     HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
-    if (!HDstrcmp(c_name, "Invalid minor error number"))
-        HGOTO_DONE(FAIL)
+    if (!strcmp(c_name, "Invalid minor error number"))
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
