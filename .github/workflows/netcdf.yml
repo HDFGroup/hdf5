@@ -1,0 +1,56 @@
+name: netCDF 1.14
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ hdf5_1_14 ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'COPYING**'
+      - '**.md'
+
+permissions:
+  contents: read
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install System dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y libaec-dev zlib1g-dev automake autoconf libcurl4-openssl-dev libjpeg-dev wget curl bzip2 m4 flex bison cmake libzip-dev doxygen openssl libtool libtool-bin
+    - name: Checkout HDF5
+      uses: actions/checkout@v3
+    - name: Install HDF5
+      run: |
+        ./autogen.sh
+        ./configure --prefix=/usr/local --disable-tests --disable-static --enable-shared --enable-hl --with-szlib
+        make -j
+        sudo make install -j
+    - name: Checkout netCDF
+      uses: actions/checkout@v3
+      with:
+        repository: unidata/netcdf-c
+        path: netcdf-c
+    - name: Test netCDF
+      run: |
+        cd netcdf-c
+        autoreconf -if
+        CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ./configure --enable-hdf5 --enable-dap --disable-dap-remote-tests  --enable-doxygen  --enable-external-server-tests
+        cat config.log
+        cat libnetcdf.settings
+        CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make -j
+        CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make check TESTS="" -j
+        LD_LIBRARY_PATH="/home/runner/work/hdf5/hdf5/netcdf-c/liblib/.libs:/usr/local/lib:${LD_LIBRARY_PATH}"
+        CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make check -j
