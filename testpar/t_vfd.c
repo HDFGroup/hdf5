@@ -4349,7 +4349,7 @@ test_vector_io(int mpi_rank, int mpi_size)
 } /* test_vector_io() */
 
 /*
- * Utilty routine to perform the actual selection I/O read
+ * Utility routine to perform the actual selection I/O read
  */
 static herr_t
 test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t block[], H5FD_t *lf,
@@ -4392,8 +4392,6 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
     /* Verify result */
     for (i = 0; i < (int)rbufcount; i++) {
         hsize_t endblock = MIN((start[i] + block[i]), (hsize_t)(sel_dim0 * sel_dim1));
-        // printf("mpi_rank = %d: start[i]=%lu, block[i]=%lu, MIN is %lu\n",
-        //        mpi_rank, start[i], block[i], endblock);
         for (j = (int)start[i]; j < (int)endblock; j++)
             if (rbufs[i][j] != erb[i][j]) {
                 H5_FAILED();
@@ -4433,7 +4431,7 @@ error:
 } /* end test_selection_io_read_verify() */
 
 /*
- * Utilty routine to perform the actual selection I/O write
+ * Utility routine to perform the actual selection I/O write 
  */
 static herr_t
 test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[],
@@ -5707,9 +5705,6 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     if ((file_spaces[1] = H5Screate_simple(2, dims2, NULL)) < 0)
         P_TEST_ERROR;
 
-    // printf("mpi_size is %d, mpi_rank is %d, sel_dim0 is %d, sel_dim1 is %d\n", mpi_size, mpi_rank,
-    // sel_dim0, sel_dim1);
-
     /* Initialize global buffers:
      * --wbuf1, wbuf2: write buffers
      * --fbuf1, fbuf1: expected file buffers
@@ -5753,15 +5748,9 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
 
     /* Loop over memory types */
     for (type = 1; type < H5FD_MEM_NTYPES; type++) {
-        // for (type = 1; type < 2; type++) {
 
         addrs[0] = H5FDalloc(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
         addrs[1] = H5FDalloc(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
-
-#ifdef OUT
-        if (MAINPROCESS)
-            printf("type is %u, addrs[0]=%d, addrs[1]=%d\n", type, addrs[0], addrs[1]);
-#endif
 
         test_selection_io_types_1d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, mem_spaces,
                                    file_spaces, dims1);
@@ -5835,7 +5824,7 @@ test_selection_io(int mpi_rank, int mpi_size)
     if (NULL == (lf = H5FDopen(filename, flags, fapl, HADDR_UNDEF)))
         P_TEST_ERROR;
 
-    /* Default dxpl which will be H5FD_MPIO_INDEPENDENT by defalt */
+    /* Default dxpl which will be H5FD_MPIO_INDEPENDENT by default */
     def_dxpl = H5Pcreate(H5P_DATASET_XFER);
 
     /* Set dxpl for collective access which will have H5FD_MPIO_COLLECTIVE_IO as default */
