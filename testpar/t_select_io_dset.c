@@ -2965,6 +2965,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
     const void *wbufs[MULTI_NUM_DSETS];
     void       *rbufs[MULTI_NUM_DSETS];
 
+    curr_nerrors = nerrors;
+
     /* for n niter to ensure that all randomized dset_types with multi_dset_type_t will be covered */
     for (n = 0; n < niter; n++) {
 
@@ -3534,6 +3536,8 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
         TESTING("for H5Pget_no_selection_io_cause()");
     }
 
+    curr_nerrors = nerrors;
+
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
     if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
@@ -3909,6 +3913,8 @@ test_bugs_select_on(const char *filename, hid_t fapl)
         printf("\n");
         TESTING("to verify bugs exposed when H5D_SELECTION_IO_MODE_ON is set as library default");
     }
+
+    curr_nerrors = nerrors;
 
     test_bug_optimized_bufs(filename, fapl);
     test_bug_base_addr(filename, fapl);
