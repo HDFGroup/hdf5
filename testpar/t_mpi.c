@@ -455,7 +455,7 @@ test_mpio_1wMr(char *filename, int special_request)
     /* show the hostname so that we can tell where the processes are running */
     if (VERBOSE_DEF) {
 #ifdef H5_HAVE_GETHOSTNAME
-        if (HDgethostname(hostname, sizeof(hostname)) < 0) {
+        if (gethostname(hostname, sizeof(hostname)) < 0) {
             printf("gethostname failed\n");
             hostname[0] = '\0';
         }
