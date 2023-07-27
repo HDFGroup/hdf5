@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Friday, January  3, 2003
- *
  * Purpose:	Create a dataset, which should have the newer mtime information
  *      stored in it.
  *		This program is used to create the test file `tmtimen.h5' which
@@ -35,9 +32,6 @@
  * Return:	Success:
  *
  *		Failure:
- *
- * Programmer:	Quincey Koziol
- *              Friday, January  3, 2003
  *
  *-------------------------------------------------------------------------
  */

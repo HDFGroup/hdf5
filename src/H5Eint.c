@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Eint.c
- *		April 11 2007
- *		Quincey Koziol
  *
  * Purpose:	General use, "internal" routines for error handling.
  *
@@ -108,9 +106,6 @@ int  H5E_mpi_error_str_len;
  * Return:      Success:    Message length (zero means no message)
  *              Failure:    -1
  *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -170,9 +165,6 @@ H5E__get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
  *              file pointer (or stderr if null).
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Raymond Lu
- *		Thursday, May 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -294,9 +286,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		Friday, December 12, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -406,9 +395,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *              Friday, February 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -478,9 +464,6 @@ done:
  *              STACK_FUNC is used.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Robb Matzke
- *		Friday, December 12, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -575,9 +558,6 @@ H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *o
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              July 18, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -614,9 +594,6 @@ H5E__get_auto(const H5E_t *estack, H5E_auto_op_t *op, void **client_data)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *              Friday, February 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -639,9 +616,6 @@ H5E__set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data)
  * Purpose:     Printf-like wrapper around H5E__push_stack.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, August 12, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -712,9 +686,6 @@ done:
  *              programmer is responsible for the description string).
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Robb Matzke
- *		Friday, December 12, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -794,9 +765,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, August 6, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -850,9 +818,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Wednesday, July 16, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -886,9 +851,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 16, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -918,9 +880,6 @@ done:
  *              current error stack.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, August 6, 2003
  *
  *-------------------------------------------------------------------------
  */

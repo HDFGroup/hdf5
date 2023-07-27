@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              Wednesday, January 28, 2015
- *
  * Purpose:
  *      Virtual Dataset (VDS) functions.  Creates a layout type which allows
  *      definition of a virtual dataset, where the actual dataset is stored in
@@ -150,9 +147,6 @@ H5FL_DEFINE_STATIC(H5D_virtual_held_file_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              August 12, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -224,9 +218,6 @@ done:
  *              legal, after the mapping is otherwise complete.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              August 12, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -301,9 +292,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -358,9 +346,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              August 13, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -407,9 +392,6 @@ done:
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
- *
- * Programmer:  Quincey Koziol
- *              Sunday, Feberuary 11, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -543,9 +525,6 @@ done:
  *              ownership of the fields passed to this function).
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -707,9 +686,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 11, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -788,9 +764,6 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 6, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -829,9 +802,6 @@ done:
  * Purpose:     Delete the file space for a virtual dataset
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 6, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -877,9 +847,6 @@ done:
  * Purpose:     Attempts to open a source dataset.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              March 6, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -972,9 +939,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 20, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1055,9 +1019,6 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 19, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1126,9 +1087,6 @@ done:
  * Purpose:     Parses a source file or dataset name.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              May 18, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1244,9 +1202,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 19, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1299,9 +1254,6 @@ done:
  *
  * Return:      void
  *
- * Programmer:  Neil Fortner
- *              May 19, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1329,9 +1281,6 @@ H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg)
  * Purpose:     Builds a source file or dataset name from a parsed name.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              May 18, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1432,9 +1381,6 @@ done:
  *              virtual mapping selections are not affected.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              April 22, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1917,9 +1863,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              August 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2172,9 +2115,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Thursday, April 30, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2296,9 +2236,6 @@ done:
  *              FALSE if it is not
  *              Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 6, 2015
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -2324,9 +2261,6 @@ H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  * Purpose:     Query if raw data is cached for dataset
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Wednesday, March 6, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -2373,9 +2307,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Sunday, May 22, 2022
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2399,9 +2330,6 @@ H5D__virtual_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t H5_ATTR_UNUSED *
  *              of elements is stored in tot_nelmts.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              June 3, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2663,9 +2591,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              June 4, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2711,9 +2636,6 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
  * Purpose:     Read from a single source dataset in a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              May 15, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2779,9 +2701,6 @@ done:
  * Purpose:     Read from a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 6, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2913,9 +2832,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 15, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2982,9 +2898,6 @@ done:
  * Purpose:     Write to a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 6, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3061,9 +2974,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              February 6, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3106,9 +3016,6 @@ done:
  * Purpose:     Hold open the source files that are open, during a refresh event
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              November 7, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3181,9 +3088,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 7, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3226,9 +3130,6 @@ done:
  * Purpose:     Refresh the source datasets
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Dana Robinson
- *              November, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3278,9 +3179,6 @@ done:
  * Purpose:     Release the hold on source files that are open, during a refresh event
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              November 7, 2015
  *
  *-------------------------------------------------------------------------
  */

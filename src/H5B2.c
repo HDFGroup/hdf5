@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5B2.c
- *			Jan 31 2005
- *			Quincey Koziol
  *
  * Purpose:		Implements a B-tree, with several modifications from
  *                      the "standard" methods.
@@ -114,9 +112,6 @@ H5FL_DEFINE_STATIC(H5B2_t);
  * Return:	Non-negative on success (with address of new B-tree
  *              filled in), negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Jan 31 2005
- *
  *-------------------------------------------------------------------------
  */
 H5B2_t *
@@ -185,9 +180,6 @@ done:
  * Return:	Pointer to v2 B-tree wrapper on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 15 2009
- *
  *-------------------------------------------------------------------------
  */
 H5B2_t *
@@ -249,9 +241,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb  2 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -289,9 +278,6 @@ done:
  *		H5B2_insert was called.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Dec 23 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -361,9 +347,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Nov  5 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -393,9 +376,6 @@ H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
  *              without finishing all the records.
  *
  * Return:	Value from callback: non-negative on success, negative on error
- *
- * Programmer:	Quincey Koziol
- *		Feb 11 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -442,9 +422,6 @@ H5B2_iterate(H5B2_t *bt2, H5B2_operator_t op, void *op_data)
  *              a record is present in the B-tree.
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Feb 23 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -706,9 +683,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
- *		Feb 23 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -900,9 +874,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 25 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -972,9 +943,6 @@ done:
  * Purpose:	Removes the n'th record from a B-tree.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1054,9 +1022,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 25 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1092,9 +1057,6 @@ H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec)
  *              in with UDATA.
  *
  * Return:	Non-negative on success, negative on failure.
- *
- * Programmer:	Quincey Koziol
- *		Mar  8 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1148,9 +1110,6 @@ done:
  *              the record.
  *
  * Return:	Non-negative on success, negative on failure.
- *
- * Programmer:	Quincey Koziol
- *		Mar 10 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1390,9 +1349,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 15 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1501,9 +1457,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
- *		Mar  9 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1554,9 +1507,6 @@ done:
  *              header and another piece of metadata in the file.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2012
  *
  *-------------------------------------------------------------------------
  */

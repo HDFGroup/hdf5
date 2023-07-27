@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5system.c
- *              Aug 21 2006
- *              Quincey Koziol
  *
  * Purpose:     System call wrapper implementations.
  *
@@ -108,9 +106,6 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
  * Return:  Success:  Random number from 0 to RAND_MAX
  *
  *    Failure:  Cannot fail.
- *
- * Programmer:  Leon Arber
- *              March 6, 2006.
  *
  *-------------------------------------------------------------------------
  */
@@ -206,9 +201,6 @@ Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
  * Return:    Success:  The value of timezone
  *        Failure:  -1
  *
- * Programmer:  Quincey Koziol
- *              November 18, 2015
- *
  *-------------------------------------------------------------------------
  */
 time_t
@@ -292,9 +284,6 @@ done:
  *          Danny Smith <dannysmith@users.sourceforge.net>
  *      and released in the public domain.
  *
- * Programmer:  Scott Wegner
- *              May 19, 2009
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -340,9 +329,6 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
  * Return:      Success:    0
  *              Failure:    non-zero error code
  *
- * Programmer:  Dana Robinson
- *              February 2016
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -376,9 +362,6 @@ Wsetenv(const char *name, const char *value, int overwrite)
  *
  * Return:      Success:  0
  *              Failure:  -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -502,9 +485,6 @@ Wflock(int fd, int operation)
  *                           This must be freed by the caller using H5MM_xfree()
  *               Failure:    NULL
  *
- * Programmer:  Dana Robinson
- *              Spring 2019
- *
  *-------------------------------------------------------------------------
  */
 wchar_t *
@@ -542,9 +522,6 @@ error:
  *
  * Return:       Success:    A POSIX file descriptor
  *               Failure:    -1
- *
- * Programmer:  Dana Robinson
- *              Spring 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -594,9 +571,6 @@ done:
  * Return:       Success:    0
  *               Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              Spring 2019
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -631,9 +605,6 @@ done:
  *                  2. The current working directory + relative path of NAME
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              April 2, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -749,8 +720,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Steffen Kiess
- *              June 22, 2015
  *--------------------------------------------------------------------------
  */
 herr_t

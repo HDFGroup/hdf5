@@ -52,9 +52,6 @@ static void coll_read_test(void);
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -89,9 +86,6 @@ coll_irregular_cont_write(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -128,9 +122,6 @@ coll_irregular_cont_read(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -165,9 +156,6 @@ coll_irregular_simple_chunk_write(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -204,9 +192,6 @@ coll_irregular_simple_chunk_read(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -241,9 +226,6 @@ coll_irregular_complex_chunk_write(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -280,9 +262,6 @@ coll_irregular_complex_chunk_read(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -737,9 +716,6 @@ coll_write_test(int chunk_factor)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        Dec 2nd, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1525,9 +1501,6 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
  *        has been corrected.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 11/11/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2374,9 +2347,6 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
  *        been corrected.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 11/11/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2436,9 +2406,6 @@ lower_dim_size_comp_test(void)
  *        and uses a 1 dimensional dataset.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 12/16/09
- *
  *-------------------------------------------------------------------------
  */
 

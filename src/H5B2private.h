@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5B2private.h
- *			Jan 31 2005
- *			Quincey Koziol
  *
  * Purpose:		Private header for library accessible B-tree routines.
  *

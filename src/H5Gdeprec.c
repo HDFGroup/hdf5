@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Gdeprec.c
- *		June 21 2006
- *		James Laird
  *
  * Purpose:	Deprecated functions from the H5G interface.  These
  *              functions are here for compatibility purposes and may be
@@ -94,9 +92,6 @@ static herr_t H5G__get_objinfo_cb(H5G_loc_t *grp_loc /*in*/, const char *name, c
  *
  * Return:	Object type (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5G_obj_t
@@ -152,9 +147,6 @@ H5G_map_obj_type(H5O_type_t obj_type)
  *				the group.
  *
  *		Failure:	H5I_INVALID_HID
- *
- * Programmer:	Robb Matzke
- *		Wednesday, September 24, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -250,9 +242,6 @@ done:
  * Return:	Success:	Object ID of the group.
  *
  *		Failure:	H5I_INVALID_HID
- *
- * Programmer:	Robb Matzke
- *		Wednesday, December 31, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -683,9 +672,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, July 20, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -748,9 +734,6 @@ done:
  *				be larger than the BUFSIZE argument.
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Monday, July 20, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -889,9 +872,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -941,9 +921,6 @@ done:
  *
  * Return:	Non-negative on success, with the fields of STATBUF (if
  *              non-null) initialized. Negative on failure.
- *
- * Programmer:	Robb Matzke
- *              Monday, April 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -995,9 +972,6 @@ done:
  *              gets the info
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 20, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1085,9 +1059,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Monday, April 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1165,9 +1136,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1225,9 +1193,6 @@ done:
  *
  * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)
  *		Failure:	H5G_UNKNOWN
- *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
  *
  *-------------------------------------------------------------------------
  */

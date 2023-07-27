@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Quincey Koziol
- *	       Thursday, September 30, 2004
- */
-
 /****************/
 /* Module Setup */
 /****************/
@@ -107,9 +102,6 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 22, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -176,9 +168,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -199,9 +188,6 @@ H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  * Purpose:	Performs initialization before any sort of I/O on the raw data
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -228,9 +214,6 @@ H5D__efl_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
  *              zeros.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -318,9 +301,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Wednesday, March  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -405,9 +385,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 30, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -435,9 +412,6 @@ done:
  *		zeros.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, May  7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -486,9 +460,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 30, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -516,9 +487,6 @@ done:
  *		extends that file.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, May  2, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -567,8 +535,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi; August 2009
  *
  *-------------------------------------------------------------------------
  */

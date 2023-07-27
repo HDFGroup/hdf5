@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              11/10/05
- *
+/*
  *        This file contains tests for the API calls associated
  *        with the cache implemented in H5C.c
  */
@@ -54,9 +52,6 @@ static hbool_t              check_file_mdc_api_errs(unsigned paged, hid_t fcpl_i
  *              data is getting to the cache.
  *
  * Return:      Test pass status (TRUE/FALSE)
- *
- * Programmer:  John Mainzer
- *              4/12/04
  *
  *-------------------------------------------------------------------------
  */
@@ -500,9 +495,6 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *
  * Return:      Test pass status (TRUE/FALSE)
  *
- * Programmer:  John Mainzer
- *              4/14/04
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -819,9 +811,6 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *                    testing express level value.
  *
  * Return:      Test pass status (TRUE/FALSE)
- *
- * Programmer:  John Mainzer
- *              4/14/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1440,9 +1429,6 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
  * Return:      Success:    Pointer to an array of cache configurations.
  *              Failure:    NULL
  *
- * Programmer:  Dana Robinson
- *              Spring 2016
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1631,9 +1617,6 @@ init_invalid_configs(void)
  *
  * Return:      Test pass status (TRUE/FALSE)
  *
- * Programmer:  John Mainzer
- *              4/19/04
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1812,9 +1795,6 @@ check_fapl_mdc_api_errs(void)
  *              errors gracefully.
  *
  * Return:      Test pass status (TRUE/FALSE)
- *
- * Programmer:  John Mainzer
- *              4/19/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2158,9 +2138,6 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
  * Purpose:     Run tests on the cache code contained in H5C.c
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */

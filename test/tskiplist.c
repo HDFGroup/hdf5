@@ -21,11 +21,6 @@
 
    EXPORTED ROUTINES
 
-   AUTHOR
-       Quincey Koziol
-
-   MODIFICATION HISTORY
-       11/15/04 - Started coding
  */
 
 #include "testhdf5.h"

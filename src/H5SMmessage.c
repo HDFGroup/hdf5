@@ -71,9 +71,6 @@ static herr_t H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequen
  *
  * Return:	Negative on error, non-negative on success
  *
- * Programmer:	James Laird
- *              Monday, January 8, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -105,9 +102,6 @@ H5SM__compare_cb(const void *obj, size_t obj_len, void *_udata)
  *              1 if this is the message we're searching for (with memcmp
  *                      result returned in udata)
  *              negative on error
- *
- * Programmer:	James Laird
- *              Wednesday, February 7, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -167,9 +161,6 @@ done:
  * Return:	0 if rec1 == rec2
  *              Negative if rec1 < rec2
  *              Positive if rec1 > rec2
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -270,9 +261,6 @@ done:
  * Return:	Non-negative on success
  *              Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -312,9 +300,6 @@ H5SM__message_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
  *
  * Return:	Non-negative on success
  *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
  *
  *-------------------------------------------------------------------------
  */

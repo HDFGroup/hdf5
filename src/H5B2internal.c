@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5B2internal.c
- *			Dec 01 2016
- *			Quincey Koziol
  *
  * Purpose:		Routines for managing v2 B-tree internal nodes.
  *
@@ -74,9 +72,6 @@ H5FL_DEFINE(H5B2_internal_t);
  *              to point to it.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -174,9 +169,6 @@ done:
  *
  * Return:	Pointer to internal node on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 25 2006
- *
  *-------------------------------------------------------------------------
  */
 H5B2_internal_t *
@@ -272,9 +264,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
- *		Mar  9 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -347,9 +336,6 @@ done:
  * Purpose:	Adds a new record to a B-tree node.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar  2 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -516,9 +502,6 @@ done:
  *		H5B2_insert was called.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Dec 24 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -730,9 +713,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Apr 27 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -793,9 +773,6 @@ done:
  * Purpose:	Removes a record from a B-tree node.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar  3 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1037,9 +1014,6 @@ done:
  *              in the B-tree records
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1332,9 +1306,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 2 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1382,9 +1353,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 19 2005
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE herr_t
@@ -1421,9 +1389,6 @@ H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t H5_ATTR_NDEBUG_U
  * Purpose:	Verify than internal nodes are mostly sane
  *
  * Return:	Non-negative on success, negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 19 2005
  *
  *-------------------------------------------------------------------------
  */

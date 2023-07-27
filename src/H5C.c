@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5C.c
- *              June 1 2004
- *              John Mainzer
  *
  * Purpose:     Functions in this file implement a generic cache for
  *              things which exist on disk, and which may be
@@ -167,9 +165,6 @@ H5FL_SEQ_DEFINE_STATIC(H5C_cache_entry_ptr_t);
  *
  * Return:      Success:        Pointer to the new instance.
  *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -575,9 +570,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              7/3/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -666,9 +658,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *        6/2/04
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -756,9 +745,6 @@ done:
  * Purpose:     Evict all except pinned entries in the cache
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *        Dec 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -876,9 +862,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *        a request to flush all items and an entry was protected.
- *
- * Programmer:  John Mainzer
- *        6/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1018,9 +1001,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure or if
  *        write is not permitted.
- *
- * Programmer:  John Mainzer
- *        9/16/05
  *
  *-------------------------------------------------------------------------
  */
@@ -2384,8 +2364,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer, 10/5/04
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2418,9 +2396,6 @@ done:
  *        stats.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *        10/8/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2609,9 +2584,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *              7/27/07
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2691,9 +2663,6 @@ done:
  *              3) set cache_ptr->slist_enabled = FALSE.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              5/1/20
  *
  *-------------------------------------------------------------------------
  */
@@ -3204,9 +3173,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              10/15/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3261,9 +3227,6 @@ done:
  *        and flag an error and return FAIL otherwise.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              3/23/05
  *
  *-------------------------------------------------------------------------
  */
@@ -7155,9 +7118,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Vailin Choi
- *        January 2014
  *
  *-------------------------------------------------------------------------
  */

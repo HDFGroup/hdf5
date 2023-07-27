@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:        H5Aint.c
- *                 Dec 18 2006
- *                 Quincey Koziol
  *
  * Purpose:        Internal routines for managing attributes.
  *
@@ -236,9 +234,6 @@ H5A_term_package(void)
  *
  * Return:      Attribute structure on success, NULL on Failure.
  *
- * Programmer:    Quincey Koziol
- *        April 2, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5A_t *
@@ -398,9 +393,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              December 6, 2017
- *
  *-------------------------------------------------------------------------
  */
 H5A_t *
@@ -463,9 +455,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              December 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -513,9 +502,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
- *        December 9, 2017
- *
  *-------------------------------------------------------------------------
  */
 H5A_t *
@@ -557,9 +543,6 @@ done:
  * Purpose:     Open an attribute according to its index order
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:    Quincey Koziol
- *        April 2, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -620,9 +603,6 @@ done:
  * Purpose:     Open an attribute in an object header, according to it's name
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:    Quincey Koziol
- *        December 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1132,9 +1112,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              February  6, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1170,9 +1147,6 @@ H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
  *
  * Return:      Success:    Pointer to a new copy of the OLD_ATTR argument.
  *              Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1233,9 +1207,6 @@ done:
  *              attr and attr->shared must not be NULL
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, November 15, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1313,9 +1284,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Robb Matzke
- *        Monday, December  8, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1366,9 +1334,6 @@ done:
  * Return:    Success:    Ptr to entry
  *        Failure:    NULL
  *
- * Programmer:    Robb Matzke
- *              Thursday, August  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5O_loc_t *
@@ -1396,9 +1361,6 @@ H5A_oloc(H5A_t *attr)
  * Return:    Success:    Ptr to entry
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Monday, September 12, 2005
- *
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
@@ -1424,9 +1386,6 @@ H5A_nameof(H5A_t *attr)
  * Return:      Success:        Ptr to entry
  *              Failure:        NULL
  *
- * Programmer:  Neil Fortner
- *              Friday, November  11, 2011
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -1450,9 +1409,6 @@ H5A_type(const H5A_t *attr)
  * Purpose:     Private version of H5Aexists_by_name
  *
  * Return:      TRUE/FALSE/FAIL
- *
- * Programmer:    Quincey Koziol
- *              Thursday, November 1, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1501,14 +1457,6 @@ done:
  *              into table.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Dec 18 2006
- *
- * Modification:Raymond Lu
- *              24 June 2008
- *              Changed the table of attribute objects to be the table of
- *              pointers to attribute objects for the ease of operation.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1563,9 +1511,6 @@ done:
  *              order for an index
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Dec 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1624,9 +1569,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
- *        Dec 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1668,9 +1610,6 @@ done:
  *              but the 'idx_type' index for sorting them.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:    Quincey Koziol
- *            Dec 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1753,9 +1692,6 @@ done:
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. same as strcmp())
  *
- * Programmer:    Quincey Koziol
- *        Dec 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1779,9 +1715,6 @@ H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. opposite of strcmp())
  *
- * Programmer:    Quincey Koziol
- *        Feb  8 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1803,9 +1736,6 @@ H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
  *              first argument is considered to be respectively less than,
  *              equal to, or greater than the second.  If two members compare
  *              as equal, their order in the sorted array is undefined.
- *
- * Programmer:    Quincey Koziol
- *        Feb  8 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1838,9 +1768,6 @@ H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
  *              equal to, or greater than the first.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *
- * Programmer:  Quincey Koziol
- *              Feb  8 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1867,9 +1794,6 @@ H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
  * Purpose:     Sort table containing a list of attributes for an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Dec 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1910,9 +1834,6 @@ H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type, H5_iter_orde
  *              making appropriate callbacks
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Dec 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1989,9 +1910,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Dec 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2029,9 +1947,6 @@ done:
  *              sets the number of attributes correctly, if it isn't set up yet.
  *
  * Return:      TRUE/FALSE/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Mar 11 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2091,9 +2006,6 @@ done:
  *              file's low bound indicates otherwise.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Jul 17 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2159,9 +2071,6 @@ done:
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              November 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2442,9 +2351,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Peter Cao
- *              March 6, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2532,9 +2438,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Peter Cao
- *              July 20, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2588,9 +2491,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Peter Cao
- *              July 20, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2632,9 +2532,6 @@ done:
  * Purpose:     Private version of H5Arename_by_name
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              February 20, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2680,9 +2577,6 @@ done:
  * Purpose:     Internal common version of H5Aiterate
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              December 6, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -2780,9 +2674,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              December 6, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2820,9 +2711,6 @@ H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_
  * Purpose:     Private version of H5Adelete_by_name
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              December 6, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -2865,9 +2753,6 @@ done:
  * Purpose:     Private version of H5Adelete_by_idx
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              December 6, 2017
  *
  *-------------------------------------------------------------------------
  */

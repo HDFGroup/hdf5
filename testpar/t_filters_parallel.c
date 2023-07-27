@@ -11,8 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Jordan Henderson
- *             01/31/2017
  *
  * This file contains tests for writing to and reading from
  * datasets in parallel with filters applied to the data.
@@ -396,8 +394,6 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
  * Tests parallel write of filtered data in the special
  * case where a dataset is composed of a single chunk.
  *
- * Programmer: Jordan Henderson
- *             02/01/2017
  */
 static void
 test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -550,8 +546,6 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
  * In this case, the write operation can be optimized because
  * chunks do not have to be redistributed to new owners.
  *
- * Programmer: Jordan Henderson
- *             02/01/2017
  */
 static void
 test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -859,8 +853,6 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
  * redistributed before the operation so that only one process
  * writes to a particular chunk.
  *
- * Programmer: Jordan Henderson
- *             02/01/2017
  */
 static void
 test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -1655,8 +1647,6 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
  * participate in the re-insertion of the filtered chunks
  * into the chunk index.
  *
- * Programmer: Jordan Henderson
- *             02/01/2017
  */
 static void
 test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_filter_t filter_id,
@@ -1827,8 +1817,6 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
  * but the dataset is populated with the default fill
  * value.
  *
- * Programmer: Jordan Henderson
- *             02/02/2017
  */
 static void
 test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -1946,8 +1934,6 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
  * Tests parallel write of filtered data by using
  * point selections instead of hyperslab selections.
  *
- * Programmer: Jordan Henderson
- *             02/02/2017
  */
 static void
 test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -2094,8 +2080,6 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
  * the whole chunk is selected, leading to an interleaved
  * write pattern.
  *
- * Programmer: Jordan Henderson
- *             02/02/2017
  */
 static void
 test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -2265,8 +2249,6 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
  * the transform function resulting in not breaking to
  * independent I/O.
  *
- * Programmer: Jan-Willem Blokland
- *             08/20/2021
  */
 static void
 test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
@@ -2429,8 +2411,6 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
  * the dataset has 3 dimensions and each process writes
  * to its own "page" in the 3rd dimension.
  *
- * Programmer: Jordan Henderson
- *             02/06/2017
  */
 static void
 test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group, H5Z_filter_t filter_id,
@@ -2591,8 +2571,6 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
  * to each "page" in the 3rd dimension. However, no chunk
  * on a given "page" is written to by more than one process.
  *
- * Programmer: Jordan Henderson
- *             02/06/2017
  */
 static void
 test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5Z_filter_t filter_id,
@@ -2754,8 +2732,6 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
  * to each "page" in the 3rd dimension. Further, each chunk
  * in each "page" is written to equally by all processes.
  *
- * Programmer: Jordan Henderson
- *             02/06/2017
  */
 static void
 test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -2928,8 +2904,6 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
  * chunks using a compound datatype which doesn't
  * require a datatype conversion.
  *
- * Programmer: Jordan Henderson
- *             02/10/2017
  */
 static void
 test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group, H5Z_filter_t filter_id,
@@ -3109,8 +3083,6 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
  * chunks using a compound datatype which doesn't
  * require a datatype conversion.
  *
- * Programmer: Jordan Henderson
- *             02/10/2017
  */
 static void
 test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H5Z_filter_t filter_id,
@@ -3302,8 +3274,6 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
  * allowed when there are filters in the pipeline,
  * unless there is only one MPI rank.
  *
- * Programmer: Jordan Henderson
- *             02/07/2017
  */
 static void
 test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_group, H5Z_filter_t filter_id,
@@ -3501,8 +3471,6 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
  * allowed when there are filters in the pipeline,
  * unless there is only one MPI rank.
  *
- * Programmer: Jordan Henderson
- *             02/10/2017
  */
 static void
 test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group, H5Z_filter_t filter_id,
@@ -3699,8 +3667,6 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
  * the singular chunk and contributes its piece to a
  * global buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/14/2018
  */
 static void
 test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -3900,8 +3866,6 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
  * the dataset and contributes its piece to a global buffer
  * that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/15/2018
  */
 static void
 test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -4101,8 +4065,6 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
  * each chunk of the dataset and contributes its pieces
  * to a global buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/15/2018
  */
 static void
 test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -4319,8 +4281,6 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
  * reads a part of the dataset and contributes its piece
  * to a global buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/15/2018
  */
 static void
 test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_filter_t filter_id,
@@ -4548,8 +4508,6 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
  * data to the dataset. Then, each rank will simply issue
  * a no-op read.
  *
- * Programmer: Jordan Henderson
- *             05/15/2018
  */
 static void
 test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -4684,8 +4642,6 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
  * contribute its piece to a global buffer that is
  * checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/15/2018
  */
 static void
 test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -4898,8 +4854,6 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
  * of each chunk of the dataset and will contribute its
  * pieces to a global buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/15/2018
  */
 static void
 test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -5126,8 +5080,6 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
  * of the dataset and contributes its piece to a global buffer
  * that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/16/2018
  */
 static void
 test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group, H5Z_filter_t filter_id,
@@ -5345,8 +5297,6 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
  * the dataset and contributes its piece to a global buffer
  * that is checked for consistency.
  *
- * Programmer: Jan-Willem Blokland
- *             08/20/2021
  */
 static void
 test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
@@ -5570,8 +5520,6 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
  * each "page" of the dataset and contributes its piece to a
  * global buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/16/2018
  */
 static void
 test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5Z_filter_t filter_id,
@@ -5781,8 +5729,6 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
  * chunk of each "page" and contributes its pieces to a
  * global buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/16/2018
  */
 static void
 test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -6013,8 +5959,6 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
  * the dataset and contributes its piece to a global
  * buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/17/2018
  */
 static void
 test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group, H5Z_filter_t filter_id,
@@ -6240,8 +6184,6 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
  * each chunk of the dataset and contributes its piece
  * to a global buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/17/2018
  */
 static void
 test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H5Z_filter_t filter_id,
@@ -6473,8 +6415,6 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
  * the dataset and contributes its piece to a global
  * buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/17/2018
  */
 static void
 test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_group, H5Z_filter_t filter_id,
@@ -6709,8 +6649,6 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
  * each chunk of the dataset and contributes its pieces
  * to a global buffer that is checked for consistency.
  *
- * Programmer: Jordan Henderson
- *             05/17/2018
  */
 static void
 test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group, H5Z_filter_t filter_id,
@@ -6947,8 +6885,6 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
  * re-opened in parallel and read by all
  * processes to ensure data correctness.
  *
- * Programmer: Jordan Henderson
- *             08/03/2017
  */
 static void
 test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -7084,8 +7020,6 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
  * then re-opened and read by a single
  * process to ensure data correctness.
  *
- * Programmer: Jordan Henderson
- *             08/03/2017
  */
 static void
 test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -7261,8 +7195,6 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
  * thus controlling the compression ratio) does not cause
  * problems.
  *
- * Programmer: Jordan Henderson
- *             06/04/2018
  */
 static void
 test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,

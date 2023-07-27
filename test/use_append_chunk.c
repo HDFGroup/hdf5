@@ -56,8 +56,6 @@
  *         o The Reader will see all new data written by Writer.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Created: Albert Cheng, 2013/5/28 */
-
 #include "h5test.h"
 
 /* This test uses many POSIX things that are not available on

@@ -14,8 +14,6 @@
  * This verifies the correctness of parallel reading of a dataset that has been
  * written serially using filters.
  *
- * Created by: Christian Chilan
- * Date: 2007/05/15
  */
 
 #include "testphdf5.h"
@@ -41,10 +39,6 @@ static int mpi_size, mpi_rank;
  * Purpose:     Tests parallel reading of a 2D dataset written serially using
  *              filters. During the parallel reading phase, the dataset is
  *              divided evenly among the processors in vertical hyperslabs.
- *
- * Programmer:  Christian Chilan
- *              Tuesday, May 15, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -188,10 +182,6 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
  *
  * Purpose:    Tests parallel reading of datasets written serially using
  *              several (combinations of) filters.
- *
- * Programmer:    Christian Chilan
- *              Tuesday, May 15, 2007
- *
  *-------------------------------------------------------------------------
  */
 

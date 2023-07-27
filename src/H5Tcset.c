@@ -33,9 +33,6 @@
  *
  *		Failure:	H5T_CSET_ERROR (Negative)
  *
- * Programmer:	Robb Matzke
- *		Friday, January	 9, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5T_cset_t
@@ -74,9 +71,6 @@ done:
  *		extent possible.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Friday, January	 9, 1998
  *
  *-------------------------------------------------------------------------
  */

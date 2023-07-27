@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi
- *              February 2015
- *
  * Purpose: This test opens a file created by the t_pshutdown program
  * and makes sure the objects created are there.
  */

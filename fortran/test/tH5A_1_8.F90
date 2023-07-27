@@ -2671,10 +2671,6 @@ END SUBROUTINE test_attr_many
 ! *
 ! * Return:      Success:        0
 ! *              Failure:        -1
-! *
-! * Programmer:  Fortran version (M.S. Breitenfeld)
-! *              March 21, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 

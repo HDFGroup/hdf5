@@ -23,10 +23,6 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 17, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -67,10 +63,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 17, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -99,10 +91,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 17, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -130,10 +118,6 @@ done:
  * Purpose: Calls H5DSis_attached
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 17, 2011
  *
  * Comments:
  *
@@ -166,10 +150,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -200,10 +180,6 @@ done:
  * Purpose: Calls H5DSset_label
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
  *
  * Comments:
  *
@@ -243,10 +219,6 @@ done:
  * Purpose: Calls H5DSget_label
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
  *
  * Comments:
  *
@@ -294,10 +266,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -341,10 +309,6 @@ done:
  * Purpose: Calls H5DSget_num_scales
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: April 18, 2011
  *
  * Comments:
  *

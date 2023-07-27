@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Pdeprec.c
- *		October 11 2007
- *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5P interface.  These
  *              functions are here for compatibility purposes and may be
@@ -441,9 +439,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -529,7 +524,6 @@ done:
  *
  * Return:	    Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; Jan 2017
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -599,8 +593,6 @@ done:
  * Purpose:	    It is mapped to H5Pget_file_space_strategy().
  *
  * Return:	    Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; Jan 2017
  *
  *-------------------------------------------------------------------------
  */

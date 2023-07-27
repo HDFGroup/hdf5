@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFiter.c
- *			Apr 24 2006
- *			Quincey Koziol
  *
  * Purpose:		Block iteration routines for fractal heaps.
  *
@@ -75,9 +73,6 @@ H5FL_DEFINE(H5HF_block_loc_t);
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -103,9 +98,6 @@ H5HF__man_iter_init(H5HF_block_iter_t *biter)
  *              an offset in the heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -262,9 +254,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May 31 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -292,9 +281,6 @@ H5HF__man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsign
  *              an indirect block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -352,9 +338,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -411,9 +394,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -444,9 +424,6 @@ H5HF__man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries
  * Purpose:	Move iterator up one level
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -490,9 +467,6 @@ done:
  * Purpose:	Move iterator down one level
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -545,9 +519,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -581,9 +552,6 @@ H5HF__man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsi
  * Purpose:	Query if iterator is ready to use
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 25 2006
  *
  *-------------------------------------------------------------------------
  */

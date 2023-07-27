@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Oprivate.h
- *			Aug  5 1997
- *			Robb Matzke
  *
  * Purpose:		Object header private include file.
  *

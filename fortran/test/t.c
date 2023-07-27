@@ -34,8 +34,6 @@
  *              full_name - buffer to return full name
  *              full_namelen - name length
  * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Friday, September 13, 2002
  *---------------------------------------------------------------------------*/
 int_f
 nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_name, size_t_f *full_namelen)
@@ -75,8 +73,6 @@ done:
  *              base_namelen - name length
  *              fapl - file access property list
  * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Thursday, September 19, 2002
  *---------------------------------------------------------------------------*/
 int_f
 nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl)
@@ -124,8 +120,6 @@ DONE:
  *              up as exit(0).
  * Inputs:      status - status for exit() to return
  * Returns:     none
- * Programmer:  Quincey Koziol
- *              Tuesday, December 14, 2004
  *---------------------------------------------------------------------------*/
 void
 nh5_exit_c(int_f *status)
@@ -140,8 +134,6 @@ nh5_exit_c(int_f *status)
  * Output:      status:  1 - HDF5_NOCLEANUP is set
  *                       0 - HDF5_NOCLEANUP is not set
  * Returns:     none
- * Programmer:  M.S. Breitenfeld
- *              September 30, 2008
  *---------------------------------------------------------------------------*/
 void
 nh5_env_nocleanup_c(int_f *status)

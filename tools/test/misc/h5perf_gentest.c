@@ -14,7 +14,6 @@
   creates a large number of attributes, groups, and datasets by specifying
   -a, -g, -d options respectively. Using "-h" option to see details.
 
-  Programmer:  Peter Cao, Jan. 2013
  ****************************************************************************/
 
 #include "hdf5.h"
@@ -128,7 +127,6 @@ main(int argc, char *argv[])
 
   Return:  Non-negative on success/Negative on failure
 
-  Programmer:  Peter Cao, Jan. 2013
  ****************************************************************************/
 herr_t
 create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsize_t nrows, hsize_t dim0,

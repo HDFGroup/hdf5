@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Wednesday, October  7, 1998
- *
  * Purpose:	Tests file mounting.
  */
 #include "h5test.h"
@@ -37,9 +34,6 @@ int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -111,9 +105,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -164,9 +155,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -306,9 +294,6 @@ error:
  *
  * Return:	Success:	0
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 15, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -452,9 +437,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -550,9 +532,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Robb Matzke
- *              Tuesday, October 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -637,9 +616,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -704,9 +680,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -773,9 +746,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -839,9 +809,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -912,9 +879,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1065,9 +1029,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Robb Matzke
- *              Tuesday, October 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1125,9 +1086,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1246,9 +1204,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1322,9 +1277,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1410,9 +1362,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, May  4, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1643,9 +1592,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, June  6, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1911,9 +1857,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Quincey Koziol
- *              Thursday, June 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2061,9 +2004,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2188,9 +2128,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 14, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2343,9 +2280,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2485,9 +2419,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2626,9 +2557,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2765,9 +2693,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2967,9 +2892,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3189,9 +3111,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3400,9 +3319,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3568,9 +3484,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3959,9 +3872,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4122,9 +4032,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Neil Fortner
- *              Friday, August 1, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4225,9 +4132,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	number of errors
- *
- * Programmer:	Neil Fortner
- *              Friday, August 6, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -4383,9 +4287,6 @@ error:
  *
  *		Failure:	number of errors
  *
- * Programmer:	Neil Fortner
- *              Friday, November 14, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4534,9 +4435,6 @@ error:
  * Return:	Success:	zero
  *
  *		Failure:	non-zero
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October  7, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -31,9 +31,6 @@
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Friday, January	 9, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -69,9 +66,6 @@ done:
  * Purpose:	Sets the LSB and MSB pad types.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Friday, January	 9, 1998
  *
  *-------------------------------------------------------------------------
  */

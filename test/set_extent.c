@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Pedro Vicente
- *              April 12, 2002
- *
  * Purpose:     Tests the H5Dset_extent call
  */
 
@@ -2234,9 +2231,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Neil Fortner
- *              Monday, January 11, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2453,9 +2447,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Neil Fortner
- *              Tueday, June 29, 2010
  *
  *-------------------------------------------------------------------------
  */

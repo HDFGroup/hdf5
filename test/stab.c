@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- */
-
 #define H5G_FRIEND /*suppress error about including H5Gpkg      */
 
 /* Define this macro to indicate that the testing APIs should be available */
@@ -84,9 +79,6 @@ const char *FILENAME[] = {"stab", NULL};
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -189,8 +181,6 @@ error:
  *
  *         Failure:    number of errors
  *
- * Programmer:  Robb Matzke 2002-03-28
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -275,10 +265,6 @@ error:
  *
  *         Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              robb@maya.nuance.com
- *              Aug 29 1997
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -350,9 +336,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -637,9 +620,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 18, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -803,9 +783,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Monday, October 24, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -909,9 +886,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1049,9 +1023,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1202,9 +1173,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Thursday, August 23, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1308,9 +1276,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Neil Fortner
- *              Wednesday, March 18, 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1401,9 +1366,6 @@ error:
  * Return:    Success:    zero
  *
  *        Failure:    non-zero
- *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */

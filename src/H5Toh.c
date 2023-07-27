@@ -81,9 +81,6 @@ const H5O_obj_class_t H5O_OBJ_DATATYPE[1] = {{
  *		Failure:	FAIL if the existence of certain messages
  *				cannot be determined.
  *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -109,9 +106,6 @@ done:
  *
  * Return:	Success:	Open object identifier
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -148,9 +142,6 @@ done:
  *
  * Return:	Success:	Pointer to the named datatype data structure
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, April 11, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -191,9 +182,6 @@ done:
  *
  * Return:	Success:	Pointer to object header location
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
  */

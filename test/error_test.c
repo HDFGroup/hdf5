@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Raymond Lu
- *              October 14, 2001
- *
  * Purpose:    Tests the error API routines.
  */
 #include "h5test.h"

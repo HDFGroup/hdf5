@@ -90,9 +90,6 @@ static hsize_t values_used[WRT_N];
  *
  *            Failure:    Random value which overlaps another write
  *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -136,9 +133,6 @@ randll(hsize_t limit, int current_index)
  *
  *            Failure:    zero
  *
- * Programmer:    Robb Matzke
- *              Wednesday, July 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -176,9 +170,6 @@ is_sparse(void)
  *                otherwise.
  *
  *            Failure:    zero
- *
- * Programmer:    Raymond Lu
- *              Wednesday, April 18, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -245,9 +236,6 @@ error:
  *
  *            Failure:    zero
  *
- * Programmer:    Robb Matzke
- *              Thursday, August  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 /* Disable warning for "format not a string literal" here -QAK */
@@ -308,9 +296,6 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
  * Return:    Success:    0
  *
  *            Failure:    >0
- *
- * Programmer:    Robb Matzke
- *              Wednesday, April  8, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -458,9 +443,6 @@ error:
  *
  *            Failure:    >0
  *
- * Programmer:    Robb Matzke
- *              Friday, April 10, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -561,9 +543,6 @@ error:
  * Purpose:    Print command usage
  *
  * Return:    void
- *
- * Programmer:    Albert Chent
- *              Mar 28, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -719,9 +698,6 @@ error:
  * Return:    Success:
  *
  *            Failure:
- *
- * Programmer:    Robb Matzke
- *              Friday, April 10, 1998
  *
  *-------------------------------------------------------------------------
  */

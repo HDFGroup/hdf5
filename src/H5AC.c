@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5AC.c
- *                      Jul  9 1997
- *                      Robb Matzke
  *
  * Purpose:             Functions in this file implement a cache for
  *                      things which exist on disk.  All "things" associated
@@ -129,9 +127,6 @@ static const H5AC_class_t *const H5AC_class_s[] = {
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 18, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -168,9 +163,6 @@ H5AC_init(void)
  *                              affect other interfaces; zero otherwise.
  *              Failure:        Negative.
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 18, 2002
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -193,8 +185,6 @@ H5AC_term_package(void)
  *              if not.  Throws an assertion failure on error.
  *
  * Return:      TRUE if a cache image load is pending, and FALSE otherwise.
- *
- * Programmer:  John Mainzer, 1/10/17
  *
  *-------------------------------------------------------------------------
  */
@@ -227,9 +217,6 @@ H5AC_cache_image_pending(const H5F_t *f)
  * Return:      Success:        Number of slots actually used.
  *
  *              Failure:        Negative
- *
- * Programmer:  Robb Matzke
- *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -410,9 +397,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Jul  9 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -533,9 +517,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              Dec 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -571,9 +552,6 @@ done:
  *              pinned or protected.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              6/30/06
  *
  *-------------------------------------------------------------------------
  */
@@ -617,9 +595,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure if there was a
  *              request to flush all items and something was protected.
- *
- * Programmer:  Robb Matzke
- *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -674,9 +649,6 @@ done:
  *              On error, the value of *status is undefined.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              4/27/06
  *
  *-------------------------------------------------------------------------
  */
@@ -734,9 +706,6 @@ done:
  *              space reserved.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -805,9 +774,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              7/6/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -836,9 +802,6 @@ done:
  *              entry MUST be either pinned, protected, or both.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              5/16/06
  *
  *-------------------------------------------------------------------------
  */
@@ -891,9 +854,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              7/23/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -944,9 +904,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              12/22/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -986,9 +943,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              12/22/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1026,9 +980,6 @@ done:
  *              file address changed.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1084,9 +1035,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              4/27/06
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1132,9 +1080,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              7/3/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1173,9 +1118,6 @@ done:
  *              repeatedly.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              5/5/20
  *
  *-------------------------------------------------------------------------
  */
@@ -1218,9 +1160,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              5/5/20
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1250,9 +1189,6 @@ done:
  *              cache.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              3/24/09
  *
  *-------------------------------------------------------------------------
  */
@@ -1305,9 +1241,6 @@ done:
  *
  * Return:      Success:        Ptr to the object.
  *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Sep  2 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1372,9 +1305,6 @@ done:
  * Purpose:     Resize a pinned or protected entry.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              7/5/06
  *
  *-------------------------------------------------------------------------
  */
@@ -1470,9 +1400,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              4/11/06
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1511,9 +1438,6 @@ done:
  * Purpose:     Destroy a flush dependency between two entries.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              3/24/09
  *
  *-------------------------------------------------------------------------
  */
@@ -1580,9 +1504,6 @@ done:
  *              from the file and should not be returned to the cache.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Sep  2 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1669,9 +1590,6 @@ done:
  * Purpose:     Wrapper function for H5C_get_cache_auto_resize_config().
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              3/10/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1763,9 +1681,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *              3/11/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1791,9 +1706,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *              3/11/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1816,9 +1728,6 @@ done:
  * Purpose:     Wrapper function for H5C_get_cache_hit_rate().
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              3/10/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1844,8 +1753,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer, 3/10/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1868,9 +1775,6 @@ done:
  * Purpose:     Wrapper function for H5C_set_cache_auto_resize_config().
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              3/10/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1970,9 +1874,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              4/6/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2046,9 +1947,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              6/25/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2096,8 +1994,6 @@ done:
  *              is undefined.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/15/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2150,9 +2046,6 @@ H5AC__check_if_write_permitted(const H5F_t
  *              Does only minimal sanity checking.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              1/26/06
  *
  *-------------------------------------------------------------------------
  */
@@ -2212,9 +2105,6 @@ done:
  *
  * Return:      SUCCEED on success, FAIL otherwise.
  *
- * Programmer:  Mike McGreevy
- *              December 1, 2009
- *
  *------------------------------------------------------------------------------
  */
 herr_t
@@ -2244,9 +2134,6 @@ done:
  *
  * Return:      void
  *
- * Programmer:  Mike McGreevy
- *              December 1, 2009
- *
  *------------------------------------------------------------------------------
  */
 void
@@ -2272,9 +2159,6 @@ H5AC_tag(haddr_t metadata_tag, haddr_t *prev_tag)
  *              result of an object copy, and applies the provided tag.
  *
  * Return:      SUCCEED on success, FAIL otherwise.
- *
- * Programmer:  Mike McGreevy
- *              March 17, 2010
  *
  *------------------------------------------------------------------------------
  */
@@ -2304,9 +2188,6 @@ done:
  *              that contains the specific tag.
  *
  * Return:      SUCCEED on success, FAIL otherwise.
- *
- * Programmer:  Mike McGreevy
- *              May 19, 2010
  *
  *------------------------------------------------------------------------------
  */
@@ -2373,8 +2254,6 @@ done:
  *
  * Return:      SUCCEED on success, FAIL otherwise.
  *
- * Programmer:  Vailin Choi; May 2016
- *
  *------------------------------------------------------------------------------
  */
 herr_t
@@ -2405,9 +2284,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2016
- *
  *------------------------------------------------------------------------------
  */
 herr_t
@@ -2437,8 +2313,6 @@ done:
  * Purpose:     To cork/uncork/get cork status for an object
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -2487,9 +2361,6 @@ done:
  *
  * Return:      SUCCEED or FAIL.
  *
- * Programmer:  Mike McGreevy
- *              October 20, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2522,9 +2393,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              9/8/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2554,9 +2422,6 @@ done:
  *              to the metadata cache).
  *
  * Return:      void
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, September 8, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2599,9 +2464,6 @@ H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring)
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -2646,9 +2508,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              10/15/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2672,9 +2531,6 @@ done:
  *              dirty, involved in flush dependencies, etc.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -2712,8 +2568,6 @@ done:
  * Purpose:     Wrapper function for H5C_get_mdc_image_info().
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  Vailin Choi; March 2017
  *
  *-------------------------------------------------------------------------
  */

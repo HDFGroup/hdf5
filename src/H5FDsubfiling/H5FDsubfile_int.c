@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Richard Warren
- *              Wednesday, July 1, 2020
- *
  * Purpose:     This is part of a parallel subfiling I/O driver.
  *
  */
@@ -62,8 +59,6 @@
  *              has been queued.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  JRM -- 12/13/21
  *
  *-------------------------------------------------------------------------
  */
@@ -275,8 +270,6 @@ done:
  *              4. If (sf_eof > current_sf_eof), then current_sf_eof = sf_eof.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  JRM -- 1/18/22
  *
  *-------------------------------------------------------------------------
  */

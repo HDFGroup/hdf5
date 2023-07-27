@@ -26,9 +26,6 @@
  * Temporary files generated:
  *   ttsafe_cancel.h5
  *
- * Created: May 15 2000
- * Programmer: Chee Wai LEE
- *
  ********************************************************************/
 #include "ttsafe.h"
 

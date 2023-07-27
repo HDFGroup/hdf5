@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Apr 17, 2007
- *
  * Purpose:     This program is run to generate an HDF5 data file with several
  *              datasets that have "bogus" messages in their object header.
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pmtpl.c
- *			November  1 2006
- *			Quincey Koziol
  *
  * Purpose:		File mount property list class routines
  *
@@ -101,8 +99,6 @@ static const hbool_t H5F_def_local_g = H5F_MNT_SYM_LOCAL_DEF; /* Whether symlink
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t

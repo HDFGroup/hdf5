@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5B2int.c
- *			Feb 27 2006
- *			Quincey Koziol
  *
  * Purpose:		Internal routines for managing v2 B-trees.
  *
@@ -85,9 +83,6 @@ H5FL_SEQ_EXTERN(H5B2_node_info_t);
  *              being greater than value in *IDX (which should only happen when
  *              record to locate is greater than all records to search).
  *
- * Programmer:	Quincey Koziol
- *		Feb  3 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -126,9 +121,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Aug 28 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -332,9 +324,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Feb  3 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -413,9 +402,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -684,9 +670,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1111,9 +1094,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Mar  4 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1285,9 +1265,6 @@ done:
  * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1552,9 +1529,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Dec 23 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1609,9 +1583,6 @@ done:
  *              without finishing all the records.
  *
  * Return:	Value from callback, non-negative on success, negative on error
- *
- * Programmer:	Quincey Koziol
- *		Feb 11 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1731,9 +1702,6 @@ done:
  *
  * Return:	Value from callback, non-negative on success, negative on error
  *
- * Programmer:	Quincey Koziol
- *		Mar  9 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1815,9 +1783,6 @@ done:
  *
  * Return:      non-negative on success, negative on error
  *
- * Programmer:  Vailin Choi
- *              July 12 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1870,9 +1835,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1900,9 +1862,6 @@ done:
  * Purpose:     Update flush dependencies for children of a node
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *		Dec  1 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1999,9 +1958,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *		Dec  1 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2037,9 +1993,6 @@ done:
  * Purpose:     Destroy a flush dependency between two data structure components
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2012
  *
  *-------------------------------------------------------------------------
  */

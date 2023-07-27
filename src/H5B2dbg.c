@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5B2dbg.c
- *			Feb  2 2005
- *			Quincey Koziol
  *
  * Purpose:		Dump debugging information about a v2 B-tree.
  *
@@ -69,9 +67,6 @@
  * Purpose:	Prints debugging info about a B-tree header.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb  2 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -148,9 +143,6 @@ done:
  * Purpose:	Prints debugging info about a B-tree internal node
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb  4 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -249,9 +241,6 @@ done:
  * Purpose:	Prints debugging info about a B-tree leaf node
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb  7 2005
  *
  *-------------------------------------------------------------------------
  */

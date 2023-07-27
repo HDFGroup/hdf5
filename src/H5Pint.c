@@ -10,8 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *
+/*
  * Purpose:	Generic Property Functions
  */
 
@@ -421,9 +420,6 @@ static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Saturday, March 4, 2000
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -692,9 +688,6 @@ H5P_term_package(void)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Wednesday, April 8, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -722,9 +715,6 @@ done:
  * Purpose:     Called when the ref count reaches zero on a property list's ID
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -5541,9 +5531,6 @@ done:
  * Return:	   Success:	ID of new property list
  *		   Failure:	H5I_INVALID_HID
  *
- * Programmer:     Quincey Koziol
- *                 Thursday, August 2, 2012
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -5682,9 +5669,6 @@ done:
  * Return:      Success:        Non-negative ID of property list.
  *              Failure:        H5I_INVALID_HID
  *
- * Programmer:	Quincey Koziol
- *		April 22, 2014
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -5708,9 +5692,6 @@ H5P_get_plist_id(const H5P_genplist_t *plist)
  *
  * Return:      Success:        Non-NULL class of property list.
  *              Failure:        NULL
- *
- * Programmer:	Quincey Koziol
- *		April 22, 2014
  *
  *-------------------------------------------------------------------------
  */

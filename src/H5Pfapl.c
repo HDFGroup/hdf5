@@ -538,8 +538,6 @@ static const hbool_t H5F_def_ignore_disabled_file_locks_g =
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1062,9 +1060,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Tuesday, June  9, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1102,9 +1097,6 @@ done:
  *        pointers may be null pointers.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Tuesday, June  9, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1149,9 +1141,6 @@ done:
  *             should be specified, but not both.
  *
  * Return:     Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *                Tuesday, August 3, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1203,9 +1192,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *              Tuesday, August  3, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1419,9 +1405,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Thursday, February 26, 1998
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1464,9 +1447,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Thursday, February 26, 1998
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1502,9 +1482,6 @@ done:
  *                not registered any driver-specific properties
  *                although no error is pushed on the stack in
  *                this case.
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1543,9 +1520,6 @@ done:
  *                not registered any driver-specific properties
  *                although no error is pushed on the stack in
  *                this case.
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1672,9 +1646,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, Sept 8, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1742,9 +1713,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, Sept 8, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1785,9 +1753,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, September 8, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1812,9 +1777,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Monday, Sept 7, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1845,9 +1807,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, Sept 7, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1877,9 +1836,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, September 8, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1905,9 +1861,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Monday, September 8, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1935,9 +1888,6 @@ done:
  * Return:         positive if VALUE1 is greater than VALUE2, negative if
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Monday, September 8, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2008,9 +1958,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, September 8, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2037,9 +1984,6 @@ done:
  *
  * Return:      Success:        Non-negative value.
  *              Failure:        Negative value.
- *
- * Programmer:  Raymond Lu
- *              Sep 17, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2075,9 +2019,6 @@ done:
  *
  * Return:      Success:        Non-negative value.
  *              Failure:        Negative value.
- *
- * Programmer:  Raymond Lu
- *              Sep 17, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2116,9 +2057,6 @@ done:
  * Return:      Success:        Non-negative value.
  *              Failure:        Negative value.
  *
- * Programmer:  Raymond Lu
- *              Sep 17, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2153,9 +2091,6 @@ done:
  *
  * Return:      Success:        Non-negative value.
  *              Failure:        Negative value.
- *
- * Programmer:  Raymond Lu
- *              Sep 17, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2201,9 +2136,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Tuesday, May 19, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2247,9 +2179,6 @@ done:
  *        corresponding datum is not returned.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Tuesday, May 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2295,9 +2224,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    J. Mainzer
- *              Thursday, June 25, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2342,9 +2268,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    J. Mainzer
- *              Friday, June 26, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2386,9 +2309,6 @@ done:
  *        target FAPL.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    J. Mainzer
- *              Thursday, April 7, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2433,9 +2353,6 @@ done:
  *        version of H5AC_cache_config_t.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    J. Mainzer
- *              Thursday, April 7, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2490,9 +2407,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        June, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2523,9 +2437,6 @@ done:
  *        references property from a file access property list.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              June, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -2558,9 +2469,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              November, 2001
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2590,9 +2498,6 @@ done:
  * Purpose:     Returns the degree for the file close behavior.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              November, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -2633,9 +2538,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 25, 2000
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2666,9 +2568,6 @@ done:
  *      property from a file access property list.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 29, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -2712,9 +2611,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Thursday, September 21, 2000
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2745,9 +2641,6 @@ done:
  *      property from a file access property list.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Thursday, September 21, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -2790,9 +2683,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Wednesday, June 5, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2823,9 +2713,6 @@ done:
  *      allocation property from a file access property list.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Wednesday, June 5, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2951,9 +2838,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Sunday, December 30, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3000,9 +2884,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Thursday, January 3, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3042,9 +2923,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Friday, December 17, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3079,9 +2957,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Friday, December 17, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3113,9 +2988,6 @@ done:
  *              the starting data in a file from a buffer.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jacob Gruber
- *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3211,9 +3083,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Jacob Gruber
- *              Thursday, August 11, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3285,9 +3154,6 @@ done:
  *              and memcpys or to perform detailed logging.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jacob Gruber
- *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3362,9 +3228,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Jacob Gruber
- *              Thursday, August 11, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3419,9 +3282,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3494,9 +3354,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3546,9 +3403,6 @@ done:
  *
  * Return: positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
  *        greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
- *
- * Programmer:     John Mainzer
- *                 June 26, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3603,9 +3457,6 @@ done:
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     John Mainzer
- *                 June 26, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3648,9 +3499,6 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
  *
  * Return:       Success:    Non-negative
  *           Failure:    Negative
- *
- * Programmer:     John Mainzer
- *                 June 26, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3698,9 +3546,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3729,9 +3574,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3764,9 +3606,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Jacob Gruber
- *              Thursday, August 11, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3794,9 +3633,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Jacob Gruber
- *              Thursday, August 11, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3823,9 +3659,6 @@ done:
  * Return:         positive if VALUE1 is greater than VALUE2, negative if
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Thursday, September 3, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3893,9 +3726,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Jacob Gruber
- *              Thursday, August 11, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3920,9 +3750,6 @@ done:
  *
  * Return: positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
  *        greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
- *
- * Programmer:     Mohamad Chaarawi
- *                 September 24, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -4092,9 +3919,6 @@ done:
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 August 09, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4237,9 +4061,6 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 August 09, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4371,9 +4192,6 @@ done:
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4409,9 +4227,6 @@ H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4442,9 +4257,6 @@ H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
  *
  * Return:       Success:    Non-negative
  *           Failure:    Negative
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -4480,9 +4292,6 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4513,8 +4322,6 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
  *
  * Return:       Success:    Non-negative
  *           Failure:    Negative
- *
- * Programmer
  *
  *-------------------------------------------------------------------------
  */
@@ -4550,8 +4357,6 @@ H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4585,8 +4390,6 @@ H5P__facc_libver_type_dec(const void **_pp, void *_value)
  *        case, the # of read attempts will be always be 1.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Vailin Choi; Sept 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -4622,8 +4425,6 @@ done:
  * Purpose:    Returns the # of metadata read attempts set in the file access property list.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Vailin Choi; Sept 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -4663,8 +4464,6 @@ done:
  *        object flush occurs in the file.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Vailin Choi; Dec 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -4706,8 +4505,6 @@ done:
  *        property list for an object flush.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Vailin Choi; Dec 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -5051,9 +4848,6 @@ H5P__facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Spring 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5099,9 +4893,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Spring 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5144,9 +4935,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Spring 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5185,9 +4973,6 @@ done:
  *              problematic file accesses.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Spring 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -5228,9 +5013,6 @@ done:
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Sunday, June 21, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5264,9 +5046,6 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
  *
  * Return:       Success:    Non-negative
  *           Failure:    Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Sunday, June 21, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -5304,9 +5083,6 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
  *          and named datatype access property lists.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Mohamad Chaarawi
- *              Sunday, June 21, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -5357,9 +5133,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Mohamad Chaarawi
- *              Sunday, June 21, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5408,9 +5181,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Mohamad Chaarawi
- *              Sunday, June 21, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5444,9 +5214,6 @@ done:
  * Purpose:     Gets the MPI communicator and info stored in the fapl.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Dana Robinson
- *              August 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -5483,9 +5250,6 @@ done:
  * Purpose:     Set the MPI communicator and info
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Dana Robinson
- *              August 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -5895,9 +5659,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Mohamad Chaarawi
- *              Sunday, June 21, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5933,9 +5694,6 @@ done:
  *              otherwise file create/open will fail.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Mohamad Chaarawi
- *              June 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -5981,9 +5739,6 @@ done:
  * Purpose:    Retrieves the maximum page buffer size.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Mohamad Chaarawi
- *              June 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -6067,9 +5822,6 @@ done:
  *		The reference count on the new VOL will _NOT_ be incremented.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              March 8, 2019
  *
  *-------------------------------------------------------------------------
  */

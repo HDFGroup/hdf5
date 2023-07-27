@@ -37,9 +37,6 @@ static herr_t H5T__enum_valueof(const H5T_t *dt, const char *name, void *value /
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Tuesday, December 22, 1998
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -80,9 +77,6 @@ done:
  *
  *		Failure:        NULL
  *
- * Programmer:	Raymond Lu
- *              October 9, 2002
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -119,9 +113,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, December 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -163,9 +154,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, December 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -226,9 +214,6 @@ done:
  *
  *		Failure:	negative, VALUE memory is undefined.
  *
- * Programmer:	Robb Matzke
- *              Wednesday, December 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -266,9 +251,6 @@ done:
  *
  *		Failure:	negative, VALUE memory is undefined.
  *
- * Programmer:	Raymond Lu
- *              October 9, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -298,9 +280,6 @@ H5T__get_member_value(const H5T_t *dt, unsigned membno, void *value /*out*/)
  *
  *		Failure:	Negative, first character of NAME is set to
  *				null if SIZE allows it.
- *
- * Programmer:	Robb Matzke
- *              Monday, January  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -347,9 +326,6 @@ done:
  * Return:	Success:	Pointer to NAME
  *
  *		Failure:	NULL, name[0] is set to null.
- *
- * Programmer:	Robb Matzke
- *              Monday, January  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -436,9 +412,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Monday, January  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -478,9 +451,6 @@ done:
  * Return:	Success:	Non-negative, value stored in VALUE.
  *
  *		Failure:	Negative, VALUE is undefined.
- *
- * Programmer:	Robb Matzke
- *              Monday, January  4, 1999
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pocpypl.c
- *			Mar 13 2006
- *			Peter Cao
  *
  * Purpose:		Object copying property list class routines
  *
@@ -145,8 +143,6 @@ H5FL_DEFINE(H5O_copy_dtype_merge_list_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -188,9 +184,6 @@ done:
  *
  * Return:      NULL
  *
- * Programmer:  Neil Fortner
- *              October 27, 2011
- *
  *-------------------------------------------------------------------------
  */
 static H5O_copy_dtype_merge_list_t *
@@ -220,9 +213,6 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, September 2, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -287,9 +277,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -318,9 +305,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -352,9 +336,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -409,9 +390,6 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -485,9 +463,6 @@ done:
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, September 2, 2015
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -512,9 +487,6 @@ H5P__ocpy_merge_comm_dt_list_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Friday, August 31, 2012
  *
  *--------------------------------------------------------------------------
  */
@@ -546,9 +518,6 @@ done:
  * Return:         positive if VALUE1 is greater than VALUE2, negative if
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
- *
- * Programmer:     Neil Fortner
- *                 Friday, October 28, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -601,9 +570,6 @@ done:
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 31, 2012
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -636,8 +602,6 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              March 13, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -673,8 +637,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              March 13, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -715,8 +677,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              October 27, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -777,8 +737,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              October 27, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -825,7 +783,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; November 28, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -871,8 +828,6 @@ done:
  *		void **op_data;			OUT: The user data
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; November 29, 2011
  *
  *-------------------------------------------------------------------------
  */

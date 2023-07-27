@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke
- *        Monday, November 10, 1997
- *
  * Purpose:    Implements a family of files that acts as a single hdf5
  *        file.  The purpose is to be able to split a huge file on a
  *        64-bit platform, transfer all the <2GB members to a 32-bit
@@ -278,9 +275,6 @@ done:
  * Return:      Success:    The driver ID for the family driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -305,9 +299,6 @@ H5FD_family_init(void)
  * Purpose:    Shut down the VFD
  *
  * Returns:     Non-negative on success or negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
  *
  *---------------------------------------------------------------------------
  */
@@ -334,9 +325,6 @@ H5FD__family_term(void)
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -384,9 +372,6 @@ done:
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -427,9 +412,6 @@ done:
  *
  *            Failure:    NULL
  *
- * Programmer:    Robb Matzke
- *              Friday, August 13, 1999
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -469,9 +451,6 @@ done:
  * Return:    Success:    Ptr to a new property list
  *
  *            Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -522,9 +501,6 @@ done:
  *
  *            Failure:    -1
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -553,9 +529,6 @@ done:
  *
  *            Failure:    never fails
  *
- * Programmer:    Raymond Lu
- *              Tuesday, May 10, 2005
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -580,9 +553,6 @@ H5FD__family_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
  * Return:    Success:    0
  *
  *            Failure:    -1
- *
- * Programmer:    Raymond Lu
- *              Tuesday, May 10, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -622,9 +592,6 @@ H5FD__family_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*o
  * Return:    Success:    0
  *
  *            Failure:    -1
- *
- * Programmer:    Raymond Lu
- *              Tuesday, May 10, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -676,9 +643,6 @@ done:
  *                caller, which is always H5FD_open().
  *
  *            Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -877,9 +841,6 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
  *                possible. The only subsequent operation
  *                permitted on the file is a close operation.
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -928,9 +889,6 @@ H5FD__family_close(H5FD_t *_file)
  *            Failure:    never fails (arguments were checked by the
  *                caller).
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -958,9 +916,6 @@ H5FD__family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *
  * Return:    Success:    non-negative
  *            Failure:    negative
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 25, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -999,9 +954,6 @@ H5FD__family_query(const H5FD_t *_file, unsigned long *flags /* out */)
  *
  *            Failure:    HADDR_UNDEF
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1022,9 +974,6 @@ H5FD__family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Return:    Success:    0
  *
  *            Failure:    -1
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1117,9 +1066,6 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
  *
  *            Failure:          HADDR_UNDEF
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1167,9 +1113,6 @@ H5FD__family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
  *
  * Returns:        Non-negative if succeed or negative if fails.
  *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1210,9 +1153,6 @@ done:
  *                buffer BUF.
  *
  *            Failure:    -1, contents of buffer BUF are undefined.
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1277,9 +1217,6 @@ done:
  *
  *            Failure:    -1
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1339,9 +1276,6 @@ done:
  * Return:    Success:    0
  *            Failure:    -1, as many files flushed as possible.
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1372,9 +1306,6 @@ done:
  * Return:    Success:    0
  *
  *            Failure:    -1, as many files truncated as possible.
- *
- * Programmer:    Quincey Koziol
- *              Saturday, February 23, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1407,8 +1338,6 @@ done:
  *                      FALSE--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1451,8 +1380,6 @@ done:
  * Purpose:     To remove the existing lock on the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */

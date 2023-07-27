@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	    H5Gnode.c
- *              Jun 26 1997
- *              Robb Matzke
  *
  * Purpose:     Functions for handling symbol table nodes.  A
  *              symbol table node is a small collection of symbol
@@ -130,9 +128,6 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
  *
  *              Failure:	Can't fail
  *
- * Programmer:  Robb Matzke
- *              Wednesday, October  8, 1997
- *
  *-------------------------------------------------------------------------
  */
 static H5UC_t *
@@ -152,9 +147,6 @@ H5G__node_get_shared(const H5F_t *f, const void H5_ATTR_UNUSED *_udata)
  * Purpose:     Decodes a raw key into a native key.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Jul  8 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -181,9 +173,6 @@ H5G__node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Jul  8 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -208,9 +197,6 @@ H5G__node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
  * Purpose:     Prints a key.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Friday, February 28, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -247,9 +233,6 @@ H5G__node_debug_key(FILE *stream, int indent, int fwidth, const void *_key, cons
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Jan 15 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -284,9 +267,6 @@ H5G__node_free(H5G_node_t *sym)
  *                      node is returned through the ADDR_P argument.
  *
  *          Failure:    Negative
- *
- * Programmer:  Robb Matzke
- *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -355,9 +335,6 @@ done:
  *
  *          Failure:    FAIL (same as LT_KEY<RT_KEY)
  *
- * Programmer:  Robb Matzke
- *              Jun 23 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -407,9 +384,6 @@ done:
  *                      RT_KEY (inclusive).
  *
  *          Failure:    FAIL (same as UDATA < LT_KEY)
- *
- * Programmer:  Robb Matzke
- *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -464,9 +438,6 @@ done:
  * Return:      Success:    Non-negative (TRUE/FALSE) if found and data
  *                          returned through the UDATA pointer, if *FOUND is true.
  *              Failure:    Negative if not found.
- *
- * Programmer:  Robb Matzke
- *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -556,9 +527,6 @@ done:
  *                          initialized if the return value is H5B_INS_NOOP.
  *
  *              Failure:    H5B_INS_ERROR, NEW_NODE_P might not be initialized.
- *
- * Programmer:  Robb Matzke
- *              Jun 24 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -717,9 +685,6 @@ done:
  *                      otherwise H5B_INS_NOOP is returned.
  *
  *          Failure:    H5B_INS_ERROR
- *
- * Programmer:  Robb Matzke
- *              Thursday, September 24, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -915,9 +880,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Jun 24 1997
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -994,9 +956,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Nov 20, 2002
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1037,9 +996,6 @@ done:
  *
  * Return:      0 if object isn't found in this node; 1 if object is found;
  *              Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Nov 20, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1098,9 +1054,6 @@ done:
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Jul  5, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1142,9 +1095,6 @@ done:
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Jul  5, 2004
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -1170,9 +1120,6 @@ H5G_node_close(const H5F_t *f)
  *              to copy objects of this node into a new location.
  *
  * Return:      0(zero) on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Sept 10, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1330,9 +1277,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Nov 19 2006
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1406,9 +1350,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              Jun 19 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1435,9 +1376,6 @@ H5G__node_iterate_size(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t H5_
  *              or a B-tree node for a symbol table B-tree.
  *
  * Return:      0(zero) on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Aug  4 1997
  *
  *-------------------------------------------------------------------------
  */

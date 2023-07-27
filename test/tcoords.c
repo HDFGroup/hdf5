@@ -710,9 +710,6 @@ test_coords(void)
  *
  * Return:	none
  *
- * Programmer:	Raymond Lu
- *              20 Dec. 2007
- *
  *-------------------------------------------------------------------------
  */
 void

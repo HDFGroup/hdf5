@@ -25,9 +25,6 @@
  * Connect to remote host, send and receive HTTP requests and responses
  * as part of the AWS REST API, authenticating requests as appropriate.
  *
- * Programmer: Jacob Smith
- *             2017-11-30
- *
  *****************************************************************************/
 
 /****************/
@@ -128,9 +125,6 @@ herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
  *         - Should equal number of bytes passed to callback.
  *         - Failure will result in curl error: CURLE_WRITE_ERROR.
  *
- * Programmer: Jacob Smith
- *             2017-08-17
- *
  *----------------------------------------------------------------------------
  */
 size_t
@@ -199,9 +193,6 @@ curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata)
  *         - Unable to perform operation
  *             - Forbidden (attempting to remove absent node, e.g.)
  *             - Internal error
- *
- * Programmer: Jacob Smith
- *             2017-09-22
  *
  *----------------------------------------------------------------------------
  */
@@ -595,9 +586,6 @@ done:
  *     - FAILURE: `FAIL`
  *         - `buf->magic != S3COMMS_HRB_MAGIC`
  *
- * Programmer: Jacob Smith
- *             2017-07-21
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -652,9 +640,6 @@ done:
  *
  *     - SUCCESS: pointer to new `hrb_t`
  *     - FAILURE: `NULL`
- *
- * Programmer: Jacob Smith
- *             2017-07-21
  *
  *----------------------------------------------------------------------------
  */
@@ -767,9 +752,6 @@ done:
  *         - fails if handle is null or has invalid magic number
  *
  *
- * Programmer: Jacob Smith
- *             2017-08-31
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -822,8 +804,6 @@ done:
  *     - SUCCESS: size of file, in bytes, if handle is valid.
  *     - FAILURE: 0, if handle is NULL or undefined.
  *
- * Programmer: Jacob Smith 2017-01-14
- *
  *----------------------------------------------------------------------------
  */
 size_t
@@ -865,9 +845,6 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
  *
  *     - SUCCESS: `SUCCEED`
  *     - FAILURE: `FAIL`
- *
- * Programmer: Jacob Smith
- *             2017-08-23
  *
  *----------------------------------------------------------------------------
  */
@@ -1016,9 +993,6 @@ done:
  *             - url is NULL (no filename)
  *             - unable to parse url (malformed?)
  *             - error while performing `getsize()`
- *
- * Programmer: Jacob Smith
- *             2017-09-01
  *
  *----------------------------------------------------------------------------
  */
@@ -1196,9 +1170,6 @@ done:
  *
  *     - SUCCESS: `SUCCEED`
  *     - FAILURE: `FAIL`
- *
- * Programmer: Jacob Smith
- *             2017-08-22
  *
  *----------------------------------------------------------------------------
  */
@@ -1546,9 +1517,6 @@ done:
  *
  *    Pointer to resulting `struct tm`,as created by gmtime(time_t * T).
  *
- * Programmer: Jacob Smith
- *             2017-07-12
- *
  *----------------------------------------------------------------------------
  */
 struct tm *
@@ -1600,9 +1568,6 @@ gmnow(void)
  *     - FAILURE: `FAIL`
  *         - one or more input argument was NULL
  *         - internal error
- *
- * Programmer: Jacob Smith
- *             2017-10-04
  *
  *----------------------------------------------------------------------------
  */
@@ -1727,9 +1692,6 @@ done:
  *         - `dest == NULL`
  *         - `msg == NULL`
  *
- * Programmer: Jacob Smith
- *             2017-07-12
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -1773,9 +1735,6 @@ done:
  * Return:
  *
  *     `SUCCEED` (never fails)
- *
- * Programmer: Jacob Smith
- *             2017-11-01
  *
  *----------------------------------------------------------------------------
  */
@@ -1831,9 +1790,6 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
  *     - FAILURE: `FAIL`
  *         - `dest == NULL`
  *         - error while generating hex string output
- *
- * Programmer: Jacob Smith
- *             2017-07-??
  *
  *----------------------------------------------------------------------------
  */
@@ -1906,9 +1862,6 @@ done:
  *         + -1 :: unable to format profile label
  *         + -2 :: profile name/label not found in file
  *         + -3 :: some other error
- *
- * Programmer: Jacob Smith
- *             2018-02-27
  *
  *-----------------------------------------------------------------------------
  */
@@ -2040,9 +1993,6 @@ done:
  *         + unable to locate profile
  *         + region, key id, and secret key were not all found and set
  *
- * Programmer: Jacob Smith
- *             2018-02-27
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2130,9 +2080,6 @@ done:
  *     - FAILURE: `FAIL`
  *         - `dest == NULL`
  *
- * Programmer: Jacob Smith
- *             2017-09-18
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2186,9 +2133,6 @@ done:
  *     - FAILURE: `FAIL`
  *         - unable to parse
  *             - `purl` is unaltered (probably NULL)
- *
- * Programmer: Jacob Smith
- *             2017-10-30
  *
  *----------------------------------------------------------------------------
  */
@@ -2404,8 +2348,6 @@ done:
  *     - FAILURE: `FAIL`
  *         - `c` or `repr` was NULL
  *
- * Programmer: Jacob Smith
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2551,9 +2493,6 @@ done:
  *     - FAILURE: `FAIL`
  *         - if any input arguments was NULL
  *
- * Programmer: Jacob Smith
- *             2017-07-13
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2641,9 +2580,6 @@ done:
  *     - FAILURE: `FAIL`
  *         - if any of the inputs are NULL
  *         - if an error is encountered while computing checksum
- *
- * Programmer: Jacob Smith
- *             2017-07-??
  *
  *----------------------------------------------------------------------------
  */
@@ -2736,9 +2672,6 @@ done:
  *     - FAILURE: `FAIL`
  *         - `dest == NULL`
  *
- * Programmer: Jacob Smith
- *             2017-09-18
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2819,9 +2752,6 @@ done:
  *     - FAILURE: `FAIL`
  *         - source strings `s` or destination `dest` are NULL
  *         - error while attempting to percent-encode a character
- *
- * Programmer: Jacob Smith
- *             2017-07-??
  *
  *----------------------------------------------------------------------------
  */

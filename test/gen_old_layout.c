@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Thursday, May 27, 2004
- *
  * Purpose:	Create two datasets (one for version 1 and one for version 2 of
  *      the layout message), which should have dimensions too large to
  *      represent in version 1 & 2 of the storage layout message.
@@ -41,9 +38,6 @@
  * Return:	Success:
  *
  *		Failure:
- *
- * Programmer:	Quincey Koziol
- *              Friday, January  3, 2003
  *
  *-------------------------------------------------------------------------
  */

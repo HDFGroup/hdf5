@@ -292,8 +292,6 @@ static const H5O_layout_t H5D_def_layout_virtual_g = H5D_DEF_LAYOUT_VIRTUAL;
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -349,9 +347,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -385,9 +380,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -424,9 +416,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -559,9 +548,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -757,9 +743,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Neil Fortner
- *              Tuesday, Feb 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -788,9 +771,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Neil Fortner
- *              Monday, Feb 9, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -826,9 +806,6 @@ done:
  * Return:         positive if VALUE1 is greater than VALUE2, negative if
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Tuesday, December 23, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -957,9 +934,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Neil Fortner
- *              Tuesday, Feb 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -987,9 +961,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1024,9 +995,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1063,9 +1031,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1158,9 +1123,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1222,9 +1184,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Neil Fortner
- *              Thursday, Feb 26, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1253,9 +1212,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Neil Fortner
- *              Thursday, Feb 26, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -1290,9 +1246,6 @@ done:
  * Return:         positive if VALUE1 is greater than VALUE2, negative if
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, January 7, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1359,9 +1312,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Neil Fortner
- *              Thursday, Feb 26, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1389,9 +1339,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1426,9 +1373,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1465,9 +1409,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1551,9 +1492,6 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1636,9 +1574,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Neil Fortner
- *              Thursday, Feb 26, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1667,9 +1602,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Neil Fortner
- *              Thursday, Feb 26, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -1705,9 +1637,6 @@ done:
  * Return:         positive if VALUE1 is greater than VALUE2, negative if
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, January 7, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1789,9 +1718,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Neil Fortner
- *              Thursday, Feb 26, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1818,9 +1744,6 @@ done:
  * Purpose:   Sets the layout of raw data in the file.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 23, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1885,9 +1808,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Tuesday, January  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1949,9 +1869,6 @@ done:
  *
  *		Failure:	H5D_LAYOUT_ERROR (negative)
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
@@ -1990,9 +1907,6 @@ done:
  *		H5D_CHUNKED.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Tuesday, January  6, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2056,9 +1970,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2110,9 +2021,6 @@ done:
  *              H5D_VIRTUAL.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Friday, February  13, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2285,9 +2193,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Friday, February  13, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2329,9 +2234,6 @@ done:
  *
  * Return:      Returns a dataspace identifier if successful; otherwise
  *              returns a negative value.
- *
- * Programmer:  Neil Fortner
- *              Friday, February  13, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2386,9 +2288,6 @@ done:
  *
  * Return:      Returns a dataspace identifier if successful; otherwise
  *              returns a negative value.
- *
- * Programmer:  Neil Fortner
- *              Saturday, February  14, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2491,9 +2390,6 @@ done:
  * Return:      Returns the length of the name if successful, otherwise
  *              returns a negative value.
  *
- * Programmer:  Neil Fortner
- *              Saturday, February  14, 2015
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -2552,9 +2448,6 @@ done:
  * Return:      Returns the length of the name if successful, otherwise
  *              returns a negative value.
  *
- * Programmer:  Neil Fortner
- *              Saturday, February  14, 2015
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -2597,9 +2490,6 @@ done:
  *              The storage must already be set to chunked.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Thursday, January 21, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2654,9 +2544,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Friday, January 22, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2708,9 +2595,6 @@ done:
  *		the extending).
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Tuesday, March	3, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2782,9 +2666,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Tuesday, March  3, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2830,9 +2711,6 @@ done:
  * See Also:	H5Pset_external()
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, March  3, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2889,9 +2767,6 @@ done:
  *              for scientific data.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Kent Yang
- *              Tuesday, April 1, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2959,9 +2834,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Kent Yang
- *              Wednesday, November 13, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3000,9 +2872,6 @@ done:
  * Purpose:     Sets nbit filter for a dataset creation property list
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Xiaowen Wu
- *              Wednesday, December 22, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -3058,9 +2927,6 @@ done:
                               other values, for integer datatype
 
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Xiaowen Wu
- *              Thursday, April 14, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3122,9 +2988,6 @@ done:
  *		undefining fill value.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -3212,9 +3075,6 @@ done:
  *		specified TYPE.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, October 17, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -3306,9 +3166,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3345,9 +3202,6 @@ done:
  * Purpose:	Check if fill value is defined.  Internal version of function
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Wednesday, January 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -3386,9 +3240,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, October 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3419,9 +3270,6 @@ done:
  * Purpose:	Check if fill value is defined.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Wednesday, January 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -3456,9 +3304,6 @@ done:
  *			H5D_ALLOC_TIME_LATE, H5D_ALLOC_TIME_INCR
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- * 		Wednesday, January 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -3546,9 +3391,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Wednesday, January 16, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3587,9 +3429,6 @@ done:
  *		H5D_FILL_TIME_ALLOC and H5D_FILL_TIME_NEVER.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Wednesday, January 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -3633,9 +3472,6 @@ done:
  *		and H5D_ALLOC.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Wednesday, January 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -3681,9 +3517,6 @@ done:
  *     Failure: Negative value (FAIL)
  *     Success: Non-negative value (SUCCEED)
  *
- * Programmer: Jacob Smith
- *             2018 August 14
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -3724,9 +3557,6 @@ done:
  *
  *     Failure: Negative value (FAIL)
  *     Success: Non-negative value (SUCCEED)
- *
- * Programmer: Jacob Smith
- *             2018 August 14
  *
  *-----------------------------------------------------------------------------
  */

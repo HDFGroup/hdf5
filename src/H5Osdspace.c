@@ -391,9 +391,6 @@ H5O__sdspace_size(const H5F_t *f, const void *_mesg)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Thursday, April 30, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -414,9 +411,6 @@ H5O__sdspace_reset(void *_mesg)
  * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 30, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -441,9 +435,6 @@ H5O__sdspace_free(void *mesg)
  * Return:      Success:        Non-negative
  *
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              November 30, 2006
  *
  *-------------------------------------------------------------------------
  */

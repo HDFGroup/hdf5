@@ -97,9 +97,6 @@ H5FL_DEFINE_STATIC(H5AC_proxy_entry_t);
  * Return:	Success:	Pointer to the new proxy entry object.
  *		Failure:	NULL
  *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
  *-------------------------------------------------------------------------
  */
 H5AC_proxy_entry_t *
@@ -135,9 +132,6 @@ done:
  * Purpose:     Add a parent to a proxy entry
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -182,9 +176,6 @@ done:
  * Purpose:     Removes a parent from a proxy entry
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -236,9 +227,6 @@ done:
  * Return:	Success:	Non-negative on success
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Thursday, September 22, 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -265,9 +253,6 @@ done:
  * Purpose:     Add a child a proxy entry
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -329,9 +314,6 @@ done:
  * Return:	Success:	Non-negative on success
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Thursday, September 22, 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -358,9 +340,6 @@ done:
  * Purpose:     Remove a child a proxy entry
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -410,9 +389,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -442,9 +418,6 @@ H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -470,9 +443,6 @@ H5AC__proxy_entry_image_len(const void H5_ATTR_UNUSED *thing, size_t *image_len)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -495,9 +465,6 @@ H5AC__proxy_entry_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *
  * Purpose:     Handle cache action notifications
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -619,9 +586,6 @@ done:
  *              structure
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
  *
  *-------------------------------------------------------------------------
  */

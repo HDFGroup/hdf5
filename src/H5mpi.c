@@ -43,8 +43,6 @@ static hsize_t bigio_count_g = H5_MAX_MPI_COUNT;
  *
  * Return:    The current/previous value of bigio_count_g.
  *
- * Programmer: Richard Warren,  March 10, 2017
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -65,8 +63,6 @@ H5_mpi_set_bigio_count(hsize_t new_count)
  *            the current value for bigio_count_g.
  *
  * Return:    The current/previous value of bigio_count_g.
- *
- * Programmer: Richard Warren,  October 7, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -450,8 +446,6 @@ done:
  *
  *              *new_type    the new datatype created
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -793,8 +787,6 @@ done:
  *              to all ranks.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Houjun Tang,  April 7, 2022
  *
  *-------------------------------------------------------------------------
  */

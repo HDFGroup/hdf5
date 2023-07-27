@@ -218,8 +218,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -262,8 +260,6 @@ H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -300,8 +296,6 @@ done:
  * Return:      Success:        Message data size in bytes without alignment.
  *              Failure:        zero
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -332,8 +326,6 @@ H5O__fsinfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -354,8 +346,6 @@ H5O__fsinfo_free(void *mesg)
  * Purpose:     Prints debugging info for a message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; Feb 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -428,8 +418,6 @@ H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; June 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -467,9 +455,6 @@ done:
  * Purpose:     Validate the fsinfo message version
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Summer 2019
  *
  *-------------------------------------------------------------------------
  */

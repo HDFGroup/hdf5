@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAcache.c
- *			Aug 26 2008
- *			Quincey Koziol
  *
  * Purpose:		Implement extensible array metadata cache methods.
  *
@@ -215,9 +213,6 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 16, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -246,8 +241,6 @@ H5EA__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -280,9 +273,6 @@ H5EA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              July 16, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -407,9 +397,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 16, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -435,9 +422,6 @@ H5EA__cache_hdr_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 16, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -506,9 +490,6 @@ H5EA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *              11/30/15
  *
  *-------------------------------------------------------------------------
  */
@@ -588,9 +569,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 16, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -617,9 +595,6 @@ done:
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -657,8 +632,6 @@ H5EA__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
  *
- * Programmer:	Vailin Choi; Aug 2015
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -690,9 +663,6 @@ H5EA__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -798,9 +768,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -826,9 +793,6 @@ H5EA__cache_iblock_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -913,9 +877,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -989,9 +950,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1018,9 +976,6 @@ done:
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1077,8 +1032,6 @@ H5EA__cache_sblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
  *
- * Programmer:	Vailin Choi; Aug 2015
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -1110,9 +1063,6 @@ H5EA__cache_sblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1215,9 +1165,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1243,9 +1190,6 @@ H5EA__cache_sblock_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1316,9 +1260,6 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1414,9 +1355,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1443,9 +1381,6 @@ done:
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1503,8 +1438,6 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
  *
- * Programmer:	Vailin Choi; Aug 2015
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -1536,9 +1469,6 @@ H5EA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1641,9 +1571,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1672,9 +1599,6 @@ H5EA__cache_dblock_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1742,9 +1666,6 @@ done:
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1839,9 +1760,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1886,9 +1804,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              12/5/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1915,9 +1830,6 @@ H5EA__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1947,8 +1859,6 @@ H5EA__cache_dblk_page_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1981,9 +1891,6 @@ H5EA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2055,9 +1962,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2083,9 +1987,6 @@ H5EA__cache_dblk_page_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2135,9 +2036,6 @@ done:
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -2232,9 +2130,6 @@ done:
  *              structure
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 17, 2013
  *
  *-------------------------------------------------------------------------
  */

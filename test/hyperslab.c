@@ -10,14 +10,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke
- *        Friday, October 10, 1997
- *
- * Purpose:    Hyperslab operations are rather complex, so this file
- *        attempts to test them extensively so we can be relatively
- *        sure they really work.    We only test 1d, 2d, and 3d cases
- *        because testing general dimensionalities would require us to
- *        rewrite much of the hyperslab stuff.
+/*
+ * Purpose: Hyperslab operations are rather complex, so this file
+ *          attempts to test them extensively so we can be relatively
+ *          sure they really work.    We only test 1d, 2d, and 3d cases
+ *          because testing general dimensionalities would require us to
+ *          rewrite much of the hyperslab stuff.
  */
 #include "h5test.h"
 #include "H5VMprivate.h"
@@ -38,9 +36,6 @@
  * Purpose:    Initialize full array.
  *
  * Return:    void
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -69,9 +64,6 @@ init_full(uint8_t *array, size_t nx, size_t ny, size_t nz)
  * Purpose:    Prints the values in an array
  *
  * Return:    void
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -107,9 +99,6 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
  *
  *        Failure:
  *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -133,9 +122,6 @@ print_ref(size_t nx, size_t ny, size_t nz)
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -288,9 +274,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -554,9 +537,6 @@ error:
  *
  *        Failure:    FAIL
  *
- * Programmer:    Robb Matzke
- *        Saturday, October 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -670,9 +650,6 @@ error:
  *
  *        Failure:    FAIL
  *
- * Programmer:    Robb Matzke
- *        Saturday, October 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -754,9 +731,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -851,9 +825,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Monday, October 13, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1001,9 +972,6 @@ error:
  *
  *        Failure:    FAIL
  *
- * Programmer:    Quincey Koziol
- *        Monday, April 21, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1060,9 +1028,6 @@ error:
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Quincey Koziol
- *        Monday, April 21, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1144,9 +1109,6 @@ error:
  *              is assumed.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */

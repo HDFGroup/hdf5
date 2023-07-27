@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5checksum.c
- *			Aug 21 2006
- *			Quincey Koziol
  *
  * Purpose:		Internal code for computing fletcher32 checksums
  *
@@ -91,9 +89,6 @@ static hbool_t H5_crc_table_computed = FALSE;
  *
  * Return:	32-bit fletcher checksum of input buffer (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Monday, August 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 uint32_t
@@ -147,9 +142,6 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
  *
  * Return:	none
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -185,9 +177,6 @@ H5__checksum_crc_make_table(void)
  *
  * Return:	32-bit CRC checksum of input buffer (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static uint32_t
@@ -219,9 +208,6 @@ H5__checksum_crc_update(uint32_t crc, const uint8_t *buf, size_t len)
  *                  http://www.w3.org/TR/PNG/#D-CRCAppendix
  *
  * Return:	32-bit CRC checksum of input buffer (can't fail)
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, September  5, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -480,9 +466,6 @@ done:
  *
  * Return:	checksum of input buffer (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 uint32_t
@@ -508,9 +491,6 @@ H5_checksum_metadata(const void *data, size_t len, uint32_t initval)
  *              http://www.cse.yorku.ca/~oz/hash.html
  *
  * Return:	hash of input string (can't fail)
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, December 11, 2007
  *
  *-------------------------------------------------------------------------
  */

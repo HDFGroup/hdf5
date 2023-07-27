@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFdtable.c
- *			Apr 10 2006
- *			Quincey Koziol
  *
  * Purpose:		"Doubling table" routines for fractal heaps.
  *
@@ -70,9 +68,6 @@
  * Purpose:	Initialize values for doubling table
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -134,9 +129,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar  6 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -174,9 +166,6 @@ H5HF__dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, uns
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar 27 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -211,9 +200,6 @@ H5HF__dtable_dest(H5HF_dtable_t *dtable)
  *
  * Return:	Non-negative on success (can't fail)
  *
- * Programmer:	Quincey Koziol
- *		Apr 25 2006
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -245,9 +231,6 @@ H5HF__dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
  *
  * Return:	Non-negative on success (can't fail)
  *
- * Programmer:	Quincey Koziol
- *		May 31 2006
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -273,9 +256,6 @@ H5HF__dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
  * Purpose:	Compute the size covered by a span of entries
  *
  * Return:	Non-zero span size on success/zero on failure
- *
- * Programmer:	Quincey Koziol
- *		July 25 2006
  *
  *-------------------------------------------------------------------------
  */

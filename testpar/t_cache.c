@@ -473,8 +473,6 @@ static hbool_t trace_file_check(int metadata_write_strategy);
  *
  * Return:      void
  *
- * Programmer:  JRM -- 4/17/06
- *
  *****************************************************************************/
 
 static void
@@ -500,8 +498,6 @@ print_stats(void)
  * Purpose:    Reset the rudementary stats maintained by t_cache.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 4/17/06
  *
  *****************************************************************************/
 
@@ -536,8 +532,6 @@ reset_stats(void)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 11/16/05
  *
  *****************************************************************************/
 
@@ -682,8 +676,6 @@ set_up_file_communicator(void)
  *
  *        Failure:    -1.
  *
- * Programmer:    JRM -- 12/20/05
- *
  *****************************************************************************/
 static int
 addr_to_datum_index(haddr_t base_addr)
@@ -725,8 +717,6 @@ addr_to_datum_index(haddr_t base_addr)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 12/20/05
  *
  *****************************************************************************/
 static void
@@ -803,8 +793,6 @@ init_data(void)
  *
  *        Failure:    -1
  *
- * Programmer:    JRM -- 4/25/06
- *
  *****************************************************************************/
 static int
 do_express_test(void)
@@ -844,8 +832,6 @@ do_express_test(void)
  *         Do nothing if nerrors is greater than zero.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 5/10/06
  *
  *****************************************************************************/
 static void
@@ -911,8 +897,6 @@ do_sync(void)
  *
  *        Failure:    -1
  *
- * Programmer:    JRM -- 1/3/06
- *
  *****************************************************************************/
 static int
 get_max_nerrors(void)
@@ -949,9 +933,6 @@ get_max_nerrors(void)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 12/22/05
- *
  *
  *****************************************************************************/
 
@@ -1025,8 +1006,6 @@ recv_mssg(struct mssg_t *mssg_ptr, int mssg_tag_offset)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 12/22/05
- *
  *****************************************************************************/
 static hbool_t
 send_mssg(struct mssg_t *mssg_ptr, hbool_t add_req_to_tag)
@@ -1082,8 +1061,6 @@ send_mssg(struct mssg_t *mssg_ptr, hbool_t add_req_to_tag)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 12/22/05
  *
  *****************************************************************************/
 static hbool_t
@@ -1168,8 +1145,6 @@ setup_derived_types(void)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 12/22/05
- *
  *****************************************************************************/
 static hbool_t
 takedown_derived_types(void)
@@ -1209,8 +1184,6 @@ takedown_derived_types(void)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 5/5/10
  *
  *****************************************************************************/
 static hbool_t
@@ -1276,8 +1249,6 @@ reset_server_counters(void)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 12/22/05
  *
  *****************************************************************************/
 static hbool_t
@@ -1418,8 +1389,6 @@ server_main(void)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 12/22/05
- *
  *****************************************************************************/
 static hbool_t
 serve_read_request(struct mssg_t *mssg_ptr)
@@ -1536,8 +1505,6 @@ serve_read_request(struct mssg_t *mssg_ptr)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/10/06
- *
  *****************************************************************************/
 static hbool_t
 serve_sync_request(struct mssg_t *mssg_ptr)
@@ -1604,8 +1571,6 @@ serve_sync_request(struct mssg_t *mssg_ptr)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 12/21/05
  *
  *****************************************************************************/
 static hbool_t
@@ -1735,8 +1700,6 @@ serve_write_request(struct mssg_t *mssg_ptr)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/5/10
- *
  *****************************************************************************/
 static hbool_t
 serve_total_writes_request(struct mssg_t *mssg_ptr)
@@ -1805,8 +1768,6 @@ serve_total_writes_request(struct mssg_t *mssg_ptr)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/5/10
- *
  *****************************************************************************/
 static hbool_t
 serve_total_reads_request(struct mssg_t *mssg_ptr)
@@ -1874,8 +1835,6 @@ serve_total_reads_request(struct mssg_t *mssg_ptr)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 5/5/10
  *
  *****************************************************************************/
 static hbool_t
@@ -1964,8 +1923,6 @@ serve_entry_writes_request(struct mssg_t *mssg_ptr)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/5/10
- *
  *****************************************************************************/
 static hbool_t
 serve_entry_reads_request(struct mssg_t *mssg_ptr)
@@ -2052,8 +2009,6 @@ serve_entry_reads_request(struct mssg_t *mssg_ptr)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/5/10
- *
  *****************************************************************************/
 static hbool_t
 serve_rw_count_reset_request(struct mssg_t *mssg_ptr)
@@ -2122,9 +2077,6 @@ serve_rw_count_reset_request(struct mssg_t *mssg_ptr)
  *
  * Return:    SUCCEED
  *
- * Programmer:    Quincey Koziol
- *              5/18/10
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2168,9 +2120,6 @@ datum_get_initial_load_size(void *udata_ptr, size_t *image_len_ptr)
  * Purpose:    deserialize the entry.
  *
  * Return:    void * (pointer to the in core representation of the entry)
- *
- * Programmer:    John Mainzer
- *              9/20/07
  *
  *-------------------------------------------------------------------------
  */
@@ -2227,9 +2176,6 @@ datum_deserialize(const void H5_ATTR_NDEBUG_UNUSED *image_ptr, H5_ATTR_UNUSED si
  *
  * Return:    SUCCEED
  *
- * Programmer:    John Mainzer
- *              9/19/07
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2271,9 +2217,6 @@ datum_image_len(const void *thing, size_t *image_len)
  * Purpose:    Serialize the supplied entry.
  *
  * Return:    SUCCEED if successful, FAIL otherwise.
- *
- * Programmer:    John Mainzer
- *              10/30/07
  *
  *-------------------------------------------------------------------------
  */
@@ -2341,9 +2284,6 @@ datum_serialize(const H5F_t *f, void H5_ATTR_NDEBUG_UNUSED *image_ptr, size_t le
  *        flush and load callbacks in the version 2 cache.
  *
  * Return:    SUCCEED
- *
- * Programmer:    John Mainzer
- *              1/12/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2720,9 +2660,6 @@ datum_notify(H5C_notify_action_t action, void *thing)
  *
  * Return:    SUCCEED
  *
- * Programmer:    John Mainzer
- *              9/19/07
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2775,9 +2712,6 @@ datum_free_icr(void *thing)
  *        Do nothing if nerrors is non-zero on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              07/11/06
  *
  *****************************************************************************/
 static void
@@ -2846,9 +2780,6 @@ expunge_entry(H5F_t *file_ptr, int32_t idx)
  *        Do nothing if nerrors is non-zero on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              01/04/06
  *
  *****************************************************************************/
 static void
@@ -2939,9 +2870,6 @@ insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              4/12/06
- *
  *****************************************************************************/
 static void
 local_pin_and_unpin_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, int min_count, int max_count)
@@ -3002,9 +2930,6 @@ local_pin_and_unpin_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, in
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              4/12/06
- *
  *****************************************************************************/
 static void
 local_pin_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
@@ -3041,9 +2966,6 @@ local_pin_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              4/12/06
- *
  *****************************************************************************/
 static void
 local_unpin_all_entries(H5F_t *file_ptr, hbool_t via_unprotect)
@@ -3077,9 +2999,6 @@ local_unpin_all_entries(H5F_t *file_ptr, hbool_t via_unprotect)
  * Return:      Index of the unpinned entry if there is one, or -1 if
  *              nerrors is non-zero on entry, or if there is no locally
  *              pinned entry.
- *
- * Programmer:  John Mainzer
- *              4/12/06
  *
  *****************************************************************************/
 static int
@@ -3130,9 +3049,6 @@ local_unpin_next_pinned_entry(H5F_t *file_ptr, int start_idx, hbool_t via_unprot
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/12/06
- *
  *****************************************************************************/
 static void
 lock_and_unlock_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, int min_count, int max_count)
@@ -3170,9 +3086,6 @@ lock_and_unlock_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, int mi
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/4/06
- *
  *****************************************************************************/
 static void
 lock_and_unlock_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
@@ -3208,9 +3121,6 @@ lock_and_unlock_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
  *              Do nothing if nerrors is non-zero on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              1/4/06
  *
  *****************************************************************************/
 static void
@@ -3262,9 +3172,6 @@ lock_entry(H5F_t *file_ptr, int32_t idx)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              4/14/06
- *
  *****************************************************************************/
 static void
 mark_entry_dirty(int32_t idx)
@@ -3311,9 +3218,6 @@ mark_entry_dirty(int32_t idx)
  *              Do nothing if nerrors is non-zero on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/11/06
  *
  *****************************************************************************/
 static void
@@ -3373,9 +3277,6 @@ pin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty)
  *        Do nothing if nerrors is non-zero on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              01/04/06
  *
  *****************************************************************************/
 static void
@@ -3437,9 +3338,6 @@ pin_protected_entry(int32_t idx, hbool_t global)
  *        new_idx.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              1/10/06
  *
  *****************************************************************************/
 static void
@@ -3555,8 +3453,6 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/6/10
- *
  *****************************************************************************/
 static hbool_t
 reset_server_counts(void)
@@ -3625,9 +3521,6 @@ reset_server_counts(void)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/11/06
- *
  *****************************************************************************/
 static void
 resize_entry(int32_t idx, size_t new_size)
@@ -3693,8 +3586,6 @@ resize_entry(int32_t idx, size_t new_size)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 1/4/06
  *
  *****************************************************************************/
 static hbool_t
@@ -3946,8 +3837,6 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
  *
  * Return:    void.
  *
- * Programmer:    JRM -- 5/9/10
- *
  *****************************************************************************/
 static void
 verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
@@ -4048,8 +3937,6 @@ verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
  *
  * Return:    void.
  *
- * Programmer:    JRM -- 1/12/06
- *
  *****************************************************************************/
 static void
 setup_rand(void)
@@ -4105,8 +3992,6 @@ setup_rand(void)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 1/4/06
  *
  *****************************************************************************/
 static hbool_t
@@ -4197,9 +4082,6 @@ take_down_cache(hid_t fid, H5C_t *cache_ptr)
  *        Return FALSE and flag an error otherwise.
  *
  * Return:      TRUE if successful, FALSE otherwise.
- *
- * Programmer:  John Mainzer
- *              5/6/10
  *
  *-------------------------------------------------------------------------
  */
@@ -4294,9 +4176,6 @@ verify_entry_reads(haddr_t addr, int expected_entry_reads)
  *        Return FALSE and flag an error otherwise.
  *
  * Return:      TRUE if successful, FALSE otherwise.
- *
- * Programmer:  John Mainzer
- *              5/6/10
  *
  *-------------------------------------------------------------------------
  */
@@ -4393,8 +4272,6 @@ verify_entry_writes(haddr_t addr, int expected_entry_writes)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/6/10
- *
  *****************************************************************************/
 static hbool_t
 verify_total_reads(int expected_total_reads)
@@ -4485,8 +4362,6 @@ verify_total_reads(int expected_total_reads)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/6/10
- *
  *****************************************************************************/
 static hbool_t
 verify_total_writes(unsigned expected_total_writes)
@@ -4570,9 +4445,6 @@ verify_total_writes(unsigned expected_total_writes)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/4/06
- *
  *****************************************************************************/
 static void
 unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
@@ -4639,9 +4511,6 @@ unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
  *              Do nothing if nerrors is non-zero on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/12/06
  *
  *****************************************************************************/
 static void
@@ -4722,8 +4591,6 @@ unpin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty, hbool_t
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 12/21/05
  *
  *****************************************************************************/
 static hbool_t
@@ -5050,8 +4917,6 @@ server_smoke_check(void)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 1/4/06
- *
  *****************************************************************************/
 static hbool_t
 smoke_check_1(int metadata_write_strategy)
@@ -5213,8 +5078,6 @@ smoke_check_1(int metadata_write_strategy)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 1/12/06
  *
  *****************************************************************************/
 static hbool_t
@@ -5414,8 +5277,6 @@ smoke_check_2(int metadata_write_strategy)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 1/13/06
  *
  *****************************************************************************/
 static hbool_t
@@ -5700,8 +5561,6 @@ smoke_check_3(int metadata_write_strategy)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 1/13/06
- *
  *****************************************************************************/
 static hbool_t
 smoke_check_4(int metadata_write_strategy)
@@ -5979,8 +5838,6 @@ smoke_check_4(int metadata_write_strategy)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 5/18/06
- *
  *****************************************************************************/
 static hbool_t
 smoke_check_5(int metadata_write_strategy)
@@ -6193,8 +6050,6 @@ smoke_check_5(int metadata_write_strategy)
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
- *
- * Programmer:    JRM -- 6/13/06
  *
  *****************************************************************************/
 static hbool_t
@@ -6569,8 +6424,6 @@ trace_file_check(int metadata_write_strategy)
  *
  *        Failure:    FALSE
  *
- * Programmer:    JRM -- 1/13/06
- *
  *****************************************************************************/
 static hbool_t
 smoke_check_6(int metadata_write_strategy)
@@ -6823,8 +6676,6 @@ smoke_check_6(int metadata_write_strategy)
  * Return:    Success:    0
  *
  *        Failure:    1
- *
- * Programmer:    JRM -- 12/23/05
  *
  *****************************************************************************/
 int

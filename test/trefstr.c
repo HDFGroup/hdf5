@@ -22,12 +22,6 @@
    BUGS/LIMITATIONS
 
    EXPORTED ROUTINES
-
-   AUTHOR
-       Quincey Koziol
-
-   MODIFICATION HISTORY
-       12/17/02 - Started coding
  */
 
 #include "testhdf5.h"

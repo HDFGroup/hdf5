@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Richard Warren
- *
- *
  * Purpose: An initial implementation of a subfiling VFD which is
  *          derived from other "stacked" VFDs such as the splitter,
  *          mirror, and family VFDs.
@@ -84,8 +81,6 @@ static hbool_t H5FD_mpi_self_initialized = FALSE;
  *  Recall that the existing fields are inherited from the sec2 driver
  *  and should be kept or not as appropriate for the sub-filing VFD.
  *
- *
- * Programmer: Richard Warren
  *
  ***************************************************************************/
 
@@ -283,8 +278,6 @@ H5FD__subfiling_mpi_finalize(void)
  * Return:      Success:    The driver ID for the subfiling driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -443,9 +436,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  John Mainzer
- *              9/10/17
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -529,9 +519,6 @@ done:
  *              property list though the function arguments.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              9/10/17
  *
  *-------------------------------------------------------------------------
  */
@@ -957,9 +944,6 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  John Mainzer
- *              9/8/17
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1038,9 +1022,6 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  John Mainzer
- *              9/8/17
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1080,9 +1061,6 @@ done:
  *
  * Return:      SUCCEED (cannot fail)
  *
- * Programmer:  John Mainzer
- *              9/8/17
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1111,8 +1089,6 @@ H5FD__subfiling_fapl_free(void *_fa)
  *                          public fields will be initialized by the
  *                          caller, which is always H5FD_open().
  *              Failure:    NULL
- *
- * Programmer:  Richard Warren
  *
  *-------------------------------------------------------------------------
  */
@@ -1366,8 +1342,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL, file not closed.
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1392,8 +1366,6 @@ done:
  * Return:      Success:    A value like strcmp()
  *              Failure:    never fails (arguments were checked by the
  *                          caller).
- *
- * Programmer:  Richard Warren
  *
  *-------------------------------------------------------------------------
  */
@@ -1424,9 +1396,6 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  John Mainzer
- *              11/15/21
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1454,8 +1423,6 @@ H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /
  *
  * Return:      The end-of-address marker.
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1477,8 +1444,6 @@ H5FD__subfiling_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *              to tell the driver where the end of the HDF5 data is located.
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  Richard Warren
  *
  *-------------------------------------------------------------------------
  */
@@ -1563,8 +1528,6 @@ done:
  * Return:      Success:    SUCCEED. Result is stored in caller-supplied
  *                          buffer BUF.
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
- *
- * Programmer:  Richard Warren
  *
  *-------------------------------------------------------------------------
  */
@@ -1799,8 +1762,6 @@ done:
  *              DXPL_ID.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Richard Warren
  *
  *-------------------------------------------------------------------------
  */
@@ -2069,8 +2030,6 @@ done:
  *              Failure:    FAIL
  *                          The contents of supplied buffers are undefined.
  *
- * Programmer:  RAW -- ??/??/21
- *
  * Notes:       Thus function doesn't actually implement vector read.
  *              Instead, it comverts the vector read call into a series
  *              of scalar read calls.  Fix this when time permits.
@@ -2231,8 +2190,6 @@ done:
  *                          input arguments are not valid, or the actual
  *                          subfiling writes have failed for some reason.
  *
- * Programmer:  RAW -- ??/??/21
- *
  * Notes:       Thus function doesn't actually implement vector write.
  *              Instead, it comverts the vector write call into a series
  *              of scalar read calls.  Fix this when time permits.
@@ -2380,8 +2337,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2458,8 +2413,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 #if 0
@@ -2491,8 +2444,6 @@ done:
  * Purpose:     To remove the existing lock on the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2568,8 +2519,6 @@ done:
  *              support MPI.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  JRM -- 8/3/21
  *
  *-------------------------------------------------------------------------
  */
@@ -3062,9 +3011,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3160,9 +3106,6 @@ done:
  *              memory/file offsets and the last I/O size.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3292,9 +3235,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3402,9 +3342,6 @@ done:
  *              'sf_blocksize_per_stripe' bytes of data.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */

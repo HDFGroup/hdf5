@@ -38,9 +38,6 @@
 !  help@hdfgroup.org.                                                          *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! AUTHOR
-!  M. Scot Breitenfeld
-!
 !*****
 
 #include <H5config_f.inc>

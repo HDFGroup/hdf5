@@ -88,9 +88,6 @@ cast_to_void(const void *data)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -258,9 +255,6 @@ done:
  *              all pending operations have completed.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */

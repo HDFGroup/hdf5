@@ -10,10 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Thursday, February  3, 2005
- *
- * Purpose:	v2 B-tree testing functions.
+/*
+ * Purpose:     v2 B-tree testing functions
  *
  */
 
@@ -121,9 +119,6 @@ H5FL_DEFINE_STATIC(H5B2_test_ctx_t);
  * Return:	Success:	non-NULL
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 26, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -160,9 +155,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 26, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -189,9 +181,6 @@ H5B2__test_dst_context(void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, February  3, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -213,9 +202,6 @@ H5B2__test_store(void *nrecord, const void *udata)
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
  *
- * Programmer:	Quincey Koziol
- *              Thursday, February  3, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -235,9 +221,6 @@ H5B2__test_compare(const void *rec1, const void *rec2, int *result)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, February  3, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -264,9 +247,6 @@ H5B2__test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Friday, February  4, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -292,9 +272,6 @@ H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Friday, February  4, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -317,9 +294,6 @@ H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record, const
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Friday, December 25, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -341,9 +315,6 @@ H5B2__test2_store(void *nrecord, const void *udata)
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
  *
- * Programmer:	Quincey Koziol
- *              Friday, December 25, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -363,9 +334,6 @@ H5B2__test2_compare(const void *rec1, const void *rec2, int *result)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, December 25, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -393,9 +361,6 @@ H5B2__test2_encode(uint8_t *raw, const void *nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Friday, December 25, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -422,9 +387,6 @@ H5B2__test2_decode(const uint8_t *raw, void *nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Friday, December 25, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -446,9 +408,6 @@ H5B2__test2_debug(FILE *stream, int indent, int fwidth, const void *record, cons
  * Purpose:     Retrieve the root node's address
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Saturday, February 26, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -473,9 +432,6 @@ H5B2__get_root_addr_test(H5B2_t *bt2, haddr_t *root_addr)
  * Purpose:     Determine information about a node holding a record in the B-tree
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 31, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -626,9 +582,6 @@ done:
  *                          was found
  *
  *              Failure:    -1
- *
- * Programmer:	Quincey Koziol
- *              Saturday, August 26, 2006
  *
  *-------------------------------------------------------------------------
  */

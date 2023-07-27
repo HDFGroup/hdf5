@@ -11,13 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  rky 980813
- * KY 2005 revised the code and made the change to support and optimize
- * collective IO support.
  * Purpose:    Functions to read/write directly between app buffer and file.
- *
- *         Beware of the ifdef'ed print statements.
- *         I didn't make them portable.
  */
 
 /****************/
@@ -1066,16 +1060,6 @@ done:
  *                      4. DO IO
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
- * Modification:
- *  - Refctore to remove multi-chunk-without-opimization feature and update for
- *    multi-chunk-io accordingly
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1351,9 +1335,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1378,9 +1359,6 @@ done:
  *              application memory using collective I/O.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  4, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1411,9 +1389,6 @@ done:
  *              4. Use common collective IO routine to do MPI-IO
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1961,9 +1936,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2466,9 +2438,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2587,9 +2556,6 @@ done:
  * Purpose:     Routine for the common part of collective IO with different storages.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2846,9 +2812,6 @@ H5D__cmp_chunk_redistribute_info_orig_owner(const void *_entry1, const void *_en
  *                      haddr_t chunk_addr[],     : chunk address array for each chunk
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
  *
  *-------------------------------------------------------------------------
  */

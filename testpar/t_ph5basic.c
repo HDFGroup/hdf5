@@ -25,10 +25,6 @@
  *
  * Return:      Success:    None
  *              Failure:    Abort
- *
- * Programmer:  Albert Cheng
- *              January 9, 2003
- *
  *-------------------------------------------------------------------------
  */
 void

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAstat.c
- *			Sep 11 2008
- *			Quincey Koziol
  *
  * Purpose:	        Extensible array metadata statistics functions.
  *
@@ -73,9 +71,6 @@
  * Purpose:	Query the metadata stats of an array
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
  */

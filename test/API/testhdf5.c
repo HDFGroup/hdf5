@@ -99,15 +99,6 @@ TestErrPrintf(const char *format, ...)
  *
  * Return:  pointer to a string containing the value of the environment variable
  *     NULL if the variable doesn't exist in task 'root's environment.
- *
- * Programmer:  Leon Arber
- *              4/4/05
- *
- * Modifications:
- *    Use original getenv if MPI is not initialized. This happens
- *    one uses the PHDF5 library to build a serial nature code.
- *    Albert 2006/04/07
- *
  *-------------------------------------------------------------------------
  */
 char *
@@ -185,9 +176,6 @@ getenv_all(MPI_Comm comm, int root, const char *name)
  * Return:      Success:    A file access property list
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Thursday, November 19, 1998
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -218,9 +206,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              November 2018
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Thursday, November 09, 2000
- *
  * Purpose:	Create a two datasets, one with a compound datatypes with array
  *      fields (which should be stored in the newer version (version 2)) and
  *      one with an array datatype.
@@ -46,9 +43,6 @@
  * Return:	Success:
  *
  *		Failure:
- *
- * Programmer:	Robb Matzke
- *              Monday, October 26, 1998
  *
  *-------------------------------------------------------------------------
  */

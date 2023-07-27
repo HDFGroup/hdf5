@@ -10,9 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *
- *              This file is a catchall for parallel VFD tests.
+/*
+ *      This file is a catchall for parallel VFD tests.
  */
 
 #include "testphdf5.h"
@@ -114,9 +113,6 @@ static unsigned vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/25/26
- *
  *-------------------------------------------------------------------------
  */
 
@@ -192,9 +188,6 @@ alloc_and_init_file_images(int mpi_size)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/25/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -249,9 +242,6 @@ free_file_images(void)
  *              "fixed" file name into file_name on exit.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/25/26
  *
  *-------------------------------------------------------------------------
  */
@@ -520,9 +510,6 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/25/26
- *
  *-------------------------------------------------------------------------
  */
 
@@ -638,9 +625,6 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
  *              7) On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/26/21
  *
  *-------------------------------------------------------------------------
  */
@@ -871,9 +855,6 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *              11) On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/26/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1171,9 +1152,6 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *               9) On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/26/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1527,9 +1505,6 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *               9) On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/26/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1959,9 +1934,6 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
  *
- * Programmer:  John Mainzer
- *              3/26/21
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2201,9 +2173,6 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
  *
- * Programmer:  John Mainzer
- *              3/26/21
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2389,9 +2358,6 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *              5) Close the test file.  On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/28/21
  *
  *-------------------------------------------------------------------------
  */
@@ -2641,9 +2607,6 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *              5) Close the test file.  On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/31/21
  *
  *-------------------------------------------------------------------------
  */
@@ -2904,9 +2867,6 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *              5) Close the test file.  On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/31/21
  *
  *-------------------------------------------------------------------------
  */
@@ -3205,9 +3165,6 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *              7) Close the test file.  On rank 0, delete the test file.
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
- *
- * Programmer:  John Mainzer
- *              3/31/21
  *
  *-------------------------------------------------------------------------
  */
@@ -3645,9 +3602,6 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
  *
- * Programmer:  John Mainzer
- *              3/26/21
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3902,9 +3856,6 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Return:      FALSE on success, TRUE if any errors are detected.
  *
- * Programmer:  John Mainzer
- *              10/10/21
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4122,9 +4073,6 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  * Return:      Success: 0
  *
  *              Failure: 1
- *
- * Programmer:  John Mainzer
- *              3/2621/
  *
  *-------------------------------------------------------------------------
  */

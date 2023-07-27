@@ -11,13 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, May  2, 2006
- *
  * Purpose:     Free space tracking functions.
  *
  * Note:        (Used to be in the H5HFflist.c file, prior to the date above)
- *
  */
 
 /****************/
@@ -81,9 +77,6 @@ H5FL_DEFINE(H5FS_t);
  *
  * Return:      Success:    Pointer to free space structure
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -165,9 +158,6 @@ done:
  * Return:      Success:    Pointer to free space structure
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, May  2, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5FS_t *
@@ -233,9 +223,6 @@ done:
  * Purpose:     Delete a free space manager on disk
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, May 30, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -387,9 +374,6 @@ done:
  *              in the bins
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -589,9 +573,6 @@ done:
  * Return:      Success:    non-NULL, pointer to new free space manager struct
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Monday, July 31, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5FS_t *
@@ -668,9 +649,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Vailin Choi
- *              June 19, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -696,9 +674,6 @@ H5FS_size(const H5FS_t *fspace, hsize_t *meta_size)
  * Purpose:     Increment reference count on free space header
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              February  7, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -736,9 +711,6 @@ done:
  * Purpose:     Decrement reference count on free space header
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              February  7, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -784,9 +756,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Feb 14 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -815,9 +784,6 @@ done:
  * Purpose:     Allocate space for the free-space manager header
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Feb 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -855,9 +821,6 @@ done:
  * Purpose:     Allocate space for the free-space manager section info header
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Feb 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -902,9 +865,6 @@ done:
  * Purpose:     Free space for free-space manager header and section info header
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Feb 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1018,9 +978,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              May  2 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1062,9 +1019,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Saturday, March 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1090,9 +1044,6 @@ H5FS__sinfo_free_sect_cb(void *_sect, void H5_ATTR_UNUSED *key, void *op_data)
  * Purpose:     Free a size-tracking node for a bin
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Saturday, March 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1121,9 +1072,6 @@ H5FS__sinfo_free_node_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
  * Purpose:     Destroys a free space section info in memory.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              July 31 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1198,9 +1146,6 @@ H5FS_get_sect_count(const H5FS_t *frsp, hsize_t *tot_sect_count)
  * Purpose:     Verify that the free space manager is mostly sane
  *
  * Return:      void
- *
- * Programmer:  Quincey Koziol
- *              Jul 17 2006
  *
  *-------------------------------------------------------------------------
  */

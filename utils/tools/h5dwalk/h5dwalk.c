@@ -1688,12 +1688,6 @@ main(int argc, char *argv[])
  * Purpose: close the tools library and exit
  *
  * Return: none
- *
- * Programmer: Albert Cheng
- * Date: Feb 6, 2005
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_NORETURN void

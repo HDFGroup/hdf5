@@ -11,11 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, May  1, 2006
- *
  * Purpose:     Free space section routines for fractal heaps
- *
  */
 
 /****************/
@@ -283,9 +279,6 @@ H5FL_DEFINE(H5HF_free_section_t);
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 25, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -324,9 +317,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 25, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -362,9 +352,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, May 13, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -408,9 +395,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, May 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -441,9 +425,6 @@ done:
  * Purpose:	Create a new 'single' section and return it to the caller
  *
  * Return:	Pointer to new section on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		May 30 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -492,9 +473,6 @@ done:
  * Purpose:	Locate the parent indirect block for a single section
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		October 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -554,9 +532,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              May  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -599,9 +574,6 @@ done:
  * Purpose:     Retrieve the direct block information for a single section
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              October 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -646,9 +618,6 @@ H5HF__sect_single_dblock_info(H5HF_hdr_t *hdr, const H5HF_free_section_t *sect, 
  *              (if it hasn't been freed)
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		May 31 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -698,9 +667,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -765,9 +731,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -814,9 +777,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, May  1, 2006
- *
  *-------------------------------------------------------------------------
  */
 static H5FS_section_info_t *
@@ -855,9 +815,6 @@ done:
  * Return:	Success:	non-negative (TRUE/FALSE)
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, May 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -899,9 +856,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, May 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -957,9 +911,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, June  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -1010,9 +961,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1076,9 +1024,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, May 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1114,9 +1059,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, July 21, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1202,9 +1144,6 @@ H5HF__sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static H5HF_free_section_t *
@@ -1249,9 +1188,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July  6 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1295,9 +1231,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July  6 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1340,9 +1273,6 @@ done:
  *              (if it hasn't been freed)
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		July  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1414,9 +1344,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July 10 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1453,9 +1380,6 @@ done:
  *
  * Return:	Pointer to indirect block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		July  9 2006
- *
  *-------------------------------------------------------------------------
  */
 H5HF_indirect_t *
@@ -1485,9 +1409,6 @@ H5HF__sect_row_get_iblock(H5HF_free_section_t *sect)
  *              when an indirect block is removed from the metadata cache.
  *
  * Return:	Non-negative on success / Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		February 4 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1541,9 +1462,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, July  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1584,9 +1502,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, July  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1615,9 +1530,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1659,9 +1571,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Saturday, July 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static H5FS_section_info_t *
@@ -1699,9 +1608,6 @@ done:
  * Return:	Success:	non-negative (TRUE/FALSE)
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1756,9 +1662,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1811,9 +1714,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -1846,9 +1746,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1891,9 +1788,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1921,9 +1815,6 @@ done:
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1957,9 +1848,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, July 21, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2018,9 +1906,6 @@ H5HF__sect_row_valid(const H5FS_section_class_t *cls, const H5FS_section_info_t 
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 25, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2056,9 +1941,6 @@ H5HF__sect_row_debug(const H5FS_section_info_t *_sect, FILE *stream, int indent,
  *
  * Return:	Offset of indirect block in "heap space" (can't fail)
  *
- * Programmer:	Quincey Koziol
- *		July  6 2006
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -2085,9 +1967,6 @@ H5HF__sect_indirect_iblock_off(const H5HF_free_section_t *sect)
  * Purpose:	Get the "top" indirect section
  *
  * Return:	Pointer to the top indirect section (can't fail)
- *
- * Programmer:	Quincey Koziol
- *		July  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2119,9 +1998,6 @@ H5HF__sect_indirect_top(H5HF_free_section_t *sect)
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, July  3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2157,9 +2033,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, July  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2187,9 +2060,6 @@ done:
  *              initializing.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		July  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2256,9 +2126,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July  6 2006
- *
  *-------------------------------------------------------------------------
  */
 static H5HF_free_section_t *
@@ -2317,9 +2184,6 @@ done:
  *              indirect section
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		July  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2572,9 +2436,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July  3 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2647,9 +2508,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July  6 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2697,9 +2555,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July  3 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2741,9 +2596,6 @@ done:
  * Purpose:	Update the memory information for a 'indirect' free section
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		July 10 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2797,9 +2649,6 @@ done:
  *              (if it hasn't been freed)
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		July 10 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3068,9 +2917,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July 10 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3304,9 +3150,6 @@ done:
  *
  * Return:	Non-negative (TRUE/FALSE) on success/<can't fail>
  *
- * Programmer:	Quincey Koziol
- *		July 17 2006
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -3336,9 +3179,6 @@ H5HF__sect_indirect_is_first(H5HF_free_section_t *sect)
  * Purpose:	Make new 'first row' for indirect section
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		July 10 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3387,9 +3227,6 @@ done:
  *
  * Return:	Pointer to indirect block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		July  9 2006
- *
  *-------------------------------------------------------------------------
  */
 static H5HF_indirect_t *
@@ -3417,9 +3254,6 @@ H5HF__sect_indirect_get_iblock(H5HF_free_section_t *sect)
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3663,9 +3497,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Friday, July 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3745,9 +3576,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3801,9 +3629,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, July  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3855,9 +3680,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, July  3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3934,9 +3756,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, July  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3976,9 +3795,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, July 21, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -4080,9 +3896,6 @@ H5HF__sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, July  3, 2006
  *
  *-------------------------------------------------------------------------
  */

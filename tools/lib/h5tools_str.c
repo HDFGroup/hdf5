@@ -56,8 +56,6 @@ void           h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *inf
  *
  * Return:  void
  *
- * Programmer:  Robb Matzke
- *              Monday, April 26, 1999
  *-------------------------------------------------------------------------
  */
 void
@@ -79,8 +77,6 @@ h5tools_str_close(h5tools_str_t *str)
  *
  *          Failure:    0
  *
- * Programmer:  Robb Matzke
- *              Monday, April 26, 1999
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE size_t
@@ -99,8 +95,6 @@ h5tools_str_len(h5tools_str_t *str)
  *
  *          Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Monday, April 26, 1999
  *-------------------------------------------------------------------------
  */
 char *
@@ -174,8 +168,6 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
  *
  *          Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Monday, April 26, 1999
  *-------------------------------------------------------------------------
  */
 char *
@@ -201,8 +193,6 @@ h5tools_str_reset(h5tools_str_t *str /*in,out*/)
  *
  *          Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Monday, April 26, 1999
  *-------------------------------------------------------------------------
  */
 char *
@@ -229,8 +219,6 @@ h5tools_str_trunc(h5tools_str_t *str /*in,out*/, size_t size)
  *
  *          Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Monday, April 26, 1999
  *-------------------------------------------------------------------------
  */
 char *
@@ -1497,8 +1485,6 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
  *              buffer has as many left-to-right escapes as
  *              possible before overflow would have happened.
  *
- * Programmer:  Robb Matzke
- *              Monday, April 26, 1999
  *-------------------------------------------------------------------------
  */
 static char *
@@ -1579,8 +1565,6 @@ h5tools_escape(char *s /*in,out*/, size_t size)
  *
  * Return:      TRUE if all bytes are zero; FALSE otherwise
  *
- * Programmer:  Robb Matzke
- *              Monday, June  7, 1999
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1601,9 +1585,6 @@ h5tools_str_is_zero(const void *_mem, size_t size)
  * Purpose:     replace all occurrences of substring.
  *
  * Return:      char *
- *
- * Programmer:  Peter Cao
- *              March 8, 2012
  *
  * Notes:
  *   Applications need to call free() to free the memory allocated for

@@ -76,7 +76,6 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
 /*
  * Function:    error
  * Purpose:     Display error message and exit.
- * Programmer:  Bill Wendling, 05. June 2002
  */
 static void
 error(const char *fmt, ...)
@@ -97,7 +96,6 @@ error(const char *fmt, ...)
  * Function:    cleanup
  * Purpose:     Cleanup the output file.
  * Returns:     Nothing
- * Programmer:  Bill Wendling, 06. June 2002
  */
 static void
 cleanup(void)
@@ -161,7 +159,6 @@ write_file(Bytef *source, uLongf sourceLen)
  *              Z_MEM_ERROR     - not enough memory
  *              Z_BUF_ERROR     - not enough room in the output buffer
  *              Z_STREAM_ERROR  - level parameter is invalid
- * Programmer:  Bill Wendling, 05. June 2002
  */
 static void
 compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
@@ -194,7 +191,6 @@ compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceL
  * Purpose:     Create a new file who's name doesn't conflict with
  *              pre-existing files.
  * Returns:     Nothing
- * Programmer:  Bill Wendling, 06. June 2002
  */
 #define ZIP_PERF_FILE "zip_perf.data"
 static void
@@ -230,7 +226,6 @@ get_unique_name(void)
  * Function:    usage
  * Purpose:     Print a usage message and then exit.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 05. June 2002
  */
 static void
 usage(void)
@@ -272,7 +267,6 @@ usage(void)
  * Return:      The size as a size_t because this is related to buffer size.
  *              If an unknown size indicator is used, then the program will
  *              exit with EXIT_FAILURE as the return value.
- * Programmer:  Bill Wendling, 05. June 2002
  */
 static unsigned long
 parse_size_directive(const char *size)
@@ -460,7 +454,6 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
  * Function:    main
  * Purpose:     Run the program
  * Return:      EXIT_SUCCESS or EXIT_FAILURE
- * Programmer:  Bill Wendling, 05. June 2002
  */
 int
 main(int argc, char *argv[])
@@ -547,7 +540,6 @@ main(int argc, char *argv[])
  * Purpose:     Dummy main() function for if HDF5 was configured without
  *              zlib stuff.
  * Return:      EXIT_SUCCESS
- * Programmer:  Bill Wendling, 10. June 2002
  */
 int
 main(void)

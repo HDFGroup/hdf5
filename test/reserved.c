@@ -26,10 +26,6 @@ const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    James Laird
- *              Nat Furrer
- *              Friday, May 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -158,10 +154,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    James Laird
- *              Nat Furrer
- *              Friday, May 28, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -300,10 +292,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    James Laird
- *        Nat Furrer
- *              Thursday, July 1, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -461,9 +449,6 @@ error:
  * Return:    Success:
  *
  *        Failure:
- *
- * Programmer:    Nat Furrer and James Laird
- *              Thursday, July 1, 2004
  *
  *-------------------------------------------------------------------------
  */

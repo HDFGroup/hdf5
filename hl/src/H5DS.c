@@ -63,10 +63,6 @@ H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref)
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Pedro Vicente
- *
- * Date: January 04, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -127,10 +123,6 @@ H5DSset_scale(hid_t dsid, const char *dimname)
  * Fails if: Bad arguments
  *           If DSID is not a Dimension Scale
  *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
- *
- * Programmer: Pedro Vicente
- *
- * Date: December 20, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -719,10 +711,6 @@ out:
  * Note that a scale may be associated with more than dimension of the same dataset.
  * If so, the detach operation only deletes one of the associations, for DID.
  *
- * Programmer: Pedro Vicente
- *
- * Date: December 20, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1218,10 +1206,6 @@ out:
  *           If DSID is not a Dimension Scale
  *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
- * Programmer: Pedro Vicente
- *
- * Date: February 18, 2005
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1588,10 +1572,6 @@ out:
  *       C. Negative causes the iterator to immediately return that value,
  *           indicating failure.
  *
- * Programmer: Pedro Vicente
- *
- * Date: January 31, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1776,10 +1756,6 @@ out:
  * Purpose: Set label for the dimension IDX of dataset DID to the value LABEL
  *
  * Return: Success: SUCCEED, Failure: FAIL
- *
- * Programmer: Pedro Vicente
- *
- * Date: January 11, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1980,10 +1956,6 @@ out:
  *
  * Return: 0 if no label found, size of label if found, Failure: FAIL
  *
- * Programmer: Pedro Vicente
- *
- * Date: January 11, 2005
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -2128,10 +2100,6 @@ out:
  *
  * Return: size of name if found, zero if not found,  Failure: FAIL
  *
- * Programmer: Pedro Vicente
- *
- * Date: January 04, 2005
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -2244,10 +2212,6 @@ out:
  *
  * Return: 1, is, 0, not, FAIL, error
  *
- * Programmer: Pedro Vicente
- *
- * Date: January 04, 2005
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2356,10 +2320,6 @@ out:
  * Return:
  *   Success: number of scales
  *   Failure: FAIL
- *
- * Programmer: Pedro Vicente
- *
- * Date: January 13, 2005
  *
  *-------------------------------------------------------------------------
  */

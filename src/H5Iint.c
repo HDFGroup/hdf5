@@ -213,9 +213,6 @@ done:
  *
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Wednesday, March 24, 1999
- *
  *-------------------------------------------------------------------------
  */
 int64_t
@@ -246,9 +243,6 @@ done:
  *              to an ID.
  *
  * Return:      Pointer to the unwrapped pointer (can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Friday, October 19, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -289,9 +283,6 @@ H5I__unwrap(void *object, H5I_type_t type)
  *              function for each object regardless of the reference count.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March 24, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -356,9 +347,6 @@ done:
  *              function for the object, if any
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Neil Fortner
- *              Friday, July 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -451,9 +439,6 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
  *              then adding the ID struct to the ID free list.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Nathaniel Furrer
- *              James Laird
  *
  *-------------------------------------------------------------------------
  */
@@ -677,9 +662,6 @@ done:
  *                          with the specified ID.
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, February 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -747,9 +729,6 @@ H5I_object(hid_t id)
  *                          specified ID.
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, July 31, 2002
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -785,9 +764,6 @@ H5I_object_verify(hid_t id, H5I_type_t type)
  *                          enum value for library ID types, but not for user
  *                          ID types).
  *              Failure:    H5I_BADID
- *
- * Programmer:  Robb Matzke
- *              Friday, February 19, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -865,9 +841,6 @@ done:
  *                          calling H5I_object().
  *              Failure:    NULL
  *
- * Programmer:  James Laird
- *              Nat Furrer
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -895,9 +868,6 @@ H5I__remove_verify(hid_t id, H5I_type_t type)
  *                          same pointer which would have been found by
  *                          calling H5I_object().
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              October 3, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1135,9 +1105,6 @@ done:
  * Return:      Success:    New app. reference count
  *              Failure:    -1
  *
- * Programmer:  Quincey Koziol
- *              Sept 16, 2010
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1169,9 +1136,6 @@ done:
  *
  * Return:      Success:    New app. reference count
  *              Failure:    -1
- *
- * Programmer:  Houjun Tang
- *              Oct 21, 2019
  *
  *-------------------------------------------------------------------------
  */

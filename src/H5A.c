@@ -1296,9 +1296,6 @@ done:
  *				in NAME buffer
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              February  8, 2007
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1369,9 +1366,6 @@ done:
  *
  *		Failure:	Zero
  *
- * Programmer:	Raymond Lu
- *              October 23, 2002
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -1411,9 +1405,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1455,9 +1446,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1515,9 +1503,6 @@ done:
  *
  * Return:	Success:	Non-negative with information in AINFO
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              February  8, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1665,9 +1650,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:	Raymond Lu
- *              October 23, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1779,9 +1761,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:	Quincey Koziol
- *              February 20, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2401,9 +2380,6 @@ done:
  * Return:	Success:	TRUE/FALSE
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 1, 2007
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2516,9 +2492,6 @@ done:
  *
  * Return:	Success:	TRUE/FALSE
  * 		    Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 1, 2007
  *
  *-------------------------------------------------------------------------
  */

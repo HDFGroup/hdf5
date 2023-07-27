@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Defc.c
- *                      December 13, 2010
- *                      Neil Fortner
  *
  * Purpose:             External file caching routines - implements a
  *                      cache of external files to minimize the number of
@@ -81,9 +79,6 @@ H5FL_DEFINE_STATIC(H5F_efc_t);
  * Return:      Pointer to new external file cache object on success
  *              NULL on failure
  *
- * Programmer:  Neil Fortner
- *              Tuesday, December 14, 2010
- *
  *-------------------------------------------------------------------------
  */
 H5F_efc_t *
@@ -130,9 +125,6 @@ done:
  *
  * Return:      Pointer to open file on success
  *              NULL on failure
- *
- * Programmer:  Neil Fortner
- *              Tuesday, December 14, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -338,9 +330,6 @@ done:
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -400,9 +389,6 @@ done:
  *
  * Return:      Maximum number of files (never fails)
  *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -425,9 +411,6 @@ H5F__efc_max_nfiles(H5F_efc_t *efc)
  *
  * Return:      Non-negative on success
  *              Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -486,9 +469,6 @@ done:
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Sunday, February 18, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -518,9 +498,6 @@ done:
  *
  * Return:      Non-negative on success
  *              Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -568,9 +545,6 @@ done:
  *
  * Return:      Non-negative on success
  *              Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -633,9 +607,6 @@ done:
  *              files will eventually be closed.
  *
  * Return:      void (never fails)
- *
- * Programmer:  Neil Fortner
- *              Monday, January 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -706,9 +677,6 @@ H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail)
  *              of the provided linked list.
  *
  * Return:      void (never fails)
- *
- * Programmer:  Neil Fortner
- *              Monday, January 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -810,9 +778,6 @@ H5F__efc_try_close_tag2(H5F_shared_t *sf, H5F_shared_t **tail)
  *
  * Return:      Non-negative on success
  *              Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Thursday, January 6, 2011
  *
  *-------------------------------------------------------------------------
  */

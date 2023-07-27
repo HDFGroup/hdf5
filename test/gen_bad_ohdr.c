@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Jan  5, 2008
- *
  * Purpose:     This program is run to generate an HDF5 data file with a
  *              root group that contains the incorrect # of object header
  *              messages.  It must be built/run with a copy of the library

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, June 16, 1998
- *
  * Purpose:	Tests functions in H5Tbit.c
  */
 #include "h5test.h"
@@ -33,9 +30,6 @@
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -148,9 +142,6 @@ failed:
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -272,9 +263,6 @@ failed:
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *              Monday, April 12, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -410,9 +398,6 @@ failed:
  *
  *		Failure:	-1
  *
- * Programmer:	Raymond Lu
- *              Monday, April 12, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -499,9 +484,6 @@ failed:
  *
  *		Failure:	-1
  *
- * Programmer:	Raymond Lu
- *              Monday, April 12, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -570,9 +552,6 @@ failed:
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *              Monday, April 12, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -672,9 +651,6 @@ failed:
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -791,9 +767,6 @@ failed:
  *
  *		Failure:	-1
  *
- * Programmer:	Robb Matzke
- *              Tuesday, June 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -906,9 +879,6 @@ failed:
  * Purpose:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:	Robb Matzke
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Jordan Henderson
- *             01/31/2017
- *
  * This file contains #defines for tests of the use
  * of filters in parallel HDF5, implemented in
  * H5Dmpio.c

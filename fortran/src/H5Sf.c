@@ -34,11 +34,6 @@
  *  space_id - identifier of the created dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 4, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -79,11 +74,6 @@ done:
  *  space_id - identifier of the dataspace to be closed
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 4, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -111,11 +101,6 @@ h5sclose_c(hid_t_f *space_id)
  *  space_id  - identifier of the created dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -146,11 +131,6 @@ h5screate_c(int_f *classtype, hid_t_f *space_id)
  *  new_space_id - identifier of the new datspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -185,11 +165,6 @@ h5scopy_c(hid_t_f *space_id, hid_t_f *new_space_id)
  *                the current dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, November 12, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -224,11 +199,6 @@ h5sget_select_hyper_nblocks_c(hid_t_f *space_id, hssize_t_f *num_blocks)
  *                the current dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Monday, November 15, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -269,13 +239,6 @@ h5sget_select_elem_npoints_c(hid_t_f *space_id, hssize_t_f *num_points)
  *  buf - List of hyperslab blocks selected
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Monday, November 15, 1999
- * HISTORY
- *
- *  Transpose dimension arrays because of C-FORTRAN storage order
- *  M. Scot Breitenfeld
  * SOURCE
  */
 
@@ -344,13 +307,6 @@ h5sget_select_hyper_blocklist_c(hid_t_f *space_id, hsize_t_f *startblock, hsize_
  *           i.e., the coordinates of the diagonally opposite corne
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, November 17, 1999
- * HISTORY
- *  swapped array bounds to account for C and Fortran reversed
- *  matrix notation.
- *  M. Scot Breitenfeld
  * SOURCE
  */
 
@@ -401,11 +357,6 @@ done:
  *  buf - List of element points selected
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, November 17, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -463,11 +414,6 @@ h5sget_select_elem_pointlist_c(hid_t_f *space_id, hsize_t_f *startpoint, hsize_t
  *  space_id - identifier of the dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -493,11 +439,6 @@ h5sselect_all_c(hid_t_f *space_id)
  *  space_id - identifier of the dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -527,11 +468,6 @@ h5sselect_none_c(hid_t_f *space_id)
  *             and negative on failure.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -563,11 +499,6 @@ h5sselect_valid_c(hid_t_f *space_id, int_f *flag)
  *  npoints  - number of points in a dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -599,11 +530,6 @@ h5sget_simple_extent_npoints_c(hid_t_f *space_id, hsize_t_f *npoints)
  *  npoints  - number of points in a dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -635,11 +561,6 @@ h5sget_select_npoints_c(hid_t_f *space_id, hssize_t_f *npoints)
  *  rank - number of dataspace dimensions
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -672,11 +593,6 @@ h5sget_simple_extent_ndims_c(hid_t_f *space_id, int_f *ndims)
  *              H5S_SCALAR_F (0), H5S_SIMPLE_F (1), H5S_NULL_F (2)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -712,11 +628,6 @@ h5sget_simple_extent_type_c(hid_t_f *space_id, int_f *classtype)
  *  offset   - offset array
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -761,11 +672,6 @@ done:
  *  maximum_size - array with maximum sizes of dimensions
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -806,11 +712,6 @@ done:
  *  maxdims - array with maximum sizes of dimensions
  * RETURNS
  *  number of dataspace dimensions (rank) on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -860,11 +761,6 @@ done:
  *             and negative on failure.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -894,11 +790,6 @@ h5sis_simple_c(hid_t_f *space_id, int_f *flag)
  *  source_space_id - identifier of the source dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -927,11 +818,6 @@ h5sextent_copy_c(hid_t_f *dest_space_id, hid_t_f *source_space_id)
  *  space_id - dataspace identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -966,11 +852,6 @@ h5sset_extent_none_c(hid_t_f *space_id)
  *  block    - size of block in the hyperslab
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1026,11 +907,6 @@ done:
  *  hyper_id - identifier for the new dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1114,11 +990,6 @@ DONE:
  *  ds_id     - identifier for the new dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1154,11 +1025,6 @@ h5scombine_select_c(hid_t_f *space1_id, int_f *op, hid_t_f *space2_id, hid_t_f *
  *  space2_id - identifier of the second dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1192,11 +1058,6 @@ h5smodify_select_c(hid_t_f *space1_id, int_f *op, hid_t_f *space2_id)
  *  type - type of selection
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1230,11 +1091,6 @@ h5sget_select_type_c(hid_t_f *space_id, int_f *type)
  *  coord     - arrays with the elements coordinates
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1285,11 +1141,6 @@ h5sselect_elements_c(hid_t_f *space_id, int_f *op, size_t_f *nelements, hsize_t_
  *  obj_id  - Object_id (non-negative)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 26, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1328,11 +1179,6 @@ h5sdecode_c(_fcd buf, hid_t_f *obj_id)
  *  nalloc - The size of the allocated buffer.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 26, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1398,11 +1244,6 @@ h5sencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc, hid_t_f *fapl_id)
  *  equal - TRUE if equal, FALSE if unequal.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 4, 2008
- * HISTORY
- *
  * SOURCE
  */
 

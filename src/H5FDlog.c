@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, April 17, 2000
- *
  * Purpose:     The POSIX unbuffered file driver using only the HDF5 public
  *              API and with a few optimizations: the lseek() call is made
  *              only when the current file position is unknown or needs to be
@@ -236,9 +233,6 @@ H5FL_DEFINE_STATIC(H5FD_log_t);
  * Return:      Success:    The driver ID for the log driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -274,9 +268,6 @@ H5FD_log_init(void)
  *
  * Returns:     SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -297,9 +288,6 @@ H5FD__log_term(void)
  *              driver defined in this source file.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Thursday, February 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -352,9 +340,6 @@ done:
  *                          members copied from the file struct.
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 20, 2000
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -378,9 +363,6 @@ H5FD__log_fapl_get(H5FD_t *_file)
  *
  * Return:      Success:    Ptr to a new property list
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Thursday, April 20, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -428,9 +410,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 20, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -457,9 +436,6 @@ H5FD__log_fapl_free(void *_fa)
  *                          public fields will be initialized by the
  *                          caller, which is always H5FD_open().
  *              Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -662,9 +638,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL, file not closed.
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -820,9 +793,6 @@ done:
  *              Failure:    never fails (arguments were checked by the
  *                          caller).
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -885,9 +855,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Friday, August 25, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -926,9 +893,6 @@ H5FD__log_query(const H5FD_t *_file, unsigned long *flags /* out */)
  *
  * Return:      Success:    Address of new memory
  *              Failure:    HADDR_UNDEF
- *
- * Programmer:  Quincey Koziol
- *              Monday, April 17, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -974,9 +938,6 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, September 28, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1013,9 +974,6 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
  * Return:      Success:    The end-of-address marker.
  *              Failure:    HADDR_UNDEF
  *
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1036,9 +994,6 @@ H5FD__log_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *              to tell the driver where the end of the HDF5 data is located.
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1104,9 +1059,6 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
  *                          or the HDF5 file.
  *              Failure:    HADDR_UNDEF
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1125,9 +1077,6 @@ H5FD__log_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Purpose:        Returns the file handle of LOG file driver.
  *
  * Returns:        SUCCEED/FAIL
- *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1158,9 +1107,6 @@ done:
  * Return:      Success:    SUCCEED. Result is stored in caller-supplied
  *                          buffer BUF.
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1372,9 +1318,6 @@ done:
  *              DXPL_ID.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1590,9 +1533,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1698,8 +1638,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL, file not locked.
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1739,8 +1677,6 @@ done:
  * Purpose:     Remove the existing lock on the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */

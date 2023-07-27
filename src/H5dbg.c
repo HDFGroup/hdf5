@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5dbg.c
- *                  Mar  4 2006
- *                  Quincey Koziol
  *
  * Purpose:         Generic debugging routines
  *
@@ -61,9 +59,6 @@
  * Purpose:     Dumps a buffer of memory in an octal dump form
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Mar  4 2006
  *
  *-------------------------------------------------------------------------
  */

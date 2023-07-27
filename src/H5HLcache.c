@@ -203,9 +203,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -273,9 +270,6 @@ done:
  *
  * Return:      Nothing (void)
  *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -316,9 +310,6 @@ H5HL__fl_serialize(const H5HL_t *heap)
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -343,9 +334,6 @@ H5HL__cache_prefix_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *im
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              November 18, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -491,9 +479,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -531,9 +516,6 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              7/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -633,9 +615,6 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -670,9 +649,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -702,9 +678,6 @@ H5HL__cache_datablock_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        Pointer to in core representation
  *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -764,9 +737,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -797,9 +767,6 @@ H5HL__cache_datablock_image_len(const void *_thing, size_t *image_len)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -843,9 +810,6 @@ H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *imag
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		November 19, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -915,9 +879,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              6/21/14
  *
  *-------------------------------------------------------------------------
  */

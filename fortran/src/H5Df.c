@@ -35,12 +35,6 @@
  *  n             - number of references to be stored.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, May 14, 2002
- * HISTORY
- *  This function was added to accommodate h5dwrite_f with the
- *  dims argument being of INTEGER(HSIZE_T) type
  * SOURCE
  */
 int_f
@@ -107,12 +101,6 @@ h5dwrite_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
  *  n - number of references to be stored.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, May 15, 2002
- * HISTORY
- *  This function was added to accommodate h5dread_f subroutine
- *  with the dims parameter being of INTEGER(HSIZE_T_F) size.
  * SOURCE
  */
 int_f
@@ -174,11 +162,6 @@ h5dread_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
  *  type_id - identifier of the dataset's datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 19, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -213,11 +196,6 @@ h5dget_type_c(hid_t_f *dset_id, hid_t_f *type_id)
  *  plist_id - identifier of he dataset creation property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 19, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -252,11 +230,6 @@ h5dget_create_plist_c(hid_t_f *dset_id, hid_t_f *plist_id)
  *  size    - the amount of storage required for a dataset
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, October 22, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -290,11 +263,6 @@ h5dget_storage_size_c(hid_t_f *dset_id, hsize_t_f *size)
  *  len      - maximum length of the VL dataset element
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, October 22, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -357,11 +325,6 @@ DONE:
  *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, October 23, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -434,11 +397,6 @@ DONE:
  *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, October 24, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -508,11 +466,6 @@ DONE:
  *  len           - array of strings lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 28, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -599,11 +552,6 @@ DONE:
  *  len           - array of strings lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, November 1, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -687,11 +635,6 @@ h5dread_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
  *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, November 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -764,11 +707,6 @@ DONE:
  *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, November 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -833,11 +771,6 @@ DONE:
  *  flag - status flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12, 2003
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -880,9 +813,6 @@ h5dget_space_status_c(hid_t_f *dset_id, int_f *flag)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February, 2008
  * SOURCE
  */
 int_f
@@ -919,12 +849,6 @@ DONE:
  *  buf           - data buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 28, 2008
- * HISTORY
- *
- *
  * SOURCE
  */
 int_f
@@ -979,11 +903,6 @@ h5dwrite_f_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
  *  len - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 28, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1025,10 +944,6 @@ h5dread_f_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
  *  plist_id  - the dataset access property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 13, 2009
- *
  * SOURCE
  */
 int_f
@@ -1061,10 +976,6 @@ DONE:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *   M. Scot Breitenfeld
- *  January 15, 2011
- *
  * SOURCE
  */
 int_f

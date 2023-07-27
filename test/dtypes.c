@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
  * Purpose:     Tests the datatype interface (H5T)
  */
 
@@ -140,8 +137,6 @@ static int    opaque_funcs(void);
  *
  * Return:      void
  *
- * Programmer:  Robb Matzke
- *              Monday, November 16, 1998
  *-------------------------------------------------------------------------
  */
 static void
@@ -173,8 +168,6 @@ reset_hdf5(void)
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 static int
@@ -293,8 +286,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 static int
@@ -337,9 +328,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 30, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -562,8 +550,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke
- *              Wednesday, January  7, 1998
  *-------------------------------------------------------------------------
  */
 static int
@@ -749,8 +735,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, June 17, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -876,8 +860,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, June 17, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -999,8 +981,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, June 17, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -1130,8 +1110,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, June 17, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -1230,8 +1208,6 @@ test_compound_5(void)
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, December 13, 2000
  *-------------------------------------------------------------------------
  */
 static int
@@ -1338,9 +1314,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, December 18, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1482,9 +1455,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Robb Matzke
- *              Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1752,8 +1722,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Wednesday, June 9, 2004
  *-------------------------------------------------------------------------
  */
 static int
@@ -2001,9 +1969,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Tuesday, June 15, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2212,9 +2177,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 7, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -2494,9 +2456,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Wednesday, September 29, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2589,9 +2548,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Thursday, March 13, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -2723,9 +2679,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Monday, August 25, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -3178,9 +3131,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Friday, September 19, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3351,9 +3301,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Ray Lu
- *              14 July 2022
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3477,9 +3424,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Friday, October 3, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3588,9 +3532,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Tuesday, January 13, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -3742,9 +3683,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 14, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3892,9 +3830,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Thursday, April 4, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -4135,9 +4070,6 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Thursday, June  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4289,9 +4221,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Monday, June  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4584,9 +4513,6 @@ error:
  * Return:    Success:    New type
  *        Failure:    -1
  *
- * Programmer:    Robb Matzke
- *              Monday, August 10, 1998
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -4611,9 +4537,6 @@ mkstr(size_t len, H5T_str_t strpad)
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Raymond Lu
- *              19 May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -4696,9 +4619,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Monday, August 10, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5031,9 +4951,6 @@ error:
  * Return:    Success:    0
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Monday, August 10, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5102,9 +5019,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Raymond Lu
- *              Tuesday, April 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5242,9 +5156,6 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Tuesday, January  5, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5321,7 +5232,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke, LLNL, 2003-06-09
  *-------------------------------------------------------------------------
  */
 static int
@@ -5395,8 +5305,6 @@ test_conv_enum_2(void)
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, May 20, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -5492,8 +5400,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Raymond Lu
- *              Wednesday, April 5, 2006
  *-------------------------------------------------------------------------
  */
 static int
@@ -5638,8 +5544,6 @@ error:
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Robb Matzke
- *              Friday, June  4, 1999
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5661,8 +5565,6 @@ convert_opaque(hid_t H5_ATTR_UNUSED st, hid_t H5_ATTR_UNUSED dt, H5T_cdata_t *cd
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Raymond Lu
- *              June 2, 2004
  *-------------------------------------------------------------------------
  */
 static int
@@ -5699,8 +5601,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, May 20, 1999
  *-------------------------------------------------------------------------
  */
 static int
@@ -5777,9 +5677,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 14, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5835,8 +5732,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Raymond Lu
- *              Wednesday, April 5, 2006
  *-------------------------------------------------------------------------
  */
 static int
@@ -6538,9 +6433,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              October 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6756,9 +6648,6 @@ conv_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
  *
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              August 18, 2005
- *
  * Notes: This routine is pretty specific to 4 byte integers and 4 byte
  *              floats and I can't think of a particularly good way to
  *              make it portable to other architectures, but further
@@ -6923,9 +6812,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              January 23, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -7157,9 +7043,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              18 August 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7325,8 +7208,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Neil Fortner
- *              Thursday, June 4, 2009
  *-------------------------------------------------------------------------
  */
 static int
@@ -7695,9 +7576,6 @@ create_del_obj_named_test_file(const char *filename, hid_t fapl, H5F_libver_t lo
  * Return:    Success:    0
  *        Failure:    number of errors
  *
- * Programmer:    Quincey Koziol
- *              Monday, July 18, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7814,9 +7692,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Quincey Koziol
- *              Thursday, July 28, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -8016,9 +7891,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, September 27, 2007
- *
  *-------------------------------------------------------------------------
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -8188,8 +8060,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Raymond Lu
- *              10 November 2011
  *-------------------------------------------------------------------------
  */
 static int
@@ -8860,8 +8730,6 @@ error:
  *
  *              Failure:
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 int

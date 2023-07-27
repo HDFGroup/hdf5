@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5HLdblk.c
- *              Summer 2012
- *              Dana Robinson
  *
  * Purpose:     Data block routines for local heaps.
  *
@@ -75,9 +73,6 @@ H5FL_DEFINE_STATIC(H5HL_dblk_t);
  * Return:      Success:    non-NULL pointer to new local heap data block
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
- *
  *-------------------------------------------------------------------------
  */
 H5HL_dblk_t *
@@ -122,9 +117,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -164,9 +156,6 @@ done:
  * Purpose:     Reallocate data block for heap
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */

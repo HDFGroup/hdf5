@@ -74,9 +74,6 @@ typedef struct {
  * Returns:     Success: 0
  *              Failure: 1
  *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
- *
  ******************************************************************************
  */
 static int
@@ -175,9 +172,6 @@ error:
  *
  * Returns:     The result of a standard malloc
  *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
- *
  ******************************************************************************
  */
 static void *
@@ -196,9 +190,6 @@ malloc_cb(size_t size, H5FD_file_image_op_t op, void *udata)
  * Purpose:     This function allows calls to the memcpy callback to be tracked.
  *
  * Returns:     The result of a standard memcpy
- *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
  *
  ******************************************************************************
  */
@@ -219,9 +210,6 @@ memcpy_cb(void *dest, const void *src, size_t size, H5FD_file_image_op_t op, voi
  *
  * Returns:     The result of a standard realloc
  *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
- *
  ******************************************************************************
  */
 static void *
@@ -238,9 +226,6 @@ realloc_cb(void *ptr, size_t size, H5FD_file_image_op_t op, void *udata)
  * Function:    free_cb
  *
  * Purpose:     This function allows calls to the free callback to be tracked.
- *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
  *
  ******************************************************************************
  */
@@ -264,9 +249,6 @@ free_cb(void *ptr, H5FD_file_image_op_t op, void *udata)
  *
  * Returns:     A pointer to the same udata that was passed in.
  *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
- *
  ******************************************************************************
  */
 static void *
@@ -287,9 +269,6 @@ udata_copy_cb(void *udata)
  *              udata_copy callback doesn't copy, only one instance of the udata
  *              is kept alive and such it must be freed explicitly at the end of the tests.
  *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
- *
  ******************************************************************************
  */
 static herr_t
@@ -307,9 +286,6 @@ udata_free_cb(void *udata)
  * Purpose:     Resets the udata to default values. This facilitates storing only
  *              the results of a single operation in the udata.
  *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
- *
  ******************************************************************************
  */
 static void
@@ -323,9 +299,6 @@ reset_udata(udata_t *u)
  * Function:    test_callbacks
  *
  * Purpose:     Tests that callbacks are called properly in property list functions.
- *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
  *
  ******************************************************************************
  */
@@ -543,9 +516,6 @@ error:
  * Purpose:     Tests that callbacks are called properly in the core VFD and
  *              that the initial file image works properly.
  *
- * Programmer:  Jacob Gruber
- *              Monday, August 22, 2011
- *
  ******************************************************************************
  */
 static int
@@ -695,9 +665,6 @@ error:
  * Function:    test_get_file_image
  *
  * Purpose:     Test the H5Fget_file_image() call.
- *
- * Programmer:  John Mainzer
- *              Tuesday, November 15, 2011
  *
  ******************************************************************************
  */
@@ -977,9 +944,6 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
  * Function:    test_get_file_image_error_rejection
  *
  * Purpose:     Verify that H5Fget_file_image() rejects invalid input.
- *
- * Programmer:  John Mainzer
- *              Tuesday, November 22, 2011
  *
  ******************************************************************************
  */

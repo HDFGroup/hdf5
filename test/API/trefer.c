@@ -3616,12 +3616,6 @@ test_reference(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Quincey Koziol
- *              September 8, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

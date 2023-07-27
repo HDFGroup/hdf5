@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Jan-Willem Blokland
- *              December 1, 2020
- *
  * Purpose:     Test writing compounded attribute followed by
  *              writing data with a data transform function.
  */

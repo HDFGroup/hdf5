@@ -49,9 +49,6 @@ static herr_t H5T__set_offset(const H5T_t *dt, size_t offset);
  * Return:	Success:	The offset (non-negative)
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -98,9 +95,6 @@ done:
  *
  * Return:	Success:	The offset (non-negative)
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, October 17, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -153,9 +147,6 @@ done:
  *		zero.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -218,9 +209,6 @@ done:
  *		zero.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */

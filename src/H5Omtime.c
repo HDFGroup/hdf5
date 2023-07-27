@@ -218,9 +218,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Jan  3 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -257,9 +254,6 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -293,9 +287,6 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
  * Return:	Success:	Ptr to _DEST
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -335,9 +326,6 @@ done:
  *
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *		Jan  3 2002
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -365,9 +353,6 @@ H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disabl
  *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
- *		Jul 14 1998
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -390,9 +375,6 @@ H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, March 30, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -413,9 +395,6 @@ H5O__mtime_free(void *mesg)
  * Purpose:	Prints debugging info for the message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
  *
  *-------------------------------------------------------------------------
  */

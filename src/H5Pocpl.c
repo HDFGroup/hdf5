@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:   H5Pocpl.c
- *            Nov 28 2006
- *            Quincey Koziol
  *
  * Purpose:   Object creation property list class routines
  *
@@ -143,9 +141,6 @@ static const H5O_pline_t H5O_def_pline_g  = H5O_CRT_PIPELINE_DEF;   /* Default I
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -201,9 +196,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -244,9 +236,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -282,9 +271,6 @@ done:
  * Purpose:     Set the flags for creation order of attributes on an object
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -334,9 +320,6 @@ done:
  *              for attributes on an object.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -394,9 +377,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -437,9 +417,6 @@ done:
  * Purpose:     Returns whether times are tracked for an object.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March  1, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -503,9 +480,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Wednesday, October 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -563,9 +537,6 @@ done:
  *              property list.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Friday, April  5, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -625,9 +596,6 @@ done:
  *      attempting to write will generate an error.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -691,9 +659,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -741,9 +706,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *              Tuesday, August  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -789,9 +751,6 @@ done:
  * Return:    Success:    Filter identification number.
  *
  *        Failure:    H5Z_FILTER_ERROR (Negative)
- *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -873,9 +832,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Wednesday, October 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -921,9 +877,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Friday, April  5, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -983,9 +936,6 @@ done:
  *                              more filters not currently available.
  *        Failure:    FAIL on error
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April  8, 2003
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1024,9 +974,6 @@ done:
  *        FALSE:        not found
  *              FAIL:         error
  *
- * Programmer:    Raymond Lu
- *              26 April 2013
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1056,9 +1003,6 @@ done:
  *  deletes all filters if FILTER is H5Z_FILTER_NONE
  *
  * Return: Non-negative on success/Negative on failure
- *
- * Programmer:  Pedro Vicente
- *              January 26, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1108,9 +1052,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1155,9 +1096,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *              Dec 19, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1196,9 +1134,6 @@ done:
  * Purpose:    Internal component of H5Pget_filter & H5Pget_filter_id
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Monday, October 23, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1272,9 +1207,6 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1308,9 +1240,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1347,9 +1276,6 @@ done:
  *
  * Return:       Success:    Non-negative
  *           Failure:    Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1439,9 +1365,6 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
  *
  * Return:       Success:    Non-negative
  *           Failure:    Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1533,9 +1456,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1564,9 +1484,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -1602,9 +1519,6 @@ done:
  * Return:         positive if VALUE1 is greater than VALUE2, negative if
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, January 7, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1698,9 +1612,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1740,9 +1651,6 @@ done:
  * Return:    Success:    Filter identification number.
  *
  *        Failure:    H5Z_FILTER_ERROR (Negative)
- *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1821,9 +1729,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Friday, April  5, 2003
  *
  *-------------------------------------------------------------------------
  */

@@ -54,9 +54,6 @@
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -92,9 +89,6 @@ done:
  * Purpose:     Handles the blob 'get' callback
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -138,9 +132,6 @@ done:
  * Purpose:     Handles the blob 'specific' callback
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
  *
  *-------------------------------------------------------------------------
  */

@@ -115,9 +115,6 @@ H5Z_class2_t H5Z_NBIT[1] = {{
  * Return:	Success: Non-negative
  *		Failure: Negative
  *
- * Programmer:  Xiaowen Wu
- *              Tuesday, December 21, 2004
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -151,9 +148,6 @@ done:
  *              of datatype that is not integer, nor floating-point, nor
  *              compound, and nor array.
  *
- * Programmer:  Xiaowen Wu
- *              Thursday, March 3, 2005
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -172,9 +166,6 @@ H5Z__calc_parms_nooptype(size_t *cd_values_actual_nparms)
  * Purpose:     Calculate the number of parameters of array cd_values[]
  *              of atomic datatype whose datatype class is integer
  *              or floating point
- *
- * Programmer:  Xiaowen Wu
- *              Saturday, January 29, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -206,9 +197,6 @@ H5Z__calc_parms_atomic(size_t *cd_values_actual_nparms)
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
- *
- * Programmer:  Xiaowen Wu
- *              Wednesday, January 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -288,9 +276,6 @@ done:
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
- *
- * Programmer:  Xiaowen Wu
- *              Wednesday, January 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -393,9 +378,6 @@ done:
  * Return:      Success: Non-negative
  *              Failure: Negative
  *
- * Programmer:  Xiaowen Wu
- *              Tuesday, April 5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -429,9 +411,6 @@ done:
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
- *
- * Programmer:  Xiaowen Wu
- *              Tuesday, January 11, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -520,9 +499,6 @@ done:
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
- *
- * Programmer:  Xiaowen Wu
- *              Tuesday, April 5, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -623,9 +599,6 @@ done:
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
- *
- * Programmer:  Xiaowen Wu
- *              Tuesday, April 5, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -769,9 +742,6 @@ done:
  *
  * Return:	Success: Non-negative
  *		Failure: Negative
- *
- * Programmer:	Xiaowen Wu
- *              Tuesday, January 11, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -940,9 +910,6 @@ done:
  *
  * Return:	Success: Size of buffer filtered
  *		Failure: 0
- *
- * Programmer:	Xiaowen Wu
- *              Friday, January 21, 2005
  *
  *-------------------------------------------------------------------------
  */

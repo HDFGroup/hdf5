@@ -73,9 +73,6 @@
  *
  * Return:      TRUE/FALSE/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Dec 19, 2006
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -103,9 +100,6 @@ done:
  * Purpose:     Retrieve the refcount for a shared attribute
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Dec 19, 2006
  *
  *-------------------------------------------------------------------------
  */

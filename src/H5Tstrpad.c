@@ -34,9 +34,6 @@
  *
  *		Failure:	H5T_STR_ERROR (Negative)
  *
- * Programmer:	Robb Matzke
- *		Friday, January	 9, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5T_str_t
@@ -85,9 +82,6 @@ done:
  *		spaces.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Friday, January	 9, 1998
  *
  *-------------------------------------------------------------------------
  */

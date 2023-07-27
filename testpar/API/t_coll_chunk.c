@@ -42,12 +42,6 @@ static void coll_chunktest(const char *filename, int chunk_factor, int select_fa
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -109,12 +103,6 @@ coll_chunk1(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -176,12 +164,6 @@ coll_chunk2(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -246,12 +228,6 @@ coll_chunk3(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -314,12 +290,6 @@ coll_chunk4(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -384,12 +354,6 @@ coll_chunk5(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -452,12 +416,6 @@ coll_chunk6(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -520,12 +478,6 @@ coll_chunk7(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -588,12 +540,6 @@ coll_chunk8(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -656,12 +602,6 @@ coll_chunk9(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -727,18 +667,6 @@ coll_chunk10(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Modifications:
- *   Remove invalid temporary property checkings for API_LINK_HARD and
- *   API_LINK_TRUE cases.
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 

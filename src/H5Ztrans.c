@@ -305,11 +305,6 @@ static void       H5Z__xform_reduce_tree(H5Z_node *tree);
     }
 
 /*
- *  Programmer: Bill Wendling
- *              25. August 2003
- */
-
-/*
  * This is the context-free grammar for our expressions:
  *
  * expr     :=  term    | term '+ term      | term '-' term
@@ -333,9 +328,6 @@ static void       H5Z__xform_reduce_tree(H5Z_node *tree);
  *              for our grammar.
  *
  * Return:      Always succeeds.
- *
- * Programmer:  Bill Wendling
- *              26. August 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -366,9 +358,6 @@ H5Z__unget_token(H5Z_token *current)
  *                              field.
  *              Failure:        The passed in H5Z_token but with the tok_type
  *                              field set to ERROR.
- *
- * Programmer:  Bill Wendling
- *              26. August 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -507,9 +496,6 @@ done:
  * Function:    H5Z__xform_destroy_parse_tree
  * Purpose:     Recursively destroys the expression tree.
  * Return:      Nothing
- * Programmer:  Bill Wendling
- *              25. August 2003
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -534,9 +520,6 @@ H5Z__xform_destroy_parse_tree(H5Z_node *tree)
  *
  * Return:      Success:    Valid H5Z_node ptr to an expression tree.
  *              Failure:    NULL
- *
- * Programmer:  Bill Wendling
- *              26. August 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -571,9 +554,6 @@ done:
  *
  * Return:      Success:    Valid H5Z_node ptr to expression tree
  *              Failure:    NULL
- *
- * Programmer:  Bill Wendling
- *              26. August 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -663,9 +643,6 @@ done:
  *
  * Return:      Success:    Valid H5Z_node ptr to expression tree
  *              Failure:    NULL
- *
- * Programmer:  Bill Wendling
- *              26. August 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -762,9 +739,6 @@ done:
  *
  * Return:      Success:    Valid H5Z_node ptr to expression tree
  *              Failure:    NULL
- *
- * Programmer:  Bill Wendling
- *              26. August 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -908,9 +882,6 @@ done:
  * Return:      Success:    Valid H5Z_node ptr
  *              Failure:    NULL
  *
- * Programmer:  Bill Wendling
- *              26. August 2003
- *
  *-------------------------------------------------------------------------
  */
 static H5Z_node *
@@ -936,9 +907,6 @@ done:
  *              Otherwise, it calls H5Z__xform_eval_full to do the full
  *              transform.
  * Return:      SUCCEED if transform applied successfully, FAIL otherwise
- * Programmer:  Leon Arber
- *              5/1/04
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1056,9 +1024,6 @@ done:
  *
  * Return:      Nothing
  *
- * Programmer:  Leon Arber
- *              5/1/04
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1151,8 +1116,6 @@ done:
  *
  * Return:      Native type of datatype that is passed in
  *
- * Programmer:  Leon Arber, 4/20/04
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -1222,9 +1185,6 @@ done:
  * Return:      A pointer to a root for a new parse tree which is a copy
  *              of the one passed in.
  *
- * Programmer:  Leon Arber
- *              April 1, 2004.
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1291,9 +1251,6 @@ done:
  *
  * Return:      TRUE or FALSE
  *
- * Programmer:  Raymond Lu
- *              15 March 2012
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1321,9 +1278,6 @@ H5Z__op_is_numbs(H5Z_node *_tree)
  *              can be empty, like -x or +x.
  *
  * Return:      TRUE or FALSE
- *
- * Programmer:  Raymond Lu
- *              15 March 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1354,9 +1308,6 @@ H5Z__op_is_numbs2(H5Z_node *_tree)
  *              and trivial arithmetic calculations.
  *
  * Return:      None.
- *
- * Programmer:  Leon Arber
- *              April 1, 2004.
  *
  *-------------------------------------------------------------------------
  */
@@ -1410,9 +1361,6 @@ H5Z__xform_reduce_tree(H5Z_node *tree)
  *
  * Return:      None.
  *
- * Programmer:  Leon Arber
- *              April 1, 2004.
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1440,10 +1388,6 @@ H5Z__do_op(H5Z_node *tree)
  * Return:
  *      Success: SUCCEED
  *      Failure: FAIL
- *
- * Programmer: Quincey Koziol
- *
- * Date: May 4, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1543,10 +1487,6 @@ done:
  *      Success: SUCCEED
  *      Failure: FAIL
  *
- * Programmer: Quincey Koziol
- *
- * Date: May 4, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1583,10 +1523,6 @@ H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop)
  * Return:
  *      Success: SUCCEED
  *      Failure: FAIL
- *
- * Programmer: Quincey Koziol
- *
- * Date: May 4, 2004
  *
  * Comments: This is an "in-place" copy, since this routine gets called
  *      after the top-level copy has been performed and this routine finishes
@@ -1673,10 +1609,6 @@ done:
  *
  * Return:  TRUE for no data transform, FALSE for a data transform
  *
- * Programmer: Quincey Koziol
- *
- * Date: May 4, 2004
- *
  * Comments: Can't fail
  *
  *-------------------------------------------------------------------------
@@ -1708,10 +1640,6 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
  *              data transform property.`
  * Return:
  *          Pointer to a copy of the string in the data_xform property.
- *
- * Programmer: Leon Arber
- *
- * Date: Sept. 4, 2004
  *
  *-------------------------------------------------------------------------
  */

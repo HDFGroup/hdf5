@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		tchecksum.c
- *			Aug 21 2006
- *			Quincey Koziol
  *
  * Purpose:		Test internal checksum routine(s)
  *
@@ -238,9 +236,6 @@ test_checksum(void)
  * Purpose:	Cleanup temporary test files
  *
  * Return:	none
- *
- * Programmer:	Quincey Koziol
- *              August 21, 2006
  *
  *-------------------------------------------------------------------------
  */

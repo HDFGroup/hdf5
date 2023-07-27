@@ -62,9 +62,6 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Oct 3, 2002
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -109,9 +106,6 @@ done:
  * Return:      Success:        Returns the native data type if successful.
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              Oct 3, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -542,9 +536,6 @@ H5_GCC_DIAG_OFF("duplicated-branches")
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Oct 3, 2002
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -701,9 +692,6 @@ H5_GCC_DIAG_OFF("duplicated-branches")
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Oct 3, 2002
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -815,9 +803,6 @@ H5_GCC_DIAG_OFF("duplicated-branches")
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              1 December 2009
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -909,9 +894,6 @@ H5_GCC_DIAG_ON("duplicated-branches")
  * Return:    Success:        Non-negative value.
  *
  *            Failure:        Negative value.
- *
- * Programmer:    Raymond Lu
- *        December  10, 2002
  *
  *-------------------------------------------------------------------------
  */

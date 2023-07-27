@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAhdr.c
- *			Aug 26 2008
- *			Quincey Koziol
  *
  * Purpose:		Array header routines for extensible arrays.
  *
@@ -96,9 +94,6 @@ H5FL_SEQ_DEFINE_STATIC(H5EA_sblk_info_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 26 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_hdr_t *
@@ -167,9 +162,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 18 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -231,9 +223,6 @@ done:
  * Purpose:	Allocate extensible array data block elements
  *
  * Return:	Non-NULL pointer to buffer for elements on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 16 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -303,9 +292,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 18 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -339,9 +325,6 @@ H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts)
  *
  * Return:      Success:    Address of new header in the file
  *              Failure:    HADDR_UNDEF
- *
- * Programmer:	Quincey Koziol
- *		Jun 17 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -471,9 +454,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 26 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -504,9 +484,6 @@ done:
  * Purpose:	Decrement component reference count on shared array header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Aug 26 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -542,9 +519,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 26 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -568,9 +542,6 @@ H5EA__hdr_fuse_incr(H5EA_hdr_t *hdr)
  *
  * Return:      Success:    The reference count of the header
  *              Failure:    Can't fail
- *
- * Programmer:	Quincey Koziol
- *		Aug 26 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -601,9 +572,6 @@ H5EA__hdr_fuse_decr(H5EA_hdr_t *hdr)
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -631,9 +599,6 @@ done:
  * Purpose:	Convenience wrapper around protecting extensible array header
  *
  * Return:	Non-NULL pointer to header on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Jul 31 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -690,9 +655,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug  1 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -720,9 +682,6 @@ done:
  * Purpose:	Delete an extensible array, starting with the header
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug 26 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -775,9 +734,6 @@ done:
  * Purpose:	Destroys an extensible array header in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */

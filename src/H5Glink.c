@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Glink.c
- *			Nov 13 2006
- *			Quincey Koziol
  *
  * Purpose:		Functions for handling links in groups.
  *
@@ -86,9 +84,6 @@ static int H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2);
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. same as strcmp())
  *
- * Programmer:	Quincey Koziol
- *		Sep  5 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -111,9 +106,6 @@ H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2)
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. opposite strcmp())
  *
- * Programmer:	Quincey Koziol
- *		Sep 25 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -134,9 +126,6 @@ H5G__link_cmp_name_dec(const void *lnk1, const void *lnk2)
  *              first argument is considered to be respectively less than,
  *              equal to, or greater than the second.  If two members compare
  *              as equal, their order in the sorted array is undefined.
- *
- * Programmer:	Quincey Koziol
- *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -168,9 +157,6 @@ H5G__link_cmp_corder_inc(const void *lnk1, const void *lnk2)
  *              equal to, or greater than the first.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *
- * Programmer:	Quincey Koziol
- *		Nov  6 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -196,9 +182,6 @@ H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2)
  * Purpose:     Convert a symbol table entry to a link
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 16 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -263,9 +246,6 @@ done:
  * Purpose:	Retrieve information from a link object
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November  7 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -345,9 +325,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 20 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -390,9 +367,6 @@ done:
  * Purpose:     Sort table containing a list of links for a group
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Nov 20, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -445,9 +419,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Nov 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -493,9 +464,6 @@ H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip, hsize_t *l
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Sep  6, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -533,9 +501,6 @@ done:
  *              the link type (for soft links and user-defined links).
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov 13 2006
  *
  *-------------------------------------------------------------------------
  */

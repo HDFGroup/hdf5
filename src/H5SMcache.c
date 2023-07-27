@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5SMcache.c
- *			Nov 13 2006
- *			James Laird
  *
  * Purpose:		Implement shared message metadata cache methods.
  *
@@ -121,9 +119,6 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              7/28/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -152,8 +147,6 @@ H5SM__cache_table_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer: 	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -189,9 +182,6 @@ H5SM__cache_table_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  *
  * Return:      Success:        Pointer to in core representation
  *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              7/28/14
  *
  *-------------------------------------------------------------------------
  */
@@ -309,9 +299,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              7/28/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -341,9 +328,6 @@ H5SM__cache_table_image_len(const void *_thing, size_t *image_len)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              7/28/14
  *
  *-------------------------------------------------------------------------
  */
@@ -430,9 +414,6 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              7/28/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -466,9 +447,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              7/28/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -498,8 +476,6 @@ H5SM__cache_list_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -540,9 +516,6 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
  *
  * Return:      Success:        Pointer to in core representation
  *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              7/28/14
  *
  *-------------------------------------------------------------------------
  */
@@ -625,9 +598,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              7/28/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -657,9 +627,6 @@ H5SM__cache_list_image_len(const void *_thing, size_t *image_len)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              7/28/14
  *
  *-------------------------------------------------------------------------
  */
@@ -733,9 +700,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              7/28/14
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Dana Robinson
- *              May, 2011
- *
  * Purpose:     Tests the operation of the platform-independent timers.
  */
 
@@ -26,9 +23,6 @@
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -114,9 +108,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -181,9 +172,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -367,9 +355,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Dana Robinson
- *              May, 2011
  *
  *-------------------------------------------------------------------------
  */

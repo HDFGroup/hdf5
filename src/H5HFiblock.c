@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFiblock.c
- *			Apr 10 2006
- *			Quincey Koziol
  *
  * Purpose:		Indirect block routines for fractal heaps.
  *
@@ -88,9 +86,6 @@ H5FL_SEQ_DEFINE(H5HF_indirect_ptr_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 17 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -153,9 +148,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 17 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -182,9 +174,6 @@ done:
  * Purpose:	Increment reference count on shared indirect block
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -217,9 +206,6 @@ done:
  * Purpose:	Decrement reference count on shared indirect block
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -298,9 +284,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar 21 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -327,9 +310,6 @@ done:
  * Purpose:	Create root indirect block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		May  2 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -477,9 +457,6 @@ done:
  * Purpose:	Double size of root indirect block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -660,9 +637,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Jun 12 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -794,9 +768,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May 31 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -884,9 +855,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July  6 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -949,9 +917,6 @@ done:
  * Purpose:	Allocate & initialize a managed indirect block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Mar  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1098,9 +1063,6 @@ done:
  *
  * Return:	Pointer to indirect block on success, NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Apr 17 2006
- *
  *-------------------------------------------------------------------------
  */
 H5HF_indirect_t *
@@ -1226,9 +1188,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1276,9 +1235,6 @@ done:
  * Purpose:	Attach a child block (direct or indirect) to an indirect block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		May 30 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1339,9 +1295,6 @@ done:
  * Purpose:	Detach a child block (direct or indirect) from an indirect block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		May 31 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1557,9 +1510,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		July 10 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1589,9 +1539,6 @@ H5HF__man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry, haddr_t *ch
  *              being deleted in a top-down fashion.
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1703,8 +1650,6 @@ done:
  *
  * Return:      non-negative on success, negative on error
  *
- * Programmer:  Vailin Choi
- *              July 12 2007
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1777,9 +1722,6 @@ done:
  *
  * Return:	Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Jan 14 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1848,9 +1790,6 @@ done:
  * Purpose:	Destroys a fractal heap indirect block in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar  6 2006
  *
  *-------------------------------------------------------------------------
  */

@@ -82,9 +82,6 @@ H5FL_BLK_DEFINE(fa_page_init);
  *
  * Return:      Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 H5FA_dblock_t *
@@ -166,9 +163,6 @@ done:
  * Purpose:     Creates a fixed array data block in the file
  *
  * Return:      Valid file address on success/HADDR_UNDEF on failure
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -256,9 +250,6 @@ done:
  *
  * Return:      Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 H5FA_dblock_t *
@@ -319,9 +310,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -350,9 +338,6 @@ done:
  * Purpose:     Delete a data block
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -409,9 +394,6 @@ done:
  * Purpose:     Destroys a fixed array data block in memory.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */

@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Friday, January 23, 1998
- */
-
 /* See H5private.h for how to include headers */
 #undef NDEBUG
 
@@ -123,9 +118,6 @@ typedef struct {
  * Return:    Success:    0
  *
  *        Failure:    1
- *
- * Programmer:    Robb Matzke
- *              Friday, January 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -810,9 +802,6 @@ error:
  *
  * Return:    void
  *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -850,9 +839,6 @@ initialize_stype1(unsigned char *buf, size_t num)
  * Purpose:    Initialize data buffer.
  *
  * Return:    void
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -896,9 +882,6 @@ initialize_stype2(unsigned char *buf, size_t num)
  *
  * Return:    Success:
  *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -924,9 +907,6 @@ initialize_stype3(unsigned char *buf, size_t num)
  * Purpose:    Initialize data buffer.
  *
  * Return:    void
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -975,9 +955,6 @@ initialize_stype4(unsigned char *buf, size_t num)
  * Return:    Success:        datatype ID
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1029,9 +1006,6 @@ error:
  * Return:    Success:        datatype ID
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1087,9 +1061,6 @@ error:
  *
  *              Failure:        negative
  *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -1127,9 +1098,6 @@ error:
  * Return:    Success:        datatype ID
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1187,9 +1155,6 @@ error:
  * Return:    Success:        0
  *
  *              Failure:        negative
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1269,9 +1234,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    1
- *
- * Programmer:    Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1475,9 +1437,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    1
- *
- * Programmer:    Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1683,9 +1642,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    1
- *
- * Programmer:    Neil Fortner
- *              Thursday, 22 January 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1959,9 +1915,6 @@ error:
  *
  *        Failure:    1
  *
- * Programmer:    Neil Fortner
- *              Monday, 19 October 2009
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2198,9 +2151,6 @@ error:
  * Return:    Success:         0
  *
  *              Failure:         1
- *
- * Programmer:  Raymond Lu
- *              Friday, 15 June 2007
  *
  *-------------------------------------------------------------------------
  */

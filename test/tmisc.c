@@ -6180,8 +6180,6 @@ test_misc(void)
  *
  * Return:    none
  *
- * Programmer:    Albert Cheng
- *              July 2, 1998
  *-------------------------------------------------------------------------
  */
 void

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFman.c
- *			Feb 24 2006
- *			Quincey Koziol
  *
  * Purpose:		"Managed" object routines for fractal heaps.
  *
@@ -86,9 +84,6 @@ static herr_t H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operato
  * Purpose:	Insert an object in a managed direct block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Mar 13 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -211,9 +206,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Dana Robinson
- *              August 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -248,9 +240,6 @@ H5HF__man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
- *		Aug 20 2015
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -281,9 +270,6 @@ H5HF__man_get_obj_off(const H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off
  *              object
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Mar 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -433,9 +419,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Mar 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -466,9 +449,6 @@ done:
  * Purpose:	Write an object to a managed heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -508,9 +488,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -541,9 +518,6 @@ done:
  * Purpose:	Remove an object from a managed heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		May 15 2006
  *
  *-------------------------------------------------------------------------
  */

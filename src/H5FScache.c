@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FScache.c
- *              May  2 2006
- *              Quincey Koziol
  *
  * Purpose:     Implement file free space metadata cache methods.
  *
@@ -147,9 +145,6 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 14, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -178,8 +173,6 @@ H5FS__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -215,9 +208,6 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *
  * Return:	Success:	Pointer to new object
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		August 18 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -329,9 +319,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 14, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -374,9 +361,6 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -674,9 +658,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -778,9 +759,6 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              January 3, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -840,9 +818,6 @@ done:
  * Return:	Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:	Quincey Koziol
- *		May  2 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -878,9 +853,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		7/7/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -912,8 +884,6 @@ H5FS__cache_sinfo_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -949,9 +919,6 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  *
  * Return:	Success:	Pointer to in core representation
  *		Failure:	NULL
- *
- * Programmer:	John Mainzer
- *		7/7/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1110,9 +1077,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 14, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1147,9 +1111,6 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		7/7/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1231,9 +1192,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1308,9 +1266,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1380,9 +1335,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1416,9 +1368,6 @@ done:
  *              of a particular size
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Monday, May  8, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1471,9 +1420,6 @@ done:
  *              in a bin
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Monday, May  8, 2006
  *
  *-------------------------------------------------------------------------
  */

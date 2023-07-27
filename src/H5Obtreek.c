@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Thursday, March  1, 2007
- *
+/*
  * Purpose:	A message holding non-default v1 B-tree 'K' value
  *              information in the superblock extension.
  */
@@ -119,9 +117,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -154,9 +149,6 @@ H5O__btreek_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_share
  *
  * Return:	Success:	Ptr to _DEST
  *		Failure:	NULL
- *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -195,9 +187,6 @@ done:
  * Return:	Success:	Message data size in bytes w/o alignment.
  *		Failure:	0
  *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -225,9 +214,6 @@ H5O__btreek_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
  * Purpose:	Prints debugging info for the message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */

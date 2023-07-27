@@ -7282,9 +7282,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, August 21, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7441,9 +7438,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Saturday, August 17, 2019
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -7537,9 +7531,6 @@ done:
  * Purpose:	Optional operation on blobs through the VOL
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *		Thursday, November 14, 2019
  *
  *-------------------------------------------------------------------------
  */

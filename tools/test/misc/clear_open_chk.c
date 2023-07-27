@@ -32,8 +32,6 @@ usage(void)
  * Return:    0 on success
  *        1 on failure
  *
- * Programmer:    Vailin Choi; July 2013
- *
  *-------------------------------------------------------------------------
  */
 int

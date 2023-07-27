@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, October 26, 1998
- *
  * Purpose:	Create a dataset with a simple data space that has the
  *		maximum possible number of dimensions. This program is used
  *		to create the test file `th5s.h5' which has a data space with
@@ -33,9 +30,6 @@
  * Return:	Success:
  *
  *		Failure:
- *
- * Programmer:	Robb Matzke
- *              Monday, October 26, 1998
  *
  *-------------------------------------------------------------------------
  */

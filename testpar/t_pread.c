@@ -73,10 +73,6 @@ static char *test_argv0 = NULL;
  * Return:      Success: 0
  *
  *              Failure: 1
- *
- * Programmer:  Richard Warren
- *              10/1/17
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -477,10 +473,6 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
  * Return:      Success: 0
  *
  *              Failure: 1
- *
- * Programmer:  Richard Warren
- *              10/1/17
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1049,9 +1041,6 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
  *
  * Return:      Success: 0
  *              Failure: 1
- *
- * Programmer:  Richard Warren
- *              10/1/17
  *-------------------------------------------------------------------------
  */
 

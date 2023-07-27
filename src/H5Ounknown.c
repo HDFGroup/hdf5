@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Ounknown.c
- *                      Apr 19 2007
- *                      Quincey Koziol
  *
  * Purpose:             Handle unknown message classes in a minimal way.
  *
@@ -64,9 +62,6 @@ H5FL_DEFINE(H5O_unknown_t);
  * Purpose:     Frees the message
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, May 1, 2007
  *
  *-------------------------------------------------------------------------
  */

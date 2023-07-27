@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HF.c
- *			Feb 24 2006
- *			Quincey Koziol
  *
  * Purpose:		Implements a "fractal heap" for storing variable-
  *                      length objects in a file.
@@ -80,9 +78,6 @@ H5FL_DEFINE_STATIC(H5HF_t);
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -102,9 +97,6 @@ H5HF__op_read(const void *obj, size_t obj_len, void *op_data)
  * Purpose:	Performs a 'write' operation for a heap 'op' callback
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -132,9 +124,6 @@ H5HF__op_write(const void *obj, size_t obj_len, void *op_data)
  *
  * Return:	Pointer to heap wrapper on success
  *              NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -199,9 +188,6 @@ done:
  * Return:	Pointer to heap wrapper on success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Apr 18 2006
- *
  *-------------------------------------------------------------------------
  */
 H5HF_t *
@@ -263,9 +249,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Apr 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -291,9 +274,6 @@ H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p)
  * Purpose:	Get the address of a fractal heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 18 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -321,9 +301,6 @@ H5HF_get_heap_addr(const H5HF_t *fh, haddr_t *heap_addr_p)
  *
  * Return:	Non-negative on success (with heap ID of new object
  *              filled in), negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 24 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -391,9 +368,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May  9 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -451,9 +425,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 20 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -510,9 +481,6 @@ done:
  * Purpose:	Read an object from a fractal heap into a buffer
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Mar 18 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -586,9 +554,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec 18 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -655,9 +620,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -718,9 +680,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May 15 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -780,9 +739,6 @@ done:
  * Purpose:	Close a fractal heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -875,9 +831,6 @@ done:
  * Purpose:	Delete a fractal heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug  4 2006
  *
  *-------------------------------------------------------------------------
  */

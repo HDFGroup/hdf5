@@ -345,11 +345,6 @@ typedef struct {
  * Return:  1:  decode+encode is enabled
  *    0:  only decode is enabled
  *              -1: other
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -6302,8 +6297,6 @@ test_misc(void)
  *
  * Return:    none
  *
- * Programmer:    Albert Cheng
- *              July 2, 1998
  *-------------------------------------------------------------------------
  */
 void

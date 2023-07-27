@@ -101,9 +101,6 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
  *  lapl_id          - Link access property list identifier.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 21, 2008
  * SOURCE
  */
 int_f
@@ -146,9 +143,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  September 14, 2009
  * SOURCE
  */
 int_f
@@ -188,9 +182,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  December 1, 2008
  * SOURCE
  */
 int_f
@@ -237,9 +228,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  December 1, 2008
  * SOURCE
  */
 int_f
@@ -290,9 +278,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 16, 2012
  * SOURCE
  */
 int_f
@@ -323,9 +308,6 @@ done:
  *  object_id - Object identifier.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 16, 2012
  * SOURCE
  */
 int_f
@@ -357,9 +339,6 @@ done:
  *
  * RETURNS
  *  link status: 0 = false, 1 = true, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 17, 2012
  * SOURCE
  */
 int_f
@@ -396,9 +375,6 @@ done:
  *  object_id - Object identifier.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 16, 2012
  * SOURCE
  */
 int_f
@@ -428,9 +404,6 @@ done:
  *  commentlen - Length of the comment.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 17, 2012
  * SOURCE
  */
 int_f
@@ -473,9 +446,6 @@ done:
  *  lapl_id    - Link access property list identifier.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 17, 2012
  * SOURCE
  */
 int_f
@@ -525,9 +495,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 24, 2012
  * SOURCE
  */
 int_f
@@ -581,9 +548,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  July 6, 2012
  * SOURCE
  */
 int_f
@@ -656,9 +620,6 @@ done:
  *  cmp_value - Whether the tokens are equal.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  January 10, 2019
  * SOURCE
  */
 int_f

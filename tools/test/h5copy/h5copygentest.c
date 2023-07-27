@@ -491,7 +491,6 @@ gent_nested_group(hid_t loc_id)
  *
  * Purpose: Generate object references to dataset and group
  *
- * Programmer: Jonathan Kim (Feb 23, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_obj_ref(hid_t loc_id)
@@ -592,7 +591,6 @@ out:
  *
  * Purpose: Generate dataset region references
  *
- * Programmer: Jonathan Kim (Feb 23, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_region_ref(hid_t loc_id)
@@ -799,7 +797,6 @@ out:
  *
  * Purpose: generate target external link objs
  *
- * Programmer: Jonathan Kim (March 03, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_extlink_trg(hid_t loc_id)
@@ -849,7 +846,6 @@ out:
  *
  * Purpose: generate source external link objs
  *
- * Programmer: Jonathan Kim (March 03, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_extlink_src(hid_t loc_id)

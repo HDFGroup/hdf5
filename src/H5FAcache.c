@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FAcache.c
- *		Jul  2 2009
- *		Quincey Koziol
  *
  * Purpose:     Implement fixed array metadata cache methods.
  *
@@ -161,9 +159,6 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              July 31, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -192,8 +187,6 @@ H5FA__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -226,9 +219,6 @@ H5FA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *
  * Return:	Success:	Pointer to a new Fixed array
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              August 12, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -339,9 +329,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 12, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -367,9 +354,6 @@ H5FA__cache_hdr_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              August 12, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -428,9 +412,6 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Dana Robinson
- *              December 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -511,9 +492,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              August 12, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -540,9 +518,6 @@ done:
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              August 12, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -595,8 +570,6 @@ H5FA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
  *
- * Programmer:	Vailin Choi; Aug 2015
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -628,9 +601,6 @@ H5FA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              August 14, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -729,9 +699,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 14, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -760,9 +727,6 @@ H5FA__cache_dblock_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              August 14, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -834,9 +798,6 @@ done:
  * Purpose:     Handle cache action notifications
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -910,9 +871,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              August 14, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -958,9 +916,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	John Mainzer
- *              12/5/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -987,9 +942,6 @@ H5FA__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              August 14, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1020,8 +972,6 @@ H5FA__cache_dblk_page_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1054,9 +1004,6 @@ H5FA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              August 14, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1129,9 +1076,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 14, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1157,9 +1101,6 @@ H5FA__cache_dblk_page_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty object to disk.
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              August 14, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1209,9 +1150,6 @@ done:
  * Purpose:	Handle cache action notifications
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 17 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1273,9 +1211,6 @@ done:
  *              structure
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              August 14, 2013
  *
  *-------------------------------------------------------------------------
  */

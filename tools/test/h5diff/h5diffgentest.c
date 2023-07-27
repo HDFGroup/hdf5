@@ -30,10 +30,6 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
  *
  * Purpose: generate files for h5diff testing
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2077,8 +2073,6 @@ test_special_datasets(const char *file, int make_diffs /* flag to modify data bu
  * Purpose: Create test files to compare links, one has longer name than
  *          the other and short name is subset of long name.
  *
- * Programmer: Jonathan Kim (Feb 17, 2010)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_link_name(const char *fname1)
@@ -2149,8 +2143,6 @@ out:
 /*-------------------------------------------------------------------------
  *
  * Purpose: Create test files to compare soft links in various way
- *
- * Programmer: Jonathan Kim (Feb 17, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -2269,8 +2261,6 @@ out:
 /*-------------------------------------------------------------------------
  *
  * Purpose: Create test files to compare linked soft links in various way
- *
- * Programmer: Jonathan Kim (Feb 17, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -2452,8 +2442,6 @@ out:
  *
  * Purpose: Create test files to compare external links in various way
  *
- * Programmer: Jonathan Kim (Feb 17, 2010)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_external_links(const char *fname1, const char *fname2)
@@ -2599,8 +2587,6 @@ out:
  *
  * Purpose: Create test files to compare external links which point to
  *          soft link in various way
- *
- * Programmer: Jonathan Kim (Feb 17, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -2820,8 +2806,6 @@ gen_dataset_idx(const char *file, int format)
  *
  * Purpose: Create test files to compare dangling links in various way
  *
- * Programmer: Jonathan Kim (Feb 17, 2010)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_dangle_links(const char *fname1, const char *fname2)
@@ -3020,8 +3004,6 @@ out:
 /*-------------------------------------------------------------------------
  *
  * Purpose: For testing comparing group member objects recursively
- *
- * Programmer: Jonathan Kim (Aug 19, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -3434,8 +3416,6 @@ out:
  *   For testing comparing group member objects recursively via multiple
  *   linked external links
  *
- * Programmer: Jonathan Kim (Sep 16, 2010)
- *
  *-------------------------------------------------------------------------*/
 #define GRP_R_DSETNAME1 "dset1"
 #define GRP_R_DSETNAME2 "dset2"
@@ -3748,8 +3728,6 @@ out:
  *          Same structure, same obj names
  * Test : exclude obj with different value to verify the rest are same
  *
- * Programmer: Jonathan Kim (July, 21, 2010)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_exclude_obj1(const char *fname1, const char *fname2)
@@ -3868,8 +3846,6 @@ out:
  * Purpose: Create test files for excluding obj.
  *          different structure and name
  * Test : exclude different objs to verify the rest are same
- *
- * Programmer: Jonathan Kim (July, 21, 2010)
  *
  *-------------------------------------------------------------------------*/
 static int
@@ -4001,8 +3977,6 @@ out:
  *          Only one file contains unique objs. Common objs are same.
  * Test : exclude unique objs to verify the rest are same - HDFFV-7837
  *
- * Programmer: Jonathan Kim (Mar, 19, 2012)
- *
  *-------------------------------------------------------------------------*/
 static int
 test_exclude_obj3(const char *fname1, const char *fname2)
@@ -4087,8 +4061,6 @@ out:
  * Purpose: Create test files for multiple variable length string/string array
  *          along with fixed length string/string array types in
  *          a compound type dataset.
- *
- * Programmer: Jonathan Kim (Oct, 26, 2010)
  *
  *-------------------------------------------------------------------------*/
 #define STR_RANK             1
@@ -4761,8 +4733,6 @@ out:
  *
  * Purpose: Test diffs of enum values which may include invalid values.
  *
- * Programmer: Dana Robinson
- *
  *-------------------------------------------------------------------------*/
 
 static int
@@ -4871,8 +4841,6 @@ out:
  *
  * Function: test_comps_vlen_arry()
  *  - type: compound->vlen->compound->array->compound
- *
- * Programmer: Jonathan Kim (Sep, 1, 2011)
  *
  *-------------------------------------------------------------------------*/
 #define SDIM_DSET       2

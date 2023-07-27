@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Wednesday, May 13, 1998
- *
  * Purpose:    Repartitions a file family.  This program can be used to
  *        split a single file into a family of files, join a family of
  *        files into a single file, or copy one family to another while
@@ -41,9 +38,6 @@
  * Purpose:    Prints a usage message.
  *
  * Return:    void
- *
- * Programmer:    Robb Matzke
- *              Wednesday, May 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -86,8 +80,6 @@ usage(const char *progname)
  *        Failure:    Calls usage() which exits with a non-zero
  *                status.
  *
- * Programmer:    Robb Matzke
- *              Wednesday, May 13, 1998
  *-------------------------------------------------------------------------
  */
 static off_t
@@ -140,9 +132,6 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
  * Return:    Success:
  *
  *        Failure:
- *
- * Programmer:    Robb Matzke
- *              Wednesday, May 13, 1998
  *
  *-------------------------------------------------------------------------
  */
