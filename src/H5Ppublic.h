@@ -3527,7 +3527,7 @@ H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
  *          string is simply returned. The caller can then allocate a buffer
  *          of the appropriate size and call this routine again.
  *
- * \version 1.12.1 Function publicized in this release.
+ * \version 1.14.0 Function publicized in this release.
  *
  */
 H5_DLL ssize_t H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size);
@@ -4388,7 +4388,7 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_
  *          registered, an attempt will be made to load the driver as a
  *          plugin.
  *
- * \version 1.12.1 Function publicized in this release.
+ * \version 1.14.0 Function publicized in this release.
  *
  */
 H5_DLL herr_t H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, const char *driver_config);
@@ -4413,7 +4413,7 @@ H5_DLL herr_t H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, con
  *          registered, an attempt will be made to load the driver as a
  *          plugin.
  *
- * \version 1.12.1 Function publicized in this release.
+ * \version 1.14.0 Function publicized in this release.
  *
  */
 H5_DLL herr_t H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_value,
