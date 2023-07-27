@@ -2623,7 +2623,7 @@ H5D__cmp_piece_addr(const void *piece_info1, const void *piece_info2)
     addr1 = (*((const H5D_piece_info_t *const *)piece_info1))->faddr;
     addr2 = (*((const H5D_piece_info_t *const *)piece_info2))->faddr;
 
-    FUNC_LEAVE_NOAPI(H5F_addr_cmp(addr1, addr2))
+    FUNC_LEAVE_NOAPI(H5_addr_cmp(addr1, addr2))
 } /* end H5D__cmp_chunk_addr() */
 
 /*-------------------------------------------------------------------------
@@ -2658,23 +2658,23 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
     addr2 = entry2->chunk_new.offset;
 
     /*
-     * If both chunk addresses are defined, H5F_addr_cmp is safe to use.
+     * If both chunk addresses are defined, H5_addr_cmp is safe to use.
      * Otherwise, if both addresses aren't defined, compared chunk
      * entries based on their chunk index. Finally, if only one chunk
      * address is defined, return the appropriate value based on which
      * is defined.
      */
-    if (H5F_addr_defined(addr1) && H5F_addr_defined(addr2)) {
-        ret_value = H5F_addr_cmp(addr1, addr2);
+    if (H5_addr_defined(addr1) && H5_addr_defined(addr2)) {
+        ret_value = H5_addr_cmp(addr1, addr2);
     }
-    else if (!H5F_addr_defined(addr1) && !H5F_addr_defined(addr2)) {
+    else if (!H5_addr_defined(addr1) && !H5_addr_defined(addr2)) {
         hsize_t chunk_idx1 = entry1->index_info.chunk_idx;
         hsize_t chunk_idx2 = entry2->index_info.chunk_idx;
 
         ret_value = (chunk_idx1 > chunk_idx2) - (chunk_idx1 < chunk_idx2);
     }
     else
-        ret_value = H5F_addr_defined(addr1) ? 1 : -1;
+        ret_value = H5_addr_defined(addr1) ? 1 : -1;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__cmp_filtered_collective_io_info_entry() */
@@ -2757,23 +2757,23 @@ H5D__cmp_chunk_redistribute_info_orig_owner(const void *_entry1, const void *_en
         haddr_t addr2 = entry2->chunk_block.offset;
 
         /*
-         * If both chunk addresses are defined, H5F_addr_cmp is safe to use.
+         * If both chunk addresses are defined, H5_addr_cmp is safe to use.
          * Otherwise, if both addresses aren't defined, compared chunk
          * entries based on their chunk index. Finally, if only one chunk
          * address is defined, return the appropriate value based on which
          * is defined.
          */
-        if (H5F_addr_defined(addr1) && H5F_addr_defined(addr2)) {
-            ret_value = H5F_addr_cmp(addr1, addr2);
+        if (H5_addr_defined(addr1) && H5_addr_defined(addr2)) {
+            ret_value = H5_addr_cmp(addr1, addr2);
         }
-        else if (!H5F_addr_defined(addr1) && !H5F_addr_defined(addr2)) {
+        else if (!H5_addr_defined(addr1) && !H5_addr_defined(addr2)) {
             hsize_t chunk_idx1 = entry1->chunk_idx;
             hsize_t chunk_idx2 = entry2->chunk_idx;
 
             ret_value = (chunk_idx1 > chunk_idx2) - (chunk_idx1 < chunk_idx2);
         }
         else
-            ret_value = H5F_addr_defined(addr1) ? 1 : -1;
+            ret_value = H5_addr_defined(addr1) ? 1 : -1;
     }
     else
         ret_value = (owner1 > owner2) - (owner1 < owner2);
@@ -3134,7 +3134,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                 haddr_t curr_chunk_offset = local_info_array[i].chunk_current.offset;
                 haddr_t prev_chunk_offset = local_info_array[i - 1].chunk_current.offset;
 
-                if (!H5F_addr_defined(prev_chunk_offset) || !H5F_addr_defined(curr_chunk_offset) ||
+                if (!H5_addr_defined(prev_chunk_offset) || !H5_addr_defined(curr_chunk_offset) ||
                     (curr_chunk_offset < prev_chunk_offset))
                     need_sort = TRUE;
             }
@@ -4141,7 +4141,7 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
             assert(chunk_list[i].buf);
 
             if (chunk_list[i].need_read) {
-                if (!H5F_addr_defined(base_read_offset))
+                if (!H5_addr_defined(base_read_offset))
                     base_read_offset = chunk_list[i].chunk_current.offset;
 
                 num_chunks++;
@@ -4297,7 +4297,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
          * read it from the file. Instead, just fill the chunk buffer
          * with the fill value if necessary.
          */
-        if (H5F_addr_defined(chunk_list[i].chunk_current.offset)) {
+        if (H5_addr_defined(chunk_list[i].chunk_current.offset)) {
             /* Set first read buffer */
             if (!base_read_buf)
                 base_read_buf = chunk_list[i].buf;
@@ -4519,7 +4519,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
          * out fill values to it, make sure to 0-fill its memory buffer
          * so we don't use uninitialized memory.
          */
-        if (!H5F_addr_defined(chunk_list[i].chunk_current.offset) && !should_fill)
+        if (!H5_addr_defined(chunk_list[i].chunk_current.offset) && !should_fill)
             chunk_list[i].buf = H5MM_calloc(chunk_list[i].chunk_buf_size);
         else
             chunk_list[i].buf = H5MM_malloc(chunk_list[i].chunk_buf_size);
@@ -4537,7 +4537,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
              * read it from the file. Instead, just fill the chunk buffer
              * with the fill value if fill values are to be written.
              */
-            if (H5F_addr_defined(chunk_list[i].chunk_current.offset)) {
+            if (H5_addr_defined(chunk_list[i].chunk_current.offset)) {
                 /* Set first read buffer */
                 if (!base_read_buf)
                     base_read_buf = chunk_list[i].buf;
@@ -4919,7 +4919,7 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
                 haddr_t curr_chunk_offset = local_chunk->chunk_new.offset;
                 haddr_t prev_chunk_offset = chunk_list[num_local_chunks_processed - 1].chunk_new.offset;
 
-                assert(H5F_addr_defined(prev_chunk_offset) && H5F_addr_defined(curr_chunk_offset));
+                assert(H5_addr_defined(prev_chunk_offset) && H5_addr_defined(curr_chunk_offset));
                 if (curr_chunk_offset < prev_chunk_offset)
                     need_sort = TRUE;
             }
@@ -5688,7 +5688,7 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                      * set the base chunk offset and base chunk
                      * data buffer if we haven't already
                      */
-                    if (!H5F_addr_defined(base_offset)) {
+                    if (!H5_addr_defined(base_offset)) {
 #if H5_CHECK_MPI_VERSION(3, 0)
                         if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[i].buf, &base_buf)))
                             HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
@@ -5708,7 +5708,7 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                  * Set the current chunk entry's offset in the file, relative to
                  * the first chunk entry
                  */
-                assert(H5F_addr_defined(chunk_block->offset));
+                assert(H5_addr_defined(chunk_block->offset));
                 file_offset_array[chunk_count] = (MPI_Aint)(chunk_block->offset - base_offset);
 
                 /*

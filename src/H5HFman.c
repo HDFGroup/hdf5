@@ -359,7 +359,7 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
         dblock_size = (size_t)hdr->man_dtable.row_block_size[entry / hdr->man_dtable.cparam.width];
 
         /* Check for offset of invalid direct block */
-        if (!H5F_addr_defined(dblock_addr)) {
+        if (!H5_addr_defined(dblock_addr)) {
             /* Unlock indirect block */
             if (H5HF__man_iblock_unprotect(iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL,
@@ -579,7 +579,7 @@ H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section")
 
         /* Check for offset of invalid direct block */
-        if (!H5F_addr_defined(iblock->ents[dblock_entry].addr))
+        if (!H5_addr_defined(iblock->ents[dblock_entry].addr))
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap ID not in allocated direct block")
 
         /* Set direct block info */

@@ -2800,7 +2800,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
     assert(file);
     assert(H5FD_MPIO == file->pub.driver_id);
 
-    if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
+    if (!H5_addr_eq(file->eoa, file->last_eoa)) {
         int        mpi_code; /* mpi return code */
         MPI_Offset size;
         MPI_Offset needed_eof;

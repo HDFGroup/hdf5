@@ -352,7 +352,7 @@ H5HF__huge_bt2_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     assert(ctx);
 
     /* Encode the record's fields */
-    H5F_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
+    H5_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
     H5F_ENCODE_LENGTH_LEN(raw, nrecord->len, ctx->sizeof_size);
     H5F_ENCODE_LENGTH_LEN(raw, nrecord->id, ctx->sizeof_size);
 
@@ -381,7 +381,7 @@ H5HF__huge_bt2_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     assert(ctx);
 
     /* Decode the record's fields */
-    H5F_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
+    H5_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
     H5F_DECODE_LENGTH_LEN(raw, nrecord->len, ctx->sizeof_size);
     H5F_DECODE_LENGTH_LEN(raw, nrecord->id, ctx->sizeof_size);
 
@@ -529,7 +529,7 @@ H5HF__huge_bt2_filt_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     assert(ctx);
 
     /* Encode the record's fields */
-    H5F_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
+    H5_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
     H5F_ENCODE_LENGTH_LEN(raw, nrecord->len, ctx->sizeof_size);
     UINT32ENCODE(raw, nrecord->filter_mask);
     H5F_ENCODE_LENGTH_LEN(raw, nrecord->obj_size, ctx->sizeof_size);
@@ -560,7 +560,7 @@ H5HF__huge_bt2_filt_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     assert(ctx);
 
     /* Decode the record's fields */
-    H5F_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
+    H5_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
     H5F_DECODE_LENGTH_LEN(raw, nrecord->len, ctx->sizeof_size);
     UINT32DECODE(raw, nrecord->filter_mask);
     H5F_DECODE_LENGTH_LEN(raw, nrecord->obj_size, ctx->sizeof_size);
@@ -700,7 +700,7 @@ H5HF__huge_bt2_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     assert(ctx);
 
     /* Encode the record's fields */
-    H5F_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
+    H5_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
     H5F_ENCODE_LENGTH_LEN(raw, nrecord->len, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -728,7 +728,7 @@ H5HF__huge_bt2_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     assert(ctx);
 
     /* Decode the record's fields */
-    H5F_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
+    H5_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
     H5F_DECODE_LENGTH_LEN(raw, nrecord->len, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -886,7 +886,7 @@ H5HF__huge_bt2_filt_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     assert(ctx);
 
     /* Encode the record's fields */
-    H5F_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
+    H5_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
     H5F_ENCODE_LENGTH_LEN(raw, nrecord->len, ctx->sizeof_size);
     UINT32ENCODE(raw, nrecord->filter_mask);
     H5F_ENCODE_LENGTH_LEN(raw, nrecord->obj_size, ctx->sizeof_size);
@@ -916,7 +916,7 @@ H5HF__huge_bt2_filt_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     assert(ctx);
 
     /* Decode the record's fields */
-    H5F_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
+    H5_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
     H5F_DECODE_LENGTH_LEN(raw, nrecord->len, ctx->sizeof_size);
     UINT32DECODE(raw, nrecord->filter_mask);
     H5F_DECODE_LENGTH_LEN(raw, nrecord->obj_size, ctx->sizeof_size);

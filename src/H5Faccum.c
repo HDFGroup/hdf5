@@ -120,8 +120,8 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
             assert(!accum->buf || (accum->alloc_size >= accum->size));
 
             /* Current read adjoins or overlaps with metadata accumulator */
-            if (H5F_addr_defined(accum->loc) &&
-                (H5F_addr_overlap(addr, size, accum->loc, accum->size) || ((addr + size) == accum->loc) ||
+            if (H5_addr_defined(accum->loc) &&
+                (H5_addr_overlap(addr, size, accum->loc, accum->size) || ((addr + size) == accum->loc) ||
                  (accum->loc + accum->size) == addr)) {
                 size_t  amount_before; /* Amount to read before current accumulator */
                 haddr_t new_addr;      /* New address of the accumulator buffer */
@@ -208,14 +208,14 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
              *  just read in. -QAK)
              */
             if (accum->dirty &&
-                H5F_addr_overlap(addr, size, accum->loc + accum->dirty_off, accum->dirty_len)) {
+                H5_addr_overlap(addr, size, accum->loc + accum->dirty_off, accum->dirty_len)) {
                 haddr_t dirty_loc = accum->loc + accum->dirty_off; /* File offset of dirty information */
                 size_t  buf_off;                                   /* Offset of dirty region in buffer */
                 size_t  dirty_off;                                 /* Offset within dirty region */
                 size_t  overlap_size;                              /* Size of overlap with dirty region */
 
                 /* Check for read starting before beginning dirty region */
-                if (H5F_addr_le(addr, dirty_loc)) {
+                if (H5_addr_le(addr, dirty_loc)) {
                     /* Compute offset of dirty region within buffer */
                     buf_off = (size_t)(dirty_loc - addr);
 
@@ -223,7 +223,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
                     dirty_off = 0;
 
                     /* Check for read ending within dirty region */
-                    if (H5F_addr_lt(addr + size, dirty_loc + accum->dirty_len))
+                    if (H5_addr_lt(addr + size, dirty_loc + accum->dirty_len))
                         overlap_size = (size_t)((addr + size) - buf_off);
                     else /* Access covers whole dirty region */
                         overlap_size = accum->dirty_len;
@@ -428,7 +428,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
             /* Check if there is already metadata in the accumulator */
             if (accum->size > 0) {
                 /* Check if the new metadata adjoins the beginning of the current accumulator */
-                if (H5F_addr_defined(accum->loc) && (addr + size) == accum->loc) {
+                if (H5_addr_defined(accum->loc) && (addr + size) == accum->loc) {
                     /* Check if we need to adjust accumulator size */
                     if (H5F__accum_adjust(accum, file, H5F_ACCUM_PREPEND, size) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
@@ -453,7 +453,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     accum->dirty_off = 0;
                 } /* end if */
                 /* Check if the new metadata adjoins the end of the current accumulator */
-                else if (H5F_addr_defined(accum->loc) && addr == (accum->loc + accum->size)) {
+                else if (H5_addr_defined(accum->loc) && addr == (accum->loc + accum->size)) {
                     /* Check if we need to adjust accumulator size */
                     if (H5F__accum_adjust(accum, file, H5F_ACCUM_APPEND, size) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
@@ -474,8 +474,8 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     accum->size += size;
                 } /* end if */
                 /* Check if the piece of metadata being written overlaps the metadata accumulator */
-                else if (H5F_addr_defined(accum->loc) &&
-                         H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
+                else if (H5_addr_defined(accum->loc) &&
+                         H5_addr_overlap(addr, size, accum->loc, accum->size)) {
                     size_t add_size; /* New size of the accumulator buffer */
 
                     /* Check if the new metadata is entirely within the current accumulator */
@@ -735,11 +735,11 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
             /* (Note that this could be improved by updating the accumulator
              *  with [some of] the information just read in. -QAK)
              */
-            if (H5F_addr_defined(accum->loc) && H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
+            if (H5_addr_defined(accum->loc) && H5_addr_overlap(addr, size, accum->loc, accum->size)) {
                 /* Check for write starting before beginning of accumulator */
-                if (H5F_addr_le(addr, accum->loc)) {
+                if (H5_addr_le(addr, accum->loc)) {
                     /* Check for write ending within accumulator */
-                    if (H5F_addr_le(addr + size, accum->loc + accum->size)) {
+                    if (H5_addr_le(addr + size, accum->loc + accum->size)) {
                         size_t overlap_size; /* Size of overlapping region */
 
                         /* Compute overlap size */
@@ -753,13 +753,13 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                                 dirty_start + accum->dirty_len; /* File address of end of dirty region */
 
                             /* Check if entire dirty region is overwritten */
-                            if (H5F_addr_le(dirty_end, addr + size)) {
+                            if (H5_addr_le(dirty_end, addr + size)) {
                                 accum->dirty     = FALSE;
                                 accum->dirty_len = 0;
                             } /* end if */
                             else {
                                 /* Check for dirty region falling after write */
-                                if (H5F_addr_le(addr + size, dirty_start))
+                                if (H5_addr_le(addr + size, dirty_start))
                                     accum->dirty_off = overlap_size;
                                 else { /* Dirty region overlaps w/written region */
                                     accum->dirty_off = 0;
@@ -783,7 +783,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     size_t overlap_size; /* Size of overlapping region */
 
                     /* Sanity check */
-                    assert(H5F_addr_gt(addr + size, accum->loc + accum->size));
+                    assert(H5_addr_gt(addr + size, accum->loc + accum->size));
 
                     /* Compute overlap size */
                     overlap_size = (size_t)((accum->loc + accum->size) - addr);
@@ -796,13 +796,13 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                             dirty_start + accum->dirty_len; /* File address of end of dirty region */
 
                         /* Check if entire dirty region is overwritten */
-                        if (H5F_addr_ge(dirty_start, addr)) {
+                        if (H5_addr_ge(dirty_start, addr)) {
                             accum->dirty     = FALSE;
                             accum->dirty_len = 0;
                         } /* end if */
                         else {
                             /* Check for dirty region falling before write */
-                            if (H5F_addr_le(dirty_end, addr))
+                            if (H5_addr_le(dirty_end, addr))
                                 ; /* noop */
                             else  /* Dirty region overlaps w/written region */
                                 accum->dirty_len = (size_t)(addr - dirty_start);
@@ -854,8 +854,8 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
     file = f_sh->lf;
 
     /* Adjust the metadata accumulator to remove the freed block, if it overlaps */
-    if ((f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && H5F_addr_defined(accum->loc) &&
-        H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
+    if ((f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && H5_addr_defined(accum->loc) &&
+        H5_addr_overlap(addr, size, accum->loc, accum->size)) {
         size_t overlap_size; /* Size of overlap with accumulator */
 
         /* Sanity check */
@@ -864,9 +864,9 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
         assert(H5FD_MEM_GHEAP != type); /* (global heap data is being treated as raw data currently) */
 
         /* Check for overlapping the beginning of the accumulator */
-        if (H5F_addr_le(addr, accum->loc)) {
+        if (H5_addr_le(addr, accum->loc)) {
             /* Check for completely overlapping the accumulator */
-            if (H5F_addr_ge(addr + size, accum->loc + accum->size)) {
+            if (H5_addr_ge(addr + size, accum->loc + accum->size)) {
                 /* Reset the accumulator, but don't free buffer */
                 accum->loc   = HADDR_UNDEF;
                 accum->size  = 0;
@@ -914,16 +914,16 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
             H5_CHECKED_ASSIGN(overlap_size, size_t, (accum->loc + accum->size) - addr, haddr_t);
 
             /* Check if block to free begins before end of dirty region */
-            if (accum->dirty && H5F_addr_lt(addr, dirty_end)) {
+            if (accum->dirty && H5_addr_lt(addr, dirty_end)) {
                 haddr_t tail_addr;
 
                 /* Calculate the address of the tail to write */
                 tail_addr = addr + size;
 
                 /* Check if the block to free begins before dirty region */
-                if (H5F_addr_lt(addr, dirty_start)) {
+                if (H5_addr_lt(addr, dirty_start)) {
                     /* Check if block to free is entirely before dirty region */
-                    if (H5F_addr_le(tail_addr, dirty_start)) {
+                    if (H5_addr_le(tail_addr, dirty_start)) {
                         /* Write out the entire dirty region of the accumulator */
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, dirty_start, accum->dirty_len,
                                        accum->buf + accum->dirty_off) < 0)
@@ -931,7 +931,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                     } /* end if */
                     /* Block to free overlaps with some/all of dirty region */
                     /* Check for unfreed dirty region to write */
-                    else if (H5F_addr_lt(tail_addr, dirty_end)) {
+                    else if (H5_addr_lt(tail_addr, dirty_end)) {
                         size_t write_size;
                         size_t dirty_delta;
 
@@ -952,7 +952,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                 /* Block to free begins at beginning of or in middle of dirty region */
                 else {
                     /* Check if block to free ends before end of dirty region */
-                    if (H5F_addr_lt(tail_addr, dirty_end)) {
+                    if (H5_addr_lt(tail_addr, dirty_end)) {
                         size_t write_size;
                         size_t dirty_delta;
 
@@ -968,7 +968,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                     } /* end if */
 
                     /* Check for block to free beginning at same location as dirty region */
-                    if (H5F_addr_eq(addr, dirty_start)) {
+                    if (H5_addr_eq(addr, dirty_start)) {
                         /* Reset dirty flag */
                         accum->dirty = FALSE;
                     } /* end if */

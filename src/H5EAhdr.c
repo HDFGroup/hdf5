@@ -425,7 +425,7 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
     ret_value = hdr->addr;
 
 done:
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (hdr) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -434,7 +434,7 @@ done:
                                 "unable to remove extensible array header from cache")
 
             /* Release header's disk space */
-            if (H5F_addr_defined(hdr->addr) &&
+            if (H5_addr_defined(hdr->addr) &&
                 H5MF_xfree(f, H5FD_MEM_EARRAY_HDR, hdr->addr, (hsize_t)hdr->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to free extensible array header")
 
@@ -613,7 +613,7 @@ H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, void *ctx_udata, unsigned flags)
 
     /* Sanity check */
     assert(f);
-    assert(H5F_addr_defined(ea_addr));
+    assert(H5_addr_defined(ea_addr));
 
     /* only the H5AC__READ_ONLY_FLAG may appear in flags */
     assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
@@ -710,7 +710,7 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr)
 #endif /* NDEBUG */
 
     /* Check for index block */
-    if (H5F_addr_defined(hdr->idx_blk_addr)) {
+    if (H5_addr_defined(hdr->idx_blk_addr)) {
         /* Delete index block */
         if (H5EA__iblock_delete(hdr) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTDELETE, FAIL, "unable to delete extensible array index block")

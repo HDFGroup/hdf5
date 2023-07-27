@@ -203,7 +203,7 @@ H5HF_open(H5F_t *f, haddr_t fh_addr)
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(fh_addr));
+    assert(H5_addr_defined(fh_addr));
 
     /* Load the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__READ_ONLY_FLAG)))
@@ -846,7 +846,7 @@ H5HF_delete(H5F_t *f, haddr_t fh_addr)
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(fh_addr));
+    assert(H5_addr_defined(fh_addr));
 
     /* Lock the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__NO_FLAGS_SET)))

@@ -181,11 +181,11 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     /* Sibling pointers */
     if (H5_IS_BUFFER_OVERFLOW(image, H5F_sizeof_addr(udata->f), p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5F_addr_decode(udata->f, (const uint8_t **)&image, &(bt->left));
+    H5_addr_decode(udata->f, (const uint8_t **)&image, &(bt->left));
 
     if (H5_IS_BUFFER_OVERFLOW(image, H5F_sizeof_addr(udata->f), p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5F_addr_decode(udata->f, (const uint8_t **)&image, &(bt->right));
+    H5_addr_decode(udata->f, (const uint8_t **)&image, &(bt->right));
 
     /* Child/key pairs */
     native = bt->native;
@@ -201,7 +201,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
         /* Decode address value */
         if (H5_IS_BUFFER_OVERFLOW(image, H5F_sizeof_addr(udata->f), p_end))
             HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        H5F_addr_decode(udata->f, (const uint8_t **)&image, bt->child + u);
+        H5_addr_decode(udata->f, (const uint8_t **)&image, bt->child + u);
     }
 
     /* Final key */
@@ -299,8 +299,8 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     UINT16ENCODE(image, bt->nchildren);
 
     /* sibling pointers */
-    H5F_addr_encode(f, &image, bt->left);
-    H5F_addr_encode(f, &image, bt->right);
+    H5_addr_encode(f, &image, bt->left);
+    H5_addr_encode(f, &image, bt->right);
 
     /* child keys and pointers */
     native = bt->native;
@@ -312,7 +312,7 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
         native += shared->type->sizeof_nkey;
 
         /* encode the child address */
-        H5F_addr_encode(f, &image, bt->child[u]);
+        H5_addr_encode(f, &image, bt->child[u]);
     } /* end for */
     if (bt->nchildren > 0) {
         /* Encode the final key */

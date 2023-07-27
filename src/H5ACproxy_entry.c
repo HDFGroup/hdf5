@@ -160,7 +160,7 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     /* Add flush dependency on parent */
     if (pentry->nchildren > 0) {
         /* Sanity check */
-        assert(H5F_addr_defined(pentry->addr));
+        assert(H5_addr_defined(pentry->addr));
 
         if (H5AC_create_flush_dependency(parent, pentry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency on proxy entry")
@@ -196,7 +196,7 @@ H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     /* Remove parent from skip list */
     if (NULL == (rem_parent = (H5AC_info_t *)H5SL_remove(pentry->parents, &parent->addr)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry parent from skip list")
-    if (!H5F_addr_eq(rem_parent->addr, parent->addr))
+    if (!H5_addr_eq(rem_parent->addr, parent->addr))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "removed proxy entry parent not the same as real parent")
 
     /* Shut down the skip list, if this is the last parent */
@@ -270,7 +270,7 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, void *child)
     /* Check for first child */
     if (0 == pentry->nchildren) {
         /* Get an address, if the proxy doesn't already have one */
-        if (!H5F_addr_defined(pentry->addr))
+        if (!H5_addr_defined(pentry->addr))
             if (HADDR_UNDEF == (pentry->addr = H5MF_alloc_tmp(f, 1)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
                             "temporary file space allocation failed for proxy entry")

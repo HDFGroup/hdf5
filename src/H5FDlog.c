@@ -1006,7 +1006,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 
     if (file->fa.flags != 0) {
         /* Check for increasing file size */
-        if (H5F_addr_gt(addr, file->eoa) && H5F_addr_gt(addr, 0)) {
+        if (H5_addr_gt(addr, file->eoa) && H5_addr_gt(addr, 0)) {
             hsize_t size = addr - file->eoa;
 
             /* Retain the flavor of the space allocated by the extension */
@@ -1024,7 +1024,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
         }
 
         /* Check for decreasing file size */
-        if (H5F_addr_lt(addr, file->eoa) && H5F_addr_gt(addr, 0)) {
+        if (H5_addr_lt(addr, file->eoa) && H5_addr_gt(addr, 0)) {
             hsize_t size = file->eoa - addr;
 
             /* Reset the flavor of the space freed by the shrink */
@@ -1131,7 +1131,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     H5_timer_init(&read_timer);
 
     /* Check for overflow conditions */
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
@@ -1351,7 +1351,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     }
 
     /* Check for overflow conditions */
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu",
@@ -1546,7 +1546,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
     assert(file);
 
     /* Extend the file to make sure it's large enough */
-    if (!H5F_addr_eq(file->eoa, file->eof)) {
+    if (!H5_addr_eq(file->eoa, file->eof)) {
         H5_timer_t    trunc_timer; /* Timer for truncate operation */
         H5_timevals_t trunc_times; /* Elapsed time for truncate operation */
 

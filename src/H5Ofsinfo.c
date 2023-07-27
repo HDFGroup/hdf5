@@ -138,7 +138,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                     "ran off end of input buffer while decoding");
-                    H5F_addr_decode(f, &p, &(fsinfo->fs_addr[type - 1]));
+                    H5_addr_decode(f, &p, &(fsinfo->fs_addr[type - 1]));
                 }
                 break;
 
@@ -188,15 +188,15 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        H5F_addr_decode(f, &p,
-                        &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
+        H5_addr_decode(f, &p,
+                       &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
 
         /* Decode addresses of free space managers, if persisting */
         if (fsinfo->persist)
             for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++) {
                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-                H5F_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
+                H5_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
             }
         fsinfo->mapped = FALSE;
     }
@@ -238,15 +238,15 @@ H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     *p++ = (unsigned char)fsinfo->persist;      /* Free-space persist or not */
     H5F_ENCODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section size threshold */
 
-    H5F_ENCODE_LENGTH(f, p, fsinfo->page_size);          /* File space page size */
-    UINT16ENCODE(p, fsinfo->pgend_meta_thres);           /* Page end metadata threshold */
-    H5F_addr_encode(f, &p, fsinfo->eoa_pre_fsm_fsalloc); /* EOA before free-space header and section info */
+    H5F_ENCODE_LENGTH(f, p, fsinfo->page_size);         /* File space page size */
+    UINT16ENCODE(p, fsinfo->pgend_meta_thres);          /* Page end metadata threshold */
+    H5_addr_encode(f, &p, fsinfo->eoa_pre_fsm_fsalloc); /* EOA before free-space header and section info */
 
     /* Store addresses of free-space managers, if persisting */
     if (fsinfo->persist)
         /* Addresses of free-space managers */
         for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
-            H5F_addr_encode(f, &p, fsinfo->fs_addr[ptype - 1]);
+            H5_addr_encode(f, &p, fsinfo->fs_addr[ptype - 1]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__fsinfo_encode() */

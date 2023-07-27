@@ -457,7 +457,7 @@ H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, hboo
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(found);
     assert(udata && udata->common.heap);
 
@@ -552,7 +552,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(md_key);
     assert(rt_key);
     assert(udata && udata->common.heap);
@@ -705,7 +705,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert((H5G_node_key_t *)_lt_key);
     assert(rt_key);
     assert(udata && udata->common.heap);
@@ -754,7 +754,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
         } /* end if */
         else {
             lnk.type = H5L_TYPE_HARD;
-            assert(H5F_addr_defined(sn->entry[idx].header));
+            assert(H5_addr_defined(sn->entry[idx].header));
             lnk.u.hard.addr = sn->entry[idx].header;
         } /* end else */
 
@@ -847,7 +847,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
         for (idx = 0; idx < sn->nsyms; idx++) {
             if (!(H5G_CACHED_SLINK == sn->entry[idx].type)) {
                 /* Decrement the reference count */
-                assert(H5F_addr_defined(sn->entry[idx].header));
+                assert(H5_addr_defined(sn->entry[idx].header));
                 tmp_oloc.addr = sn->entry[idx].header;
 
                 if (H5O_link(&tmp_oloc, -1) < 0)
@@ -898,7 +898,7 @@ H5G__node_iterate(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(udata && udata->heap);
 
     /* Protect the symbol table node & local heap while we iterate over entries */
@@ -972,7 +972,7 @@ H5G__node_sumup(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(num_objs);
 
     /* Find the object node and add the number of symbol entries. */
@@ -1013,7 +1013,7 @@ H5G__node_by_idx(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(udata);
 
     /* Get a pointer to the symbol table node */
@@ -1139,7 +1139,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
 
     /* Check arguments. */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(udata);
 
     /* load the symbol table into memory from the source file */
@@ -1192,7 +1192,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
         }                              /* if ((H5G_CACHED_SLINK == src_ent->type)... */
 
         /* Check if object in source group is a hard link */
-        if (H5F_addr_defined(src_ent->header)) {
+        if (H5_addr_defined(src_ent->header)) {
             H5O_loc_t new_dst_oloc; /* Copied object location in destination */
             H5O_loc_t tmp_src_oloc; /* Temporary object location for source object */
 
@@ -1222,7 +1222,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
             /* Construct link information for eventual insertion */
             lnk.type        = H5L_TYPE_HARD;
             lnk.u.hard.addr = new_dst_oloc.addr;
-        } /* ( H5F_addr_defined(src_ent->header)) */
+        } /* ( H5_addr_defined(src_ent->header)) */
         else if (H5G_CACHED_SLINK == src_ent->type) {
             /* it is a soft link */
             /* Set object type to unknown */
@@ -1294,7 +1294,7 @@ H5G__node_build_table(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(udata && udata->heap);
 
     /*
@@ -1393,13 +1393,13 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);
 
     /* Pin the heap down in memory */
-    if (heap_addr > 0 && H5F_addr_defined(heap_addr))
+    if (heap_addr > 0 && H5_addr_defined(heap_addr))
         if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to protect symbol table heap")
 

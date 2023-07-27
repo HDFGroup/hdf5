@@ -128,7 +128,7 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, const uint8
     if (H5_IS_BUFFER_OVERFLOW(*pp, H5F_SIZEOF_ADDR(f) + sizeof(uint32_t), p_end))
         HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, FAIL, "image pointer is out of bounds")
 
-    H5F_addr_decode(f, pp, &(ent->header));
+    H5_addr_decode(f, pp, &(ent->header));
     UINT32DECODE(*pp, tmp);
     *pp += 4; /*reserved*/
 
@@ -146,8 +146,8 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, const uint8
             assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
             if (H5_IS_BUFFER_OVERFLOW(*pp, H5F_SIZEOF_ADDR(f) * 2, p_end))
                 HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, FAIL, "image pointer is out of bounds")
-            H5F_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
-            H5F_addr_decode(f, pp, &(ent->cache.stab.heap_addr));
+            H5_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
+            H5_addr_decode(f, pp, &(ent->cache.stab.heap_addr));
             break;
 
         case H5G_CACHED_SLINK:
@@ -232,7 +232,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     if (ent) {
         /* encode header */
         H5F_ENCODE_LENGTH(f, *pp, ent->name_off);
-        H5F_addr_encode(f, pp, ent->header);
+        H5_addr_encode(f, pp, ent->header);
         UINT32ENCODE(*pp, ent->type);
         UINT32ENCODE(*pp, 0); /*reserved*/
 
@@ -243,8 +243,8 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 
             case H5G_CACHED_STAB:
                 assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
-                H5F_addr_encode(f, pp, ent->cache.stab.btree_addr);
-                H5F_addr_encode(f, pp, ent->cache.stab.heap_addr);
+                H5_addr_encode(f, pp, ent->cache.stab.btree_addr);
+                H5_addr_encode(f, pp, ent->cache.stab.heap_addr);
                 break;
 
             case H5G_CACHED_SLINK:
@@ -259,7 +259,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     }     /* end if */
     else {
         H5F_ENCODE_LENGTH(f, *pp, 0);
-        H5F_addr_encode(f, pp, HADDR_UNDEF);
+        H5_addr_encode(f, pp, HADDR_UNDEF);
         UINT32ENCODE(*pp, H5G_NOTHING_CACHED);
         UINT32ENCODE(*pp, 0); /*reserved*/
     }                         /* end else */

@@ -205,7 +205,7 @@ H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t dblk_pag
 
     /* Sanity check */
     assert(hdr);
-    assert(H5F_addr_defined(dblk_page_addr));
+    assert(H5_addr_defined(dblk_page_addr));
 
     /* only the H5AC__READ_ONLY_FLAG may be set */
     assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);

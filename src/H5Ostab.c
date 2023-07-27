@@ -98,11 +98,11 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5F_addr_decode(f, &p, &(stab->btree_addr));
+    H5_addr_decode(f, &p, &(stab->btree_addr));
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5F_addr_decode(f, &p, &(stab->heap_addr));
+    H5_addr_decode(f, &p, &(stab->heap_addr));
 
     ret_value = stab;
 
@@ -135,8 +135,8 @@ H5O__stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     assert(stab);
 
     /* encode */
-    H5F_addr_encode(f, &p, stab->btree_addr);
-    H5F_addr_encode(f, &p, stab->heap_addr);
+    H5_addr_encode(f, &p, stab->btree_addr);
+    H5_addr_encode(f, &p, stab->heap_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__stab_encode() */
@@ -336,7 +336,7 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
 
     /* check args */
     assert(stab_src);
-    assert(H5F_addr_defined(dst_oloc->addr));
+    assert(H5_addr_defined(dst_oloc->addr));
     assert(dst_oloc->file);
     assert(stab_dst);
     assert(cpy_info);

@@ -132,11 +132,11 @@ H5G__is_empty_test(hid_t gid)
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Check for 'dense' link storage file addresses being defined */
-        if (H5F_addr_defined(linfo.fheap_addr))
+        if (H5_addr_defined(linfo.fheap_addr))
             HGOTO_DONE(FALSE)
-        if (H5F_addr_defined(linfo.name_bt2_addr))
+        if (H5_addr_defined(linfo.name_bt2_addr))
             HGOTO_DONE(FALSE)
-        if (H5F_addr_defined(linfo.corder_bt2_addr))
+        if (H5_addr_defined(linfo.corder_bt2_addr))
             HGOTO_DONE(FALSE)
 
         /* Check for link count */
@@ -366,9 +366,9 @@ H5G__is_new_dense_test(hid_t gid)
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Check for 'dense' link storage file addresses being defined */
-        if (!H5F_addr_defined(linfo.fheap_addr))
+        if (!H5_addr_defined(linfo.fheap_addr))
             HGOTO_DONE(FALSE)
-        if (!H5F_addr_defined(linfo.name_bt2_addr))
+        if (!H5_addr_defined(linfo.name_bt2_addr))
             HGOTO_DONE(FALSE)
     } /* end if */
 
@@ -429,9 +429,9 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_ERROR_TAG(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
     /* Check for 'dense' link storage file addresses being defined */
-    if (!H5F_addr_defined(linfo.fheap_addr))
+    if (!H5_addr_defined(linfo.fheap_addr))
         HGOTO_DONE_TAG(FAIL)
-    if (!H5F_addr_defined(linfo.name_bt2_addr))
+    if (!H5_addr_defined(linfo.name_bt2_addr))
         HGOTO_DONE_TAG(FAIL)
 
     /* Open the name index v2 B-tree */
@@ -443,7 +443,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
 
     /* Check if there is a creation order index */
-    if (H5F_addr_defined(linfo.corder_bt2_addr)) {
+    if (H5_addr_defined(linfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
         if (NULL == (bt2_corder = H5B2_open(grp->oloc.file, linfo.corder_bt2_addr, NULL)))
             HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL,
@@ -716,7 +716,7 @@ H5G__verify_cached_stabs_test_cb(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, h
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Load the node */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))

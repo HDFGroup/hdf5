@@ -471,7 +471,7 @@ H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
     ret_value = hdr->heap_addr;
 
 done:
-    if (!H5F_addr_defined(ret_value) && hdr)
+    if (!H5_addr_defined(ret_value) && hdr)
         if (H5HF__hdr_free(hdr) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release fractal heap header")
 
@@ -498,7 +498,7 @@ H5HF__hdr_protect(H5F_t *f, haddr_t addr, unsigned flags)
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
     assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
@@ -980,7 +980,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
             if (next_row >= hdr->man_dtable.max_direct_rows) {
                 unsigned child_nrows; /* Number of rows in new indirect block */
 
-                assert(!H5F_addr_defined(iblock->ents[next_entry].addr));
+                assert(!H5_addr_defined(iblock->ents[next_entry].addr));
 
                 /* Compute # of rows in next child indirect block to use */
                 child_nrows =
@@ -1150,8 +1150,8 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
         /* Walk backwards through entries, until we find one that has a child */
         /* (Skip direct block that will be deleted, if we find it) */
         tmp_entry = (int)curr_entry;
-        while (tmp_entry >= 0 && (H5F_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) ||
-                                  !H5F_addr_defined(iblock->ents[tmp_entry].addr)))
+        while (tmp_entry >= 0 && (H5_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) ||
+                                  !H5_addr_defined(iblock->ents[tmp_entry].addr)))
             tmp_entry--;
         /* Check for no earlier blocks in this indirect block */
         if (tmp_entry < 0) {
@@ -1372,13 +1372,13 @@ H5HF__hdr_delete(H5HF_hdr_t *hdr)
     /* (must occur before attempting to delete the heap, so indirect blocks
      *  will get unpinned)
      */
-    if (H5F_addr_defined(hdr->fs_addr))
+    if (H5_addr_defined(hdr->fs_addr))
         /* Delete free space manager for heap */
         if (H5HF__space_delete(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap free space manager")
 
     /* Check for root direct/indirect block */
-    if (H5F_addr_defined(hdr->man_dtable.table_addr)) {
+    if (H5_addr_defined(hdr->man_dtable.table_addr)) {
         if (hdr->man_dtable.curr_root_rows == 0) {
             hsize_t dblock_size; /* Size of direct block on disk */
 
@@ -1408,7 +1408,7 @@ H5HF__hdr_delete(H5HF_hdr_t *hdr)
     }     /* end if */
 
     /* Check for 'huge' objects in heap */
-    if (H5F_addr_defined(hdr->huge_bt2_addr)) {
+    if (H5_addr_defined(hdr->huge_bt2_addr)) {
         /* Delete huge objects in heap and their tracker */
         if (H5HF__huge_delete(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,

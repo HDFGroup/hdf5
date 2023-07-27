@@ -273,7 +273,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 
     for (u = 0; u < num_candidates; u++) {
         addr = candidates_list_ptr[u];
-        assert(H5F_addr_defined(addr));
+        assert(H5_addr_defined(addr));
 
 #ifdef H5C_DO_SANITY_CHECKS
         if (u > 0) {
@@ -665,7 +665,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 #endif /* H5C_DO_SANITY_CHECKS */
 
-        assert(H5F_addr_defined(addr));
+        assert(H5_addr_defined(addr));
 
         H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
 

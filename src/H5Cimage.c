@@ -535,7 +535,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
      * either the speculative read flag.  Hence disallow.
      */
     assert(!((type->flags & H5C__CLASS_SKIP_READS) && (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)));
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(type->get_initial_load_size);
     assert(type->deserialize);
 
@@ -993,7 +993,7 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
     /* Sanity checks */
     assert(f);
     assert(cache_ptr);
-    assert(H5F_addr_defined(cache_ptr->image_addr));
+    assert(H5_addr_defined(cache_ptr->image_addr));
     assert(cache_ptr->image_len > 0);
     assert(cache_ptr->image_buffer);
 
@@ -1075,7 +1075,7 @@ H5C__load_cache_image(H5F_t *f)
      * no image exists, and that the load operation should be skipped
      * silently.
      */
-    if (H5F_addr_defined(cache_ptr->image_addr)) {
+    if (H5_addr_defined(cache_ptr->image_addr)) {
         /* Sanity checks */
         assert(cache_ptr->image_len > 0);
         assert(cache_ptr->image_buffer == NULL);
@@ -1893,8 +1893,8 @@ H5C__decode_cache_image_entry(const H5F_t *f, const H5C_t *cache_ptr, const uint
     assert((in_lru && lru_rank >= 0) || (!in_lru && lru_rank == -1));
 
     /* Decode entry offset */
-    H5F_addr_decode(f, &p, &addr);
-    if (!H5F_addr_defined(addr))
+    H5_addr_decode(f, &p, &addr);
+    if (!H5_addr_defined(addr))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid entry offset")
 
     /* Decode entry length */
@@ -1916,8 +1916,8 @@ H5C__decode_cache_image_entry(const H5F_t *f, const H5C_t *cache_ptr, const uint
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for fd parent addrs buffer")
 
         for (i = 0; i < fd_parent_count; i++) {
-            H5F_addr_decode(f, &p, &(fd_parent_addrs[i]));
-            if (!H5F_addr_defined(fd_parent_addrs[i]))
+            H5_addr_decode(f, &p, &(fd_parent_addrs[i]));
+            if (!H5_addr_defined(fd_parent_addrs[i]))
                 HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid flush dependency parent offset")
         } /* end for */
     }     /* end if */
@@ -2238,7 +2238,7 @@ H5C__encode_cache_image_entry(H5F_t *f, H5C_t *cache_ptr, uint8_t **buf, unsigne
     INT32ENCODE(p, ie_ptr->lru_rank);
 
     /* Encode entry offset */
-    H5F_addr_encode(f, &p, ie_ptr->addr);
+    H5_addr_encode(f, &p, ie_ptr->addr);
 
     /* Encode entry length */
     H5F_ENCODE_LENGTH(f, p, ie_ptr->size);
@@ -2249,7 +2249,7 @@ H5C__encode_cache_image_entry(H5F_t *f, H5C_t *cache_ptr, uint8_t **buf, unsigne
 
     /* Encode dependency parent offsets -- if any */
     for (u = 0; u < ie_ptr->fd_parent_count; u++)
-        H5F_addr_encode(f, &p, ie_ptr->fd_parent_addrs[u]);
+        H5_addr_encode(f, &p, ie_ptr->fd_parent_addrs[u]);
 
     /* Copy entry image */
     H5MM_memcpy(p, ie_ptr->image_ptr, ie_ptr->size);
@@ -2803,7 +2803,7 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
 
                 for (int i = 0; i < (int)(entry_ptr->fd_parent_count); i++) {
                     entry_ptr->fd_parent_addrs[i] = entry_ptr->flush_dep_parent[i]->addr;
-                    assert(H5F_addr_defined(entry_ptr->fd_parent_addrs[i]));
+                    assert(H5_addr_defined(entry_ptr->fd_parent_addrs[i]));
                 } /* end for */
             }     /* end if */
             else if (entry_ptr->fd_parent_count > 0) {
@@ -3020,7 +3020,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
         for (v = 0; v < pf_entry_ptr->fd_parent_count; v++) {
             /* Sanity checks */
             assert(pf_entry_ptr->fd_parent_addrs);
-            assert(H5F_addr_defined(pf_entry_ptr->fd_parent_addrs[v]));
+            assert(H5_addr_defined(pf_entry_ptr->fd_parent_addrs[v]));
 
             /* Find the parent entry */
             parent_ptr = NULL;
@@ -3243,8 +3243,8 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
     assert((in_lru && pf_entry_ptr->lru_rank >= 0) || (!in_lru && pf_entry_ptr->lru_rank == -1));
 
     /* Decode entry offset */
-    H5F_addr_decode(f, &p, &pf_entry_ptr->addr);
-    if (!H5F_addr_defined(pf_entry_ptr->addr))
+    H5_addr_decode(f, &p, &pf_entry_ptr->addr);
+    if (!H5_addr_defined(pf_entry_ptr->addr))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid entry offset")
 
     /* Decode entry length */
@@ -3267,8 +3267,8 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for fd parent addrs buffer")
 
         for (u = 0; u < pf_entry_ptr->fd_parent_count; u++) {
-            H5F_addr_decode(f, &p, &(pf_entry_ptr->fd_parent_addrs[u]));
-            if (!H5F_addr_defined(pf_entry_ptr->fd_parent_addrs[u]))
+            H5_addr_decode(f, &p, &(pf_entry_ptr->fd_parent_addrs[u]));
+            if (!H5_addr_defined(pf_entry_ptr->fd_parent_addrs[u]))
                 HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid flush dependency parent offset")
         } /* end for */
     }     /* end if */
@@ -3390,7 +3390,7 @@ H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr)
     /* Sanity checks */
     assert(f);
     assert(cache_ptr);
-    assert(H5F_addr_defined(cache_ptr->image_addr));
+    assert(H5_addr_defined(cache_ptr->image_addr));
     assert(cache_ptr->image_len > 0);
     assert(cache_ptr->image_buffer);
 

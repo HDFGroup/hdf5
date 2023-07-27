@@ -294,7 +294,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
     assert(id);
 
     /* Check if the v2 B-tree for tracking 'huge' heap objects has been created yet */
-    if (!H5F_addr_defined(hdr->huge_bt2_addr)) {
+    if (!H5_addr_defined(hdr->huge_bt2_addr)) {
         /* Go create (& open) v2 B-tree */
         if (H5HF__huge_bt2_create(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL,
@@ -372,7 +372,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
             /* Encode ID for user */
             *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_HUGE;
-            H5F_addr_encode(hdr->f, &id, obj_addr);
+            H5_addr_encode(hdr->f, &id, obj_addr);
             H5F_ENCODE_LENGTH(hdr->f, id, (hsize_t)write_size);
             UINT32ENCODE(id, filter_mask);
             H5F_ENCODE_LENGTH(hdr->f, id, (hsize_t)obj_size);
@@ -391,7 +391,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
             /* Encode ID for user */
             *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_HUGE;
-            H5F_addr_encode(hdr->f, &id, obj_addr);
+            H5_addr_encode(hdr->f, &id, obj_addr);
             H5F_ENCODE_LENGTH(hdr->f, id, (hsize_t)write_size);
         } /* end if */
     }     /* end if */
@@ -467,7 +467,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
      * Check arguments.
      */
     assert(hdr);
-    assert(H5F_addr_defined(hdr->huge_bt2_addr));
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
     assert(id);
     assert(obj_len_p);
 
@@ -562,7 +562,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
      * Check arguments.
      */
     assert(hdr);
-    assert(H5F_addr_defined(hdr->huge_bt2_addr));
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
     assert(id);
     assert(obj_off_p);
 
@@ -572,13 +572,13 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
     /* Check if 'huge' object ID encodes address & length directly */
     if (hdr->huge_ids_direct) {
         /* Retrieve the object's address (common) */
-        H5F_addr_decode(hdr->f, &id, &obj_addr);
+        H5_addr_decode(hdr->f, &id, &obj_addr);
     } /* end if */
     else {
         hbool_t found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        assert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -663,7 +663,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
     /* Check for 'huge' object ID that encodes address & length directly */
     if (hdr->huge_ids_direct) {
         /* Retrieve the object's address and length (common) */
-        H5F_addr_decode(hdr->f, &id, &obj_addr);
+        H5_addr_decode(hdr->f, &id, &obj_addr);
         H5F_DECODE_LENGTH(hdr->f, id, obj_size);
 
         /* Retrieve extra information needed for filtered objects */
@@ -674,7 +674,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
         hbool_t found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        assert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -822,7 +822,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
     /* Check for 'huge' object ID that encodes address & length directly */
     if (hdr->huge_ids_direct) {
         /* Retrieve the object's address and length (common) */
-        H5F_addr_decode(hdr->f, &id, &obj_addr);
+        H5_addr_decode(hdr->f, &id, &obj_addr);
         H5F_DECODE_LENGTH(hdr->f, id, obj_size);
     } /* end if */
     else {
@@ -831,7 +831,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
         hbool_t                   found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        assert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -947,7 +947,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
      * Check arguments.
      */
     assert(hdr);
-    assert(H5F_addr_defined(hdr->huge_bt2_addr));
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
     assert(id);
 
     /* Check if v2 B-tree is open yet */
@@ -971,7 +971,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
 
             /* Retrieve the object's address and length */
             /* (used as key in v2 B-tree record) */
-            H5F_addr_decode(hdr->f, &id, &search_rec.addr);
+            H5_addr_decode(hdr->f, &id, &search_rec.addr);
             H5F_DECODE_LENGTH(hdr->f, id, search_rec.len);
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
@@ -984,7 +984,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
 
             /* Retrieve the object's address and length */
             /* (used as key in v2 B-tree record) */
-            H5F_addr_decode(hdr->f, &id, &search_rec.addr);
+            H5_addr_decode(hdr->f, &id, &search_rec.addr);
             H5F_DECODE_LENGTH(hdr->f, id, search_rec.len);
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
@@ -1054,7 +1054,7 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
     /* Check if v2 B-tree index is open */
     if (hdr->huge_bt2) {
         /* Sanity check */
-        assert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5_addr_defined(hdr->huge_bt2_addr));
 
         /* Close v2 B-tree index */
         if (H5B2_close(hdr->huge_bt2) < 0)
@@ -1065,7 +1065,7 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
     /* Check if there are no more 'huge' objects in the heap and delete the
      *  v2 B-tree that tracks them, if so
      */
-    if (H5F_addr_defined(hdr->huge_bt2_addr) && hdr->huge_nobjs == 0) {
+    if (H5_addr_defined(hdr->huge_bt2_addr) && hdr->huge_nobjs == 0) {
         /* Sanity check */
         assert(hdr->huge_size == 0);
 
@@ -1111,7 +1111,7 @@ H5HF__huge_delete(H5HF_hdr_t *hdr)
      * Check arguments.
      */
     assert(hdr);
-    assert(H5F_addr_defined(hdr->huge_bt2_addr));
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
     assert(hdr->huge_nobjs);
     assert(hdr->huge_size);
 

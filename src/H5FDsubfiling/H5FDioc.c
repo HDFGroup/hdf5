@@ -1226,7 +1226,7 @@ H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     assert(buf);
 
     /* Check for overflow conditions */
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr);
     if (REGION_OVERFLOW(addr, size))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR, addr);
@@ -1385,7 +1385,7 @@ H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
     assert(file);
 
     /* TODO: placeholder for now since Subfiling does the truncation */
-    if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
+    if (!H5_addr_eq(file->eoa, file->last_eoa)) {
         file->last_eoa = file->eoa;
     }
 

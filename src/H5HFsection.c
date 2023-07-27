@@ -364,7 +364,7 @@ H5FS__sect_node_new(unsigned sect_type, haddr_t sect_addr, hsize_t sect_size, H5
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    assert(H5F_addr_defined(sect_addr));
+    assert(H5_addr_defined(sect_addr));
 
     /* Create free list section node */
     if (NULL == (new_sect = H5FL_MALLOC(H5HF_free_section_t)))
@@ -551,7 +551,7 @@ H5HF__sect_single_revive(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     /* Check for root direct block */
     if (hdr->man_dtable.curr_root_rows == 0) {
         /* Set the information for the section */
-        assert(H5F_addr_defined(hdr->man_dtable.table_addr));
+        assert(H5_addr_defined(hdr->man_dtable.table_addr));
         sect->u.single.parent    = NULL;
         sect->u.single.par_entry = 0;
     } /* end if */
@@ -596,7 +596,7 @@ H5HF__sect_single_dblock_info(H5HF_hdr_t *hdr, const H5HF_free_section_t *sect, 
     /* Check for root direct block */
     if (hdr->man_dtable.curr_root_rows == 0) {
         /* Retrieve direct block info from heap header */
-        assert(H5F_addr_defined(hdr->man_dtable.table_addr));
+        assert(H5_addr_defined(hdr->man_dtable.table_addr));
         *dblock_addr = hdr->man_dtable.table_addr;
         *dblock_size = hdr->man_dtable.cparam.start_block_size;
     } /* end if */
@@ -699,7 +699,7 @@ H5HF__sect_single_full_dblock(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
         if (NULL == (dblock = H5HF__man_dblock_protect(hdr, dblock_addr, dblock_size, sect->u.single.parent,
                                                        sect->u.single.par_entry, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
-        assert(H5F_addr_eq(dblock->block_off + dblock_overhead, sect->sect_info.addr));
+        assert(H5_addr_eq(dblock->block_off + dblock_overhead, sect->sect_info.addr));
 
         /* Convert 'single' section into 'row' section */
         if (H5HF__sect_row_from_single(hdr, sect, dblock) < 0)
@@ -790,7 +790,7 @@ H5HF__sect_single_deserialize(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    assert(H5F_addr_defined(sect_addr));
+    assert(H5_addr_defined(sect_addr));
     assert(sect_size);
 
     /* Create free list section node */
@@ -832,14 +832,14 @@ H5HF__sect_single_can_merge(const H5FS_section_info_t *_sect1, const H5FS_sectio
     assert(sect1);
     assert(sect2);
     assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    assert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(H5_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     /* Check if second section adjoins first section */
     /* (This can only occur within a direct block, due to the direct block
      *  overhead at the beginning of a block, so no need to check if sections
      *  are actually within the same direct block)
      */
-    if (H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr))
+    if (H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr))
         HGOTO_DONE(TRUE)
 
 done:
@@ -875,7 +875,7 @@ H5HF__sect_single_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect
     assert((*sect1)->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
     assert(sect2);
     assert(sect2->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
-    assert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    assert(H5_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -997,7 +997,7 @@ H5HF__sect_single_shrink(H5FS_section_info_t **_sect, void *_udata)
     if (NULL == (dblock = H5HF__man_dblock_protect(hdr, dblock_addr, dblock_size, (*sect)->u.single.parent,
                                                    (*sect)->u.single.par_entry, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
-    assert(H5F_addr_eq(dblock->block_off + dblock_size, (*sect)->sect_info.addr + (*sect)->sect_info.size));
+    assert(H5_addr_eq(dblock->block_off + dblock_size, (*sect)->sect_info.addr + (*sect)->sect_info.size));
 
     /* Get rid of section */
     if (H5HF__sect_single_free((H5FS_section_info_t *)*sect) < 0)
@@ -1085,13 +1085,13 @@ H5HF__sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5
 
             /* Sanity check settings for section's direct block's parent */
             iblock = sect->u.single.parent;
-            assert(H5F_addr_defined(iblock->ents[sect->u.single.par_entry].addr));
+            assert(H5_addr_defined(iblock->ents[sect->u.single.par_entry].addr));
 
             /* Retrieve direct block address from section */
             status = H5HF__sect_single_dblock_info(iblock->hdr, (const H5HF_free_section_t *)sect,
                                                    &dblock_addr, &dblock_size);
             assert(status >= 0);
-            assert(H5F_addr_eq(iblock->ents[sect->u.single.par_entry].addr, dblock_addr));
+            assert(H5_addr_eq(iblock->ents[sect->u.single.par_entry].addr, dblock_addr));
             assert(dblock_size > 0);
 
             /* Check if the section is actually within the heap */
@@ -1120,9 +1120,9 @@ H5HF__sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5
                 /* Sanity check settings for section */
                 assert(dblock_size == dblock->size);
                 assert(dblock->size > sect->sect_info.size);
-                assert(H5F_addr_lt(dblock->block_off, sect->sect_info.addr));
-                assert(H5F_addr_ge((dblock->block_off + dblock->size),
-                                   (sect->sect_info.addr + sect->sect_info.size)));
+                assert(H5_addr_lt(dblock->block_off, sect->sect_info.addr));
+                assert(H5_addr_ge((dblock->block_off + dblock->size),
+                                  (sect->sect_info.addr + sect->sect_info.size)));
 
                 /* Release direct block */
                 status = H5AC_unprotect(iblock->hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, dblock,
@@ -1585,7 +1585,7 @@ H5HF__sect_row_deserialize(const H5FS_section_class_t *cls, const uint8_t *buf, 
     /* Check arguments. */
     assert(cls);
     assert(buf);
-    assert(H5F_addr_defined(sect_addr));
+    assert(H5_addr_defined(sect_addr));
     assert(sect_size);
 
     /* Forward to indirect routine to deserialize underlying section */
@@ -1627,7 +1627,7 @@ H5HF__sect_row_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_i
     assert(sect1->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
     assert(sect2);
     assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    assert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(H5_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     /* Get the top indirect section underlying each row */
     top_indir_sect1 = H5HF__sect_indirect_top(sect1->u.row.under);
@@ -1643,8 +1643,8 @@ H5HF__sect_row_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_i
         if (H5HF__sect_indirect_iblock_off(sect1->u.row.under) ==
             H5HF__sect_indirect_iblock_off(sect2->u.row.under))
             /* Check if second section adjoins first section */
-            if (H5F_addr_eq((top_indir_sect1->sect_info.addr + top_indir_sect1->u.indirect.span_size),
-                            top_indir_sect2->sect_info.addr))
+            if (H5_addr_eq((top_indir_sect1->sect_info.addr + top_indir_sect1->u.indirect.span_size),
+                           top_indir_sect2->sect_info.addr))
                 HGOTO_DONE(TRUE)
 
 done:
@@ -2351,7 +2351,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
                                     "unable to retrieve child indirect block's address")
 
                     /* If the child indirect block's address is defined, protect it */
-                    if (H5F_addr_defined(child_iblock_addr)) {
+                    if (H5_addr_defined(child_iblock_addr)) {
                         if (NULL == (child_iblock = H5HF__man_iblock_protect(
                                          hdr, child_iblock_addr, child_nrows, sect->u.indirect.u.iblock,
                                          curr_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
@@ -3702,7 +3702,7 @@ H5HF__sect_indirect_deserialize(H5HF_hdr_t *hdr, const uint8_t *buf, haddr_t sec
     /* Check arguments. */
     assert(hdr);
     assert(buf);
-    assert(H5F_addr_defined(sect_addr));
+    assert(H5_addr_defined(sect_addr));
     assert(sect_size);
 
     /* Indirect range's indirect block's block offset */
@@ -3849,7 +3849,7 @@ H5HF__sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect
 
                 tmp_row_sect2 = sect->u.indirect.dir_rows[u - 1];
                 assert(tmp_row_sect2->u.row.row < tmp_row_sect->u.row.row);
-                assert(H5F_addr_lt(tmp_row_sect2->sect_info.addr, tmp_row_sect->sect_info.addr));
+                assert(H5_addr_lt(tmp_row_sect2->sect_info.addr, tmp_row_sect->sect_info.addr));
                 assert(tmp_row_sect2->sect_info.size <= tmp_row_sect->sect_info.size);
             } /* end if */
         }     /* end for */
@@ -3876,7 +3876,7 @@ H5HF__sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect
                     *tmp_child_sect2; /* Pointer to child indirect section */
 
                 tmp_child_sect2 = sect->u.indirect.indir_ents[u - 1];
-                assert(H5F_addr_lt(tmp_child_sect2->sect_info.addr, tmp_child_sect->sect_info.addr));
+                assert(H5_addr_lt(tmp_child_sect2->sect_info.addr, tmp_child_sect->sect_info.addr));
             } /* end if */
 
             /* Recursively check child indirect section */

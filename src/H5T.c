@@ -4019,8 +4019,8 @@ H5T_close(H5T_t *dt)
 
         /* Sanity checks */
         assert(dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
-        assert(H5F_addr_defined(dt->sh_loc.u.loc.oh_addr));
-        assert(H5F_addr_defined(dt->oloc.addr));
+        assert(H5_addr_defined(dt->sh_loc.u.loc.oh_addr));
+        assert(H5_addr_defined(dt->oloc.addr));
 
         /* If a named type is being closed then close the object header and
          * remove from the list of open objects in the file.

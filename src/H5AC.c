@@ -568,7 +568,7 @@ H5AC_expunge_entry(H5F_t *f, const H5AC_class_t *type, haddr_t addr, unsigned fl
     assert(f->shared->cache);
     assert(type);
     assert(type->serialize);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     if (H5C_expunge_entry(f, type, addr, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "H5C_expunge_entry() failed")
@@ -667,7 +667,7 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((f == NULL) || (!H5F_addr_defined(addr)) || (status == NULL))
+    if ((f == NULL) || (!H5_addr_defined(addr)) || (status == NULL))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry")
 
     if (H5C_get_entry_status(f, addr, NULL, &in_cache, &is_dirty, &is_protected, &is_pinned, &is_corked,
@@ -722,7 +722,7 @@ H5AC_insert_entry(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
     assert(f->shared->cache);
     assert(type);
     assert(type->serialize);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(thing);
 
     /* Check for invalid access request */
@@ -997,9 +997,9 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
     assert(f);
     assert(f->shared->cache);
     assert(type);
-    assert(H5F_addr_defined(old_addr));
-    assert(H5F_addr_defined(new_addr));
-    assert(H5F_addr_ne(old_addr, new_addr));
+    assert(H5_addr_defined(old_addr));
+    assert(H5_addr_defined(new_addr));
+    assert(H5_addr_ne(old_addr, new_addr));
 
 #ifdef H5_HAVE_PARALLEL
     /* Log moving the entry */
@@ -1258,7 +1258,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata, unsi
     assert(f->shared->cache);
     assert(type);
     assert(type->serialize);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Check for unexpected flags -- H5C__FLUSH_COLLECTIVELY_FLAG
      * only permitted in the parallel case.
@@ -1526,7 +1526,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
     assert(type);
     assert(type->deserialize);
     assert(type->image_len);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(thing);
     assert(((H5AC_info_t *)thing)->addr == addr);
     assert(((H5AC_info_t *)thing)->type == type);
@@ -2327,7 +2327,7 @@ H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
     assert(f);
     assert(f->shared);
     assert(f->shared->cache);
-    assert(H5F_addr_defined(obj_addr));
+    assert(H5_addr_defined(obj_addr));
     assert(action == H5AC__SET_CORK || action == H5AC__UNCORK || action == H5AC__GET_CORKED);
 
     /*  Skip the search on "tag_list" when there are no "corked" objects.
@@ -2404,7 +2404,7 @@ H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *ring)
 
     /* Sanity check */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(ring);
 
     /* Retrieve the ring value for the entry at address */

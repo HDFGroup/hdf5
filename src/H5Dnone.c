@@ -123,14 +123,14 @@ H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->layout);
     assert(idx_info->storage);
     assert(idx_info->layout->max_nchunks);
-    assert(!H5F_addr_defined(idx_info->storage->idx_addr)); /* address of data shouldn't be defined */
+    assert(!H5_addr_defined(idx_info->storage->idx_addr)); /* address of data shouldn't be defined */
 
     /* Calculate size of max dataset chunks */
     nbytes = idx_info->layout->max_nchunks * idx_info->layout->size;
 
     /* Allocate space for max dataset chunks */
     addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, nbytes);
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed")
 
     /* This is the address of the dataset chunks */
@@ -157,7 +157,7 @@ H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     /* Check args */
     assert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
 } /* end H5D__none_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -183,7 +183,7 @@ H5D__none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     assert(idx_info->layout);
     assert(idx_info->storage);
     assert(udata);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Calculate the index of this chunk */
     udata->chunk_idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->max_down_chunks,
@@ -230,7 +230,7 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t ch
     assert(idx_info->storage);
     assert(chunk_cb);
     assert(chunk_udata);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Initialize generic chunk record */
     memset(&chunk_rec, 0, sizeof(chunk_rec));
@@ -323,7 +323,7 @@ H5D__none_idx_delete(const H5D_chk_idx_info_t *idx_info)
     assert(!idx_info->pline->nused); /* Shouldn't have filter defined on entering here */
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr)); /* should be defined */
+    assert(H5_addr_defined(idx_info->storage->idx_addr)); /* should be defined */
 
     /* chunk size * max # of chunks */
     nbytes = idx_info->layout->max_nchunks * idx_info->layout->size;
@@ -360,7 +360,7 @@ H5D__none_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_inf
     assert(!idx_info_src->pline->nused);
     assert(idx_info_src->layout);
     assert(idx_info_src->storage);
-    assert(H5F_addr_defined(idx_info_src->storage->idx_addr));
+    assert(H5_addr_defined(idx_info_src->storage->idx_addr));
 
     assert(idx_info_dst);
     assert(idx_info_dst->f);

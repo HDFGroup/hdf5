@@ -261,10 +261,10 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
         UINT16DECODE(image, table->indexes[u].num_messages);
 
         /* Address of the actual index */
-        H5F_addr_decode(f, &image, &(table->indexes[u].index_addr));
+        H5_addr_decode(f, &image, &(table->indexes[u].index_addr));
 
         /* Address of the index's heap */
-        H5F_addr_decode(f, &image, &(table->indexes[u].heap_addr));
+        H5_addr_decode(f, &image, &(table->indexes[u].heap_addr));
 
         /* Compute the size of a list index for this SOHM index */
         table->indexes[u].list_size = H5SM_LIST_SIZE(f, table->indexes[u].list_max);
@@ -382,10 +382,10 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
         UINT16ENCODE(image, table->indexes[u].num_messages);
 
         /* Address of the actual index */
-        H5F_addr_encode(f, &image, table->indexes[u].index_addr);
+        H5_addr_encode(f, &image, table->indexes[u].index_addr);
 
         /* Address of the index's heap */
-        H5F_addr_encode(f, &image, table->indexes[u].heap_addr);
+        H5_addr_encode(f, &image, table->indexes[u].heap_addr);
     } /* end for */
 
     /* Compute checksum on buffer */

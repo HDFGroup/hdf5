@@ -118,7 +118,7 @@ H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open, void *ctx_udata)
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(ea_addr));
+    assert(H5_addr_defined(ea_addr));
 
     /* Allocate extensible array wrapper */
     if (NULL == (ea = H5FL_CALLOC(H5EA_t)))
@@ -225,7 +225,7 @@ H5EA_open(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(ea_addr));
+    assert(H5_addr_defined(ea_addr));
 
     /* Allocate and initialize new extensible array wrapper */
     if (NULL == (ea = H5EA__new(f, ea_addr, TRUE, ctx_udata)))
@@ -340,12 +340,12 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
     *thing_unprot_func = (H5EA__unprotect_func_t)NULL;
 
     /* Check if we should create the index block */
-    if (!H5F_addr_defined(hdr->idx_blk_addr)) {
+    if (!H5_addr_defined(hdr->idx_blk_addr)) {
         /* Check if we are allowed to create the thing */
         if (0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
             /* Create the index block */
             hdr->idx_blk_addr = H5EA__iblock_create(hdr, &stats_changed);
-            if (!H5F_addr_defined(hdr->idx_blk_addr))
+            if (!H5_addr_defined(hdr->idx_blk_addr))
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL, "unable to create index block")
             hdr_dirty = TRUE;
         } /* end if */
@@ -386,7 +386,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
             assert(dblk_idx < iblock->ndblk_addrs);
 
             /* Check if the data block has been allocated on disk yet */
-            if (!H5F_addr_defined(iblock->dblk_addrs[dblk_idx])) {
+            if (!H5_addr_defined(iblock->dblk_addrs[dblk_idx])) {
                 /* Check if we are allowed to create the thing */
                 if (0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t dblk_addr;                         /* Address of data block created */
@@ -397,7 +397,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
                     dblk_addr = H5EA__dblock_create(hdr, iblock, &stats_changed, dblk_off,
                                                     hdr->sblk_info[sblk_idx].dblk_nelmts);
-                    if (!H5F_addr_defined(dblk_addr))
+                    if (!H5_addr_defined(dblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
                                     "unable to create extensible array data block")
 
@@ -442,14 +442,14 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
             sblk_off = sblk_idx - iblock->nsblks;
 
             /* Check if the super block has been allocated on disk yet */
-            if (!H5F_addr_defined(iblock->sblk_addrs[sblk_off])) {
+            if (!H5_addr_defined(iblock->sblk_addrs[sblk_off])) {
                 /* Check if we are allowed to create the thing */
                 if (0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t sblk_addr;                         /* Address of data block created */
 
                     /* Create super block */
                     sblk_addr = H5EA__sblock_create(hdr, iblock, &stats_changed, sblk_idx);
-                    if (!H5F_addr_defined(sblk_addr))
+                    if (!H5_addr_defined(sblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
                                     "unable to create extensible array super block")
 
@@ -473,7 +473,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
             assert(dblk_idx < sblock->ndblks);
 
             /* Check if the data block has been allocated on disk yet */
-            if (!H5F_addr_defined(sblock->dblk_addrs[dblk_idx])) {
+            if (!H5_addr_defined(sblock->dblk_addrs[dblk_idx])) {
                 /* Check if we are allowed to create the thing */
                 if (0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t dblk_addr;                         /* Address of data block created */
@@ -484,7 +484,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
                     dblk_addr =
                         H5EA__dblock_create(hdr, sblock, &stats_changed, dblk_off, sblock->dblk_nelmts);
-                    if (!H5F_addr_defined(dblk_addr))
+                    if (!H5_addr_defined(dblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
                                     "unable to create extensible array data block")
 
@@ -920,7 +920,7 @@ H5EA_delete(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(ea_addr));
+    assert(H5_addr_defined(ea_addr));
 
     /* Lock the array header into memory */
     if (NULL == (hdr = H5EA__hdr_protect(f, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))

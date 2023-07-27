@@ -196,8 +196,8 @@ H5HG__create(H5F_t *f, size_t size)
 
 done:
     /* Cleanup on error */
-    if (!H5F_addr_defined(ret_value)) {
-        if (H5F_addr_defined(addr)) {
+    if (!H5_addr_defined(ret_value)) {
+        if (H5_addr_defined(addr)) {
             /* Release the space on disk */
             if (H5MF_xfree(f, H5FD_MEM_GHEAP, addr, (hsize_t)size) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free global heap")
@@ -233,7 +233,7 @@ H5HG__protect(H5F_t *f, haddr_t addr, unsigned flags)
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
     assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
@@ -400,7 +400,7 @@ H5HG_extend(H5F_t *f, haddr_t addr, size_t need)
 
     /* Check args */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Protect the heap */
     if (NULL == (heap = H5HG__protect(f, addr, H5AC__NO_FLAGS_SET)))
@@ -503,13 +503,13 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
      * If we didn't find any collection with enough free space then allocate a
      * new collection large enough for the message plus the collection header.
      */
-    if (!H5F_addr_defined(addr)) {
+    if (!H5_addr_defined(addr)) {
         addr = H5HG__create(f, need + H5HG_SIZEOF_HDR(f));
 
-        if (!H5F_addr_defined(addr))
+        if (!H5_addr_defined(addr))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to allocate a global heap collection")
     } /* end if */
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     if (NULL == (heap = H5HG__protect(f, addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")

@@ -804,7 +804,7 @@ H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flag
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     assert(type);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_lru_list(cache_ptr) < 0)
@@ -1082,7 +1082,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     assert(type);
     assert(type->mem_type == cache_ptr->class_table_ptr[type->id]->mem_type);
     assert(type->image_len);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(thing);
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -1358,7 +1358,7 @@ H5C_mark_entry_dirty(void *thing)
 
     /* Sanity checks */
     assert(entry_ptr);
-    assert(H5F_addr_defined(entry_ptr->addr));
+    assert(H5_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -1456,7 +1456,7 @@ H5C_mark_entry_clean(void *_thing)
 
     /* Sanity checks */
     assert(entry_ptr);
-    assert(H5F_addr_defined(entry_ptr->addr));
+    assert(H5_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -1531,7 +1531,7 @@ H5C_mark_entry_unserialized(void *thing)
 
     /* Sanity checks */
     assert(entry);
-    assert(H5F_addr_defined(entry->addr));
+    assert(H5_addr_defined(entry->addr));
 
     if (entry->is_protected || entry->is_pinned) {
         assert(!entry->is_read_only);
@@ -1577,7 +1577,7 @@ H5C_mark_entry_serialized(void *_thing)
 
     /* Sanity checks */
     assert(entry);
-    assert(H5F_addr_defined(entry->addr));
+    assert(H5_addr_defined(entry->addr));
 
     /* Operate on pinned entry */
     if (entry->is_protected)
@@ -1628,9 +1628,9 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     assert(type);
-    assert(H5F_addr_defined(old_addr));
-    assert(H5F_addr_defined(new_addr));
-    assert(H5F_addr_ne(old_addr, new_addr));
+    assert(H5_addr_defined(old_addr));
+    assert(H5_addr_defined(new_addr));
+    assert(H5_addr_ne(old_addr, new_addr));
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
@@ -1774,7 +1774,7 @@ H5C_resize_entry(void *thing, size_t new_size)
 
     /* Sanity checks */
     assert(entry_ptr);
-    assert(H5F_addr_defined(entry_ptr->addr));
+    assert(H5_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -1907,7 +1907,7 @@ H5C_pin_protected_entry(void *thing)
 
     /* Sanity checks */
     assert(entry_ptr);
-    assert(H5F_addr_defined(entry_ptr->addr));
+    assert(H5_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -1989,7 +1989,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     assert(type);
     assert(type->mem_type == cache_ptr->class_table_ptr[type->id]->mem_type);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
@@ -2843,7 +2843,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(thing);
     assert(!(pin_entry && unpin_entry));
 
@@ -3383,10 +3383,10 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
     /* Sanity checks */
     assert(parent_entry);
     assert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    assert(H5F_addr_defined(parent_entry->addr));
+    assert(H5_addr_defined(parent_entry->addr));
     assert(child_entry);
     assert(child_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    assert(H5F_addr_defined(child_entry->addr));
+    assert(H5_addr_defined(child_entry->addr));
     cache_ptr = parent_entry->cache_ptr;
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -3525,10 +3525,10 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
     /* Sanity checks */
     assert(parent_entry);
     assert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    assert(H5F_addr_defined(parent_entry->addr));
+    assert(H5_addr_defined(parent_entry->addr));
     assert(child_entry);
     assert(child_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    assert(H5F_addr_defined(child_entry->addr));
+    assert(H5_addr_defined(child_entry->addr));
     cache_ptr = parent_entry->cache_ptr;
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -5958,7 +5958,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             hsize_t fsf_size;
 
             /* Sanity checks */
-            assert(H5F_addr_defined(entry_ptr->addr));
+            assert(H5_addr_defined(entry_ptr->addr));
             assert(!H5F_IS_TMP_ADDR(f, entry_ptr->addr));
 #ifndef NDEBUG
             {
@@ -6113,15 +6113,15 @@ H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr, size_t *len
 
     /* Get the file's end-of-allocation value */
     eoa = H5F_get_eoa(f, cooked_type);
-    if (!H5F_addr_defined(eoa))
+    if (!H5_addr_defined(eoa))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid EOA address for file")
 
     /* Check for bad address in general */
-    if (H5F_addr_gt(addr, eoa))
+    if (H5_addr_gt(addr, eoa))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "address of object past end of allocation")
 
     /* Check if the amount of data to read will be past the EOA */
-    if (H5F_addr_gt((addr + *len), eoa)) {
+    if (H5_addr_gt((addr + *len), eoa)) {
         if (actual)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "actual len exceeds EOA")
         else
@@ -6180,7 +6180,7 @@ H5C__load_entry(H5F_t *f,
     assert(f->shared);
     assert(f->shared->cache);
     assert(type);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(type->get_initial_load_size);
     if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
         assert(type->get_final_load_size);
@@ -7131,7 +7131,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 
     /* Assertions */
     assert(cache_ptr != NULL);
-    assert(H5F_addr_defined(obj_addr));
+    assert(H5_addr_defined(obj_addr));
     assert(action == H5C__SET_CORK || action == H5C__UNCORK || action == H5C__GET_CORKED);
 
     /* Search the list of corked object addresses in the cache */

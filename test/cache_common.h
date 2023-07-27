@@ -408,7 +408,7 @@ typedef struct test_entry_t {
 #define H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                                                          \
     if (((cache_ptr) == NULL) || ((cache_ptr)->magic != H5C__H5C_T_MAGIC) ||                                 \
         ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size)) ||      \
-        (!H5F_addr_defined(Addr)) || (H5C__HASH_FCN(Addr) < 0) ||                                            \
+        (!H5_addr_defined(Addr)) || (H5C__HASH_FCN(Addr) < 0) ||                                             \
         (H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN)) {                                                      \
         HDfprintf(stdout, "Pre HT search SC failed.\n");                                                     \
     }
@@ -438,7 +438,7 @@ typedef struct test_entry_t {
         k         = H5C__HASH_FCN(Addr);                                                                     \
         entry_ptr = ((cache_ptr)->index)[k];                                                                 \
         while (entry_ptr) {                                                                                  \
-            if (H5F_addr_eq(Addr, (entry_ptr)->addr)) {                                                      \
+            if (H5_addr_eq(Addr, (entry_ptr)->addr)) {                                                       \
                 H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)                                     \
                 if (entry_ptr != ((cache_ptr)->index)[k]) {                                                  \
                     if ((entry_ptr)->ht_next)                                                                \

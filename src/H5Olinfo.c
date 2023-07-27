@@ -148,16 +148,16 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
 
     /* Address of fractal heap to store "dense" links */
-    H5F_addr_decode(f, &p, &(linfo->fheap_addr));
+    H5_addr_decode(f, &p, &(linfo->fheap_addr));
 
     /* Address of v2 B-tree to index names of links (names are always indexed) */
-    H5F_addr_decode(f, &p, &(linfo->name_bt2_addr));
+    H5_addr_decode(f, &p, &(linfo->name_bt2_addr));
 
     /* Address of v2 B-tree to index creation order of links, if there is one */
     if (linfo->index_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, addr_size, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-        H5F_addr_decode(f, &p, &(linfo->corder_bt2_addr));
+        H5_addr_decode(f, &p, &(linfo->corder_bt2_addr));
     }
     else
         linfo->corder_bt2_addr = HADDR_UNDEF;
@@ -208,16 +208,16 @@ H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
         INT64ENCODE(p, linfo->max_corder)
 
     /* Address of fractal heap to store "dense" links */
-    H5F_addr_encode(f, &p, linfo->fheap_addr);
+    H5_addr_encode(f, &p, linfo->fheap_addr);
 
     /* Address of v2 B-tree to index names of links */
-    H5F_addr_encode(f, &p, linfo->name_bt2_addr);
+    H5_addr_encode(f, &p, linfo->name_bt2_addr);
 
     /* Address of v2 B-tree to index creation order of links, if they are indexed */
     if (linfo->index_corder)
-        H5F_addr_encode(f, &p, linfo->corder_bt2_addr);
+        H5_addr_encode(f, &p, linfo->corder_bt2_addr);
     else
-        assert(!H5F_addr_defined(linfo->corder_bt2_addr));
+        assert(!H5_addr_defined(linfo->corder_bt2_addr));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__linfo_encode() */
@@ -333,7 +333,7 @@ H5O__linfo_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     assert(linfo);
 
     /* If the group is using "dense" link storage, delete it */
-    if (H5F_addr_defined(linfo->fheap_addr))
+    if (H5_addr_defined(linfo->fheap_addr))
         if (H5G__dense_delete(f, linfo, TRUE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage")
 
@@ -388,7 +388,7 @@ H5O__linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *fi
         /* (XXX: should probably get the "creation" parameters for the source group's
          *      dense link storage components and use those - QAK)
          */
-        if (H5F_addr_defined(linfo_src->fheap_addr)) {
+        if (H5_addr_defined(linfo_src->fheap_addr)) {
             /* Create the dense link storage */
             if (H5G__dense_create(file_dst, linfo_dst, udata->common.src_pline) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create 'dense' form of new format group")
@@ -478,7 +478,7 @@ H5O__linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
     assert(src_oloc && src_oloc->file);
     assert(linfo_src);
     assert(dst_oloc && dst_oloc->file);
-    assert(H5F_addr_defined(dst_oloc->addr));
+    assert(H5_addr_defined(dst_oloc->addr));
     assert(linfo_dst);
     assert(cpy_info);
 
@@ -487,7 +487,7 @@ H5O__linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
         HGOTO_DONE(SUCCEED)
 
     /* Check for copying dense link storage */
-    if (H5F_addr_defined(linfo_src->fheap_addr)) {
+    if (H5_addr_defined(linfo_src->fheap_addr)) {
         H5O_linfo_postcopy_ud_t udata; /* User data for iteration callback */
 
         /* Set up dense link iteration user data */

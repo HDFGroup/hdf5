@@ -190,7 +190,7 @@ H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, size_t len, H5HL_cache
     /* Heap data address */
     if (H5_IS_BUFFER_OVERFLOW(image, udata->sizeof_addr, p_end))
         HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
-    H5F_addr_decode_len(udata->sizeof_addr, &image, &(heap->dblk_addr));
+    H5_addr_decode_len(udata->sizeof_addr, &image, &(heap->dblk_addr));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -365,7 +365,7 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len, voi
     /* Check if heap block exists */
     if (heap.dblk_size)
         /* Check if heap data block is contiguous with header */
-        if (H5F_addr_eq((heap.prfx_addr + heap.prfx_size), heap.dblk_addr))
+        if (H5_addr_eq((heap.prfx_addr + heap.prfx_size), heap.dblk_addr))
             /* Note that the heap should be a single object in the cache */
             *actual_len += heap.dblk_size;
 
@@ -404,7 +404,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, hbo
     assert(udata->sizeof_size > 0);
     assert(udata->sizeof_addr > 0);
     assert(udata->sizeof_prfx > 0);
-    assert(H5F_addr_defined(udata->prfx_addr));
+    assert(H5_addr_defined(udata->prfx_addr));
     assert(dirty);
 
     /* Allocate space in memory for the heap */
@@ -422,7 +422,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, hbo
     /* Check if heap block exists */
     if (heap->dblk_size) {
         /* Check if heap data block is contiguous with header */
-        if (H5F_addr_eq((heap->prfx_addr + heap->prfx_size), heap->dblk_addr)) {
+        if (H5_addr_eq((heap->prfx_addr + heap->prfx_size), heap->dblk_addr)) {
             /* Note that the heap should be a single object in the cache */
             heap->single_cache_obj = TRUE;
 
@@ -535,7 +535,7 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     assert(prfx);
     assert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    assert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
+    assert(H5_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
     assert(prfx->heap);
 
     /* Get the pointer to the heap */
@@ -562,7 +562,7 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     *image++ = 0; /*reserved*/
     H5F_ENCODE_LENGTH_LEN(image, heap->dblk_size, heap->sizeof_size);
     H5F_ENCODE_LENGTH_LEN(image, heap->free_block, heap->sizeof_size);
-    H5F_addr_encode_len(heap->sizeof_addr, &image, heap->dblk_addr);
+    H5_addr_encode_len(heap->sizeof_addr, &image, heap->dblk_addr);
 
     /* Check if the local heap is a single object in cache */
     if (heap->single_cache_obj) {
@@ -629,7 +629,7 @@ H5HL__cache_prefix_free_icr(void *_thing)
     assert(prfx);
     assert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    assert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
+    assert(H5_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
 
     /* Destroy local heap prefix */
     if (H5HL__prfx_dest(prfx) < 0)

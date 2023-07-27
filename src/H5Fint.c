@@ -1215,7 +1215,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
-        if (!H5F_addr_defined(f->shared->maxaddr))
+        if (!H5_addr_defined(f->shared->maxaddr))
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad maximum address from VFD")
         if (H5FD_get_feature_flags(lf, &f->shared->feature_flags) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get feature flags from VFD")
@@ -2799,7 +2799,7 @@ done:
 } /* H5F__build_actual_name() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_addr_encode_len
+ * Function:    H5_addr_encode_len
  *
  * Purpose:     Encodes an address into the buffer pointed to by *PP and
  *              then increments the pointer to the first byte after the
@@ -2809,7 +2809,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_encode_len(size_t addr_len, uint8_t **pp /*in,out*/, haddr_t addr)
+H5_addr_encode_len(size_t addr_len, uint8_t **pp /*in,out*/, haddr_t addr)
 {
     unsigned u; /* Local index variable */
 
@@ -2819,7 +2819,7 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp /*in,out*/, haddr_t addr)
     assert(addr_len);
     assert(pp && *pp);
 
-    if (H5F_addr_defined(addr)) {
+    if (H5_addr_defined(addr)) {
         for (u = 0; u < addr_len; u++) {
             *(*pp)++ = (uint8_t)(addr & 0xff);
             addr >>= 8;
@@ -2832,10 +2832,10 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp /*in,out*/, haddr_t addr)
     } /* end else */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5F_addr_encode_len() */
+} /* end H5_addr_encode_len() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_addr_encode
+ * Function:    H5_addr_encode
  *
  * Purpose:     Encodes an address into the buffer pointed to by *PP and
  *              then increments the pointer to the first byte after the
@@ -2845,20 +2845,20 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp /*in,out*/, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_encode(const H5F_t *f, uint8_t **pp /*in,out*/, haddr_t addr)
+H5_addr_encode(const H5F_t *f, uint8_t **pp /*in,out*/, haddr_t addr)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(f);
 
-    H5F_addr_encode_len(H5F_SIZEOF_ADDR(f), pp, addr);
+    H5_addr_encode_len(H5F_SIZEOF_ADDR(f), pp, addr);
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5F_addr_encode() */
+} /* end H5_addr_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_addr_decode_len
+ * Function:    H5_addr_decode_len
  *
  * Purpose:     Decodes an address from the buffer pointed to by *PP and
  *              updates the pointer to point to the next byte after the
@@ -2871,7 +2871,7 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp /*in,out*/, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_decode_len(size_t addr_len, const uint8_t **pp /*in,out*/, haddr_t *addr_p /*out*/)
+H5_addr_decode_len(size_t addr_len, const uint8_t **pp /*in,out*/, haddr_t *addr_p /*out*/)
 {
     hbool_t  all_zero = TRUE; /* True if address was all zeroes */
     unsigned u;               /* Local index variable */
@@ -2917,10 +2917,10 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp /*in,out*/, haddr_t *add
         *addr_p = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5F_addr_decode_len() */
+} /* end H5_addr_decode_len() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_addr_decode
+ * Function:    H5_addr_decode
  *
  * Purpose:     Decodes an address from the buffer pointed to by *PP and
  *              updates the pointer to point to the next byte after the
@@ -2933,17 +2933,17 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp /*in,out*/, haddr_t *add
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_decode(const H5F_t *f, const uint8_t **pp /*in,out*/, haddr_t *addr_p /*out*/)
+H5_addr_decode(const H5F_t *f, const uint8_t **pp /*in,out*/, haddr_t *addr_p /*out*/)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(f);
 
-    H5F_addr_decode_len(H5F_SIZEOF_ADDR(f), pp, addr_p);
+    H5_addr_decode_len(H5F_SIZEOF_ADDR(f), pp, addr_p);
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5F_addr_decode() */
+} /* end H5_addr_decode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_grp_btree_shared
@@ -3254,7 +3254,7 @@ H5F__get_info(H5F_t *f, H5F_info2_t *finfo)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve free space information")
 
     /* Check for SOHM info */
-    if (H5F_addr_defined(f->shared->sohm_addr))
+    if (H5_addr_defined(f->shared->sohm_addr))
         if (H5SM_ih_size(f, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve SOHM index & heap storage info")
 
@@ -3932,7 +3932,7 @@ H5F__format_convert(H5F_t *f)
           f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
 
         /* Check to remove free-space manager info message from superblock extension */
-        if (H5F_addr_defined(f->shared->sblock->ext_addr))
+        if (H5_addr_defined(f->shared->sblock->ext_addr))
             if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL,
                             "error in removing message from superblock extension")

@@ -193,7 +193,7 @@ H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
 
     /* Check arguments. */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Look up the B-tree header */
     if (NULL == (hdr = H5B2__hdr_protect(f, addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
@@ -301,7 +301,7 @@ H5B2_update(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
     hdr = bt2->hdr;
 
     /* Check if the root node is allocated yet */
-    if (!H5F_addr_defined(hdr->root.addr)) {
+    if (!H5_addr_defined(hdr->root.addr)) {
         /* Create root node as leaf node in B-tree */
         if (H5B2__create_leaf(hdr, hdr, &(hdr->root)) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create root node")
@@ -1079,7 +1079,7 @@ H5B2_neighbor(H5B2_t *bt2, H5B2_compare_t range, void *udata, H5B2_found_t op, v
     hdr = bt2->hdr;
 
     /* Check for empty tree */
-    if (!H5F_addr_defined(hdr->root.addr))
+    if (!H5_addr_defined(hdr->root.addr))
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
 
     /* Attempt to find neighbor record in B-tree */
@@ -1384,7 +1384,7 @@ H5B2_close(H5B2_t *bt2)
         H5B2_hdr_t *hdr; /* Another pointer to v2 B-tree header */
 
         /* Sanity check */
-        assert(H5F_addr_defined(bt2_addr));
+        assert(H5_addr_defined(bt2_addr));
 
 #ifndef NDEBUG
         {
@@ -1469,7 +1469,7 @@ H5B2_delete(H5F_t *f, haddr_t addr, void *ctx_udata, H5B2_remove_t op, void *op_
 
     /* Check arguments. */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Lock the v2 B-tree header into memory */
     if (NULL == (hdr = H5B2__hdr_protect(f, addr, ctx_udata, H5AC__NO_FLAGS_SET)))

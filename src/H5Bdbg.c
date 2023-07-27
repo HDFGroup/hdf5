@@ -58,7 +58,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
      * Check arguments.
      */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);
@@ -204,13 +204,13 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
         /* Check node header */
         assert(bt->level == cur->level);
         if (cur->next && cur->next->level == bt->level)
-            assert(H5F_addr_eq(bt->right, cur->next->addr));
+            assert(H5_addr_eq(bt->right, cur->next->addr));
         else
-            assert(!H5F_addr_defined(bt->right));
+            assert(!H5_addr_defined(bt->right));
         if (prev && prev->level == bt->level)
-            assert(H5F_addr_eq(bt->left, prev->addr));
+            assert(H5_addr_eq(bt->left, prev->addr));
         else
-            assert(!H5F_addr_defined(bt->left));
+            assert(!H5_addr_defined(bt->left));
 
         if (cur->level > 0) {
             unsigned u;
@@ -221,7 +221,7 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
                  * have then the tree has a cycle.
                  */
                 for (tmp = head; tmp; tmp = tmp->next)
-                    assert(H5F_addr_ne(tmp->addr, bt->child[u]));
+                    assert(H5_addr_ne(tmp->addr, bt->child[u]));
 
                 /* Add the child node to the end of the queue */
                 tmp = (struct child_t *)H5MM_calloc(sizeof(struct child_t));

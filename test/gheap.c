@@ -103,7 +103,7 @@ test_1(hid_t fapl)
             HDputs("    Unable to insert object into global heap");
             nerrors++;
         }
-        else if (u && H5F_addr_gt(obj[u - 1].addr, obj[u].addr)) {
+        else if (u && H5_addr_gt(obj[u - 1].addr, obj[u].addr)) {
             H5_FAILED();
             HDputs("    Collection addresses are not monotonically increasing");
             nerrors++;

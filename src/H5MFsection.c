@@ -256,7 +256,7 @@ H5MF__sect_deserialize(const H5FS_section_class_t *cls, const uint8_t H5_ATTR_UN
 
     /* Check arguments. */
     assert(cls);
-    assert(H5F_addr_defined(sect_addr));
+    assert(H5_addr_defined(sect_addr));
     assert(sect_size);
 
     /* Create free space section for block */
@@ -359,10 +359,10 @@ H5MF__sect_simple_can_merge(const H5FS_section_info_t *_sect1, const H5FS_sectio
     assert(sect1);
     assert(sect2);
     assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    assert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(H5_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     /* Check if second section adjoins first section */
-    ret_value = H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
+    ret_value = H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__sect_simple_can_merge() */
@@ -394,7 +394,7 @@ H5MF__sect_simple_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect
     assert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_SIMPLE);
     assert(sect2);
     assert(sect2->sect_info.type == H5MF_FSPACE_SECT_SIMPLE);
-    assert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    assert(H5_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -441,7 +441,7 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     end = sect->sect_info.addr + sect->sect_info.size;
 
     /* Check if the section is exactly at the end of the allocated space in the file */
-    if (H5F_addr_eq(end, eoa)) {
+    if (H5_addr_eq(end, eoa)) {
         /* Set the shrinking type */
         udata->shrink = H5MF_SHRINK_EOA;
 #ifdef H5MF_ALLOC_DEBUG_MORE
@@ -658,10 +658,10 @@ H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
     assert(sect1);
     assert(sect2);
     assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    assert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(H5_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     /* Check if second section adjoins first section */
-    ret_value = H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
+    ret_value = H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
     if (ret_value > 0)
         /* If they are on different pages, couldn't merge */
         if ((sect1->sect_info.addr / udata->f->shared->fs_page_size) !=
@@ -704,7 +704,7 @@ H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
     assert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_SMALL);
     assert(sect2);
     assert(sect2->sect_info.type == H5MF_FSPACE_SECT_SMALL);
-    assert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    assert(H5_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -764,9 +764,9 @@ H5MF__sect_large_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
     assert(sect1);
     assert(sect2);
     assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    assert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(H5_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
-    ret_value = H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
+    ret_value = H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
     fprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
@@ -801,7 +801,7 @@ H5MF__sect_large_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
     assert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_LARGE);
     assert(sect2);
     assert(sect2->sect_info.type == H5MF_FSPACE_SECT_LARGE);
-    assert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    assert(H5_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -849,7 +849,7 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     end = sect->sect_info.addr + sect->sect_info.size;
 
     /* Check if the section is exactly at the end of the allocated space in the file */
-    if (H5F_addr_eq(end, eoa) && sect->sect_info.size >= udata->f->shared->fs_page_size) {
+    if (H5_addr_eq(end, eoa) && sect->sect_info.size >= udata->f->shared->fs_page_size) {
         /* Set the shrinking type */
         udata->shrink = H5MF_SHRINK_EOA;
 #ifdef H5MF_ALLOC_DEBUG_MORE

@@ -656,7 +656,7 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     assert(buf);
 
     /* Check for overflow conditions */
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
@@ -761,7 +761,7 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     assert(buf);
 
     /* Check for overflow conditions */
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu",
@@ -859,7 +859,7 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
     assert(file);
 
     /* Extend the file to make sure it's large enough */
-    if (!H5F_addr_eq(file->eoa, file->eof)) {
+    if (!H5_addr_eq(file->eoa, file->eof)) {
 #ifdef H5_HAVE_WIN32_API
         LARGE_INTEGER li;       /* 64-bit (union) integer for SetFilePointer() call */
         DWORD         dwPtrLow; /* Low-order pointer bits from SetFilePointer()

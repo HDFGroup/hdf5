@@ -846,8 +846,8 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
     /* Sanity checks */
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    assert(H5F_addr_defined(parent_addr));
-    assert(H5F_addr_defined(child_addr));
+    assert(H5_addr_defined(parent_addr));
+    assert(H5_addr_defined(child_addr));
     assert(fd_exists_ptr);
 
     H5C__SEARCH_INDEX(cache_ptr, parent_addr, parent_ptr, FAIL)
@@ -1044,7 +1044,7 @@ H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr
     /* Sanity checks */
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(entry_ptr_ptr);
 
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
@@ -1175,7 +1175,7 @@ H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expecte
     /* Sanity checks */
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(expected_type);
     assert(in_cache_ptr);
     assert(type_ok_ptr);

@@ -1341,7 +1341,7 @@ H5R__encode_heap(H5F_t *f, unsigned char *buf, size_t *nalloc, const unsigned ch
             HGOTO_ERROR(H5E_REFERENCE, H5E_WRITEERROR, FAIL, "Unable to write reference information")
 
         /* Encode the heap information */
-        H5F_addr_encode(f, &p, hobjid.addr);
+        H5_addr_encode(f, &p, hobjid.addr);
         UINT32ENCODE(p, hobjid.idx);
     } /* end if */
     *nalloc = buf_size;
@@ -1381,8 +1381,8 @@ H5R__decode_heap(H5F_t *f, const unsigned char *buf, size_t *nbytes, unsigned ch
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
     /* Get the heap information */
-    H5F_addr_decode(f, &p, &(hobjid.addr));
-    if (!H5F_addr_defined(hobjid.addr) || hobjid.addr == 0)
+    H5_addr_decode(f, &p, &(hobjid.addr));
+    if (!H5_addr_defined(hobjid.addr) || hobjid.addr == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Undefined reference pointer")
     UINT32DECODE(p, hobjid.idx);
 

@@ -234,7 +234,7 @@ H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in
 
     assert(cache_ptr != NULL);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(in_cache_ptr != NULL);
 
     /* this test duplicates two of the above asserts, but we need an
@@ -355,7 +355,7 @@ H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring)
     cache_ptr = f->shared->cache;
     assert(cache_ptr);
     assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Locate the entry at the address */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)

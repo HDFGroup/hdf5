@@ -148,7 +148,7 @@ done:
                                 "unable to remove v2 B-tree internal node from cache")
 
             /* Release internal node's disk space */
-            if (H5F_addr_defined(node_ptr->addr) &&
+            if (H5_addr_defined(node_ptr->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_BTREE, node_ptr->addr, (hsize_t)hdr->node_size) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL,
                             "unable to release file space for v2 B-tree internal node")
@@ -184,7 +184,7 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     /* Check arguments. */
     assert(hdr);
     assert(node_ptr);
-    assert(H5F_addr_defined(node_ptr->addr));
+    assert(H5_addr_defined(node_ptr->addr));
     assert(depth > 0);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
@@ -281,7 +281,7 @@ H5B2__neighbor_internal(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_n
     assert(hdr);
     assert(depth > 0);
     assert(curr_node_ptr);
-    assert(H5F_addr_defined(curr_node_ptr->addr));
+    assert(H5_addr_defined(curr_node_ptr->addr));
     assert(op);
 
     /* Lock current B-tree node */
@@ -355,7 +355,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
     assert(hdr);
     assert(depth > 0);
     assert(curr_node_ptr);
-    assert(H5F_addr_defined(curr_node_ptr->addr));
+    assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL ==
@@ -523,7 +523,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
     assert(hdr);
     assert(depth > 0);
     assert(curr_node_ptr);
-    assert(H5F_addr_defined(curr_node_ptr->addr));
+    assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL ==
@@ -728,7 +728,7 @@ H5B2__shadow_internal(H5B2_internal_t *internal, H5B2_node_ptr_t *curr_node_ptr)
      */
     assert(internal);
     assert(curr_node_ptr);
-    assert(H5F_addr_defined(curr_node_ptr->addr));
+    assert(H5_addr_defined(curr_node_ptr->addr));
     hdr = internal->hdr;
     assert(hdr);
     assert(hdr->swmr_write);
@@ -800,7 +800,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
     assert(depth > 0);
     assert(parent_cache_info);
     assert(curr_node_ptr);
-    assert(H5F_addr_defined(curr_node_ptr->addr));
+    assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL == (internal = H5B2__protect_internal(hdr, parent_cache_info, curr_node_ptr, depth, FALSE,
@@ -1041,7 +1041,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
     assert(depth > 0);
     assert(parent_cache_info);
     assert(curr_node_ptr);
-    assert(H5F_addr_defined(curr_node_ptr->addr));
+    assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL == (internal = H5B2__protect_internal(hdr, parent_cache_info, curr_node_ptr, depth, FALSE,
@@ -1370,7 +1370,7 @@ H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t H5_ATTR_NDEBUG_U
     for (u = 0; u < internal->nrec + 1; u++) {
         tot_all_nrec += internal->node_ptrs[u].all_nrec;
 
-        assert(H5F_addr_defined(internal->node_ptrs[u].addr));
+        assert(H5_addr_defined(internal->node_ptrs[u].addr));
         assert(internal->node_ptrs[u].addr > 0);
         for (v = 0; v < u; v++)
             assert(internal->node_ptrs[u].addr != internal->node_ptrs[v].addr);
@@ -1407,7 +1407,7 @@ H5B2__assert_internal2(hsize_t parent_all_nrec, const H5B2_hdr_t H5_ATTR_NDEBUG_
     for (u = 0; u < internal->nrec + 1; u++) {
         tot_all_nrec += internal->node_ptrs[u].all_nrec;
 
-        assert(H5F_addr_defined(internal->node_ptrs[u].addr));
+        assert(H5_addr_defined(internal->node_ptrs[u].addr));
         assert(internal->node_ptrs[u].addr > 0);
         for (v = 0; v < u; v++)
             assert(internal->node_ptrs[u].addr != internal->node_ptrs[v].addr);
