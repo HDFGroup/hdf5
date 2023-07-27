@@ -71,11 +71,11 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All image tests passed.\n");
+    printf("All image tests passed.\n");
     return 0;
 
 error:
-    HDprintf("***** %d IMAGE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d IMAGE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
 
@@ -111,14 +111,14 @@ test_simple(void)
     hsize_t        pal_dims_out[2];          /* palette dimensions */
 
     /* Allocate image buffers */
-    buf1 = (unsigned char *)HDmalloc(WIDTH * HEIGHT);
-    HDassert(buf1);
-    buf2 = (unsigned char *)HDmalloc(WIDTH * HEIGHT * 3);
-    HDassert(buf2);
-    buf1_out = (unsigned char *)HDmalloc(WIDTH * HEIGHT);
-    HDassert(buf1_out);
-    buf2_out = (unsigned char *)HDmalloc(WIDTH * HEIGHT * 3);
-    HDassert(buf2_out);
+    buf1 = (unsigned char *)malloc(WIDTH * HEIGHT);
+    assert(buf1);
+    buf2 = (unsigned char *)malloc(WIDTH * HEIGHT * 3);
+    assert(buf2);
+    buf1_out = (unsigned char *)malloc(WIDTH * HEIGHT);
+    assert(buf1_out);
+    buf2_out = (unsigned char *)malloc(WIDTH * HEIGHT * 3);
+    assert(buf2_out);
 
     /* create an image */
     space = WIDTH * HEIGHT / PAL_ENTRIES;
@@ -274,13 +274,13 @@ test_simple(void)
      */
 
     if (buf1)
-        HDfree(buf1);
+        free(buf1);
     if (buf2)
-        HDfree(buf2);
+        free(buf2);
     if (buf1_out)
-        HDfree(buf1_out);
+        free(buf1_out);
     if (buf2_out)
-        HDfree(buf2_out);
+        free(buf2_out);
 
     /* Close the file. */
     if (H5Fclose(fid) < 0)
@@ -293,13 +293,13 @@ test_simple(void)
     /* error zone, gracefully close */
 out:
     if (buf1)
-        HDfree(buf1);
+        free(buf1);
     if (buf2)
-        HDfree(buf2);
+        free(buf2);
     if (buf1_out)
-        HDfree(buf1_out);
+        free(buf1_out);
     if (buf2_out)
-        HDfree(buf2_out);
+        free(buf2_out);
     H5E_BEGIN_TRY
     {
         H5Fclose(fid);
@@ -329,7 +329,7 @@ test_data(void)
     if ((fid = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 
-    HDprintf("Testing read ascii image data and generate images\n");
+    printf("Testing read ascii image data and generate images\n");
 
     /*-------------------------------------------------------------------------
      * read 8bit image data
@@ -480,7 +480,7 @@ test_data(void)
         goto out;
 
     /* Release memory buffer */
-    HDfree(image_data);
+    free(image_data);
 
     return 0;
 
@@ -488,7 +488,7 @@ test_data(void)
 out:
     /* Release memory buffer */
     if (image_data)
-        HDfree(image_data);
+        free(image_data);
 
     H5E_BEGIN_TRY
     {
@@ -531,16 +531,16 @@ test_generate(void)
     if ((fid = H5Fcreate(FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 
-    HDprintf("Testing read and process data and make indexed images\n");
+    printf("Testing read and process data and make indexed images\n");
 
     /*-------------------------------------------------------------------------
      * read data; the file data format is described below
      *-------------------------------------------------------------------------
      */
 
-    f = HDfopen(data_file, "r");
+    f = fopen(data_file, "r");
     if (f == NULL) {
-        HDprintf("Could not find file %s. Try set $srcdir \n", data_file);
+        printf("Could not find file %s. Try set $srcdir \n", data_file);
         goto out;
     }
 
@@ -580,11 +580,11 @@ test_generate(void)
     */
 
     if (HDfscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
     if (HDfscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
@@ -606,16 +606,16 @@ test_generate(void)
     if (n_elements > INT_MAX / (int)sizeof(float))
         goto out;
 
-    data = (float *)HDmalloc((size_t)n_elements * sizeof(float));
+    data = (float *)malloc((size_t)n_elements * sizeof(float));
     if (NULL == data)
         goto out;
-    image_data = (unsigned char *)HDmalloc((size_t)n_elements * sizeof(unsigned char));
+    image_data = (unsigned char *)malloc((size_t)n_elements * sizeof(unsigned char));
     if (NULL == image_data)
         goto out;
 
     for (i = 0; i < n_elements; i++) {
         if (HDfscanf(f, "%f ", &value) < 0 && HDferror(f)) {
-            HDprintf("fscanf error in file %s.\n", data_file);
+            printf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
         data[i] = value;
@@ -712,8 +712,8 @@ test_generate(void)
         goto out;
 
     /* Release memory buffers */
-    HDfree(data);
-    HDfree(image_data);
+    free(data);
+    free(image_data);
 
     /* Indicate success */
     return 0;
@@ -722,9 +722,9 @@ test_generate(void)
 out:
     /* Release memory buffers */
     if (data)
-        HDfree(data);
+        free(data);
     if (image_data)
-        HDfree(image_data);
+        free(image_data);
 
     H5E_BEGIN_TRY
     {
@@ -773,38 +773,38 @@ read_data(const char *fname, /*IN*/
      *-------------------------------------------------------------------------
      */
 
-    if (NULL == (f = HDfopen(data_file, "r"))) {
-        HDprintf("Could not open file %s. Try set $srcdir \n", data_file);
+    if (NULL == (f = fopen(data_file, "r"))) {
+        printf("Could not open file %s. Try set $srcdir \n", data_file);
         goto out;
     }
 
     if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
     if (HDfscanf(f, "%d", &color_planes) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
     if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
     if (HDfscanf(f, "%d", &h) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
     if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
     if (HDfscanf(f, "%d", &w) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
@@ -825,10 +825,10 @@ read_data(const char *fname, /*IN*/
 
     /* Release the buffer, if it was previously allocated */
     if (image_data)
-        HDfree(image_data);
+        free(image_data);
 
     /* Allocate the image data buffer */
-    image_data = (unsigned char *)HDmalloc((size_t)n_elements * sizeof(unsigned char));
+    image_data = (unsigned char *)malloc((size_t)n_elements * sizeof(unsigned char));
     if (NULL == image_data)
         goto out;
 
@@ -838,7 +838,7 @@ read_data(const char *fname, /*IN*/
     /* Read data elements */
     for (i = 0; i < n_elements; i++) {
         if (HDfscanf(f, "%d", &n) < 0 && HDferror(f)) {
-            HDprintf("fscanf error in file %s.\n", data_file);
+            printf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
         image_data[i] = (unsigned char)n;
@@ -889,8 +889,8 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
         return -1;
 
     /* open the input file */
-    if (!(file = HDfopen(data_file, "r"))) {
-        HDprintf("Could not open file %s. Try set $srcdir \n", data_file);
+    if (!(file = fopen(data_file, "r"))) {
+        printf("Could not open file %s. Try set $srcdir \n", data_file);
         return -1;
     }
 

@@ -120,7 +120,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define ONE_DIM_SIZE            16
 
 /* Error macros */
-#define AT() HDprintf("ERROR at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define AT() printf("ERROR at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
 #define PROGRAM_ERROR                                                                                        \
     do {                                                                                                     \
         AT();                                                                                                \
@@ -334,17 +334,17 @@ onion_filepaths_init(const char *basename)
 {
     struct onion_filepaths *paths = NULL;
 
-    if (NULL == (paths = HDcalloc(1, sizeof(struct onion_filepaths))))
+    if (NULL == (paths = calloc(1, sizeof(struct onion_filepaths))))
         goto error;
 
     if (NULL == (paths->canon = HDstrdup(basename)))
         goto error;
 
-    if (NULL == (paths->onion = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+    if (NULL == (paths->onion = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
     HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
-    if (NULL == (paths->recovery = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+    if (NULL == (paths->recovery = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
     HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
@@ -352,10 +352,10 @@ onion_filepaths_init(const char *basename)
 
 error:
     if (paths != NULL) {
-        HDfree(paths->canon);
-        HDfree(paths->onion);
-        HDfree(paths->recovery);
-        HDfree(paths);
+        free(paths->canon);
+        free(paths->onion);
+        free(paths->recovery);
+        free(paths);
     }
     return NULL;
 }
@@ -364,10 +364,10 @@ static void
 onion_filepaths_destroy(struct onion_filepaths *s)
 {
     if (s) {
-        HDfree(s->canon);
-        HDfree(s->onion);
-        HDfree(s->recovery);
-        HDfree(s);
+        free(s->canon);
+        free(s->onion);
+        free(s->recovery);
+        free(s);
     }
 }
 
@@ -1000,11 +1000,11 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
 
     /* create the empty file */
     if ((fid1 = H5Fcreate(fname3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "empty file (%s) creation failed.\n", fname3);
+        fprintf(stderr, "empty file (%s) creation failed.\n", fname3);
         goto out;
     }
     if (H5Fclose(fid1) < 0) {
-        HDfprintf(stderr, "empty file (%s) close failed.\n", fname3);
+        fprintf(stderr, "empty file (%s) close failed.\n", fname3);
         goto out;
     }
 
@@ -1734,7 +1734,7 @@ test_attributes_verbose_level(const char *fname1, const char *fname2)
      * Create file1
      *-----------------------------------------------------------------------*/
     if ((fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -1744,28 +1744,28 @@ test_attributes_verbose_level(const char *fname1, const char *fname2)
      */
     f1_gid = H5Gcreate2(fid1, "g", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f1_gid < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     f1_gid2 = H5Gcreate2(fid1, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f1_gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     f1_gid3 = H5Gcreate2(fid1, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f1_gid3 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     f1_gid4 = H5Gcreate2(fid1, "g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f1_gid4 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -1776,13 +1776,13 @@ test_attributes_verbose_level(const char *fname1, const char *fname2)
     f1_sid = H5Screate_simple(1, dset_dims, NULL);
     f1_did = H5Dcreate2(fid1, "dset", H5T_NATIVE_INT, f1_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f1_did == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
     status = H5Dwrite(f1_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -1793,7 +1793,7 @@ test_attributes_verbose_level(const char *fname1, const char *fname2)
     f1_tid = H5Tcopy(H5T_NATIVE_INT);
     status = H5Tcommit2(fid1, "ntype", f1_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -1802,7 +1802,7 @@ test_attributes_verbose_level(const char *fname1, const char *fname2)
      * Create file2
      *-----------------------------------------------------------------------*/
     if ((fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -1812,28 +1812,28 @@ test_attributes_verbose_level(const char *fname1, const char *fname2)
      */
     f2_gid = H5Gcreate2(fid2, "g", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f2_gid < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     f2_gid2 = H5Gcreate2(fid2, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f2_gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     f2_gid3 = H5Gcreate2(fid2, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f2_gid3 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     f2_gid4 = H5Gcreate2(fid2, "g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f2_gid4 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -1844,13 +1844,13 @@ test_attributes_verbose_level(const char *fname1, const char *fname2)
     f2_sid = H5Screate_simple(1, dset_dims, NULL);
     f2_did = H5Dcreate2(fid2, "dset", H5T_NATIVE_INT, f2_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (f2_did == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
     status = H5Dwrite(f2_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -1861,7 +1861,7 @@ test_attributes_verbose_level(const char *fname1, const char *fname2)
     f2_tid = H5Tcopy(H5T_NATIVE_INT);
     status = H5Tcommit2(fid2, "ntype", f2_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2093,7 +2093,7 @@ test_link_name(const char *fname1)
      *------------------------------------------------------------------------*/
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2103,14 +2103,14 @@ test_link_name(const char *fname1)
      *------------------------------------------------------------------------*/
     gid1 = H5Gcreate2(fid1, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
     gid2 = H5Gcreate2(fid1, "group_longname", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     if (gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2120,14 +2120,14 @@ test_link_name(const char *fname1)
      *------------------------------------------------------------------------*/
     status = H5Lcreate_soft("group", fid1, "link_g1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("group_longname", fid1, "link_g2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2168,7 +2168,7 @@ test_soft_links(const char *fname1)
      *------------------------------------------------------------------------*/
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2178,7 +2178,7 @@ test_soft_links(const char *fname1)
      *------------------------------------------------------------------------*/
     gid1 = H5Gcreate2(fid1, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2189,21 +2189,21 @@ test_soft_links(const char *fname1)
     /* file1 */
     status = write_dset(fid1, 2, dims2, "target_dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid1, 2, dims2, "target_dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid1, 2, dims2, "dset", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2214,42 +2214,42 @@ test_soft_links(const char *fname1)
     /* file 1 */
     status = H5Lcreate_soft("/target_dset1", fid1, "softlink_dset1_1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/target_dset1", fid1, "softlink_dset1_2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/target_dset2", fid1, "softlink_dset2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/target_group", fid1, "softlink_group1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/target_group", fid1, "softlink_group2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/no_obj", fid1, "softlink_noexist", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2290,7 +2290,7 @@ test_linked_softlinks(const char *fname1)
      *------------------------------------------------------------------------*/
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2300,21 +2300,21 @@ test_linked_softlinks(const char *fname1)
      *------------------------------------------------------------------------*/
     gid1 = H5Gcreate2(fid1, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     gid2 = H5Gcreate2(fid1, "target_group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     gid3 = H5Gcreate2(fid1, "target_group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid3 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2325,20 +2325,20 @@ test_linked_softlinks(const char *fname1)
     /* file1 */
     status = write_dset(fid1, 2, dims2, "target_dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid1, 2, dims2, "target_dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
     status = write_dset(gid1, 2, dims2, "dset", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2350,84 +2350,84 @@ test_linked_softlinks(const char *fname1)
      * file 1 */
     status = H5Lcreate_soft("/target_dset1", fid1, "softlink1_to_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("softlink1_to_dset1", fid1, "softlink1_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("softlink1_to_slink1", fid1, "softlink1_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/target_dset2", fid1, "softlink2_to_dset2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("softlink2_to_dset2", fid1, "softlink2_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("softlink2_to_slink1", fid1, "softlink2_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("target_group1", fid1, "softlink3_to_group1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("softlink3_to_group1", fid1, "softlink3_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("softlink3_to_slink1", fid1, "softlink3_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("target_group2", fid1, "softlink4_to_group2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("softlink4_to_group2", fid1, "softlink4_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("softlink4_to_slink1", fid1, "softlink4_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2473,7 +2473,7 @@ test_external_links(const char *fname1, const char *fname2)
     /* source file */
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2481,7 +2481,7 @@ test_external_links(const char *fname1, const char *fname2)
     /* target file */
     fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2493,14 +2493,14 @@ test_external_links(const char *fname1, const char *fname2)
      * target file */
     gid1 = H5Gcreate2(fid2, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     gid2 = H5Gcreate2(fid2, "target_group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2511,21 +2511,21 @@ test_external_links(const char *fname1, const char *fname2)
      * target file */
     status = write_dset(fid2, 2, dims2, "target_dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid1, 2, dims2, "x_dset", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid2, 2, dims2, "x_dset", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2538,7 +2538,7 @@ test_external_links(const char *fname1, const char *fname2)
     status =
         H5Lcreate_external(fname2, "/target_group/x_dset", fid1, "ext_link_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2546,35 +2546,35 @@ test_external_links(const char *fname1, const char *fname2)
     status =
         H5Lcreate_external(fname2, "/target_group2/x_dset", fid1, "ext_link_dset2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname2, "/target_group", fid1, "/ext_link_grp1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname2, "/target_group2", fid1, "/ext_link_grp2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname2, "no_obj", fid1, "ext_link_noexist1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external("no_file.h5", "no_obj", fid1, "ext_link_noexist2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2620,7 +2620,7 @@ test_ext2soft_links(const char *fname1, const char *fname2)
     /* source file */
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2628,7 +2628,7 @@ test_ext2soft_links(const char *fname1, const char *fname2)
     /* target file */
     fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2639,7 +2639,7 @@ test_ext2soft_links(const char *fname1, const char *fname2)
     /* target file */
     gid2 = H5Gcreate2(fid2, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2651,14 +2651,14 @@ test_ext2soft_links(const char *fname1, const char *fname2)
      * target file */
     status = write_dset(fid2, 2, dims2, "dset1", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid2, 2, dims2, "dset2", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2670,14 +2670,14 @@ test_ext2soft_links(const char *fname1, const char *fname2)
      * target file */
     status = H5Lcreate_soft("/dset1", fid2, "softlink_to_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/dset2", fid2, "softlink_to_dset2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2689,7 +2689,7 @@ test_ext2soft_links(const char *fname1, const char *fname2)
      * source file */
     status = H5Lcreate_external(fname2, "/target_group", fid1, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2697,7 +2697,7 @@ test_ext2soft_links(const char *fname1, const char *fname2)
     status = H5Lcreate_external(fname2, "/softlink_to_dset1", fid1, "ext_link_to_slink1", H5P_DEFAULT,
                                 H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2705,7 +2705,7 @@ test_ext2soft_links(const char *fname1, const char *fname2)
     status = H5Lcreate_external(fname2, "/softlink_to_dset2", fid1, "ext_link_to_slink2", H5P_DEFAULT,
                                 H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2838,14 +2838,14 @@ test_dangle_links(const char *fname1, const char *fname2)
      *------------------------------------------------------------------------*/
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2856,14 +2856,14 @@ test_dangle_links(const char *fname1, const char *fname2)
     /* file1 */
     status = write_dset(fid1, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid1, 2, dims2, "dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2871,14 +2871,14 @@ test_dangle_links(const char *fname1, const char *fname2)
     /* file2 */
     status = write_dset(fid2, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid2, 2, dims2, "dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2889,28 +2889,28 @@ test_dangle_links(const char *fname1, const char *fname2)
     /* file 1 */
     status = H5Lcreate_soft("no_obj", fid1, "soft_link1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/dset1", fid1, "soft_link2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("no_obj", fid1, "soft_link3", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("no_obj1", fid1, "soft_link4", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2918,28 +2918,28 @@ test_dangle_links(const char *fname1, const char *fname2)
     /* file 2 */
     status = H5Lcreate_soft("no_obj", fid2, "soft_link1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("no_obj", fid2, "soft_link2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/dset2", fid2, "soft_link3", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("no_obj2", fid2, "soft_link4", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -2950,28 +2950,28 @@ test_dangle_links(const char *fname1, const char *fname2)
     /* file1 */
     status = H5Lcreate_external(fname2, "no_obj", fid1, "ext_link1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname2, "/dset1", fid1, "ext_link2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname2, "no_obj", fid1, "ext_link3", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external("no_file.h5", "no_obj", fid1, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -2979,28 +2979,28 @@ test_dangle_links(const char *fname1, const char *fname2)
     /* file2 */
     status = H5Lcreate_external(fname1, "no_obj", fid2, "ext_link1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname1, "no_obj", fid2, "ext_link2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname1, "/dset2", fid2, "ext_link3", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external("no_file.h5", "no_obj", fid2, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3044,14 +3044,14 @@ test_group_recurse(const char *fname1, const char *fname2)
      *------------------------------------------------------------------------*/
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3062,28 +3062,28 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file1 */
     gid1_f1 = H5Gcreate2(fid1, "/grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1_f1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     gid2_f1 = H5Gcreate2(fid1, "/grp1/grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2_f1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     gid3_f1 = H5Gcreate2(fid1, "/grp1/grp2/grp3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid3_f1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     gid10_f1 = H5Gcreate2(fid1, "/grp10", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid10_f1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3091,28 +3091,28 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file2 */
     gid1_f2 = H5Gcreate2(fid2, "/grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1_f2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     gid2_f2 = H5Gcreate2(fid2, "/grp1/grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2_f2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     gid3_f2 = H5Gcreate2(fid2, "/grp1/grp2/grp3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid3_f2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     gid11_f2 = H5Gcreate2(fid2, "/grp11", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid11_f2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3123,21 +3123,21 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file1 */
     status = write_dset(fid1, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid1, 2, dims2, "dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid1, 2, dims2, "dset3", H5T_NATIVE_INT, data3);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3145,21 +3145,21 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file2 */
     status = write_dset(fid2, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid2, 2, dims2, "dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid2, 2, dims2, "dset3", H5T_NATIVE_INT, data3);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3170,54 +3170,54 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file1 */
     status = write_dset(gid1_f1, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid2_f1, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
     status = write_dset(gid2_f1, 2, dims2, "dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid3_f1, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
     status = write_dset(gid3_f1, 2, dims2, "dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid3_f1, 2, dims2, "dset3", H5T_NATIVE_INT, data3);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid10_f1, 2, dims2, "dset4", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid10_f1, 2, dims2, "dset5", H5T_NATIVE_INT, data3);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3225,54 +3225,54 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file2 */
     status = write_dset(gid1_f2, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid2_f2, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
     status = write_dset(gid2_f2, 2, dims2, "dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid3_f2, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
     status = write_dset(gid3_f2, 2, dims2, "dset2", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid3_f2, 2, dims2, "dset3", H5T_NATIVE_INT, data3);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid11_f2, 2, dims2, "dset4", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid11_f2, 2, dims2, "dset5", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3283,28 +3283,28 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file 1 */
     status = H5Lcreate_soft("/grp1", fid1, "slink_grp1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/grp1/grp2", fid1, "slink_grp2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/grp1/grp2/grp3", fid1, "slink_grp3", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/grp10", fid1, "slink_grp10", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3312,28 +3312,28 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file 2 */
     status = H5Lcreate_soft("/grp1", fid2, "slink_grp1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/grp1/grp2", fid2, "slink_grp2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/grp1/grp2/grp3", fid2, "slink_grp3", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_soft("/grp11", fid2, "slink_grp11", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3344,21 +3344,21 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file1 */
     status = H5Lcreate_external(fname2, "/grp1", fid1, "elink_grp1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname2, "/grp1/grp2", fid1, "elink_grp2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname2, "/grp1/grp2/grp3", fid1, "elink_grp3", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3366,21 +3366,21 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file2 */
     status = H5Lcreate_external(fname1, "/grp1", fid2, "elink_grp1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname1, "/grp1/grp2", fid2, "elink_grp2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = H5Lcreate_external(fname1, "/grp1/grp2/grp3", fid2, "elink_grp3", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3392,14 +3392,14 @@ test_group_recurse(const char *fname1, const char *fname2)
     /* file1 */
     status = H5Lcreate_external(fname2, "/grp11", gid10_f1, "elink_grp_circle", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
         status = FAIL;
         goto out;
     }
     /* file2 */
     status = H5Lcreate_external(fname1, "/grp10", gid11_f2, "elink_grp_circle", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3474,28 +3474,28 @@ test_group_recurse2(void)
      *------------------------------------------------------------------------*/
     grp1 = H5Gcreate2(fileid1, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
         status = FAIL;
         goto out;
     }
 
     grp2 = H5Gcreate2(grp1, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
         status = FAIL;
         goto out;
     }
 
     grp3 = H5Gcreate2(grp2, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp3 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
         status = FAIL;
         goto out;
     }
 
     grp4 = H5Gcreate2(grp3, "g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp4 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
         status = FAIL;
         goto out;
     }
@@ -3570,7 +3570,7 @@ test_group_recurse2(void)
     /* link to dset1 */
     status = H5Lcreate_soft(GRP_R_DSETNAME1, fileid1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", GRP_RECURSE1_EXT);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", GRP_RECURSE1_EXT);
         status = FAIL;
         goto out;
     }
@@ -3594,7 +3594,7 @@ test_group_recurse2(void)
      */
     grp4 = H5Gcreate2(fileid4, "/g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp4 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT3);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT3);
         status = FAIL;
         goto out;
     }
@@ -3628,14 +3628,14 @@ test_group_recurse2(void)
      */
     grp2 = H5Gcreate2(fileid3, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT2);
         status = FAIL;
         goto out;
     }
 
     grp3 = H5Gcreate2(grp2, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp3 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT2);
         status = FAIL;
         goto out;
     }
@@ -3659,7 +3659,7 @@ test_group_recurse2(void)
      */
     status = H5Lcreate_external(GRP_RECURSE2_EXT3, "/g4", fileid3, "/g2/g3/g4", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", GRP_RECURSE2_EXT2);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", GRP_RECURSE2_EXT2);
         status = FAIL;
         goto out;
     }
@@ -3680,7 +3680,7 @@ test_group_recurse2(void)
      */
     grp1 = H5Gcreate2(fileid2, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
         status = FAIL;
         goto out;
     }
@@ -3704,7 +3704,7 @@ test_group_recurse2(void)
     /* link to dset1 */
     status = H5Lcreate_soft(GRP_R_DSETNAME1, fileid2, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", GRP_RECURSE2_EXT1);
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", GRP_RECURSE2_EXT1);
         status = FAIL;
         goto out;
     }
@@ -3714,7 +3714,7 @@ test_group_recurse2(void)
      */
     status = H5Lcreate_external(GRP_RECURSE2_EXT2, "/g2", fileid2, "/g1/g2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", GRP_RECURSE2_EXT1);
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", GRP_RECURSE2_EXT1);
         status = FAIL;
         goto out;
     }
@@ -3768,14 +3768,14 @@ test_exclude_obj1(const char *fname1, const char *fname2)
      *------------------------------------------------------------------------*/
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3786,7 +3786,7 @@ test_exclude_obj1(const char *fname1, const char *fname2)
     /* file1 */
     gid1 = H5Gcreate2(fid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3795,7 +3795,7 @@ test_exclude_obj1(const char *fname1, const char *fname2)
     gid2 = H5Gcreate2(fid2, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     if (gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3806,21 +3806,21 @@ test_exclude_obj1(const char *fname1, const char *fname2)
     /* file1 */
     status = write_dset(fid1, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid1, 2, dims2, "dset2", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid1, 2, dims2, "dset3", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3828,21 +3828,21 @@ test_exclude_obj1(const char *fname1, const char *fname2)
     /* file2 */
     status = write_dset(fid2, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid2, 2, dims2, "dset2", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid2, 2, dims2, "dset3", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3890,14 +3890,14 @@ test_exclude_obj2(const char *fname1, const char *fname2)
      *------------------------------------------------------------------------*/
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3908,7 +3908,7 @@ test_exclude_obj2(const char *fname1, const char *fname2)
     /* file1 */
     gid1 = H5Gcreate2(fid1, "group10", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3916,7 +3916,7 @@ test_exclude_obj2(const char *fname1, const char *fname2)
     /* file2 */
     gid2 = H5Gcreate2(fid2, "group10", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3925,7 +3925,7 @@ test_exclude_obj2(const char *fname1, const char *fname2)
     gid3 = H5Gcreate2(fid2, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     if (gid3 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -3936,21 +3936,21 @@ test_exclude_obj2(const char *fname1, const char *fname2)
     /* file1 */
     status = write_dset(fid1, 2, dims2, "dset10", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(fid1, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid1, 2, dims2, "dset2", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3958,21 +3958,21 @@ test_exclude_obj2(const char *fname1, const char *fname2)
     /* file2 */
     status = write_dset(fid2, 2, dims2, "dset10", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid2, 2, dims2, "dset2", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid3, 2, dims2, "dset3", H5T_NATIVE_INT, data2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -4019,14 +4019,14 @@ test_exclude_obj3(const char *fname1, const char *fname2)
      *------------------------------------------------------------------------*/
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
     fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -4037,7 +4037,7 @@ test_exclude_obj3(const char *fname1, const char *fname2)
     /* file1 */
     gid1 = H5Gcreate2(fid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4048,14 +4048,14 @@ test_exclude_obj3(const char *fname1, const char *fname2)
     /* file1 */
     status = write_dset(fid1, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
 
     status = write_dset(gid1, 2, dims2, "dset", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4063,7 +4063,7 @@ test_exclude_obj3(const char *fname1, const char *fname2)
     /* file2 */
     status = write_dset(fid2, 2, dims2, "dset1", H5T_NATIVE_INT, data1);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
         status = FAIL;
         goto out;
     }
@@ -4374,7 +4374,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     if (is_file_new == 1) {
         fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if (fid1 < 0) {
-            HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+            fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
             status = FAIL;
             goto out;
         }
@@ -4382,7 +4382,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     else {
         fid1 = H5Fopen(fname1, H5F_ACC_RDWR, H5P_DEFAULT);
         if (fid1 < 0) {
-            HDfprintf(stderr, "Error: %s> H5Fopen failed.\n", fname1);
+            fprintf(stderr, "Error: %s> H5Fopen failed.\n", fname1);
             status = FAIL;
             goto out;
         }
@@ -4393,7 +4393,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
      *------------------------------------------------------------------------*/
     gid = H5Gcreate2(fid1, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4403,7 +4403,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
      *------------------------------------------------------------------------*/
     sid_vlen_str = H5Screate_simple(STR_RANK, dims_vlen_str, NULL);
     if (sid_vlen_str < 0) {
-        HDfprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4411,7 +4411,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     tid_vlen_str = H5Tcopy(H5T_C_S1);
     status       = H5Tset_size(tid_vlen_str, H5T_VARIABLE);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4421,7 +4421,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
      *------------------------------------------------------------------------*/
     sid_fixlen_str = H5Screate_simple(STR_RANK, dims_fixlen_str, NULL);
     if (sid_fixlen_str < 0) {
-        HDfprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4429,7 +4429,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     tid_fixlen_str = H5Tcopy(H5T_C_S1);
     status         = H5Tset_size(tid_fixlen_str, FIXLEN_STR_SIZE);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4439,7 +4439,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
      *------------------------------------------------------------------------*/
     sid_vlen_str_array = H5Screate_simple(STR_RANK, dims_vlen_str_array, NULL);
     if (sid_vlen_str_array < 0) {
-        HDfprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4447,7 +4447,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     tid_vlen_str_array_pre = H5Tcopy(H5T_C_S1);
     status                 = H5Tset_size(tid_vlen_str_array_pre, H5T_VARIABLE);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4455,7 +4455,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     /* Create the array data type for the string array                */
     tid_vlen_str_array = H5Tarray_create2(tid_vlen_str_array_pre, COMP_RANK, dims_vlen_str_array);
     if (tid_vlen_str_array < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tarray_create2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Tarray_create2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4465,7 +4465,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
      *------------------------------------------------------------------------*/
     sid_fixlen_str_array = H5Screate_simple(STR_RANK, dims_fixlen_str_array, NULL);
     if (sid_fixlen_str_array < 0) {
-        HDfprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4473,14 +4473,14 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     tid_fixlen_str_array_pre = H5Tcopy(H5T_C_S1);
     status                   = H5Tset_size(tid_fixlen_str_array_pre, FIXLEN_STR_ARRY_SIZE);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
         status = FAIL;
         goto out;
     }
     /* Create the array data type for the string array                */
     tid_fixlen_str_array = H5Tarray_create2(tid_fixlen_str_array_pre, COMP_RANK, dims_fixlen_str_array);
     if (tid_fixlen_str_array < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tarray_create2 failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Tarray_create2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4490,7 +4490,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
      *------------------------------------------------------------------------*/
     sid_comp = H5Screate_simple(COMP_RANK, dims_comp, NULL);
     if (sid_comp < 0) {
-        HDfprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4604,7 +4604,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     did_comp = H5Dcreate2(gid, "Compound_dset1", tid1_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status   = H5Dwrite(did_comp, tid1_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp1_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4614,7 +4614,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     did_comp = H5Dcreate2(gid, "Compound_dset2", tid2_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status   = H5Dwrite(did_comp, tid2_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp2_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4624,7 +4624,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     did_comp = H5Dcreate2(gid, "Compound_dset3", tid3_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status   = H5Dwrite(did_comp, tid3_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp3_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4634,7 +4634,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     did_comp = H5Dcreate2(gid, "Compound_dset4", tid4_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status   = H5Dwrite(did_comp, tid4_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp4_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4644,7 +4644,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     did_comp = H5Dcreate2(gid, "Compound_dset5", tid5_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status   = H5Dwrite(did_comp, tid5_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp5_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4654,7 +4654,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     did_comp = H5Dcreate2(gid, "Compound_dset6", tid6_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status   = H5Dwrite(did_comp, tid6_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp6_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4664,7 +4664,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     did_comp = H5Dcreate2(gid, "Compound_dset7", tid7_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status   = H5Dwrite(did_comp, tid7_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp7_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4674,7 +4674,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     did_comp = H5Dcreate2(gid, "Compound_dset8", tid8_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status   = H5Dwrite(did_comp, tid8_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp8_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4690,7 +4690,7 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
 
     status = H5Dwrite(did_comp, tid9_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp9_buf);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -4813,14 +4813,14 @@ test_enums(const char *fname)
     enum_val = 0;
     status   = H5Tenum_insert(tid, "YIN", &enum_val);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tenum_insert failed.\n", fname);
+        fprintf(stderr, "Error: %s> H5Tenum_insert failed.\n", fname);
         status = FAIL;
         goto out;
     }
     enum_val = 1;
     status   = H5Tenum_insert(tid, "YANG", &enum_val);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> H5Tenum_insert failed.\n", fname);
+        fprintf(stderr, "Error: %s> H5Tenum_insert failed.\n", fname);
         status = FAIL;
         goto out;
     }
@@ -4831,13 +4831,13 @@ test_enums(const char *fname)
 
     status = write_dset(fid, 1, &dims, "dset1", tid, data1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> write_dset failed.\n", fname);
+        fprintf(stderr, "Error: %s> write_dset failed.\n", fname);
         status = FAIL;
         goto out;
     }
     status = write_dset(fid, 1, &dims, "dset2", tid, data2);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s> write_dset failed.\n", fname);
+        fprintf(stderr, "Error: %s> write_dset failed.\n", fname);
         status = FAIL;
         goto out;
     }
@@ -5020,7 +5020,7 @@ test_comps_vlen(const char *fname, const char *dset, const char *attr, int diff,
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SDIM_DSET; i++) {
         wdata[i].i1     = (int)i;
-        wdata[i].vl.p   = HDmalloc((i + 1) * sizeof(cmpd2_t));
+        wdata[i].vl.p   = malloc((i + 1) * sizeof(cmpd2_t));
         wdata[i].vl.len = i + 1;
         for (j = 0; j < (i + 1); j++) {
             ((cmpd2_t *)wdata[i].vl.p)[j].i2 = (int)(i * 10 + (unsigned)diff);
@@ -5141,7 +5141,7 @@ test_comps_array_vlen(const char *fname, const char *dset, const char *attr, int
         /* Allocate and initialize VL data to write in compound2 */
         for (j = 0; j < SDIM_CMPD_ARRAY; j++) {
             wdata[i].cmpd2[j].i2     = (int)(j * 10);
-            wdata[i].cmpd2[j].vl.p   = HDmalloc((j + 1) * sizeof(cmpd3_t));
+            wdata[i].cmpd2[j].vl.p   = malloc((j + 1) * sizeof(cmpd3_t));
             wdata[i].cmpd2[j].vl.len = j + 1;
             for (k = 0; k < (j + 1); k++) {
                 /* Initialize data of compound3 */
@@ -5280,7 +5280,7 @@ test_comps_vlen_arry(const char *fname, const char *dset, const char *attr, int 
     for (i = 0; i < SDIM_DSET; i++) {
         /* compound 1 data */
         wdata[i].i1     = (int)i;
-        wdata[i].vl.p   = HDmalloc((i + 1) * sizeof(cmpd2_t));
+        wdata[i].vl.p   = malloc((i + 1) * sizeof(cmpd2_t));
         wdata[i].vl.len = i + 1;
         for (j = 0; j < (i + 1); j++) {
             /* compound2 data */
@@ -5470,7 +5470,7 @@ test_data_nocomparables(const char *fname, int make_diffs)
      *------------------------------------------------------------------------*/
     fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname);
         status = FAIL;
         goto out;
     }
@@ -5480,14 +5480,14 @@ test_data_nocomparables(const char *fname, int make_diffs)
      *------------------------------------------------------------------------*/
     gid1 = H5Gcreate2(fid, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname);
         status = FAIL;
         goto out;
     }
 
     gid2 = H5Gcreate2(fid, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname);
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname);
         status = FAIL;
         goto out;
     }
@@ -5500,13 +5500,13 @@ test_data_nocomparables(const char *fname, int make_diffs)
 
     /*  dset1 */
     if ((did1 = H5Dcreate2(gid1, "dset1", tid_dset1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", "dset1");
+        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", "dset1");
         status = FAIL;
         goto out;
     }
 
     if (H5Dwrite(did1, tid_dset1, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data_ptr1) < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", "dset1");
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", "dset1");
         status = FAIL;
         goto out;
     }
@@ -5515,7 +5515,7 @@ test_data_nocomparables(const char *fname, int make_diffs)
     /*  dset2 */
     status = write_dset(gid1, 1, dims1_1, "dset2", H5T_NATIVE_INT, dset_data_ptr2);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname);
         goto out;
     }
 
@@ -5525,13 +5525,13 @@ test_data_nocomparables(const char *fname, int make_diffs)
     /* ---------
      *  dset1 */
     if ((did2 = H5Dcreate2(gid2, "dset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", "dset1");
+        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", "dset1");
         status = FAIL;
         goto out;
     }
 
     if (H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data_ptr3) < 0) {
-        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", "dset1");
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", "dset1");
         status = FAIL;
         goto out;
     }
@@ -5551,7 +5551,7 @@ test_data_nocomparables(const char *fname, int make_diffs)
      * dset2 */
     status = write_dset(gid2, 1, dims1_1, "dset2", H5T_NATIVE_INT, dset_data_ptr3);
     if (status == FAIL) {
-        HDfprintf(stderr, "Error: %s> write_dset failed\n", fname);
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname);
         goto out;
     }
 
@@ -5755,14 +5755,14 @@ test_objs_strings(const char *fname1, const char *fname2)
     /* file1 */
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
         goto out;
     }
 
     /* file2 */
     fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
-        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
         goto out;
     }
 
@@ -6088,10 +6088,10 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -6349,7 +6349,7 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     n = 0;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 2; j++) {
-            buf52[i][j].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((size_t)(i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)
@@ -6748,7 +6748,7 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     for (i = 0; i < 4; i++)
         for (j = 0; j < 3; j++)
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((size_t)(i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)
@@ -7074,10 +7074,10 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -7338,7 +7338,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     n = 0;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 2; j++) {
-            buf52[i][j].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((size_t)(i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)
@@ -7738,7 +7738,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     for (i = 0; i < 4; i++)
         for (j = 0; j < 3; j++)
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((size_t)(i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)
@@ -8041,10 +8041,10 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -8058,9 +8058,9 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     tid    = H5Tvlen_create(H5T_NATIVE_INT);
     did    = H5Dcreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Treclaim(tid, sid, H5P_DEFAULT, buf5);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);
     status = H5Sclose(sid);
@@ -8091,7 +8091,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
 
         /* allocate and initialize array data to write */
         size = (H5TOOLS_MALLOCSIZE / sizeof(double) + 1) * sizeof(double);
-        dbuf = (double *)HDmalloc(size);
+        dbuf = (double *)malloc(size);
 
         for (jj = 0; jj < (H5TOOLS_MALLOCSIZE / sizeof(double) + 1); jj++)
             dbuf[jj] = (double)jj;
@@ -8114,7 +8114,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
         H5Dclose(ldid);
         H5Tclose(ltid);
         H5Sclose(lsid);
-        HDfree(dbuf);
+        free(dbuf);
     }
 
     /*-------------------------------------------------------------------------
@@ -8229,7 +8229,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     n = 0;
     for (i = 0; i < 3; i++)
         for (j = 0; j < 2; j++) {
-            buf52[i][j].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((size_t)(i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++) {
                 if (make_diffs)
@@ -8408,7 +8408,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     for (i = 0; i < 4; i++)
         for (j = 0; j < 3; j++)
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p   = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((size_t)(i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++) {
                     if (make_diffs)
@@ -8500,10 +8500,10 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
     int                          i;
 
     /* allocate the buffer for write the references */
-    rbuf = (hdset_reg_ref_t *)HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
+    rbuf = (hdset_reg_ref_t *)calloc((size_t)2, sizeof(hdset_reg_ref_t));
 
     /* allocate the buffer for write the data dataset */
-    buf = (int *)HDmalloc(10 * 10 * sizeof(int));
+    buf = (int *)malloc(10 * 10 * sizeof(int));
 
     for (i = 0; i < 10 * 10; i++)
         buf[i] = i;
@@ -8512,7 +8512,7 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
     sid1   = H5Screate_simple(2, dims1, NULL);
     did1   = H5Dcreate2(fid, "dsetref", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* create the reference dataset */
     sid2 = H5Screate_simple(1, dims2, NULL);
@@ -8533,12 +8533,12 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
     }
 
     status = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
-    HDassert(status >= 0);
+    assert(status >= 0);
     H5Sget_select_npoints(sid1);
 
     /* store first dataset region */
     status = H5Rcreate(&rbuf[0], fid, "dsetref", H5R_DATASET_REGION, sid1);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* select sequence of five points for second reference */
     coord[0][0] = 6;
@@ -8567,20 +8567,20 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
 
     /* write */
     status = H5Dwrite(did2, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* close, free memory buffers */
     status = H5Dclose(did1);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Sclose(sid1);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Dclose(did2);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Sclose(sid2);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
-    HDfree(rbuf);
-    HDfree(buf);
+    free(rbuf);
+    free(buf);
 }
 
 /*-------------------------------------------------------------------------
@@ -8631,7 +8631,7 @@ test_hyperslab(const char *fname, int make_diffs /* flag to modify data buffers 
         goto out;
 
     /* create a evenly divided buffer from 0 to 127  */
-    buf = (char *)HDmalloc((size_t)(nelmts * size));
+    buf = (char *)malloc((size_t)(nelmts * size));
     s   = 1024 * 1024 / 127;
     for (i = 0, j = 0, c = 0; i < 1024 * 1024; j++, i++) {
         if (j == s) {
@@ -8640,11 +8640,11 @@ test_hyperslab(const char *fname, int make_diffs /* flag to modify data buffers 
         }
 
         /* set the hyperslab values */
-        HDmemset(buf, c, nelmts);
+        memset(buf, c, nelmts);
 
         /* make a different hyperslab at this position */
         if (make_diffs && i == 512 * 512)
-            HDmemset(buf, 0, nelmts);
+            memset(buf, 0, nelmts);
 
         hs_start[0] = (unsigned long long)i * GBLL / (1024 * 1024);
         if (H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL) < 0)
@@ -8656,7 +8656,7 @@ test_hyperslab(const char *fname, int make_diffs /* flag to modify data buffers 
                 goto out;
         }
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     /* close */

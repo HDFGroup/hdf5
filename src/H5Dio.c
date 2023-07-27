@@ -215,7 +215,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                                                 (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
                                                 (hsize_t)dset_info[i].type_info.dst_type_size, &buf_adj) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-            HDassert(dset_info[i].mem_space);
+            assert(dset_info[i].mem_space);
 
             /* Adjust the buffer by the given amount */
             dset_info[i].buf.vp = (void *)(((uint8_t *)dset_info[i].buf.vp) + buf_adj);
@@ -264,7 +264,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Sanity check that space is allocated, if there are elements */
             if (dset_info[i].nelmts > 0)
-                HDassert(
+                assert(
                     (*dset_info[i].dset->shared->layout.ops->is_space_alloc)(
                         &dset_info[i].dset->shared->layout.storage) ||
                     (dset_info[i].dset->shared->layout.ops->is_data_cached &&
@@ -284,7 +284,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         }
     } /* end of for loop */
 
-    HDassert(io_op_init + io_skipped == count);
+    assert(io_op_init + io_skipped == count);
 
     /* If no datasets have I/O, we're done */
     if (io_op_init == 0)
@@ -312,8 +312,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     if (io_info.md_io_ops.multi_read_md) {
         /* Create sel_pieces array if any pieces are selected */
         if (io_info.piece_count > 0) {
-            HDassert(!io_info.sel_pieces);
-            HDassert(io_info.pieces_added == 0);
+            assert(!io_info.sel_pieces);
+            assert(io_info.pieces_added == 0);
 
             /* Allocate sel_pieces array */
             if (NULL ==
@@ -632,7 +632,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                                                 (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
                                                 dset_info[i].type_info.src_type_size, &buf_adj) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-            HDassert(dset_info[i].mem_space);
+            assert(dset_info[i].mem_space);
 
             /* Adjust the buffer by the given amount */
             dset_info[i].buf.cvp = (const void *)(((const uint8_t *)dset_info[i].buf.cvp) + buf_adj);
@@ -692,7 +692,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         H5AC_tag(prev_tag, NULL);
     } /* end of for loop */
 
-    HDassert(io_op_init == count);
+    assert(io_op_init == count);
 
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
@@ -716,8 +716,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     if (io_info.md_io_ops.multi_write_md) {
         /* Create sel_pieces array if any pieces are selected */
         if (io_info.piece_count > 0) {
-            HDassert(!io_info.sel_pieces);
-            HDassert(io_info.pieces_added == 0);
+            assert(!io_info.sel_pieces);
+            assert(io_info.pieces_added == 0);
 
             /* Allocate sel_pieces array */
             if (NULL ==
@@ -773,7 +773,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* loop with serial & single-dset write IO path */
         for (i = 0; i < count; i++) {
-            HDassert(!dset_info[i].skip_io);
+            assert(!dset_info[i].skip_io);
 
             /* set metadata tagging with dset oheader addr */
             H5AC_tag(dset_info->dset->oloc.addr, &prev_tag);
@@ -848,7 +848,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++) {
-        HDassert(!dset_info[i].skip_io);
+        assert(!dset_info[i].skip_io);
         if (dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
@@ -908,13 +908,13 @@ H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dse
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(count > 0);
-    HDassert(dset_info);
-    HDassert(dset_info[0].dset->oloc.file);
-    HDassert(io_info);
+    assert(count > 0);
+    assert(dset_info);
+    assert(dset_info[0].dset->oloc.file);
+    assert(io_info);
 
     /* Zero out struct */
-    HDmemset(io_info, 0, sizeof(*io_info));
+    memset(io_info, 0, sizeof(*io_info));
 
     /* Set up simple fields */
     io_info->op_type = op_type;
@@ -970,9 +970,9 @@ H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(dset);
-    HDassert(dset->oloc.file);
-    HDassert(dset_info->type_info.tpath);
+    assert(dset);
+    assert(dset->oloc.file);
+    assert(dset_info->type_info.tpath);
 
     /* Set up "normal" I/O fields */
     dset_info->dset  = dset;
@@ -1032,20 +1032,20 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(io_info);
-    HDassert(dset_info);
+    assert(io_info);
+    assert(dset_info);
 
     /* Set convenience pointers */
     type_info = &dset_info->type_info;
     dset      = dset_info->dset;
-    HDassert(dset);
+    assert(dset);
 
     /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
     if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Initialize type info safely */
-    HDmemset(type_info, 0, sizeof(*type_info));
+    memset(type_info, 0, sizeof(*type_info));
 
     /* Get the memory & dataset datatypes */
     if (NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
@@ -1144,7 +1144,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(io_info);
+    assert(io_info);
 
     /* If selection I/O mode is default (auto), enable it here if the VFD supports it (it will be turned off
      * later if something else conflicts), otherwise disable it.  If we're using the MPIO VFD, the automatic
@@ -1232,12 +1232,12 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(io_info);
+    assert(io_info);
 
     /* check the first dset, should exist either single or multi dset cases */
-    HDassert(io_info->dsets_info[0].dset);
+    assert(io_info->dsets_info[0].dset);
     dset0 = io_info->dsets_info[0].dset;
-    HDassert(dset0->oloc.file);
+    assert(dset0->oloc.file);
 
     /* Reset the actual io mode properties to the default values in case
      * the DXPL (if it's non-default) was previously used in a collective
@@ -1367,7 +1367,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(io_info);
+    assert(io_info);
 
     /* Check if we need to allocate a shared type conversion buffer */
     if (io_info->max_tconv_type_size) {
@@ -1411,7 +1411,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
             size_t i;
 
             /* Make sure selection I/O is disabled (DEFAULT should have been handled by now) */
-            HDassert(io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF);
+            assert(io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF);
 
             /* Get max buffer size from API context */
             if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
@@ -1497,11 +1497,11 @@ H5D__typeinfo_term(H5D_io_info_t *io_info)
 
     /* Check for releasing datatype conversion & background buffers */
     if (io_info->tconv_buf_allocated) {
-        HDassert(io_info->tconv_buf);
+        assert(io_info->tconv_buf);
         (void)H5FL_BLK_FREE(type_conv, io_info->tconv_buf);
     } /* end if */
     if (io_info->bkg_buf_allocated) {
-        HDassert(io_info->bkg_buf);
+        assert(io_info->bkg_buf);
         (void)H5FL_BLK_FREE(type_conv, io_info->bkg_buf);
     } /* end if */
 

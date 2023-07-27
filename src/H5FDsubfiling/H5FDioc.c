@@ -91,8 +91,8 @@ typedef struct H5FD_ioc_t {
 #ifdef H5FD_IOC_DEBUG
 #define H5FD_IOC_LOG_CALL(name)                                                                              \
     do {                                                                                                     \
-        HDprintf("called %s()\n", (name));                                                                   \
-        HDfflush(stdout);                                                                                    \
+        printf("called %s()\n", (name));                                                                     \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define H5FD_IOC_LOG_CALL(name) /* no-op */
@@ -399,7 +399,7 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
     }
     else {
         /* Copy the IOC fapl data out */
-        HDmemcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
+        memcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
     }
 
 done:
@@ -422,9 +422,9 @@ H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
 {
     herr_t ret_value = SUCCEED;
 
-    HDassert(config_out);
+    assert(config_out);
 
-    HDmemset(config_out, 0, sizeof(*config_out));
+    memset(config_out, 0, sizeof(*config_out));
 
     config_out->magic            = H5FD_IOC_FAPL_MAGIC;
     config_out->version          = H5FD_IOC_CURR_FAPL_VERSION;
@@ -455,7 +455,7 @@ H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
 {
     herr_t ret_value = SUCCEED;
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
     if (fa->version != H5FD_IOC_CURR_FAPL_VERSION)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ioc_config_t version");
@@ -660,13 +660,13 @@ H5FD__ioc_fapl_copy(const void *_old_fa)
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(old_fa_ptr);
+    assert(old_fa_ptr);
 
     new_fa_ptr = H5FL_CALLOC(H5FD_ioc_config_t);
     if (NULL == new_fa_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL");
 
-    HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
+    memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
 
     ret_value = (void *)new_fa_ptr;
 
@@ -695,7 +695,7 @@ H5FD__ioc_fapl_free(void *_fapl)
     H5FD_IOC_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(fapl);
+    assert(fapl);
 
     /* Free the property list */
     fapl = H5FL_FREE(H5FD_ioc_config_t, fapl);
@@ -790,7 +790,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
 
     /* Fill in the file config values */
-    HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
+    memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
 
     /* Fully resolve the given filepath and get its dirname */
     if (H5_resolve_pathname(name, file_ptr->comm, &file_ptr->file_path) < 0)
@@ -904,7 +904,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(file_ptr);
+    assert(file_ptr);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
@@ -936,7 +936,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
     }
 
 done:
-    HDfree(file_ptr->file_path);
+    free(file_ptr->file_path);
     file_ptr->file_path = NULL;
 
     H5MM_free(file_ptr->file_dir);
@@ -990,8 +990,8 @@ H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(f1);
-    HDassert(f2);
+    assert(f1);
+    assert(f2);
 
     ret_value = (f1->file_id > f2->file_id) - (f1->file_id < f2->file_id);
 
@@ -1108,7 +1108,7 @@ H5FD__ioc_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     H5FD_IOC_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     ret_value = file->eoa;
 
@@ -1134,7 +1134,7 @@ H5FD__ioc_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     H5FD_IOC_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     file->eoa = addr;
 
@@ -1163,7 +1163,7 @@ H5FD__ioc_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     H5FD_IOC_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     sf_context = H5_get_subfiling_object(file->context_id);
     if (sf_context) {
@@ -1222,8 +1222,8 @@ H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (!H5F_addr_defined(addr))
@@ -1382,7 +1382,7 @@ H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(file);
+    assert(file);
 
     /* TODO: placeholder for now since Subfiling does the truncation */
     if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
@@ -1454,7 +1454,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
     if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    HDassert(H5FD_IOC == H5P_peek_driver(plist));
+    assert(H5FD_IOC == H5P_peek_driver(plist));
 
     if (H5FD_mpi_self_initialized) {
         comm = MPI_COMM_WORLD;
@@ -1486,7 +1486,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file dirname");
 
         /* Try to open the subfiling configuration file and get the number of IOCs */
-        if (NULL == (tmp_filename = HDmalloc(PATH_MAX)))
+        if (NULL == (tmp_filename = malloc(PATH_MAX)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate config file name buffer");
 
@@ -1498,10 +1498,10 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
                    prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
 
-        if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
+        if (NULL == (config_file = fopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
 #ifdef H5FD_IOC_DEBUG
-                HDprintf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
+                printf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
 #endif
 
                 H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1540,7 +1540,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
             if (HDremove(tmp_filename) < 0) {
 #ifdef H5FD_IOC_DEBUG
-                HDprintf("** WARNING: couldn't delete subfile '%s'\n", tmp_filename);
+                printf("** WARNING: couldn't delete subfile '%s'\n", tmp_filename);
 #endif
 
                 if (ENOENT != errno)
@@ -1576,7 +1576,7 @@ done:
     if (H5_mpi_info_free(&info) < 0)
         H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object");
 
-    HDfree(tmp_filename);
+    free(tmp_filename);
     H5MM_free(file_dirname);
     H5MM_free(base_filename);
 
@@ -1610,10 +1610,10 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
 
-    HDassert(_file);
-    HDassert(addrs);
-    HDassert(sizes);
-    HDassert(bufs);
+    assert(_file);
+    assert(addrs);
+    assert(sizes);
+    assert(bufs);
 
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1622,7 +1622,7 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
-    HDassert(sf_context->topology);
+    assert(sf_context->topology);
 
     /*
      * Allocate an array of I/O requests and an array twice that size for
@@ -1633,9 +1633,9 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
      * that blocking write calls do not return early before the data is
      * actually written.
      */
-    if (NULL == (sf_io_reqs = HDcalloc((size_t)count, sizeof(*sf_io_reqs))))
+    if (NULL == (sf_io_reqs = calloc((size_t)count, sizeof(*sf_io_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
-    if (NULL == (mpi_reqs = HDmalloc(2 * (size_t)count * sizeof(*mpi_reqs))))
+    if (NULL == (mpi_reqs = malloc(2 * (size_t)count * sizeof(*mpi_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     /* Each pass thru the following should queue an MPI write
@@ -1669,12 +1669,12 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't complete I/O requests");
 
 done:
-    HDfree(mpi_reqs);
+    free(mpi_reqs);
 
     if (sf_io_reqs) {
         for (size_t i = 0; i < count; i++)
-            HDfree(sf_io_reqs[i]);
-        HDfree(sf_io_reqs);
+            free(sf_io_reqs[i]);
+        free(sf_io_reqs);
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -1691,10 +1691,10 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
 
-    HDassert(_file);
-    HDassert(addrs);
-    HDassert(sizes);
-    HDassert(bufs);
+    assert(_file);
+    assert(addrs);
+    assert(sizes);
+    assert(bufs);
 
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1703,7 +1703,7 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
-    HDassert(sf_context->topology);
+    assert(sf_context->topology);
 
     /*
      * Allocate an array of I/O requests and an array for MPI_Request
@@ -1712,9 +1712,9 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
      * that the actual I/O call (currently, HDpread) has completed and
      * the data read from the file has been transferred to the caller.
      */
-    if (NULL == (sf_io_reqs = HDcalloc((size_t)count, sizeof(*sf_io_reqs))))
+    if (NULL == (sf_io_reqs = calloc((size_t)count, sizeof(*sf_io_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
-    if (NULL == (mpi_reqs = HDmalloc((size_t)count * sizeof(*mpi_reqs))))
+    if (NULL == (mpi_reqs = malloc((size_t)count * sizeof(*mpi_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     for (size_t i = 0; i < (size_t)count; i++) {
@@ -1741,12 +1741,12 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't complete I/O requests");
 
 done:
-    HDfree(mpi_reqs);
+    free(mpi_reqs);
 
     if (sf_io_reqs) {
         for (size_t i = 0; i < count; i++)
-            HDfree(sf_io_reqs[i]);
-        HDfree(sf_io_reqs);
+            free(sf_io_reqs[i]);
+        free(sf_io_reqs);
     }
 
     H5_SUBFILING_FUNC_LEAVE;

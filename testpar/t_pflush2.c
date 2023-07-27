@@ -68,7 +68,7 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
         goto error;
     if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
         goto error;
-    HDassert(100 == dims[0] && 100 == dims[1]);
+    assert(100 == dims[0] && 100 == dims[1]);
 
     /* Read some data */
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
@@ -78,9 +78,9 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
             val = (int)(i + (i * j) + j);
             if (data_g[(i * 100) + j] != val) {
                 H5_FAILED();
-                HDprintf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j,
-                         data_g[(i * 100) + j]);
-                HDprintf("    should be %d\n", val);
+                printf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j,
+                       data_g[(i * 100) + j]);
+                printf("    should be %d\n", val);
             }
         }
     }
@@ -167,10 +167,10 @@ main(int argc, char *argv[])
             HDputs("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
-    if (NULL == (data_g = HDmalloc(100 * 100 * sizeof(*data_g))))
+    if (NULL == (data_g = malloc(100 * 100 * sizeof(*data_g))))
         goto error;
 
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -217,17 +217,17 @@ main(int argc, char *argv[])
     h5_clean_files(&FILENAME[1], fapl_id2);
 
     if (data_g) {
-        HDfree(data_g);
+        free(data_g);
         data_g = NULL;
     }
 
     MPI_Finalize();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     if (data_g)
-        HDfree(data_g);
+        free(data_g);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

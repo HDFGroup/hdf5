@@ -33,8 +33,8 @@ test_h5_dirname(void)
 
     MESSAGE(5, ("Testing H5_dirname\n"));
 
-    path = HDmalloc(H5_SYSTEM_TEST_PATH_MAX);
-    CHECK_PTR(path, "HDmalloc");
+    path = malloc(H5_SYSTEM_TEST_PATH_MAX);
+    CHECK_PTR(path, "malloc");
     if (!path)
         return;
 
@@ -225,7 +225,7 @@ test_h5_dirname(void)
                "comparing H5_dirname with contrived path to proper dirname");
     H5MM_free(dirname);
 
-    HDfree(path);
+    free(path);
 }
 
 static void
@@ -237,8 +237,8 @@ test_h5_basename(void)
 
     MESSAGE(5, ("Testing H5_basename\n"));
 
-    path = HDmalloc(H5_SYSTEM_TEST_PATH_MAX);
-    CHECK_PTR(path, "HDmalloc");
+    path = malloc(H5_SYSTEM_TEST_PATH_MAX);
+    CHECK_PTR(path, "malloc");
     if (!path)
         return;
 
@@ -434,7 +434,7 @@ test_h5_basename(void)
     VERIFY_STR(basename, "finaldir", "comparing H5_basename with contrived path to proper basename");
     H5MM_free(basename);
 
-    HDfree(path);
+    free(path);
 }
 
 static void

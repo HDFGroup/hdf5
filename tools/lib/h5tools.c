@@ -176,7 +176,7 @@ h5tools_close(void)
     if (h5tools_init_g) {
         /* special case where only data is output to stdout */
         if ((rawoutstream == NULL) && rawdatastream && (rawdatastream == stdout))
-            HDfprintf(rawdatastream, "\n");
+            fprintf(rawdatastream, "\n");
 
         if (tools_func)
             H5Eprint2(H5tools_ERR_STACK_g, rawerrorstream);
@@ -256,13 +256,13 @@ h5tools_set_data_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
+            if ((f = fopen(fname, "wb")) != NULL) {
                 rawdatastream = f;
                 retvalue      = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
+            if ((f = fopen(fname, "w")) != NULL) {
                 rawdatastream = f;
                 retvalue      = SUCCEED;
             }
@@ -304,13 +304,13 @@ h5tools_set_attr_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
+            if ((f = fopen(fname, "wb")) != NULL) {
                 rawattrstream = f;
                 retvalue      = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
+            if ((f = fopen(fname, "w")) != NULL) {
                 rawattrstream = f;
                 retvalue      = SUCCEED;
             }
@@ -352,13 +352,13 @@ h5tools_set_input_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "rb")) != NULL) {
+            if ((f = fopen(fname, "rb")) != NULL) {
                 rawinstream = f;
                 retvalue    = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "r")) != NULL) {
+            if ((f = fopen(fname, "r")) != NULL) {
                 rawinstream = f;
                 retvalue    = SUCCEED;
             }
@@ -400,13 +400,13 @@ h5tools_set_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
+            if ((f = fopen(fname, "wb")) != NULL) {
                 rawoutstream = f;
                 retvalue     = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
+            if ((f = fopen(fname, "w")) != NULL) {
                 rawoutstream = f;
                 retvalue     = SUCCEED;
             }
@@ -448,13 +448,13 @@ h5tools_set_error_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
+            if ((f = fopen(fname, "wb")) != NULL) {
                 rawerrorstream = f;
                 retvalue       = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
+            if ((f = fopen(fname, "w")) != NULL) {
                 rawerrorstream = f;
                 retvalue       = SUCCEED;
             }
@@ -1230,8 +1230,8 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info, h5tools_context
 
     H5TOOLS_START_DEBUG(" ");
 
-    HDmemset(&prefix, 0, sizeof(h5tools_str_t));
-    HDmemset(&str, 0, sizeof(h5tools_str_t));
+    memset(&prefix, 0, sizeof(h5tools_str_t));
+    memset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     H5TOOLS_DEBUG("before CR elmtno=%ld, ctx->cur_column=%d, info->idx_fmt=%s, info->line_suf=%s", elmtno,
@@ -1325,8 +1325,8 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info, h5tools_
     if (!ctx->need_prefix)
         return;
 
-    HDmemset(&prefix, 0, sizeof(h5tools_str_t));
-    HDmemset(&str, 0, sizeof(h5tools_str_t));
+    memset(&prefix, 0, sizeof(h5tools_str_t));
+    memset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
@@ -1843,7 +1843,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                     s = (char *)mem;
                 }
                 for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
-                    HDmemcpy(&tempuchar, &s[i], sizeof(unsigned char));
+                    memcpy(&tempuchar, &s[i], sizeof(unsigned char));
                     if (1 != HDfwrite(&tempuchar, sizeof(unsigned char), 1, stream))
                         H5TOOLS_THROW((-1), "fwrite failed");
                 } /* i */
@@ -1947,11 +1947,11 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                     if (size > sizeof(tref))
                         H5TOOLS_THROW((-1), "unexpectedly large ref");
 
-                    HDmemset(&tref, 0, sizeof(tref));
+                    memset(&tref, 0, sizeof(tref));
 
                     for (block_index = 0; block_index < block_nelmts; block_index++) {
                         mem = ((unsigned char *)_mem) + block_index * size;
-                        HDmemcpy(&tref, mem, size);
+                        memcpy(&tref, mem, size);
                         if ((region_id = H5Ropen_object(&tref, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                             H5TOOLS_INFO("H5Ropen_object H5T_STD_REF failed");
                         else {
@@ -2044,7 +2044,7 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream, hid_t contai
         H5TOOLS_THROW((-1), "H5Dget_space failed");
 
     /* Allocate space for the dimension array */
-    if ((dims1 = (hsize_t *)HDmalloc(sizeof(hsize_t) * ndims)) == NULL)
+    if ((dims1 = (hsize_t *)malloc(sizeof(hsize_t) * ndims)) == NULL)
         H5TOOLS_THROW((-1), "Could not allocate buffer for dims");
 
     /* find the dimensions of each data space from the block coordinates */
@@ -2061,15 +2061,15 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream, hid_t contai
     if ((type_size = H5Tget_size(type_id)) == 0)
         H5TOOLS_THROW((-1), "H5Tget_size failed");
 
-    if ((region_buf = HDmalloc(type_size * (size_t)numelem)) == NULL)
+    if ((region_buf = malloc(type_size * (size_t)numelem)) == NULL)
         H5TOOLS_THROW((-1), "Could not allocate region buffer");
 
     /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
     /*          1   2        n      1   2        n                                       */
-    if ((start = (hsize_t *)HDmalloc(sizeof(hsize_t) * ndims)) == NULL)
+    if ((start = (hsize_t *)malloc(sizeof(hsize_t) * ndims)) == NULL)
         H5TOOLS_THROW((-1), "Could not allocate buffer for start");
 
-    if ((count = (hsize_t *)HDmalloc(sizeof(hsize_t) * ndims)) == NULL)
+    if ((count = (hsize_t *)malloc(sizeof(hsize_t) * ndims)) == NULL)
         H5TOOLS_THROW((-1), "Could not allocate buffer for count");
 
     for (blkndx = 0; blkndx < nblocks; blkndx++) {
@@ -2094,10 +2094,10 @@ done:;
     } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
 
     CATCH
-    HDfree(start);
-    HDfree(count);
-    HDfree(region_buf);
-    HDfree(dims1);
+    free(start);
+    free(count);
+    free(region_buf);
+    free(dims1);
 
     if (H5Sclose(mem_space) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");
@@ -2143,7 +2143,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id, FILE *strea
     ndims = (unsigned)sndims;
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-    if ((ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)) == NULL)
+    if ((ptdata = (hsize_t *)malloc((size_t)alloc_size)) == NULL)
         H5TOOLS_GOTO_ERROR(FALSE, "Could not allocate buffer for ptdata");
 
     if (H5Sget_select_hyper_blocklist(region_space, (hsize_t)0, nblocks, ptdata) < 0)
@@ -2157,7 +2157,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id, FILE *strea
     render_bin_output_region_data_blocks(region_id, stream, container, ndims, type_id, nblocks, ptdata);
 
 done:
-    HDfree(ptdata);
+    free(ptdata);
 
     if (type_id > 0 && H5Tclose(type_id) < 0)
         H5TOOLS_ERROR(FALSE, "H5Tclose failed");
@@ -2203,11 +2203,11 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id, FILE *
     if ((type_size = H5Tget_size(type_id)) == 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Tget_size failed");
 
-    if ((region_buf = HDmalloc(type_size * (size_t)npoints)) == NULL)
+    if ((region_buf = malloc(type_size * (size_t)npoints)) == NULL)
         H5TOOLS_GOTO_ERROR((-1), "Could not allocate buffer for region");
 
     /* Allocate space for the dimension array */
-    if ((dims1 = (hsize_t *)HDmalloc(sizeof(hsize_t) * ndims)) == NULL)
+    if ((dims1 = (hsize_t *)malloc(sizeof(hsize_t) * ndims)) == NULL)
         H5TOOLS_GOTO_ERROR((-1), "Could not allocate buffer for dims");
 
     dims1[0] = npoints;
@@ -2223,8 +2223,8 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id, FILE *
         H5TOOLS_GOTO_ERROR((-1), "render_bin_output of data points failed");
 
 done:
-    HDfree(region_buf);
-    HDfree(dims1);
+    free(region_buf);
+    free(dims1);
 
     if (H5Sclose(mem_space) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");

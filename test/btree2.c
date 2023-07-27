@@ -62,7 +62,7 @@ static int
 init_cparam(H5B2_create_t *cparam, H5B2_create_t *cparam2)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(*cparam));
+    memset(cparam, 0, sizeof(*cparam));
 
     /* General parameters */
     cparam->cls           = H5B2_TEST;
@@ -72,7 +72,7 @@ init_cparam(H5B2_create_t *cparam, H5B2_create_t *cparam2)
     cparam->merge_percent = 40;
 
     /* Wipe out background */
-    HDmemset(cparam2, 0, sizeof(*cparam2));
+    memset(cparam2, 0, sizeof(*cparam2));
 
     /* General parameters */
     cparam2->cls           = H5B2_TEST2;
@@ -476,8 +476,8 @@ index_rec_cb(const void *_record, void *_op_data)
     const H5B2_test_rec_t *record = (const H5B2_test_rec_t *)_record;
     H5B2_test_rec_t       *search = (H5B2_test_rec_t *)_op_data;
 
-    HDassert(record);
-    HDassert(search);
+    assert(record);
+    assert(search);
 
     search->key = record->key;
     search->val = record->val;
@@ -554,7 +554,7 @@ modify_rec_cb(void *_record, void *_op_data, hbool_t *changed)
     H5B2_test_rec_t *record = (H5B2_test_rec_t *)_record;
     H5B2_test_rec_t *modify = (H5B2_test_rec_t *)_op_data;
 
-    HDassert(record->key == modify->key);
+    assert(record->key == modify->key);
     record->val = modify->val;
     *changed    = TRUE;
 
@@ -3008,7 +3008,7 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     curr_time = HDtime(NULL);
 #if 0
 curr_time=1109170019;
-HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
+fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif
     HDsrandom((unsigned)curr_time);
 
@@ -3018,7 +3018,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     TESTING("B-tree insert: create random level 4 B-tree");
 
     /* Allocate space for the records */
-    if (NULL == (records = (hsize_t *)HDmalloc(sizeof(hsize_t) * INSERT_MANY)))
+    if (NULL == (records = (hsize_t *)malloc(sizeof(hsize_t) * INSERT_MANY)))
         TEST_ERROR;
 
     /* Initialize record #'s */
@@ -3198,7 +3198,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     PASSED();
 
-    HDfree(records);
+    free(records);
 
     return 0;
 
@@ -3210,7 +3210,7 @@ error:
         H5Fclose(file);
     }
     H5E_END_TRY;
-    HDfree(records);
+    free(records);
     return 1;
 } /* test_insert_lots() */
 
@@ -5102,7 +5102,7 @@ test_update_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     curr_time = HDtime(NULL);
 #if 0
 curr_time = 1451342093;
-HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif
     HDsrandom((unsigned)curr_time);
 
@@ -5112,7 +5112,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     TESTING("B-tree update: create random level 4 B-tree");
 
     /* Allocate space for the records */
-    if (NULL == (records = (H5B2_test_rec_t *)HDmalloc(sizeof(H5B2_test_rec_t) * INSERT_MANY_REC)))
+    if (NULL == (records = (H5B2_test_rec_t *)malloc(sizeof(H5B2_test_rec_t) * INSERT_MANY_REC)))
         TEST_ERROR;
 
     /* Initialize record #'s */
@@ -5300,12 +5300,12 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     PASSED();
 
-    HDfree(records);
+    free(records);
 
     return 0;
 
 error:
-    HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+    fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     H5E_BEGIN_TRY
     {
         if (bt2)
@@ -5313,7 +5313,7 @@ error:
         H5Fclose(file);
     }
     H5E_END_TRY;
-    HDfree(records);
+    free(records);
 
     return 1;
 } /* test_update_lots() */
@@ -8814,7 +8814,7 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
     curr_time = HDtime(NULL);
 #if 0
 curr_time = 1163537969;
-HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif
     HDsrandom((unsigned)curr_time);
 
@@ -8823,7 +8823,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
      */
 
     /* Allocate space for the records */
-    if (NULL == (records = (hsize_t *)HDmalloc(sizeof(hsize_t) * INSERT_MANY)))
+    if (NULL == (records = (hsize_t *)malloc(sizeof(hsize_t) * INSERT_MANY)))
         TEST_ERROR;
 
     /* Initialize record #'s */
@@ -8861,7 +8861,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
             TEST_ERROR;
 
         /* Allocate space for the file data */
-        if (NULL == (file_data = HDmalloc((size_t)sb.st_size)))
+        if (NULL == (file_data = malloc((size_t)sb.st_size)))
             TEST_ERROR;
 
         /* Read file's data into memory */
@@ -9192,9 +9192,9 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     PASSED();
 
     if (records)
-        HDfree(records);
+        free(records);
     if (file_data)
-        HDfree(file_data);
+        free(file_data);
 
     return 0;
 
@@ -9210,9 +9210,9 @@ error:
     if (fd > 0)
         HDclose(fd);
     if (records)
-        HDfree(records);
+        free(records);
     if (file_data)
-        HDfree(file_data);
+        free(file_data);
 
     return 1;
 } /* test_remove_lots() */
@@ -9246,7 +9246,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param
     herr_t                ret;         /* Generic error return value */
 
     /* Allocate space for the records */
-    if (NULL == (records = (hsize_t *)HDmalloc(sizeof(hsize_t) * FIND_NEIGHBOR)))
+    if (NULL == (records = (hsize_t *)malloc(sizeof(hsize_t) * FIND_NEIGHBOR)))
         TEST_ERROR;
 
     /* Initialize record #'s */
@@ -9426,7 +9426,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param
 
     PASSED();
 
-    HDfree(records);
+    free(records);
 
     return 0;
 
@@ -9438,7 +9438,7 @@ error:
         H5Fclose(file);
     }
     H5E_END_TRY;
-    HDfree(records);
+    free(records);
     return 1;
 } /* test_find_neighbor() */
 
@@ -10139,7 +10139,7 @@ main(void)
         ExpressMode = 2;
 
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Initialize v2 B-tree creation parameters */
     init_cparam(&cparam, &cparam2);
@@ -10152,11 +10152,11 @@ main(void)
     /* Loop over re-opening B-tree during tests */
     for (reopen = FALSE; reopen <= TRUE; reopen++) {
         if (reopen) {
-            HDfprintf(stdout, "Testing with reopening B-tree:\n");
+            fprintf(stdout, "Testing with reopening B-tree:\n");
             tparam.reopen_btree = TRUE;
         } /* end if */
         else {
-            HDfprintf(stdout, "Testing without reopening B-tree:\n");
+            fprintf(stdout, "Testing without reopening B-tree:\n");
             tparam.reopen_btree = FALSE;
         } /* end else */
 
@@ -10176,7 +10176,7 @@ main(void)
         nerrors += test_insert_level2_3internal_redistrib(fapl, &cparam, &tparam);
         nerrors += test_insert_level2_3internal_split(fapl, &cparam, &tparam);
         if (ExpressMode > 1)
-            HDprintf("***Express test mode on.  test_insert_lots skipped\n");
+            printf("***Express test mode on.  test_insert_lots skipped\n");
         else
             nerrors += test_insert_lots(fapl, &cparam, &tparam);
 
@@ -10190,7 +10190,7 @@ main(void)
         nerrors += test_update_level1_middle_split(fapl, &cparam2, &tparam);
         nerrors += test_update_make_level2(fapl, &cparam2, &tparam);
         if (ExpressMode > 1)
-            HDprintf("***Express test mode on.  test_update_lots skipped\n");
+            printf("***Express test mode on.  test_update_lots skipped\n");
         else
             nerrors += test_update_lots(fapl, &cparam2, &tparam);
 
@@ -10217,7 +10217,7 @@ main(void)
         nerrors += test_remove_level2_3internal_merge(fapl, &cparam, &tparam);
         nerrors += test_remove_level2_collapse_right(fapl, &cparam, &tparam);
         if (ExpressMode > 1)
-            HDprintf("***Express test mode on.  test_remove_lots skipped\n");
+            printf("***Express test mode on.  test_remove_lots skipped\n");
         else
             nerrors += test_remove_lots(envval, fapl, &cparam);
 

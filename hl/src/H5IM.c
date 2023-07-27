@@ -570,7 +570,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
 
         dim_ref = (hsize_t)n_refs + 1;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -611,7 +611,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
         if (H5Aclose(aid) < 0)
             goto out;
 
-        HDfree(refbuf);
+        free(refbuf);
 
     } /* ok_pal > 0 */
 
@@ -868,7 +868,7 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
 
         dim_ref = (hsize_t)n_refs;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -897,7 +897,7 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(refbuf);
+        free(refbuf);
     }
 
     /* Close the image dataset. */
@@ -975,7 +975,7 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
 
         dim_ref = (hsize_t)n_refs;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -997,7 +997,7 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(refbuf);
+        free(refbuf);
     }
 
     /* Close the image dataset. */
@@ -1081,7 +1081,7 @@ H5IMis_image(hid_t loc_id, const char *dset_name)
         if ((storage_size = H5Aget_storage_size(aid)) == 0)
             goto out;
 
-        attr_data = (char *)HDmalloc((size_t)storage_size * sizeof(char) + 1);
+        attr_data = (char *)malloc((size_t)storage_size * sizeof(char) + 1);
         if (attr_data == NULL)
             goto out;
 
@@ -1093,7 +1093,7 @@ H5IMis_image(hid_t loc_id, const char *dset_name)
         else
             ret = 0;
 
-        HDfree(attr_data);
+        free(attr_data);
 
         if (H5Tclose(atid) < 0)
             goto out;
@@ -1180,7 +1180,7 @@ H5IMis_palette(hid_t loc_id, const char *dset_name)
         if ((storage_size = H5Aget_storage_size(aid)) == 0)
             goto out;
 
-        attr_data = (char *)HDmalloc((size_t)storage_size * sizeof(char) + 1);
+        attr_data = (char *)malloc((size_t)storage_size * sizeof(char) + 1);
         if (attr_data == NULL)
             goto out;
 
@@ -1192,7 +1192,7 @@ H5IMis_palette(hid_t loc_id, const char *dset_name)
         else
             ret = 0;
 
-        HDfree(attr_data);
+        free(attr_data);
 
         if (H5Tclose(atid) < 0)
             goto out;

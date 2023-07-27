@@ -67,8 +67,8 @@ typedef enum fill_t { FILL_ALL, FILL_FORWARD, FILL_REVERSE, FILL_INWARD, FILL_OU
 static void
 usage(const char *prog)
 {
-    HDfprintf(stderr, "usage: %s [STYLE|cache] [LEFT [MIDDLE [RIGHT]]]\n", prog);
-    HDfprintf(stderr, "\
+    fprintf(stderr, "usage: %s [STYLE|cache] [LEFT [MIDDLE [RIGHT]]]\n", prog);
+    fprintf(stderr, "\
     STYLE is the order that the dataset is filled and should be one of:\n\
         forward   --  Fill the dataset from lowest address to highest\n\
                       address. This style tests the right split ratio.\n\
@@ -230,7 +230,7 @@ test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc
                 abort();
             default:
                 /* unknown request */
-                HDfprintf(stderr, "Unknown fill style\n");
+                fprintf(stderr, "Unknown fill style\n");
                 goto error;
                 break;
         }
@@ -286,7 +286,7 @@ test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc
                 abort();
             default:
                 /* unknown request */
-                HDfprintf(stderr, "Unknown fill style\n");
+                fprintf(stderr, "Unknown fill style\n");
                 goto error;
                 break;
         }
@@ -394,6 +394,6 @@ main(int argc, char *argv[])
     return 0;
 
 error:
-    HDfprintf(stderr, "*** ERRORS DETECTED ***\n");
+    fprintf(stderr, "*** ERRORS DETECTED ***\n");
     return 1;
 }

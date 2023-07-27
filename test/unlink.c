@@ -649,7 +649,7 @@ test_filespace(hid_t fapl)
         TEST_ERROR;
 
     /* Create buffer for writing dataset */
-    if (NULL == (data = (int *)HDmalloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2)))
+    if (NULL == (data = (int *)malloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2)))
         TEST_ERROR;
 
     /* Create single dataset (with contiguous storage & late allocation), remove it & verify file size */
@@ -1425,7 +1425,7 @@ test_filespace(hid_t fapl)
     /* Cleanup common objects */
 
     /* Release dataset buffer */
-    HDfree(data);
+    free(data);
 
     /* Close property lists */
     if (H5Pclose(fapl_nocache) < 0)
@@ -1452,7 +1452,7 @@ test_filespace(hid_t fapl)
 error:
     /* Release dataset buffer */
     if (data)
-        HDfree(data);
+        free(data);
 
     return 1;
 } /* end test_filespace() */
@@ -1490,12 +1490,12 @@ test_create_unlink(const char *msg, hid_t fapl)
         HDsnprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
         if ((group = H5Gcreate2(file, groupname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             H5_FAILED();
-            HDprintf("group %s creation failed\n", groupname);
+            printf("group %s creation failed\n", groupname);
             goto error;
         } /* end if */
         if (H5Gclose(group) < 0) {
             H5_FAILED();
-            HDprintf("closing group %s failed\n", groupname);
+            printf("closing group %s failed\n", groupname);
             goto error;
         } /* end if */
     }     /* end for */
@@ -1505,7 +1505,7 @@ test_create_unlink(const char *msg, hid_t fapl)
         HDsnprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
         if (H5Ldelete(file, groupname, H5P_DEFAULT) < 0) {
             H5_FAILED();
-            HDprintf("Unlinking group %s failed\n", groupname);
+            printf("Unlinking group %s failed\n", groupname);
             goto error;
         } /* end if */
     }     /* end for */
@@ -1736,7 +1736,7 @@ test_unlink_rightleaf(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -1770,7 +1770,7 @@ test_unlink_rightleaf(hid_t fid)
         TEST_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -1786,7 +1786,7 @@ error:
                 }
                 H5E_END_TRY;
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
@@ -1823,7 +1823,7 @@ test_unlink_rightnode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -1860,7 +1860,7 @@ test_unlink_rightnode(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -1876,7 +1876,7 @@ error:
                 }
                 H5E_END_TRY;
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
@@ -1913,7 +1913,7 @@ test_unlink_middlenode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -2236,7 +2236,7 @@ test_unlink_middlenode(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -2252,7 +2252,7 @@ error:
                 }
                 H5E_END_TRY;
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
@@ -3022,12 +3022,12 @@ main(void)
 
             /* Get FAPL cache settings */
             if (H5Pget_cache(fapl_small_mdc, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
-                HDprintf("H5Pget_cache failed\n");
+                printf("H5Pget_cache failed\n");
 
             /* Change FAPL cache settings */
             mdc_nelmts = 1;
             if (H5Pset_cache(fapl_small_mdc, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
-                HDprintf("H5Pset_cache failed\n");
+                printf("H5Pset_cache failed\n");
 
             /* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
             nerrors += test_create_unlink("create and unlink large number of objects with small cache",
@@ -3075,16 +3075,16 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if (nerrors) {
-        HDprintf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        printf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        exit(EXIT_FAILURE);
     }
 
     HDputs("All unlink tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

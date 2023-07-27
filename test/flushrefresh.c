@@ -70,9 +70,9 @@ FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
     {                                                                                                        \
-        errorfile = HDfopen(ERRFILE, "w+");                                                                  \
-        HDfprintf(errorfile, "Error occurred in flushrefresh.\n");                                           \
-        HDfflush(errorfile);                                                                                 \
+        errorfile = fopen(ERRFILE, "w+");                                                                    \
+        fprintf(errorfile, "Error occurred in flushrefresh.\n");                                             \
+        fflush(errorfile);                                                                                   \
         HDfclose(errorfile);                                                                                 \
         TEST_ERROR;                                                                                          \
     }
@@ -161,8 +161,7 @@ main(int argc, char *argv[])
                 TEST_ERROR;
         } /* end if */
         else {
-            HDfprintf(stdout,
-                      "Skipping all flush/refresh tests (only run with SWMR-enabled file drivers).\n");
+            fprintf(stdout, "Skipping all flush/refresh tests (only run with SWMR-enabled file drivers).\n");
 
             /* Test script is expecting some signals, so send them out to end it. */
             if (end_verification() < 0)
@@ -183,7 +182,7 @@ main(int argc, char *argv[])
     }
     else {
         /* Illegal number of arguments supplied. Error. */
-        HDfprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
+        fprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
         PROCESS_ERROR
     } /* end if */
 
@@ -267,7 +266,7 @@ test_flush(void)
     hsize_t dims[2] = {3, 5};
 
     /* Testing Message */
-    HDfprintf(stdout, "Testing individual object flush behavior:\n");
+    fprintf(stdout, "Testing individual object flush behavior:\n");
 
     /* Cleanup any old error or signal files */
     CLEANUP_FILES;
@@ -739,7 +738,7 @@ test_refresh(void)
     int     fillval  = 2;
 
     /* Testing Message */
-    HDfprintf(stdout, "Testing individual object refresh behavior:\n");
+    fprintf(stdout, "Testing individual object refresh behavior:\n");
 
     /* Cleanup any old error or signal files */
     CLEANUP_FILES;
@@ -1089,20 +1088,19 @@ flush_verification(const char *obj_pathname, const char *expected)
     /* Compare to expected result */
     if (HDstrcmp(expected, FLUSHED) == 0) {
         if ((oid < 0) || (status < 0)) {
-            HDfprintf(stderr, "Error! %s should be on disk, but was NOT!\n", obj_pathname);
+            fprintf(stderr, "Error! %s should be on disk, but was NOT!\n", obj_pathname);
             PROCESS_ERROR;
         } /* end if */
     }
     else if (HDstrcmp(expected, NOT_FLUSHED) == 0) {
         if ((oid > 0) || (status > 0)) {
-            HDfprintf(stderr, "Error! %s not expected to be flushed, but it was found on disk!\n",
-                      obj_pathname);
+            fprintf(stderr, "Error! %s not expected to be flushed, but it was found on disk!\n",
+                    obj_pathname);
             PROCESS_ERROR;
         } /* end if */
     }
     else {
-        HDfprintf(stderr, "Error! Bad verification parameters. %s is an invalid expected outcome.\n",
-                  expected);
+        fprintf(stderr, "Error! Bad verification parameters. %s is an invalid expected outcome.\n", expected);
         PROCESS_ERROR;
     } /* end if */
 
@@ -1312,7 +1310,7 @@ refresh_verification(const char *obj_pathname)
                 PROCESS_ERROR;
         } /* end if */
         else {
-            HDfprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
+            fprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
             PROCESS_ERROR;
         } /* end else */
 
@@ -1343,12 +1341,12 @@ refresh_verification(const char *obj_pathname)
     } while (--tries);
 
     if (!ok) {
-        HDprintf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)flushed_oinfo.num_attrs,
-                 (int)flushed_ninfo.hdr.nmesgs, (int)flushed_ninfo.hdr.nchunks,
-                 (int)flushed_ninfo.hdr.space.total);
-        HDprintf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)refreshed_oinfo.num_attrs,
-                 (int)refreshed_ninfo.hdr.nmesgs, (int)refreshed_ninfo.hdr.nchunks,
-                 (int)refreshed_ninfo.hdr.space.total);
+        printf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)flushed_oinfo.num_attrs,
+               (int)flushed_ninfo.hdr.nmesgs, (int)flushed_ninfo.hdr.nchunks,
+               (int)flushed_ninfo.hdr.space.total);
+        printf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)refreshed_oinfo.num_attrs,
+               (int)refreshed_ninfo.hdr.nmesgs, (int)refreshed_ninfo.hdr.nchunks,
+               (int)refreshed_ninfo.hdr.space.total);
         PROCESS_ERROR;
     }
 
@@ -1387,7 +1385,7 @@ check_for_errors(void)
 {
     FILE *file;
 
-    if ((file = HDfopen(ERRFILE, "r"))) {
+    if ((file = fopen(ERRFILE, "r"))) {
         HDfclose(file);
         HDremove(ERRFILE);
         return FAIL;

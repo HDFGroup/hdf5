@@ -32,7 +32,7 @@ static const char *FileHeader = "\n\
 
 #include "H5private.h"
 
-/* Do NOT use HDfprintf in this file as it is not linked with the library,
+/* Do NOT use fprintf in this file as it is not linked with the library,
  * which contains the H5system.c file in which the function is defined.
  */
 
@@ -59,32 +59,32 @@ insert_libhdf5_settings(FILE *flibinfo)
     int   inchar;
     int   bol = 0; /* indicates the beginning of a new line */
 
-    if (NULL == (fsettings = HDfopen(LIBSETTINGSFNAME, "r"))) {
+    if (NULL == (fsettings = fopen(LIBSETTINGSFNAME, "r"))) {
         HDperror(LIBSETTINGSFNAME);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Turn off warnings for large arrays. If the library info string is
      * a problem, people can build without the embedded library info.
      */
-    HDfprintf(flibinfo, "#include \"H5private.h\"\n");
-    HDfprintf(flibinfo, "H5_GCC_DIAG_OFF(\"larger-than=\")\n\n");
-    HDfprintf(flibinfo, "H5_CLANG_DIAG_OFF(\"overlength-strings\")\n\n");
+    fprintf(flibinfo, "#include \"H5private.h\"\n");
+    fprintf(flibinfo, "H5_GCC_DIAG_OFF(\"larger-than=\")\n\n");
+    fprintf(flibinfo, "H5_CLANG_DIAG_OFF(\"overlength-strings\")\n\n");
 
     /* Print variable definition and the string. Do not use const or some
      * platforms (AIX?) will have issues.
      */
-    HDfprintf(flibinfo, "char H5libhdf5_settings[]=\n");
+    fprintf(flibinfo, "char H5libhdf5_settings[]=\n");
     bol++;
     while (EOF != (inchar = HDgetc(fsettings))) {
         if (bol) {
             /* Start a new line */
-            HDfprintf(flibinfo, "\t\"");
+            fprintf(flibinfo, "\t\"");
             bol = 0;
         }
         if (inchar == '\n') {
             /* end of a line */
-            HDfprintf(flibinfo, "\\n\"\n");
+            fprintf(flibinfo, "\\n\"\n");
             bol++;
         }
         else
@@ -95,26 +95,26 @@ insert_libhdf5_settings(FILE *flibinfo)
         /* wrap up */
         if (!bol)
             /* EOF found without a new line */
-            HDfprintf(flibinfo, "\\n\"\n");
-        HDfprintf(flibinfo, ";\n\n");
+            fprintf(flibinfo, "\\n\"\n");
+        fprintf(flibinfo, ";\n\n");
     }
     else {
-        HDfprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
+        exit(EXIT_FAILURE);
     }
     if (0 != HDfclose(fsettings)) {
         HDperror(LIBSETTINGSFNAME);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Re-enable warnings for large arrays */
-    HDfprintf(rawoutstream, "H5_GCC_DIAG_ON(\"larger-than=\")\n");
-    HDfprintf(rawoutstream, "H5_CLANG_DIAG_OFF(\"overlength-strings\")\n");
+    fprintf(rawoutstream, "H5_GCC_DIAG_ON(\"larger-than=\")\n");
+    fprintf(rawoutstream, "H5_CLANG_DIAG_OFF(\"overlength-strings\")\n");
 #else
     /* Print variable definition and an empty string. Do not use const or some
      * platforms (AIX?) will have issues.
      */
-    HDfprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
+    fprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
 #endif
 } /* insert_libhdf5_settings() */
 
@@ -202,42 +202,42 @@ information about the library build configuration\n";
     /*
      * The file header: warning, copyright notice, build information.
      */
-    HDfprintf(rawoutstream, "/* Generated automatically by H5make_libsettings -- do not edit */\n\n\n");
+    fprintf(rawoutstream, "/* Generated automatically by H5make_libsettings -- do not edit */\n\n\n");
     HDfputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
 
-    HDfprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
-              1900 + tm->tm_year);
+    fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
+            1900 + tm->tm_year);
     if (pwd || real_name[0] || host_name[0]) {
-        HDfprintf(rawoutstream, " *\t\t\t");
+        fprintf(rawoutstream, " *\t\t\t");
         if (real_name[0])
-            HDfprintf(rawoutstream, "%s <", real_name);
+            fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
         if (pwd)
             HDfputs(pwd->pw_name, rawoutstream);
 #endif
         if (host_name[0])
-            HDfprintf(rawoutstream, "@%s", host_name);
+            fprintf(rawoutstream, "@%s", host_name);
         if (real_name[0])
-            HDfprintf(rawoutstream, ">");
+            fprintf(rawoutstream, ">");
         HDfputc('\n', rawoutstream);
     }
 
-    HDfprintf(rawoutstream, " *\n * Purpose:\t\t");
+    fprintf(rawoutstream, " *\n * Purpose:\t\t");
 
     for (s = purpose; *s; s++) {
         HDfputc(*s, rawoutstream);
         if ('\n' == *s && s[1])
-            HDfprintf(rawoutstream, " *\t\t\t");
+            fprintf(rawoutstream, " *\t\t\t");
     }
 
-    HDfprintf(rawoutstream, " *\n");
-    HDfprintf(rawoutstream, " *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
-    HDfprintf(rawoutstream, " *\tIt was generated by code in `H5make_libsettings.c'.\n");
+    fprintf(rawoutstream, " *\n");
+    fprintf(rawoutstream, " *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
+    fprintf(rawoutstream, " *\tIt was generated by code in `H5make_libsettings.c'.\n");
 
-    HDfprintf(rawoutstream, " *\n *");
+    fprintf(rawoutstream, " *\n *");
     for (i = 0; i < 73; i++)
         HDfputc('-', rawoutstream);
-    HDfprintf(rawoutstream, "\n */\n\n");
+    fprintf(rawoutstream, "\n */\n\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -276,7 +276,7 @@ main(int argc, char *argv[])
     /* First check if filename is string "NULL" */
     if (fname != NULL) {
         /* binary output */
-        if ((f = HDfopen(fname, "w")) != NULL)
+        if ((f = fopen(fname, "w")) != NULL)
             rawoutstream = f;
     }
     if (!rawoutstream)
@@ -291,10 +291,10 @@ main(int argc, char *argv[])
 
     if (rawoutstream && rawoutstream != stdout) {
         if (HDfclose(rawoutstream))
-            HDfprintf(stderr, "closing rawoutstream");
+            fprintf(stderr, "closing rawoutstream");
         else
             rawoutstream = NULL;
     }
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

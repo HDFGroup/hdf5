@@ -194,7 +194,7 @@ H5HF__huge_bt2_crt_context(void *_f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Allocate callback context */
     if (NULL == (ctx = H5FL_MALLOC(H5HF_huge_bt2_ctx_t)))
@@ -234,7 +234,7 @@ H5HF__huge_bt2_dst_context(void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Release callback context */
     ctx = H5FL_FREE(H5HF_huge_bt2_ctx_t, ctx);
@@ -370,7 +370,7 @@ H5HF__huge_bt2_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Encode the record's fields */
     H5F_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
@@ -402,7 +402,7 @@ H5HF__huge_bt2_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Decode the record's fields */
     H5F_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
@@ -433,8 +433,8 @@ H5HF__huge_bt2_indir_debug(FILE *stream, int indent, int fwidth, const void *_nr
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", indent, "", fwidth,
-              "Record:", nrecord->addr, nrecord->len, nrecord->id);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", indent, "", fwidth,
+            "Record:", nrecord->addr, nrecord->len, nrecord->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_indir_debug() */
@@ -568,7 +568,7 @@ H5HF__huge_bt2_filt_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Encode the record's fields */
     H5F_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
@@ -602,7 +602,7 @@ H5HF__huge_bt2_filt_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Decode the record's fields */
     H5F_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
@@ -635,9 +635,9 @@ H5HF__huge_bt2_filt_indir_debug(FILE *stream, int indent, int fwidth, const void
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE ", %" PRIuHSIZE "}\n",
-              indent, "", fwidth, "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask,
-              nrecord->obj_size, nrecord->id);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE ", %" PRIuHSIZE "}\n", indent,
+            "", fwidth, "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size,
+            nrecord->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_filt_indir_debug() */
@@ -757,7 +757,7 @@ H5HF__huge_bt2_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Encode the record's fields */
     H5F_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
@@ -788,7 +788,7 @@ H5HF__huge_bt2_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Decode the record's fields */
     H5F_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
@@ -818,8 +818,8 @@ H5HF__huge_bt2_dir_debug(FILE *stream, int indent, int fwidth, const void *_nrec
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE "}\n", indent, "", fwidth,
-              "Record:", nrecord->addr, nrecord->len);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE "}\n", indent, "", fwidth,
+            "Record:", nrecord->addr, nrecord->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_dir_debug() */
@@ -964,7 +964,7 @@ H5HF__huge_bt2_filt_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Encode the record's fields */
     H5F_addr_encode_len(ctx->sizeof_addr, &raw, nrecord->addr);
@@ -997,7 +997,7 @@ H5HF__huge_bt2_filt_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Decode the record's fields */
     H5F_addr_decode_len(ctx->sizeof_addr, &raw, &nrecord->addr);
@@ -1029,8 +1029,8 @@ H5HF__huge_bt2_filt_dir_debug(FILE *stream, int indent, int fwidth, const void *
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE "}\n", indent, "", fwidth,
-              "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE "}\n", indent, "", fwidth,
+            "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_filt_dir_debug() */

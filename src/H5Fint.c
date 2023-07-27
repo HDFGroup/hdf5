@@ -209,7 +209,7 @@ H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file_vol_obj);
+    assert(file_vol_obj);
 
     /* Close the file */
     if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
@@ -275,7 +275,7 @@ H5F__set_vol_conn(H5F_t *file)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     /* Retrieve a copy of the "top-level" connector property, before any pass-through
      *  connectors modified or unwrapped it.
@@ -284,7 +284,7 @@ H5F__set_vol_conn(H5F_t *file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL connector info from API context")
 
     /* Sanity check */
-    HDassert(0 != connector_prop.connector_id);
+    assert(0 != connector_prop.connector_id);
 
     /* Retrieve the connector for the ID */
     if (NULL == (file->shared->vol_cls = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
@@ -336,7 +336,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     /* Check args */
-    HDassert(f);
+    assert(f);
 
     /* Make a copy of the default file access property list */
     if (NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
@@ -469,7 +469,7 @@ H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_i
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(obj_id_count_ptr);
+    assert(obj_id_count_ptr);
 
     /* Perform the query */
     if ((ret_value = H5F__get_objects(f, types, 0, NULL, app_ref, obj_id_count_ptr)) < 0)
@@ -496,7 +496,7 @@ H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(obj_id_count_ptr);
+    assert(obj_id_count_ptr);
 
     /* Perform the query */
     if ((ret_value = H5F__get_objects(f, types, max_objs, oid_list, app_ref, obj_id_count_ptr)) < 0)
@@ -527,7 +527,7 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(obj_id_count_ptr);
+    assert(obj_id_count_ptr);
 
     /* Set up search information */
     olist.obj_id_list  = (max_nobjs == 0 ? NULL : obj_id_list);
@@ -628,8 +628,8 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(obj_ptr);
-    HDassert(olist);
+    assert(obj_ptr);
+    assert(olist);
 
     /* Count file IDs */
     if (olist->obj_type == H5I_FILE) {
@@ -816,8 +816,8 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(primary_file);
-    HDassert(primary_file->shared);
+    assert(primary_file);
+    assert(primary_file->shared);
 
     efc = primary_file->shared->efc;
 
@@ -843,7 +843,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
 
             /* Get last component of file_name */
             H5_GET_LAST_DELIMITER(file_name, ptr)
-            HDassert(ptr);
+            assert(ptr);
 
             /* Increment past delimiter */
             ptr++;
@@ -1097,7 +1097,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
     f->id_exists = FALSE;
 
     if (shared) {
-        HDassert(lf == NULL);
+        assert(lf == NULL);
         f->shared = shared;
     }
     else {
@@ -1105,7 +1105,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         unsigned        efc_size; /* External file cache size */
         size_t          u;        /* Local index variable */
 
-        HDassert(lf != NULL);
+        assert(lf != NULL);
         if (NULL == (f->shared = H5FL_CALLOC(H5F_shared_t)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 
@@ -1147,7 +1147,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size")
         if (H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &f->shared->sohm_nindexes) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
-        HDassert(f->shared->sohm_nindexes < 255);
+        assert(f->shared->sohm_nindexes < 255);
         if (H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &f->shared->fs_strategy) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space strategy")
         if (H5P_get(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, &f->shared->fs_persist) < 0)
@@ -1156,7 +1156,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get free-space section threshold")
         if (H5P_get(plist, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, &f->shared->fs_page_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space page size")
-        HDassert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
+        assert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
 
         /* Temporary for multi/split drivers: fail file creation
          * when persisting free-space or using paged aggregation strategy.
@@ -1322,7 +1322,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
 
 done:
     if (!ret_value && f) {
-        HDassert(NULL == f->vol_obj);
+        assert(NULL == f->vol_obj);
 
         if (!shared) {
             /* Attempt to clean up some of the shared file structures */
@@ -1361,8 +1361,8 @@ H5F__dest(H5F_t *f, hbool_t flush)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     if (1 == f->shared->nrefs) {
         int actype; /* metadata cache type (enum value) */
@@ -1402,7 +1402,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
          *
          * Verify this.
          */
-        HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
+        assert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
 
         /* Release the external file cache */
         if (f->shared->efc) {
@@ -1418,7 +1418,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
          *
          * Verify this.
          */
-        HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
+        assert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
 
         /* Release objects that depend on the superblock being initialized */
         if (f->shared->sblock) {
@@ -1446,7 +1446,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
                 /* at this point, only the superblock and superblock
                  * extension should be dirty.
                  */
-                HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
+                assert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
 
                 /* Flush the file again (if requested), as shutting down the
                  * free space manager may dirty some data structures again.
@@ -1480,7 +1480,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
                     /* at this point, only the superblock and superblock
                      * extension should be dirty.
                      */
-                    HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
+                    assert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
                 } /* end if */
             }     /* end if */
 
@@ -1504,7 +1504,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
          *
          * Verify this.
          */
-        HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
+        assert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
 
         /* Remove shared file struct from list of open files */
         if (H5F__sfile_remove(f->shared) < 0)
@@ -2142,7 +2142,7 @@ H5F__post_open(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
-    HDassert(f);
+    assert(f);
 
     /* Store a vol object in the file struct */
     if (NULL == (f->vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, f, f->shared->vol_id)))
@@ -2169,7 +2169,7 @@ H5F__flush_phase1(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
-    HDassert(f);
+    assert(f);
 
     /* Flush any cached dataset storage raw data */
     if (H5D_flush_all(f) < 0)
@@ -2206,7 +2206,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
-    HDassert(f);
+    assert(f);
 
     /* Inform the metadata cache that we are about to flush */
     if (H5AC_prep_for_file_flush(f) < 0)
@@ -2285,7 +2285,7 @@ H5F__flush(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
-    HDassert(f);
+    assert(f);
 
     /* First phase of flushing data */
     if (H5F__flush_phase1(f) < 0)
@@ -2329,7 +2329,7 @@ H5F__close(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open.
@@ -2377,7 +2377,7 @@ H5F__delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(filename);
+    assert(filename);
 
     /* Delete the file */
     if (H5FD_delete(filename, fapl_id) < 0)
@@ -2409,8 +2409,8 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Set the was_closed flag to the default value.
      * This flag lets downstream code know if the file struct is
@@ -2462,7 +2462,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
             /* Sanity check: If close degree if "semi" and we have gotten this
              * far and there are objects left open, bail out now.
              */
-            HDassert(nopen_files == 0 && nopen_objs == 0);
+            assert(nopen_files == 0 && nopen_objs == 0);
 
             /* If we've gotten this far (ie. there are no open objects in the file), fall through to flush &
              * close */
@@ -2487,7 +2487,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
 
     /* If the file close degree is "strong", close all the open objects in this file */
     if (f->shared->fc_degree == H5F_CLOSE_STRONG) {
-        HDassert(nopen_files == 0);
+        assert(nopen_files == 0);
 
         /* Forced close of all opened objects in this file */
         if (f->nopen_objs > 0) {
@@ -2616,7 +2616,7 @@ H5F_get_id(H5F_t *file)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(file);
+    assert(file);
 
     if (H5I_find_id(file, H5I_FILE, &ret_value) < 0 || H5I_INVALID_HID == ret_value) {
         /* resurrect the ID - Register an ID with the native connector */
@@ -2649,7 +2649,7 @@ H5F_incr_nopen_objs(H5F_t *f)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(f);
+    assert(f);
 
     FUNC_LEAVE_NOAPI(++f->nopen_objs)
 } /* end H5F_incr_nopen_objs() */
@@ -2669,7 +2669,7 @@ H5F_decr_nopen_objs(H5F_t *f)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(f);
+    assert(f);
 
     FUNC_LEAVE_NOAPI(--f->nopen_objs)
 } /* end H5F_decr_nopen_objs() */
@@ -2698,10 +2698,10 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(fapl);
-    HDassert(name);
-    HDassert(actual_name);
+    assert(f);
+    assert(fapl);
+    assert(name);
+    assert(actual_name);
 
     /* Clear actual name pointer to begin with */
     *actual_name = NULL;
@@ -2816,15 +2816,15 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp /*in,out*/, haddr_t addr)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(addr_len);
-    HDassert(pp && *pp);
+    assert(addr_len);
+    assert(pp && *pp);
 
     if (H5F_addr_defined(addr)) {
         for (u = 0; u < addr_len; u++) {
             *(*pp)++ = (uint8_t)(addr & 0xff);
             addr >>= 8;
         } /* end for */
-        HDassert("overflow" && 0 == addr);
+        assert("overflow" && 0 == addr);
     } /* end if */
     else {
         for (u = 0; u < addr_len; u++)
@@ -2850,7 +2850,7 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp /*in,out*/, haddr_t addr)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(f);
+    assert(f);
 
     H5F_addr_encode_len(H5F_SIZEOF_ADDR(f), pp, addr);
 
@@ -2879,9 +2879,9 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp /*in,out*/, haddr_t *add
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(addr_len);
-    HDassert(pp && *pp);
-    HDassert(addr_p);
+    assert(addr_len);
+    assert(pp && *pp);
+    assert(addr_p);
 
     /* Reset value in destination */
     *addr_p = 0;
@@ -2907,8 +2907,8 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp /*in,out*/, haddr_t *add
             *addr_p |= tmp;
         } /* end if */
         else if (!all_zero)
-            HDassert(0 == **pp); /*overflow */
-    }                            /* end for */
+            assert(0 == **pp); /*overflow */
+    }                          /* end for */
 
     /* If 'all_zero' is still TRUE, the address was entirely composed of '0xff'
      *  bytes, which is the encoded form of 'HADDR_UNDEF', so set the destination
@@ -2938,7 +2938,7 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp /*in,out*/, haddr_t *addr_p /
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(f);
+    assert(f);
 
     H5F_addr_decode_len(H5F_SIZEOF_ADDR(f), pp, addr_p);
 
@@ -2960,9 +2960,9 @@ H5F_set_grp_btree_shared(H5F_t *f, H5UC_t *rc)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(rc);
+    assert(f);
+    assert(f->shared);
+    assert(rc);
 
     f->shared->grp_btree_shared = rc;
 
@@ -2984,8 +2984,8 @@ H5F_set_sohm_addr(H5F_t *f, haddr_t addr)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     f->shared->sohm_addr = addr;
 
@@ -3007,8 +3007,8 @@ H5F_set_sohm_vers(H5F_t *f, unsigned vers)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     f->shared->sohm_vers = vers;
 
@@ -3030,8 +3030,8 @@ H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     f->shared->sohm_nindexes = nindexes;
 
@@ -3053,8 +3053,8 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     f->shared->store_msg_crt_idx = flag;
 
@@ -3083,8 +3083,8 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Set the bounds only if the existing setting is different from the inputs */
     if (f->shared->low_bound != low || f->shared->high_bound != high) {
@@ -3213,7 +3213,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_le
         tmp_size = H5F_SUPER_STATUS_FLAGS_SIZE(file->shared->sblock->super_vers);
 
         /* Clear "status_flags" */
-        HDmemset((uint8_t *)buf_ptr + tmp, 0, tmp_size);
+        memset((uint8_t *)buf_ptr + tmp, 0, tmp_size);
     } /* end if */
 
     /* Set *image_len = to EOA */
@@ -3240,12 +3240,12 @@ H5F__get_info(H5F_t *f, H5F_info2_t *finfo)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(finfo);
+    assert(f);
+    assert(f->shared);
+    assert(finfo);
 
     /* Reset file info struct */
-    HDmemset(finfo, 0, sizeof(*finfo));
+    memset(finfo, 0, sizeof(*finfo));
 
     /* Get the size of the superblock and any superblock extensions */
     if (H5F__super_size(f, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
@@ -3291,12 +3291,12 @@ H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared->read_attempts > 1);
-    HDassert(f->shared->retries_nbins > 0);
-    HDassert(retries > 0);
-    HDassert(retries < f->shared->read_attempts);
-    HDassert(actype < H5AC_NTYPES);
+    assert(f);
+    assert(f->shared->read_attempts > 1);
+    assert(f->shared->retries_nbins > 0);
+    assert(retries > 0);
+    assert(retries < f->shared->read_attempts);
+    assert(actype < H5AC_NTYPES);
 
     /* Allocate memory for retries */
     if (NULL == f->shared->retries[actype])
@@ -3307,7 +3307,7 @@ H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
     /* Index to retries based on log10 */
     tmp     = HDlog10((double)retries);
     log_ind = (unsigned)tmp;
-    HDassert(log_ind < f->shared->retries_nbins);
+    assert(log_ind < f->shared->retries_nbins);
 
     /* Increment the # of the "retries" */
     f->shared->retries[actype][log_ind]++;
@@ -3335,10 +3335,10 @@ H5F_set_retries(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Initialize the tracking for metadata read retries */
-    HDmemset(f->shared->retries, 0, sizeof(f->shared->retries));
+    memset(f->shared->retries, 0, sizeof(f->shared->retries));
 
     /* Initialize the # of bins for retries */
     f->shared->retries_nbins = 0;
@@ -3370,8 +3370,8 @@ H5F_object_flush_cb(H5F_t *f, hid_t obj_id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Invoke object flush callback if there is one */
     if (f->shared->object_flush.func &&
@@ -3397,8 +3397,8 @@ H5F__set_base_addr(const H5F_t *f, haddr_t addr)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Dispatch to driver */
     if (H5FD_set_base_addr(f->shared->lf, addr) < 0)
@@ -3423,8 +3423,8 @@ H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Dispatch to driver */
     /* (H5FD_set_eoa() will add base_addr to addr) */
@@ -3451,8 +3451,8 @@ H5F__set_paged_aggr(const H5F_t *f, hbool_t paged)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Dispatch to driver */
     if (H5FD_set_paged_aggr(f->shared->lf, paged) < 0)
@@ -3481,8 +3481,8 @@ H5F__get_max_eof_eoa(const H5F_t *f, haddr_t *max_eof_eoa)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Get the relative EOA and EOF */
     eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT);
@@ -3519,14 +3519,14 @@ H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(file);
-    HDassert(info);
+    assert(file);
+    assert(info);
 
     /* Copy the # of bins for "retries" array */
     info->nbins = file->shared->retries_nbins;
 
     /* Initialize the array of "retries" */
-    HDmemset(info->retries, 0, sizeof(info->retries));
+    memset(info->retries, 0, sizeof(info->retries));
 
     /* Return if there are no bins -- no retries */
     if (!info->nbins)
@@ -3560,7 +3560,7 @@ H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info)
             case H5AC_FARRAY_DBLOCK_ID:
             case H5AC_FARRAY_DBLK_PAGE_ID:
             case H5AC_SUPERBLOCK_ID:
-                HDassert(j < H5F_NUM_METADATA_READ_RETRY_TYPES);
+                assert(j < H5F_NUM_METADATA_READ_RETRY_TYPES);
                 if (file->shared->retries[i] != NULL) {
                     /* Allocate memory for retries[i]
                      *
@@ -3641,8 +3641,8 @@ H5F__start_swmr_write(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Should have write permission */
     if ((H5F_INTENT(f) & H5F_ACC_RDWR) == 0)
@@ -3701,7 +3701,7 @@ H5F__start_swmr_write(H5F_t *f)
          * or ensure 0 cannot be a valid value and check for 0 at cleanup. */
         if ((obj_apl_ids = (hid_t *)H5MM_calloc(grp_dset_count * sizeof(hid_t))) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t")
-        HDassert(obj_apl_ids[0] == H5P_DEFAULT);
+        assert(obj_apl_ids[0] == H5P_DEFAULT);
 
         /* Get the list of opened object ids (groups & datasets) */
         if (H5F_get_obj_ids(f, H5F_OBJ_GROUP | H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE,
@@ -3918,8 +3918,8 @@ H5F__format_convert(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Check if the superblock should be downgraded */
     if (f->shared->sblock->super_vers > HDF5_SUPERBLOCK_VERSION_V18_LATEST) {
@@ -4044,8 +4044,8 @@ H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     f->shared->crt_dset_min_ohdr_flag = minimize;
 

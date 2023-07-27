@@ -193,7 +193,7 @@ H5MF__sect_new(unsigned ctype, haddr_t sect_off, hsize_t sect_size)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments.  */
-    HDassert(sect_size);
+    assert(sect_size);
 
     /* Create free space section node */
     if (NULL == (sect = H5FL_MALLOC(H5MF_free_section_t)))
@@ -236,7 +236,7 @@ H5MF__sect_free(H5FS_section_info_t *_sect)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(sect);
+    assert(sect);
 
     /* Release the section */
     sect = H5FL_FREE(H5MF_free_section_t, sect);
@@ -267,9 +267,9 @@ H5MF__sect_deserialize(const H5FS_section_class_t *cls, const uint8_t H5_ATTR_UN
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(cls);
-    HDassert(H5F_addr_defined(sect_addr));
-    HDassert(sect_size);
+    assert(cls);
+    assert(H5F_addr_defined(sect_addr));
+    assert(sect_size);
 
     /* Create free space section for block */
     if (NULL == (sect = H5MF__sect_new(cls->type, sect_addr, sect_size)))
@@ -309,7 +309,7 @@ H5MF__sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_sect
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(sect);
+    assert(sect);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5MF__sect_valid() */
@@ -376,10 +376,10 @@ H5MF__sect_simple_can_merge(const H5FS_section_info_t *_sect1, const H5FS_sectio
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(sect1);
-    HDassert(sect2);
-    HDassert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    HDassert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(sect1);
+    assert(sect2);
+    assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
+    assert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     /* Check if second section adjoins first section */
     ret_value = H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
@@ -413,11 +413,11 @@ H5MF__sect_simple_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(sect1);
-    HDassert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_SIMPLE);
-    HDassert(sect2);
-    HDassert(sect2->sect_info.type == H5MF_FSPACE_SECT_SIMPLE);
-    HDassert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    assert(sect1);
+    assert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_SIMPLE);
+    assert(sect2);
+    assert(sect2->sect_info.type == H5MF_FSPACE_SECT_SIMPLE);
+    assert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -455,9 +455,9 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(sect);
-    HDassert(udata);
-    HDassert(udata->f);
+    assert(sect);
+    assert(udata);
+    assert(udata->f);
 
     /* Retrieve the end of the file's address space */
     if (HADDR_UNDEF == (eoa = H5F_get_eoa(udata->f, udata->alloc_type)))
@@ -471,9 +471,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
         /* Set the shrinking type */
         udata->shrink = H5MF_SHRINK_EOA;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr,
-                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
-                  __func__, sect->sect_info.addr, sect->sect_info.size, eoa);
+        fprintf(stderr, "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
+                __func__, sect->sect_info.addr, sect->sect_info.size, eoa);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */
@@ -496,9 +495,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
                 /* Set the aggregator to operate on */
                 udata->aggr = &(udata->f->shared->meta_aggr);
 #ifdef H5MF_ALLOC_DEBUG_MORE
-                HDfprintf(stderr,
-                          "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins metadata aggregator\n",
-                          __func__, sect->sect_info.addr, sect->sect_info.size);
+                fprintf(stderr, "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins metadata aggregator\n",
+                        __func__, sect->sect_info.addr, sect->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
@@ -518,9 +516,9 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
                 /* Set the aggregator to operate on */
                 udata->aggr = &(udata->f->shared->sdata_aggr);
 #ifdef H5MF_ALLOC_DEBUG_MORE
-                HDfprintf(stderr,
-                          "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins small data aggregator\n",
-                          __func__, sect->sect_info.addr, sect->sect_info.size);
+                fprintf(stderr,
+                        "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins small data aggregator\n",
+                        __func__, sect->sect_info.addr, sect->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
@@ -559,14 +557,14 @@ H5MF__sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(sect);
-    HDassert(udata);
-    HDassert(udata->f);
+    assert(sect);
+    assert(udata);
+    assert(udata->f);
 
     /* Check for shrinking file */
     if (H5MF_SHRINK_EOA == udata->shrink) {
         /* Sanity check */
-        HDassert(H5F_INTENT(udata->f) & H5F_ACC_RDWR);
+        assert(H5F_INTENT(udata->f) & H5F_ACC_RDWR);
 
         /* Release section's space at EOA */
         if (H5F__free(udata->f, udata->alloc_type, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
@@ -574,7 +572,7 @@ H5MF__sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
     } /* end if */
     else {
         /* Sanity check */
-        HDassert(udata->aggr);
+        assert(udata->aggr);
 
         /* Absorb the section into the aggregator or vice versa */
         if (H5MF__aggr_absorb(udata->f, udata->aggr, *sect, udata->allow_sect_absorb) < 0)
@@ -627,8 +625,8 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
     FUNC_ENTER_PACKAGE
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Entering, section {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
-              (*sect)->sect_info.addr, (*sect)->sect_info.size);
+    fprintf(stderr, "%s: Entering, section {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
+            (*sect)->sect_info.addr, (*sect)->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* Do not adjust the section raw data or global heap data */
@@ -648,15 +646,15 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
         *flags &= (unsigned)~H5FS_ADD_RETURNED_SPACE;
         *flags |= H5FS_PAGE_END_NO_ADD;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: section is dropped\n", __func__);
+        fprintf(stderr, "%s: section is dropped\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     }  /* end if */
     /* Adjust the section if it is not at page end but its size + prem is at page end */
     else if (prem <= H5F_PGEND_META_THRES(udata->f)) {
         (*sect)->sect_info.size += prem;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: section is adjusted {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
-                  (*sect)->sect_info.addr, (*sect)->sect_info.size);
+        fprintf(stderr, "%s: section is adjusted {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
+                (*sect)->sect_info.addr, (*sect)->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     }  /* end if */
 
@@ -690,10 +688,10 @@ H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(sect1);
-    HDassert(sect2);
-    HDassert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    HDassert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(sect1);
+    assert(sect2);
+    assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
+    assert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     /* Check if second section adjoins first section */
     ret_value = H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
@@ -704,7 +702,7 @@ H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
             ret_value = FALSE;
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
+    fprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -737,11 +735,11 @@ H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(sect1);
-    HDassert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_SMALL);
-    HDassert(sect2);
-    HDassert(sect2->sect_info.type == H5MF_FSPACE_SECT_SMALL);
-    HDassert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    assert(sect1);
+    assert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_SMALL);
+    assert(sect2);
+    assert(sect2->sect_info.type == H5MF_FSPACE_SECT_SMALL);
+    assert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -800,15 +798,15 @@ H5MF__sect_large_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(sect1);
-    HDassert(sect2);
-    HDassert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    HDassert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(sect1);
+    assert(sect2);
+    assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
+    assert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     ret_value = H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
+    fprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -838,11 +836,11 @@ H5MF__sect_large_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(sect1);
-    HDassert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_LARGE);
-    HDassert(sect2);
-    HDassert(sect2->sect_info.type == H5MF_FSPACE_SECT_LARGE);
-    HDassert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    assert(sect1);
+    assert((*sect1)->sect_info.type == H5MF_FSPACE_SECT_LARGE);
+    assert(sect2);
+    assert(sect2->sect_info.type == H5MF_FSPACE_SECT_LARGE);
+    assert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -879,10 +877,10 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(sect);
-    HDassert(sect->sect_info.type == H5MF_FSPACE_SECT_LARGE);
-    HDassert(udata);
-    HDassert(udata->f);
+    assert(sect);
+    assert(sect->sect_info.type == H5MF_FSPACE_SECT_LARGE);
+    assert(udata);
+    assert(udata->f);
 
     /* Retrieve the end of the file's address space */
     if (HADDR_UNDEF == (eoa = H5FD_get_eoa(udata->f->shared->lf, udata->alloc_type)))
@@ -896,9 +894,8 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
         /* Set the shrinking type */
         udata->shrink = H5MF_SHRINK_EOA;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr,
-                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
-                  __func__, sect->sect_info.addr, sect->sect_info.size, eoa);
+        fprintf(stderr, "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
+                __func__, sect->sect_info.addr, sect->sect_info.size, eoa);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */
@@ -932,13 +929,13 @@ H5MF__sect_large_shrink(H5FS_section_info_t **_sect, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(sect);
-    HDassert((*sect)->sect_info.type == H5MF_FSPACE_SECT_LARGE);
-    HDassert(udata);
-    HDassert(udata->f);
-    HDassert(udata->shrink == H5MF_SHRINK_EOA);
-    HDassert(H5F_INTENT(udata->f) & H5F_ACC_RDWR);
-    HDassert(H5F_PAGED_AGGR(udata->f));
+    assert(sect);
+    assert((*sect)->sect_info.type == H5MF_FSPACE_SECT_LARGE);
+    assert(udata);
+    assert(udata->f);
+    assert(udata->shrink == H5MF_SHRINK_EOA);
+    assert(H5F_INTENT(udata->f) & H5F_ACC_RDWR);
+    assert(H5F_PAGED_AGGR(udata->f));
 
     /* Calculate possible mis-aligned fragment */
     H5MF_EOA_MISALIGN(udata->f, (*sect)->sect_info.addr, udata->f->shared->fs_page_size, frag_size);

@@ -49,7 +49,7 @@ h5ltmake_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *rank, h
     if (c_name == NULL)
         goto done;
 
-    c_dims = (hsize_t *)HDmalloc(sizeof(hsize_t) * ((size_t)*rank));
+    c_dims = (hsize_t *)malloc(sizeof(hsize_t) * ((size_t)*rank));
     if (c_dims == NULL)
         goto done;
     /*
@@ -71,9 +71,9 @@ h5ltmake_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *rank, h
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_dims != NULL)
-        HDfree(c_dims);
+        free(c_dims);
     return ret_value;
 }
 
@@ -124,7 +124,7 @@ h5ltread_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hid_t_f *type_
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -179,9 +179,9 @@ h5ltmake_dataset_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_buf != NULL)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -231,7 +231,7 @@ h5ltread_dataset_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, char *b
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -324,11 +324,11 @@ h5ltset_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
     if (c_buf != NULL)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -405,9 +405,9 @@ h5ltget_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
 
     return ret_value;
 }
@@ -451,7 +451,7 @@ h5ltget_attribute_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, si
     /*
      * Allocate buffer to hold C attribute string
      */
-    if ((c_buf = (char *)HDmalloc((size_t)*buf_size + 1)) == NULL)
+    if ((c_buf = (char *)malloc((size_t)*buf_size + 1)) == NULL)
         goto done;
 
     /*
@@ -470,11 +470,11 @@ h5ltget_attribute_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, si
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
     if (c_buf != NULL)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -526,7 +526,7 @@ h5ltget_dataset_ndims_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *ra
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -569,7 +569,7 @@ h5ltfind_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
     ret = H5LTfind_dataset(c_loc_id, c_name);
 
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret;
 }
@@ -639,7 +639,7 @@ h5ltget_dataset_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f 
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -697,9 +697,9 @@ h5ltget_attribute_ndims_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, siz
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
 
     return ret_value;
 }
@@ -774,9 +774,9 @@ h5ltget_attribute_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
 
     return ret_value;
 }
@@ -821,7 +821,7 @@ h5ltpath_valid_c(hid_t_f *loc_id, _fcd path, size_t_f *pathlen, int_f *check_obj
 
 done:
     if (c_path != NULL)
-        HDfree(c_path);
+        free(c_path);
 
     return (int_f)ret;
 }

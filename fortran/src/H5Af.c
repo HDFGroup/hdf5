@@ -60,7 +60,7 @@ h5adelete_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen)
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -135,7 +135,7 @@ h5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
     /*
      * Allocate buffer to hold name of an attribute
      */
-    if (NULL == (c_buf = (char *)HDmalloc(c_bufsize)))
+    if (NULL == (c_buf = (char *)malloc(c_bufsize)))
         HGOTO_DONE(FAIL);
 
     /*
@@ -151,7 +151,7 @@ h5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
 
 done:
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 
@@ -204,9 +204,9 @@ h5adelete_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd 
 
 done:
     if (c_attr_name)
-        HDfree(c_attr_name);
+        free(c_attr_name);
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     return ret_value;
 }
 /****if* H5Af/h5adelete_by_idx_c
@@ -256,7 +256,7 @@ h5adelete_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_f 
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
 
     return ret_value;
 }
@@ -325,7 +325,7 @@ h5aget_name_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_
      * Allocate buffer to hold name of an attribute
      */
     c_buf_size = (size_t)*size + 1;
-    if (NULL == (c_buf = (char *)HDmalloc(c_buf_size)))
+    if (NULL == (c_buf = (char *)malloc(c_buf_size)))
         HGOTO_DONE(FAIL)
 
     /*
@@ -344,9 +344,9 @@ h5aget_name_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 
@@ -474,7 +474,7 @@ h5aget_info_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
 
     return ret_value;
 }
@@ -542,9 +542,9 @@ h5aget_info_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fc
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_attr_name)
-        HDfree(c_attr_name);
+        free(c_attr_name);
 
     return ret_value;
 }

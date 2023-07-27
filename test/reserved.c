@@ -491,7 +491,7 @@ main(void)
         num_errs += rsrv_vlen();
 
         if (num_errs > 0)
-            HDprintf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
+            printf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
         else
             HDputs("All address space reservation tests passed.");
 

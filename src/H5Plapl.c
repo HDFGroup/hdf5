@@ -257,7 +257,7 @@ H5P__lacc_elink_fapl_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = *(const hid_t *)value;
@@ -299,7 +299,7 @@ H5P__lacc_elink_fapl_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = *(const hid_t *)value;
@@ -370,7 +370,7 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
             /* encode the length of the plist */
             enc_value = (uint64_t)fapl_size;
             enc_size  = H5VM_limit_enc_size(enc_value);
-            HDassert(enc_size < 256);
+            assert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
@@ -415,9 +415,9 @@ H5P__lacc_elink_fapl_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(elink_fapl);
+    assert(pp);
+    assert(*pp);
+    assert(elink_fapl);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Determine if the FAPL is non-default */
@@ -430,7 +430,7 @@ H5P__lacc_elink_fapl_dec(const void **_pp, void *_value)
 
         /* Decode the plist length */
         enc_size = *(*pp)++;
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         fapl_size = (size_t)enc_value;
 
@@ -470,7 +470,7 @@ H5P__lacc_elink_fapl_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
@@ -505,7 +505,7 @@ H5P__lacc_elink_fapl_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
@@ -567,7 +567,7 @@ H5P__lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t H5_ATTR_
         herr_t H5_ATTR_NDEBUG_UNUSED status;
 
         status = H5P__cmp_plist(obj1, obj2, &ret_value);
-        HDassert(status >= 0);
+        assert(status >= 0);
     } /* end if */
 
 done:
@@ -596,7 +596,7 @@ H5P__lacc_elink_fapl_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
@@ -629,7 +629,7 @@ H5P__lacc_elink_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -657,7 +657,7 @@ H5P__lacc_elink_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -699,7 +699,7 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* encode the length of the prefix */
@@ -747,14 +747,14 @@ H5P__lacc_elink_pref_dec(const void **_pp, void *_value)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(elink_pref);
+    assert(pp);
+    assert(*pp);
+    assert(elink_pref);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -794,7 +794,7 @@ H5P__lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -818,7 +818,7 @@ H5P__lacc_elink_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     *(char **)value = H5MM_xstrdup(*(const char **)value);
 
@@ -876,7 +876,7 @@ H5P__lacc_elink_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 

@@ -192,8 +192,8 @@ test_conv(hid_t file)
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if (data1[i] != data2[i]) {
             H5_FAILED();
-            HDprintf("    1. data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data2[i]));
+            printf("    1. data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i,
+                   (int)(data1[i]), (unsigned long)i, (int)(data2[i]));
             goto error;
         } /* end if */
 
@@ -204,8 +204,8 @@ test_conv(hid_t file)
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if ((short)data1[i] != data_short[i]) {
             H5_FAILED();
-            HDprintf("    2. data1[%lu]=%d, data_short[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_short[i]));
+            printf("    2. data1[%lu]=%d, data_short[%lu]=%d (should be same)\n", (unsigned long)i,
+                   (int)(data1[i]), (unsigned long)i, (int)(data_short[i]));
             goto error;
         } /* end if */
 
@@ -216,8 +216,8 @@ test_conv(hid_t file)
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if ((int)data1[i] != (int)data_double[i]) {
             H5_FAILED();
-            HDprintf("    3. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
+            printf("    3. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n", (unsigned long)i,
+                   (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
             goto error;
         } /* end if */
 
@@ -242,8 +242,8 @@ test_conv(hid_t file)
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if ((int)data1[i] != data_int[i]) {
             H5_FAILED();
-            HDprintf("    4. data1[%lu]=%d, data_int[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_int[i]));
+            printf("    4. data1[%lu]=%d, data_int[%lu]=%d (should be same)\n", (unsigned long)i,
+                   (int)(data1[i]), (unsigned long)i, (int)(data_int[i]));
             goto error;
         } /* end if */
 
@@ -268,8 +268,8 @@ test_conv(hid_t file)
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if ((int)data1[i] != (int)data_double[i]) {
             H5_FAILED();
-            HDprintf("    5. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
+            printf("    5. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n", (unsigned long)i,
+                   (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
             goto error;
         } /* end if */
 
@@ -370,8 +370,8 @@ test_tr1(hid_t file)
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if (data1[i] != data2[i]) {
             H5_FAILED();
-            HDprintf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i, (int)(data1[i]),
-                     (unsigned long)i, (int)(data2[i]));
+            printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i, (int)(data1[i]),
+                   (unsigned long)i, (int)(data2[i]));
             goto error;
         }
 
@@ -472,8 +472,8 @@ test_tr2(hid_t file)
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if (data1[i] != data2[i]) {
             H5_FAILED();
-            HDprintf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i, (int)(data1[i]),
-                     (unsigned long)i, (int)(data2[i]));
+            printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i, (int)(data1[i]),
+                   (unsigned long)i, (int)(data2[i]));
             goto error;
         }
 
@@ -660,7 +660,7 @@ test_funcs(void)
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
+        printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
 
@@ -671,7 +671,7 @@ test_funcs(void)
     H5E_END_TRY;
     if (size > 0) {
         H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
+        printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
 
@@ -682,7 +682,7 @@ test_funcs(void)
     H5E_END_TRY;
     if (inpad > -1) {
         H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
+        printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
 
@@ -693,7 +693,7 @@ test_funcs(void)
     H5E_END_TRY;
     if (cset > -1) {
         H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
+        printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
 
@@ -705,7 +705,7 @@ test_funcs(void)
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
+        printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
 
@@ -716,7 +716,7 @@ test_funcs(void)
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
+        printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
 

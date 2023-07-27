@@ -155,8 +155,8 @@ H5FD_locate_signature(H5FD_t *file, haddr_t *sig_addr)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(sig_addr);
+    assert(file);
+    assert(sig_addr);
 
     /* Find the least N such that 2^N is larger than the file size */
     eof  = H5FD_get_eof(file, H5FD_MEM_SUPER);
@@ -177,7 +177,7 @@ H5FD_locate_signature(H5FD_t *file, haddr_t *sig_addr)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to set EOA value for file signature")
         if (H5FD_read(file, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to read file signature")
-        if (!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
+        if (!memcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
             break;
     }
 
@@ -215,9 +215,9 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(buf);
+    assert(file);
+    assert(file->cls);
+    assert(buf);
 
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
@@ -277,9 +277,9 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(buf);
+    assert(file);
+    assert(file->cls);
+    assert(buf);
 
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
@@ -364,18 +364,18 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((types) || (count == 0));
-    HDassert((addrs) || (count == 0));
-    HDassert((sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((types) || (count == 0));
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* verify that the first elements of the sizes and types arrays are
      * valid.
      */
-    HDassert((count == 0) || (sizes[0] != 0));
-    HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+    assert((count == 0) || (sizes[0] != 0));
+    assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
@@ -517,7 +517,7 @@ done:
     /* undo the base addr offset to the addrs array if necessary */
     if (addrs_cooked) {
 
-        HDassert(file->base_addr > 0);
+        assert(file->base_addr > 0);
 
         for (i = 0; i < count; i++) {
 
@@ -581,18 +581,18 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((types) || (count == 0));
-    HDassert((addrs) || (count == 0));
-    HDassert((sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((types) || (count == 0));
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* verify that the first elements of the sizes and types arrays are
      * valid.
      */
-    HDassert((count == 0) || (sizes[0] != 0));
-    HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+    assert((count == 0) || (sizes[0] != 0));
+    assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
@@ -723,7 +723,7 @@ done:
     /* undo the base addr offset to the addrs array if necessary */
     if (addrs_cooked) {
 
-        HDassert(file->base_addr > 0);
+        assert(file->base_addr > 0);
 
         for (i = 0; i < count; i++) {
 
@@ -793,13 +793,13 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_spaces) || (count == 0));
-    HDassert((file_spaces) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_spaces) || (count == 0));
+    assert((file_spaces) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
     use_vector = file->cls->read_vector != NULL;
@@ -807,8 +807,8 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     if (count > 0) {
         /* Verify that the first elements of the element_sizes and bufs arrays are
          * valid. */
-        HDassert(element_sizes[0] != 0);
-        HDassert(bufs[0] != NULL);
+        assert(element_sizes[0] != 0);
+        assert(bufs[0] != NULL);
 
         /* Allocate sequence lists for memory and file spaces */
         if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -867,7 +867,7 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
         {
             if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(mem_spaces[i])) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
-            HDassert((hssize_t)nelmts == hss_nelmts);
+            assert((hssize_t)nelmts == hss_nelmts);
         }
 #endif /* NDEBUG */
 
@@ -885,23 +885,23 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
                                                  &seq_nelem, file_off, file_len) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-                HDassert(file_nseq > 0);
+                assert(file_nseq > 0);
 
                 nelmts -= seq_nelem;
                 file_seq_i = 0;
             }
-            HDassert(file_seq_i < file_nseq);
+            assert(file_seq_i < file_nseq);
 
             /* Fill/refill memory sequence list if necessary */
             if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &seq_nelem,
                                                  mem_off, mem_len) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-                HDassert(mem_nseq > 0);
+                assert(mem_nseq > 0);
 
                 mem_seq_i = 0;
             }
-            HDassert(mem_seq_i < mem_nseq);
+            assert(mem_seq_i < mem_nseq);
 
             /* Calculate length of this IO */
             io_len = MIN(file_len[file_seq_i], mem_len[mem_seq_i]);
@@ -912,8 +912,8 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                 if (vec_arr_nused == vec_arr_nalloc) {
                     /* Check if we're using the static arrays */
                     if (addrs == addrs_local) {
-                        HDassert(sizes == sizes_local);
-                        HDassert(vec_bufs == vec_bufs_local);
+                        assert(sizes == sizes_local);
+                        assert(vec_bufs == vec_bufs_local);
 
                         /* Allocate dynamic arrays */
                         if (NULL == (addrs = H5MM_malloc(sizeof(addrs_local) * 2)))
@@ -1036,9 +1036,9 @@ done:
     }
 
     /* Make sure we cleaned up */
-    HDassert(!addrs || addrs == addrs_local);
-    HDassert(!sizes || sizes == sizes_local);
-    HDassert(!vec_bufs || vec_bufs == vec_bufs_local);
+    assert(!addrs || addrs == addrs_local);
+    assert(!sizes || sizes == sizes_local);
+    assert(!vec_bufs || vec_bufs == vec_bufs_local);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__read_selection_translate() */
@@ -1099,18 +1099,18 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_spaces) || (count == 0));
-    HDassert((file_spaces) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_spaces) || (count == 0));
+    assert((file_spaces) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
@@ -1203,7 +1203,7 @@ done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
 
-        HDassert(file->base_addr > 0);
+        assert(file->base_addr > 0);
 
         for (i = 0; i < count; i++) {
 
@@ -1263,18 +1263,18 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_space_ids) || (count == 0));
-    HDassert((file_space_ids) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
@@ -1365,7 +1365,7 @@ done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
 
-        HDassert(file->base_addr > 0);
+        assert(file->base_addr > 0);
 
         for (i = 0; i < count; i++) {
 
@@ -1440,13 +1440,13 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_spaces) || (count == 0));
-    HDassert((file_spaces) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_spaces) || (count == 0));
+    assert((file_spaces) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
     use_vector = file->cls->write_vector != NULL;
@@ -1454,8 +1454,8 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     if (count > 0) {
         /* Verify that the first elements of the element_sizes and bufs arrays are
          * valid. */
-        HDassert(element_sizes[0] != 0);
-        HDassert(bufs[0] != NULL);
+        assert(element_sizes[0] != 0);
+        assert(bufs[0] != NULL);
 
         /* Allocate sequence lists for memory and file spaces */
         if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -1514,7 +1514,7 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         {
             if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(mem_spaces[i])) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
-            HDassert((hssize_t)nelmts == hss_nelmts);
+            assert((hssize_t)nelmts == hss_nelmts);
         }
 #endif /* NDEBUG */
 
@@ -1532,23 +1532,23 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
                                                  &seq_nelem, file_off, file_len) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-                HDassert(file_nseq > 0);
+                assert(file_nseq > 0);
 
                 nelmts -= seq_nelem;
                 file_seq_i = 0;
             }
-            HDassert(file_seq_i < file_nseq);
+            assert(file_seq_i < file_nseq);
 
             /* Fill/refill memory sequence list if necessary */
             if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &seq_nelem,
                                                  mem_off, mem_len) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-                HDassert(mem_nseq > 0);
+                assert(mem_nseq > 0);
 
                 mem_seq_i = 0;
             }
-            HDassert(mem_seq_i < mem_nseq);
+            assert(mem_seq_i < mem_nseq);
 
             /* Calculate length of this IO */
             io_len = MIN(file_len[file_seq_i], mem_len[mem_seq_i]);
@@ -1559,8 +1559,8 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                 if (vec_arr_nused == vec_arr_nalloc) {
                     /* Check if we're using the static arrays */
                     if (addrs == addrs_local) {
-                        HDassert(sizes == sizes_local);
-                        HDassert(vec_bufs == vec_bufs_local);
+                        assert(sizes == sizes_local);
+                        assert(vec_bufs == vec_bufs_local);
 
                         /* Allocate dynamic arrays */
                         if (NULL == (addrs = H5MM_malloc(sizeof(addrs_local) * 2)))
@@ -1683,9 +1683,9 @@ done:
     }
 
     /* Make sure we cleaned up */
-    HDassert(!addrs || addrs == addrs_local);
-    HDassert(!sizes || sizes == sizes_local);
-    HDassert(!vec_bufs || vec_bufs == vec_bufs_local);
+    assert(!addrs || addrs == addrs_local);
+    assert(!sizes || sizes == sizes_local);
+    assert(!vec_bufs || vec_bufs == vec_bufs_local);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__write_selection_translate() */
@@ -1744,18 +1744,18 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_spaces) || (count == 0));
-    HDassert((file_spaces) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_spaces) || (count == 0));
+    assert((file_spaces) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
@@ -1842,7 +1842,7 @@ done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
 
-        HDassert(file->base_addr > 0);
+        assert(file->base_addr > 0);
 
         for (i = 0; i < count; i++) {
 
@@ -1899,18 +1899,18 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_space_ids) || (count == 0));
-    HDassert((file_space_ids) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Get proper DXPL for I/O */
     dxpl_id = H5CX_get_dxpl();
@@ -1995,7 +1995,7 @@ done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
 
-        HDassert(file->base_addr > 0);
+        assert(file->base_addr > 0);
 
         for (i = 0; i < count; i++) {
 
@@ -2033,8 +2033,8 @@ H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(file && file->cls);
-    HDassert(H5F_addr_defined(addr) && addr <= file->maxaddr);
+    assert(file && file->cls);
+    assert(H5F_addr_defined(addr) && addr <= file->maxaddr);
 
     /* Dispatch to driver, convert to absolute address */
     if ((file->cls->set_eoa)(file, type, addr + file->base_addr) < 0)
@@ -2067,7 +2067,7 @@ H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
-    HDassert(file && file->cls);
+    assert(file && file->cls);
 
     /* Dispatch to driver */
     if (HADDR_UNDEF == (ret_value = (file->cls->get_eoa)(file, type)))
@@ -2103,7 +2103,7 @@ H5FD_get_eof(const H5FD_t *file, H5FD_mem_t type)
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
-    HDassert(file && file->cls);
+    assert(file && file->cls);
 
     /* Dispatch to driver */
     if (file->cls->get_eof) {
@@ -2139,8 +2139,8 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(driver);
-    HDassert(flags);
+    assert(driver);
+    assert(flags);
 
     /* Check for the driver to query and then query it */
     if (driver->query)
@@ -2193,8 +2193,8 @@ H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(H5F_addr_defined(addr_1));
-    HDassert(H5F_addr_defined(addr_2));
+    assert(H5F_addr_defined(addr_1));
+    assert(H5F_addr_defined(addr_2));
 
     /* Compare the addresses */
     if (H5F_addr_gt(addr_1, addr_2))
@@ -2219,27 +2219,27 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
 
     /* Sanity checks */
 
-    HDassert(vector_was_sorted);
+    assert(vector_was_sorted);
 
-    HDassert((types) || (count == 0));
-    HDassert((addrs) || (count == 0));
-    HDassert((sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert((types) || (count == 0));
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* verify that the first elements of the sizes and types arrays are
      * valid.
      */
-    HDassert((count == 0) || (sizes[0] != 0));
-    HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+    assert((count == 0) || (sizes[0] != 0));
+    assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
-    HDassert((count == 0) || ((s_types_ptr) && (NULL == *s_types_ptr)));
-    HDassert((count == 0) || ((s_addrs_ptr) && (NULL == *s_addrs_ptr)));
-    HDassert((count == 0) || ((s_sizes_ptr) && (NULL == *s_sizes_ptr)));
-    HDassert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
+    assert((count == 0) || ((s_types_ptr) && (NULL == *s_types_ptr)));
+    assert((count == 0) || ((s_addrs_ptr) && (NULL == *s_addrs_ptr)));
+    assert((count == 0) || ((s_sizes_ptr) && (NULL == *s_sizes_ptr)));
+    assert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
 
     /* scan the addrs array to see if it is sorted */
     for (i = 1; i < count; i++) {
-        HDassert(H5F_addr_defined(addrs[i - 1]));
+        assert(H5F_addr_defined(addrs[i - 1]));
 
         if (H5F_addr_gt(addrs[i - 1], addrs[i]))
             break;
@@ -2282,7 +2282,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
 
         srt_tmp_size = (count * sizeof(struct H5FD_vsrt_tmp_t));
 
-        if (NULL == (srt_tmp = (H5FD_vsrt_tmp_t *)HDmalloc(srt_tmp_size)))
+        if (NULL == (srt_tmp = (H5FD_vsrt_tmp_t *)malloc(srt_tmp_size)))
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
 
@@ -2298,23 +2298,23 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
         i = 1;
 
         for (i = 1; i < count; i++) {
-            HDassert(H5F_addr_lt(srt_tmp[i - 1].addr, srt_tmp[i].addr));
+            assert(H5F_addr_lt(srt_tmp[i - 1].addr, srt_tmp[i].addr));
 
             if (H5F_addr_eq(addrs[i - 1], addrs[i]))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
         }
 
-        if ((NULL == (*s_types_ptr = (H5FD_mem_t *)HDmalloc(count * sizeof(H5FD_mem_t)))) ||
-            (NULL == (*s_addrs_ptr = (haddr_t *)HDmalloc(count * sizeof(haddr_t)))) ||
-            (NULL == (*s_sizes_ptr = (size_t *)HDmalloc(count * sizeof(size_t)))) ||
+        if ((NULL == (*s_types_ptr = (H5FD_mem_t *)malloc(count * sizeof(H5FD_mem_t)))) ||
+            (NULL == (*s_addrs_ptr = (haddr_t *)malloc(count * sizeof(haddr_t)))) ||
+            (NULL == (*s_sizes_ptr = (size_t *)malloc(count * sizeof(size_t)))) ||
             (NULL ==
-             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)HDmalloc(count * sizeof(H5_flexible_const_ptr_t))))) {
+             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t))))) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted vector(s)")
         }
 
-        HDassert(sizes[0] != 0);
-        HDassert(types[0] != H5FD_MEM_NOLIST);
+        assert(sizes[0] != 0);
+        assert(types[0] != H5FD_MEM_NOLIST);
 
         /* Scan the sizes and types vectors to determine if the fixed size / type
          * optimization is in use, and if so, to determine the index of the last
@@ -2329,8 +2329,8 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
                 fixed_type_index = i - 1;
         }
 
-        HDassert(fixed_size_index <= count);
-        HDassert(fixed_type_index <= count);
+        assert(fixed_size_index <= count);
+        assert(fixed_type_index <= count);
 
         /* Populate the sorted vectors.  Note that the index stored in srt_tmp
          * refers to the index in the unsorted array, while the position of
@@ -2349,7 +2349,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
 done:
     if (srt_tmp) {
 
-        HDfree(srt_tmp);
+        free(srt_tmp);
         srt_tmp = NULL;
     }
 
@@ -2364,25 +2364,25 @@ done:
         /* free space allocated for sorted vectors */
         if (*s_types_ptr) {
 
-            HDfree(*s_types_ptr);
+            free(*s_types_ptr);
             *s_types_ptr = NULL;
         }
 
         if (*s_addrs_ptr) {
 
-            HDfree(*s_addrs_ptr);
+            free(*s_addrs_ptr);
             *s_addrs_ptr = NULL;
         }
 
         if (*s_sizes_ptr) {
 
-            HDfree(*s_sizes_ptr);
+            free(*s_sizes_ptr);
             *s_sizes_ptr = NULL;
         }
 
         if (*s_bufs_ptr) {
 
-            HDfree(*s_bufs_ptr);
+            free(*s_bufs_ptr);
             *s_bufs_ptr = NULL;
         }
     }
@@ -2412,7 +2412,7 @@ H5FD_delete(const char *filename, hid_t fapl_id)
 
     /* Sanity checks */
 
-    HDassert(filename);
+    assert(filename);
 
     /* Get file access property list */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -2461,9 +2461,9 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, hbool_t *
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
-    HDassert(cls);
-    HDassert(key);
-    HDassert(success);
+    assert(cls);
+    assert(key);
+    assert(success);
 
     /* Which kind of key are we looking for? */
     if (key->vfd.kind == H5FD_GET_DRIVER_BY_NAME) {
@@ -2473,7 +2473,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, hbool_t *
     }
     else {
         /* Sanity check */
-        HDassert(key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
+        assert(key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
 
         /* Check if plugin value matches VFD class value */
         if (cls->value == key->vfd.u.value)
@@ -2510,7 +2510,7 @@ H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data)
         } /* end if */
     }     /* end if */
     else {
-        HDassert(H5FD_GET_DRIVER_BY_VALUE == op_data->key.kind);
+        assert(H5FD_GET_DRIVER_BY_VALUE == op_data->key.kind);
         if (cls->value == op_data->key.u.value) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
@@ -2548,7 +2548,7 @@ H5FD_register_driver_by_name(const char *name, hbool_t app_ref)
 
     /* If driver is already registered, increment ref count on ID and return ID */
     if (driver_is_registered) {
-        HDassert(driver_id >= 0);
+        assert(driver_id >= 0);
 
         if (H5I_inc_ref(driver_id, app_ref) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFD")
@@ -2602,7 +2602,7 @@ H5FD_register_driver_by_value(H5FD_class_value_t value, hbool_t app_ref)
 
     /* If driver is already registered, increment ref count on ID and return ID */
     if (driver_is_registered) {
-        HDassert(driver_id >= 0);
+        assert(driver_id >= 0);
 
         if (H5I_inc_ref(driver_id, app_ref) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFD")

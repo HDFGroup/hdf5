@@ -58,8 +58,8 @@ free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op
 {
     ref_path_node_t *node = (ref_path_node_t *)item;
 
-    HDfree(node->path);
-    HDfree(node);
+    free(node->path);
+    free(node);
 
     return (0);
 }
@@ -112,7 +112,7 @@ ref_path_table_cmp(const void *key1, const void *key2)
     if (thefile > 0)
         H5Otoken_cmp(thefile, token1, token2, &cmp_value);
     else
-        cmp_value = HDmemcmp(token1, token2, sizeof(H5O_token_t));
+        cmp_value = memcmp(token1, token2, sizeof(H5O_token_t));
 
     return cmp_value;
 }
@@ -211,7 +211,7 @@ ref_path_table_lookup(const char *thepath, H5O_token_t *token)
         return -1;
 
     /* Return object token through parameter */
-    HDmemcpy(token, &oi.token, sizeof(H5O_token_t));
+    memcpy(token, &oi.token, sizeof(H5O_token_t));
 
     return 0;
 }
@@ -239,10 +239,10 @@ ref_path_table_put(const char *path, const H5O_token_t *token)
     ref_path_node_t *new_node;
 
     if (ref_path_table && path) {
-        if ((new_node = (ref_path_node_t *)HDmalloc(sizeof(ref_path_node_t))) == NULL)
+        if ((new_node = (ref_path_node_t *)malloc(sizeof(ref_path_node_t))) == NULL)
             return (-1);
 
-        HDmemcpy(&new_node->obj_token, token, sizeof(H5O_token_t));
+        memcpy(&new_node->obj_token, token, sizeof(H5O_token_t));
         new_node->path = HDstrdup(path);
 
         return (H5SL_insert(ref_path_table, new_node, &(new_node->obj_token)));

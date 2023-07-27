@@ -85,20 +85,20 @@ main(int argc, char *argv[])
         else if (strcmp(argv[i], "-z") == 0)
             z = 1;
         else if (strcmp(argv[i], "-h") == 0) {
-            HDprintf("\nOPTONS:\n");
-            HDprintf("\t-f F:\tname of the test file (default: %s).\n", FNAME);
-            HDprintf("\t-g N:\tnumber of top level groups (default: %d).\n", NGROUPS);
-            HDprintf("\t-d N:\tnumber of datasets (default: %d).\n", NDSETS);
-            HDprintf("\t-a N:\tnumber of attributes (default: %d).\n", NATTRS);
-            HDprintf("\t-r N:\tnumber of rows in the large compound dataset (default: %d).\n", NROWS);
-            HDprintf("\t-s N:\tsize of dim0 in datasets (default: %d).\n", DIM0);
-            HDprintf("\t-c N:\tchunk size of dim0 (default: %d).\n", (DIM0 / 10 + 1));
-            HDprintf("\t-v N:\tmax vlen size (default: %d).\n", MAXVLEN);
-            HDprintf("\t-l:\tuse latest format (default: no).\n");
-            HDprintf("\t-z:\tuse gzip compression (default: no).\n");
-            HDprintf("\t-h:\tthis help information.\n");
-            HDprintf("Example:\n");
-            HDprintf("\t./a.out -f test.h5 -g 10000 -d 5000 -a 500 -r 10000 -s 200 -c 20 -v 40 -l -z\n\n");
+            printf("\nOPTONS:\n");
+            printf("\t-f F:\tname of the test file (default: %s).\n", FNAME);
+            printf("\t-g N:\tnumber of top level groups (default: %d).\n", NGROUPS);
+            printf("\t-d N:\tnumber of datasets (default: %d).\n", NDSETS);
+            printf("\t-a N:\tnumber of attributes (default: %d).\n", NATTRS);
+            printf("\t-r N:\tnumber of rows in the large compound dataset (default: %d).\n", NROWS);
+            printf("\t-s N:\tsize of dim0 in datasets (default: %d).\n", DIM0);
+            printf("\t-c N:\tchunk size of dim0 (default: %d).\n", (DIM0 / 10 + 1));
+            printf("\t-v N:\tmax vlen size (default: %d).\n", MAXVLEN);
+            printf("\t-l:\tuse latest format (default: no).\n");
+            printf("\t-z:\tuse gzip compression (default: no).\n");
+            printf("\t-h:\tthis help information.\n");
+            printf("Example:\n");
+            printf("\t./a.out -f test.h5 -g 10000 -d 5000 -a 500 -r 10000 -s 200 -c 20 -v 40 -l -z\n\n");
             exit(0);
         }
     }

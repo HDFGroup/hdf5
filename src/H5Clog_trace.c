@@ -161,15 +161,15 @@ H5C__trace_write_log_message(H5C_log_trace_udata_t *trace_udata)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->outfile);
-    HDassert(trace_udata->message);
+    assert(trace_udata);
+    assert(trace_udata->outfile);
+    assert(trace_udata->message);
 
     /* Write the log message and flush */
     n_chars = HDstrlen(trace_udata->message);
-    if ((int)n_chars != HDfprintf(trace_udata->outfile, "%s", trace_udata->message))
+    if ((int)n_chars != fprintf(trace_udata->outfile, "%s", trace_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
-    HDmemset((void *)(trace_udata->message), 0, (size_t)(n_chars * sizeof(char)));
+    memset((void *)(trace_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -210,8 +210,8 @@ H5C_log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(log_info);
-    HDassert(log_location);
+    assert(log_info);
+    assert(log_location);
 
     /* Set up the class struct */
     log_info->cls = &H5C_trace_log_class_g;
@@ -244,12 +244,12 @@ H5C_log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
         HDsnprintf(file_name, n_chars, "%s.%d", log_location, mpi_rank);
 
     /* Open log file and set it to be unbuffered */
-    if (NULL == (trace_udata->outfile = HDfopen(file_name, "w")))
+    if (NULL == (trace_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file")
     HDsetbuf(trace_udata->outfile, NULL);
 
     /* Write the header */
-    HDfprintf(trace_udata->outfile, "### HDF5 metadata cache trace file version 1 ###\n");
+    fprintf(trace_udata->outfile, "### HDF5 metadata cache trace file version 1 ###\n");
 
 done:
     if (file_name)
@@ -292,7 +292,7 @@ H5C__trace_tear_down_logging(H5C_log_info_t *log_info)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(log_info);
+    assert(log_info);
 
     /* Alias */
     trace_udata = (H5C_log_trace_udata_t *)(log_info->udata);
@@ -337,8 +337,8 @@ H5C__trace_write_expunge_entry_log_msg(void *udata, haddr_t address, int type_id
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
+    assert(trace_udata);
+    assert(trace_udata->message);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_expunge_entry 0x%lx %d %d\n",
@@ -373,8 +373,8 @@ H5C__trace_write_flush_cache_log_msg(void *udata, herr_t fxn_ret_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
+    assert(trace_udata);
+    assert(trace_udata->message);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_flush %d\n", (int)fxn_ret_value);
@@ -409,8 +409,8 @@ H5C__trace_write_insert_entry_log_msg(void *udata, haddr_t address, int type_id,
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
+    assert(trace_udata);
+    assert(trace_udata->message);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_insert_entry 0x%lx %d 0x%x %d %d\n",
@@ -445,9 +445,9 @@ H5C__trace_write_mark_entry_dirty_log_msg(void *udata, const H5C_cache_entry_t *
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_mark_entry_dirty 0x%lx %d\n",
@@ -482,9 +482,9 @@ H5C__trace_write_mark_entry_clean_log_msg(void *udata, const H5C_cache_entry_t *
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_mark_entry_clean 0x%lx %d\n",
@@ -520,9 +520,9 @@ H5C__trace_write_mark_unserialized_entry_log_msg(void *udata, const H5C_cache_en
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_mark_entry_unserialized 0x%lx %d\n",
@@ -558,9 +558,9 @@ H5C__trace_write_mark_serialized_entry_log_msg(void *udata, const H5C_cache_entr
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_mark_entry_serialized 0x%lx %d\n",
@@ -596,8 +596,8 @@ H5C__trace_write_move_entry_log_msg(void *udata, haddr_t old_addr, haddr_t new_a
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
+    assert(trace_udata);
+    assert(trace_udata->message);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_move_entry 0x%lx 0x%lx %d %d\n",
@@ -632,9 +632,9 @@ H5C__trace_write_pin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_pin_protected_entry 0x%lx %d\n",
@@ -671,10 +671,10 @@ H5C__trace_write_create_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(parent);
-    HDassert(child);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(parent);
+    assert(child);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE,
@@ -711,9 +711,9 @@ H5C__trace_write_protect_entry_log_msg(void *udata, const H5C_cache_entry_t *ent
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_protect 0x%lx %d 0x%x %d %d\n",
@@ -749,9 +749,9 @@ H5C__trace_write_resize_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_resize_entry 0x%lx %d %d\n",
@@ -786,9 +786,9 @@ H5C__trace_write_unpin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_unpin_entry 0x%lx %d\n",
@@ -825,10 +825,10 @@ H5C__trace_write_destroy_fd_log_msg(void *udata, const H5C_cache_entry_t *parent
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(parent);
-    HDassert(child);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(parent);
+    assert(child);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE,
@@ -865,8 +865,8 @@ H5C__trace_write_unprotect_entry_log_msg(void *udata, haddr_t address, int type_
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
+    assert(trace_udata);
+    assert(trace_udata->message);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_unprotect 0x%lx %d 0x%x %d\n",
@@ -902,9 +902,9 @@ H5C__trace_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(config);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(config);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE,
@@ -951,9 +951,9 @@ H5C__trace_write_remove_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(trace_udata);
-    HDassert(trace_udata->message);
-    HDassert(entry);
+    assert(trace_udata);
+    assert(trace_udata->message);
+    assert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_remove_entry 0x%lx %d\n",

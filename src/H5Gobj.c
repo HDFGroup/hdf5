@@ -120,8 +120,8 @@ H5G__obj_create(H5F_t *f, H5G_obj_create_t *gcrt_info, H5O_loc_t *oloc /*out*/)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(oloc);
+    assert(f);
+    assert(oloc);
 
     /* Get the property list */
     if (NULL == (gc_plist = (H5P_genplist_t *)H5I_object(gcrt_info->gcpl_id)))
@@ -173,11 +173,11 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linf
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(ginfo);
-    HDassert(linfo);
-    HDassert(pline);
-    HDassert(oloc);
+    assert(f);
+    assert(ginfo);
+    assert(linfo);
+    assert(pline);
+    assert(oloc);
 
     /* Check for invalid access request */
     if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
@@ -207,14 +207,14 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linf
 
         /* Calculate message size information, for creating group's object header */
         linfo_size = H5O_msg_size_f(f, gcpl_id, H5O_LINFO_ID, linfo, (size_t)0);
-        HDassert(linfo_size);
+        assert(linfo_size);
 
         ginfo_size = H5O_msg_size_f(f, gcpl_id, H5O_GINFO_ID, ginfo, (size_t)0);
-        HDassert(ginfo_size);
+        assert(ginfo_size);
 
         if (pline && pline->nused) {
             pline_size = H5O_msg_size_f(f, gcpl_id, H5O_PLINE_ID, pline, (size_t)0);
-            HDassert(pline_size);
+            assert(pline_size);
         } /* end if */
 
         lnk.type         = H5L_TYPE_HARD;
@@ -223,7 +223,7 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linf
         lnk.cset         = H5T_CSET_ASCII;
         lnk.name         = &null_char;
         link_size        = H5O_msg_size_f(f, gcpl_id, H5O_LINK_ID, &lnk, (size_t)ginfo->est_name_len);
-        HDassert(link_size);
+        assert(link_size);
 
         /* Compute size of header to use for creation */
         hdr_size = linfo_size + ginfo_size + pline_size + (ginfo->est_num_entries * link_size);
@@ -296,8 +296,8 @@ H5G__obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo)
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
 
     /* check arguments */
-    HDassert(grp_oloc);
-    HDassert(linfo);
+    assert(grp_oloc);
+    assert(linfo);
 
     /* Check for the group having a link info message */
     if ((ret_value = H5O_msg_exists(grp_oloc, H5O_LINFO_ID)) < 0)
@@ -359,8 +359,8 @@ H5G__obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, voi
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(lnk);
-    HDassert(udata);
+    assert(lnk);
+    assert(udata);
 
     /* Insert link into dense link storage */
     if (H5G__dense_insert(udata->f, udata->linfo, lnk) < 0)
@@ -392,8 +392,8 @@ H5G__obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(lnk);
-    HDassert(udata);
+    assert(lnk);
+    assert(udata);
 
     /* Insert link into group */
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
@@ -436,9 +436,9 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL)
 
     /* check arguments */
-    HDassert(grp_oloc && grp_oloc->file);
-    HDassert(name && *name);
-    HDassert(obj_lnk);
+    assert(grp_oloc && grp_oloc->file);
+    assert(name && *name);
+    assert(obj_lnk);
 
     /* Check if we have information about the number of objects in this group */
     /* (by attempting to get the link info message for this group) */
@@ -631,8 +631,8 @@ H5G__obj_iterate(const H5O_loc_t *grp_oloc, H5_index_t idx_type, H5_iter_order_t
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
 
     /* Sanity check */
-    HDassert(grp_oloc);
-    HDassert(op);
+    assert(grp_oloc);
+    assert(op);
 
     /* Attempt to get the link info for this group */
     if ((linfo_exists = H5G__obj_get_linfo(grp_oloc, &linfo)) < 0)
@@ -702,8 +702,8 @@ H5G__obj_info(const H5O_loc_t *oloc, H5G_info_t *grp_info)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(oloc);
-    HDassert(grp_info);
+    assert(oloc);
+    assert(grp_info);
 
     /* Set up group location to fill in */
     grp_loc.oloc = &grp_oloc;
@@ -777,7 +777,7 @@ H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_orde
     FUNC_ENTER_NOAPI_TAG(oloc->addr, FAIL)
 
     /* Sanity check */
-    HDassert(oloc && oloc->file);
+    assert(oloc && oloc->file);
 
     /* Attempt to get the link info for this group */
     if ((linfo_exists = H5G__obj_get_linfo(oloc, &linfo)) < 0)
@@ -837,8 +837,8 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(oloc);
-    HDassert(linfo);
+    assert(oloc);
+    assert(linfo);
 
     /* Decrement # of links in group */
     linfo->nlinks--;
@@ -951,8 +951,8 @@ H5G_obj_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *n
     FUNC_ENTER_NOAPI_TAG(oloc->addr, FAIL)
 
     /* Sanity check */
-    HDassert(oloc);
-    HDassert(name && *name);
+    assert(oloc);
+    assert(name && *name);
 
     /* Attempt to get the link info for this group */
     if ((linfo_exists = H5G__obj_get_linfo(oloc, &linfo)) < 0)
@@ -1015,7 +1015,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(grp_oloc && grp_oloc->file);
+    assert(grp_oloc && grp_oloc->file);
 
     /* Attempt to get the link info for this group */
     if ((linfo_exists = H5G__obj_get_linfo(grp_oloc, &linfo)) < 0)
@@ -1087,8 +1087,8 @@ H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
 
     /* check arguments */
-    HDassert(grp_oloc && grp_oloc->file);
-    HDassert(name && *name);
+    assert(grp_oloc && grp_oloc->file);
+    assert(name && *name);
 
     /* Attempt to get the link info message for this group */
     if ((linfo_exists = H5G__obj_get_linfo(grp_oloc, &linfo)) < 0)
@@ -1139,7 +1139,7 @@ H5G_obj_lookup_by_idx(const H5O_loc_t *grp_oloc, H5_index_t idx_type, H5_iter_or
     FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL)
 
     /* check arguments */
-    HDassert(grp_oloc && grp_oloc->file);
+    assert(grp_oloc && grp_oloc->file);
 
     /* Attempt to get the link info message for this group */
     if ((linfo_exists = H5G__obj_get_linfo(grp_oloc, &linfo)) < 0)

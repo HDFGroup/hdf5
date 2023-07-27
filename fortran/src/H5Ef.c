@@ -84,7 +84,7 @@ h5eprint_c1(_fcd name, int_f *namelen)
 
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL)
-    if (NULL == (file = HDfopen(c_name, "a")))
+    if (NULL == (file = fopen(c_name, "a")))
         HGOTO_DONE(FAIL)
 
     /*
@@ -97,7 +97,7 @@ done:
     if (file)
         HDfclose(file);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -164,7 +164,7 @@ h5eget_major_c(int_f *error_no, _fcd name, size_t_f *namelen)
     int_f  ret_value = 0;
 
     if (c_namelen > 0)
-        c_name = (char *)HDmalloc(c_namelen + 1);
+        c_name = (char *)malloc(c_namelen + 1);
 
     if (!c_name)
         HGOTO_DONE(FAIL)
@@ -179,7 +179,7 @@ h5eget_major_c(int_f *error_no, _fcd name, size_t_f *namelen)
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -212,7 +212,7 @@ h5eget_minor_c(int_f *error_no, _fcd name, size_t_f *namelen)
     int_f  ret_value = 0;
 
     if (c_namelen > 0)
-        c_name = (char *)HDmalloc(c_namelen + 1);
+        c_name = (char *)malloc(c_namelen + 1);
 
     if (!c_name)
         HGOTO_DONE(FAIL)
@@ -227,7 +227,7 @@ h5eget_minor_c(int_f *error_no, _fcd name, size_t_f *namelen)
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }

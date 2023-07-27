@@ -45,13 +45,13 @@ unsigned release = H5_VERS_RELEASE;
 void
 showhelp(void)
 {
-    HDprintf("Usage: " progname " [-h] [-t<vers>]\n");
-    HDprintf("\t-h\tShow this page and version information\n");
-    HDprintf("\t-t<vers>: Test by changing (adding 1 to) the <vers> to trigger\n");
-    HDprintf("\t\t  the warning. <vers> can be:\n");
-    HDprintf("\t\t\tM for Major version number (%d)\n", H5_VERS_MAJOR);
-    HDprintf("\t\t\tm for Minor version number (%d)\n", H5_VERS_MINOR);
-    HDprintf("\t\t\tr for Release number (%d)\n", H5_VERS_RELEASE);
+    printf("Usage: " progname " [-h] [-t<vers>]\n");
+    printf("\t-h\tShow this page and version information\n");
+    printf("\t-t<vers>: Test by changing (adding 1 to) the <vers> to trigger\n");
+    printf("\t\t  the warning. <vers> can be:\n");
+    printf("\t\t\tM for Major version number (%d)\n", H5_VERS_MAJOR);
+    printf("\t\t\tm for Minor version number (%d)\n", H5_VERS_MINOR);
+    printf("\t\t\tr for Release number (%d)\n", H5_VERS_RELEASE);
 }
 
 void
@@ -62,8 +62,8 @@ parse(int ac, char **av)
     while (--ac > 0) {
         pt = *(++av);
         if (*pt != '-') {
-            HDfprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
-            HDexit(EXIT_FAILURE);
+            fprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
+            exit(EXIT_FAILURE);
         }
         else {
             switch (*(++pt)) {
@@ -79,16 +79,16 @@ parse(int ac, char **av)
                             release++;
                             break;
                         default:
-                            HDfprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
-                            HDexit(EXIT_FAILURE);
+                            fprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
+                            exit(EXIT_FAILURE);
                     }
                     break;
                 case 'h': /* help page */
                     showhelp();
-                    HDexit(EXIT_SUCCESS);
+                    exit(EXIT_SUCCESS);
                 default:
-                    HDfprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
-                    HDexit(EXIT_FAILURE);
+                    fprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
+                    exit(EXIT_FAILURE);
             }
         }
     }
@@ -106,7 +106,7 @@ parse(int ac, char **av)
 H5_ATTR_NORETURN void
 abort_intercept(int H5_ATTR_UNUSED sig)
 {
-    HDexit(6);
+    exit(6);
 }
 
 #ifdef H5_HAVE_WIN32_API

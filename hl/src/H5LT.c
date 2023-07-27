@@ -304,7 +304,7 @@ image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *
         if (udata->vfd_ref_count != 1)
             goto out;
 
-        if (NULL == (udata->vfd_image_ptr = HDrealloc(ptr, size)))
+        if (NULL == (udata->vfd_image_ptr = realloc(ptr, size)))
             goto out;
 
         udata->vfd_image_size = size;
@@ -356,7 +356,7 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
              * references */
             if (udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0 &&
                 !(udata->flags & H5LT_FILE_IMAGE_DONT_RELEASE)) {
-                HDfree(udata->fapl_image_ptr);
+                free(udata->fapl_image_ptr);
                 udata->app_image_ptr  = NULL;
                 udata->fapl_image_ptr = NULL;
                 udata->vfd_image_ptr  = NULL;
@@ -375,7 +375,7 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
              * references */
             if (udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0 &&
                 !(udata->flags & H5LT_FILE_IMAGE_DONT_RELEASE)) {
-                HDfree(udata->vfd_image_ptr);
+                free(udata->vfd_image_ptr);
                 udata->app_image_ptr  = NULL;
                 udata->fapl_image_ptr = NULL;
                 udata->vfd_image_ptr  = NULL;
@@ -463,7 +463,7 @@ udata_free(void *_udata)
 
     /* checks that there are no references outstanding before deallocating udata */
     if (udata->ref_count == 0 && udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0)
-        HDfree(udata);
+        free(udata);
 
     return (SUCCEED);
 
@@ -832,7 +832,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
         H5LT_file_image_ud_t *udata; /* Pointer to udata structure */
 
         /* Allocate buffer to communicate user data to callbacks */
-        if (NULL == (udata = (H5LT_file_image_ud_t *)HDmalloc(sizeof(H5LT_file_image_ud_t))))
+        if (NULL == (udata = (H5LT_file_image_ud_t *)malloc(sizeof(H5LT_file_image_ud_t))))
             goto out;
 
         /* Initialize udata with info about app buffer containing file image  and flags */
@@ -852,7 +852,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
 
         /* Set file image callbacks */
         if (H5Pset_file_image_callbacks(fapl, &callbacks) < 0) {
-            HDfree(udata);
+            free(udata);
             goto out;
         } /* end if */
     }     /* end if */
@@ -2021,7 +2021,7 @@ H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
         goto out;
 
     if (lang_type != H5LT_DDL) {
-        HDfprintf(stderr, "only DDL is supported for now.\n");
+        fprintf(stderr, "only DDL is supported for now.\n");
         goto out;
     }
 
@@ -2029,11 +2029,11 @@ H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
     myinput   = HDstrdup(text);
 
     if ((type_id = H5LTyyparse()) < 0) {
-        HDfree(myinput);
+        free(myinput);
         goto out;
     }
 
-    HDfree(myinput);
+    free(myinput);
     input_len = 0;
 
     return type_id;
@@ -2074,9 +2074,9 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
             *len += INCREMENT;
         }
 
-        tmp_realloc = (char *)HDrealloc(buf, *len);
+        tmp_realloc = (char *)realloc(buf, *len);
         if (tmp_realloc == NULL) {
-            HDfree(buf);
+            free(buf);
             buf = NULL;
             goto out;
         }
@@ -2131,7 +2131,7 @@ indentation(size_t x, char *str, hbool_t no_u_buf, size_t *s_len)
     char tmp_str[TMP_LEN];
 
     if (x < 80) {
-        HDmemset(tmp_str, ' ', x);
+        memset(tmp_str, ' ', x);
         tmp_str[x] = '\0';
     }
     else
@@ -2191,8 +2191,8 @@ print_enum(hid_t type, char *str, size_t *str_len, hbool_t no_ubuf, size_t indt)
     dst_size   = H5Tget_size(native);
 
     /* Get the names and raw values of all members */
-    name  = (char **)HDcalloc((size_t)nmembs, sizeof(char *));
-    value = (unsigned char *)HDcalloc((size_t)nmembs, MAX(dst_size, super_size));
+    name  = (char **)calloc((size_t)nmembs, sizeof(char *));
+    value = (unsigned char *)calloc((size_t)nmembs, MAX(dst_size, super_size));
 
     for (i = 0; i < nmembs; i++) {
         if ((name[i] = H5Tget_member_name(type, (unsigned)i)) == NULL)
@@ -2219,7 +2219,7 @@ print_enum(hid_t type, char *str, size_t *str_len, hbool_t no_ubuf, size_t indt)
         nchars = HDsnprintf(tmp_str, TMP_LEN, "\"%s\"", name[i]);
         if (!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
-        HDmemset(tmp_str, ' ', (size_t)MAX(3, 19 - nchars) + 1);
+        memset(tmp_str, ' ', (size_t)MAX(3, 19 - nchars) + 1);
         tmp_str[MAX(3, 19 - nchars)] = '\0';
         if (!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
@@ -2240,8 +2240,8 @@ print_enum(hid_t type, char *str, size_t *str_len, hbool_t no_ubuf, size_t indt)
     for (i = 0; i < nmembs; i++)
         H5free_memory(name[i]);
 
-    HDfree(name);
-    HDfree(value);
+    free(name);
+    free(value);
     H5Tclose(super);
 
     return str;
@@ -2250,8 +2250,8 @@ out:
 
     if (0 == nmembs) {
         str = realloc_and_append(no_ubuf, str_len, str, "\n");
-        HDassert((indt + 4) < TMP_LEN);
-        HDmemset(tmp_str, ' ', (indt + 4) + 1);
+        assert((indt + 4) < TMP_LEN);
+        memset(tmp_str, ' ', (indt + 4) + 1);
         tmp_str[(indt + 4)] = '\0';
         str                 = realloc_and_append(no_ubuf, str_len, str, tmp_str);
         str                 = realloc_and_append(no_ubuf, str_len, str, " <empty>");
@@ -2261,12 +2261,12 @@ out:
     if (name) {
         for (i = 0; i < nmembs; i++)
             if (name[i])
-                HDfree(name[i]);
-        HDfree(name);
+                free(name[i]);
+        free(name);
     } /* end if */
 
     if (value)
-        HDfree(value);
+        free(value);
 
     if (super >= 0)
         H5Tclose(super);
@@ -2300,13 +2300,13 @@ H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
         goto out;
 
     if (len && !str) {
-        text_str    = (char *)HDcalloc(str_len, sizeof(char));
+        text_str    = (char *)calloc(str_len, sizeof(char));
         text_str[0] = '\0';
         if (!(text_str = H5LT_dtype_to_text(dtype, text_str, lang_type, &str_len, 1)))
             goto out;
         *len = HDstrlen(text_str) + 1;
         if (text_str)
-            HDfree(text_str);
+            free(text_str);
         text_str = NULL;
     }
     else if (len && str) {
@@ -2318,7 +2318,7 @@ H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
     return ret;
 
 out:
-    HDfree(text_str);
+    free(text_str);
 
     return FAIL;
 }
@@ -2694,18 +2694,18 @@ next:
                 goto out;
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
-            stmp = (char *)HDcalloc(super_len, sizeof(char));
+            stmp = (char *)calloc(super_len, sizeof(char));
             if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
 
             if (stmp)
-                HDfree(stmp);
+                free(stmp);
             stmp = NULL;
 
             HDsnprintf(tmp_str, TMP_LEN, ";\n");
@@ -2741,18 +2741,18 @@ next:
                 goto out;
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
-            stmp = (char *)HDcalloc(super_len, sizeof(char));
+            stmp = (char *)calloc(super_len, sizeof(char));
             if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
 
             if (stmp)
-                HDfree(stmp);
+                free(stmp);
             stmp = NULL;
             HDsnprintf(tmp_str, TMP_LEN, "\n");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
@@ -2802,17 +2802,17 @@ next:
                 goto out;
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
-            stmp = (char *)HDcalloc(super_len, sizeof(char));
+            stmp = (char *)calloc(super_len, sizeof(char));
             if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
             if (stmp)
-                HDfree(stmp);
+                free(stmp);
             stmp = NULL;
             HDsnprintf(tmp_str, TMP_LEN, "\n");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
@@ -2860,17 +2860,17 @@ next:
 
                 if (H5LTdtype_to_text(mtype, NULL, lang, &mlen) < 0)
                     goto out;
-                mtmp = (char *)HDcalloc(mlen, sizeof(char));
+                mtmp = (char *)calloc(mlen, sizeof(char));
                 if (H5LTdtype_to_text(mtype, mtmp, lang, &mlen) < 0) {
-                    HDfree(mtmp);
+                    free(mtmp);
                     goto out;
                 }
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, mtmp))) {
-                    HDfree(mtmp);
+                    free(mtmp);
                     goto out;
                 }
                 if (mtmp)
-                    HDfree(mtmp);
+                    free(mtmp);
                 mtmp = NULL;
 
                 if (H5T_COMPOUND == mclass)
@@ -3611,7 +3611,7 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
 
 done:
     if (tmp_path != NULL)
-        HDfree(tmp_path);
+        free(tmp_path);
 
     return ret_value;
 }

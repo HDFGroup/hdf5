@@ -144,11 +144,11 @@ parse_command_line(int argc, const char *const *argv)
             case 'i':
                 increment_eoa_eof = TRUE;
                 if (H5_optarg != NULL) {
-                    if (HDatoi(H5_optarg) < 0) {
+                    if (atoi(H5_optarg) < 0) {
                         usage(h5tools_getprogname());
                         goto done;
                     }
-                    increment = (hsize_t)HDatoi(H5_optarg);
+                    increment = (hsize_t)atoi(H5_optarg);
                 }
                 break;
 
@@ -189,7 +189,7 @@ static void
 leave(int ret)
 {
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 } /* leave() */
 
 /*-------------------------------------------------------------------------
@@ -325,7 +325,7 @@ main(int argc, char *argv[])
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        HDfprintf(stdout, "EOA is %" PRIuHADDR "; EOF is %" PRIuHADDR " \n", eoa, (haddr_t)st.st_size);
+        fprintf(stdout, "EOA is %" PRIuHADDR "; EOF is %" PRIuHADDR " \n", eoa, (haddr_t)st.st_size);
     }
 
     /* --increment option */
@@ -353,9 +353,9 @@ main(int argc, char *argv[])
 
 done:
     if (fname)
-        HDfree(fname);
+        free(fname);
     if (fname_g)
-        HDfree(fname_g);
+        free(fname_g);
 
     H5E_BEGIN_TRY
     {

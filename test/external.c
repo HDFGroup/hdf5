@@ -53,8 +53,8 @@ files_have_same_contents(const char *name1, const char *name2)
 
     /* Loop until files are empty or we encounter a problem */
     while (1) {
-        HDmemset(buf1, 0, sizeof(buf1));
-        HDmemset(buf2, 0, sizeof(buf2));
+        memset(buf1, 0, sizeof(buf1));
+        memset(buf2, 0, sizeof(buf2));
 
         n1 = HDread(fd1, buf1, sizeof(buf1));
         if (n1 < 0 || (size_t)n1 > sizeof(buf1))
@@ -71,7 +71,7 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
         }
 
-        if (HDmemcmp(buf1, buf2, (size_t)n1) != 0)
+        if (memcmp(buf1, buf2, (size_t)n1) != 0)
             break;
 
     } /* end while */
@@ -149,7 +149,7 @@ test_non_extendible(hid_t file)
     if (1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        HDprintf("   got: %d\n    ans: 1\n", n);
+        printf("   got: %d\n    ans: 1\n", n);
         goto error;
     }
 
@@ -159,13 +159,13 @@ test_non_extendible(hid_t file)
     if (file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
+        printf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
         goto error;
     }
 
@@ -418,7 +418,7 @@ test_unlimited(hid_t file)
     if (1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        HDprintf("    got: %d\n    ans: 1\n", n);
+        printf("    got: %d\n    ans: 1\n", n);
         goto error;
     } /* end if */
 
@@ -427,13 +427,13 @@ test_unlimited(hid_t file)
     if (file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (H5F_UNLIMITED != file_size) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
+        printf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
         goto error;
     }
 
@@ -482,13 +482,13 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
     }
     for (i = 0; i < n_external_files; i++) {
         if (HDsnprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
-            HDfprintf(stderr, "External file %d overflows name buffer\n", i + 1);
-            HDfflush(stderr);
+            fprintf(stderr, "External file %d overflows name buffer\n", i + 1);
+            fflush(stderr);
             return -1;
         }
         if (H5Pset_external(dcpl_id, exname, offset, max_ext_size) < 0) {
-            HDfprintf(stderr, "Problem adding external file %s\n", exname);
-            HDfflush(stderr);
+            fprintf(stderr, "Problem adding external file %s\n", exname);
+            fflush(stderr);
             return -1;
         }
     }
@@ -756,7 +756,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -774,7 +774,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, hs_space, hs_space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -1004,7 +1004,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1094,7 +1094,7 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1218,7 +1218,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1255,7 +1255,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1362,7 +1362,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_STACK_ERROR;
 
     /* Check the value for the external prefix */
-    if ((buffer = (char *)HDcalloc((size_t)64, sizeof(char))) == NULL)
+    if ((buffer = (char *)calloc((size_t)64, sizeof(char))) == NULL)
         TEST_ERROR;
     if (H5Pget_efile_prefix(dapl_id, buffer, (size_t)64) < 0)
         FAIL_STACK_ERROR;
@@ -1370,7 +1370,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_PUTS_ERROR("external file prefix from dapl incorrect");
 
     /* Close everything */
-    HDfree(buffer);
+    free(buffer);
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
@@ -1387,7 +1387,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
 
 error:
     if (buffer)
-        HDfree(buffer);
+        free(buffer);
     H5E_BEGIN_TRY
     {
         H5Dclose(did);
@@ -1527,6 +1527,6 @@ error:
     }
     H5E_END_TRY;
     nerrors = MAX(1, nerrors);
-    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */

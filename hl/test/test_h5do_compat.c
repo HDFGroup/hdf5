@@ -192,7 +192,7 @@ test_direct_chunk_read(hid_t did)
             TEST_ERROR;
 
         /* Read the raw chunk back */
-        HDmemset(chunk_data, 0, CHUNK_NX * sizeof(int));
+        memset(chunk_data, 0, CHUNK_NX * sizeof(int));
         filter_mask = UINT_MAX;
         offset[0]   = (hsize_t)i * CHUNK_NX;
         if (H5DOread_chunk(did, H5P_DEFAULT, offset, &filter_mask, chunk_data) < 0)
