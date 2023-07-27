@@ -10,11 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Mike McGreevy
- *              January 25, 2010
- *
+/*
  *              This file contains tests for metadata tagging.
  */
+
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
 #define H5F_TESTING
 #include "H5Fpkg.h"
@@ -108,9 +107,6 @@ static unsigned check_invalid_tag_application(void);
  *
  * Return:      void
  *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -143,9 +139,6 @@ error:
  *              in the cache.
  *
  * Return:      0 on Success, -1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -192,9 +185,6 @@ error:
  *
  * Return:      0 on Success, -1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -236,9 +226,6 @@ error:
  *              to the same state as just after a flush call.
  *
  * Return:      0 on Success, -1 on Failure
- *
- * Programmer:  Quincey Koziol
- *              July 13, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -283,9 +270,6 @@ error:
  *              checked.
  *
  * Return:      0 on Success, -1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -370,9 +354,6 @@ error:
  *
  * Return:      0 on Success; 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -402,9 +383,6 @@ error:
  *
  * Return:      0 on Success; 1 on Failure
  *
- * Programmer:  Quincey Koziol
- *              July 10, 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -431,9 +409,6 @@ error:
  *              during file creation.
  *
  * Return:      0 on Success; 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -535,9 +510,6 @@ error:
  *              during file open.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -665,9 +637,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -787,9 +756,6 @@ error:
  *              during multiple group creation.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -939,9 +905,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1078,9 +1041,6 @@ error:
  *              during various dense attribute manipulations.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1312,9 +1272,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1440,9 +1397,6 @@ error:
  *              during attribute creation.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1605,9 +1559,6 @@ error:
  *              during attribute open.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1772,9 +1723,6 @@ error:
  *              during attribute renaming.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1986,9 +1934,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2178,9 +2123,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2337,9 +2279,6 @@ error:
  *              during dataset creation.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2504,9 +2443,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2655,9 +2591,6 @@ error:
  *              during dataset write.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2821,9 +2754,6 @@ error:
  *              during attribute write.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3009,9 +2939,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3170,9 +3097,6 @@ error:
  *              during dataset size retrieval.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3333,9 +3257,6 @@ error:
  *              during dataset extension.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3498,9 +3419,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3632,9 +3550,6 @@ error:
  *              during object copy.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3780,9 +3695,6 @@ error:
  *              during link removal.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -3969,9 +3881,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4148,9 +4057,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4272,9 +4178,6 @@ error:
  *              during external link open.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -4446,9 +4349,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              May 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4553,9 +4453,6 @@ error:
  * Purpose:     Run tests on library's ability to tag metadata entries.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Mike McGreevy
- *              January 15, 2009
  *
  *-------------------------------------------------------------------------
  */

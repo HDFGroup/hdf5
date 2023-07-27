@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAint.c
- *			Jun 17 2008
- *			Quincey Koziol
  *
  * Purpose:		Internal routines for extnsible arrays.
  *
@@ -73,9 +71,6 @@
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar 26 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -103,9 +98,6 @@ done:
  * Purpose:	Destroy a flush dependency between two data structure components
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 26 2009
  *
  *-------------------------------------------------------------------------
  */

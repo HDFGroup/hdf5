@@ -25,10 +25,6 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -129,10 +125,6 @@ done:
  * Purpose: Call H5TBmake_table using F2003 features
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: Sept. 10, 2015
  *
  * Comments:
  *
@@ -235,10 +227,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: Sept. 14, 2015
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -295,10 +283,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -342,10 +326,6 @@ done:
  * Purpose: Call H5TBread_fields_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
  *
  * Comments:
  *
@@ -391,10 +371,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -435,10 +411,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -478,10 +450,6 @@ done:
  * Purpose: Call H5TBinsert_field
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 13, 2004
  *
  * Comments:
  *
@@ -526,10 +494,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 13, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -571,10 +535,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 12, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -615,10 +575,6 @@ done:
  * Purpose: Call H5TBget_field_info
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 13, 2004
  *
  * Comments:
  *

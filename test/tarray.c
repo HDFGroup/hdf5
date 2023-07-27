@@ -2236,9 +2236,6 @@ test_array(void)
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              June 8, 1999
- *
  *-------------------------------------------------------------------------
  */
 void

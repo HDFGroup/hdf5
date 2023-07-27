@@ -373,9 +373,6 @@ H5FL_EXTERN(H5S_sel_iter_t);
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *              30 July 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -481,9 +478,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              14 February 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -575,9 +569,6 @@ done:
  * Purpose:     Internal routine to read the storage size of a chunk on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              20 October 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -723,9 +714,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -758,9 +746,6 @@ done:
  * Purpose:     Sets chunk and type sizes.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:    Dana Robinson
- *              December 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -823,9 +808,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Thursday, May 22, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -887,9 +869,6 @@ done:
  *        called when the dataset is initialized.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Monday, May 18, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -991,9 +970,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1021,9 +997,6 @@ H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, March 6, 2016
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1043,9 +1016,6 @@ H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
  * Purpose:    Performs initialization before any sort of I/O on the raw data
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1148,9 +1118,6 @@ done:
  * Purpose:        Initialize the chunk mappings
  *
  * Return:        Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1366,9 +1333,6 @@ done:
  *
  * Return:    Pointer to memory for chunk on success/NULL on failure
  *
- * Programmer:    Quincey Koziol
- *              April 22, 2004
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1397,9 +1361,6 @@ H5D__chunk_mem_alloc(size_t size, void *pline)
  *              and uses malloc()/free() for filtered chunks.
  *
  * Return:    NULL (never fails)
- *
- * Programmer:    Quincey Koziol
- *              April 22, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1441,9 +1402,6 @@ H5D__chunk_mem_free(void *chk, void *pline)
  *              and uses malloc()/free() for filtered chunks.
  *
  * Return:      Pointer to memory for chunk on success/NULL on failure
- *
- * Programmer:  Neil Fortner
- *              May 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1519,7 +1477,6 @@ H5D__free_piece_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Jonathan Kim Nov, 2013
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1605,9 +1562,6 @@ done:
  * Purpose:    Create all chunk selections in file, for an "all" selection.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Monday, January 21, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1818,7 +1772,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Jonathan Kim  Nov, 2013
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2000,8 +1953,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Jonathan Kim  Nov, 2013
- *
  * Assumptions: That the file and memory selections are the same shape.
  *-------------------------------------------------------------------------
  */
@@ -2133,9 +2084,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Vailin Choi
- *                Sept 18, 2019
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2217,8 +2165,6 @@ done:
  *              creating selections in file for each point selected.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jonathan Kim  Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2343,8 +2289,6 @@ done:
  *              work.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Jonathan Kim  Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2480,9 +2424,6 @@ done:
  *
  * Return:    TRUE or FALSE
  *
- * Programmer:    Raymond Lu
- *        17 July 2007
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2572,9 +2513,6 @@ done:
  *
  * Return:    TRUE or FALSE
  *
- * Programmer:    Neil Fortner
- *        4 May 2021
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2642,9 +2580,6 @@ done:
  * Purpose:    Read from a chunked dataset.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Thursday, April 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2962,9 +2897,6 @@ done:
  * Purpose:    Writes to a chunked dataset.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *        Thursday, April 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -3361,9 +3293,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Thursday, May 21, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3398,8 +3327,6 @@ done:
  * Purpose:    Destroy I/O operation information.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Jonathan Kim  Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -3462,9 +3389,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Thursday, May 21, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3520,9 +3444,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3552,9 +3473,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              November 27, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3577,9 +3495,6 @@ H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last)
  * Purpose:    Update the cached chunk info
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              November 27, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -3613,9 +3528,6 @@ H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *ud
  * Purpose:    Look for chunk info in cache
  *
  * Return:    TRUE/FALSE/FAIL
- *
- * Programmer:    Quincey Koziol
- *              November 27, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -3665,9 +3577,6 @@ done:
  * Return:    Non-negative on success (with the layout information initialized
  *        and ready to write to an object header). Negative on failure.
  *
- * Programmer:    Quincey Koziol
- *        Thursday, May 22, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3716,8 +3625,6 @@ done:
  *
  * Return:    Hash value index
  *
- * Programmer:    Vailin Choi; Nov 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3756,9 +3663,6 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
  *              information about that chunk.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Albert Cheng
- *              June 27, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -3911,9 +3815,6 @@ done:
  *        memory copy.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4103,9 +4004,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Thursday, May 21, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4182,9 +4080,6 @@ H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t flush)
  *        entries are considered for preemption.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4303,9 +4198,6 @@ done:
  * Return:    Success:    Ptr to a file chunk.
  *
  *        Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4712,9 +4604,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Thursday, May 21, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4817,9 +4706,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 21, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4842,9 +4728,6 @@ H5D__chunk_allocated_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  *
  * Return:    Success:    Number of bytes stored in all chunks.
  *        Failure:    0
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -4896,9 +4779,6 @@ done:
  *        FAIL.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Albert Cheng
- *        June 26, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5373,9 +5253,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              April 14, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5551,9 +5428,6 @@ done:
  *              otherwise use independent I/O).
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Mohamad Chaarawi
- *         July 30, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -5828,9 +5702,6 @@ H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2)
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Pedro Vicente
- *              March 26, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5949,10 +5820,6 @@ done:
  *              both in the raw data cache and in the chunk index.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Pedro Vicente
- * Algorithm:    Robb Matzke
- *         March 27, 2002
  *
  * The algorithm is:
  *
@@ -6388,9 +6255,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Kent Yang
- *              Tuesday, November 15, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6418,9 +6282,6 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  *
  * Return:    Success:    Non-negative on succeed.
  *        Failure:    negative value
- *
- * Programmer:  Kent Yang
- *              November 15, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -6468,9 +6329,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    negative
- *
- * Programmer:    Quincey Koziol
- *              Thursday, March 20, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6545,9 +6403,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    negative
- *
- * Programmer:    Quincey Koziol
- *              Saturday, May 29, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -6656,9 +6511,6 @@ done:
  *              index in the destination file
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              August 20, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -6904,9 +6756,6 @@ done:
  *
  * Return:    Success:    Non-negative
  *        Failure:    negative
- *
- * Programmer:  Peter Cao
- *            August 20, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7188,9 +7037,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi
- *              June 8, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7267,9 +7113,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 21, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7311,9 +7154,6 @@ H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  *
  * Return:    Success:    Non-negative
  *        Failure:    negative
- *
- * Programmer:    Robb Matzke
- *              Wednesday, April 28, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -7370,9 +7210,6 @@ done:
  *        otherwise assume that the H5AC layer has already printed them.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -7439,9 +7276,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        30 Sep 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -7488,9 +7322,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        6 Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static ssize_t
@@ -7536,9 +7367,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              19 Nov 2009
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -7574,8 +7402,6 @@ done:
  *          The coding is moved and modified from each index structure.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; June 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -7706,9 +7532,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Vailin Choi
- *              Feb 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7803,9 +7626,6 @@ done:
  *        the chunk addresses into v1 B-tree chunk index via callback.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *              Feb 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -7928,9 +7748,6 @@ done:
  *
  * Return:      H5_ITER_CONT
  *
- * Programmer:  Binh-Minh Ribler
- *              June 2019 (HDFFV-10677)
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7958,9 +7775,6 @@ H5D__get_num_chunks_cb(const H5D_chunk_rec_t H5_ATTR_UNUSED *chunk_rec, void *_u
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Binh-Minh Ribler
- *              June 2019 (HDFFV-10677)
  *
  *-------------------------------------------------------------------------
  */
@@ -8020,9 +7834,6 @@ done:
  *                          H5_ITER_STOP indicates the queried chunk is found
  *              Failure:    Negative (H5_ITER_ERROR)
  *
- * Programmer:  Binh-Minh Ribler
- *              June 2019 (HDFFV-10677)
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -8070,9 +7881,6 @@ H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Binh-Minh Ribler
- *              June 2019 (HDFFV-10677)
  *
  *-------------------------------------------------------------------------
  */
@@ -8159,9 +7967,6 @@ done:
  * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
  *              Failure:    Negative (H5_ITER_ERROR)
  *
- * Programmer:  Binh-Minh Ribler
- *              June 2019 (HDFFV-10677)
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -8205,9 +8010,6 @@ H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Binh-Minh Ribler
- *              June 2019 (HDFFV-10677)
  *
  *-------------------------------------------------------------------------
  */
@@ -8298,9 +8100,6 @@ done:
  * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
  *              Failure:    Negative (H5_ITER_ERROR)
  *
- * Programmer:  Gaute Hope
- *              August 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -8333,9 +8132,6 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Gaute Hope
- *              August 2020
  *
  *-------------------------------------------------------------------------
  */

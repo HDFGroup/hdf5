@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Thursday, November 14, 2002
- *
  * Purpose:	    Create a dataset compressed with the deflate filter.
  *              This program is used to create the test file `tdeflate.h5'
  *              which has a dataset compressed with the "deflate" I/O filter.
@@ -37,9 +34,6 @@
  * Function:	main
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 14, 2002
  *
  *-------------------------------------------------------------------------
  */

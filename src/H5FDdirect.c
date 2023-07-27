@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  * Purpose:  The Direct I/O file driver forces the data to be written to
  *    the file directly without being copied into system kernel
  *    buffer.  The main system support this feature is Linux.
@@ -195,9 +192,6 @@ H5FL_DEFINE_STATIC(H5FD_direct_t);
  * Return:      Success:    The driver ID for the direct driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -237,9 +231,6 @@ done:
  *
  * Returns:     Non-negative on success or negative on failure
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -261,9 +252,6 @@ H5FD__direct_term(void)
  *    specific properties.
  *
  * Return:  Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *    Wednesday, 20 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -298,9 +286,6 @@ done:
  * Return:  Success:  Non-negative
  *
  *    Failure:  Negative
- *
- * Programmer:  Raymond Lu
- *              Wednesday, October 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -391,9 +376,6 @@ done:
  *
  *    Failure:  NULL
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 18 October 2006
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -418,9 +400,6 @@ H5FD__direct_fapl_get(H5FD_t *_file)
  * Return:  Success:  Ptr to a new property list
  *
  *    Failure:  NULL
- *
- * Programmer:  Raymond Lu
- *              Wednesday, 18 October 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -450,9 +429,6 @@ H5FD__direct_fapl_copy(const void *_old_fa)
  *        caller, which is always H5FD_open().
  *
  *    Failure:  NULL
- *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -616,9 +592,6 @@ done:
  *
  *    Failure:  -1, file not closed.
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -648,9 +621,6 @@ done:
  *
  *    Failure:  never fails (arguments were checked by the
  *        caller).
- *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -712,9 +682,6 @@ done:
  *
  *    Failure:  negative
  *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -747,9 +714,6 @@ H5FD__direct_query(const H5FD_t H5_ATTR_UNUSED *_f, unsigned long *flags /* out 
  *
  *    Failure:  HADDR_UNDEF
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -772,9 +736,6 @@ H5FD__direct_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Return:  Success:  0
  *
  *    Failure:  -1
- *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -803,9 +764,6 @@ H5FD__direct_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
  *
  *    Failure:  HADDR_UNDEF
  *
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -824,9 +782,6 @@ H5FD__direct_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Purpose:        Returns the file handle of direct file driver.
  *
  * Returns:        Non-negative if succeed or negative if fails.
- *
- * Programmer:     Raymond Lu
- *                 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -857,9 +812,6 @@ done:
  *        buffer BUF.
  *
  *    Failure:  -1, Contents of buffer BUF are undefined.
- *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1037,9 +989,6 @@ done:
  * Return:  Success:  Zero
  *
  *    Failure:  -1
- *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1266,9 +1215,6 @@ done:
  *
  *    Failure:  Negative
  *
- * Programmer:  Raymond Lu
- *              Thursday, 21 September 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1330,8 +1276,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1370,8 +1314,6 @@ done:
  * Purpose:     To remove the existing lock on the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */

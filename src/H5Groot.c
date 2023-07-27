@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Groot.c
- *			Apr  8 2009
- *			Neil Fortner
  *
  * Purpose:		Functions for operating on the root group.
  *
@@ -80,9 +78,6 @@
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *              Tuesday, October 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -123,9 +118,6 @@ H5G_rootof(H5F_t *f)
  *		opened.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -323,9 +315,6 @@ done:
  * Return:	Success:    Non-negative
  *		Failure:    Negative
  *
- * Programmer:	James Laird
- *		Tuesday, September 7, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -353,9 +342,6 @@ H5G_root_free(H5G_t *grp)
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Mar  5 2007
  *
  *-------------------------------------------------------------------------
  */

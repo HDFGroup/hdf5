@@ -76,9 +76,6 @@ H5FL_DEFINE_STATIC(H5FA_hdr_t);
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 H5FA_hdr_t *
@@ -122,9 +119,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sunday, November 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -160,9 +154,6 @@ done:
  *
  * Return:      Success:    Address of new header in the file
  *              Failure:    HADDR_UNDEF
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -258,9 +249,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -291,9 +279,6 @@ done:
  * Purpose:     Decrement component reference count on shared array header
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -329,9 +314,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -355,9 +337,6 @@ H5FA__hdr_fuse_incr(H5FA_hdr_t *hdr)
  *
  * Return:      Success:    The reference count of the header
  *              Failure:    Can't fail
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -388,9 +367,6 @@ H5FA__hdr_fuse_decr(H5FA_hdr_t *hdr)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -417,9 +393,6 @@ done:
  * Purpose:	Convenience wrapper around protecting fixed array header
  *
  * Return:	Non-NULL pointer to header on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Aug 12 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -476,9 +449,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 12 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -506,9 +476,6 @@ done:
  * Purpose:     Delete a fixed array, starting with the header
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -562,9 +529,6 @@ done:
  * Purpose:     Destroys a fixed array header in memory.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */

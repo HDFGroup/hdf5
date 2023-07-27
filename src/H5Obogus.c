@@ -139,9 +139,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Jan 21 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -173,9 +170,6 @@ H5O__bogus_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
  *
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Jan 21 2003
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -193,9 +187,6 @@ H5O__bogus_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  * Purpose:     Prints debugging info for the message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Jan 21 2003
  *
  *-------------------------------------------------------------------------
  */

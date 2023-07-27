@@ -255,9 +255,6 @@ usage(const char *prog)
  *
  * Return: >0 on success, 0 on failure
  *
- * Programmer: Quincey Koziol
- *              Monday, August 22, 2005
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_CONST static unsigned
@@ -282,9 +279,6 @@ ceil_log10(unsigned long x)
  * Return:  Success: 0
  *
  *          Failure: -1
- *
- * Programmer:    Quincey Koziol
- *                Tuesday, July 17, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -330,9 +324,6 @@ attribute_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *na
  *
  * Return:  Success: 0
  *          Failure: -1
- *
- * Programmer: Quincey Koziol
- *             Tuesday, August 16, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -400,9 +391,6 @@ done:
  *
  * Return:  Success: 0
  *          Failure: -1
- *
- * Programmer:    Quincey Koziol
- *                Tuesday, August 16, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -595,8 +583,6 @@ done:
  * Return:  Success: 0
  *          Failure: -1
  *
- * Programmer:    Vailin Choi; July 7th, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -625,9 +611,6 @@ done:
  *
  * Return: Success: 0
  *       Failure: -1
- *
- * Programmer: Quincey Koziol
- *             Tuesday, November 6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -686,9 +669,6 @@ done:
  * Return:  Success: 0
  *          Failure: -1
  *
- * Programmer: Quincey Koziol
- *             Tuesday, November 6, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -722,8 +702,6 @@ lnk_stats(const char H5_ATTR_UNUSED *path, const H5L_info2_t *li, void *_iter)
  *
  * Return: Success: 0
  *       Failure: -1
- *
- * Programmer:  Vailin Choi; July 7th, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -811,9 +789,6 @@ hand_free(struct handler_t *hand)
  * Return: Success: 0
  *
  * Failure: -1
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1087,9 +1062,6 @@ iter_free(iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1115,9 +1087,6 @@ print_file_info(const iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1172,9 +1141,6 @@ print_file_metadata(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1221,8 +1187,6 @@ print_group_info(const iter_t *iter)
  * Return:  Success: 0
  *          Failure: Never fails
  *
- * Programmer: Vailin Choi; October 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1246,9 +1210,6 @@ print_group_metadata(const iter_t *iter)
  *
  * Return:  Success: 0
  *          Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1336,8 +1297,6 @@ print_dataset_info(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer:  Vailin Choi; October 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1362,8 +1321,6 @@ print_dset_metadata(const iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Vailin Choi; October 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1402,9 +1359,6 @@ print_dset_dtype_meta(const iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Vailin Choi
- *             July 12, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1451,8 +1405,6 @@ print_attr_info(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Vailin Choi; July 7th, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1498,8 +1450,6 @@ print_freespace_info(const iter_t *iter)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Vailin Choi; August 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1555,9 +1505,6 @@ print_storage_summary(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1611,9 +1558,6 @@ print_file_statistics(const iter_t *iter)
  *
  * Failure: Never fails
  *
- * Programmer: Elena Pourmal
- *             Thursday, August 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1630,9 +1574,6 @@ print_object_statistics(const char *name)
  * Return: Success: 0
  *
  * Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Thursday, August 17, 2006
  *
  *-------------------------------------------------------------------------
  */

@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
- *
+/*
  * Purpose:    Tests various aspects of indexed raw data storage.
  */
 
@@ -54,9 +52,6 @@ hsize_t zero[H5O_LAYOUT_NDIMS];
  *
  *        Failure:    zero
  *
- * Programmer:    Robb Matzke
- *              Wednesday, July 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -90,9 +85,6 @@ is_sparse(void)
  * Purpose:    Prints the values in an array
  *
  * Return:    void
- *
- * Programmer:    Robb Matzke
- *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -131,9 +123,6 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
  * Return:    Success:    ID of dataset
  *
  *        Failure:    -1
- *
- * Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -186,9 +175,6 @@ error:
  *
  *        Failure:    FAIL
  *
- * Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -231,9 +217,6 @@ test_create(hid_t f, const char *prefix)
  * Return:    Success:    SUCCEED
  *
  *        Failure:    FAIL
- *
- * Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -429,9 +412,6 @@ error:
  *
  *        Failure:    FAIL
  *
- * Programmer:    Robb Matzke
- *        Wednesday, October 22, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -557,9 +537,6 @@ error:
  * Purpose:     Tests indexed storage
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
  *
  *-------------------------------------------------------------------------
  */

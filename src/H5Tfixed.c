@@ -31,9 +31,6 @@
  *
  *		Failure:	H5T_SGN_ERROR (Negative)
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5T_sign_t
@@ -64,9 +61,6 @@ done:
  * Return:	Success:	The sign type.
  *
  *		Failure:	H5T_SGN_ERROR (Negative)
- *
- * Programmer:	Raymond Lu
- *		October 8, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -100,9 +94,6 @@ done:
  * Purpose:	Sets the sign property for an integer.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */

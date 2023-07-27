@@ -306,9 +306,6 @@ done:
  *                          members match. H5_ITER_CONT otherwise.
  *              Failure:    Can't fail
  *
- * Programmer:  Dana Robinson
- *              June 22, 2017
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -348,9 +345,6 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Jordan Henderson
- *              November 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -487,9 +481,6 @@ done:
  * Return:      Success:        Wrapped object pointer
  *              Failure:        NULL
  *
- * Programmer:	Quincey Koziol
- *		Friday, October  7, 2018
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -528,9 +519,6 @@ done:
  *
  * Return:      Success:        VOL object pointer
  *              Failure:        NULL
- *
- * Programmer:	Quincey Koziol
- *		Friday, October  7, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -945,9 +933,6 @@ done:
  *
  * Return:      Current ref. count (can't fail)
  *
- * Programmer:  Quincey Koziol
- *              February 23, 2019
- *
  *-------------------------------------------------------------------------
  */
 int64_t
@@ -974,9 +959,6 @@ H5VL_conn_inc_rc(H5VL_t *connector)
  * Purpose:     Wrapper to decrement the ref. count on a connector.
  *
  * Return:      Current ref. count (>=0) on success, <0 on failure
- *
- * Programmer:  Quincey Koziol
- *              February 23, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1071,9 +1053,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              December 14, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1116,9 +1095,6 @@ done:
  * Purpose:     Query if two files are the same.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              December 14, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1185,9 +1161,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Dana Robinson
- *              June 22, 2017
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1241,9 +1214,6 @@ done:
  *                          unregistered.
  *
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Dana Robinson
- *              June 22, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1314,9 +1284,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Dana Robinson
- *              June 22, 2017
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1374,9 +1341,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Dana Robinson
- *              June 22, 2017
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1430,9 +1394,6 @@ done:
  * Return:      >0 if a VOL connector with that name has been registered
  *              0 if a VOL connector with that name has NOT been registered
  *              <0 on errors
- *
- * Programmer:  Dana Robinson
- *              June 17, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1506,9 +1467,6 @@ done:
  * Return:      Positive if the VOL class has been registered
  *              Negative on error (if the class is not a valid class or not registered)
  *
- * Programmer:  Dana Robinson
- *              June 17, 2017
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1539,9 +1497,6 @@ done:
  *
  * Return:      Positive if the VOL class has been registered
  *              Negative on error (if the class is not a valid class or not registered)
- *
- * Programmer:  Dana Robinson
- *              June 17, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1673,9 +1628,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              March 2, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -2091,9 +2043,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *              Friday, February 5, 2021
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2120,9 +2069,6 @@ done:
  *		expanded in the future.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *		Thursday, January 10, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -2159,9 +2105,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Saturday, February 23, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2189,9 +2132,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Thursday, January 10, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2218,9 +2158,6 @@ done:
  * Purpose:     Free object wrapping context for VOL connector
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, January  9, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -2332,9 +2269,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, January  9, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2365,9 +2299,6 @@ done:
  *		if the refcount drops to zero.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, January  9, 2019
  *
  *-------------------------------------------------------------------------
  */

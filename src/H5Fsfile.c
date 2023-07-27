@@ -44,9 +44,6 @@ H5F_sfile_node_t *H5F_sfile_head_g = NULL;
  *
  * Return:      void
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -87,9 +84,6 @@ H5F_sfile_assert_num(unsigned n)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -126,9 +120,6 @@ done:
  *
  * Return:      Non-NULL on success / NULL on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
- *
  *-------------------------------------------------------------------------
  */
 H5F_shared_t *
@@ -163,9 +154,6 @@ done:
  * Purpose:     Remove a "shared" file struct from the list of open files
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 18, 2005
  *
  *-------------------------------------------------------------------------
  */

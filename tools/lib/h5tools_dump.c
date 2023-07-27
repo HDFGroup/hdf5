@@ -230,8 +230,6 @@ h5tools_dump_init(void)
  *      END_OF_DATA).
  * Return: Success:    SUCCEED
  *         Failure:    FAIL
- * Programmer:
- *      Robb Matzke, Monday, April 26, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1532,12 +1530,6 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
  *
  * Return:
  *      On success, return SUCCEED. Otherwise, the function returns FAIL.
- *
- * Original programmer:
- *      Bill Wendling, Wednesday, March 07, 2001
- *
- * Rewritten with modified algorithm by:
- *      Pedro Vicente, Wednesday, January 16, 2008, contributions from Quincey Koziol
  *
  * Algorithm
  *

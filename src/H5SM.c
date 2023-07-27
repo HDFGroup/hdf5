@@ -99,9 +99,6 @@ H5FL_ARR_DEFINE(H5SM_sohm_t, H5O_SHMESG_MAX_LIST_SIZE);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Tuesday, May 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -246,9 +243,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Tuesday, October 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -292,9 +286,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Tuesday, October 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -330,9 +321,6 @@ done:
  * Purpose:     Check if a given message type is shared in a file.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, December 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -388,9 +376,6 @@ done:
  *
  * Return:      Non-negative on success/negative on failure
  *
- * Programmer:  James Laird
- *              Tuesday, October 3, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -436,9 +421,6 @@ done:
  * Purpose:     Allocates storage for an index, populating the HEADER struct.
  *
  * Return:      Non-negative on success/negative on failure
- *
- * Programmer:  James Laird
- *              Tuesday, May 2, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -543,9 +525,6 @@ done:
  *
  * Return:      Non-negative on success/negative on failure
  *
- * Programmer:  James Laird
- *              Thursday, January 4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -610,9 +589,6 @@ done:
  *              B-tree needs to be converted back into a list.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  James Laird
- *              Monday, August 28, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -685,9 +661,6 @@ done:
  *
  * Return:      Non-negative on success
  *              Negative on failure
- *
- * Programmer:  James Laird
- *              Thursday, January 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -795,9 +768,6 @@ done:
  * Return:	Non-negative on success
  *              Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -833,9 +803,6 @@ H5SM__bt2_convert_to_list_op(const void *record, void *op_data)
  *
  * Return:      Non-negative on success
  *              Negative on failure
- *
- * Programmer:  James Laird
- *              Thursday, January 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -897,9 +864,6 @@ done:
  *              FALSE if this message couldn't be a SOHM
  *              Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, February 21, 2007
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -939,9 +903,6 @@ done:
  * Return:      TRUE if message will be a SOHM
  *              FALSE if this message won't be a SOHM
  *              Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, February 21, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1060,9 +1021,6 @@ done:
  *              FALSE if this message is not a SOHM
  *              Negative on failure
  *
- * Programmer:  James Laird
- *              Tuesday, May 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1173,9 +1131,6 @@ done:
  * Return:	Non-negative on success
  *              Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1248,9 +1203,6 @@ done:
  *
  * Return:      Non-negative on success
  *              Negative on failure
- *
- * Programmer:  James Laird
- *              Tuesday, May 2, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1550,9 +1502,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Tuesday, May 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1652,9 +1601,6 @@ done:
  *              Failure:    FAIL
  *                          pos & empty_pos indeterminate
  *
- * Programmer:  James Laird
- *              Tuesday, May 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1718,9 +1664,6 @@ done:
  * Return:	Non-negative on success
  *              Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1760,9 +1703,6 @@ H5SM__decr_ref(void *record, void *op_data, hbool_t *changed)
  *
  * Return:      Non-negative on success
  *              Negative on failure
- *
- * Programmer:  James Laird
- *              Tuesday, May 2, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1957,9 +1897,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Thursday, May 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2083,9 +2020,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Monday, December 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2111,9 +2045,6 @@ H5SM_reconstitute(H5O_shared_t *sh_mesg, H5F_t *f, unsigned msg_type_id, H5O_fhe
  * Purpose:	v2 B-tree 'find' callback to retrieve the record for a message
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, December 19, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2143,9 +2074,6 @@ H5SM__get_refcount_bt2_cb(const void *_record, void *_op_data)
  * Purpose:     Retrieve the reference count for a message shared in the heap
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, December 19, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2279,9 +2207,6 @@ done:
  *                      value returned in udata)
  *              negative on error
  *
- * Programmer:	James Laird
- *              Wednesday, February 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2336,9 +2261,6 @@ done:
  *
  * Return:	Negative on error, non-negative on success
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, June 26, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2368,9 +2290,6 @@ done:
  *              This buffer should then be freed.
  *
  * Return:	Non-negative on success/negative on error
- *
- * Programmer:	James Laird
- *              Wednesday, February 21, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2467,9 +2386,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *		November 6, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2494,9 +2410,6 @@ H5SM__table_free(H5SM_master_table_t *table)
  * Purpose:	Frees all memory used by the list.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *		November 6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2524,9 +2437,6 @@ H5SM__list_free(H5SM_list_t *list)
  *              instead of the values in the superblock.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  James Laird
- *              Thursday, January 18, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2613,9 +2523,6 @@ done:
  *              Relies on the list version and number of messages passed in.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  James Laird
- *              Thursday, January 18, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2721,9 +2628,6 @@ done:
  *                      2. collect fractal heap storage
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *              June 19, 2007
  *
  *-------------------------------------------------------------------------
  */

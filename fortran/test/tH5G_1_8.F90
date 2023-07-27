@@ -129,10 +129,6 @@ END SUBROUTINE group_test
 ! * Return:      Success:        0
 ! *              Failure:        -1
 ! *
-! * Programmer:  Adapted from C test routines by
-! *              M.S. Breitenfeld
-! *              February 18, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -552,11 +548,6 @@ END SUBROUTINE group_info
 ! *
 ! * Purpose:     Verify that disabling tracking timestamps for an object
 ! *              works correctly
-! *
-! *
-! * Programmer:  M.S. Breitenfeld
-! *              February 20, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -745,10 +736,6 @@ END SUBROUTINE group_info
 ! *
 ! * Purpose:	Build a file with assorted links.
 ! *
-! *
-! * Programmer:	Adapted from C test by:
-! *             M.S. Breitenfeld
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -836,10 +823,6 @@ END SUBROUTINE group_info
 ! *
 ! * Purpose:     Tests that moving and renaming links preserves their
 ! *              properties.
-! *
-! * Programmer:  M.S. Breitenfeld
-! *              March 3, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -1041,10 +1024,6 @@ END SUBROUTINE group_info
 ! * Return:      Success:        0
 ! *
 ! *              Failure:        -1
-! *
-! * Programmer:  Quincey Koziol
-! *              Monday, October 17, 2005
-! *
 ! *-------------------------------------------------------------------------
 !
 SUBROUTINE lifecycle(cleanup, fapl2, total_error)
@@ -1182,10 +1161,6 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 ! * Return:	Success:	0
 ! *
 ! *		Failure:	-1
-! *
-! * Programmer:	M.S. Breitenfeld
-! *             April 14, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -1250,12 +1225,6 @@ END SUBROUTINE cklinks
 ! *              links by index.
 ! *
 ! * Return:      Total error
-! *
-! * C Programmer:  Quincey Koziol
-! *                Tuesday, November 14, 2006
-! *
-! * Adapted to FORTRAN: M.S. Breitenfeld
-! *                     March 3, 2008
 ! *
 ! *-------------------------------------------------------------------------
 !
@@ -1491,10 +1460,6 @@ END SUBROUTINE delete_by_idx
 ! *
 ! * Return:      Success:        0
 ! *              Failure:        -1
-! *
-! * Programmer:  Quincey Koziol
-! *              Tuesday, November  7, 2006
-! *
 ! *-------------------------------------------------------------------------
 !
 SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
@@ -1589,10 +1554,6 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 ! *
 ! * Return:      Success:        0
 ! *              Failure:        number of errors
-! *
-! * Programmer:  M.S. Breitenfeld
-! *              Modified C routine
-! *              March 12, 2008
 ! *
 ! *-------------------------------------------------------------------------
 !
@@ -1958,10 +1919,6 @@ END SUBROUTINE objcopy
 ! * Return:      Success:        0
 ! *
 ! *              Failure:        -1
-! *
-! * Programmer:  James Laird
-! *              Tuesday, June 6, 2006
-! *
 ! *-------------------------------------------------------------------------
 !
 

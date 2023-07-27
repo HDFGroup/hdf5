@@ -49,9 +49,6 @@ const H5Z_class2_t H5Z_SHUFFLE[1] = {{
  * Return:	Success: Non-negative
  *		Failure: Negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, April  7, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -104,9 +101,6 @@ done:
  *
  * Return:	Success: Size of buffer filtered
  *		Failure: 0
- *
- * Programmer:	Kent Yang
- *              Wednesday, November 13, 2002
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Fdeprec.c
- *		October 1 2009
- *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5F interface.  These
  *              functions are here for compatibility purposes and may be
@@ -204,8 +202,6 @@ done:
  *              See also RFC: Setting Bounds for Object Creation in HDF5 1.10.0.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */

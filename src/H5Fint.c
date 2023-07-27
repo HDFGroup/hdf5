@@ -3071,8 +3071,6 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; December 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t

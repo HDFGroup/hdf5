@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Fspace.c
- *			Dec 30 2013
- *			Quincey Koziol
  *
  * Purpose:		Space allocation routines for the file.
  *
@@ -76,9 +74,6 @@
  * Return:      Success:    The format address of the new file memory.
  *              Failure:    The undefined address HADDR_UNDEF
  *
- * Programmer:  Quincey Koziol
- *              Monday, December 30, 2013
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -135,9 +130,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, December 30, 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -178,9 +170,6 @@ done:
  * Return:	Success:	TRUE(1)  - Block was extended
  *                              FALSE(0) - Block could not be extended
  * 		Failure:	FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, 30 December, 2013
  *
  *-------------------------------------------------------------------------
  */

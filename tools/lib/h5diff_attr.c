@@ -38,9 +38,6 @@ typedef struct table_attrs_t {
  * Parameter:
  *  - tbl [OUT]
  *
- * Programmer: Jonathan Kim
- *
- * Date: March 15, 2011
  *------------------------------------------------------------------------*/
 static void
 table_attrs_init(table_attrs_t **tbl)
@@ -64,9 +61,6 @@ table_attrs_init(table_attrs_t **tbl)
  * Parameter:
  *  - table [IN]
  *
- * Programmer: Jonathan Kim
- *
- * Date: March 15, 2011
  *------------------------------------------------------------------------*/
 static void
 table_attrs_free(table_attrs_t *table)
@@ -98,9 +92,6 @@ table_attrs_free(table_attrs_t *table)
  *  - name [IN]  : attribute name
  *  - table [OUT]
  *
- * Programmer: Jonathan Kim
- *
- * Date: March 15, 2011
  *------------------------------------------------------------------------*/
 static void
 table_attr_mark_exist(const unsigned *exist, char *name, table_attrs_t *table)

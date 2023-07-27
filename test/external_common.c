@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              April, 2019
- *
  * Purpose:     Private function for external.c and external_env.c
  */
 
@@ -26,9 +23,6 @@
  *              perform dataset I/O on a set of files.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              February 2016
  *
  *-------------------------------------------------------------------------
  */

@@ -160,9 +160,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              April 5, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -232,9 +229,6 @@ done:
  *              turn the type ID into a "named", immutable type.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              April 5, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -318,9 +312,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              May 17, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -388,9 +379,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, December 12, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -431,9 +419,6 @@ done:
  *		immutable.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Monday, June  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -554,9 +539,6 @@ done:
  *
  * Return:      TRUE/FALSE/Negative
  *
- * Programmer:	Robb Matzke
- *              Thursday, June  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -587,9 +569,6 @@ done:
  *
  * Return:	Success:	New link count
  *		Failure:	-1
- *
- * Programmer:	Quincey Koziol
- *              Friday, September 26, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -673,9 +652,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  James Laird
- *              Thursday July 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -756,9 +732,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -820,9 +793,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Mike McGreevy
- *              May 19, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -866,9 +836,6 @@ done:
  * Purpose:     Refreshes all buffers associated with a named datatype.
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Mike McGreevy
- *              July 21, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -921,9 +888,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, December 13, 2017
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -972,9 +936,6 @@ done:
  *
  * Return:	Success:	Ptr to a new datatype.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, December 13, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1038,9 +999,6 @@ done:
  * Return:	Success:	Ptr to a new datatype.
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Monday, June  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1159,9 +1117,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, March 17, 1999
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -1213,9 +1168,6 @@ done:
  * Purpose:	Update the shared location information from the object location
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, April 13, 2007
  *
  *-------------------------------------------------------------------------
  */

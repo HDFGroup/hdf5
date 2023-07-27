@@ -793,9 +793,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Monday, December  8, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1578,9 +1575,6 @@ H5O__dtype_size(const H5F_t *f, const void *_mesg)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Tuesday, December  9, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1602,9 +1596,6 @@ H5O__dtype_reset(void *_mesg)
  * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 30, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1632,9 +1623,6 @@ done:
  * Purpose:	Copies sharing information from SH into the message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Thursday, June	4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1688,9 +1676,6 @@ done:
  *              FALSE if datatype may not shared
  *              Negative on failure
  *
- * Programmer:	James Laird
- *		Monday, October 16, 2006
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -1729,9 +1714,6 @@ done:
  * Return:      Success:        Non-negative
  *
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1785,9 +1767,6 @@ done:
  * Return:      Success:        Native copy of message
  *              Failure:        NULL
  *
- * Programmer:  James Laird
- *              December 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1824,9 +1803,6 @@ done:
  *              during the post-copy loop
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              November 8, 2011
  *
  *-------------------------------------------------------------------------
  */

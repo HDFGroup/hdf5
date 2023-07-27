@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Monday, October 17, 2005
- *
+/*
  * Purpose:	Group testing functions.
  */
 
@@ -649,9 +647,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Neil Fortner
- *	        Mar  31, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -702,9 +697,6 @@ done:
  *              correct.
  *
  * Return:      H5_ITER_STOP/H5_ITER_CONT/H5_ITER_ERROR
- *
- * Programmer:  Neil Fortner
- *              Apr 8, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -796,9 +788,6 @@ done:
  *              does nothing.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              April 6 2011
  *
  *-------------------------------------------------------------------------
  */

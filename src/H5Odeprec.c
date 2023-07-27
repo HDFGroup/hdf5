@@ -109,9 +109,6 @@ H5O__reset_info1(H5O_info1_t *oinfo)
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              November 26 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -209,9 +206,6 @@ done:
  * Purpose:     Retrieve deprecated info about an object.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              December 21 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -334,9 +328,6 @@ done:
  *
  * Return:	Success:	An open object identifier
  *		Failure:	H5I_INVALID_HID
- *
- * Programmer:	James Laird
- *		July 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -493,9 +484,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              November 26 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -552,9 +540,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Neil Fortner
- *              July 7 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -606,9 +591,6 @@ done:
  *              NOTE: Add a parameter "fields" to indicate selection of object info.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Neil Fortner
- *              July 7 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -674,9 +656,6 @@ done:
  *
  * Return:      Success:	Non-negative
  *              Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              November 26 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -763,9 +742,6 @@ done:
  *				library, or the negative value returned by one
  *				of the operators.
  *
- * Programmer:	Quincey Koziol
- *              November 25 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -844,9 +820,6 @@ done:
  *              Failure:    Negative if something goes wrong within the
  *				library, or the negative value returned by one
  *				of the operators.
- *
- * Programmer:	Quincey Koziol
- *              November 24 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -941,9 +914,6 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:	Quincey Koziol
- *              November 25 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1037,9 +1007,6 @@ done:
  *              Failure:    Negative if something goes wrong within the
  *                          library, or the negative value returned by one
  *                          of the operators.
- *
- * Programmer:	Quincey Koziol
- *              November 24 2007
  *
  *-------------------------------------------------------------------------
  */

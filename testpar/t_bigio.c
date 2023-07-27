@@ -1238,9 +1238,6 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1289,9 +1286,6 @@ coll_chunk1(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1339,9 +1333,6 @@ coll_chunk2(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1396,9 +1387,6 @@ coll_chunk3(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */

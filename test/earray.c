@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Tuesday, June 17, 2008
- */
 #include "h5test.h"
 
 /*
@@ -177,9 +174,6 @@ h5_stat_size_t empty_size_g;
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 21, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -209,9 +203,6 @@ init_cparam(H5EA_create_t *cparam)
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, September 25, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -257,9 +248,6 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, September 25, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -279,9 +267,6 @@ finish_tparam(earray_test_param_t *tparam)
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -314,9 +299,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August 21, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -406,9 +388,6 @@ error:
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -466,9 +445,6 @@ error:
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -511,9 +487,6 @@ error:
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -545,9 +518,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -590,9 +560,6 @@ error:
  *
  * Return:    Success: 0
  *        Failure: 1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August  7, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -836,9 +803,6 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -906,9 +870,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1016,9 +977,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, December 18, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1157,9 +1115,6 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1286,9 +1241,6 @@ typedef struct eiter_fw_t {
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Thursday, October  2, 2008
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1317,9 +1269,6 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static hssize_t
@@ -1345,9 +1294,6 @@ eiter_fw_next(void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
@@ -1369,9 +1315,6 @@ eiter_fw_max(const void *in_eiter)
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1430,9 +1373,6 @@ eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, October  2, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1474,9 +1414,6 @@ typedef struct eiter_rv_t {
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1517,9 +1454,6 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static hssize_t
@@ -1545,9 +1479,6 @@ eiter_rv_next(void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
@@ -1569,9 +1500,6 @@ eiter_rv_max(const void *in_eiter)
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1655,9 +1583,6 @@ eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1695,9 +1620,6 @@ typedef struct eiter_rnd_t {
  *
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *              Thursday, November  6, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1747,9 +1669,6 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Thursday, November  6, 2008
- *
  *-------------------------------------------------------------------------
  */
 static hssize_t
@@ -1780,9 +1699,6 @@ eiter_rnd_next(void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  6, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
@@ -1804,9 +1720,6 @@ eiter_rnd_max(const void *in_eiter)
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  6, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1844,9 +1757,6 @@ static const earray_iter_t ea_iter_rnd = {
  *
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *              Thursday, November 11, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1928,9 +1838,6 @@ typedef struct eiter_cyc_t {
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1960,9 +1867,6 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
  *
  * Return:    Success:    Non-negative
  *        Failure:    Negative
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1996,9 +1900,6 @@ eiter_cyc_next(void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
@@ -2020,9 +1921,6 @@ eiter_cyc_max(const void *in_eiter)
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -2056,9 +1954,6 @@ static const earray_iter_t ea_iter_cyc = {
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, September 22, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -2235,9 +2130,6 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2393,9 +2285,6 @@ error:
  *
  * Return:    Success: 0
  *        Failure: 1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 17, 2008
  *
  *-------------------------------------------------------------------------
  */

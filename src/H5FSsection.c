@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, July 31, 2006
- *
  * Purpose:     Free space tracking functions.
  *
  */
@@ -105,9 +102,6 @@ H5FL_DEFINE(H5FS_sinfo_t);
  * Return:      Success:    non-NULL, pointer to new section info struct
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Monday, July 31, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5FS_sinfo_t *
@@ -184,9 +178,6 @@ done:
  *              info
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Thursday, February  7, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -321,9 +312,6 @@ done:
  *                than what is actually needed.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Thursday, February  7, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -518,9 +506,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, May  8, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -571,9 +556,6 @@ H5FS__sect_serialize_size(H5FS_t *fspace)
  *              on disk
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, May  8, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -627,9 +609,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, May  8, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -677,9 +656,6 @@ done:
  * Purpose:     Decrement the number of sections of a particular size
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -763,9 +739,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -816,9 +789,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -861,9 +831,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -901,9 +868,6 @@ done:
  * Purpose:     Remove a section from the free space manager
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -943,9 +907,6 @@ done:
  * Purpose:     Add a section of free space to the free list bins
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, March 20, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1044,9 +1005,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1091,9 +1049,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1132,9 +1087,6 @@ done:
  *              free space.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1331,9 +1283,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1417,9 +1366,6 @@ done:
  * Purpose:     Try to extend a block using space from a section on the free list
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, January  8, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1558,9 +1504,6 @@ done:
  *              FALSE:      not merged/not shrunk
  *              Failure:    negative
  *
- * Programmer:  Vailin Choi
- *              June 10, 2009
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1621,9 +1564,6 @@ done:
  *              bins) that is large enough to fulfill request.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, March 20, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1775,9 +1715,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1832,9 +1769,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, May 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1867,9 +1801,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, May 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1901,9 +1832,6 @@ done:
  * Purpose:     Iterate over all the sections managed
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Saturday, May 13, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1960,9 +1888,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, May 30, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1989,9 +1914,6 @@ H5FS_sect_stats(const H5FS_t *fspace, hsize_t *tot_space, hsize_t *nsects)
  *              a section changes class
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2144,9 +2066,6 @@ done:
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              Jul 17 2006
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2288,8 +2207,6 @@ H5FS__sect_assert(const H5FS_t *fspace)
  *
  * Return:      TRUE/FALSE/FAIL
  *
- * Programmer:  Vailin Choi
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2380,9 +2297,6 @@ done:
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer:  John Mainzer
- *              6/6/16
  *
  *-------------------------------------------------------------------------
  */

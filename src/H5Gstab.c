@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: Robb Matzke
- *	       Friday, September 19, 1997
- *
- */
-
 /****************/
 /* Module Setup */
 /****************/
@@ -115,9 +110,6 @@ typedef struct H5G_bt_it_lbi_t {
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov  7 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -179,9 +171,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Aug  1 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -235,9 +224,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov  7 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -288,9 +274,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Aug  1 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -324,9 +307,6 @@ done:
  * Purpose:	Remove NAME from a symbol table.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, September 17, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -374,9 +354,6 @@ done:
  * Purpose:	Remove NAME from a symbol table, according to the name index.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, November 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -436,9 +413,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -490,9 +464,6 @@ done:
  * Purpose:	Iterate over the objects in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, October  3, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -582,9 +553,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September  6, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -620,9 +588,6 @@ done:
  * Purpose:	Retrieve storage for btree and heap (1.6)
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi
- *		June 25 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -667,9 +632,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Nov  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -705,9 +667,6 @@ done:
  * Purpose:     Returns the name of objects in the group by giving index.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -796,9 +755,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Sep 20, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -825,9 +781,6 @@ done:
  * Purpose:	Look up an object relative to a group, using symbol table
  *
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -888,9 +841,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Nov  9, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -925,9 +875,6 @@ done:
  * Purpose:	Look up an object in a group, according to the name index
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov  7 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1006,9 +953,6 @@ done:
  *              reported by the library.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Neil Fortner
- *		Mar 17, 2009
  *
  *-------------------------------------------------------------------------
  */

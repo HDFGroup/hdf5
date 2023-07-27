@@ -32,11 +32,6 @@
  *  namelen - name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 12, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -76,11 +71,6 @@ done:
  *  attr_num - number of attributes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 12, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -115,11 +105,6 @@ done:
  *  buf - buffer to hold the name
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 12, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -172,11 +157,6 @@ done:
  *     N/A
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -226,11 +206,6 @@ done:
  *     N/A
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -297,11 +272,6 @@ done:
  *
  * RETURNS
  *  Size of buffer on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -366,11 +336,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -434,11 +399,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -500,11 +460,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -560,12 +515,6 @@ done:
  *  buf         - data pointer buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 11, 2008
- * HISTORY
- *
- *
  * SOURCE
  */
 int_f
@@ -594,12 +543,6 @@ h5awrite_f_c(hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf)
  *  buf         - data pointer buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 11, 2008
- * HISTORY
- *
- *
  * SOURCE
  */
 int_f

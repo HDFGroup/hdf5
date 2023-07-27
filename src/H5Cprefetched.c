@@ -195,9 +195,6 @@ H5C__prefetched_entry_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUS
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              8/13/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -273,9 +270,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              8/13/15
  *
  *-------------------------------------------------------------------------
  */

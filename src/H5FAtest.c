@@ -106,9 +106,6 @@ H5FL_DEFINE_STATIC(H5FA__test_ctx_t);
  * Return:      Success:    non-NULL
  *              Failure:    NULL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -140,9 +137,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -168,9 +162,6 @@ H5FA__test_dst_context(void *_ctx)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -195,9 +186,6 @@ H5FA__test_fill(void *nat_blk, size_t nelmts)
  * Purpose:     Encode an element from "native" to "raw" form
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -239,9 +227,6 @@ H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void H5_ATTR_UNUS
  * Purpose:     Decode an element from "raw" to "native" form
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -285,9 +270,6 @@ H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_UNU
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -316,9 +298,6 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
  *
  * Return:      Success:    non-NULL
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, December 1, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -351,9 +330,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -378,9 +354,6 @@ H5FA__get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam)
  * Purpose:     Compare the parameters used to create the fixed array
  *
  * Return:      An integer value like strcmp
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */

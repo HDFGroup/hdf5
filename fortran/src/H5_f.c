@@ -43,9 +43,6 @@ int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
  *                 H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
  * SOURCE
  */
 int_f
@@ -343,9 +340,6 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
  *  in the H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
  * SOURCE
  */
 int_f
@@ -404,23 +398,6 @@ h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *
  *  None
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
- * HISTORY
- *  Added Z flags. EIP,  March 12, 2003
- *  Added more FD flags and new H5LIB flags
- *  Added more FD flags for HDF5 file driver
- *           EIP, April 9, 2005
- *  Added Generic flags introduced in version 1.8
- *           MSB, January, 2008
- *  Added types in lines h5*_flags = ( )variable to match input
- *  Added E flags
- *           MSB, July 9, 2009
- *  Added type h5d_flags of type size_t
- *           MSB, Feb. 28, 2014
- *  Added type h5s_hid_flags of type hid_t
- *           MSB, Oct. 10, 2016
  * SOURCE
  */
 int_f
@@ -949,10 +926,6 @@ h5init1_flags_c(int_f *h5lib_flags)
  *  Calls H5open call to initialize C HDF5 library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, November 17, 2000
- *
  * SOURCE
  */
 int_f
@@ -973,8 +946,6 @@ h5open_c(void)
  *  Calls H5close call to close C HDF5 library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
  * SOURCE
  */
 int_f
@@ -1005,9 +976,6 @@ h5close_c(void)
  *  relnum - the release version of the library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  *
  */
@@ -1045,9 +1013,6 @@ h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
  *  None
  * RETURNS
  *  0 on success, aborts on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -1074,9 +1039,6 @@ h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
  *  Calls H5garbage_collect to collect on all free-lists of all types
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -1098,9 +1060,6 @@ h5garbage_collect_c(void)
  *  Calls H5dont_atexit not to install atexit cleanup routine
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f

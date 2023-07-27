@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAdblock.c
- *			Sep 11 2008
- *			Quincey Koziol
  *
  * Purpose:		Data block routines for extensible arrays.
  *
@@ -79,9 +77,6 @@ H5FL_DEFINE_STATIC(H5EA_dblock_t);
  *
  * Return:	Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_dblock_t *
@@ -141,9 +136,6 @@ done:
  * Purpose:	Creates a new extensible array data block in the file
  *
  * Return:	Valid file address on success/HADDR_UNDEF on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -244,9 +236,6 @@ done:
  *
  * Return:	Super block index on success/Can't fail
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -276,9 +265,6 @@ H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx)
  * Purpose:	Convenience wrapper around protecting extensible array data block
  *
  * Return:	Non-NULL pointer to data block on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 18 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -346,9 +332,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -378,9 +361,6 @@ done:
  * Purpose:	Delete a data block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Sep 22 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -443,9 +423,6 @@ done:
  * Purpose:	Destroys an extensible array data block in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */

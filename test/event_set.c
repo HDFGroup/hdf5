@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
- *
  * Purpose:    Tests event sets.
  */
 #include "h5test.h"
@@ -178,9 +175,6 @@ fake_wait_request_free(void H5_ATTR_UNUSED *req)
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 9, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -250,9 +244,6 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Friday, February 26, 2021
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -314,9 +305,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    number of errors
- *
- * Programmer:  Neil Fortner
- *              Wednesday, November 24, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -656,9 +644,6 @@ error:
  *
  * Return:      Success: EXIT_SUCCESS
  *              Failure: EXIT_FAILURE
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */

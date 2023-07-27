@@ -3608,9 +3608,6 @@ test_reference(void)
  *
  * Return:    none
  *
- * Programmer:    Quincey Koziol
- *              September 8, 1998
- *
  *-------------------------------------------------------------------------
  */
 void

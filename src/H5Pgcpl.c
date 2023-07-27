@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pgcpl.c
- *			August 29 2006
- *			Quincey Koziol
  *
  * Purpose:		Group creation property list class routines
  *
@@ -110,8 +108,6 @@ static const H5O_linfo_t H5G_def_linfo_g = H5G_CRT_LINK_INFO_DEF;  /* Default li
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -144,8 +140,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 29, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -185,8 +179,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 29, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -230,8 +222,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 29, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -284,8 +274,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              August 29, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -334,8 +322,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September  6, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -386,8 +372,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September  6, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -428,8 +412,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 12, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -474,8 +456,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 12, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -520,9 +500,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -555,9 +532,6 @@ H5P__gcrt_group_info_enc(const void *value, void **_pp, size_t *size)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -605,9 +579,6 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -645,9 +616,6 @@ H5P__gcrt_link_info_enc(const void *value, void **_pp, size_t *size)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */

@@ -136,9 +136,6 @@ static const H5T_vlen_class_t H5T_vlen_disk_g = {
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 20, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -176,9 +173,6 @@ done:
  * Return:	Success:	new VL datatype
  *
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 20, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -237,9 +231,6 @@ done:
  *      TRUE - If the location of any vlen types changed
  *      FALSE - If the location of any vlen types is the same
  *  <0 is returned on failure
- *
- * Programmer:	Quincey Koziol
- *		Friday, June 4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -360,9 +351,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -393,9 +381,6 @@ H5T__vlen_mem_seq_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
  *
  * Return:	Non-NULL on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, June 12, 2004
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -419,9 +404,6 @@ H5T__vlen_mem_seq_getptr(void *_vl)
  * Purpose:	Checks if a memory sequence is the "null" sequence
  *
  * Return:	Non-negative on success / Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -449,9 +431,6 @@ H5T__vlen_mem_seq_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
  * Purpose:	Sets a VL info object in memory to the "nil" value
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -482,9 +461,6 @@ H5T__vlen_mem_seq_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -512,9 +488,6 @@ H5T__vlen_mem_seq_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
  * Purpose:	"Writes" the memory based VL sequence from a buffer
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -567,9 +540,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -597,9 +567,6 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
  *
  * Return:	Non-NULL on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, June 12, 2004
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -623,9 +590,6 @@ H5T__vlen_mem_str_getptr(void *_vl)
  * Purpose:	Checks if a memory string is a NULL pointer
  *
  * Return:	Non-negative on success / Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -651,9 +615,6 @@ H5T__vlen_mem_str_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -675,9 +636,6 @@ H5T__vlen_mem_str_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
  * Purpose:	"Reads" the memory based VL string into a buffer
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -707,9 +665,6 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
  * Purpose:	"Writes" the memory based VL string from a buffer
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -756,9 +711,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -784,9 +736,6 @@ H5T__vlen_disk_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, size_
  * Purpose:	Checks if a disk VL info object is the "nil" object
  *
  * Return:	Non-negative on success / Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -825,9 +774,6 @@ done:
  * Purpose:	Sets a VL info object on disk to the "nil" value
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -871,9 +817,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -906,9 +849,6 @@ done:
  * Purpose:	Writes the disk based VL element from a buffer
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -949,9 +889,6 @@ done:
  * Purpose:	Deletes a disk-based VL element
  *
  * Return:	Non-negative on success / Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -995,9 +932,6 @@ done:
  * Purpose: Internal recursive routine to free VL datatypes
  *
  * Return:  Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *      Friday, August 15, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1123,9 +1057,6 @@ done:
  *          into recursion.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mike McGreevy
- *              May 11, 2010
  *
  *-------------------------------------------------------------------------
  */

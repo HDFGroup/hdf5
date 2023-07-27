@@ -84,9 +84,6 @@ static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -165,9 +162,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -234,9 +228,6 @@ H5HF__huge_init(H5HF_hdr_t *hdr)
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug 15 2006
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -279,9 +270,6 @@ done:
  * Purpose:	Insert a 'huge' object into the file and track it
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -466,9 +454,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -563,9 +548,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -654,9 +636,6 @@ done:
  * Purpose:	Internal routine to perform an operation on a 'huge' object
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -892,9 +871,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -926,9 +902,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -959,9 +932,6 @@ done:
  * Purpose:	Remove a 'huge' object from the file and the v2 B-tree tracker
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1067,9 +1037,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1128,9 +1095,6 @@ done:
  *              tracker for them
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Aug  8 2006
  *
  *-------------------------------------------------------------------------
  */

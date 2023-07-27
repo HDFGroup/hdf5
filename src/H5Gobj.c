@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Gobj.c
- *			Sep  5 2005
- *			Quincey Koziol
  *
  * Purpose:		Functions for abstract handling of objects in groups.
  *
@@ -101,9 +99,6 @@ static herr_t H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *l
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Sep 29 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -153,9 +148,6 @@ done:
  * Purpose:     Create an object header for a group and update object location info
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Sep 29 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -282,9 +274,6 @@ done:
  * Return:	Success:	TRUE/FALSE whether message was found & retrieved
  *              Failure:        FAIL if error occurred
  *
- * Programmer:  Quincey Koziol
- *              Mar 11 2007
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -344,9 +333,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 30 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -377,9 +363,6 @@ done:
  *              "new format" storage (either "compact" or "dense" storage).
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sept 16 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -415,9 +398,6 @@ done:
  *              and ADJ_LINK is true.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -615,9 +595,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Oct  3, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -682,9 +659,6 @@ done:
  * Purpose:	Retrieve information about a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov 27 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -761,9 +735,6 @@ done:
  * Return:	Success:        Non-negative, length of name
  *		Failure:	Negative
  *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -823,9 +794,6 @@ done:
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Nov 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -935,9 +903,6 @@ done:
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Sep 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -997,9 +962,6 @@ done:
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Nov 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1072,9 +1034,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 26 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1122,9 +1081,6 @@ done:
  *              index.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
  */

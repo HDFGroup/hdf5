@@ -477,10 +477,6 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
  * Example:
  * "AA,B,CDE:CHUNK=10X10"
  *
- * Programmer: Pedro Vicente
- *
- * Date: December 30, 2003
- *
  *-------------------------------------------------------------------------
  */
 obj_list_t *

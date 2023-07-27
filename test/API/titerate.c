@@ -1251,12 +1251,6 @@ test_iterate(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Quincey Koziol
- *              April 5, 2000
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

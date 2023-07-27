@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5EAdbg.c
- *                  Sep 11 2008
- *                  Quincey Koziol
  *
  * Purpose:        Dump debugging information about an extensible array.
  *
@@ -72,9 +70,6 @@
  * Purpose:     Prints debugging info about a extensible array header.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -154,9 +149,6 @@ done:
  * Purpose:     Prints debugging info about a extensible array index block.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -275,9 +267,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -363,9 +352,6 @@ done:
  * Purpose:     Prints debugging info about a extensible array data block.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Sep 22 2008
  *
  *-------------------------------------------------------------------------
  */

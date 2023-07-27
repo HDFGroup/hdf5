@@ -12,9 +12,6 @@
 #
 # Tests for the h5mkgrp tool
 #
-# Quincey Koziol
-# Tuesday, February 13, 2007
-#
 
 srcdir=@srcdir@
 

@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Monday, March  6, 2006
- *
+/*
  * Purpose:     v2 B-tree metadata statistics functions.
  *
  */
@@ -65,9 +63,6 @@
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -92,9 +87,6 @@ H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info)
  *              storage info.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              June 19 2007
  *
  *-------------------------------------------------------------------------
  */

@@ -122,8 +122,6 @@ struct hs_dr_pio_test_vars_t {
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/9/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -574,8 +572,6 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
  *
  * Return:    void
  *
- * Programmer:    JRM -- 9/18/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -694,8 +690,6 @@ hs_dr_pio_test__takedown(struct hs_dr_pio_test_vars_t *tv_ptr)
  *        returns true on the memory and file selections.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 9/10/11
  *
  *-------------------------------------------------------------------------
  */
@@ -904,8 +898,6 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
  *        only the correct data) is read.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 8/10/11
  *
  *-------------------------------------------------------------------------
  */
@@ -1151,8 +1143,6 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *        returns true on the memory and file selections.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 8/10/11
  *
  *-------------------------------------------------------------------------
  */
@@ -1430,8 +1420,6 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/10/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1706,8 +1694,6 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 9/18/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1895,8 +1881,6 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
  *        the parallel case.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 9/18/09
  *
  *-------------------------------------------------------------------------
  */
@@ -2550,8 +2534,6 @@ return (good_data);
  *
  * Return:    void
  *
- * Programmer:    JRM -- 9/15/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2784,8 +2766,6 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
  *        data (and only the correct data) is read.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 8/15/11
  *
  *-------------------------------------------------------------------------
  */
@@ -3069,8 +3049,6 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *        file selections.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 8/15/11
  *
  *-------------------------------------------------------------------------
  */
@@ -3367,8 +3345,6 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 8/15/11
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3650,8 +3626,6 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Return:    void
  *
- * Programmer:    JRM -- 10/10/09
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3825,8 +3799,6 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
  *        the parallel case.
  *
  * Return:    void
- *
- * Programmer:    JRM -- 9/18/09
  *
  *-------------------------------------------------------------------------
  */

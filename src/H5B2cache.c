@@ -154,9 +154,6 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              May 18, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -185,8 +182,6 @@ H5B2__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -219,9 +214,6 @@ H5B2__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *
  * Return:	Success:	Pointer to a new B-tree.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Feb 1 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -317,9 +309,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              May 20, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -345,9 +334,6 @@ H5B2__cache_hdr_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Flushes a dirty B-tree header to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 1 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -414,9 +400,6 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
  * Purpose:     Handle cache action notifications
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Apr 24 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -505,9 +488,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mike McGreevy
- *              June 18, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -534,9 +514,6 @@ done:
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              May 18, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -566,8 +543,6 @@ H5B2__cache_int_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -607,9 +582,6 @@ H5B2__cache_int_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, voi
  *
  * Return:	Success:	Pointer to a new B-tree internal node.
  *              Failure:        NULL
- *
- * Programmer:	Quincey Koziol
- *		Feb 2 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -730,9 +702,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              May 20, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -760,9 +729,6 @@ H5B2__cache_int_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Serializes a B-tree internal node for writing to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 3 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -846,9 +812,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Apr 25 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -923,9 +886,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mike McGreevy
- *              June 18, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -953,9 +913,6 @@ done:
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              May 18, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -985,8 +942,6 @@ H5B2__cache_leaf_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:	Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1025,9 +980,6 @@ H5B2__cache_leaf_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
  *
  * Return:	Success:	Pointer to a new B-tree leaf node.
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Feb 2 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1123,9 +1075,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              May 20, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1152,9 +1101,6 @@ H5B2__cache_leaf_image_len(const void *_thing, size_t *image_len)
  * Purpose:	Serializes a B-tree leaf node for writing to disk.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 2 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1224,9 +1170,6 @@ done:
  * Purpose:     Handle cache action notifications
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Apr 25 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1301,9 +1244,6 @@ done:
  *              structure
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mike McGreevy
- *              June 18, 2008
  *
  *-------------------------------------------------------------------------
  */

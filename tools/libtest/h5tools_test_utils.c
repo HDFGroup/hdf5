@@ -64,9 +64,6 @@
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *****************************************************************************/
 
 H5_GCC_CLANG_DIAG_OFF("format")
@@ -93,9 +90,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *
  *     *FAILED* at somefile.c:12 in function_name()...
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSFAILED_AT()                                                                                        \
@@ -121,9 +115,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
  *     similar to `TEST_ERROR` in h5test.h
  *
- * Programmer: Jacob Smith
- *             2017-10-23
- *
  *----------------------------------------------------------------------------
  */
 #define FAIL_IF(condition)                                                                                   \
@@ -148,9 +139,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     `FAIL_UNLESS( 5 == my_op() )`
  *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
  *         (see JSVERIFY)
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -179,9 +167,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     *FAILED* at myfile.c:488 in somefunc()...
  *       ! Expected 425
  *       ! Actual   3
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -219,9 +204,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     !!! Actual:
  *     not what I expected at all
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSERR_STR(expected, actual, reason)                                                                  \
@@ -248,9 +230,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(expected, actual, reason)                                                                   \
@@ -269,9 +248,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     If equal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -292,9 +268,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
@@ -309,8 +282,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(actual, expected, reason)                                                                   \
@@ -322,8 +293,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(actual, expected, reason)                                                               \
@@ -335,8 +304,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
@@ -368,9 +335,6 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *
  *     0   Tests passed.
  *     1   Tests failed.
- *
- * Programmer: Jacob Smith
- *             2017-11-11
  *
  *----------------------------------------------------------------------------
  */
@@ -589,9 +553,6 @@ error:
  *
  * Return:     0 if test passes
  *             1 if failure
- *
- * Programmer: Jacob Smith
- *             2017-11-13
  *
  *----------------------------------------------------------------------------
  */
@@ -968,9 +929,6 @@ error:
  * Return:     0 if test passes
  *             1 if failure
  *
- * Programmer: Jacob Smith
- *             2018-07-12
- *
  *----------------------------------------------------------------------------
  */
 static unsigned
@@ -1219,9 +1177,6 @@ H5_GCC_CLANG_DIAG_ON("format")
  *
  * Return:     0 iff all test pass
  *             1 iff any failures
- *
- * Programmer: Jacob Smith
- *             2017-11-10
  *
  *----------------------------------------------------------------------------
  */

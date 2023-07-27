@@ -23,10 +23,6 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -84,10 +80,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -135,10 +127,6 @@ done:
  * Purpose: Call H5LTmake_dataset
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
  *
  * Comments:
  *
@@ -193,10 +181,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -242,10 +226,6 @@ done:
  * Purpose: Call H5LTset_attribute_int
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
  *
  * Comments:
  *
@@ -340,10 +320,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -419,10 +395,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -486,10 +458,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -538,10 +506,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -580,10 +544,6 @@ h5ltfind_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
  * Purpose: Call H5LTget_dataset_info
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
  *
  * Comments:
  *
@@ -651,10 +611,6 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -710,10 +666,6 @@ done:
  * Purpose: Call H5LTget_attribute_info
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
  *
  * Comments:
  *
@@ -787,10 +739,6 @@ done:
  * Purpose: Calls h5ltpath_valid
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: February 18, 2012
  *
  * Comments:
  *

@@ -33,9 +33,6 @@ static const char *EXT_ENV_FNAME[] = {"extern_env_dir/env_file_1", NULL};
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -134,9 +131,6 @@ error:
  * Purpose:     Runs external dataset tests.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *              Tuesday, March  3, 1998
  *
  *-------------------------------------------------------------------------
  */

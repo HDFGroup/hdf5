@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, October  1, 1998
- *
  * Purpose:    Tests dataset fill values.
  */
 #include "h5test.h"
@@ -59,9 +56,6 @@ typedef struct {
  *
  *              Failure:        -1
  *
- * Programmer:  Raymond Lu
- *              Monday, Jan 26, 2001
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -99,9 +93,6 @@ error:
  * Return:      Success:        datatype ID
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -153,9 +144,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -281,9 +269,6 @@ error:
  * Return:    Success:    0
  *        Failure:    number of errors
  *
- * Programmer:    Quincey Koziol
- *              Thursday, May 31, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -396,9 +381,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -855,9 +837,6 @@ error:
  *
  *        Failure:    1
  *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1191,9 +1170,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Robb Matzke
- *              Thursday, October  1, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1388,9 +1364,6 @@ error:
  * Return:    Success:    0
  *        Failure:    < 0
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1414,9 +1387,6 @@ test_extend_init_integer(void *_buf, size_t nelmts, const void *_val)
  *
  * Return:    Success:    0
  *        Failure:    < 0
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1452,9 +1422,6 @@ error:
  * Return:    Success:    0
  *        Failure:    < 0
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1470,9 +1437,6 @@ test_extend_release_integer(void H5_ATTR_UNUSED *_elmt)
  *
  * Return:    Success:    0
  *        Failure:    < 0
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1504,9 +1468,6 @@ test_extend_init_cmpd_vl(void *_buf, size_t nelmts, const void *_val)
  *
  * Return:    Success:    0
  *        Failure:    < 0
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1545,9 +1506,6 @@ error:
  * Return:    Success:    0
  *        Failure:    < 0
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1569,9 +1527,6 @@ test_extend_release_cmpd_vl(void *_elmt)
  *
  * Return:    Success:    0
  *        Failure:    number of errors
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July  3, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2040,9 +1995,6 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Monday, October  5, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2202,9 +2154,6 @@ skip:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Feb 27, 2002
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2355,9 +2304,6 @@ error:
  *
  *        Failure:    1
  *
- * Programmer:    Joel Plutchak
- *              April 15, 2013
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2479,9 +2425,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Joel Plutchak
- *              April 15, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2624,9 +2567,6 @@ error:
  * Return:    Success:
  *
  *        Failure:
- *
- * Programmer:    Robb Matzke
- *              Thursday, October  1, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Ochunk.c
- *			Jul 13 2008
- *			Quincey Koziol
  *
  * Purpose:		Object header chunk routines.
  *
@@ -71,9 +69,6 @@ H5FL_DEFINE(H5O_chunk_proxy_t);
  * Purpose:     Add new chunk for object header to metadata cache
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -139,9 +134,6 @@ done:
  * Purpose:     Protect an object header chunk for modifications
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Jul 17 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -213,9 +205,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Jul 17 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -263,9 +252,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May  6 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -301,9 +287,6 @@ done:
  * Purpose:     Update the chunk index for a chunk proxy
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -352,9 +335,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Jul 13 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -394,9 +374,6 @@ done:
  * Purpose:     Destroy a chunk proxy object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              July 13, 2008
  *
  *-------------------------------------------------------------------------
  */

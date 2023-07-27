@@ -63,9 +63,6 @@
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Vailin Choi
- *              August 25th, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t

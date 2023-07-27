@@ -73,9 +73,6 @@
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -143,9 +140,6 @@ done:
  * Purpose:     Prints debugging info about a fixed array data block.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */

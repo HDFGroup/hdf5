@@ -123,9 +123,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar 10 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -158,9 +155,6 @@ H5O__refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
  *
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Mar 10 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -198,9 +192,6 @@ done:
  * Return:      Success:        Message data size in bytes without alignment.
  *              Failure:        zero
  *
- * Programmer:  Quincey Koziol
- *              Mar 10 2007
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -225,9 +216,6 @@ H5O__refcount_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, March 10, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -250,9 +238,6 @@ H5O__refcount_free(void *mesg)
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Saturday, March 10, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -281,9 +266,6 @@ H5O__refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_U
  * Purpose:     Prints debugging info for a message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Mar  6 2007
  *
  *-------------------------------------------------------------------------
  */

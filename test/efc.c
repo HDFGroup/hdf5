@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Neil Fortner
- *              December 16, 2010
- */
-
 #include "h5test.h"
 
 #define H5F_FRIEND /*suppress error about including H5Fpkg	  */
@@ -45,9 +41,6 @@ hid_t fapl_id = H5I_INVALID_HID;
  *
  * Return:      Success: 0
  *              Failure: Number of errors
- *
- * Programmer:  Neil Fortner
- *              December 16, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -470,9 +463,6 @@ error:
  * Return:      Success: 0
  *              Failure: Number of errors
  *
- * Programmer:  Neil Fortner
- *              January 4, 2011
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -792,9 +782,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: Number of errors
- *
- * Programmer:  Neil Fortner
- *              January 6, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2642,9 +2629,6 @@ error:
  * Purpose:     Test the external file cache code
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Neil Fortner
- *              December 16, 2010
  *
  *-------------------------------------------------------------------------
  */

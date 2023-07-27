@@ -66,9 +66,6 @@ const unsigned H5O_layout_ver_bounds[] = {
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, March 20, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -153,9 +150,6 @@ done:
  *
  * Return:      Success:        Message data size in bytes
  *              Failure:        0
- *
- * Programmer:  Raymond Lu
- *              August 14, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -282,9 +276,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; December 2017
- *
- *-------------------------------------------------------------------------
  */
 herr_t
 H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
@@ -318,9 +309,6 @@ done:
  * Purpose:     Set the latest indexing type for a layout message
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, January 15, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -442,9 +430,6 @@ done:
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -579,9 +564,6 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, July 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -682,9 +664,6 @@ done:
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */

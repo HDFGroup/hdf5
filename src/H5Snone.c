@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, November 10, 1998
- *
  * Purpose:	"None" selection dataspace I/O functions.
  */
 
@@ -137,9 +134,6 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
  *
  * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -165,9 +159,6 @@ H5S__none_iter_init(H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, April 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -189,9 +180,6 @@ H5S__none_iter_coords(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR
  *              selection
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Monday, June 2, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -215,9 +203,6 @@ H5S__none_iter_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_
  * Purpose:     Return number of elements left to process in iterator
  *
  * Return:      Non-negative number of elements on success, zero on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -962,9 +947,6 @@ H5S__none_adjust_s(H5S_t H5_ATTR_UNUSED *space, const hssize_t H5_ATTR_UNUSED *o
  *
  * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
- *              Sunday, July 18, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -986,9 +968,6 @@ H5S__none_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUS
  *              of a different rank
  *
  * Return:      Non-negative on success, negative on failure.
- *
- * Programmer:  Quincey Koziol
- *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
  */

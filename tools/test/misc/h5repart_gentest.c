@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              June 1, 2005
- *
  * Purpose:     Generate a family file of 1024 bytes for each member
  *              for h5repart test.
  */

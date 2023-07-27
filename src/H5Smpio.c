@@ -11,10 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  rky 980813
- *
  * Purpose:     Create MPI data types for HDF5 selections.
- *
  */
 
 /****************/
@@ -109,8 +106,6 @@ H5FL_EXTERN(H5S_sel_iter_t);
  *				  (useful if this is the buffer type for xfer)
  *		*is_derived_type  0 if MPI primitive type, 1 if derived
  *
- * Programmer:	rky 980813
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -168,8 +163,6 @@ done:
  *				  (useful if this is the buffer type for xfer)
  *		*is_derived_type  0 if MPI primitive type, 1 if derived
  *
- * Programmer:	Quincey Koziol, October 29, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -193,8 +186,6 @@ H5S__mpio_none_type(MPI_Datatype *new_type, int *count, hbool_t *is_derived_type
  * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*new_type	  the MPI type corresponding to the selection
- *
- * Programmer:	Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -362,8 +353,6 @@ done:
  *                                the MPI_Datatype
  *              *is_permuted      0 if the displacements are permuted, 1 if not
  *
- * Programmer:	Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -497,8 +486,6 @@ done:
  *		*count		  how many objects of the new_type in selection
  *				  (useful if this is the buffer type for xfer)
  *		*is_derived_type  0 if MPI primitive type, 1 if derived
- *
- * Programmer:	Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -645,8 +632,6 @@ done:
  *		*count		  how many objects of the new_type in selection
  *				  (useful if this is the buffer type for xfer)
  *		*is_derived_type  0 if MPI primitive type, 1 if derived
- *
- * Programmer:	rky 980813
  *
  *-------------------------------------------------------------------------
  */
@@ -1000,8 +985,6 @@ done:
  *				  (useful if this is the buffer type for xfer)
  *		*is_derived_type  0 if MPI primitive type, 1 if derived
  *
- * Programmer:  kyang
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1079,8 +1062,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol, February 2, 2019
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1126,8 +1107,6 @@ done:
  * Return:	Non-negative on success, negative on failure.
  *
  * Outputs:	*span_type	 the MPI type corresponding to the selection
- *
- * Programmer:  kyang
  *
  *-------------------------------------------------------------------------
  */
@@ -1382,8 +1361,6 @@ done:
  *		*count		  how many objects of the new_type in selection
  *				  (useful if this is the buffer type for xfer)
  *		*is_derived_type  0 if MPI primitive type, 1 if derived
- *
- * Programmer:	rky 980813
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5ACmpio.c
- *                      Jun 20 2015
- *                      Quincey Koziol
  *
  * Purpose:             Functions in this file implement support for parallel
  *                      I/O cache functionality
@@ -130,9 +128,6 @@ H5FL_DEFINE_STATIC(H5AC_slist_entry_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              5/9/10
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -161,9 +156,6 @@ H5AC__set_sync_point_done_callback(H5C_t *cache_ptr, H5AC_sync_point_done_cb_t s
  *              for the cache.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              5/11/06
  *
  *-------------------------------------------------------------------------
  */
@@ -197,9 +189,6 @@ H5AC__set_write_done_callback(H5C_t *cache_ptr, H5AC_write_done_cb_t write_done)
  *		be called anywhere else.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              3/17/10
  *
  *-------------------------------------------------------------------------
  */
@@ -258,8 +247,6 @@ done:
  *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 7/1/05
  *
  *-------------------------------------------------------------------------
  */
@@ -341,8 +328,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure.
  *
- * Programmer:  Quincey Koziol, 6/12/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -391,8 +376,6 @@ H5AC__broadcast_clean_list_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_uda
  *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 7/1/05
  *
  *-------------------------------------------------------------------------
  */
@@ -481,9 +464,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              3/17/10
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -538,8 +518,6 @@ done:
  *
  * Return:	Return SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  Quincey Koziol, 6/12/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -590,8 +568,6 @@ H5AC__copy_candidate_list_to_buffer_cb(void *_item, void H5_ATTR_UNUSED *_key, v
  *		entry slist.
  *
  * Return:	Return SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer, 4/19/10
  *
  *-------------------------------------------------------------------------
  */
@@ -666,8 +642,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure.
  *
- * Programmer:  John Mainzer, 6/29/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -719,8 +693,6 @@ H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr)
  *		cleaned list (if it is present there).
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 6/29/05
  *
  *-------------------------------------------------------------------------
  */
@@ -797,9 +769,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure.
  *
- * Programmer:  Quincey Koziol
- *              7/23/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -859,8 +828,6 @@ H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr)
  *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 6/29/05
  *
  *-------------------------------------------------------------------------
  */
@@ -927,8 +894,6 @@ done:
  *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 6/30/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1025,8 +990,6 @@ done:
  *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 6/30/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1205,9 +1168,6 @@ done:
  *
  *              Failure:        negative
  *
- * Programmer:  John Mainzer
- *              3/17/10
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1371,9 +1331,6 @@ done:
  *
  *              Failure:        negative
  *
- * Programmer:  John Mainzer
- *              July 5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1421,8 +1378,6 @@ done:
  *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  Quincey Koziol, 6/11/2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1493,8 +1448,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure.
  *
- * Programmer:  John Mainzer, 7/4/05
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1555,8 +1508,6 @@ done:
  *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 3/17/10
  *
  *-------------------------------------------------------------------------
  */
@@ -1631,9 +1582,6 @@ done:
  * Return:      Success:        non-negative
  *
  *              Failure:        negative
- *
- * Programmer:  John Mainzer
- *              April 28, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1778,9 +1726,6 @@ done:
  *
  *              Failure:        negative
  *
- * Programmer:  John Mainzer
- *              April 28, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1856,9 +1801,6 @@ done:
  * Return:      Success:        non-negative
  *
  *              Failure:        negative
- *
- * Programmer:  John Mainzer
- *              April 28, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1967,9 +1909,6 @@ done:
  * Return:      Success:        non-negative
  *
  *              Failure:        negative
- *
- * Programmer:  John Mainzer
- *              April 28, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2082,9 +2021,6 @@ done:
  * Return:      Success:        non-negative
  *
  *              Failure:        negative
- *
- * Programmer:  John Mainzer
- *              March 11, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -2215,9 +2151,6 @@ done:
  *
  *              Failure:        negative
  *
- * Programmer:  John Mainzer
- *              4/20/10
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2275,9 +2208,6 @@ H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, unsigned num_candidates, haddr_t *ca
  *
  * Return:      Non-negative on success/Negative on failure if there was a
  *              request to flush all items and something was protected.
- *
- * Programmer:  Quincey Koziol
- *              Aug 22 2009
  *
  *-------------------------------------------------------------------------
  */

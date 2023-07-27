@@ -928,13 +928,6 @@ CONTAINS
 !            stride            - array with hyperslab strides
 !            block            - array with hyperslab block sizes
 !
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
-!
 ! NOTES
 ! Commented out until 1.6 ? 10/08/2002
 !
@@ -1043,13 +1036,6 @@ CONTAINS
 !                               Failure: -1
 ! OPTIONAL PARAMETERS            - NONE
 !
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
-!
 ! NOTES commented out until 1.6 release(?) 10/08/2002
 !
 !
@@ -1105,13 +1091,6 @@ CONTAINS
 !                               Success:  0
 !                               Failure: -1
 ! OPTIONAL PARAMETERS            - NONE
-!
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
 !
 ! NOTESCommented out until 1.6 release(?) 10/08/2002 EIP
 !

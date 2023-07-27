@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Oalloc.c
- *			Nov 17 2006
- *			Quincey Koziol
  *
  * Purpose:		Object header allocation routines.
  *
@@ -91,9 +89,6 @@ H5FL_EXTERN(H5O_cont_t);
  * Purpose:     Add a gap to a chunk
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Oct 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -217,9 +212,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Oct 17 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -313,9 +305,6 @@ H5O__eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg, uint8_t *g
  * Purpose:     Allocate room for a new message from a null message
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 22 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -423,9 +412,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 21 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -483,8 +469,6 @@ done:
  *				is undefined.
  *
  *		FAIL:		Some internal error has been detected.
- *
- * Programmer:  John Mainzer -- 8/16/05
  *
  *-------------------------------------------------------------------------
  */
@@ -709,9 +693,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Oct 21 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -857,9 +838,6 @@ H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size_t *size, H5O_
  *				image where the first message should be placed.
  *
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Oct 21 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1139,9 +1117,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Robb Matzke
- *              Aug  7 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1187,9 +1162,6 @@ done:
  *              to allocate.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Oct 21 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1260,9 +1232,6 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
  * Purpose:     Allocate enough space in the object header for this message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1344,9 +1313,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 22 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1415,9 +1381,6 @@ done:
  *
  * Return:      Success:        non-negative (TRUE/FALSE)
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi
- *		Feb. 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1584,9 +1547,6 @@ done:
  * Purpose:     Move messages toward first chunk
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1962,9 +1922,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 10 2005
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -2109,9 +2066,6 @@ done:
  *              from the object header.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct 17 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2298,9 +2252,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct  4 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2356,9 +2307,6 @@ done:
  * Purpose:     Shrinks a chunk, removing all null messages and any gap.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Neil Fortner
- *		Oct 20 2008
  *
  *-------------------------------------------------------------------------
  */

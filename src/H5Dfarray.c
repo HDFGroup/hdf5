@@ -10,13 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
+/*
  * Purpose:     Fixed array indexed (chunked) I/O functions.
  *              The chunk coordinate is mapped as an index into an array of
  *              disk addresses for the chunks.
- *
  */
 
 /****************/
@@ -205,9 +202,6 @@ H5FL_DEFINE_STATIC(H5D_farray_ctx_ud_t);
  * Return:      Success:    non-NULL
  *              Failure:    NULL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -253,9 +247,6 @@ done:
  * Return:      Success:    non-NULL
  *              Failure:    NULL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -282,9 +273,6 @@ H5D__farray_dst_context(void *_ctx)
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -310,9 +298,6 @@ H5D__farray_fill(void *nat_blk, size_t nelmts)
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -354,9 +339,6 @@ H5D__farray_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -397,9 +379,6 @@ H5D__farray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -428,9 +407,6 @@ H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void 
  *
  * Return:      Success:    non-NULL
  *              Failure:    NULL
- *
- * Programmer:  Vailin Choi
- *              5th August, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -503,9 +479,6 @@ done:
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              24th September, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -531,9 +504,6 @@ H5D__farray_dst_dbg_context(void *_dbg_ctx)
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -561,9 +531,6 @@ H5D__farray_filt_fill(void *nat_blk, size_t nelmts)
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -609,9 +576,6 @@ H5D__farray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -655,9 +619,6 @@ H5D__farray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -689,9 +650,6 @@ H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const 
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -750,9 +708,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednensday, May 23, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -779,9 +734,6 @@ H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -835,9 +787,6 @@ done:
  *
  * Return:      Non-negative on success (with the LAYOUT argument initialized
  *              and ready to write to an object header). Negative on failure.
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -911,9 +860,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -933,8 +879,6 @@ H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Purpose:     Insert chunk address into the indexing structure.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; 5 May 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1003,9 +947,6 @@ done:
  *              supplied.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1082,9 +1023,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1141,9 +1079,6 @@ H5D__farray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *
  *              for each one.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1214,9 +1149,6 @@ done:
  * Purpose:     Remove chunk from index.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1311,9 +1243,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    negative
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1347,9 +1276,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    negative
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1403,9 +1329,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1456,9 +1379,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1493,9 +1413,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1548,9 +1465,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1576,9 +1490,6 @@ H5D__farray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1601,9 +1512,6 @@ H5D__farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
  * Purpose:     Release indexing information in memory.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */

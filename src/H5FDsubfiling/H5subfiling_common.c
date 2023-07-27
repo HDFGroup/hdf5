@@ -621,9 +621,6 @@ done:
  * Return:      Success (0) or Faiure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -723,7 +720,6 @@ done:
 
 /*
 -------------------------------------------------------------------------
-  Programmer:  Richard Warren
   Purpose:     Called as part of a file open operation, we initialize a
                subfiling context which includes the application topology
                along with other relevant info such as the MPI objects
@@ -1166,7 +1162,6 @@ done:
 
 /*
 -------------------------------------------------------------------------
-  Programmer:  Richard Warren
   Purpose:     Return a character string which represents either the
                default selection method: SELECT_IOC_ONE_PER_NODE; or
                if the user has selected a method via the environment
@@ -1735,9 +1730,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1923,9 +1915,6 @@ done:
  * Return:      Success (0) or Faiure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1984,9 +1973,6 @@ done:
  * Return:      SUCCEED or FAIL.
  * Errors:      FAILs ONLY if storage for the mapping entry cannot
  *              be allocated.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -2059,9 +2045,6 @@ done:
  * Return:      None
  * Errors:      Cannot fail.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -2109,9 +2092,6 @@ clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id)
  *              the user supplied open flags is invoked.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -2670,9 +2650,6 @@ done:
  * Return:      Success (0) or Faiure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 /*-------------------------------------------------------------------------
@@ -2693,9 +2670,6 @@ done:
  *
  * Return:      Success (0) or Faiure (non-zero)
  * Errors:      If MPI operations fail for some reason.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -2994,9 +2968,6 @@ done:
  * Return:      Non-negative subfiling context ID if the context exists
  *              Negative on failure or if the subfiling context doesn't
  *                exist
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */

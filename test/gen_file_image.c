@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Friday, March 30, 2012
- *
  * Purpose:     Create a simple file for use with the file image tests.
  *
  */
@@ -30,9 +27,6 @@
  * Function:	main
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:	Quincey Koziol
- *              Friday, March 30, 2012
  *
  *-------------------------------------------------------------------------
  */

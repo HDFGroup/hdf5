@@ -411,9 +411,6 @@ test_sohm_fcpl_errors(void)
  * Return:      Success:        datatype ID (should be closed by calling function)
  *              Failure:        negative
  *
- * Programmer:  James Laird
- *              Saturday, August 26, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -476,9 +473,6 @@ error:
  *
  * Return:      Success:        datatype ID (should be closed by calling function)
  *              Failure:        negative
- *
- * Programmer:  James Laird
- *              Saturday, August 26, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -550,9 +544,6 @@ error:
  * Return:      Success:        new hid_t for the file
  *              Failure:        Negative
  *
- * Programmer:  James Laird
- *              Wednesday, October 4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -581,9 +572,6 @@ error:
  * Return:      Success:    file ID (may not be the same one passed in)
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  James Laird
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -604,8 +592,6 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
  *             Reads the dataset and verifies that [a subset of] the data
  *             are as expected.
  *
- * Programmer: Jacob Smith
- *             2018 November 1
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_S1H_VERIFY_DATA(dset_id, dtype_id)                                                             \
@@ -760,8 +746,6 @@ error:
  *          Object header information from the "first" dataset in the file
  *          is stored in pointer `oinfo`.
  *
- * Programmer: Jacob Smith
- *             2018 November 1
  *----------------------------------------------------------------------------
  */
 static h5_stat_size_t
@@ -794,9 +778,6 @@ getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, hbool_t te
  * Function:    test_sohm_size1
  *
  * Purpose:     Tests shared object header messages with a large datatype
- *
- * Programmer:  James Laird
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -982,9 +963,6 @@ test_sohm_size1(void)
  *              Uses "size1_helper" for file setup directed to a specific
  *              file handle.
  *
- * Programmer:  Jacob Smith
- *              2018 November 1
- *
  *---------------------------------------------------------------------------
  */
 #if 0  /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
@@ -1089,9 +1067,6 @@ test_sohm_size_consistency_open_create(void)
  *              Tests attribute on a Group.
  *              Tests committed and non-committed datatypes.
  *              Tests attribute access through `H5Aopen()`.
- *
- * Programmer:  James Laird
- *              Thursday, November 30, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1198,9 +1173,6 @@ sohm_attr_helper(hid_t fcpl_id)
  *              shouldn't be shared.
  *
  *              Test permutations of this.
- *
- * Programmer:  James Laird
- *              Thursday, November 30, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1379,9 +1351,6 @@ test_sohm_attrs(void)
  *              same property list used as dcpl1_id in the size2 helper
  *              function.  This ensures that the filters can be read.
  *
- * Programmer:  James Laird
- *              Wednesday, November 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1440,9 +1409,6 @@ size2_verify_plist1(hid_t plist)
  * Purpose:     Verify that the property list passed in is in fact the
  *              same property list used as dcpl2_id in the size2 helper
  *              function.  This ensures that the filters can be read.
- *
- * Programmer:  James Laird
- *              Wednesday, November 22, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1514,9 +1480,6 @@ size2_verify_plist2(hid_t plist)
  *              size2_helper_struct (which holds the various sizes for a
  *              given file during the size2_helper function).
  *
- * Programmer:  James Laird
- *              Friday, January 26, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1555,9 +1518,6 @@ size2_dump_struct(const char *name, size2_helper_struct *sizes)
  *
  *              Doesn't close the property list.  Prints an error message
  *              if there's a failure, but doesn't alter its return value.
- *
- * Programmer:  James Laird
- *              Friday, November 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1928,9 +1888,6 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
  *              file FILENAME actually has the structure that size2_helper
  *              should have created.
  *
- * Programmer:  James Laird
- *              Friday, November 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -2132,10 +2089,6 @@ size2_verify(void)
  *              function size2_helper.  The test measures the size of the
  *              file at various points.  Once all of the files have been
  *              generated, the test compares the measured sizes of the files.
- *
- *
- * Programmer:  James Laird
- *              Friday, November 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2713,9 +2666,6 @@ test_sohm_size2(int close_reopen)
  * Purpose:     Creates a dataset and attribute in file FILE_ID using value X
  *              in the DSPACE_ID and DCPL_ID arrays.
  *
- * Programmer:  James Laird
- *              Tuesday, December 19, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -2749,9 +2699,6 @@ delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id, int x)
  *
  * Purpose:     Checks the value of the dataset and attribute created by
  *              delete_helper_write.
- *
- * Programmer:  James Laird
- *              Tuesday, December 19, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2796,9 +2743,6 @@ delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
  *              DSPACE_ID and DCPL_ID are arrays of different dataspaces
  *              and property lists with filter pipelines used to create the
  *              messages.
- *
- * Programmer:  James Laird
- *              Tuesday, December 19, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2878,9 +2822,6 @@ delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
  *              can be deleted without corrupting the remaining messages.
  *              Also checks that indexes convert from B-trees back into
  *              lists.
- *
- * Programmer:  James Laird
- *              Tuesday, December 19, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3017,9 +2958,6 @@ test_sohm_delete(void)
  *              then creates datasets and deletes them.
  *              Done in two passes: once with one dataset, once with two.
  *
- * Programmer:  James Laird
- *              Wednesday, January 3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3116,9 +3054,6 @@ verify_dset_create_and_delete_does_not_grow_file(hid_t fcpl_id)
  * Purpose:     Verifies that creation and deletion of datasets with shared
  *              message headers will not increase file size.
  *
- * Programmer:  James Laird
- *              Wednesday, January 3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3194,9 +3129,6 @@ test_sohm_delete_revert(void)
  *              be opened (that shared messages were created or not and
  *              were shared in the right file).
  *
- * Programmer:  James Laird
- *              Friday, December 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3260,9 +3192,6 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
  * Purpose:     Test creating SOHMs through external links (to make sure that
  *              they're created in the correct file).
  *
- * Programmer:  James Laird
- *              Friday, December 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3306,9 +3235,6 @@ test_sohm_extlink(void)
  *              If close_reopen is TRUE, closes and reopens the file to
  *              ensure that data is correctly written to disk.
  *
- * Programmer:  James Laird
- *              Wednesday, January 10, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3336,8 +3262,6 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  * Purpose:    Encapsulate a common pattern
  *             Open, read-verify, and close the dataspaces for datasets 1-3
  *
- * Programmer: Jacob Smith
- *             2018 November 5
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_VDE_VERIFY_SPACES(dims)                                                                        \
@@ -3387,8 +3311,6 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  *                + if n > 2 then include "dataset3" (dset_id3)
  *                + file (file_id)
  *
- * Programmer: Jacob Smith
- *             2018 November 5
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(n)                                                             \
@@ -3571,9 +3493,6 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  *              dataspace will change, possibly confusing the shared message
  *              code.
  *
- * Programmer:  James Laird
- *              Wednesday, January 10, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3650,9 +3569,6 @@ test_sohm_extend_dset(void)
  * Purpose:     When a datatype is a SOHM type in one file, test that the
  *              second file using the same datatype actually save it in
  *              the file, too.
- *
- * Programmer:  Raymond Lu
- *              13 October, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -3841,9 +3757,6 @@ test_sohm(void)
  * Purpose:     Cleanup temporary test files
  *
  * Return:      none
- *
- * Programmer:  James Laird
- *              October 9, 2006
  *
  *-------------------------------------------------------------------------
  */

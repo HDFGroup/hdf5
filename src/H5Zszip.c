@@ -63,9 +63,6 @@ H5Z_class2_t H5Z_SZIP[1] = {{
  * Return:	Success: Non-negative
  *		Failure: Negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, April  7, 2003
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -110,9 +107,6 @@ done:
  *
  * Return:	Success: Non-negative
  *		Failure: Negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, April  7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -251,9 +245,6 @@ done:
  *
  * Return:	Success: Size of buffer filtered
  *		Failure: 0
- *
- * Programmer:	Kent Yang
- *              Tuesday, April 1, 2003
  *
  *-------------------------------------------------------------------------
  */

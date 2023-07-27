@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, July 19, 2011
- *
  * Purpose:	Each file has a small cache of global heap collections called
  *		the CWFS list and recently accessed collections with free
  *		space appear on this list.  As collections are accessed the
@@ -86,9 +83,6 @@
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -142,9 +136,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -240,9 +231,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, July 20, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -281,9 +269,6 @@ H5F_cwfs_advance_heap(H5F_t *f, H5HG_heap_t *heap, hbool_t add_heap)
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */

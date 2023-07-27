@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5HLint.c
- *              Oct 12 2008
- *              Quincey Koziol
  *
  * Purpose:     Local heap internal routines.
  *
@@ -74,9 +72,6 @@ H5FL_DEFINE_STATIC(H5HL_t);
  * Return:      Success:    non-NULL pointer to new local heap
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Jan  5 2010
- *
  *-------------------------------------------------------------------------
  */
 H5HL_t *
@@ -119,9 +114,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -144,9 +136,6 @@ H5HL__inc_rc(H5HL_t *heap)
  * Purpose:     Decrement ref. count on heap
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -177,9 +166,6 @@ done:
  * Purpose:     Destroys a heap in memory.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Jan 15 2003
  *
  *-------------------------------------------------------------------------
  */

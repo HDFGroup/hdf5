@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:     Peter X. Cao
- *                 May 01, 2005
- *
  * Purpose:    Test H5Ocopy().
  */
 
@@ -179,9 +176,6 @@ static int compare_attribute_compound_vlstr(hid_t loc, hid_t loc2);
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -213,9 +207,6 @@ token_insert(H5O_info2_t *oi)
  * Return:      Success:    TRUE/FALSE
  *              Failure:    (can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hbool_t
@@ -244,9 +235,6 @@ token_lookup(hid_t loc_id, H5O_info2_t *oi)
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -264,9 +252,6 @@ token_reset(void)
  * Purpose:     Create an attribute with object references
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Friday, August 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -341,9 +326,6 @@ error:
  * Purpose:     Create an attribute with object references
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Monday, March 5, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -437,9 +419,6 @@ error:
  * Purpose:     Create a dataset with region references
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Friday, August 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -563,9 +542,6 @@ error:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              Saturday, December 17, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -620,9 +596,6 @@ done:
  * Purpose:     Attach NUM_ATTRIBUTES attributes to the object to be copied
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -690,9 +663,6 @@ done:
  * Purpose:     Attach NUM_ATTRIBUTES attributes to a pair of objects to be copied
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -769,9 +739,6 @@ done:
  * Purpose:     Compare two attributes to check that they are equal
  *
  * Return:      TRUE if attributes are equal/FALSE if they are different
- *
- * Programmer:  Peter Cao
- *              Saturday, December 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -930,9 +897,6 @@ error:
  *
  * Return:    TRUE if objects have same attributes/FALSE if they are different
  *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
- *
  * Note:    This isn't very general, the attributes are assumed to be
  *              those written in test_copy_attach_attributes().
  *
@@ -1016,9 +980,6 @@ error:
  * Purpose:     Compare two buffers of data to check that they are equal
  *
  * Return:    TRUE if buffer are equal/FALSE if they are different
- *
- * Programmer:  Quincey Koziol
- *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1341,9 +1302,6 @@ error:
  *
  * Return:    TRUE if datasets are equal/FALSE if they are different
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1543,9 +1501,6 @@ error:
  * Purpose:     Compare two groups to check that they are "equal"
  *
  * Return:    TRUE if group are equal/FALSE if they are different
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1750,8 +1705,6 @@ error:
  *            as expected
  *            FALSE if not
  *
- * Programmer:  Vailin Choi; August 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1788,9 +1741,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1899,9 +1849,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 22, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2008,9 +1955,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 22, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2128,9 +2072,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil
- *              Friday, March 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2309,9 +2250,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2652,9 +2590,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2776,9 +2711,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2913,9 +2845,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3068,9 +2997,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3596,9 +3522,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4099,9 +4022,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4478,9 +4398,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4900,11 +4817,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Tuesday, May 11, 2010
- *              Mostly copied from test_copy_dataset_compressed, by
- *              Quincey Koziol
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5087,9 +4999,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5245,9 +5154,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5394,9 +5300,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5538,9 +5441,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -5706,9 +5606,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -5877,9 +5774,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -6053,9 +5947,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 31, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6224,9 +6115,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6383,9 +6271,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Saturday, December 10, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -6601,9 +6486,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Sunday, December 11, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6772,9 +6654,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Saturday, December , 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6911,8 +6790,6 @@ error:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; Aug 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6993,8 +6870,6 @@ done:
  *        The attribute is a  compound datatype with a variable length string.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; Aug 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -7100,8 +6975,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:
  *
  *-------------------------------------------------------------------------
  */
@@ -7263,9 +7136,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Tuesday, December 27, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7454,9 +7324,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7563,9 +7430,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              August 8, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -7723,9 +7587,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7881,9 +7742,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8051,9 +7909,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 1, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -8182,9 +8037,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 1, 2005
  *
  * Note:        Create groups w/lots of entries in each level, so that "dense"
  *              group form is used.
@@ -8335,9 +8187,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8665,9 +8514,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, September 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -8822,9 +8668,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  James Laird
- *              Friday, June 16, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8988,9 +8831,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, November  8, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -9114,9 +8954,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November  8, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -9280,9 +9117,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, November  8, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -9361,9 +9195,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Thursday, November 30, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9474,9 +9305,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Saturday, February 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9660,9 +9488,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Saturday, February 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -9835,9 +9660,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Saturday, February 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10033,9 +9855,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Saturday, February 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -10220,9 +10039,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Saturday, February 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10415,9 +10231,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Saturday, February 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10615,9 +10428,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Saturday, March 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10854,9 +10664,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao
- *              Saturday, March 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -11067,9 +10874,6 @@ typedef struct cmpd_vl_t {
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Tuesday, September 29, 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -11242,9 +11046,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Wednesdat, September 30 , 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -11428,9 +11229,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *              Sunday, December 11, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -11617,9 +11415,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Wednesday, March 31, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -11811,9 +11606,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Wednesday, March 31, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -12020,9 +11812,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Friday, January 20, 2012
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -12154,9 +11943,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Tuesday, October 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -12474,9 +12260,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Tuesday, October 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -12871,9 +12654,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Thursday, November 3, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -13169,9 +12949,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Thursday, November 3, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -13443,8 +13220,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Vailin Choi; January 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -13916,8 +13691,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; January 2012
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -14231,8 +14004,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; January 2012
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -14545,8 +14316,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Vailin Choi; Dec 12, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -14920,8 +14689,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Vailin Choi; January 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -15550,8 +15317,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; January 2012
- *
  *-------------------------------------------------------------------------
  */
 /* User data struct for the callback */
@@ -16021,8 +15786,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; January 2012
- *
  *-------------------------------------------------------------------------
  */
 
@@ -16377,9 +16140,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Neil Fortner
- *              Thursday, July 12, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -16542,9 +16302,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *               March 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -16953,9 +16710,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi
- *              Feb 7, 2012
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -17363,9 +17117,6 @@ error:
  *              both, or neither of the source and destination files.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */

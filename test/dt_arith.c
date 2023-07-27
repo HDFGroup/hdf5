@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
  * Purpose:     Tests the data type interface (H5T)
  */
 
@@ -400,9 +397,6 @@ static int my_isinf(int endian, const unsigned char *val, size_t size, size_t mp
  *
  * Return:    void
  *
- * Programmer:    Robb Matzke
- *              Monday, July  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -424,9 +418,6 @@ fpe_handler(int H5_ATTR_UNUSED signo)
  *        and counters to be reset.
  *
  * Return:    void
- *
- * Programmer:    Robb Matzke
- *              Monday, November 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -464,9 +455,6 @@ reset_hdf5(void)
  *              H5T_CONV_UNHANDLED      0
  *
  *              H5T_CONV_HANDLED        1
- *
- * Programmer:    Raymond Lu
- *              April 19, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -508,9 +496,6 @@ except_func(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Friday, Sept 2, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -570,9 +555,6 @@ error:
  *              conversion exceptions.
  *
  * Return:    H5T_CONV_HANDLED        1
- *
- * Programmer:    Raymond Lu
- *              Sept 7, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -789,9 +771,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Thursday, Jan 6, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1239,9 +1218,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Saturday, Jan 29, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1557,9 +1533,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Monday, November 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2609,9 +2582,6 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Friday, April 30, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2658,9 +2628,6 @@ test_conv_int_2(void)
  * Purpose:    Determines whether VAL points to NaN.
  *
  * Return:    TRUE or FALSE
- *
- * Programmer:    Robb Matzke
- *              Monday, July  6, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2733,9 +2700,6 @@ my_isnan(dtype_t type, void *val)
  *
  * Return:    TRUE or FALSE
  *
- * Programmer:    Raymond Lu
- *              Monday, June 20, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2770,9 +2734,6 @@ my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t 
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, June 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -3367,9 +3328,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Raymond Lu
- *              Thursday, November 6, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -4568,9 +4526,6 @@ error:
  *
  *              FALSE:          no overflow
  *
- * Programmer:    Raymond Lu
- *              Monday, Nov 17, 2003
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -4651,9 +4606,6 @@ done:
  * Purpose:    Runs all integer tests.
  *
  * Return:    Number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4812,9 +4764,6 @@ run_integer_tests(const char *name)
  *
  * Return:    Number of errors
  *
- * Programmer:    Raymond Lu
- *              Tuesday, March 22, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4894,9 +4843,6 @@ done:
  * Purpose:    Runs all integer-float tests.
  *
  * Return:    Number of errors
- *
- * Programmer:    Raymond Lu
- *              Monday, November 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -5000,9 +4946,6 @@ run_int_fp_conv(const char *name)
  * Purpose:    Runs all float-integer tests.
  *
  * Return:    Number of errors
- *
- * Programmer:    Raymond Lu
- *              Monday, November 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -5146,9 +5089,6 @@ run_fp_int_conv(const char *name)
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  Robb Matzke
- *              Tuesday, December 9, 1997
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Bprivate.h
- *			Jul 10 1997
- *			Robb Matzke
  *
  * Purpose:		Private non-prototype header.
  *

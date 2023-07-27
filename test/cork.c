@@ -10,13 +10,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Vailin Choi
- *              Feb 20, 2014
- *
- * This file contains tests for:
- *  H5Odisable_mdc_flushes()
- *  H5Oenable_mdc_flushes()
- *  H5Oare_mdc_flushes_disabled()
+/*
+ *      This file contains tests for:
+ *          * H5Odisable_mdc_flushes()
+ *          * H5Oenable_mdc_flushes()
+ *          * H5Oare_mdc_flushes_disabled()
  */
 #include "h5test.h"
 
@@ -84,8 +82,6 @@ static unsigned verify_multiple_cork(hbool_t swmr);
  *      object tag are checked for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -292,8 +288,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -496,8 +490,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -755,8 +747,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -923,8 +913,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1200,8 +1188,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1576,8 +1562,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1877,8 +1861,6 @@ error:
  *manipulating datasets.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -2233,8 +2215,6 @@ error:
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */

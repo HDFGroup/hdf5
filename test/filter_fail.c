@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              7 September 2010
- *
  * Purpose:     Make sure dataset, file, and library can close properly when a
  *              mandatory filter fails.
  */
@@ -49,9 +46,6 @@ const H5Z_class2_t H5Z_FAIL_TEST[1] = {{
  *
  * Return:	Success:	Data chunk size
  *		Failure:	0
- *
- * Programmer:	Raymond Lu
- *              7 September 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -93,9 +87,6 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned 
  * Return:
  *              Success:         0
  *              Failure:         -1
- *
- * Programmer:  Raymond Lu
- *              25 August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -228,9 +219,6 @@ error:
  * Return:
  *              Success:         0
  *              Failure:         -1
- *
- * Programmer:  Raymond Lu
- *              25 August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -366,9 +354,6 @@ error:
  *              failure.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Raymond Lu
- *              25 August 2010
  *
  *-------------------------------------------------------------------------
  */

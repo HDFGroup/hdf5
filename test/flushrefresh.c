@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Mike McGreevy
- *             June 30, 2010
- *
  * Purpose: This test file contains routines used to test flushing and
  *          refreshing individual objects' metadata from the cache.
  *
@@ -130,9 +127,6 @@ herr_t end_verification(void);
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Mike McGreevy
- *              July 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -200,9 +194,6 @@ error:
  *              from the metadata cache.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              July 1, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -669,9 +660,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              August 17, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1023,9 +1011,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1062,9 +1047,6 @@ error:
  *              obj_pathname argument.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1127,9 +1109,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1166,9 +1145,6 @@ error:
  *              on an object and conclude the refresh verification.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1209,9 +1185,6 @@ error:
  *              up the new metadata reflective of the added attribute.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1375,9 +1348,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              July 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1401,9 +1371,6 @@ check_for_errors(void)
  *              that the test can wrap up.
  *
  * Return:      void
- *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
  *
  *-------------------------------------------------------------------------
  */

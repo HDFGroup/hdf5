@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAsblock.c
- *			Sep 30 2008
- *			Quincey Koziol
  *
  * Purpose:		Super block routines for extensible arrays.
  *
@@ -84,9 +82,6 @@ H5FL_BLK_DEFINE(page_init);
  * Purpose:	Allocate extensible array super block
  *
  * Return:	Non-NULL pointer to super block on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -168,9 +163,6 @@ done:
  * Purpose:	Creates a new extensible array super block in the file
  *
  * Return:	Valid file address on success/HADDR_UNDEF on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -264,9 +256,6 @@ done:
  *
  * Return:	Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 H5EA_sblock_t *
@@ -332,9 +321,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -363,9 +349,6 @@ done:
  * Purpose:	Delete a super block
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -414,9 +397,6 @@ done:
  * Purpose:	Destroys an extensible array super block in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
  */

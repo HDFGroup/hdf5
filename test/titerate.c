@@ -1203,9 +1203,6 @@ test_iterate(void)
  *
  * Return:    none
  *
- * Programmer:    Quincey Koziol
- *              April 5, 2000
- *
  *-------------------------------------------------------------------------
  */
 void

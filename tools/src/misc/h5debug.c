@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             debug.c
- *                      Jul 18 1997
- *                      Robb Matzke
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *
@@ -64,9 +62,6 @@
  *              identifier is two bytes after the B-tree signature.
  *
  * Return:  Non-NULL on success/NULL on failure
- *
- * Programmer:  Quincey Koziol
- *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -146,9 +141,6 @@ get_H5B2_class(const uint8_t *sig)
  *
  * Return:  Non-NULL on success/NULL on failure
  *
- * Programmer:  Quincey Koziol
- *    Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 static const H5EA_class_t *
@@ -187,9 +179,6 @@ get_H5EA_class(const uint8_t *sig)
  *
  * Return:  Non-NULL on success/NULL on failure
  *
- * Programmer:  Quincey Koziol
- *    Sep 11 2008
- *
  *-------------------------------------------------------------------------
  */
 static const H5FA_class_t *
@@ -227,9 +216,6 @@ get_H5FA_class(const uint8_t *sig)
  * Return:      Success:        exit (0)
  *
  *              Failure:        exit (non-zero)
- *
- * Programmer:  Robb Matzke
- *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
  */

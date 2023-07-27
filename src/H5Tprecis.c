@@ -38,9 +38,6 @@ static herr_t H5T__set_precision(const H5T_t *dt, size_t prec);
  *		Failure:	0 (all atomic types have at least one
  *				significant bit)
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -75,9 +72,6 @@ done:
  * Return:	Success:	Number of significant bits
  *		Failure:	0 (all atomic types have at least one
  *				significant bit)
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, October 17, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -120,9 +114,6 @@ done:
  *		fields first.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -178,9 +169,6 @@ done:
  *		fields first.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */

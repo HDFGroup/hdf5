@@ -75,9 +75,6 @@
  * Return:	Success:	ID of new array datatype
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Oct 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -129,9 +126,6 @@ done:
  *
  * Return:	Success:	ID of new array data type
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, Oct 26, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -187,9 +181,6 @@ done:
  * Return:	Success:	Number of dimensions of the array datatype
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 6, 2000
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -223,9 +214,6 @@ done:
  * Return:	Success:	Number of dimensions of the array datatype
  *		Failure:	Negative
  *
- * Programmer:	Raymond Lu
- *              October 10, 2002
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -247,9 +235,6 @@ H5T__get_array_ndims(const H5T_t *dt)
  *
  * Return:	Success:	Number of dimensions of the array type
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, October 17, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -283,9 +268,6 @@ done:
  *
  * Return:	Success:	Number of dimensions of the array type
  *		Failure:	Negative
- *
- * Programmer:  Raymond Lu
- *              October 10, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -323,9 +305,6 @@ H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
  *
  * Return:	Success:	ID of new array datatype
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, Oct 26, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -375,9 +354,6 @@ done:
  *
  * Return:	Success:	Number of dimensions of the array type
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, November 6, 2000
  *
  *-------------------------------------------------------------------------
  */

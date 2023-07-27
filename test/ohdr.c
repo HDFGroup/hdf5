@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- */
 #include "h5test.h"
 
 #include "H5CXprivate.h" /* API Contexts                             */
@@ -1821,9 +1818,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: 1
- *
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */

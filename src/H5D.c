@@ -749,9 +749,6 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Tuesday, February  3, 1998
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -810,9 +807,6 @@ done:
  *                          released by calling H5Pclose().
  *
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Neil Fortner
- *              Wednesday, October 29, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1049,9 +1043,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Thursday, December 4, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1078,9 +1069,6 @@ done:
  * Purpose:     Asynchronously read dataset elements.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Houjun Tang
- *              Oct 15, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1125,8 +1113,6 @@ done:
  *              multiple datasets from a file into application memory BUFS.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jonathan Kim Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1202,9 +1188,6 @@ done:
  * Purpose:     Reads an entire chunk from the file directly.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              14 February 2016
  *
  *---------------------------------------------------------------------------
  */
@@ -1370,9 +1353,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Thursday, December 4, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1399,9 +1379,6 @@ done:
  * Purpose:     For asynchronous VOL with request token
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Houjun Tang
- *              Oct 15, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1447,8 +1424,6 @@ done:
  *              application memory BUFs into multiple datasets in a file.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jonathan Kim  Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1525,9 +1500,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		        30 July 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1590,9 +1562,6 @@ done:
  *              scattered is specified by type_id.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              14 Jan 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1686,9 +1655,6 @@ done:
  *              the data to be gathered is specified by type_id.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              16 Jan 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1881,9 +1847,6 @@ done:
  *          or zero if all elements were processed. Otherwise returns a
  *          negative value.
  *
- * Programmer:  Quincey Koziol
- *              Friday, June 11, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1931,9 +1894,6 @@ done:
  *      bytes are required to store the VL data in memory.
  *
  * Return:  Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, August 11, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -2190,9 +2150,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Vailin Choi
- *              Feb 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2231,9 +2188,6 @@ done:
  * Purpose:     Retrieve a dataset's chunk indexing type
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Vailin Choi
- *              Feb 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2276,9 +2230,6 @@ done:
  *              the caller can construct an appropriate buffer.
  *
  * Return:	Non-negative on success, negative on failure
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              20 October 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -2331,9 +2282,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Binh-Minh Ribler
- *              May 2019 (HDFFV-10677)
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2383,9 +2331,6 @@ done:
  *              hsize_t *size           OUT: Size of the chunk
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Binh-Minh Ribler
- *              May 2019 (HDFFV-10677)
  *
  *-------------------------------------------------------------------------
  */
@@ -2457,9 +2402,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Binh-Minh Ribler
- *              May 2019 (HDFFV-10677)
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2511,9 +2453,6 @@ done:
  *              void *op_data           IN/OUT: Optional user data passed on to user callback.
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Gaute Hope
- *              August 2020
  *
  *-------------------------------------------------------------------------
  */

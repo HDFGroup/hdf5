@@ -31,11 +31,6 @@
  *  type - object type
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Thursday, March 24, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -69,15 +64,6 @@ h5iget_type_c(hid_t_f *obj_id, int_f *type)
  *  buf - buffer to hold the name
  * RETURNS
  *  length of the name on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12, 2003
- * HISTORY
- *
- *  Changed the size of c_buf_size to c_buf_size + 1, which
- *  fixes the problem of truncating the string by 1 if the
- *  exact size of the string (buf_size) is passed in.
- *               M. Scot Breitenfeld, April 21, 2008
  * SOURCE
  */
 int_f
@@ -129,9 +115,6 @@ DONE:
  *  ref_count - Reference count of ID
  * RETURNS
  *  current reference count on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  Tuesday, December  9, 2003
  * SOURCE
  */
 int_f
@@ -165,9 +148,6 @@ done:
  *  ref_count - Reference count of ID
  * RETURNS
  *  current reference count on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  Tuesday, December  9, 2003
  * SOURCE
  */
 int_f
@@ -201,10 +181,6 @@ done:
  *  ref_count - Reference count of ID
  * RETURNS
  *  current reference count on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  Tuesday, December  9, 2003
- *
  * SOURCE
  */
 int_f
@@ -238,10 +214,6 @@ done:
  *  file_id - file identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 24, 2004
- *
  * SOURCE
  */
 int_f
@@ -271,8 +243,6 @@ done:
  *  Inputs:      obj_id - object identifier
  *  Outputs:     0 = false, 1 = true
  *  Returns:     0 on success, -1 on failure
- *  Programmer:  Elena Pourmal
- *  Tuesday, August 24, 2004
  *---------------------------------------------------------------------------*/
 int_f
 h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Gint.c
- *		April 5 2007
- *		Quincey Koziol
  *
  * Purpose:	General use, "internal" routines for groups.
  *
@@ -146,9 +144,6 @@ done:
  *				affect other interfaces; zero otherwise.
  * 		Failure:	Negative.
  *
- * Programmer:	Quincey Koziol
- *		Sunday, September	13, 2015
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -177,9 +172,6 @@ H5G_top_term_package(void)
  * Return:	Success:	Positive if anything is done that might
  *				affect other interfaces; zero otherwise.
  * 		Failure:	Negative.
- *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -239,9 +231,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:  Quincey Koziol
- *	        April 5, 2007
- *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -292,9 +281,6 @@ done:
  *				H5G_close().
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -364,9 +350,6 @@ done:
  * Return:	Success:	Ptr to a new group.
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *		Monday, August	27, 2007
- *
  *-------------------------------------------------------------------------
  */
 H5G_t *
@@ -426,9 +409,6 @@ done:
  * Return:	Success:	Ptr to a new group.
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -519,9 +499,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *	    Wednesday, March	17, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -565,9 +542,6 @@ done:
  * Purpose:	Closes the specified group.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -660,9 +634,6 @@ done:
  * Return:	Success:	Ptr to group entry
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *              Tuesday, March 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5O_loc_t *
@@ -681,9 +652,6 @@ H5G_oloc(H5G_t *grp)
  *
  * Return:	Success:	Ptr to hier. name
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Monday, September 12, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -705,9 +673,6 @@ H5G_nameof(H5G_t *grp)
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *              Tuesday, March 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -728,9 +693,6 @@ H5G_fileof(H5G_t *grp)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, July	 5, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -750,9 +712,6 @@ H5G_get_shared_count(H5G_t *grp)
  * Purpose:	Sets the 'mounted' flag for a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -778,9 +737,6 @@ H5G_mount(H5G_t *grp)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, July 15, 2008
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -800,9 +756,6 @@ H5G_mounted(H5G_t *grp)
  * Purpose:	Resets the 'mounted' flag for a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -828,9 +781,6 @@ H5G_unmount(H5G_t *grp)
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Oct  3, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -879,9 +829,6 @@ done:
  * Purpose:     Private function for iterating over links in a group
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Oct  3, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -940,9 +887,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *	        Nov  4, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -962,9 +906,6 @@ H5G__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSE
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Nov  4, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1271,9 +1212,6 @@ done:
  *
  *		Failure:	H5I_INVALID_HID
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, October 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1361,9 +1299,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 18, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1409,9 +1344,6 @@ done:
  * Purpose:     Internal routine to retrieve the info for a group, by index.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		December 18, 2017
  *
  *-------------------------------------------------------------------------
  */

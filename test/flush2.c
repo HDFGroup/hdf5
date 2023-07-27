@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  * Purpose:  This is the second half of a two-part test that makes sure
  *    that a file can be read after an application crashes as long
  *    as the file was flushed first.  This half tries to read the
@@ -51,9 +48,6 @@ static hbool_t file_ok(const char *filename, hid_t fapl_id, hbool_t check_second
  * Purpose:     Checks if the data in a dataset is what it is supposed to be.
  *
  * Return:      TRUE/FALSE
- *
- * Programmer:	Leon Arber
- *              Oct. 4, 2006.
  *
  *-------------------------------------------------------------------------
  */
@@ -113,9 +107,6 @@ error:
  * Purpose:     Checks that the contents of a file are what they should be.
  *
  * Return:      TRUE/FALSE
- *
- * Programmer:	Leon Arber
- *              Sept. 26, 2006.
  *
  *-------------------------------------------------------------------------
  */
@@ -177,9 +168,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              July 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -229,9 +217,6 @@ error:
  *              Part 2 of a two-part H5Fflush() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:	Robb Matzke
- *              Friday, October 23, 1998
  *
  *-------------------------------------------------------------------------
  */

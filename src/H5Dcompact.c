@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              August 5, 2002
- *
  * Purpose:     Compact dataset I/O functions.  These routines are similar
  *              H5D_contig_* and H5D_chunk_*.
  */
@@ -110,9 +107,6 @@ H5FL_BLK_EXTERN(type_conv);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		May 6, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -158,9 +152,6 @@ done:
  * Purpose:	Constructs new compact layout information for dataset
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, May 22, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -214,9 +205,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -237,9 +225,6 @@ H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  * Purpose:	Performs initialization before any sort of I/O on the raw data
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -310,9 +295,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              May 7, 2003
- *
  * Notes:
  *              Offsets in the sequences must be monotonically increasing
  *
@@ -371,9 +353,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              May 2, 2003
- *
  * Notes:
  *              Offsets in the sequences must be monotonically increasing
  *
@@ -429,9 +408,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -464,9 +440,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -489,9 +462,6 @@ H5D__compact_dest(H5D_t *dset)
  * Purpose:     Copy compact storage raw data from SRC file to DST file.
  *
  * Return:      Non-negative on success, negative on failure.
- *
- * Programmer:  Peter Cao
- *              December 11, 2005
  *
  *-------------------------------------------------------------------------
  */

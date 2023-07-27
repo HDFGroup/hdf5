@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, March 27, 1998
- *
  * Purpose:	Operations on the global heap.  The global heap is the set of
  *		all collections and each collection contains one or more
  *		global heap objects.  An object belongs to exactly one
@@ -113,9 +110,6 @@ H5FL_BLK_DEFINE(gheap_chunk);
  *				is called.
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Friday, March 27, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -227,9 +221,6 @@ done:
  *
  * Return:	Pointer to indirect block on success, NULL on failure
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, May  5, 2010
- *
  *-------------------------------------------------------------------------
  */
 H5HG_heap_t *
@@ -273,9 +264,6 @@ done:
  * Return:	Success:	The heap object ID of the new object.
  *
  *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Friday, March 27, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -395,9 +383,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Saturday, June 12, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -484,9 +469,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Friday, March 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -569,9 +551,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *              Monday, March 30, 1998
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -642,9 +621,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Monday, March 30, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -695,9 +671,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Neil Fortner
- *              Thursday, February 12, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -736,9 +709,6 @@ done:
  * Purpose:	Removes the specified object from the global heap.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Monday, March 30, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -831,9 +801,6 @@ done:
  * Purpose:     Destroys a global heap collection in memory
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, January 15, 2003
  *
  *-------------------------------------------------------------------------
  */

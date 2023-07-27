@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Adense.c
- *			Dec  4 2006
- *			Quincey Koziol
  *
  * Purpose:		Routines for operating on "dense" attribute storage
  *                      for an object.
@@ -159,9 +157,6 @@ typedef struct H5A_bt2_ud_rmbi_t {
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec  4 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -265,9 +260,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Dec 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -323,9 +315,6 @@ done:
  * Purpose:     Open an attribute in dense storage structures for an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -411,9 +400,6 @@ done:
  * Purpose:     Insert an attribute into dense storage structures for an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Dec  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -568,9 +554,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, February 20, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -600,9 +583,6 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
  * Purpose:     v2 B-tree 'modify' callback to update the data for an attribute
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, December  5, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -713,9 +693,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Dec  4 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -808,9 +785,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Dec  5 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -849,9 +823,6 @@ done:
  * Purpose:     Rename an attribute in dense storage structures for an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Jan  3 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1032,9 +1003,6 @@ done:
  *
  * Return:      H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
- * Programmer:  Quincey Koziol
- *              Dec  5 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1127,9 +1095,6 @@ done:
  * Purpose:     Iterate over attributes in dense storage structures for an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Dec  5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1261,9 +1226,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Dec 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1323,9 +1285,6 @@ done:
  * Purpose:     Remove an attribute from the dense storage of an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1409,9 +1368,6 @@ done:
  * Purpose:     v2 B-tree callback for dense attribute storage record removal by index
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Feb 14 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1536,9 +1492,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Feb 14 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1662,9 +1615,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Dec 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1747,9 +1697,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Jan  3 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1809,9 +1756,6 @@ done:
  * Purpose:     Delete all dense storage structures for attributes on an object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Dec  6 2006
  *
  *-------------------------------------------------------------------------
  */

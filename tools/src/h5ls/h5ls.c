@@ -11,11 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, March 23, 1998
- */
-
-/*
  * We include the private header file so we can get to the uniform
  * programming environment it declares.  Other than that, h5ls only calls
  * HDF5 API functions (except for H5G_basename())

@@ -38,9 +38,6 @@
  *
  * Return:  Non-negative on success/Negative on failure
  *
- * Programmer:  Dana Robinson
- *              October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t

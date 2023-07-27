@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Pedro Vicente
- *              April 12, 2002
- *
  * Purpose:     Tests the "ID to name" functionality
  */
 
@@ -3668,9 +3665,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 27, 2010
  *
  *-------------------------------------------------------------------------
  */

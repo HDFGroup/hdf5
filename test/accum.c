@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Mike McGreevy
- *              October 7, 2010
- */
 #include "h5test.h"
 
 #define H5F_FRIEND  /*suppress error about including H5Fpkg	  */
@@ -77,9 +74,6 @@ void accum_printf(const H5F_t *f);
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Mike McGreevy
- *              October 7, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -178,9 +172,6 @@ error:
  * Return:      Success: SUCCEED
  *              Failure: FAIL
  *
- * Programmer:  Mike McGreevy
- *              October 7, 2010
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -236,9 +227,6 @@ error:
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Allen Byrne
- *              October 8, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -302,9 +290,6 @@ error:
  * Return:      Success: SUCCEED
  *              Failure: FAIL
  *
- * Programmer:  Allen Byrne
- *              October 8, 2010
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -366,9 +351,6 @@ error:
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Raymond Lu
- *              October 8, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -600,9 +582,6 @@ error:
  * Return:      Success: SUCCEED
  *              Failure: FAIL
  *
- * Programmer:  Mike McGreevy
- *              October 7, 2010
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -806,9 +785,6 @@ error:
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Neil Fortner
- *              October 8, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1026,9 +1002,6 @@ error:
  * Return:      Success: SUCCEED
  *              Failure: FAIL
  *
- * Programmer:  Allen Byrne
- *              October 8, 2010
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -1099,9 +1072,6 @@ error:
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Allen Byrne
- *              October 8, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1183,9 +1153,6 @@ error:
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Mike McGreevy
- *              October 11, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1482,9 +1449,6 @@ error:
  * Return:      Success: SUCCEED
  *              Failure: FAIL
  *
- * Programmer:  Larry Knox
- *              October 8, 2010
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -1566,9 +1530,6 @@ error:
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Quincey Koziol
- *              October 12, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1932,9 +1893,6 @@ error:
  * Return:      Success: SUCCEED
  *              Failure: FAIL
  *
- * Programmer:  Quincey Koziol
- *              October 11, 2010
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -2085,8 +2043,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: 1
- *
- * Programmer:  Vailin Choi; April 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -2344,9 +2300,6 @@ error:
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
- *
- * Programmer:  Mike McGreevy
- *              October 7, 2010
  *
  *-------------------------------------------------------------------------
  */

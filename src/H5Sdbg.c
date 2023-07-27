@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5Sdbg.c
- *                  Quincey Koziol
- *                  Jul 24 2007
  *
  * Purpose:         Dump debugging information about a dataspace
  *
@@ -68,9 +66,6 @@
  * Purpose:     Prints debugging information about a dataspace.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Tuesday, July 21, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  James Laird
- *              Monday, January 29, 2007
- *
+/*
  * Purpose:	A message holding "implicitly shared object header message"
  *              information in the superblock extension.
  */
@@ -112,9 +110,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -145,9 +140,6 @@ H5O__shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
  *
  * Return:	Success:	Ptr to _DEST
  *		Failure:	NULL
- *
- * Programmer:  James Laird
- *              Jan 29, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -186,9 +178,6 @@ done:
  * Return:	Success:	Message data size in bytes w/o alignment.
  *		Failure:	0
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -214,9 +203,6 @@ H5O__shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
  * Purpose:	Prints debugging info for the message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  James Laird
- *              Jan 29, 2007
  *
  *-------------------------------------------------------------------------
  */

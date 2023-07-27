@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FSint.c
- *              Fall 2012
- *              Dana Robinson
  *
  * Purpose:     Internal routines for free space managers.
  *
@@ -73,9 +71,6 @@
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -103,9 +98,6 @@ done:
  * Purpose:     Destroy a flush dependency between two data structure components
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2012
  *
  *-------------------------------------------------------------------------
  */

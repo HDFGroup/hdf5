@@ -79,9 +79,6 @@ H5FL_SEQ_EXTERN(hsize_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, June 20, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -183,9 +180,6 @@ done:
  * Return:	Success:	Number of elements copied.
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, June 24, 2002
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -281,9 +275,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 8, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -366,9 +357,6 @@ done:
  * Return:	Success:	Number of elements copied.
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, June 24, 2002
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -445,9 +433,6 @@ done:
  * Purpose:	Perform scatter/gather ead from a contiguous [piece of a] dataset.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -590,9 +575,6 @@ done:
  * Purpose:	Perform scatter/gather write to a contiguous [piece of a] dataset.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1310,9 +1292,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		11 June 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1439,9 +1418,6 @@ done:
  *
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		11 June 2007
  *
  *-------------------------------------------------------------------------
  */

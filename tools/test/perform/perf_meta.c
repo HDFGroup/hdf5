@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2004
- *
  * Purpose:	Tests performance of metadata
  */
 
@@ -69,9 +66,6 @@ void   print_perf(p_time, p_time, p_time);
  * Function:	parse_options
  *
  * Purpose:	Parse command line options
- *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -188,9 +182,6 @@ parse_options(int argc, char **argv)
  *
  * Purpose:	Prints help page
  *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -241,9 +232,6 @@ usage(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -278,9 +266,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -318,9 +303,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -421,9 +403,6 @@ error:
  *
  *		Failure:	-1
  *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -521,9 +500,6 @@ error:
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -626,9 +602,6 @@ error:
  *
  * Purpose:     Returns time in seconds, in a double number.
  *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 double
@@ -653,9 +626,6 @@ retrieve_time(void)
  *
  * Purpose:	Calculate total time, maximal and minimal time of
  *              performance.
- *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -706,9 +676,6 @@ perf(p_time *perf_t, double start_t, double end_t)
  *
  * Purpose:	Print out performance data.
  *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -731,9 +698,6 @@ print_perf(p_time open_t, p_time close_t, p_time attr_t)
  * Return:	Success:	exit(0)
  *
  *		Failure:	exit(1)
- *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
  *
  *-------------------------------------------------------------------------
  */

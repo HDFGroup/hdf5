@@ -286,9 +286,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Aug 29 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -410,9 +407,6 @@ H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *
  *              Failure:        NULL
  *
- * Programmer:  Quincey Koziol
- *              Aug 29 2005
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -475,9 +469,6 @@ done:
  * Return:      Success:        Message data size in bytes without alignment.
  *
  *              Failure:        zero
- *
- * Programmer:  Quincey Koziol
- *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -548,9 +539,6 @@ H5O__link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Monday, August 29, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -581,9 +569,6 @@ H5O__link_reset(void *_mesg)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, August 29, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -606,9 +591,6 @@ H5O__link_free(void *_mesg)
  * Purpose:     Free file space referenced by message
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Monday, August 29, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -678,9 +660,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, June 26, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -712,9 +691,6 @@ H5O__link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSE
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              November  7, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -753,9 +729,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November  7, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -791,9 +764,6 @@ done:
  * Purpose:     Prints debugging info for a message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Aug 29 2005
  *
  *-------------------------------------------------------------------------
  */

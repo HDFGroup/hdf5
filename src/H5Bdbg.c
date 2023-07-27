@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5Bdbg.c
- *                  Dec 11 2008
- *                  Quincey Koziol
  *
  * Purpose:         Debugging routines for B-link tree package.
  *
@@ -41,9 +39,6 @@
  * Purpose:     Prints debugging info about a B-tree.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Aug  4 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -142,9 +137,6 @@ done:
  * Return:      Success:    SUCCEED
  *
  *              Failure:    aborts if something is wrong.
- *
- * Programmer:  Robb Matzke
- *              Tuesday, November  4, 1997
  *
  *-------------------------------------------------------------------------
  */

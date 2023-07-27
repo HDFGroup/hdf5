@@ -30,10 +30,6 @@ static void ph5diff_worker(int);
  * Return: An exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
- * Programmer: Pedro Vicente
- *
- * Date: May 9, 2003
- *
  * Comments:
  *
  * This function drives the diff process and will do a serial or parallel diff depending
@@ -112,9 +108,6 @@ main(int argc, char *argv[])
  * Purpose: worker process of ph5diff
  *
  * Return: none
- *
- * Programmer: Leon Arber
- * Date: January 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -241,10 +234,6 @@ ph5diff_worker(int nID)
  *
  * Return: none
  *
- * Programmer: Leon Arber
- *
- * Date: Feb 7, 2005
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -278,9 +267,6 @@ print_manager_output(void)
  * Purpose: dismiss phdiff worker processes and exit
  *
  * Return: none
- *
- * Programmer: Albert Cheng
- * Date: Feb 6, 2005
  *
  *-------------------------------------------------------------------------
  */

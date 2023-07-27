@@ -24,12 +24,6 @@
  * Return: An  exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
- * Programmer: Pedro Vicente
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -111,11 +105,6 @@ main(int argc, char *argv[])
  * Purpose: dismiss phdiff worker processes and exit
  *
  * Return: none
- *
- * Programmer: Albert Cheng
- * Date: Feb 6, 2005
- *
- * Comments:
  *
  *-------------------------------------------------------------------------
  */

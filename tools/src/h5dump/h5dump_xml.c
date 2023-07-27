@@ -125,7 +125,6 @@ static char *xml_escape_the_name(const char *);
  *
  *              Failure:        FAIL
  *
- * Programmer:  Ruey-Hsia Li
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -648,7 +647,6 @@ static const char *apos  = "&apos;";
  *
  * Return:      The revised string.
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 static char *
@@ -738,7 +736,6 @@ xml_escape_the_name(const char *str)
  *
  * Return:      The revised string.
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 static char *
@@ -844,7 +841,6 @@ xml_escape_the_string(const char *str, int slen)
  *
  * Return:      void
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 static void
@@ -1562,7 +1558,6 @@ xml_print_datatype(hid_t type, unsigned in_group)
  *
  * Return:      void
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
@@ -1691,7 +1686,6 @@ xml_dump_datatype(hid_t type)
  *
  * Return:      void
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
@@ -2031,7 +2025,6 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED *sset, 
  *
  * Return:      herr_t
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2352,7 +2345,6 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
  *
  * Return:      herr_t
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
@@ -2556,7 +2548,6 @@ done:
  *
  * Return:      void
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
@@ -2940,7 +2931,6 @@ xml_dump_group(hid_t gid, const char *name)
  *
  * Return:      void
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 static int
@@ -3090,7 +3080,6 @@ error:
  *
  * Return:      void
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 static int
@@ -3261,7 +3250,6 @@ error:
  *
  * Return:      void
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 static void
@@ -4370,7 +4358,6 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
  *
  * Return:      void
  *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 static void

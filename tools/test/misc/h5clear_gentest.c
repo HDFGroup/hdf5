@@ -48,8 +48,6 @@ const char *FILENAME_ENHANCE[] = {
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:    Vailin Choi; March 2017
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -166,8 +164,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:    Vailin Choi; March 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -365,8 +361,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Vailin Choi; July 2013
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, June 16, 1998
- *
  * Purpose:     Point selection dataspace I/O functions.
  */
 
@@ -163,9 +160,6 @@ H5FL_DEFINE_STATIC(H5S_pnt_list_t);
  *
  * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -216,9 +210,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, April 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -243,9 +234,6 @@ H5S__point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
  *              selection
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Monday, June 2, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -272,9 +260,6 @@ H5S__point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
  * Purpose:     Return number of elements left to process in iterator
  *
  * Return:      Non-negative number of elements on success, zero on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2226,9 +2211,6 @@ H5S__point_adjust_s(H5S_t *space, const hssize_t *offset)
  *
  * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:  Quincey Koziol
- *              Sunday, July 18, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2265,9 +2247,6 @@ done:
  *              of a different rank
  *
  * Return:      Non-negative on success, negative on failure.
- *
- * Programmer:  Quincey Koziol
- *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
  */

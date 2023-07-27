@@ -181,7 +181,6 @@ static void report_parameters(struct options *opts);
  * Function:    main
  * Purpose:     Start things up.
  * Return:      EXIT_SUCCESS or EXIT_FAILURE
- * Programmer:  Bill Wendling, 30. October 2001
  */
 int
 main(int argc, char *argv[])
@@ -235,7 +234,6 @@ finish:
  *              this out.
  *
  * Return:      Nothing
- * Programmer:  Bill Wendling, 30. October 2001
  */
 static void
 run_test_loop(struct options *opts)
@@ -288,7 +286,6 @@ run_test_loop(struct options *opts)
  * Function:    run_test
  * Purpose:     Inner loop call to actually run the I/O test.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 18. December 2001
  */
 static int
 run_test(iotype iot, parameters parms, struct options *opts)
@@ -519,7 +516,6 @@ run_test(iotype iot, parameters parms, struct options *opts)
  * Function:    output_all_info
  * Purpose:
  * Return:      Nothing
- * Programmer:  Bill Wendling, 29. January 2002
  */
 static void
 output_all_info(minmax *mm, int count, int indent_level)
@@ -540,7 +536,6 @@ output_all_info(minmax *mm, int count, int indent_level)
  * Function:    get_minmax
  * Purpose:     Gather all the min, max and total of val.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 21. December 2001
  */
 
 static void
@@ -556,7 +551,6 @@ get_minmax(minmax *mm, double val)
  * Purpose:     Accumulate the minimum, maximum, and average of the times
  *              across all processes.
  * Return:      TOTAL_MM - the total of all of these.
- * Programmer:  Bill Wendling, 21. December 2001
  */
 static void
 accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
@@ -586,7 +580,6 @@ accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
  * Purpose:     Print information about the time & bandwidth for a given
  *                  minmax & # of iterations.
  * Return:      Nothing
- * Programmer:  Quincey Koziol, 9. May 2002
  */
 static void
 output_results(const struct options *opts, const char *name, minmax *table, int table_size, off_t data_size)
@@ -626,7 +619,6 @@ output_results(const struct options *opts, const char *name, minmax *table, int 
  * Function:    output_report
  * Purpose:     Print a line of the report. Only do so if I'm the 0 process.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 19. December 2001
  */
 static void
 output_report(const char *fmt, ...)
@@ -645,7 +637,6 @@ output_report(const char *fmt, ...)
  * Purpose:     Print spaces to indent a new line of text for pretty printing
  *              things.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 29. October 2001
  */
 static void
 print_indent(int indent)
@@ -800,7 +791,6 @@ report_parameters(struct options *opts)
  * Purpose:     Parse the command line options and return a STRUCT OPTIONS
  *              structure which will need to be freed by the calling function.
  * Return:      Pointer to an OPTIONS structure
- * Programmer:  Bill Wendling, 31. October 2001
  */
 static struct options *
 parse_command_line(int argc, const char *const *argv)
@@ -1166,7 +1156,6 @@ parse_command_line(int argc, const char *const *argv)
  * Return:      The size as a off_t because this is related to file size.
  *              If an unknown size indicator is used, then the program will
  *              exit with EXIT_FAILURE as the return value.
- * Programmer:  Bill Wendling, 18. December 2001
  */
 
 static hsize_t
@@ -1210,7 +1199,6 @@ parse_size_directive(const char *size)
  * Function:    usage
  * Purpose:     Print a usage message and then exit.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 31. October 2001
  */
 static void
 usage(const char *prog)

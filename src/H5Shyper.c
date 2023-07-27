@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Thursday, June 18, 1998
- *
  * Purpose:     Hyperslab selection dataspace I/O functions.
  */
 
@@ -526,9 +523,6 @@ H5S__hyper_print_space_dfs(FILE *f, const H5S_t *space)
  *
  * Return:    Operation generation value (can't fail)
  *
- * Programmer:    Quincey Koziol
- *              Saturday, January 19, 2019
- *
  * Notes:       Assumes that a 64-bit value will not wrap around during
  *              the lifespan of the process.
  *
@@ -548,9 +542,6 @@ H5S__hyper_get_op_gen(void)
  * Purpose:     Initializes iteration information for hyperslab selection.
  *
  * Return:      Non-negative on success, negative on failure.
- *
- * Programmer:  Quincey Koziol
- *              Saturday, February 24, 2001
  *
  * Notes:       If the 'iter->elmt_size' field is set to zero, the regular
  *              hyperslab selection iterator will not be 'flattened'.  This
@@ -791,9 +782,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, April 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -876,9 +864,6 @@ H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Monday, June 2, 2003
- *
  * Notes:       This routine assumes that the iterator is always located at
  *              the beginning of a block.
  *
@@ -923,9 +908,6 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
  * Purpose:     Return number of elements left to process in iterator
  *
  * Return:      Non-negative number of elements on success, zero on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1003,9 +985,6 @@ done:
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Quincey Koziol
- *              Friday, September 8, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1212,9 +1191,6 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, June 3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6598,9 +6574,6 @@ H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
  *
  * Return:    Non-negative on success, negative on failure.
  *
- * Programmer:    Quincey Koziol
- *              Sunday, July 18, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6674,9 +6647,6 @@ H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset)
  *
  * Return:    Non-negative on success, negative on failure.
  *
- * Programmer:    Quincey Koziol
- *              Sunday, July 18, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6722,9 +6692,6 @@ done:
  *              of a higher rank
  *
  * Return:    Non-negative on success, negative on failure.
- *
- * Programmer:    Quincey Koziol
- *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -6826,9 +6793,6 @@ done:
  *              of a different rank
  *
  * Return:    Non-negative on success, negative on failure.
- *
- * Programmer:    Quincey Koziol
- *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -9192,7 +9156,6 @@ done:
  RETURNS
     TRUE for overlap, FALSE for no overlap
  PROGRAMMER
-    Quincey Koziol -  January 24, 2019
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -9573,9 +9536,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, September 12, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -9663,9 +9623,6 @@ done:
  * Purpose:    Set a regular hyperslab
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Thursday, October 2, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -9763,9 +9720,6 @@ done:
  *              and a regular hyperslab is selected in the file's dataspace.
  *
  * Return:    Non-negative on success / Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Saturday, February 9, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -9991,9 +9945,6 @@ done:
  * Purpose:     Internal version of H5Sselect_hyperslab().
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, January 10, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -10588,9 +10539,6 @@ done:
  *
  * Return:    Non-negative on success/negative on failure
  *
- * Programmer:    Chao Mei
- *              Tuesday, July 5, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -10702,9 +10650,6 @@ done:
  * Purpose:     Internal version of H5Scombine_select().
  *
  * Return:      New dataspace on success/NULL on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 30, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -10844,9 +10789,6 @@ done:
  * Purpose:     Internal version of H5Smodify_select().
  *
  * Return:      New dataspace on success/NULL on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 30, 2001
  *
  *-------------------------------------------------------------------------
  */

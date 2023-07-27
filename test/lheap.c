@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- *
  * Purpose:    Test local heaps used by symbol tables (groups).
  */
 #include "h5test.h"
@@ -38,9 +35,6 @@ const char *FILENAME[] = {"lheap", NULL};
  *              local heap, close the file.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
  */

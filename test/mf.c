@@ -7798,8 +7798,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8030,8 +8028,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8160,8 +8156,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Vailin Choi; Jan 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -8341,8 +8335,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8504,8 +8496,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8658,8 +8648,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Vailin Choi; Jan 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -8830,8 +8818,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Vailin Choi; Jan 2013
  *
  *-------------------------------------------------------------------------
  */

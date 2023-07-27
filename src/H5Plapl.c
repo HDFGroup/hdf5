@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Plapl.c
- *			July 14 2006
- *			James Laird
  *
  * Purpose:		Link access property list class routines
  *
@@ -178,9 +176,6 @@ static const H5P_coll_md_read_flag_t H5L_def_coll_md_read_g =
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -242,9 +237,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -283,9 +275,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -327,9 +316,6 @@ done:
  *
  * Return:         Success:        Non-negative
  *	               Failure:        Negative
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -399,9 +385,6 @@ done:
  * Return:         Success:        Non-negative
  *	               Failure:        Negative
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -455,9 +438,6 @@ done:
  * Return:      Success:        Non-negative
  * 	            Failure:        Negative
  *
- * Programmer:  Vailin Choi
- *	            Tuesday, Sept 23, 2008
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -490,9 +470,6 @@ done:
  *
  * Return:      Success:        Non-negative
  * 	            Failure:        Negative
- *
- * Programmer:  Vailin Choi
- *	            Tuesday, Sept 23, 2008
  *
  *--------------------------------------------------------------------------
  */
@@ -532,9 +509,6 @@ done:
  *                 compared.
  *
  * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -582,9 +556,6 @@ done:
  * Return:      Success:        Non-negative
  * 	            Failure:        Negative
  *
- * Programmer:  Vailin Choi
- *	            Tuesday, Sept 23, 2008
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -617,9 +588,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -644,9 +612,6 @@ H5P__lacc_elink_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -674,9 +639,6 @@ H5P__lacc_elink_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -730,9 +692,6 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -783,9 +742,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -807,9 +763,6 @@ H5P__lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
  * Purpose:     Creates a copy of the external link prefix string
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              November 2, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -833,9 +786,6 @@ H5P__lacc_elink_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
  *                 compared.
  *
  * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
- *
- * Programmer:     Mohamad Chaarawi
- *                 Thursday, November 3, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -866,9 +816,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -898,9 +845,6 @@ H5P__lacc_elink_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
  *              links as desired.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Friday, July 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -939,9 +883,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Friday, July 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -977,9 +918,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Thursday, August 3, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1013,9 +951,6 @@ done:
  *              buffer.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Thursday, August 3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1065,9 +1000,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:
- *              Vailin Choi; Tuesday, September 12th, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1099,9 +1031,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:
- *              Vailin Choi; Tuesday, September 12th, 2008
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1132,9 +1061,6 @@ done:
  *              H5F_ACC_RDWR, or H5F_ACC_DEFAULT to unset the value.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Tuesday, December 9, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1173,9 +1099,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Tuesday, December 9, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1208,9 +1131,6 @@ done:
  *              H5F_ACC_RDWR.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Tuesday, December 15, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1252,9 +1172,6 @@ done:
  *              external link.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              Tuesday, December 15, 2008
  *
  *-------------------------------------------------------------------------
  */

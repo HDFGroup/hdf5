@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5Tdbg.c
- *                  Jul 19 2007
- *                  Quincey Koziol
  *
  * Purpose:         Dump debugging information about a datatype
  *

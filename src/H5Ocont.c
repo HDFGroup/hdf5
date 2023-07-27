@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Ocont.c
- *                      Aug  6 1997
- *                      Robb Matzke
  *
  * Purpose:             The object header continuation message.  This
  *                      message is only generated and read from within
@@ -121,9 +119,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug  7 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -158,9 +153,6 @@ H5O__cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *
  *              Failure:        zero
  *
- * Programmer:  Quincey Koziol
- *              Sep  6 2005
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -184,9 +176,6 @@ H5O__cont_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 15, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -207,9 +196,6 @@ H5O__cont_free(void *mesg)
  * Purpose:     Free file space referenced by message
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 10, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -240,9 +226,6 @@ done:
  * Purpose:     Prints debugging info.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
  *
  *-------------------------------------------------------------------------
  */

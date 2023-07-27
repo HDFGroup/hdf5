@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol
- *	       Thursday, March 23, 2000
- *
  * Purpose: Manage priority queues of free-lists (of blocks of bytes).
  *      These are used in various places in the library which allocate and
  *      free differently blocks of bytes repeatedly.  Usually the same size
@@ -221,9 +218,6 @@ H5FL_term_package(void)
  * Return:	Success:	non-NULL
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 1, 2000
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -256,9 +250,6 @@ done:
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, March 24, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -303,9 +294,6 @@ done:
  * Purpose:	Release an object & put on free list
  *
  * Return:	Always returns NULL
- *
- * Programmer:	Quincey Koziol
- *              Friday, March 24, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -390,9 +378,6 @@ done:
  * Return:	Success:	Pointer to a valid object
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Friday, March 24, 2000
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -467,9 +452,6 @@ done:
  * Return:	Success:	Pointer to a valid object
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Monday, December 23, 2002
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -501,9 +483,6 @@ done:
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 25, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -549,9 +528,6 @@ H5FL__reg_gc_list(H5FL_reg_head_t *head)
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, March 24, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -599,7 +575,6 @@ done:
      Can't report errors...
  EXAMPLES
  REVISION LOG
-        Robb Matzke, 2000-04-25
         If a list cannot be freed because something is using it then return
         zero (failure to free a list doesn't affect any other part of the
         library). If some other layer frees something during its termination
@@ -661,9 +636,6 @@ H5FL__reg_term(void)
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  23, 2000
- *
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
@@ -719,9 +691,6 @@ H5FL__blk_find_list(H5FL_blk_node_t **head, size_t size)
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  23, 2000
- *
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
@@ -760,9 +729,6 @@ done:
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Saturday, March 25, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -800,9 +766,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Monday, December 16, 2002
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -836,9 +799,6 @@ H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size)
  * Return:	Success:	valid pointer to the block
  *
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Thursday, March  23, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -939,9 +899,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *		Monday, December 23, 2002
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -976,9 +933,6 @@ done:
  * Return:	Success:	NULL
  *
  *		Failure:	never fails
- *
- * Programmer:	Quincey Koziol
- *		Thursday, March  23, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1086,9 +1040,6 @@ done:
  *
  *		Failure:	never fails
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  23, 2000
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1169,9 +1120,6 @@ done:
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 23, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1257,9 +1205,6 @@ H5FL__blk_gc_list(H5FL_blk_head_t *head)
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 25, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1360,9 +1305,6 @@ H5FL__blk_term(void)
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Saturday, March 25, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1408,9 +1350,6 @@ done:
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, March 24, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1518,9 +1457,6 @@ done:
  * Return:	Success:	Pointer to a valid array object
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Saturday, March 25, 2000
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1616,9 +1552,6 @@ done:
  * Return:	Success:	Pointer to a valid array object
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Monday, December 23, 2002
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1650,9 +1583,6 @@ done:
  *
  * Return:	Success:	Pointer to a valid array object
  * 		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 25, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1738,9 +1668,6 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 25, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1799,9 +1726,6 @@ H5FL__arr_gc_list(H5FL_arr_head_t *head)
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 25, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1903,9 +1827,6 @@ H5FL__arr_term(void)
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Saturday, April 3, 2004
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1936,9 +1857,6 @@ H5FL_seq_free(H5FL_seq_head_t *head, void *obj)
  * Return:	Success:	Pointer to a valid sequence object
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Saturday, April 3, 2004
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1965,9 +1883,6 @@ H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS)
  *
  * Return:	Success:	Pointer to a valid array object
  * 		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Saturday, April 3, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1996,9 +1911,6 @@ H5FL_seq_calloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS)
  * Return:	Success:	Pointer to a valid sequence object
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Saturday, April 3, 2004
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -2025,9 +1937,6 @@ H5FL_seq_realloc(H5FL_seq_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
  *
  * Return:	Success:	Pointer to factory object
  * 		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, February 2, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2096,9 +2005,6 @@ done:
  * Purpose:	Release a block back to a factory & put on free list
  *
  * Return:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, February 2, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2182,9 +2088,6 @@ done:
  * Return:	Success:	Pointer to a valid sequence object
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, February 2, 2005
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -2256,9 +2159,6 @@ done:
  * Return:	Success:	Pointer to a valid array object
  * 		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, February 2, 2005
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -2291,9 +2191,6 @@ done:
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Neil Fortner
- *              Friday, December 19, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -2340,9 +2237,6 @@ H5FL__fac_gc_list(H5FL_fac_head_t *head)
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Neil Fortner
- *              Friday, December 19, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2378,9 +2272,6 @@ done:
  *
  * Return:	Success:	non-negative
  * 		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, February 2, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2440,9 +2331,6 @@ done:
  * Return:	0.  There should never be any outstanding allocations
  *              when this is called.
  *
- * Programmer:	Neil Fortner
- *              Friday, December 19, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2483,9 +2371,6 @@ H5FL__fac_term_all(void)
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, March 24, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -2538,9 +2423,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, August 2, 2000
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2588,9 +2470,6 @@ H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_l
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, March 6, 2020
  *
  *-------------------------------------------------------------------------
  */

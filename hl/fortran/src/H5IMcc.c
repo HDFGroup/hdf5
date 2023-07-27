@@ -28,10 +28,6 @@ herr_t H5IM_get_palette(hid_t loc_id, const char *image_name, int pal_number, hi
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows the creation and writing of an 8bit image on disk.
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
@@ -117,10 +113,6 @@ H5IMmake_image_8bitf(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  * Purpose:
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
  *
  * Comments:
  *  This function allows the creation and writing of an 8bit image on disk.
@@ -231,10 +223,6 @@ H5IMmake_image_24bitf(hid_t loc_id, const char *dset_name, hsize_t width, hsize_
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows reading of an 8bit image on disk.
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
@@ -284,10 +272,6 @@ out:
  * Purpose: Creates and writes a palette.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
  *
  * Comments:
  *  This function allows writing of an 8bit palette to disk.
@@ -376,10 +360,6 @@ H5IMmake_palettef(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims, i
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows reading of an 8bit palette from disk.
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
@@ -409,10 +389,6 @@ H5IMget_palettef(hid_t loc_id, const char *image_name, int pal_number, int_f *pa
  * Purpose: private function that reads a palette to memory type TID
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
  *
  * Comments:
  *  This function allows reading of an 8bit palette from disk disk

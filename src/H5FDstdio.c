@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke
- *              Wednesday, October 22, 1997
- *
+/*
  * Purpose: The C STDIO virtual file driver which only uses calls from stdio.h.
  *          This also serves as an example of coding a simple file driver,
  *          therefore, it should not use any non-public definitions.
@@ -20,6 +18,7 @@
  * NOTE:    This driver is not as well tested as the standard SEC2 driver
  *          and is not intended for production use!
  */
+
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -234,9 +233,6 @@ static const H5FD_class_t H5FD_stdio_g = {
  *
  *    Failure:  Negative.
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -269,9 +265,6 @@ H5FD_stdio_init(void)
  *
  * Returns:     Non-negative on success or negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -291,9 +284,6 @@ H5FD_stdio_term(void)
  *    specific properties.
  *
  * Return:  Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *    Thursday, February 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -331,9 +321,6 @@ H5Pset_fapl_stdio(hid_t fapl_id)
  *                  caller, which is always H5FD_open().
  *
  *      Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *    Wednesday, October 22, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -489,9 +476,6 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
  *
  * Return:  Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *    Wednesday, October 22, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -521,9 +505,6 @@ H5FD_stdio_close(H5FD_t *_file)
  *      Success:    A value like strcmp()
  *
  *      Failure:    never fails (arguments were checked by the caller).
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -586,9 +567,6 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *
  *    Failure:  negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, August 25, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -628,9 +606,6 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long /*OUT*/ *flags)
  *
  *      Failure:    HADDR_UNDEF
  *
- * Programmer:  Raymond Lu
- *              30 March 2007
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -665,9 +640,6 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
  *
  *    Failure:  HADDR_UNDEF
  *
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -694,9 +666,6 @@ H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
  * Return:  Success:  0
  *
  *    Failure:  Does not fail
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -729,9 +698,6 @@ H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, haddr_t addr)
  *
  *    Failure:  HADDR_UNDEF
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -757,9 +723,6 @@ H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
  * Purpose:        Returns the file handle of stdio file driver.
  *
  * Returns:        Non-negative if succeed or negative if fails.
- *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -794,9 +757,6 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t /*UNUSED*/ fapl, void **file_handle)
  *    IO    SEEKERROR  fseek failed.
  *
  * Return:  Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *    Wednesday, October 22, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -898,9 +858,6 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl
  *
  * Return:  Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *    Wednesday, October 22, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -986,9 +943,6 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
  *
  * Return:  Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *    Wednesday, October 22, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1029,9 +983,6 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t closing)
  *    IO    WRITEERROR    fflush or fwrite failed.
  *
  * Return:  Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *    Thursday, January 31, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1121,8 +1072,6 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t /*UNUSED*/ 
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; March 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1171,8 +1120,6 @@ H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
  *    IO    FCNTL    flock failed.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; March 2015
  *
  *-------------------------------------------------------------------------
  */

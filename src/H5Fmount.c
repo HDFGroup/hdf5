@@ -34,9 +34,6 @@ static void H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsign
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Saturday, July  2, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -89,9 +86,6 @@ done:
  *		mouted and must not be a mount ancestor of the mount-point.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -253,9 +247,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -399,9 +390,6 @@ done:
  * Return:	Success:	TRUE/FALSE
  *		Failure:	(can't happen)
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January  2, 2002
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -428,9 +416,6 @@ H5F_is_mount(const H5F_t *file)
  *              hierarchy.
  *
  * Return:      void
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -478,9 +463,6 @@ H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_ob
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Tues, July 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -509,9 +491,6 @@ H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
  * Purpose:	Flush a mount hierarchy, recursively
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Fri, August 21, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -551,9 +530,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Fri, August 21, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -585,9 +561,6 @@ done:
  *		group of the mounted file into LNK.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
  *
  *-------------------------------------------------------------------------
  */

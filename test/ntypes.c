@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Raymond Lu
- *              October 14, 2001
- *
  * Purpose:    Tests the H5Tget_native_type function.
  */
 
@@ -59,9 +56,6 @@ const char *FILENAME[] = {"ntypes", NULL};
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -308,9 +302,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -628,9 +619,6 @@ error:
  *
  *        Failure:    -1
  *
- * Programmer:    Raymond Lu
- *        October 15, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -838,9 +826,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1078,9 +1063,6 @@ error:
  *
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *        January 31, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1303,9 +1285,6 @@ error:
  *
  *        Failure:    -1
  *
- * Programmer:    Raymond Lu
- *        October 15, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1459,9 +1438,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1646,9 +1622,6 @@ error:
  *
  *        Failure:    -1
  *
- * Programmer:    Raymond Lu
- *        October 15, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1795,9 +1768,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2000,9 +1970,6 @@ error:
  *
  *        Failure:    -1
  *
- * Programmer:    Raymond Lu
- *        October 15, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2138,9 +2105,6 @@ error:
  *
  *        Failure:    -1
  *
- * Programmer:    Raymond Lu
- *        October 15, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2257,9 +2221,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2428,9 +2389,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2641,9 +2599,6 @@ error:
  *
  *        Failure:    -1
  *
- * Programmer:    Raymond Lu
- *        October 15, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2737,9 +2692,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2891,9 +2843,6 @@ error:
  *
  * Return: Success: 0
  *  Failure: -1
- *
- * Programmer: Pedro Vicente
- *  September 3, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -3097,9 +3046,6 @@ error:
  * Function:    main
  *
  * Purpose:    Test H5Tget_native_type for different datatype
- *
- * Programmer:    Raymond Lu
- *        October 15, 2002
  *
  *-------------------------------------------------------------------------
  */

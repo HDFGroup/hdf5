@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:        H5Pdapl.c
- *              October 27, 2008
- *              Neil Fortner
  *
  * Purpose:        Dataset access property list class routines
  *

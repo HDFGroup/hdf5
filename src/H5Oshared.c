@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke
- *		Wednesday, April  1, 1998
- *
  * Purpose:	Functions that operate on a shared message.  The shared
  *		message doesn't ever actually appear in the object header as
  *		a normal message.  Instead, if a message is shared, the
@@ -92,9 +89,6 @@ static herr_t H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class
  *                          should be freed by calling H5O_msg_reset().
  *
  *              Failure:    NULL
- *
- * Programmer:	Quincey Koziol
- *		Sep 24 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -206,9 +200,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 26 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -292,9 +283,6 @@ done:
  *
  * Return:      Success:    A buffer containing the decoded shared object
  *              Failure:    NULL
- *
- * Programmer:	Quincey Koziol
- *              Monday, January 22, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -380,9 +368,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *              Thursday, April  2, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -428,9 +413,6 @@ H5O__shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep 26 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -455,9 +437,6 @@ H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
  *
  * Return:      Success:    Length
  *              Failure:    0
- *
- * Programmer:	Robb Matzke
- *              Thursday, April  2, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -489,9 +468,6 @@ H5O__shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
  * Purpose:     Free file space referenced by message
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Friday, September 26, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -531,9 +507,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Friday, September 26, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -561,9 +534,6 @@ done:
  * Purpose:     Copies a message from _MESG to _DEST in file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              January 22, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -633,9 +603,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Peter Cao
- *              May 24 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -682,9 +649,6 @@ done:
  * Purpose:	Prints debugging info for the message
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, April  2, 1998
  *
  *-------------------------------------------------------------------------
  */

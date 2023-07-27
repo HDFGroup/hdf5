@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Monday, March  6, 2006
- *
+/*
  * Purpose:	Fractal heap metadata statistics functions.
  *
  */
@@ -67,9 +65,6 @@
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -105,9 +100,6 @@ H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats)
  *			3. free space storage info
  *
  * Return:      non-negative on success, negative on error
- *
- * Programmer:  Vailin Choi
- *              July 12 2007
  *
  *-------------------------------------------------------------------------
  */
