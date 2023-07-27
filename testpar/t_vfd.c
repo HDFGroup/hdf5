@@ -4431,7 +4431,7 @@ error:
 } /* end test_selection_io_read_verify() */
 
 /*
- * Utility routine to perform the actual selection I/O write 
+ * Utility routine to perform the actual selection I/O write
  */
 static herr_t
 test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[],
