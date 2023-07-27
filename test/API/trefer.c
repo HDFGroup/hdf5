@@ -2018,7 +2018,6 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
 static void
 test_reference_obj_deleted(void)
 {
-#ifndef NO_REFERENCE_TO_DELETED
     hid_t fid1;          /* HDF5 File IDs            */
     hid_t dataset,       /* Dataset ID               */
         dset2;           /* Dereferenced dataset ID  */
@@ -2026,88 +2025,90 @@ test_reference_obj_deleted(void)
     H5R_ref_t  oref;     /* Object Reference to test */
     H5O_type_t obj_type; /* Object type              */
     herr_t     ret;      /* Generic return value     */
-#endif
-    MESSAGE(5, ("Testing References to Deleted Objects - SKIPPED for now due to no support\n"));
-#ifndef NO_REFERENCE_TO_DELETED
-    /* Create file */
-    fid1 = H5Fcreate(FILE_REF_OBJ_DEL, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(fid1, H5I_INVALID_HID, "H5Fcreate");
 
-    /* Create scalar dataspace for datasets */
-    sid1 = H5Screate_simple(0, NULL, NULL);
-    CHECK(sid1, H5I_INVALID_HID, "H5Screate_simple");
+    MESSAGE(5, ("Testing References to Deleted Objects\n"));
 
-    /* Create a dataset to reference (deleted later) */
-    dataset = H5Dcreate2(fid1, "Dataset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_REF_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
+        (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
+        /* Create file */
+        fid1 = H5Fcreate(FILE_REF_OBJ_DEL, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(fid1, H5I_INVALID_HID, "H5Fcreate");
 
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-    CHECK(ret, FAIL, "H5Dclose");
+        /* Create scalar dataspace for datasets */
+        sid1 = H5Screate_simple(0, NULL, NULL);
+        CHECK(sid1, H5I_INVALID_HID, "H5Screate_simple");
 
-    /* Create a dataset */
-    dataset = H5Dcreate2(fid1, "Dataset2", H5T_STD_REF, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
+        /* Create a dataset to reference (deleted later) */
+        dataset = H5Dcreate2(fid1, "Dataset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
-    /* Create reference to dataset */
-    ret = H5Rcreate_object(fid1, "/Dataset1", H5P_DEFAULT, &oref);
-    CHECK(ret, FAIL, "H5Rcreate_object");
-    ret = H5Rget_obj_type3(&oref, H5P_DEFAULT, &obj_type);
-    CHECK(ret, FAIL, "H5Rget_obj_type3");
-    VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
+        /* Close Dataset */
+        ret = H5Dclose(dataset);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    /* Write selection to disk */
-    ret = H5Dwrite(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, &oref);
-    CHECK(ret, FAIL, "H5Dwrite");
+        /* Create a dataset */
+        dataset = H5Dcreate2(fid1, "Dataset2", H5T_STD_REF, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-    CHECK(ret, FAIL, "H5Dclose");
+        /* Create reference to dataset */
+        ret = H5Rcreate_object(fid1, "/Dataset1", H5P_DEFAULT, &oref);
+        CHECK(ret, FAIL, "H5Rcreate_object");
+        ret = H5Rget_obj_type3(&oref, H5P_DEFAULT, &obj_type);
+        CHECK(ret, FAIL, "H5Rget_obj_type3");
+        VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
-    /* Delete referenced dataset */
-    ret = H5Ldelete(fid1, "/Dataset1", H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Ldelete");
+        /* Write selection to disk */
+        ret = H5Dwrite(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, &oref);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    /* Close disk dataspace */
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
+        /* Close Dataset */
+        ret = H5Dclose(dataset);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    /* Close file */
-    ret = H5Fclose(fid1);
-    CHECK(ret, FAIL, "H5Fclose");
+        /* Delete referenced dataset */
+        ret = H5Ldelete(fid1, "/Dataset1", H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
 
-    /* Destroy reference */
-    ret = H5Rdestroy(&oref);
-    CHECK(ret, FAIL, "H5Rdestroy");
+        /* Close disk dataspace */
+        ret = H5Sclose(sid1);
+        CHECK(ret, FAIL, "H5Sclose");
 
-    /* Re-open the file */
-    fid1 = H5Fopen(FILE_REF_OBJ_DEL, H5F_ACC_RDWR, H5P_DEFAULT);
-    CHECK(fid1, H5I_INVALID_HID, "H5Fopen");
+        /* Close file */
+        ret = H5Fclose(fid1);
+        CHECK(ret, FAIL, "H5Fclose");
 
-    /* Open the dataset */
-    dataset = H5Dopen2(fid1, "/Dataset2", H5P_DEFAULT);
-    CHECK(ret, H5I_INVALID_HID, "H5Dopen2");
+        /* Destroy reference */
+        ret = H5Rdestroy(&oref);
+        CHECK(ret, FAIL, "H5Rdestroy");
 
-    /* Read selection from disk */
-    ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, &oref);
-    CHECK(ret, FAIL, "H5Dread");
+        /* Re-open the file */
+        fid1 = H5Fopen(FILE_REF_OBJ_DEL, H5F_ACC_RDWR, H5P_DEFAULT);
+        CHECK(fid1, H5I_INVALID_HID, "H5Fopen");
 
-    /* Open deleted dataset object */
-    dset2 = H5Ropen_object(&oref, H5P_DEFAULT, H5P_DEFAULT);
-    VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object");
+        /* Open the dataset */
+        dataset = H5Dopen2(fid1, "/Dataset2", H5P_DEFAULT);
+        CHECK(ret, H5I_INVALID_HID, "H5Dopen2");
 
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-    CHECK(ret, FAIL, "H5Dclose");
+        /* Read selection from disk */
+        ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, &oref);
+        CHECK(ret, FAIL, "H5Dread");
 
-    /* Close file */
-    ret = H5Fclose(fid1);
-    CHECK(ret, FAIL, "H5Fclose");
+        /* Open deleted dataset object */
+        dset2 = H5Ropen_object(&oref, H5P_DEFAULT, H5P_DEFAULT);
+        VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object");
 
-    /* Destroy reference */
-    ret = H5Rdestroy(&oref);
-    CHECK(ret, FAIL, "H5Rdestroy");
-#endif
+        /* Close Dataset */
+        ret = H5Dclose(dataset);
+        CHECK(ret, FAIL, "H5Dclose");
+
+        /* Close file */
+        ret = H5Fclose(fid1);
+        CHECK(ret, FAIL, "H5Fclose");
+
+        /* Destroy reference */
+        ret = H5Rdestroy(&oref);
+        CHECK(ret, FAIL, "H5Rdestroy");
+    }
 } /* test_reference_obj_deleted() */
 
 /****************************************************************

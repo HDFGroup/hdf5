@@ -821,6 +821,11 @@ include (UserMacros.cmake)
 include (CMakeFilters.cmake)
 
 #-----------------------------------------------------------------------------
+# Include external VOL connectors
+#-----------------------------------------------------------------------------
+include (CMakeVOL.cmake)
+
+#-----------------------------------------------------------------------------
 # Option for external libraries on windows
 #-----------------------------------------------------------------------------
 option (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)

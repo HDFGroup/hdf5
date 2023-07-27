@@ -47,7 +47,14 @@ New Features
 
     Configuration:
     -------------
-    -
+    - Updated HDF5 API tests CMake code to support VOL connectors
+
+      * Implemented support for fetching, building and testing HDF5
+        VOL connectors during the library build process and documented
+        the feature under doc/cmake-vols-fetchcontent.md
+
+      * Implemented the HDF5_TEST_API_INSTALL option that enables
+        installation of the HDF5 API tests on the system
 
 
     Library:
@@ -109,7 +116,12 @@ Bug Fixes since HDF5-1.14.1 release
 ===================================
     Library
     -------
-    -
+    - Added an AAPL check to H5Acreate
+
+      A check was added to H5Acreate to ensure that a failure is correctly
+      returned when an invalid Attribute Access Property List is passed
+      in to the function. The HDF5 API tests were failing for certain
+      build types due to this condition not being checked previously.
 
 
     Java Library
@@ -171,7 +183,23 @@ Bug Fixes since HDF5-1.14.1 release
 
     Testing
     -------
-    -
+    - A bug was fixed in the HDF5 API test random datatype generation code
+
+      A bug in the random datatype generation code could cause test failures
+      when trying to generate an enumeration datatype that has duplicated
+      name/value pairs in it. This has now been fixed.
+
+    - A bug was fixed in the HDF5 API test VOL connector registration checking code
+
+      The HDF5 API test code checks to see if the VOL connector specified by the
+      HDF5_VOL_CONNECTOR environment variable (if any) is registered with the library
+      before attempting to run tests with it so that testing can be skipped and an
+      error can be returned when a VOL connector fails to register successfully.
+      Previously, this code didn't account for VOL connectors that specify extra
+      configuration information in the HDF5_VOL_CONNECTOR environment variable and
+      would incorrectly report that the specified VOL connector isn't registered
+      due to including the configuration information as part of the VOL connector
+      name being checked for registration status. This has now been fixed. 
 
 
 Platforms Tested

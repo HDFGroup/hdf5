@@ -4175,15 +4175,11 @@ test_misc23(void)
     hsize_t dims[]  = {10};
     hid_t   file_id = 0, group_id = 0, type_id = 0, space_id = 0, tmp_id = 0, create_id = H5P_DEFAULT,
           access_id = H5P_DEFAULT;
-#ifndef NO_OBJECT_GET_NAME
-    char objname[MISC23_NAME_BUF_SIZE]; /* Name of object */
-#endif
+    char        objname[MISC23_NAME_BUF_SIZE]; /* Name of object */
     H5O_info2_t oinfo;
     htri_t      tri_status;
-#ifndef NO_OBJECT_GET_NAME
-    ssize_t namelen;
-#endif
-    herr_t status;
+    ssize_t     namelen;
+    herr_t      status;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing intermediate group creation\n"));
@@ -4269,12 +4265,12 @@ test_misc23(void)
 
     tmp_id = H5Gcreate2(file_id, "/A/B01/grp", create_id, H5P_DEFAULT, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate2");
-#ifndef NO_OBJECT_GET_NAME
+
     /* Query that the name of the new group is correct */
     namelen = H5Iget_name(tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE);
     CHECK(namelen, FAIL, "H5Iget_name");
     VERIFY_STR(objname, "/A/B01/grp", "H5Iget_name");
-#endif
+
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
@@ -4484,24 +4480,29 @@ test_misc23(void)
     /**********************************************************************
      * test H5Lcreate_external()
      **********************************************************************/
-#ifndef NO_EXTERNAL_LINKS
-    status = H5Lcreate_external("fake_filename", "fake_path", file_id, "/A/B20/grp", create_id, access_id);
-    CHECK(status, FAIL, "H5Lcreate_external");
 
-    tri_status = H5Lexists(file_id, "/A/B20/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
-#endif
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) {
+        status =
+            H5Lcreate_external("fake_filename", "fake_path", file_id, "/A/B20/grp", create_id, access_id);
+        CHECK(status, FAIL, "H5Lcreate_external");
+
+        tri_status = H5Lexists(file_id, "/A/B20/grp", access_id);
+        VERIFY(tri_status, TRUE, "H5Lexists");
+    }
+
     /**********************************************************************
      * test H5Lcreate_ud()
      **********************************************************************/
-#ifndef NO_USER_DEFINED_LINKS
-    status =
-        H5Lcreate_ud(file_id, "/A/B21/grp", H5L_TYPE_EXTERNAL, "file\0obj", (size_t)9, create_id, access_id);
-    CHECK(status, FAIL, "H5Lcreate_ud");
 
-    tri_status = H5Lexists(file_id, "/A/B21/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
-#endif
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) {
+        status = H5Lcreate_ud(file_id, "/A/B21/grp", H5L_TYPE_EXTERNAL, "file\0obj", (size_t)9, create_id,
+                              access_id);
+        CHECK(status, FAIL, "H5Lcreate_ud");
+
+        tri_status = H5Lexists(file_id, "/A/B21/grp", access_id);
+        VERIFY(tri_status, TRUE, "H5Lexists");
+    }
+
     /**********************************************************************
      * close
      **********************************************************************/

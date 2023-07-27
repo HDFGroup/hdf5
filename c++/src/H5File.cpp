@@ -618,7 +618,6 @@ H5File::getVFDHandle(void **file_handle) const
 ///\par Description
 ///             This function is called after an existing file is opened in
 ///             order to learn the true size of the underlying file.
-// Programmer   Raymond Lu - June 24, 2004
 //--------------------------------------------------------------------------
 hsize_t
 H5File::getFileSize() const
@@ -639,7 +638,6 @@ H5File::getFileSize() const
 ///\par Description
 ///             This function is called after an existing file is opened in
 ///             order to retrieve the unique 'file number' for the file.
-// Programmer   Quincey Koziol - April 13, 2019
 //--------------------------------------------------------------------------
 unsigned long
 H5File::getFileNum() const

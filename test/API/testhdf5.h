@@ -21,7 +21,6 @@
 /* #include "h5test.h" */
 #include "hdf5.h"
 #include "H5private.h"
-#include "H5_api_tests_disabled.h"
 
 #define VERBO_NONE 0 /* None    */
 #define VERBO_DEF  3 /* Default */
@@ -342,6 +341,9 @@ void cleanup_h5_system(void);
 void cleanup_sohm(void);
 void cleanup_misc(void);
 void cleanup_unicode(void);
+
+/* Extern global variables */
+extern uint64_t vol_cap_flags_g;
 
 #ifdef __cplusplus
 }

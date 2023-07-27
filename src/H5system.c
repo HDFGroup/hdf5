@@ -962,6 +962,28 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    Wstrcasestr_wrap
+ *
+ * Purpose:     Windows wrapper function for strcasestr to retain GNU
+ *              behavior where searching for an empty substring returns the
+ *              input string being searched. StrStrIA on Windows does not
+ *              exhibit this same behavior.
+ *
+ * Return:      Pointer to input string if 'needle' is the empty substring
+ *              Otherwise, returns StrStrIA(haystack, needle)
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+Wstrcasestr_wrap(const char *haystack, const char *needle)
+{
+    if (needle && !*needle)
+        return haystack;
+    else
+        return StrStrIA(haystack, needle);
+}
+
 #endif /* H5_HAVE_WIN32_API */
 
 /* dirname() and basename() are not easily ported to Windows and basename
