@@ -445,32 +445,6 @@ typedef struct H5F_t H5F_t;
 #endif /* H5F_MODULE */
 
 /* Macros to encode/decode offset/length's for storing in the file */
-#define H5F_ENCODE_OFFSET(f, p, o)                                                                           \
-    switch (H5F_SIZEOF_ADDR(f)) {                                                                            \
-        case 4:                                                                                              \
-            UINT32ENCODE(p, o);                                                                              \
-            break;                                                                                           \
-        case 8:                                                                                              \
-            UINT64ENCODE(p, o);                                                                              \
-            break;                                                                                           \
-        case 2:                                                                                              \
-            UINT16ENCODE(p, o);                                                                              \
-            break;                                                                                           \
-    }
-
-#define H5F_DECODE_OFFSET(f, p, o)                                                                           \
-    switch (H5F_SIZEOF_ADDR(f)) {                                                                            \
-        case 4:                                                                                              \
-            UINT32DECODE(p, o);                                                                              \
-            break;                                                                                           \
-        case 8:                                                                                              \
-            UINT64DECODE(p, o);                                                                              \
-            break;                                                                                           \
-        case 2:                                                                                              \
-            UINT16DECODE(p, o);                                                                              \
-            break;                                                                                           \
-    }
-
 #define H5F_ENCODE_LENGTH_LEN(p, l, s)                                                                       \
     switch (s) {                                                                                             \
         case 4:                                                                                              \

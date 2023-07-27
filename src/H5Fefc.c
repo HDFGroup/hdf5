@@ -137,9 +137,8 @@ done:
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_efc_t            *efc       = NULL;  /* External file cache for parent file */
     H5F_efc_ent_t        *ent       = NULL;  /* Entry for target file in efc */
     hbool_t               open_file = FALSE; /* Whether ent->file needs to be closed in case of error */
     H5P_genplist_t       *plist;             /* Property list pointer for FAPL */
@@ -149,8 +148,6 @@ H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hi
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(parent);
-    HDassert(parent->shared);
     HDassert(name);
 
     /* Get the VOL info from the fapl */
@@ -164,9 +161,6 @@ H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hi
      */
     if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set VOL connector info in API context")
-
-    /* Get external file cache */
-    efc = parent->shared->efc;
 
     /* Check if the EFC exists.  If it does not, just call H5F_open().  We
      * support this so clients do not have to make 2 different calls depending
