@@ -39,6 +39,7 @@
 #include "H5Eprivate.h"  /* error handling    */
 #include "H5MMprivate.h" /* memory management */
 #include "H5FDs3comms.h" /* S3 Communications */
+#include "H5FDros3.h"    /* ros3 file driver  */
 
 /****************/
 /* Local Macros */
@@ -552,7 +553,7 @@ done:
         }
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_hrb_node_set() */
 
 /*----------------------------------------------------------------------------
@@ -775,6 +776,7 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
     H5MM_xfree(handle->secret_id);
     H5MM_xfree(handle->region);
     H5MM_xfree(handle->signing_key);
+    H5MM_xfree(handle->token);
 
     assert(handle->httpverb != NULL);
     H5MM_xfree(handle->httpverb);
@@ -911,7 +913,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "No HTTP metadata")
 #if S3COMMS_DEBUG
     else
-        fprintf(stderr, "GETSIZE: OK\n");
+        fprintf(stdout, "GETSIZE: OK\n");
 #endif
 
     /******************
@@ -932,16 +934,20 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
      */
     *end = '\0';
 
-    content_length = HDstrtoumax((const char *)start, NULL, 0);
+    content_length = strtoumax((const char *)start, NULL, 0);
     if (UINTMAX_MAX > SIZE_MAX && content_length > SIZE_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "content_length overflows size_t");
 
-    if (content_length == 0 || errno == ERANGE) /* errno set by HDstrtoumax*/
+    if (content_length == 0 || errno == ERANGE) /* errno set by strtoumax*/
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "could not convert found \"Content-Length\" response (\"%s\")",
                     start); /* range is null-terminated, remember */
 
     handle->filesize = (size_t)content_length;
+
+#if S3COMMS_DEBUG
+    fprintf(stdout, "FILESIZE: %zu\n", handle->filesize);
+#endif
 
     /**********************
      * UNDO HEAD SETTINGS *
@@ -957,7 +963,7 @@ done:
     H5MM_xfree(headerresponse);
     sds.magic += 1; /* set to bad magic */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_s3r_getsize */
 
 /*----------------------------------------------------------------------------
@@ -997,7 +1003,8 @@ done:
  *----------------------------------------------------------------------------
  */
 s3r_t *
-H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const unsigned char *signing_key)
+H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const unsigned char *signing_key,
+                      const char *token)
 {
     size_t        tmplen    = 0;
     CURL         *curlh     = NULL;
@@ -1031,13 +1038,15 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     handle->region      = NULL;
     handle->secret_id   = NULL;
     handle->signing_key = NULL;
+    handle->token       = NULL;
     handle->httpverb    = NULL;
 
     /*************************************
      * RECORD AUTHENTICATION INFORMATION *
      *************************************/
 
-    if ((region != NULL && *region != '\0') || (id != NULL && *id != '\0') || (signing_key != NULL)) {
+    if ((region != NULL && *region != '\0') || (id != NULL && *id != '\0') || (signing_key != NULL) ||
+        (token != NULL)) {
 
         /* if one exists, all three must exist */
         if (region == NULL || region[0] == '\0')
@@ -1046,6 +1055,8 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "secret id cannot be null.");
         if (signing_key == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "signing key cannot be null.");
+        if (token == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "token cannot be null.");
 
         /* copy strings */
         tmplen         = HDstrlen(region) + 1;
@@ -1065,6 +1076,12 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
         if (handle->signing_key == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "could not malloc space for handle key copy.");
         H5MM_memcpy(handle->signing_key, signing_key, tmplen);
+
+        tmplen        = HDstrlen(token) + 1;
+        handle->token = (char *)H5MM_malloc(sizeof(char) * tmplen);
+        if (handle->token == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "could not malloc space for handle token copy.");
+        H5MM_memcpy(handle->token, token, tmplen);
     } /* if authentication information provided */
 
     /************************
@@ -1121,11 +1138,12 @@ done:
         if (curlh != NULL)
             curl_easy_cleanup(curlh);
         if (FAIL == H5FD_s3comms_free_purl(purl))
-            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to free parsed url structure")
+            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to free parsed url structure");
         if (handle != NULL) {
             H5MM_xfree(handle->region);
             H5MM_xfree(handle->secret_id);
             H5MM_xfree(handle->signing_key);
+            H5MM_xfree(handle->token);
             if (handle->httpverb != NULL)
                 H5MM_xfree(handle->httpverb);
             H5MM_xfree(handle);
@@ -1186,8 +1204,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     hrb_t             *request       = NULL;
     int                ret           = 0; /* working variable to check  */
                                           /* return value of HDsnprintf  */
-    struct s3r_datastruct *sds       = NULL;
-    herr_t                 ret_value = SUCCEED;
+    char                  *authorization  = NULL;
+    char                  *buffer1        = NULL;
+    char                  *signed_headers = NULL;
+    struct s3r_datastruct *sds            = NULL;
+    herr_t                 ret_value      = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1252,6 +1273,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
 
+#if S3COMMS_DEBUG
+    fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
+            offset, offset + len - 1, len);
+#endif
+
     /*******************
      * COMPILE REQUEST *
      *******************/
@@ -1275,23 +1301,31 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     else {
         /* authenticate request
          */
-        char authorization[512 + 1];
-        /*   512 := approximate max length...
-         *    67 <len("AWS4-HMAC-SHA256 Credential=///s3/aws4_request,"
-         *           "SignedHeaders=,Signature=")>
-         * +   8 <yyyyMMDD>
-         * +  64 <hex(sha256())>
-         * + 128 <max? len(secret_id)>
-         * +  20 <max? len(region)>
-         * + 128 <max? len(signed_headers)>
+        authorization = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
+        if (authorization == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for authorization variable.");
+        /*   2048 := approximate max length...
+         *     67 <len("AWS4-HMAC-SHA256 Credential=///s3/aws4_request,"
+         *             "SignedHeaders=,Signature=")>
+         * +    8 <yyyyMMDD>
+         * +   64 <hex(sha256())>
+         * +  128 <max? len(secret_id)>
+         * +   20 <max? len(region)>
+         * +  128 <max? len(signed_headers)>
+         * + 1024 <max? len(session_token)>
          */
-        char buffer1[512 + 1]; /* -> Canonical Request -> Signature */
         char buffer2[256 + 1]; /* -> String To Sign -> Credential */
         char iso8601now[ISO8601_SIZE];
-        char signed_headers[48 + 1];
+        buffer1 = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN +
+                                      1); /* -> Canonical Request -> Signature */
+        if (buffer1 == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for buffer1 variable.");
+        signed_headers = (char *)H5MM_malloc(48 + H5FD_ROS3_MAX_SECRET_KEY_LEN + 1);
+        if (signed_headers == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for signed_headers variable.");
         /* should be large enough for nominal listing:
-         * "host;range;x-amz-content-sha256;x-amz-date"
-         * + '\0', with "range;" possibly absent
+         * "host;range;x-amz-content-sha256;x-amz-date;x-amz-security-token"
+         * + '\0', with "range;" and/or "x-amz-security-token" possibly absent
          */
 
         /* zero start of strings */
@@ -1309,6 +1343,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle must have non-null secret_id.");
         if (handle->signing_key == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle must have non-null signing_key.");
+        if (handle->token == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle must have non-null token.");
         if (handle->httpverb == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle must have non-null httpverb.");
         if (handle->purl->host == NULL)
@@ -1340,6 +1376,15 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
         assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
 
+        if (HDstrlen((const char *)handle->token) > 0) {
+            if (FAIL ==
+                H5FD_s3comms_hrb_node_set(&headers, "x-amz-security-token", (const char *)handle->token))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set x-amz-security-token header")
+            if (headers == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
+            assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
+        }
+
         if (rangebytesstr != NULL) {
             if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "Range", rangebytesstr))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set range header")
@@ -1359,8 +1404,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         /**** COMPUTE AUTHORIZATION ****/
 
         /* buffer1 -> canonical request */
-        if (FAIL == H5FD_s3comms_aws_canonical_request(buffer1, 512, signed_headers, 48, request))
+        if (FAIL == H5FD_s3comms_aws_canonical_request(buffer1, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN,
+                                                       signed_headers, 48 + H5FD_ROS3_MAX_SECRET_TOK_LEN,
+                                                       request)) {
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad canonical request");
+        }
         /* buffer2->string-to-sign */
         if (FAIL == H5FD_s3comms_tostringtosign(buffer2, buffer1, iso8601now, handle->region))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad string-to-sign");
@@ -1374,9 +1422,10 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (ret == 0 || ret >= S3COMMS_MAX_CREDENTIAL_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format aws4 credential string");
 
-        ret = HDsnprintf(authorization, 512, "AWS4-HMAC-SHA256 Credential=%s,SignedHeaders=%s,Signature=%s",
-                         buffer2, signed_headers, buffer1);
-        if (ret <= 0 || ret >= 512)
+        ret = HDsnprintf(authorization, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN,
+                         "AWS4-HMAC-SHA256 Credential=%s,SignedHeaders=%s,Signature=%s", buffer2,
+                         signed_headers, buffer1);
+        if (ret <= 0 || ret >= 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format aws4 authorization string");
 
         /* append authorization header to http request buffer */
@@ -1431,8 +1480,9 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (p_status != CURLE_OK) {
             if (CURLE_OK != curl_easy_getinfo(curlh, CURLINFO_RESPONSE_CODE, &httpcode))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem getting response code")
-            fprintf(stderr, "CURL ERROR CODE: %d\nHTTP CODE: %d\n", p_status, httpcode);
-            fprintf(stderr, "%s\n", curl_easy_strerror(p_status));
+            fprintf(stdout, "CURL ERROR CODE: %d\nHTTP CODE: %ld\n", p_status, httpcode);
+            fprintf(stdout, "%s\n", curl_easy_strerror(p_status));
+
             HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "problem while performing request.");
         }
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_ERRORBUFFER, NULL))
@@ -1447,24 +1497,36 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
 #if S3COMMS_DEBUG
     if (dest != NULL) {
-        fprintf(stderr, "len: %d\n", (int)len);
-        fprintf(stderr, "CHECKING FOR BUFFER OVERFLOW\n");
+        fprintf(stdout, "len: %d\n", (int)len);
+        fprintf(stdout, "CHECKING FOR BUFFER OVERFLOW\n");
         if (sds == NULL)
-            fprintf(stderr, "sds is NULL!\n");
+            fprintf(stdout, "sds is NULL!\n");
         else {
-            fprintf(stderr, "sds: 0x%lx\n", (long long)sds);
-            fprintf(stderr, "sds->size: %d\n", (int)sds->size);
+            fprintf(stdout, "sds: 0x%llx\n", (long long)sds);
+            fprintf(stdout, "sds->size: %d\n", (int)sds->size);
             if (len > sds->size)
-                fprintf(stderr, "buffer overwrite\n");
+                fprintf(stdout, "buffer overwrite\n");
         }
     }
     else
-        fprintf(stderr, "performed on entire file\n");
+        fprintf(stdout, "performed on entire file\n");
 #endif
 
 done:
     /* clean any malloc'd resources
      */
+    if (authorization != NULL) {
+        H5MM_xfree(authorization);
+        authorization = NULL;
+    }
+    if (buffer1 != NULL) {
+        H5MM_xfree(buffer1);
+        buffer1 = NULL;
+    }
+    if (signed_headers != NULL) {
+        H5MM_xfree(signed_headers);
+        signed_headers = NULL;
+    }
     if (curlheaders != NULL) {
         curl_slist_free_all(curlheaders);
         curlheaders = NULL;
@@ -1480,24 +1542,24 @@ done:
     if (request != NULL) {
         while (headers != NULL)
             if (FAIL == H5FD_s3comms_hrb_node_set(&headers, headers->name, NULL))
-                HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header node")
+                HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header node");
         assert(NULL == headers);
         if (FAIL == H5FD_s3comms_hrb_destroy(&request))
-            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header request structure")
+            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header request structure");
         assert(NULL == request);
     }
 
     if (curlh != NULL) {
         /* clear any Range */
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_RANGE, NULL))
-            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_RANGE")
+            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_RANGE");
 
         /* clear headers */
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HTTPHEADER, NULL))
-            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_HTTPHEADER")
+            HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_HTTPHEADER");
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_s3r_read */
 
 /****************************************************************************
@@ -1583,8 +1645,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     size_t      sh_size      = (size_t)_sh_size;
     size_t      cr_len       = 0; /* working length of canonical request str */
     size_t      sh_len       = 0; /* working length of signed headers str */
-    char        tmpstr[256 + 1];
-    tmpstr[256] = 0; /* terminating NULL */
+    char        tmpstr[1024];
 
     /* "query params" refers to the optional element in the URL, e.g.
      *     http://bucket.aws.com/myfile.txt?max-keys=2&prefix=J
@@ -1617,6 +1678,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
               (size_t)3); /* three newline chars */
     if (cr_len >= cr_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not enough space in canonical request");
+
     /* TODO: compiler warning */
     ret = HDsnprintf(canonical_request_dest, (cr_size - 1), "%s\n%s\n%s\n", http_request->verb,
                      http_request->resource, query_params);
@@ -1629,8 +1691,8 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
 
         assert(node->magic == S3COMMS_HRB_NODE_MAGIC);
 
-        ret = HDsnprintf(tmpstr, 256, "%s:%s\n", node->lowername, node->value);
-        if (ret < 0 || ret >= 256)
+        ret = HDsnprintf(tmpstr, 1024, "%s:%s\n", node->lowername, node->value);
+        if (ret < 0 || ret >= 1024)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to concatenate HTTP header %s:%s",
                         node->lowername, node->value);
         cr_len += HDstrlen(tmpstr);
@@ -1638,8 +1700,8 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not enough space in canonical request");
         HDstrcat(canonical_request_dest, tmpstr);
 
-        ret = HDsnprintf(tmpstr, 256, "%s;", node->lowername);
-        if (ret < 0 || ret >= 256)
+        ret = HDsnprintf(tmpstr, 1024, "%s;", node->lowername);
+        if (ret < 0 || ret >= 1024)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to append semicolon to lowername %s",
                         node->lowername);
         sh_len += HDstrlen(tmpstr);
@@ -1663,7 +1725,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     HDstrcat(canonical_request_dest, EMPTY_SHA256);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_aws_canonical_request() */
 
 /*----------------------------------------------------------------------------
@@ -1719,7 +1781,7 @@ H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, 
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_bytes_to_hex() */
 
 /*----------------------------------------------------------------------------
@@ -1816,7 +1878,7 @@ H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *m
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not convert to hex string.");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_HMAC_SHA256 */
 
 /*-----------------------------------------------------------------------------
@@ -1953,7 +2015,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 
                 /* "trim" tailing whitespace by replacing with null terminator*/
                 buffer_i = 0;
-                while (!HDisspace(setting_pointers[setting_i][buffer_i]))
+                while (!isspace(setting_pointers[setting_i][buffer_i]))
                     buffer_i++;
                 setting_pointers[setting_i][buffer_i] = '\0';
 
@@ -1963,7 +2025,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     } while (found_setting);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_load_aws_creds_from_file() */
 
 /*----------------------------------------------------------------------------
@@ -2027,7 +2089,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
         if (H5FD__s3comms_load_aws_creds_from_file(credfile, profile_name, key_id_out, secret_access_key_out,
                                                    aws_region_out) == FAIL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to load from aws credentials")
-        if (HDfclose(credfile) == EOF)
+        if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file")
         credfile = NULL;
     } /* end if credential file opened */
@@ -2042,7 +2104,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
                 (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
                 (*aws_region_out == 0) ? aws_region_out : NULL) == FAIL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to load from aws config")
-        if (HDfclose(credfile) == EOF)
+        if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close config file")
         credfile = NULL;
     } /* end if credential file opened */
@@ -2053,10 +2115,10 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
 
 done:
     if (credfile != NULL)
-        if (HDfclose(credfile) == EOF)
-            HDONE_ERROR(H5E_ARGS, H5E_ARGS, FAIL, "problem error-closing aws configuration file")
+        if (fclose(credfile) == EOF)
+            HDONE_ERROR(H5E_ARGS, H5E_ARGS, FAIL, "problem error-closing aws configuration file");
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_load_aws_profile() */
 
 /*----------------------------------------------------------------------------
@@ -2105,7 +2167,7 @@ H5FD_s3comms_nlowercase(char *dest, const char *s, size_t len)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_nlowercase() */
 
 /*----------------------------------------------------------------------------
@@ -2147,7 +2209,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     unsigned int  i         = 0;
     herr_t        ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
     printf("called H5FD_s3comms_parse_url.\n");
@@ -2181,7 +2243,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     /* check for restrictions */
     for (i = 0; i < len; i++) {
         /* scheme = [a-zA-Z+-.]+ (terminated by ":") */
-        if (!HDisalpha(curstr[i]) && '+' != curstr[i] && '-' != curstr[i] && '.' != curstr[i])
+        if (!isalpha(curstr[i]) && '+' != curstr[i] && '-' != curstr[i] && '.' != curstr[i])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid SCHEME construction");
     }
 
@@ -2247,7 +2309,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
         else if (len > urllen)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem with length of PORT substring");
         for (i = 0; i < len; i++)
-            if (!HDisdigit(curstr[i]))
+            if (!isdigit(curstr[i]))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "PORT is not a decimal string");
 
         /* copy port */
@@ -2310,7 +2372,7 @@ done:
     if (ret_value == FAIL)
         H5FD_s3comms_free_purl(purl);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_parse_url() */
 
 /*----------------------------------------------------------------------------
@@ -2457,7 +2519,7 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
     *(repr + *repr_len) = '\0';
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_percent_encode_char */
 
 /*----------------------------------------------------------------------------
@@ -2547,7 +2609,7 @@ H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *regi
 done:
     H5MM_xfree(AWS4_secret);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_signing_key() */
 
 /*----------------------------------------------------------------------------
@@ -2694,7 +2756,7 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
         /* Find first non-whitespace character from start;
          * reduce total length per character.
          */
-        while ((s_len > 0) && HDisspace((unsigned char)s[0]) && s_len > 0) {
+        while ((s_len > 0) && isspace((unsigned char)s[0]) && s_len > 0) {
             s++;
             s_len--;
         }
@@ -2706,7 +2768,7 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
         if (s_len > 0) {
             do {
                 s_len--;
-            } while (HDisspace((unsigned char)s[s_len]));
+            } while (isspace((unsigned char)s[s_len]));
             s_len++;
 
             /* write output into dest */
@@ -2783,8 +2845,7 @@ H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, hbool_t encode_s
      */
     for (s_off = 0; s_off < s_len; s_off++) {
         c = s[s_off];
-        if (HDisalnum(c) || c == '.' || c == '-' || c == '_' || c == '~' ||
-            (c == '/' && encode_slash == FALSE))
+        if (isalnum(c) || c == '.' || c == '-' || c == '_' || c == '~' || (c == '/' && encode_slash == FALSE))
             dest[dest_off++] = c;
         else {
             hex_off = 0;

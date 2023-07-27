@@ -47,6 +47,10 @@
  */
 static hid_t H5FD_ROS3_g = 0;
 
+/* Session/security token property name
+ */
+#define ROS3_TOKEN_PROP_NAME "ros3_token_prop"
+
 #if ROS3_STATS
 
 /* arbitrarily large value, such that any reasonable size read will be "less"
@@ -566,6 +570,257 @@ H5FD__ros3_fapl_free(void *_fa)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__ros3_fapl_free() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_fapl_ros3_token
+ *
+ * Purpose:     Returns session/security token of the ros3 file access
+ *              property list though the function arguments.
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Jan-Willem Blokland
+ *              2023-05-26
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
+{
+    H5P_genplist_t *plist = NULL;
+    char           *token_src;
+    htri_t          token_exists;
+    size_t          tokenlen  = 0;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "izx", fapl_id, size, token_dst);
+
+#if ROS3_DEBUG
+    fprintf(stdout, "H5Pget_fapl_ros3_token() called.\n");
+#endif
+
+    if (size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size cannot be zero.")
+    if (token_dst == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "token_dst is NULL")
+
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (H5FD_ROS3 != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+    if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist")
+    if (token_exists) {
+        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value")
+    }
+
+    /* Copy the token data out */
+    tokenlen = HDstrlen(token_src);
+    if (size <= tokenlen) {
+        tokenlen = size - 1;
+    }
+    H5MM_memcpy(token_dst, token_src, sizeof(char) * tokenlen);
+    token_dst[tokenlen] = '\0';
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_fapl_ros3_token() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_token_copy()
+ *
+ * Purpose:     Create a copy of the token string.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Jan-Willem Blokland
+ *              2023-05-26
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_token_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+#if ROS3_DEBUG
+    fprintf(stdout, "H5FD__ros3_str_token_copy() called.\n");
+#endif
+
+    if (*value)
+        if (NULL == (*value = HDstrdup(*value)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy string property token")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_token_copy() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_token_cmp()
+ *
+ * Purpose:     Compares two token strings with each other.
+ *
+ * Return:
+ *     - Equivalent:     0
+ *     - Not Equivalent: non-zero value
+ *
+ * Programmer:  Jan-Willem Blokland
+ *              2023-05-26
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t H5_ATTR_UNUSED size)
+{
+    char *const *value1    = (char *const *)_value1;
+    char *const *value2    = (char *const *)_value2;
+    int          ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value1) {
+        if (*value2)
+            ret_value = HDstrcmp(*value1, *value2);
+        else
+            ret_value = 1;
+    }
+    else {
+        if (*value2)
+            ret_value = -1;
+        else
+            ret_value = 0;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_token_cmp */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_token_close()
+ *
+ * Purpose:     Closes/frees the memory associated to the token string.
+ *              Currently, it is an empty implementation since there no
+ *              additional treatment needed for this property.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Jan-Willem Blokland
+ *              2023-05-26
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_token_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value)
+        free(*value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_token_close */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_token_delete()
+ *
+ * Purpose:     Deletes the property token from the property list and frees
+ *              the memory associated to the token string.
+ *              Currently, it is an empty implementation since there no
+ *              additional treatment needed for this property.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Jan-Willem Blokland
+ *              2023-05-26
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_token_delete(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                            size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value)
+        free(*value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_token_delete */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_fapl_ros3_token()
+ *
+ * Purpose:     Modify the file access property list to use the H5FD_ROS3
+ *              driver defined in this source file by adding or
+ *              modifying the session/security token property.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Jan-Willem Blokland
+ *              2023-05-26
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
+{
+    H5P_genplist_t *plist = NULL;
+    char           *token_src;
+    htri_t          token_exists;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*s", fapl_id, token);
+
+#if ROS3_DEBUG
+    fprintf(stdout, "H5Pset_fapl_ros3_token() called.\n");
+#endif
+
+    if (fapl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (H5FD_ROS3 != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+    if (HDstrlen(token) > H5FD_ROS3_MAX_SECRET_TOK_LEN)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
+                    "specified token exceeds the internally specified maximum string length")
+
+    if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist")
+
+    if (token_exists) {
+        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value")
+
+        memcpy(token_src, token, HDstrlen(token) + 1);
+    }
+    else {
+        token_src = (char *)malloc(sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1));
+        if (token_src == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for token_src variable.");
+        memcpy(token_src, token, HDstrlen(token) + 1);
+        if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char *), &token_src, NULL, NULL, NULL, NULL,
+                       H5FD__ros3_str_token_delete, H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp,
+                       H5FD__ros3_str_token_close) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist")
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_fapl_ros3_token() */
+
 #if ROS3_STATS
 /*----------------------------------------------------------------------------
  *
@@ -613,7 +868,7 @@ ros3_reset_stats(H5FD_ros3_t *file)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end ros3_reset_stats() */
 #endif /* ROS3_STATS */
 
@@ -654,6 +909,9 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     unsigned char    signing_key[SHA256_DIGEST_LENGTH];
     s3r_t           *handle = NULL;
     H5FD_ros3_fapl_t fa;
+    H5P_genplist_t  *plist = NULL;
+    htri_t           token_exists;
+    char            *token;
     H5FD_t          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -681,6 +939,16 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to initialize curl global (placeholder flags)")
 
+    /* Session/security token */
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a file access property list")
+    if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "failed to check if property token exists in plist")
+    if (token_exists) {
+        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get token value")
+    }
+
     /* open file; procedure depends on whether or not the fapl instructs to
      * authenticate requests or not.
      */
@@ -697,11 +965,15 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
                                              (const char *)fa.aws_region, (const char *)iso8601now))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while computing signing key")
 
-        handle = H5FD_s3comms_s3r_open(url, (const char *)fa.aws_region, (const char *)fa.secret_id,
-                                       (const unsigned char *)signing_key);
+        if (token_exists)
+            handle = H5FD_s3comms_s3r_open(url, (const char *)fa.aws_region, (const char *)fa.secret_id,
+                                           (const unsigned char *)signing_key, (const char *)token);
+        else
+            handle = H5FD_s3comms_s3r_open(url, (const char *)fa.aws_region, (const char *)fa.secret_id,
+                                           (const unsigned char *)signing_key, "");
     }
     else
-        handle = H5FD_s3comms_s3r_open(url, NULL, NULL, NULL);
+        handle = H5FD_s3comms_s3r_open(url, NULL, NULL, NULL, NULL);
 
     if (handle == NULL)
         /* If we want to check CURL's say on the matter in a controlled
@@ -729,7 +1001,7 @@ done:
     if (ret_value == NULL) {
         if (handle != NULL)
             if (FAIL == H5FD_s3comms_s3r_close(handle))
-                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle")
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
         if (file != NULL)
             file = H5FL_FREE(H5FD_ros3_t, file);
         curl_global_cleanup(); /* early cleanup because open failed */
@@ -1011,7 +1283,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 
 } /* ros3_fprint_stats */
 #endif /* ROS3_STATS */
@@ -1122,16 +1394,16 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     /* URL: SCHEME */
     if (HDstrcmp(purl1->scheme, purl2->scheme))
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* URL: HOST */
     if (HDstrcmp(purl1->host, purl2->host))
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* URL: PORT */
     if (purl1->port && purl2->port) {
         if (HDstrcmp(purl1->port, purl2->port))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (purl1->port)
         HGOTO_DONE(-1)
@@ -1141,7 +1413,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     /* URL: PATH */
     if (purl1->path && purl2->path) {
         if (HDstrcmp(purl1->path, purl2->path))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (purl1->path && !purl2->path)
         HGOTO_DONE(-1)
@@ -1151,7 +1423,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     /* URL: QUERY */
     if (purl1->query && purl2->query) {
         if (HDstrcmp(purl1->query, purl2->query))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (purl1->query && !purl2->query)
         HGOTO_DONE(-1)
@@ -1161,7 +1433,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     /* FAPL: AWS_REGION */
     if (f1->fa.aws_region[0] != '\0' && f2->fa.aws_region[0] != '\0') {
         if (HDstrcmp(f1->fa.aws_region, f2->fa.aws_region))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (f1->fa.aws_region[0] != '\0')
         HGOTO_DONE(-1)
@@ -1171,7 +1443,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     /* FAPL: SECRET_ID */
     if (f1->fa.secret_id[0] != '\0' && f2->fa.secret_id[0] != '\0') {
         if (HDstrcmp(f1->fa.secret_id, f2->fa.secret_id))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (f1->fa.secret_id[0] != '\0')
         HGOTO_DONE(-1)
@@ -1181,7 +1453,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     /* FAPL: SECRET_KEY */
     if (f1->fa.secret_key[0] != '\0' && f2->fa.secret_key[0] != '\0') {
         if (HDstrcmp(f1->fa.secret_key, f2->fa.secret_key))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (f1->fa.secret_key[0] != '\0')
         HGOTO_DONE(-1)
