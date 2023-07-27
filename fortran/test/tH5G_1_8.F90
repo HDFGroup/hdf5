@@ -764,8 +764,8 @@ END SUBROUTINE group_info
      INTEGER ::   arank = 1                      ! Attribute rank
      INTEGER :: error
 
-     INTEGER :: cset ! Indicates the character set used for the link’s name.
-     INTEGER :: corder ! Specifies the link’s creation order position.
+     INTEGER :: cset ! Indicates the character set used for the link's name.
+     INTEGER :: corder ! Specifies the link's creation order position.
      LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
      INTEGER :: link_type ! Specifies the link class:
                           !  H5L_TYPE_HARD_F      - Hard link
@@ -867,8 +867,8 @@ END SUBROUTINE group_info
     INTEGER :: crt_order_flags !  Status of creation order info for GCPL
     CHARACTER(LEN=12), PARAMETER :: filename = 'TestLinks.h5'
 
-    INTEGER :: cset ! Indicates the character set used for the link’s name.
-    INTEGER :: corder ! Specifies the link’s creation order position.
+    INTEGER :: cset ! Indicates the character set used for the link's name.
+    INTEGER :: corder ! Specifies the link's creation order position.
     LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
     INTEGER :: link_type ! Specifies the link class:
                          !  H5L_TYPE_HARD_F      - Hard link
@@ -1281,7 +1281,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(SIZE_T) :: val_size
   INTEGER :: link_type
   TYPE(H5O_TOKEN_T_F) :: token
@@ -1510,7 +1510,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER :: link_type
   TYPE(H5O_TOKEN_T_F) :: token
   INTEGER(SIZE_T) :: val_size   ! Indicates the size, in the number of characters, of the attribute
@@ -1611,8 +1611,8 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   INTEGER(HID_T) :: type_id
   INTEGER(HID_T) :: lcpl_id
 
-  INTEGER :: cset ! Indicates the character set used for the link’s name.
-  INTEGER :: corder ! Specifies the link’s creation order position.
+  INTEGER :: cset ! Indicates the character set used for the link's name.
+  INTEGER :: corder ! Specifies the link's creation order position.
   LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
   INTEGER :: link_type ! Specifies the link class:
                        !  H5L_TYPE_HARD_F      - Hard link

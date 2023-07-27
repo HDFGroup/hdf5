@@ -1171,7 +1171,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Retrieves information about a group, according to the group’s position within an index.
+!! \brief Retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \attention  \fortran_approved
 !!
@@ -1226,7 +1226,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Asynchronously retrieves information about a group, according to the group’s position within an index.
+!! \brief Asynchronously retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \param loc_id     Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
 !! \param group_name Name of group containing group for which information is to be retrieved.
@@ -1285,7 +1285,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Retrieves information about a group, according to the group’s position within an index.
+!! \brief Retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \attention  \fortran_obsolete. Both nlinks and max_corder can overflow.
 !!

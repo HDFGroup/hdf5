@@ -124,7 +124,7 @@ It is a 2-dimensional 5 x 3 array (the dataspace). The datatype should not be co
 </ul>
 
 \subsubsection subsec_intro_desc_prop_dspace Dataspaces
-A dataspace describes the layout of a dataset’s data elements. It can consist of no elements (NULL),
+A dataspace describes the layout of a dataset's data elements. It can consist of no elements (NULL),
 a single element (scalar), or a simple array.
 
 <table>
@@ -141,7 +141,7 @@ in size (i.e. they are extendible).
 
 There are two roles of a dataspace:
 \li It contains the spatial information (logical layout) of a dataset stored in a file. This includes the rank and dimensions of a dataset, which are a permanent part of the dataset definition.
-\li It describes an application’s data buffers and data elements participating in I/O. In other words, it can be used to select a portion or subset of a dataset.
+\li It describes an application's data buffers and data elements participating in I/O. In other words, it can be used to select a portion or subset of a dataset.
 
 <table>
 <caption>The dataspace is used to describe both the logical layout of a dataset and a subset of a dataset.</caption>

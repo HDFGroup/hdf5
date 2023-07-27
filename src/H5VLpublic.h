@@ -17,9 +17,8 @@
 #ifndef H5VLpublic_H
 #define H5VLpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions                    */
-#include "H5Ipublic.h" /* IDs                                  */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
 
 /*****************/
 /* Public Macros */
@@ -27,7 +26,7 @@
 
 /**
  * \ingroup H5VLDEF
- * \brief Version # of VOL class struct & callbacks
+ * \brief Version number of VOL class struct & callbacks
  *
  * \details Each VOL connector must set the 'version' field in the H5VL_class_t
  *          struct to the version of the H5VL_class_t struct that the connector

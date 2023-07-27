@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Gpublic.h
- *                      Jul 11 1997
- *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5G package
  *
@@ -23,14 +21,10 @@
 #ifndef H5Gpublic_H
 #define H5Gpublic_H
 
-/* System headers needed by this file */
-#include <sys/types.h>
-
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Lpublic.h" /* Links                                */
-#include "H5Opublic.h" /* Object headers			*/
-#include "H5Tpublic.h" /* Datatypes				*/
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
+#include "H5Lpublic.h" /* Links                                    */
+#include "H5Opublic.h" /* Object Headers                           */
 
 /*****************/
 /* Public Macros */
@@ -154,7 +148,7 @@ H5_DLL hid_t  H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid
  *          provides similar functionality to that provided by
  *          H5Gcreate1(), with the differences described in the list below.
  *
- *          The new group’s creation and access properties are specified
+ *          The new group's creation and access properties are specified
  *          in \p gcpl_id and \p gapl_id, respectively.
  *
  *          H5Gcreate_anon() returns a new group identifier. This identifier
@@ -166,12 +160,12 @@ H5_DLL hid_t  H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid
  *
  *          \li H5Gcreate1() does not provide for the use of custom property
  *              lists; H5Gcreate1() always uses default properties.
- *          \li H5Gcreate_anon() neither provides the new group’s name
+ *          \li H5Gcreate_anon() neither provides the new group's name
  *              nor links it into the HDF5 file structure; those actions
  *              must be performed separately through a call to H5Olink(),
  *              which offers greater control over linking.
  *          \li H5Gcreate_anon() does not directly provide a hint mechanism
- *              for the group’s heap size. Comparable information can be
+ *              for the group's heap size. Comparable information can be
  *              included in the group creation property list \p gcpl_id through
  *              a H5Pset_local_heap_size_hint() call.
  *
@@ -337,7 +331,7 @@ H5_DLL herr_t H5Gget_info_by_name_async(hid_t loc_id, const char *name, H5G_info
  *-------------------------------------------------------------------------
  * \ingroup H5G
  *
- * \brief Retrieves information about a group, according to the group’s
+ * \brief Retrieves information about a group, according to the group's
  *        position within an index
  *
  * \fgdta_loc_id
@@ -890,7 +884,7 @@ H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *
  *          \p loc_id can specify any object in the file. name can be one of the
  *          following:
  *          \li The name of the object relative to \p loc_id
- *          \li An absolute name of the object, starting from \c /, the file’s
+ *          \li An absolute name of the object, starting from \c /, the file's
  *              root group
  *          \li A dot (\c .), if \p loc_id fully specifies the object
  *
@@ -933,7 +927,7 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment
  *          \p loc_id can specify any object in the file. name can be one of the
  *          following:
  *          \li The name of the object relative to \p loc_id
- *          \li An absolute name of the object, starting from \c /, the file’s
+ *          \li An absolute name of the object, starting from \c /, the file's
  *              root group
  *          \li A dot (\c .), if \p loc_id fully specifies the object
  *

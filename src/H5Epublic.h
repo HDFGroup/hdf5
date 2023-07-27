@@ -16,11 +16,10 @@
 #ifndef H5Epublic_H
 #define H5Epublic_H
 
-#include <stdio.h> /*FILE arg of H5Eprint()                     */
+#include <stdio.h> /* FILE arg of H5Eprint() */
 
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Ipublic.h"
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
 
 /* Value for the default error stack */
 #define H5E_DEFAULT 0 /* (hid_t) */
@@ -80,7 +79,7 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * easier just to use this macro like:
  *     H5E_BEGIN_TRY {
  *        ...stuff here that's likely to fail...
- *      } H5E_END_TRY;
+ *      } H5E_END_TRY
  *
  * Warning: don't break, return, or longjmp() from the body of the loop or
  *        the error reporting won't be properly restored!
@@ -277,7 +276,7 @@ H5_DLL hid_t H5Ecreate_msg(hid_t cls, H5E_type_t msg_type, const char *msg);
  * \return \hid_ti{error stack}
  *
  * \details H5Ecreate_stack() creates a new empty error stack and returns the
- *          new stack’s identifier. Use H5Eclose_stack() to close the error stack
+ *          new stack's identifier. Use H5Eclose_stack() to close the error stack
  *          identifier returned by this function.
  *
  * \since 1.8.0
@@ -531,7 +530,7 @@ H5_DLL herr_t H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t f
  *          H5Eget_auto2() will fail and will indicate that the application has
  *          mixed H5Eset_auto1() and H5Eget_auto2(). On the other hand, mixing
  *          H5Eset_auto2() and H5Eget_auto1() will also cause a failure. But if
- *          the traversal functions are the library’s default H5Eprint1() or
+ *          the traversal functions are the library's default H5Eprint1() or
  *          H5Eprint2(), mixing H5Eset_auto1() and H5Eget_auto2() or mixing
  *          H5Eset_auto2() and H5Eget_auto1() does not fail.
  *
@@ -769,7 +768,7 @@ H5_DLL herr_t H5Eclear1(void);
  *          H5Eget_auto2() will fail and will indicate that the application has
  *          mixed H5Eset_auto1() and H5Eget_auto2(). On the other hand, mixing
  *          H5Eset_auto2() and H5Eget_auto1() will also cause a failure. But if
- *          the traversal functions are the library’s default H5Eprint1() or
+ *          the traversal functions are the library's default H5Eprint1() or
  *          H5Eprint2(), mixing H5Eset_auto1() and H5Eget_auto2() or mixing
  *          H5Eset_auto2() and H5Eget_auto1() does not fail.
  *

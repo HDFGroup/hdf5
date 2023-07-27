@@ -133,7 +133,7 @@
  * \li Single file on a standard file system
  * \li Multiple files on a standard file system
  * \li Multiple files on a parallel file system
- * \li Block of memory within an application’s memory space
+ * \li Block of memory within an application's memory space
  * \li More abstract situations such as virtual files
  *
  * This HDF5 address space is generally referred to as an HDF5 file regardless of its organization at
@@ -265,7 +265,7 @@
  * </tr>
  * <tr>
  * <td>#H5garbage_collect</td>
- * <td>Garbage collects on all free-lists of all types.</td>
+ * <td>Performs garbage collection (GC) on all free-lists of all types.</td>
  * </tr>
  * <tr>
  * <td>#H5get_libversion</td>
@@ -343,15 +343,15 @@
  * </tr>
  * <tr>
  * <td>#H5Fget_mdc_config</td>
- * <td>Obtain current metadata cache configuration for target file.</td>
+ * <td>Obtains current metadata cache configuration for target file.</td>
  * </tr>
  * <tr>
  * <td>#H5Fget_mdc_hit_rate</td>
- * <td>Obtain target file’s metadata cache hit rate.</td>
+ * <td>Obtains target file's metadata cache hit rate.</td>
  * </tr>
  * <tr>
  * <td>#H5Fget_mdc_size</td>
- * <td>Obtain current metadata cache size data for specified file.</td>
+ * <td>Obtains current metadata cache size data for specified file.</td>
  * </tr>
  * <tr>
  * <td>#H5Fget_mpi_atomicity</td>
@@ -391,15 +391,15 @@
  * </tr>
  * <tr>
  * <td>#H5Freset_mdc_hit_rate_stats</td>
- * <td>Reset hit rate statistics counters for the target file.</td>
+ * <td>Resets hit rate statistics counters for the target file.</td>
  * </tr>
  * <tr>
  * <td>#H5Fset_mdc_config</td>
- * <td>Use to configure metadata cache of target file.</td>
+ * <td>Configures metadata cache of target file.</td>
  * </tr>
  * <tr>
  * <td>#H5Fset_mpi_atomicity</td>
- * <td>Use to set the MPI atomicity mode.</td>
+ * <td>Sets the MPI atomicity mode.</td>
  * </tr>
  * <tr>
  * <td>#H5Funmount</td>
@@ -436,7 +436,7 @@
  *
  * The new file is created with the properties specified in the property lists fcpl_id and fapl_id.
  * fcpl is short for file creation property list. fapl is short for file access property list. Specifying
- * #H5P_DEFAULT for either the creation or access property list will use the library’s default
+ * #H5P_DEFAULT for either the creation or access property list will use the library's default
  * creation or access properties.
  *
  * If #H5Fcreate successfully creates the file, it returns a file identifier for the new file. This
@@ -629,7 +629,7 @@
  * #H5Pget_sieve_buf_size retrieves the current maximum size of the data sieve buffer.
  *
  * <h4>Garbage Collection References</h4>
- * Dataset region references and other reference types use space in an HDF5 file’s global heap. If
+ * Dataset region references and other reference types use space in an HDF5 file's global heap. If
  * garbage collection is on (1) and the user passes in an uninitialized value in a reference structure,
  * the heap might become corrupted. When garbage collection is off (0), however, and the user reuses
  * a reference, the previous heap block will be orphaned and not returned to the free heap
@@ -644,7 +644,7 @@
  * \li Single file on standard file system
  * \li Multiple files on standard file system
  * \li Multiple files on parallel file system
- * \li Block of memory within application’s memory space
+ * \li Block of memory within application's memory space
  * \li More abstract situations such as virtual files
  *
  * This HDF5 address space is generally referred to as an HDF5 file regardless of its organization at
@@ -1029,7 +1029,7 @@
  * function.
  *
  * \subsubsection subsubsec_file_alternate_drivers_par The Parallel Driver
- * Parallel environments require a parallel low-level driver. HDF5’s default driver for parallel
+ * Parallel environments require a parallel low-level driver. HDF5's default driver for parallel
  * systems is called the Parallel driver, #H5FD_MPIO. This driver uses the MPI standard for both
  * communication and file I/O.
  *

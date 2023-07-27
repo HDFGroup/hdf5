@@ -139,7 +139,7 @@ done:
  *  Calls H5open_by_token
  * INPUTS
  *  loc_id - File or group identifier
- *  token  - Object’s token in the file
+ *  token  - Object's token in the file
  *
  * OUTPUTS
  *  obj_id  - Object identifier

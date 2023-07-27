@@ -793,13 +793,13 @@ done:
  *
  *              The chunk cache parameters in the returned property lists will be
  *              those used by the dataset.  If the properties in the file access
- *              property list were used to determine the dataset’s chunk cache
+ *              property list were used to determine the dataset's chunk cache
  *              configuration, then those properties will be present in the
  *              returned dataset access property list.  If the dataset does not
  *              use a chunked layout, then the chunk cache properties will be set
  *              to the default.  The chunk cache properties in the returned list
  *              are considered to be “set”, and any use of this list will override
- *              the corresponding properties in the file’s file access property
+ *              the corresponding properties in the file's file access property
  *              list.
  *
  *              All link access properties in the returned list will be set to the
@@ -2376,7 +2376,7 @@ done:
  *              hid_t dset_id;          IN: Chunked dataset ID
  *              hid_t fspace_id;        IN: File dataspace ID
  *              hsize_t index;          IN: Index of written chunk
- *              hsize_t *offset         OUT: Logical position of the chunk’s
+ *              hsize_t *offset         OUT: Logical position of the chunk's
  *                                           first element in the dataspace
  *              unsigned *filter_mask   OUT: Mask for identifying the filters in use
  *              haddr_t *addr           OUT: Address of the chunk
@@ -2449,7 +2449,7 @@ done:
  *
  * Parameters:
  *              hid_t dset_id;          IN: Chunked dataset ID
- *              hsize_t *offset         IN: Logical position of the chunk’s
+ *              hsize_t *offset         IN: Logical position of the chunk's
  *                                           first element in the dataspace
  *              unsigned *filter_mask   OUT: Mask for identifying the filters in use
  *              haddr_t *addr           OUT: Address of the chunk

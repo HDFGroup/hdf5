@@ -1010,13 +1010,13 @@ typedef struct H5VL_token_class_t {
 //! <!-- [H5VL_class_t_snip] -->
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
-    unsigned           version;          /**< VOL connector class struct version #     */
-    H5VL_class_value_t value;            /**< Value to identify connector              */
-    const char        *name;             /**< Connector name (MUST be unique!)         */
-    unsigned           conn_version;     /**< Version # of connector                   */
-    uint64_t           cap_flags;        /**< Capability flags for connector           */
-    herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback        */
-    herr_t (*terminate)(void);           /**< Connector termination callback           */
+    unsigned           version;          /**< VOL connector class struct version number */
+    H5VL_class_value_t value;            /**< Value to identify connector               */
+    const char        *name;             /**< Connector name (MUST be unique!)          */
+    unsigned           conn_version;     /**< Version number of connector               */
+    uint64_t           cap_flags;        /**< Capability flags for connector            */
+    herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback         */
+    herr_t (*terminate)(void);           /**< Connector termination callback            */
 
     /* VOL framework */
     H5VL_info_class_t info_cls; /**< VOL info fields & callbacks  */

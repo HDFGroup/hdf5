@@ -406,7 +406,7 @@ CONTAINS
 !! \brief Opens an object using its token within an HDF5 file.
 !!
 !! \param loc_id File or group identifier.
-!! \param token  Object’s token in the file.
+!! \param token  Object&apos;s token in the file.
 !! \param obj_id Object identifier for the opened object.
 !! \param hdferr \fortran_error
 !!
