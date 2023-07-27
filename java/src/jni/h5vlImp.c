@@ -221,7 +221,7 @@ Java_hdf_hdf5lib_H5_H5VLget_1connector_1name(JNIEnv *env, jclass clss, jlong obj
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (buf_size > 0) {
-        if (NULL == (volName = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+        if (NULL == (volName = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY,
                                    "H5VLget_connector_name: failed to allocated VOL connector name buffer");
 
@@ -235,7 +235,7 @@ Java_hdf_hdf5lib_H5_H5VLget_1connector_1name(JNIEnv *env, jclass clss, jlong obj
 
 done:
     if (volName)
-        HDfree(volName);
+        free(volName);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5VLget_1connector_1name */

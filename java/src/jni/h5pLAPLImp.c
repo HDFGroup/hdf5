@@ -128,7 +128,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix(JNIEnv *env, jclass clss, jlong lapl_i
     if ((prefix_size = H5Pget_elink_prefix((hid_t)lapl_id, (char *)NULL, size)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (pre = (char *)HDmalloc(sizeof(char) * (size_t)prefix_size + 1)))
+    if (NULL == (pre = (char *)malloc(sizeof(char) * (size_t)prefix_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_elink_prefix: memory allocation failed");
 
     if (H5Pget_elink_prefix((hid_t)lapl_id, (char *)pre, (size_t)prefix_size + 1) < 0)
@@ -146,7 +146,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix(JNIEnv *env, jclass clss, jlong lapl_i
 
 done:
     if (pre)
-        HDfree(pre);
+        free(pre);
 
     return (jlong)prefix_size;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix */
