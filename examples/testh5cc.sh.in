@@ -11,14 +11,6 @@
 # help@hdfgroup.org.
 #
 # Tests for the h5cc compiler tool
-# Created: Albert Cheng, 2007/4/11
-#
-# Modification:
-#	Albert Cheng, 2008/9/27
-#	Added -shlib tests and verbose control.
-#	Albert Cheng, 2009/10/28
-#	Added version compatibility tests.
-#
 
 srcdir=@srcdir@
 
