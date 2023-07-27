@@ -284,7 +284,7 @@ done:
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
  *
- *  n  - Attribute’s position in index
+ *  n  - Attribute's position in index
  *  attr_id  - Attribute identifier
  *  size  - Buffer size ! *TEST* check for 0 value *CHECK* should this return the correct value
  *
@@ -361,7 +361,7 @@ done:
  *
  *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
- *  cset - Indicates the character set used for the attribute’s name
+ *  cset - Indicates the character set used for the attribute's name
  *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
@@ -423,13 +423,13 @@ done:
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
  *
- *  n - Attribute’s position in index
+ *  n - Attribute's position in index
  *  lapl_id - Link access property list
  * OUTPUTS
  *
  *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
- *  cset - Indicates the character set used for the attribute’s name
+ *  cset - Indicates the character set used for the attribute's name
  *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
@@ -495,7 +495,7 @@ done:
  *
  *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
- *  cset - Indicates the character set used for the attribute’s name
+ *  cset - Indicates the character set used for the attribute's name
  *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS

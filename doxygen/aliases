@@ -306,7 +306,7 @@ ALIASES += ref_rfc20120523="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/paged_a
 ALIASES += ref_rfc20120501="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5FileImageOperations.pdf\">HDF5 File Image Operations</a>"
 ALIASES += ref_rfc20120305="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC%20PHDF5%20Consistency%20Semantics%20MC%20120328.docx.pdf\">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a>"
 ALIASES += ref_rfc20120220="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/h5repack_improve_hyperslab_over_chunked_dataset_v1.pdf\"><tt>h5repack</tt>: Improved Hyperslab selections for Large Chunked Datasets</a>"
-ALIASES += ref_rfc20120120="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2012-1-25-Maintainers-guide-for-datatype.docx.pdf\">A Maintainer’s Guide for the Datatype Module in HDF5 Library</a>"
+ALIASES += ref_rfc20120120="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2012-1-25-Maintainers-guide-for-datatype.docx.pdf\">A Maintainer's Guide for the Datatype Module in HDF5 Library</a>"
 ALIASES += ref_rfc20120104="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_actual_io_v4-1_done.docx.pdf\">Actual I/O Mode</a>"
 ALIASES += ref_rfc20111119="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-H5Ocompare-review_v6.pdf\">New public functions to handle comparison</a>"
 ALIASES += ref_rfc20110825="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2011-08-31-RFC_H5Ocopy_Named_DT_v2.docx.pdf\">Merging Named Datatypes in H5Ocopy()</a>"

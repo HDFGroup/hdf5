@@ -1954,7 +1954,7 @@ CONTAINS
 !>
 !! \ingroup FH5T
 !!
-!! \brief Check whether the library’s default conversion is hard conversion.
+!! \brief Check whether the library&apos;s default conversion is hard conversion.
 !!
 !! \param src_id Identifier for the source datatype.
 !! \param dst_id Identifier for the destination datatype.
