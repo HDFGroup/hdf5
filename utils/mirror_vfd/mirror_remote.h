@@ -10,9 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Common definitions for "remote" processes for the Mirror VFD.
- *
- * Jacob Smith, 2020-03-06
+/*
+ * Common definitions for "remote" processes for the mirror VFD
  */
 
 #include "hdf5.h"
