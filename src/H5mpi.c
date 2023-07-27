@@ -70,7 +70,7 @@ H5_mpi_set_bigio_count(hsize_t new_count)
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+H5_ATTR_PURE hsize_t
 H5_mpi_get_bigio_count(void)
 {
     return bigio_count_g;
@@ -803,6 +803,7 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
 {
     MPI_Info info_used;
     int      flag;
+    char    *sync_env_var;
     char     value[MPI_MAX_INFO_VAL];
     herr_t   ret_value = SUCCEED;
 
@@ -826,7 +827,7 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
         HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't free MPI info")
 
     /* Force setting the flag via env variable (temp solution before the flag is implemented in MPI) */
-    char *sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
+    sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
     if (sync_env_var && (!HDstrcmp(sync_env_var, "TRUE") || !HDstrcmp(sync_env_var, "1")))
         *file_sync_required = TRUE;
     if (sync_env_var && (!HDstrcmp(sync_env_var, "FALSE") || !HDstrcmp(sync_env_var, "0")))

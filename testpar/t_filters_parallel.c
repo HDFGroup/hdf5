@@ -380,6 +380,7 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                 else
                     VRFY(space_status == H5D_SPACE_STATUS_NOT_ALLOCATED, "verified space allocation status");
                 break;
+            case H5D_ALLOC_TIME_ERROR:
             default:
                 if (MAINPROCESS)
                     MESG("unknown space allocation time");
@@ -8771,6 +8772,8 @@ main(int argc, char **argv)
                     case H5D_ALLOC_TIME_INCR:
                         alloc_time = "Incremental";
                         break;
+                    case H5D_ALLOC_TIME_DEFAULT:
+                    case H5D_ALLOC_TIME_ERROR:
                     default:
                         alloc_time = "Unknown";
                 }

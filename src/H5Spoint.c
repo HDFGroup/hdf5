@@ -1353,16 +1353,18 @@ done:
 static herr_t
 H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip)
 {
-    H5S_t *tmp_space = NULL;                    /* Pointer to actual dataspace to use,
-                                                   either *space or a newly allocated one */
-    hsize_t        dims[H5S_MAX_RANK];          /* Dimension sizes */
-    uint32_t       version;                     /* Version number */
-    uint8_t        enc_size = 0;                /* Encoded size of selection info */
-    hsize_t       *coord    = NULL, *tcoord;    /* Pointer to array of elements */
-    const uint8_t *pp;                          /* Local pointer for decoding */
-    uint64_t       num_elem = 0;                /* Number of elements in selection */
-    unsigned       rank;                        /* Rank of points */
-    unsigned       i, j;                        /* local counting variables */
+    H5S_t *tmp_space = NULL;                 /* Pointer to actual dataspace to use,
+                                                either *space or a newly allocated one */
+    hsize_t        dims[H5S_MAX_RANK];       /* Dimension sizes */
+    uint32_t       version;                  /* Version number */
+    uint8_t        enc_size = 0;             /* Encoded size of selection info */
+    hsize_t       *coord    = NULL, *tcoord; /* Pointer to array of elements */
+    const uint8_t *pp;                       /* Local pointer for decoding */
+    uint64_t       num_elem = 0;             /* Number of elements in selection */
+    unsigned       rank;                     /* Rank of points */
+    unsigned       i, j;                     /* local counting variables */
+    size_t         enc_type_size;
+    size_t         coordinate_buffer_requirement;
     herr_t         ret_value = SUCCEED;         /* Return value */
     const uint8_t *p_end     = *p + p_size - 1; /* Pointer to last valid byte in buffer */
     FUNC_ENTER_PACKAGE
@@ -1460,7 +1462,7 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information")
 
     /* Determine necessary size of buffer for coordinates */
-    size_t enc_type_size = 0;
+    enc_type_size = 0;
 
     switch (enc_size) {
         case H5S_SELECT_INFO_ENC_SIZE_2:
@@ -1477,7 +1479,7 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
             break;
     }
 
-    size_t coordinate_buffer_requirement = num_elem * rank * enc_type_size;
+    coordinate_buffer_requirement = num_elem * rank * enc_type_size;
 
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, coordinate_buffer_requirement, p_end))
         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection coordinates")

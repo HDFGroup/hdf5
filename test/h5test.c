@@ -88,9 +88,6 @@ MPI_Info h5_io_info_g = MPI_INFO_NULL; /* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
-/* Length of multi-file VFD filename buffers */
-#define H5TEST_MULTI_FILENAME_LEN 1024
-
 /* Temporary file for sending signal messages */
 #define TMP_SIGNAL_FILE "tmp_signal_file"
 

@@ -243,33 +243,35 @@ H5_init_library(void)
      * The dataspace interface needs to be initialized so that future IDs for
      *   dataspaces work.
      */
-    /* clang-format off */
-    struct {
-        herr_t (*func)(void);
-        const char *descr;
-    } initializer[] = {
-        {H5E_init, "error"}
-    ,   {H5VL_init_phase1, "VOL"}
-    ,   {H5SL_init, "skip lists"}
-    ,   {H5FD_init, "VFD"}
-    ,   {H5_default_vfd_init, "default VFD"}
-    ,   {H5P_init_phase1, "property list"}
-    ,   {H5AC_init, "metadata caching"}
-    ,   {H5L_init, "link"}
-    ,   {H5S_init, "dataspace"}
-    ,   {H5PL_init, "plugins"}
-    /* Finish initializing interfaces that depend on the interfaces above */
-    ,   {H5P_init_phase2, "property list"}
-    ,   {H5VL_init_phase2, "VOL"}
-    };
+    {
+        /* clang-format off */
+        struct {
+            herr_t (*func)(void);
+            const char *descr;
+        } initializer[] = {
+            {H5E_init, "error"}
+        ,   {H5VL_init_phase1, "VOL"}
+        ,   {H5SL_init, "skip lists"}
+        ,   {H5FD_init, "VFD"}
+        ,   {H5_default_vfd_init, "default VFD"}
+        ,   {H5P_init_phase1, "property list"}
+        ,   {H5AC_init, "metadata caching"}
+        ,   {H5L_init, "link"}
+        ,   {H5S_init, "dataspace"}
+        ,   {H5PL_init, "plugins"}
+        /* Finish initializing interfaces that depend on the interfaces above */
+        ,   {H5P_init_phase2, "property list"}
+        ,   {H5VL_init_phase2, "VOL"}
+        };
 
-    for (i = 0; i < NELMTS(initializer); i++) {
-        if (initializer[i].func() < 0) {
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                "unable to initialize %s interface", initializer[i].descr)
+        for (i = 0; i < NELMTS(initializer); i++) {
+            if (initializer[i].func() < 0) {
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                    "unable to initialize %s interface", initializer[i].descr)
+            }
         }
+        /* clang-format on */
     }
-    /* clang-format on */
 
     /* Debugging? */
     H5__debug_mask("-all");
@@ -349,139 +351,141 @@ H5_term_library(void)
      * way that would necessitate some cleanup work in the other interface.
      */
 
-#define TERMINATOR(module, wait) {      \
-      .func = H5##module##_term_package \
-    , .name = #module                   \
-    , .completed = false                \
-    , .await_prior = wait               \
-    }
-
-    /*
-     * Termination is ordered by the `terminator` table so the "higher" level
-     * packages are shut down before "lower" level packages that they
-     * rely on:
-     */
-    struct {
-        int (*func)(void);       /* function to terminate the module; returns 0
-                                  * on success, >0 if termination was not
-                                  * completed and we should try to terminate
-                                  * some dependent modules, first.
-                                  */
-        const char *name;        /* name of the module */
-        hbool_t     completed;   /* true iff this terminator was already
-                                  * completed
-                                  */
-        const hbool_t await_prior;  /* true iff all prior terminators in the
-                                     * list must complete before this
-                                     * terminator is attempted
-                                     */
-    } terminator[] = {
-        /* Close the event sets first, so that all asynchronous operations
-         * complete before anything else attempts to shut down.
-         */
-        TERMINATOR(ES, false)
-        /* Do not attempt to close down package L until after event sets
-         * have finished closing down.
-         */
-    ,   TERMINATOR(L, true)
-        /* Close the "top" of various interfaces (IDs, etc) but don't shut
-         * down the whole interface yet, so that the object header messages
-         * get serialized correctly for entries in the metadata cache and the
-         * symbol table entry in the superblock gets serialized correctly, etc.
-         * all of which is performed in the 'F' shutdown.
-         *
-         * The tops of packages A, D, G, M, S, T do not need to wait for L
-         * or previous packages to finish closing down.
-         */
-    ,   TERMINATOR(A_top, false)
-    ,   TERMINATOR(D_top, false)
-    ,   TERMINATOR(G_top, false)
-    ,   TERMINATOR(M_top, false)
-    ,   TERMINATOR(S_top, false)
-    ,   TERMINATOR(T_top, false)
-        /* Don't shut down the file code until objects in files are shut down */
-    ,   TERMINATOR(F, true)
-        /* Don't shut down the property list code until all objects that might
-         * use property lists are shut down
-         */
-    ,   TERMINATOR(P, true)
-        /* Wait to shut down the "bottom" of various interfaces until the
-         * files are closed, so pieces of the file can be serialized
-         * correctly.
-         *
-         * Shut down the "bottom" of the attribute, dataset, group,
-         * reference, dataspace, and datatype interfaces, fully closing
-         * out the interfaces now.
-         */
-    ,   TERMINATOR(A, true)
-    ,   TERMINATOR(D, false)
-    ,   TERMINATOR(G, false)
-    ,   TERMINATOR(M, false)
-    ,   TERMINATOR(S, false)
-    ,   TERMINATOR(T, false)
-        /* Wait to shut down low-level packages like AC until after
-         * the preceding high-level packages have shut down.  This prevents
-         * low-level objects from closing "out from underneath" their
-         * reliant high-level objects.
-         */
-    ,   TERMINATOR(AC, true)
-        /* Shut down the "pluggable" interfaces, before the plugin framework */
-    ,   TERMINATOR(Z, false)
-    ,   TERMINATOR(FD, false)
-    ,   TERMINATOR(VL, false)
-        /* Don't shut down the plugin code until all "pluggable" interfaces
-         * (Z, FD, PL) are shut down
-         */
-    ,   TERMINATOR(PL, true)
-        /* Shut down the following packages in strictly the order given
-         * by the table.
-         */
-    ,   TERMINATOR(E, true)
-    ,   TERMINATOR(I, true)
-    ,   TERMINATOR(SL, true)
-    ,   TERMINATOR(FL, true)
-    ,   TERMINATOR(CX, true)
-    };
-
-    do {
-        pending = 0;
-        for (i = 0; i < NELMTS(terminator); i++) {
-            if (terminator[i].completed)
-                continue;
-            if (pending != 0 && terminator[i].await_prior)
-                break;
-            if (terminator[i].func() == 0) {
-                terminator[i].completed = true;
-                continue;
-            }
-
-            /* log a package when its terminator needs to be retried */
-            pending++;
-            nprinted = HDsnprintf(next, nleft, "%s%s",
-                (next != loop) ? "," : "", terminator[i].name);
-            if (nprinted < 0)
-                continue;
-            if ((size_t)nprinted >= nleft)
-                nprinted = HDsnprintf(next, nleft, "...");
-            if (nprinted < 0 || (size_t)nprinted >= nleft)
-                continue;
-            nleft -= (size_t)nprinted;
-            next += nprinted;
+    {
+#define TERMINATOR(module, wait) {          \
+          .func = H5##module##_term_package \
+        , .name = #module                   \
+        , .completed = false                \
+        , .await_prior = wait               \
         }
-    } while (pending && ntries++ < 100);
 
-    /* clang-format on */
+        /*
+         * Termination is ordered by the `terminator` table so the "higher" level
+         * packages are shut down before "lower" level packages that they
+         * rely on:
+         */
+        struct {
+            int (*func)(void);       /* function to terminate the module; returns 0
+                                      * on success, >0 if termination was not
+                                      * completed and we should try to terminate
+                                      * some dependent modules, first.
+                                      */
+            const char *name;        /* name of the module */
+            hbool_t     completed;   /* true iff this terminator was already
+                                      * completed
+                                      */
+            const hbool_t await_prior;  /* true iff all prior terminators in the
+                                         * list must complete before this
+                                         * terminator is attempted
+                                         */
+        } terminator[] = {
+            /* Close the event sets first, so that all asynchronous operations
+             * complete before anything else attempts to shut down.
+             */
+            TERMINATOR(ES, false)
+            /* Do not attempt to close down package L until after event sets
+             * have finished closing down.
+             */
+        ,   TERMINATOR(L, true)
+            /* Close the "top" of various interfaces (IDs, etc) but don't shut
+             * down the whole interface yet, so that the object header messages
+             * get serialized correctly for entries in the metadata cache and the
+             * symbol table entry in the superblock gets serialized correctly, etc.
+             * all of which is performed in the 'F' shutdown.
+             *
+             * The tops of packages A, D, G, M, S, T do not need to wait for L
+             * or previous packages to finish closing down.
+             */
+        ,   TERMINATOR(A_top, false)
+        ,   TERMINATOR(D_top, false)
+        ,   TERMINATOR(G_top, false)
+        ,   TERMINATOR(M_top, false)
+        ,   TERMINATOR(S_top, false)
+        ,   TERMINATOR(T_top, false)
+            /* Don't shut down the file code until objects in files are shut down */
+        ,   TERMINATOR(F, true)
+            /* Don't shut down the property list code until all objects that might
+             * use property lists are shut down
+             */
+        ,   TERMINATOR(P, true)
+            /* Wait to shut down the "bottom" of various interfaces until the
+             * files are closed, so pieces of the file can be serialized
+             * correctly.
+             *
+             * Shut down the "bottom" of the attribute, dataset, group,
+             * reference, dataspace, and datatype interfaces, fully closing
+             * out the interfaces now.
+             */
+        ,   TERMINATOR(A, true)
+        ,   TERMINATOR(D, false)
+        ,   TERMINATOR(G, false)
+        ,   TERMINATOR(M, false)
+        ,   TERMINATOR(S, false)
+        ,   TERMINATOR(T, false)
+            /* Wait to shut down low-level packages like AC until after
+             * the preceding high-level packages have shut down.  This prevents
+             * low-level objects from closing "out from underneath" their
+             * reliant high-level objects.
+             */
+        ,   TERMINATOR(AC, true)
+            /* Shut down the "pluggable" interfaces, before the plugin framework */
+        ,   TERMINATOR(Z, false)
+        ,   TERMINATOR(FD, false)
+        ,   TERMINATOR(VL, false)
+            /* Don't shut down the plugin code until all "pluggable" interfaces
+             * (Z, FD, PL) are shut down
+             */
+        ,   TERMINATOR(PL, true)
+            /* Shut down the following packages in strictly the order given
+             * by the table.
+             */
+        ,   TERMINATOR(E, true)
+        ,   TERMINATOR(I, true)
+        ,   TERMINATOR(SL, true)
+        ,   TERMINATOR(FL, true)
+        ,   TERMINATOR(CX, true)
+        };
 
-    if (pending) {
-        /* Only display the error message if the user is interested in them. */
-        if (func) {
-            HDfprintf(stderr, "HDF5: infinite loop closing library\n");
-            HDfprintf(stderr, "      %s\n", loop);
+        do {
+            pending = 0;
+            for (i = 0; i < NELMTS(terminator); i++) {
+                if (terminator[i].completed)
+                    continue;
+                if (pending != 0 && terminator[i].await_prior)
+                    break;
+                if (terminator[i].func() == 0) {
+                    terminator[i].completed = true;
+                    continue;
+                }
+
+                /* log a package when its terminator needs to be retried */
+                pending++;
+                nprinted = HDsnprintf(next, nleft, "%s%s",
+                    (next != loop) ? "," : "", terminator[i].name);
+                if (nprinted < 0)
+                    continue;
+                if ((size_t)nprinted >= nleft)
+                    nprinted = HDsnprintf(next, nleft, "...");
+                if (nprinted < 0 || (size_t)nprinted >= nleft)
+                    continue;
+                nleft -= (size_t)nprinted;
+                next += nprinted;
+            }
+        } while (pending && ntries++ < 100);
+
+        /* clang-format on */
+
+        if (pending) {
+            /* Only display the error message if the user is interested in them. */
+            if (func) {
+                fprintf(stderr, "HDF5: infinite loop closing library\n");
+                fprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
-            HDabort();
-#endif    /* NDEBUG */
-        } /* end if */
-    }     /* end if */
+                HDabort();
+#endif        /* NDEBUG */
+            } /* end if */
+        }     /* end if */
+    }
 
     /* Free open debugging streams */
     while (H5_debug_g.open_stream) {
@@ -1122,7 +1126,7 @@ H5close(void)
  *
  *-------------------------------------------------------------------------
  */
-void *
+void *H5_ATTR_MALLOC
 H5allocate_memory(size_t size, hbool_t clear)
 {
     void *ret_value = NULL;

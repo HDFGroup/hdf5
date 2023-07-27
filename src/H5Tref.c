@@ -1003,8 +1003,10 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     src_size -= H5R_ENCODE_HEADER_SIZE;
 
 #ifndef NDEBUG
-    size_t buf_size_left = dst_size - sizeof(uint32_t);
-    HDassert(buf_size_left > sizeof(uint32_t));
+    {
+        size_t buf_size_left = dst_size - sizeof(uint32_t);
+        assert(buf_size_left > sizeof(uint32_t));
+    }
 #endif
 
     /* Set the size */
