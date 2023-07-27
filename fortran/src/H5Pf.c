@@ -61,7 +61,7 @@ h5pcreate_c(hid_t_f *cls, hid_t_f *prp_id)
 
     c_prp_id = H5Pcreate((hid_t)*cls);
     if (c_prp_id < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *prp_id = (hid_t_f)c_prp_id;
 
@@ -115,7 +115,7 @@ h5pcopy_c(hid_t_f *prp_id, hid_t_f *new_prp_id)
 
     c_new_prp_id = H5Pcopy((hid_t)*prp_id);
     if (c_new_prp_id < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *new_prp_id = (hid_t_f)c_new_prp_id;
 
@@ -146,7 +146,7 @@ h5pequal_c(hid_t_f *plist1_id, hid_t_f *plist2_id, int_f *c_flag)
 
     c_c_flag = H5Pequal((hid_t)*plist1_id, (hid_t)*plist2_id);
     if (c_c_flag < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *c_flag = (int_f)c_c_flag;
 
@@ -176,7 +176,7 @@ h5pget_class_c(hid_t_f *prp_id, hid_t_f *classtype)
     int_f ret_value = 0;
 
     if ((c_classtype = H5Pget_class((hid_t)*prp_id)) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *classtype = (hid_t_f)c_classtype;
 
@@ -202,10 +202,10 @@ int_f
 h5pset_preserve_c(hid_t_f *prp_id, int_f *flag)
 /******/
 {
-    int     ret_value = 0;
-    hid_t   c_prp_id;
-    herr_t  status;
-    hbool_t c_flag = 0;
+    int    ret_value = 0;
+    hid_t  c_prp_id;
+    herr_t status;
+    bool   c_flag = 0;
 
     if (*flag > 0)
         c_flag = 1;
@@ -1035,13 +1035,13 @@ int_f
 h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag)
 /******/
 {
-    int     ret_value = -1;
-    hid_t   c_prp_id;
-    herr_t  ret = -1;
-    size_t  c_increment;
-    hbool_t c_backing_store;
+    int    ret_value = -1;
+    hid_t  c_prp_id;
+    herr_t ret = -1;
+    size_t c_increment;
+    bool   c_backing_store;
     c_increment     = (size_t)*increment;
-    c_backing_store = (hbool_t)*flag;
+    c_backing_store = (bool)*flag;
 
     /*
      * Call H5Pset_fapl_core function.
@@ -1071,11 +1071,11 @@ int_f
 h5pget_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag)
 /******/
 {
-    int     ret_value = -1;
-    hid_t   c_prp_id;
-    herr_t  ret         = -1;
-    size_t  c_increment = 0;
-    hbool_t c_backing_store;
+    int    ret_value = -1;
+    hid_t  c_prp_id;
+    herr_t ret         = -1;
+    size_t c_increment = 0;
+    bool   c_backing_store;
     *flag = 0;
     /*
      * Call H5Pset_fapl_core function.
@@ -2871,7 +2871,7 @@ h5pget_class_name_c(hid_t_f *cls, _fcd name, int_f *name_len)
         goto DONE;
 
     HD5packFstring(c_name, _fcdtocp(name), (size_t)*name_len);
-    ret_value = (int_f)HDstrlen(c_name);
+    ret_value = (int_f)strlen(c_name);
     H5free_memory(c_name);
 
 DONE:
@@ -3130,14 +3130,14 @@ h5pset_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
     hid_t       c_memb_fapl[H5FD_MEM_NTYPES];
     char       *c_memb_name[H5FD_MEM_NTYPES];
     haddr_t     c_memb_addr[H5FD_MEM_NTYPES];
-    hbool_t     relax;
+    bool        relax;
     herr_t      status;
     char       *tmp, *tmp_p, *tmp_pp;
     int         i;
     int         c_lenmax;
     long double tmp_max_addr;
     c_lenmax = (int)*lenmax;
-    relax    = (hbool_t)*flag;
+    relax    = (bool)*flag;
     /*
      *  Check that we got correct values from Fortran for memb_addr array
      */
@@ -3206,12 +3206,12 @@ int_f
 h5pset_fapl_multi_sc(hid_t_f *prp_id, int_f *flag)
 /******/
 {
-    int_f   ret_value = -1;
-    hid_t   c_prp_id;
-    hbool_t relax;
-    herr_t  status;
+    int_f  ret_value = -1;
+    hid_t  c_prp_id;
+    bool   relax;
+    herr_t status;
 
-    relax    = (hbool_t)*flag;
+    relax    = (bool)*flag;
     c_prp_id = (hid_t)*prp_id;
     /*
      *  Call  H5Pset_fapl_multi function
@@ -3253,7 +3253,7 @@ h5pget_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
     hid_t      c_memb_fapl[H5FD_MEM_NTYPES];
     char      *c_memb_name[H5FD_MEM_NTYPES];
     haddr_t    c_memb_addr[H5FD_MEM_NTYPES];
-    hbool_t    relax;
+    bool       relax;
     herr_t     status;
     char      *tmp, *tmp_p;
     int        i;
@@ -3428,7 +3428,7 @@ h5pget_filter_by_id_c(hid_t_f *prp_id, int_f *filter_id, int_f *flags, size_t_f 
 
     *cd_nelmts = (size_t_f)c_cd_nelmts;
     *flags     = (int_f)c_flags;
-    HD5packFstring(c_name, _fcdtocp(name), HDstrlen(c_name));
+    HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));
 
     for (i = 0; i < c_cd_nelmts_in; i++)
         cd_values[i] = (int_f)c_cd_values[i];
@@ -3804,9 +3804,9 @@ int_f
 h5pget_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
 /******/
 {
-    int     ret_value     = -1;
-    hbool_t c_track_times = 0;
-    herr_t  ret;
+    int    ret_value     = -1;
+    bool   c_track_times = 0;
+    herr_t ret;
 
     /*
      * Call H5Pget_obj_track_times function.
@@ -3841,11 +3841,11 @@ int_f
 h5pset_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
 /******/
 {
-    int     ret_value = -1;
-    hbool_t c_track_times;
-    herr_t  ret;
+    int    ret_value = -1;
+    bool   c_track_times;
+    herr_t ret;
 
-    c_track_times = (hbool_t)*flag;
+    c_track_times = (bool)*flag;
 
     /*
      * Call H5Pset_obj_track_times function.
@@ -4117,7 +4117,7 @@ h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
     if (c_expression_len) {
         c_expression = (char *)malloc(c_expression_len);
         if (NULL == c_expression)
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
     } /* end if */
 
     /*
@@ -4125,7 +4125,7 @@ h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
      */
     ret = H5Pget_data_transform((hid_t)*plist_id, c_expression, c_expression_len);
     if (ret < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* or strlen ? */
     HD5packFstring(c_expression, _fcdtocp(expression), (size_t)*expression_len);
@@ -4170,13 +4170,13 @@ h5pset_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_expression = HD5f2cstring(expression, (size_t)*expression_len)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Pset_data_transform function.
      */
     if (H5Pset_data_transform((hid_t)*plist_id, c_expression) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_expression)

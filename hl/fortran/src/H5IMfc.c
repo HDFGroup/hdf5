@@ -297,7 +297,7 @@ h5immake_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *dim
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     for (i = 0; i < rank; i++)
         c_dims[i] = (hsize_t)dims[i];
@@ -306,7 +306,7 @@ h5immake_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *dim
      * call H5IMmake_palette function.
      */
     if (H5IMmake_palettef((hid_t)*loc_id, c_name, c_dims, (int_f *)buf) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)

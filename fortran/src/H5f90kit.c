@@ -50,7 +50,7 @@ HD5f2cstring(_fcd fdesc, size_t len)
 
     /* Search for the end of the string */
     str = _fcdtocp(fdesc);
-    for (i = (int)len - 1; i >= 0 && HDisspace((int)str[i]) && str[i] == ' '; i--)
+    for (i = (int)len - 1; i >= 0 && isspace((int)str[i]) && str[i] == ' '; i--)
         /*EMPTY*/;
 
     /* Allocate C string */
@@ -90,7 +90,7 @@ void
 HD5packFstring(char *src, char *dest, size_t dst_len)
 /******/
 {
-    size_t src_len = HDstrlen(src);
+    size_t src_len = strlen(src);
 
     /* Copy over the string information, up to the length of the src */
     /* (Don't copy the NUL terminator from the C string to the FORTRAN string */

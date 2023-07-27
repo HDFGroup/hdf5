@@ -37,8 +37,8 @@
 
 MODULE H5E
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR
   USE H5GLOBAL
+  IMPLICIT NONE
 
   INTEGER, PARAMETER :: PRINTON  = 1 !< Turn on automatic printing of errors
   INTEGER, PARAMETER :: PRINTOFF = 0 !< Turn off automatic printing of errors

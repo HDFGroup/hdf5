@@ -1743,7 +1743,7 @@ h5tget_tag_c(hid_t_f *type_id, _fcd tag, size_t_f *tag_size, int_f *taglen)
         return ret_value;
 
     HD5packFstring(c_tag, _fcdtocp(tag), (size_t)*tag_size);
-    *taglen = (int_f)HDstrlen(c_tag);
+    *taglen = (int_f)strlen(c_tag);
     H5free_memory(c_tag);
     ret_value = 0;
     return ret_value;

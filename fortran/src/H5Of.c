@@ -38,7 +38,7 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
     object_info->type = (int_f)Oinfo.type;
     object_info->rc   = (int_f)Oinfo.rc;
 
-    ts = HDgmtime(&Oinfo.atime);
+    ts = gmtime(&Oinfo.atime);
 
     object_info->atime[0] = (int_f)ts->tm_year + 1900; /* year starts at 1900 */
     object_info->atime[1] = (int_f)ts->tm_mon + 1;     /* month starts at 0 in C */
@@ -49,7 +49,7 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
     object_info->atime[6] = (int_f)ts->tm_sec;
     object_info->atime[7] = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-    ts = HDgmtime(&Oinfo.btime);
+    ts = gmtime(&Oinfo.btime);
 
     object_info->btime[0] = (int_f)ts->tm_year + 1900; /* year starts at 1900 */
     object_info->btime[1] = (int_f)ts->tm_mon + 1;     /* month starts at 0 in C */
@@ -60,7 +60,7 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
     object_info->btime[6] = (int_f)ts->tm_sec;
     object_info->btime[7] = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-    ts = HDgmtime(&Oinfo.ctime);
+    ts = gmtime(&Oinfo.ctime);
 
     object_info->ctime[0] = (int_f)ts->tm_year + 1900; /* year starts at 1900 */
     object_info->ctime[1] = (int_f)ts->tm_mon + 1;     /* month starts at 0 in C */
@@ -71,7 +71,7 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
     object_info->ctime[6] = (int_f)ts->tm_sec;
     object_info->ctime[7] = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-    ts = HDgmtime(&Oinfo.mtime);
+    ts = gmtime(&Oinfo.mtime);
 
     object_info->mtime[0] = (int_f)ts->tm_year + 1900; /* year starts at 1900 */
     object_info->mtime[1] = (int_f)ts->tm_mon + 1;     /* month starts at 0 in C */

@@ -36,10 +36,10 @@
 !
 
 MODULE H5G
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_CHAR, C_INT
+
   USE H5GLOBAL
   USE H5P, ONLY : H5Pcreate_f, H5Pset_local_heap_size_hint_f, H5Pclose_f
-
+  IMPLICIT NONE
 
 !
 ! @brief Fortran2003 Derived Type for @ref H5G_info_t

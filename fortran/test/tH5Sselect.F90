@@ -1086,8 +1086,8 @@ SUBROUTINE test_select_point(cleanup, total_error)
 !    MESSAGE(5, ("Testing Element Selection Functions\n"));
 
     ! Allocate write & read buffers
-!!$  wbuf = HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-!!$  rbuf = HDcalloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+!!$  wbuf = malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+!!$  rbuf = calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
 !!$
   ! Initialize WRITE buffer
 
@@ -1204,7 +1204,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
 !!$     Save points for later iteration
 !!$     (these are in the second half of the buffer, because we are prepending
 !!$      the next list of points to the beginning of the point selection list)
-!!$    HDmemcpy(((char *)pi.coord)+sizeof(coord2),coord2,sizeof(coord2));
+!!$    memcpy(((char *)pi.coord)+sizeof(coord2),coord2,sizeof(coord2));
 !!$
 
   CALL H5Sget_select_npoints_f(sid2, npoints, error)
@@ -1241,7 +1241,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL verify("h5sget_select_npoints_f", INT(npoints), 20, total_error)
 
 !!$     Save points for later iteration
-!!$    HDmemcpy(pi.coord,coord2,sizeof(coord2));
+!!$    memcpy(pi.coord,coord2,sizeof(coord2));
 
   !  Create a dataset
   CALL h5dcreate_f(fid1, "Dataset1", H5T_NATIVE_CHARACTER, sid1, dataset, error)
