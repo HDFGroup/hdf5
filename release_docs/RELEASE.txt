@@ -139,7 +139,12 @@ Bug Fixes since HDF5-1.14.1 release
 
     Configuration
     -------------
-    -
+    - Fixed a configuration issue that prevented building of the Subfiling VFD on macOS
+
+      Checks were added to the CMake and Autotools code to verify that CLOCK_MONOTONIC_COARSE,
+      PTHREAD_MUTEX_ADAPTIVE_NP and pthread_condattr_setclock() are available before attempting
+      to use them in Subfiling VFD-related utility code. Without these checks, attempting
+      to build the Subfiling VFD on macOS would fail. 
 
 
     Tools

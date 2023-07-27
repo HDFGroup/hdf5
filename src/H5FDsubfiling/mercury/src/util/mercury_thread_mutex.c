@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2013-2022 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2022-2023 Intel Corporation.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -32,7 +33,6 @@ hg_thread_mutex_init_posix(hg_thread_mutex_t *mutex, int kind)
 
 done:
     rc = pthread_mutexattr_destroy(&mutex_attr);
-    HG_UTIL_CHECK_ERROR_DONE(rc != 0, "pthread_mutexattr_destroy() failed (%s)", strerror(rc));
 
     return ret;
 }
@@ -61,7 +61,7 @@ hg_thread_mutex_init_fast(hg_thread_mutex_t *mutex)
 
 #if defined(_WIN32)
     ret = hg_thread_mutex_init(mutex);
-#elif defined(HG_UTIL_HAS_PTHREAD_MUTEX_ADAPTIVE_NP)
+#elif defined(H5_HAVE_PTHREAD_MUTEX_ADAPTIVE_NP)
     /* Set type to PTHREAD_MUTEX_ADAPTIVE_NP to improve performance */
     ret = hg_thread_mutex_init_posix(mutex, PTHREAD_MUTEX_ADAPTIVE_NP);
 #else

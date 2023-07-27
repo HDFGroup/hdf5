@@ -760,8 +760,22 @@ if (HDF5_ENABLE_SUBFILING_VFD)
       ${HDF5_SRC_INCLUDE_DIRS}
       ${H5FD_SUBFILING_MERCURY_DIR}
   )
-  set (H5_HAVE_MERCURY_H 1)
   set (CMAKE_REQUIRED_INCLUDES "${H5FD_SUBFILING_MERCURY_DIR}")
+
+  # Run some configure checks for the Mercury util files
+  set (CMAKE_EXTRA_INCLUDE_FILES pthread.h)
+  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+
+  check_type_size(PTHREAD_MUTEX_ADAPTIVE_NP PTHREAD_MUTEX_ADAPTIVE_NP_SIZE)
+  if (HAVE_PTHREAD_MUTEX_ADAPTIVE_NP_SIZE)
+    set (${HDF_PREFIX}_HAVE_PTHREAD_MUTEX_ADAPTIVE_NP 1)
+  endif ()
+
+  check_symbol_exists(pthread_condattr_setclock pthread.h
+    ${HDF_PREFIX}_HAVE_PTHREAD_CONDATTR_SETCLOCK)
+
+  unset (CMAKE_EXTRA_INCLUDE_FILES)
+  unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 
 #option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")
