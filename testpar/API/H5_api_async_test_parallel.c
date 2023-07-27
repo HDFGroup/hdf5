@@ -77,7 +77,7 @@ test_one_dataset_io(void)
     int     *write_buf = NULL;
     int     *read_buf  = NULL;
 
-    TESTING_MULTIPART("single dataset I/O")
+    TESTING_MULTIPART("single dataset I/O");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
@@ -442,7 +442,7 @@ test_multi_dataset_io(void)
     int     *write_buf = NULL;
     int     *read_buf  = NULL;
 
-    TESTING_MULTIPART("multi dataset I/O")
+    TESTING_MULTIPART("multi dataset I/O");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
@@ -768,7 +768,7 @@ test_multi_file_dataset_io(void)
     int     *write_buf = NULL;
     int     *read_buf  = NULL;
 
-    TESTING_MULTIPART("multi file dataset I/O")
+    TESTING_MULTIPART("multi file dataset I/O");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
@@ -1191,7 +1191,7 @@ test_multi_file_grp_dset_io(void)
     int     *write_buf = NULL;
     int     *read_buf  = NULL;
 
-    TESTING_MULTIPART("multi file dataset I/O with groups")
+    TESTING_MULTIPART("multi file dataset I/O with groups");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
@@ -2024,7 +2024,7 @@ test_attribute_exists(void)
     if (exists1)
         FAIL_PUTS_ERROR("    H5Aexists returned TRUE for an attribute that should not exist")
     if (!exists2)
-        FAIL_PUTS_ERROR("    H5Aexists returned FALSE for an attribute that should exist")
+        FAIL_PUTS_ERROR("    H5Aexists returned FALSE for an attribute that should exist");
 
     /* Close */
     if (H5Aclose_async(attr_id, es_id) < 0)
@@ -2913,11 +2913,10 @@ test_group(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, group, group more, creation order, or flush aren't "
+            HDprintf("    API functions for basic file, group, group more or flush aren't "
                      "supported with this connector\n");
         }
 
@@ -2931,9 +2930,11 @@ test_group(void)
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
         TEST_ERROR;
 
-    /* Track creation order */
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0)
-        TEST_ERROR;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        /* Track creation order */
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0)
+            TEST_ERROR;
+    }
 
     /* Create event stack */
     if ((es_id = H5EScreate()) < 0)
@@ -2997,10 +2998,12 @@ test_group(void)
     if (H5Gget_info_async(group_id, &info1, es_id) < 0)
         TEST_ERROR;
 
-    /* Test H5Gget_info_by_idx_async */
-    if (H5Gget_info_by_idx_async(parent_group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &info2,
-                                 H5P_DEFAULT, es_id) < 0)
-        TEST_ERROR;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        /* Test H5Gget_info_by_idx_async */
+        if (H5Gget_info_by_idx_async(parent_group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &info2,
+                                     H5P_DEFAULT, es_id) < 0)
+            TEST_ERROR;
+    }
 
     /* Test H5Gget_info_by_name_async */
     if (H5Gget_info_by_name_async(parent_group_id, "group3", &info3, H5P_DEFAULT, es_id) < 0)
@@ -3014,11 +3017,13 @@ test_group(void)
 
     /* Verify group infos */
     if (info1.nlinks != 0)
-        FAIL_PUTS_ERROR("    incorrect number of links")
-    if (info2.nlinks != 1)
-        FAIL_PUTS_ERROR("    incorrect number of links")
+        FAIL_PUTS_ERROR("    incorrect number of links");
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (info2.nlinks != 1)
+            FAIL_PUTS_ERROR("    incorrect number of links");
+    }
     if (info3.nlinks != 2)
-        FAIL_PUTS_ERROR("    incorrect number of links")
+        FAIL_PUTS_ERROR("    incorrect number of links");
 
     /* Close */
     if (H5Gclose_async(group_id, es_id) < 0)
@@ -3271,17 +3276,17 @@ test_link(void)
 
     /* Check if existence returns were correct */
     if (!existsh1)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist")
+        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
     if (!existss1)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist")
+        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
     if (!existsh2)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist")
+        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
     if (existss2)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist")
+        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
     if (existsh3)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist")
+        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
     if (existsh3)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist")
+        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
 
     /* Close */
     if (H5Gclose_async(parent_group_id, es_id) < 0)
