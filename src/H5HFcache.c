@@ -476,13 +476,13 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     hdr->checksum_dblocks = heap_flags & H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS;
 
     /* "Huge" object information */
-    UINT32DECODE(image, hdr->max_man_size);                 /* Max. size of "managed" objects */
-    H5F_DECODE_LENGTH(udata->f, image, hdr->huge_next_id);  /* Next ID to use for "huge" object */
+    UINT32DECODE(image, hdr->max_man_size);                /* Max. size of "managed" objects */
+    H5F_DECODE_LENGTH(udata->f, image, hdr->huge_next_id); /* Next ID to use for "huge" object */
     H5_addr_decode(udata->f, &image, &hdr->huge_bt2_addr); /* Address of "huge" object tracker B-tree */
 
     /* "Managed" object free space information */
     H5F_DECODE_LENGTH(udata->f, image,
-                      hdr->total_man_free);           /* Internal free space in managed direct blocks */
+                      hdr->total_man_free);          /* Internal free space in managed direct blocks */
     H5_addr_decode(udata->f, &image, &hdr->fs_addr); /* Address of free section header */
 
     /* Heap statistics */
@@ -740,11 +740,11 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     /* "Huge" object information */
     UINT32ENCODE(image, hdr->max_man_size);         /* Max. size of "managed" objects */
     H5F_ENCODE_LENGTH(f, image, hdr->huge_next_id); /* Next ID to use for "huge" object */
-    H5_addr_encode(f, &image, hdr->huge_bt2_addr); /* Address of "huge" object tracker B-tree */
+    H5_addr_encode(f, &image, hdr->huge_bt2_addr);  /* Address of "huge" object tracker B-tree */
 
     /* "Managed" object free space information */
     H5F_ENCODE_LENGTH(f, image, hdr->total_man_free); /* Internal free space in managed direct blocks */
-    H5_addr_encode(f, &image, hdr->fs_addr);         /* Address of free section header */
+    H5_addr_encode(f, &image, hdr->fs_addr);          /* Address of free section header */
 
     /* Heap statistics */
     H5F_ENCODE_LENGTH(f, image, hdr->man_size);

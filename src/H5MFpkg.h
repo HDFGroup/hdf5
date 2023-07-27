@@ -70,7 +70,7 @@
     {                                                                                                        \
         hsize_t m;                                                                                           \
                                                                                                              \
-        if (H5_addr_gt((E), 0) && ((m) = ((E) + H5F_BASE_ADDR(F)) % (A)))                                   \
+        if (H5_addr_gt((E), 0) && ((m) = ((E) + H5F_BASE_ADDR(F)) % (A)))                                    \
             (FR) = (A)-m;                                                                                    \
         else                                                                                                 \
             (FR) = 0;                                                                                        \

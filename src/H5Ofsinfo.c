@@ -189,7 +189,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5_addr_decode(f, &p,
-                        &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
+                       &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
 
         /* Decode addresses of free space managers, if persisting */
         if (fsinfo->persist)
@@ -238,8 +238,8 @@ H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     *p++ = (unsigned char)fsinfo->persist;      /* Free-space persist or not */
     H5F_ENCODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section size threshold */
 
-    H5F_ENCODE_LENGTH(f, p, fsinfo->page_size);          /* File space page size */
-    UINT16ENCODE(p, fsinfo->pgend_meta_thres);           /* Page end metadata threshold */
+    H5F_ENCODE_LENGTH(f, p, fsinfo->page_size);         /* File space page size */
+    UINT16ENCODE(p, fsinfo->pgend_meta_thres);          /* Page end metadata threshold */
     H5_addr_encode(f, &p, fsinfo->eoa_pre_fsm_fsalloc); /* EOA before free-space header and section info */
 
     /* Store addresses of free-space managers, if persisting */

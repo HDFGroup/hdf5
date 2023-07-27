@@ -48,7 +48,7 @@
 #define H5MF_CHECK_FSM(FSM, CF)                                                                              \
     do {                                                                                                     \
         assert(*CF == FALSE);                                                                                \
-        if (!H5_addr_defined(FSM->addr) || !H5_addr_defined(FSM->sect_addr))                               \
+        if (!H5_addr_defined(FSM->addr) || !H5_addr_defined(FSM->sect_addr))                                 \
             *CF = TRUE;                                                                                      \
     } while (0)
 

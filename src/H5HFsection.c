@@ -1122,7 +1122,7 @@ H5HF__sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5
                 assert(dblock->size > sect->sect_info.size);
                 assert(H5_addr_lt(dblock->block_off, sect->sect_info.addr));
                 assert(H5_addr_ge((dblock->block_off + dblock->size),
-                                   (sect->sect_info.addr + sect->sect_info.size)));
+                                  (sect->sect_info.addr + sect->sect_info.size)));
 
                 /* Release direct block */
                 status = H5AC_unprotect(iblock->hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, dblock,
@@ -1644,7 +1644,7 @@ H5HF__sect_row_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_i
             H5HF__sect_indirect_iblock_off(sect2->u.row.under))
             /* Check if second section adjoins first section */
             if (H5_addr_eq((top_indir_sect1->sect_info.addr + top_indir_sect1->u.indirect.span_size),
-                            top_indir_sect2->sect_info.addr))
+                           top_indir_sect2->sect_info.addr))
                 HGOTO_DONE(TRUE)
 
 done:
