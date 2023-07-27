@@ -99,14 +99,14 @@ H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa")
 
         /* Check for overlapping into file's temporary allocation space */
-        if (H5F_addr_gt((eoa + size), f->shared->tmp_addr))
+        if (H5_addr_gt((eoa + size), f->shared->tmp_addr))
             HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, HADDR_UNDEF,
                         "'normal' file space allocation request will overlap into 'temporary' file space")
     } /* end if */
 
     /* Call the file driver 'alloc' routine */
     ret_value = H5FD_alloc(f->shared->lf, type, f, size, frag_addr, frag_size);
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, HADDR_UNDEF, "file driver 'alloc' request failed")
 
     /* Mark EOA dirty */

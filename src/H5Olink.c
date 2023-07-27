@@ -216,7 +216,7 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
             /* Get the address of the object the link points to */
             if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-            H5F_addr_decode(f, &p, &(lnk->u.hard.addr));
+            H5_addr_decode(f, &p, &(lnk->u.hard.addr));
             break;
 
         case H5L_TYPE_SOFT:
@@ -365,7 +365,7 @@ H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     switch (lnk->type) {
         case H5L_TYPE_HARD:
             /* Store the address of the object the link points to */
-            H5F_addr_encode(f, &p, lnk->u.hard.addr);
+            H5_addr_encode(f, &p, lnk->u.hard.addr);
             break;
 
         case H5L_TYPE_SOFT:
@@ -615,7 +615,7 @@ H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
         /* Construct object location for object, in order to decrement it's ref count */
         H5O_loc_reset(&oloc);
         oloc.file = f;
-        assert(H5F_addr_defined(lnk->u.hard.addr));
+        assert(H5_addr_defined(lnk->u.hard.addr));
         oloc.addr = lnk->u.hard.addr;
 
         /* Decrement the ref count for the object */
@@ -744,7 +744,7 @@ H5O__link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     /* check args */
     assert(link_src);
     assert(dst_oloc);
-    assert(H5F_addr_defined(dst_oloc->addr));
+    assert(H5_addr_defined(dst_oloc->addr));
     assert(dst_oloc->file);
     assert(link_dst);
     assert(cpy_info);

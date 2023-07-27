@@ -7142,9 +7142,9 @@ get_free_sections_test(hbool_t single_file_vfd)
         /* file_ptr->shared->first_alloc_dealloc is set to FALSE if the
          * file is opened R/O.
          */
-        if ((!H5F_addr_defined(file_ptr->shared->eoa_fsm_fsalloc)) ||
-            (!H5F_addr_defined(file_ptr->shared->cache->image_addr)) ||
-            (H5F_addr_gt(file_ptr->shared->eoa_fsm_fsalloc, file_ptr->shared->cache->image_addr))) {
+        if ((!H5_addr_defined(file_ptr->shared->eoa_fsm_fsalloc)) ||
+            (!H5_addr_defined(file_ptr->shared->cache->image_addr)) ||
+            (H5_addr_gt(file_ptr->shared->eoa_fsm_fsalloc, file_ptr->shared->cache->image_addr))) {
 
             pass         = FALSE;
             failure_mssg = "unexpected cache image status (1).\n";
@@ -7247,9 +7247,9 @@ get_free_sections_test(hbool_t single_file_vfd)
      */
     if (pass) {
 
-        if ((!H5F_addr_defined(file_ptr->shared->eoa_fsm_fsalloc)) ||
-            (!H5F_addr_defined(file_ptr->shared->cache->image_addr)) ||
-            (H5F_addr_gt(file_ptr->shared->eoa_fsm_fsalloc, file_ptr->shared->cache->image_addr))) {
+        if ((!H5_addr_defined(file_ptr->shared->eoa_fsm_fsalloc)) ||
+            (!H5_addr_defined(file_ptr->shared->cache->image_addr)) ||
+            (H5_addr_gt(file_ptr->shared->eoa_fsm_fsalloc, file_ptr->shared->cache->image_addr))) {
 
             pass         = FALSE;
             failure_mssg = "unexpected cache image status (2).\n";

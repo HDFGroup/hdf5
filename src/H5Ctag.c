@@ -227,7 +227,7 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
            arbitrarily set it to something for the sake of passing the tests.
            If the tag value is set, then we'll just let it get assigned without
            additional checking for correctness. */
-        if (!H5F_addr_defined(tag))
+        if (!H5_addr_defined(tag))
             tag = H5AC__IGNORE_TAG;
     }
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS

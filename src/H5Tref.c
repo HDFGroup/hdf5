@@ -1063,7 +1063,7 @@ H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbo
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
 
     /* Get the object address */
-    H5F_addr_decode(src_f, &p, &addr);
+    H5_addr_decode(src_f, &p, &addr);
 
     /* Check if heap address is 'nil' */
     *isnull = (addr == 0) ? TRUE : FALSE;
@@ -1215,7 +1215,7 @@ H5T__ref_dsetreg_disk_isnull(const H5VL_object_t *src_file, const void *src_buf,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
 
     /* Get the heap address */
-    H5F_addr_decode(src_f, &p, &addr);
+    H5_addr_decode(src_f, &p, &addr);
 
     /* Check if heap address is 'nil' */
     *isnull = (addr == 0) ? TRUE : FALSE;

@@ -1543,7 +1543,7 @@ H5B2__insert(H5B2_hdr_t *hdr, void *udata)
     assert(udata);
 
     /* Check if the root node is allocated yet */
-    if (!H5F_addr_defined(hdr->root.addr)) {
+    if (!H5_addr_defined(hdr->root.addr)) {
         /* Create root node as leaf node in B-tree */
         if (H5B2__create_leaf(hdr, hdr, &(hdr->root)) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create root node")

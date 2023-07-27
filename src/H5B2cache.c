@@ -268,7 +268,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     cparam.merge_percent = *image++;
 
     /* Root node pointer */
-    H5F_addr_decode(udata->f, (const uint8_t **)&image, &(hdr->root.addr));
+    H5_addr_decode(udata->f, (const uint8_t **)&image, &(hdr->root.addr));
     UINT16DECODE(image, hdr->root.node_nrec);
     H5F_DECODE_LENGTH(udata->f, image, hdr->root.all_nrec);
 
@@ -378,7 +378,7 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = (uint8_t)hdr->merge_percent;
 
     /* Root node pointer */
-    H5F_addr_encode(f, &image, hdr->root.addr);
+    H5_addr_encode(f, &image, hdr->root.addr);
     UINT16ENCODE(image, hdr->root.node_nrec);
     H5F_ENCODE_LENGTH(f, image, hdr->root.all_nrec);
 
@@ -663,7 +663,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     int_node_ptr = internal->node_ptrs;
     for (u = 0; u < (unsigned)(internal->nrec + 1); u++) {
         /* Decode node pointer */
-        H5F_addr_decode(udata->f, (const uint8_t **)&image, &(int_node_ptr->addr));
+        H5_addr_decode(udata->f, (const uint8_t **)&image, &(int_node_ptr->addr));
         UINT64DECODE_VAR(image, node_nrec, udata->hdr->max_nrec_size);
         H5_CHECKED_ASSIGN(int_node_ptr->node_nrec, uint16_t, node_nrec, int);
         if (udata->depth > 1)
@@ -779,7 +779,7 @@ H5B2__cache_int_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     int_node_ptr = internal->node_ptrs;
     for (u = 0; u < (unsigned)(internal->nrec + 1); u++) {
         /* Encode node pointer */
-        H5F_addr_encode(f, &image, int_node_ptr->addr);
+        H5_addr_encode(f, &image, int_node_ptr->addr);
         UINT64ENCODE_VAR(image, int_node_ptr->node_nrec, internal->hdr->max_nrec_size);
         if (internal->depth > 1)
             UINT64ENCODE_VAR(image, int_node_ptr->all_nrec,

@@ -139,18 +139,18 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     /* Address of fractal heap to store "dense" attributes */
     if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5F_addr_decode(f, &p, &(ainfo->fheap_addr));
+    H5_addr_decode(f, &p, &(ainfo->fheap_addr));
 
     /* Address of v2 B-tree to index names of attributes (names are always indexed) */
     if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5F_addr_decode(f, &p, &(ainfo->name_bt2_addr));
+    H5_addr_decode(f, &p, &(ainfo->name_bt2_addr));
 
     /* Address of v2 B-tree to index creation order of links, if there is one */
     if (ainfo->index_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        H5F_addr_decode(f, &p, &(ainfo->corder_bt2_addr));
+        H5_addr_decode(f, &p, &(ainfo->corder_bt2_addr));
     }
     else
         ainfo->corder_bt2_addr = HADDR_UNDEF;
@@ -200,16 +200,16 @@ H5O__ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
         UINT16ENCODE(p, ainfo->max_crt_idx);
 
     /* Address of fractal heap to store "dense" attributes */
-    H5F_addr_encode(f, &p, ainfo->fheap_addr);
+    H5_addr_encode(f, &p, ainfo->fheap_addr);
 
     /* Address of v2 B-tree to index names of attributes */
-    H5F_addr_encode(f, &p, ainfo->name_bt2_addr);
+    H5_addr_encode(f, &p, ainfo->name_bt2_addr);
 
     /* Address of v2 B-tree to index creation order of attributes, if they are indexed */
     if (ainfo->index_corder)
-        H5F_addr_encode(f, &p, ainfo->corder_bt2_addr);
+        H5_addr_encode(f, &p, ainfo->corder_bt2_addr);
     else
-        assert(!H5F_addr_defined(ainfo->corder_bt2_addr));
+        assert(!H5_addr_defined(ainfo->corder_bt2_addr));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__ainfo_encode() */
@@ -329,7 +329,7 @@ H5O__ainfo_delete(H5F_t *f, H5O_t H5_ATTR_NDEBUG_UNUSED *open_oh, void *_mesg)
     assert(open_oh);
 
     /* If the object is using "dense" attribute storage, delete it */
-    if (H5F_addr_defined(ainfo->fheap_addr))
+    if (H5_addr_defined(ainfo->fheap_addr))
         /* Delete the attribute */
         if (H5A__dense_delete(f, ainfo) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
@@ -403,7 +403,7 @@ H5O__ainfo_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, void *mesg_src, H5F_
     /* Copy the top level of the information */
     *ainfo_dst = *ainfo_src;
 
-    if (H5F_addr_defined(ainfo_src->fheap_addr)) {
+    if (H5_addr_defined(ainfo_src->fheap_addr)) {
         /* Prepare to copy dense attributes - actual copy in post_copy */
 
         /* Set copied metadata tag */
@@ -451,7 +451,7 @@ H5O__ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
 
     assert(ainfo_src);
 
-    if (H5F_addr_defined(ainfo_src->fheap_addr))
+    if (H5_addr_defined(ainfo_src->fheap_addr))
         if (H5A__dense_post_copy_file_all(src_oloc, ainfo_src, dst_oloc, (H5O_ainfo_t *)mesg_dst, cpy_info) <
             0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")

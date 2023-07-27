@@ -245,7 +245,7 @@ H5D__btree_new_node(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5B_ins_t op, void *_lt_key,
     assert(addr_p);
 
     /* Set address */
-    assert(H5F_addr_defined(udata->chunk_block.offset));
+    assert(H5_addr_defined(udata->chunk_block.offset));
     assert(udata->chunk_block.length > 0);
     *addr_p = udata->chunk_block.offset;
 
@@ -408,7 +408,7 @@ H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, haddr_t addr, const void *_lt_key, hbo
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(lt_key);
     assert(found);
     assert(udata);
@@ -507,7 +507,7 @@ H5D__btree_insert(H5F_t H5_ATTR_NDEBUG_UNUSED *f, haddr_t H5_ATTR_NDEBUG_UNUSED 
 
     /* check args */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(lt_key);
     assert(lt_key_changed);
     assert(md_key);
@@ -530,7 +530,7 @@ H5D__btree_insert(H5F_t H5_ATTR_NDEBUG_UNUSED *f, haddr_t H5_ATTR_NDEBUG_UNUSED 
          */
         if (lt_key->nbytes != udata->chunk_block.length) {
             /* Set node's address (already re-allocated by main chunk routines) */
-            assert(H5F_addr_defined(udata->chunk_block.offset));
+            assert(H5_addr_defined(udata->chunk_block.offset));
             *new_node_p = udata->chunk_block.offset;
             H5_CHECKED_ASSIGN(lt_key->nbytes, uint32_t, udata->chunk_block.length, hsize_t);
             lt_key->filter_mask = udata->filter_mask;
@@ -539,7 +539,7 @@ H5D__btree_insert(H5F_t H5_ATTR_NDEBUG_UNUSED *f, haddr_t H5_ATTR_NDEBUG_UNUSED 
         }
         else {
             /* Already have address in udata, from main chunk routines */
-            assert(H5F_addr_defined(udata->chunk_block.offset));
+            assert(H5_addr_defined(udata->chunk_block.offset));
             ret_value = H5B_INS_NOOP;
         }
     }
@@ -554,7 +554,7 @@ H5D__btree_insert(H5F_t H5_ATTR_NDEBUG_UNUSED *f, haddr_t H5_ATTR_NDEBUG_UNUSED 
         for (u = 0; u < udata->common.layout->ndims; u++)
             md_key->scaled[u] = udata->common.scaled[u];
 
-        assert(H5F_addr_defined(udata->chunk_block.offset));
+        assert(H5_addr_defined(udata->chunk_block.offset));
         *new_node_p = udata->chunk_block.offset;
         ret_value   = H5B_INS_RIGHT;
     }
@@ -810,7 +810,7 @@ H5D__btree_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNUS
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(dset_ohdr_addr));
+    assert(H5_addr_defined(dset_ohdr_addr));
 
     idx_info->storage->u.btree.dset_ohdr_addr = dset_ohdr_addr;
 
@@ -851,7 +851,7 @@ H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(!H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(!H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Initialize "user" data for B-tree callbacks, etc. */
     udata.layout  = idx_info->layout;
@@ -882,7 +882,7 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     /* Check args */
     assert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
 } /* end H5D__btree_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -907,7 +907,7 @@ H5D__btree_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(udata);
 
     /*
@@ -946,7 +946,7 @@ H5D__btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     assert(idx_info->layout);
     assert(idx_info->layout->ndims > 0);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(udata);
 
     /* Go get the chunk information from the B-tree */
@@ -1023,7 +1023,7 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t c
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(chunk_cb);
     assert(chunk_udata);
 
@@ -1063,7 +1063,7 @@ H5D__btree_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(udata);
 
     /* Remove the chunk from the v1 B-tree index and release the space for the
@@ -1102,7 +1102,7 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->storage);
 
     /* Check if the index data structure has been allocated */
-    if (H5F_addr_defined(idx_info->storage->idx_addr)) {
+    if (H5_addr_defined(idx_info->storage->idx_addr)) {
         H5O_storage_chunk_t   tmp_storage; /* Local copy of storage info */
         H5D_chunk_common_ud_t udata;       /* User data for B-tree operations */
 
@@ -1159,7 +1159,7 @@ H5D__btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_
     assert(idx_info_dst->pline);
     assert(idx_info_dst->layout);
     assert(idx_info_dst->storage);
-    assert(!H5F_addr_defined(idx_info_dst->storage->idx_addr));
+    assert(!H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Create shared B-tree info for each file */
     if (H5D__btree_shared_create(idx_info_src->f, idx_info_src->storage, idx_info_src->layout) < 0)
@@ -1171,7 +1171,7 @@ H5D__btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_
     /* Create the root of the B-tree that describes chunked storage in the dest. file */
     if (H5D__btree_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
-    assert(H5F_addr_defined(idx_info_dst->storage->idx_addr));
+    assert(H5_addr_defined(idx_info_dst->storage->idx_addr));
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)

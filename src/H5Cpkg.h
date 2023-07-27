@@ -828,7 +828,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                      \
      ( (entry_ptr) == NULL ) ||                                         \
-     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                       \
+     ( ! H5_addr_defined((entry_ptr)->addr) ) ||                       \
      ( (entry_ptr)->ht_next != NULL ) ||                                \
      ( (entry_ptr)->ht_prev != NULL ) ||                                \
      ( (entry_ptr)->size <= 0 ) ||                                      \
@@ -880,7 +880,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_len < 1 ) ||                                  \
      ( (entry_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                 \
-     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                       \
+     ( ! H5_addr_defined((entry_ptr)->addr) ) ||                       \
      ( (entry_ptr)->size <= 0 ) ||                                      \
      ( H5C__HASH_FCN((entry_ptr)->addr) < 0 ) ||                        \
      ( H5C__HASH_FCN((entry_ptr)->addr) >= H5C__HASH_TABLE_LEN ) ||     \
@@ -918,7 +918,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
 if ( ( (cache_ptr) == NULL ) ||                                          \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                       \
      ( (entry_ptr) == NULL ) ||                                          \
-     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                        \
+     ( ! H5_addr_defined((entry_ptr)->addr) ) ||                        \
      ( (entry_ptr)->size <= 0 ) ||                                       \
      ( (entry_ptr)->ht_prev != NULL ) ||                                 \
      ( (entry_ptr)->ht_prev != NULL ) ||                                 \
@@ -945,7 +945,7 @@ if ( ( (cache_ptr) == NULL ) ||                                             \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                          \
      ( (cache_ptr)->index_size !=                                           \
        ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) || \
-     ( ! H5F_addr_defined(entry_addr) ) ||                                        \
+     ( ! H5_addr_defined(entry_addr) ) ||                                        \
      ( H5C__HASH_FCN(entry_addr) < 0 ) ||                                         \
      ( H5C__HASH_FCN(entry_addr) >= H5C__HASH_TABLE_LEN ) ) {                     \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT search SC failed") \
@@ -1228,7 +1228,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     k = H5C__HASH_FCN(entry_addr);                                                \
     entry_ptr = ((cache_ptr)->index)[k];                                    \
     while(entry_ptr) {                                                      \
-        if(H5F_addr_eq(entry_addr, (entry_ptr)->addr)) {                          \
+        if(H5_addr_eq(entry_addr, (entry_ptr)->addr)) {                          \
             H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k, fail_val)   \
             if(entry_ptr != ((cache_ptr)->index)[k]) {                      \
                 if((entry_ptr)->ht_next)                                    \
@@ -1360,7 +1360,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
                                                                                \
         assert( (entry_ptr) );                                               \
         assert( (entry_ptr)->size > 0 );                                     \
-        assert( H5F_addr_defined((entry_ptr)->addr) );                       \
+        assert( H5_addr_defined((entry_ptr)->addr) );                       \
         assert( !((entry_ptr)->in_slist) );                                  \
         assert( ! H5C_ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
         assert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
@@ -1406,7 +1406,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
         assert( (entry_ptr) );                                               \
         assert( (entry_ptr)->size > 0 );                                     \
         assert( ! H5C_ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
-        assert( H5F_addr_defined((entry_ptr)->addr) );                       \
+        assert( H5_addr_defined((entry_ptr)->addr) );                       \
         assert( !((entry_ptr)->in_slist) );                                  \
         assert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
         assert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \

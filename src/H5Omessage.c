@@ -231,7 +231,7 @@ H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags, unsig
     /* check args */
     assert(loc);
     assert(loc->file);
-    assert(H5F_addr_defined(loc->addr));
+    assert(H5_addr_defined(loc->addr));
     assert(H5O_ATTR_ID != type_id); /* Attributes are modified in another routine */
     assert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id]; /* map the type ID to the actual type object */
@@ -420,7 +420,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg)
     /* check args */
     assert(loc);
     assert(loc->file);
-    assert(H5F_addr_defined(loc->addr));
+    assert(H5_addr_defined(loc->addr));
     assert(type_id < NELMTS(H5O_msg_class_g));
 
     /* Get the object header */
@@ -707,7 +707,7 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id)
     /* Check args */
     assert(loc);
     assert(loc->file);
-    assert(H5F_addr_defined(loc->addr));
+    assert(H5_addr_defined(loc->addr));
     assert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id]; /* map the type ID to the actual type object */
     assert(type);
@@ -867,7 +867,7 @@ H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj
     /* check args */
     assert(loc);
     assert(loc->file);
-    assert(H5F_addr_defined(loc->addr));
+    assert(H5_addr_defined(loc->addr));
     assert(H5O_ATTR_ID != type_id); /* Attributes are modified in another routine */
     assert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id]; /* map the type ID to the actual type object */
@@ -914,7 +914,7 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence, H5O_oper
     /* check args */
     assert(loc);
     assert(loc->file);
-    assert(H5F_addr_defined(loc->addr));
+    assert(H5_addr_defined(loc->addr));
     assert(H5O_ATTR_ID != type_id); /* Attributes are modified in another routine */
     assert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id]; /* map the type ID to the actual type object */
@@ -1088,7 +1088,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, const H5O_mesg_operator_
     /* check args */
     assert(loc);
     assert(loc->file);
-    assert(H5F_addr_defined(loc->addr));
+    assert(H5_addr_defined(loc->addr));
     assert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id]; /* map the type ID to the actual type object */
     assert(type);
@@ -2050,7 +2050,7 @@ H5O_msg_get_flags(const H5O_loc_t *loc, unsigned type_id, uint8_t *flags)
     /* check args */
     assert(loc);
     assert(loc->file);
-    assert(H5F_addr_defined(loc->addr));
+    assert(H5_addr_defined(loc->addr));
     assert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id]; /* map the type ID to the actual type object */
     assert(type);

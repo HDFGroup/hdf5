@@ -79,7 +79,7 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
     /* check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);

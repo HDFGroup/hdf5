@@ -306,7 +306,7 @@ H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
     ret_value = hdr->addr;
 
 done:
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (hdr) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -315,7 +315,7 @@ done:
                                 "unable to remove v2 B-tree header from cache")
 
             /* Release header's disk space */
-            if (H5F_addr_defined(hdr->addr) &&
+            if (H5_addr_defined(hdr->addr) &&
                 H5MF_xfree(f, H5FD_MEM_BTREE, hdr->addr, (hsize_t)hdr->hdr_size) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free v2 B-tree header")
 
@@ -484,7 +484,7 @@ H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata, unsigned flags)
 
     /* Sanity check */
     assert(f);
-    assert(H5F_addr_defined(hdr_addr));
+    assert(H5_addr_defined(hdr_addr));
 
     /* only the H5AC__READ_ONLY_FLAG may appear in flags */
     assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
@@ -664,7 +664,7 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr)
 #endif /* NDEBUG */
 
     /* Delete all nodes in B-tree */
-    if (H5F_addr_defined(hdr->root.addr))
+    if (H5_addr_defined(hdr->root.addr))
         if (H5B2__delete_node(hdr, hdr->depth, &hdr->root, hdr, hdr->remove_op, hdr->remove_op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
 

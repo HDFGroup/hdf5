@@ -284,37 +284,6 @@ typedef struct H5F_t H5F_t;
         (p) += 8;                                                                                            \
     }
 
-/* clang-format off */
-/* Address-related macros */
-#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                      \
-                HADDR_UNDEF==(X)+(haddr_t)(Z) ||                            \
-                (X)+(haddr_t)(Z)<(X))
-#define H5F_addr_defined(X)    ((X)!=HADDR_UNDEF)
-/* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
- * certain that X is not HADDR_UNDEF and then checking that X equals Y
- */
-#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                            \
-                (X)==(Y))
-#define H5F_addr_ne(X,Y)    (!H5F_addr_eq((X),(Y)))
-#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                           \
-                (Y)!=HADDR_UNDEF &&                                         \
-                (X)<(Y))
-#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                            \
-                (Y)!=HADDR_UNDEF &&                                         \
-                (X)<=(Y))
-#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                            \
-                (Y)!=HADDR_UNDEF &&                                         \
-                (X)>(Y))
-#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                            \
-                (Y)!=HADDR_UNDEF &&                                         \
-                (X)>=(Y))
-#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :                   \
-                (H5F_addr_lt((X), (Y)) ? -1 : 1))
-#define H5F_addr_pow2(N)    ((haddr_t)1<<(N))
-#define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
-                                 ((O1) >= (O2) && (O1) < ((O2) + (L2))))
-/* clang-format on */
-
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_MODULE
 #define H5F_LOW_BOUND(F)                 ((F)->shared->low_bound)
@@ -362,7 +331,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_GRP_BTREE_SHARED(F)          ((F)->shared->grp_btree_shared)
 #define H5F_SET_GRP_BTREE_SHARED(F, RC)  (((F)->shared->grp_btree_shared = (RC)) ? SUCCEED : FAIL)
 #define H5F_USE_TMP_SPACE(F)             ((F)->shared->fs.use_tmp_space)
-#define H5F_IS_TMP_ADDR(F, ADDR)         (H5F_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
+#define H5F_IS_TMP_ADDR(F, ADDR)         (H5_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F) ((F)->shared->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
@@ -928,10 +897,10 @@ H5_DLL herr_t H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *in
 H5_DLL herr_t H5F_object_flush_cb(H5F_t *f, hid_t obj_id);
 
 /* Address-related functions */
-H5_DLL void H5F_addr_encode(const H5F_t *f, uint8_t **pp, haddr_t addr);
-H5_DLL void H5F_addr_encode_len(size_t addr_len, uint8_t **pp, haddr_t addr);
-H5_DLL void H5F_addr_decode(const H5F_t *f, const uint8_t **pp, haddr_t *addr_p);
-H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *addr_p);
+H5_DLL void H5_addr_encode(const H5F_t *f, uint8_t **pp, haddr_t addr);
+H5_DLL void H5_addr_encode_len(size_t addr_len, uint8_t **pp, haddr_t addr);
+H5_DLL void H5_addr_decode(const H5F_t *f, const uint8_t **pp, haddr_t *addr_p);
+H5_DLL void H5_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *addr_p);
 
 /* Shared file list related routines */
 H5_DLL void H5F_sfile_assert_num(unsigned n);

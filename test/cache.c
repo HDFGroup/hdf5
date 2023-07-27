@@ -33812,7 +33812,7 @@ takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats)
 
     if (saved_fid != -1) {
 
-        if (H5F_addr_defined(saved_actual_base_addr)) {
+        if (H5_addr_defined(saved_actual_base_addr)) {
 
             if (NULL == file_ptr) {
                 file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);

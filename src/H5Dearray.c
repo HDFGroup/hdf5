@@ -321,7 +321,7 @@ H5D__earray_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
     while (nelmts) {
         /* Encode element */
         /* (advances 'raw' pointer) */
-        H5F_addr_encode_len(ctx->file_addr_len, (uint8_t **)&raw, *elmt);
+        H5_addr_encode_len(ctx->file_addr_len, (uint8_t **)&raw, *elmt);
 
         /* Advance native element pointer */
         elmt++;
@@ -361,7 +361,7 @@ H5D__earray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
     while (nelmts) {
         /* Decode element */
         /* (advances 'raw' pointer) */
-        H5F_addr_decode_len(ctx->file_addr_len, &raw, elmt);
+        H5_addr_decode_len(ctx->file_addr_len, &raw, elmt);
 
         /* Advance native element pointer */
         elmt++;
@@ -458,7 +458,7 @@ H5D__earray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx
     while (nelmts) {
         /* Encode element */
         /* (advances 'raw' pointer) */
-        H5F_addr_encode_len(ctx->file_addr_len, &raw, elmt->addr);
+        H5_addr_encode_len(ctx->file_addr_len, &raw, elmt->addr);
         UINT64ENCODE_VAR(raw, elmt->nbytes, ctx->chunk_size_len);
         UINT32ENCODE(raw, elmt->filter_mask);
 
@@ -501,7 +501,7 @@ H5D__earray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx
     while (nelmts) {
         /* Decode element */
         /* (advances 'raw' pointer) */
-        H5F_addr_decode_len(ctx->file_addr_len, &raw, &elmt->addr);
+        H5_addr_decode_len(ctx->file_addr_len, &raw, &elmt->addr);
         UINT64DECODE_VAR(raw, elmt->nbytes, ctx->chunk_size_len);
         UINT32DECODE(raw, elmt->filter_mask);
 
@@ -570,7 +570,7 @@ H5D__earray_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
 
     /* Sanity checks */
     assert(f);
-    assert(H5F_addr_defined(obj_addr));
+    assert(H5_addr_defined(obj_addr));
 
     /* Allocate context for debugging callback */
     if (NULL == (dbg_ctx = H5FL_MALLOC(H5D_earray_ctx_ud_t)))
@@ -676,7 +676,7 @@ H5D__earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
     assert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->idx_type);
     assert(idx_info->storage);
     assert(H5D_CHUNK_IDX_EARRAY == idx_info->storage->idx_type);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(idx_info->storage->u.earray.ea);
 
     /* Set up object header location for dataset */
@@ -736,7 +736,7 @@ H5D__earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     assert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->idx_type);
     assert(idx_info->storage);
     assert(H5D_CHUNK_IDX_EARRAY == idx_info->storage->idx_type);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(NULL == idx_info->storage->u.earray.ea);
 
     /* Set up the user data */
@@ -786,7 +786,7 @@ H5D__earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space, had
     assert(idx_info->layout);
     assert(idx_info->storage);
     assert(space);
-    assert(H5F_addr_defined(dset_ohdr_addr));
+    assert(H5_addr_defined(dset_ohdr_addr));
 
     /* Get the dim info for dataset */
     if ((sndims = H5S_get_simple_extent_dims(space, NULL, max_dims)) < 0)
@@ -851,7 +851,7 @@ H5D__earray_idx_create(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(!H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(!H5_addr_defined(idx_info->storage->idx_addr));
     assert(NULL == idx_info->storage->u.earray.ea);
 
     /* General parameters */
@@ -922,7 +922,7 @@ H5D__earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     /* Check args */
     assert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
 } /* end H5D__earray_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -949,7 +949,7 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(udata);
 
     /* Check if the extensible array is open yet */
@@ -964,7 +964,7 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->storage->u.earray.ea;
 
-    if (!H5F_addr_defined(udata->chunk_block.offset))
+    if (!H5_addr_defined(udata->chunk_block.offset))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "The chunk should have allocated already")
     if (udata->chunk_idx != (udata->chunk_idx & 0xffffffff)) /* negative value */
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32")
@@ -1017,7 +1017,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(udata);
 
     /* Check if the extensible array is open yet */
@@ -1079,7 +1079,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
         udata->filter_mask        = 0;
     } /* end else */
 
-    if (!H5F_addr_defined(udata->chunk_block.offset))
+    if (!H5_addr_defined(udata->chunk_block.offset))
         udata->chunk_block.length = 0;
 
 done:
@@ -1164,7 +1164,7 @@ H5D__earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *
         udata->chunk_rec.chunk_addr = *(const haddr_t *)_elmt;
 
     /* Make "generic chunk" callback */
-    if (H5F_addr_defined(udata->chunk_rec.chunk_addr))
+    if (H5_addr_defined(udata->chunk_rec.chunk_addr))
         if ((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
             HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
 
@@ -1218,7 +1218,7 @@ H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(chunk_cb);
     assert(chunk_udata);
 
@@ -1287,7 +1287,7 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(udata);
 
     /* Check if the extensible array is open yet */
@@ -1334,7 +1334,7 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
 
         /* Remove raw data chunk from file if not doing SWMR writes */
-        assert(H5F_addr_defined(elmt.addr));
+        assert(H5_addr_defined(elmt.addr));
         if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
             H5_CHECK_OVERFLOW(elmt.nbytes, /*From: */ uint32_t, /*To: */ hsize_t);
             if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, elmt.addr, (hsize_t)elmt.nbytes) < 0)
@@ -1356,7 +1356,7 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
 
         /* Remove raw data chunk from file if not doing SWMR writes */
-        assert(H5F_addr_defined(addr));
+        assert(H5_addr_defined(addr));
         if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
             H5_CHECK_OVERFLOW(idx_info->layout->size, /*From: */ uint32_t, /*To: */ hsize_t);
             if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, addr, (hsize_t)idx_info->layout->size) < 0)
@@ -1393,7 +1393,7 @@ H5D__earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Sanity checks */
     assert(chunk_rec);
-    assert(H5F_addr_defined(chunk_rec->chunk_addr));
+    assert(H5_addr_defined(chunk_rec->chunk_addr));
     assert(chunk_rec->nbytes > 0);
     assert(f);
 
@@ -1436,7 +1436,7 @@ H5D__earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->storage);
 
     /* Check if the index data structure has been allocated */
-    if (H5F_addr_defined(idx_info->storage->idx_addr)) {
+    if (H5_addr_defined(idx_info->storage->idx_addr)) {
         H5D_earray_ctx_ud_t ctx_udata; /* User data for extensible array open call */
 
         /* Iterate over the chunk addresses in the extensible array, deleting each chunk */
@@ -1491,7 +1491,7 @@ H5D__earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk
     assert(idx_info_dst->pline);
     assert(idx_info_dst->layout);
     assert(idx_info_dst->storage);
-    assert(!H5F_addr_defined(idx_info_dst->storage->idx_addr));
+    assert(!H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Check if the source extensible array is open yet */
     if (NULL == idx_info_src->storage->u.earray.ea)
@@ -1505,7 +1505,7 @@ H5D__earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk
     /* Create the extensible array that describes chunked storage in the dest. file */
     if (H5D__earray_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
-    assert(H5F_addr_defined(idx_info_dst->storage->idx_addr));
+    assert(H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Reset metadata tag */
     H5_END_TAG
@@ -1573,7 +1573,7 @@ H5D__earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     assert(idx_info->pline);
     assert(idx_info->layout);
     assert(idx_info->storage);
-    assert(H5F_addr_defined(idx_info->storage->idx_addr));
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
     assert(index_size);
 
     /* Open the extensible array in file */

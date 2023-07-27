@@ -429,7 +429,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                 {
                     haddr_t addr = va_arg(ap, haddr_t);
 
-                    if (H5F_addr_defined(addr))
+                    if (H5_addr_defined(addr))
                         H5RS_asprintf_cat(rs, "%" PRIuHADDR, addr);
                     else
                         H5RS_acat(rs, "UNDEF");

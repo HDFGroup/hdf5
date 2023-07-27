@@ -345,7 +345,7 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
     /* Sanity check */
     assert(loc);
     assert(loc->file);
-    assert(H5F_addr_defined(loc->addr));
+    assert(H5_addr_defined(loc->addr));
     assert(oh);
     assert(bh_info);
 

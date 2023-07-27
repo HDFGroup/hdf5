@@ -136,7 +136,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         if (mesg->type == H5D_CONTIGUOUS) {
             if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-            H5F_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
+            H5_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
 
             /* Set the layout operations */
             mesg->ops = H5D_LOPS_CONTIG;
@@ -144,7 +144,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         else if (mesg->type == H5D_CHUNKED) {
             if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-            H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
+            H5_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
 
             /* Set the layout operations */
             mesg->ops = H5D_LOPS_CHUNK;
@@ -255,7 +255,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 /* Contiguous storage address */
                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-                H5F_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
+                H5_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
 
                 /* Contiguous storage size */
                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
@@ -286,7 +286,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                     "ran off end of input buffer while decoding")
-                    H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
+                    H5_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
 
                     if (H5_IS_BUFFER_OVERFLOW(p, (mesg->u.chunk.ndims * 4), p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
@@ -512,7 +512,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                     "ran off end of input buffer while decoding")
-                    H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
+                    H5_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
                 }
 
                 /* Set the layout operations */
@@ -527,7 +527,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 /* Heap information */
                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-                H5F_addr_decode(f, &p, &(mesg->storage.u.virt.serial_list_hobjid.addr));
+                H5_addr_decode(f, &p, &(mesg->storage.u.virt.serial_list_hobjid.addr));
                 /* NOTE: virtual mapping global heap entry address could be undefined */
 
                 if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
@@ -822,7 +822,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 
         case H5D_CONTIGUOUS:
             /* Contiguous storage address */
-            H5F_addr_encode(f, &p, mesg->storage.u.contig.addr);
+            H5_addr_encode(f, &p, mesg->storage.u.contig.addr);
 
             /* Contiguous storage size */
             H5F_ENCODE_LENGTH(f, p, mesg->storage.u.contig.size);
@@ -835,7 +835,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 *p++ = (uint8_t)mesg->u.chunk.ndims;
 
                 /* B-tree address */
-                H5F_addr_encode(f, &p, mesg->storage.u.chunk.idx_addr);
+                H5_addr_encode(f, &p, mesg->storage.u.chunk.idx_addr);
 
                 /* Dimension sizes */
                 for (u = 0; u < mesg->u.chunk.ndims; u++)
@@ -907,13 +907,13 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                  * Single chunk index: address of the single chunk
                  * Other indexes: chunk index address
                  */
-                H5F_addr_encode(f, &p, mesg->storage.u.chunk.idx_addr);
+                H5_addr_encode(f, &p, mesg->storage.u.chunk.idx_addr);
             } /* end else */
             break;
 
         case H5D_VIRTUAL:
             /* Encode heap ID for VDS info */
-            H5F_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
+            H5_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
             UINT32ENCODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);
             break;
 

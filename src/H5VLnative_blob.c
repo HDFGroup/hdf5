@@ -76,7 +76,7 @@ H5VL__native_blob_put(void *obj, const void *buf, size_t size, void *blob_id, vo
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "unable to write blob information")
 
     /* Encode the heap information */
-    H5F_addr_encode(f, &id, hobjid.addr);
+    H5_addr_encode(f, &id, hobjid.addr);
     UINT32ENCODE(id, hobjid.idx);
 
 done:
@@ -109,7 +109,7 @@ H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t size, vo
     assert(buf);
 
     /* Get the heap information */
-    H5F_addr_decode(f, &id, &hobjid.addr);
+    H5_addr_decode(f, &id, &hobjid.addr);
     UINT32DECODE(id, hobjid.idx);
 
     /* Check if this sequence actually has any data */
@@ -153,7 +153,7 @@ H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_args_t *
             haddr_t        addr;                          /* Sequence's heap address */
 
             /* Get the heap address */
-            H5F_addr_decode(f, &id, &addr);
+            H5_addr_decode(f, &id, &addr);
 
             /* Check if heap address is 'nil' */
             *args->args.is_null.isnull = (addr == 0 ? TRUE : FALSE);
@@ -165,7 +165,7 @@ H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_args_t *
             uint8_t *id = (uint8_t *)blob_id; /* Pointer to the blob ID */
 
             /* Encode the 'nil' heap pointer information */
-            H5F_addr_encode(f, &id, (haddr_t)0);
+            H5_addr_encode(f, &id, (haddr_t)0);
             UINT32ENCODE(id, 0);
 
             break;
@@ -176,7 +176,7 @@ H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_args_t *
             H5HG_t         hobjid;                        /* VL sequence's heap ID */
 
             /* Get heap information */
-            H5F_addr_decode(f, &id, &hobjid.addr);
+            H5_addr_decode(f, &id, &hobjid.addr);
             UINT32DECODE(id, hobjid.idx);
 
             /* Free heap object */

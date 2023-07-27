@@ -116,7 +116,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
     assert(f);
     assert(f->shared);
     assert(f->shared->open_objs);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Get the object node from the container */
     if (NULL != (open_obj = (H5FO_open_obj_t *)H5SL_search(f->shared->open_objs, &addr))) {
@@ -162,7 +162,7 @@ H5FO_insert(const H5F_t *f, haddr_t addr, void *obj, hbool_t delete_flag)
     assert(f);
     assert(f->shared);
     assert(f->shared->open_objs);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(obj);
 
     /* Allocate new opened object information structure */
@@ -213,7 +213,7 @@ H5FO_delete(H5F_t *f, haddr_t addr)
     assert(f);
     assert(f->shared);
     assert(f->shared->open_objs);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Remove from container */
     if (NULL == (open_obj = (H5FO_open_obj_t *)H5SL_remove(f->shared->open_objs, &addr)))
@@ -263,7 +263,7 @@ H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted)
     assert(f);
     assert(f->shared);
     assert(f->shared->open_objs);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Get the object node from the container */
     if (NULL != (open_obj = (H5FO_open_obj_t *)H5SL_search(f->shared->open_objs, &addr)))
@@ -306,7 +306,7 @@ H5FO_marked(const H5F_t *f, haddr_t addr)
     assert(f);
     assert(f->shared);
     assert(f->shared->open_objs);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Get the object node from the container */
     if (NULL != (open_obj = (H5FO_open_obj_t *)H5SL_search(f->shared->open_objs, &addr)))
@@ -425,7 +425,7 @@ H5FO_top_incr(const H5F_t *f, haddr_t addr)
     /* Sanity check */
     assert(f);
     assert(f->obj_count);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Get the object node from the container */
     if (NULL != (obj_count = (H5FO_obj_count_t *)H5SL_search(f->obj_count, &addr))) {
@@ -479,7 +479,7 @@ H5FO_top_decr(const H5F_t *f, haddr_t addr)
     /* Sanity check */
     assert(f);
     assert(f->obj_count);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Get the object node from the container */
     if (NULL != (obj_count = (H5FO_obj_count_t *)H5SL_search(f->obj_count, &addr))) {
@@ -532,7 +532,7 @@ H5FO_top_count(const H5F_t *f, haddr_t addr)
     /* Sanity check */
     assert(f);
     assert(f->obj_count);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
 
     /* Get the object node from the container */
     if (NULL != (obj_count = (H5FO_obj_count_t *)H5SL_search(f->obj_count, &addr)))

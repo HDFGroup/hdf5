@@ -107,7 +107,7 @@ H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(fa_addr));
+    assert(H5_addr_defined(fa_addr));
 
     /* Allocate fixed array wrapper */
     if (NULL == (fa = H5FL_CALLOC(H5FA_t)))
@@ -213,7 +213,7 @@ H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(fa_addr));
+    assert(H5_addr_defined(fa_addr));
 
     /* Allocate and initialize new fixed array wrapper */
     if (NULL == (fa = H5FA__new(f, fa_addr, TRUE, ctx_udata)))
@@ -311,10 +311,10 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
     hdr->f = fa->f;
 
     /* Check if we need to create the fixed array data block */
-    if (!H5F_addr_defined(hdr->dblk_addr)) {
+    if (!H5_addr_defined(hdr->dblk_addr)) {
         /* Create the data block */
         hdr->dblk_addr = H5FA__dblock_create(hdr, &hdr_dirty);
-        if (!H5F_addr_defined(hdr->dblk_addr))
+        if (!H5_addr_defined(hdr->dblk_addr))
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, FAIL, "unable to create fixed array data block")
     }
 
@@ -419,14 +419,14 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
     hdr->f = fa->f;
 
     /* Check if the fixed array data block has been allocated on disk yet */
-    if (!H5F_addr_defined(hdr->dblk_addr)) {
+    if (!H5_addr_defined(hdr->dblk_addr)) {
         /* Call the class's 'fill' callback */
         if ((hdr->cparam.cls->fill)(elmt, (size_t)1) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "can't set element to class's fill value")
     } /* end if */
     else {
         /* Get the data block */
-        assert(H5F_addr_defined(hdr->dblk_addr));
+        assert(H5_addr_defined(hdr->dblk_addr));
         if (NULL == (dblock = H5FA__dblock_protect(hdr, hdr->dblk_addr, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
                         "unable to protect fixed array data block, address = %llu",
@@ -611,7 +611,7 @@ H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(fa_addr));
+    assert(H5_addr_defined(fa_addr));
 
     /* Lock the array header into memory */
     if (NULL == (hdr = H5FA__hdr_protect(f, fa_addr, ctx_udata, H5AC__NO_FLAGS_SET)))

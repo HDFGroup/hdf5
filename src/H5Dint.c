@@ -1355,7 +1355,7 @@ done:
                 } /* end else */
             }     /* end if */
 
-            if (H5F_addr_defined(new_dset->oloc.addr)) {
+            if (H5_addr_defined(new_dset->oloc.addr)) {
                 if (H5O_dec_rc_by_loc(&(new_dset->oloc)) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL,
                                 "unable to decrement refcount on newly created object")
@@ -1819,7 +1819,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
 
 done:
     if (ret_value < 0) {
-        if (H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc), NULL) < 0)
+        if (H5_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc), NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
         if (dataset->shared) {
             if (layout_init)
@@ -2545,7 +2545,7 @@ H5D__get_offset(const H5D_t *dset)
              * an external file, the value will be HADDR_UNDEF.
              */
             if (dset->shared->dcpl_cache.efl.nused == 0 ||
-                H5F_addr_defined(dset->shared->layout.storage.u.contig.addr))
+                H5_addr_defined(dset->shared->layout.storage.u.contig.addr))
                 /* Return the absolute dataset offset from the beginning of file. */
                 ret_value = dset->shared->layout.storage.u.contig.addr + H5F_BASE_ADDR(dset->oloc.file);
             break;
@@ -3314,7 +3314,7 @@ H5D__format_convert(H5D_t *dataset)
             init_new_index = TRUE;
 
             /* If the current chunk index exists */
-            if (H5F_addr_defined(idx_info.storage->idx_addr)) {
+            if (H5_addr_defined(idx_info.storage->idx_addr)) {
 
                 /* Create v1 B-tree chunk index */
                 if ((new_idx_info.storage->ops->create)(&new_idx_info) < 0)
@@ -3383,9 +3383,9 @@ done:
 
         /* Clean up v1 b-tree chunk index */
         if (init_new_index) {
-            if (H5F_addr_defined(new_idx_info.storage->idx_addr)) {
+            if (H5_addr_defined(new_idx_info.storage->idx_addr)) {
                 /* Check for valid address i.e. tag */
-                if (!H5F_addr_defined(dataset->oloc.addr))
+                if (!H5_addr_defined(dataset->oloc.addr))
                     HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "address undefined")
 
                 /* Expunge from cache all v1 B-tree type entries associated with tag */

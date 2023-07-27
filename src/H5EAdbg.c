@@ -86,8 +86,8 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(H5F_addr_defined(obj_addr));
+    assert(H5_addr_defined(addr));
+    assert(H5_addr_defined(obj_addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);
@@ -166,13 +166,13 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);
     assert(cls);
-    assert(H5F_addr_defined(hdr_addr));
-    assert(H5F_addr_defined(obj_addr));
+    assert(H5_addr_defined(hdr_addr));
+    assert(H5_addr_defined(obj_addr));
 
     /* Check for debugging context callback available */
     if (cls->crt_dbg_ctx)
@@ -185,7 +185,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
 
     /* Sanity check */
-    assert(H5F_addr_eq(hdr->idx_blk_addr, addr));
+    assert(H5_addr_eq(hdr->idx_blk_addr, addr));
 
     /* Protect index block */
     if (NULL == (iblock = H5EA__iblock_protect(hdr, H5AC__READ_ONLY_FLAG)))
@@ -283,13 +283,13 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);
     assert(cls);
-    assert(H5F_addr_defined(hdr_addr));
-    assert(H5F_addr_defined(obj_addr));
+    assert(H5_addr_defined(hdr_addr));
+    assert(H5_addr_defined(obj_addr));
 
     /* Check for debugging context callback available */
     if (cls->crt_dbg_ctx)
@@ -370,13 +370,13 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 
     /* Check arguments */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(H5_addr_defined(addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);
     assert(cls);
-    assert(H5F_addr_defined(hdr_addr));
-    assert(H5F_addr_defined(obj_addr));
+    assert(H5_addr_defined(hdr_addr));
+    assert(H5_addr_defined(obj_addr));
     assert(dblk_nelmts > 0);
 
     /* Check for debugging context callback available */
