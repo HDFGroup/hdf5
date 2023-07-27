@@ -156,9 +156,9 @@
 #define H5SL_GROW(X, LVL, ERR)                                                                               \
     {                                                                                                        \
         /* Check if we need to increase allocation of forward pointers */                                    \
-        if (LVL + 1 >= 1u << X->log_nalloc) {                                                                \
+        if (LVL + 1 >= ((size_t)1) << X->log_nalloc) {                                                       \
             H5SL_node_t **_tmp;                                                                              \
-            HDassert(LVL + 1 == 1U << X->log_nalloc);                                                        \
+            HDassert(LVL + 1 == ((size_t)1) << X->log_nalloc);                                               \
             /* Double the amount of allocated space */                                                       \
             X->log_nalloc++;                                                                                 \
                                                                                                              \
@@ -178,7 +178,7 @@
                                                                                                              \
                 /* Create the new factory */                                                                 \
                 H5SL_fac_g[H5SL_fac_nused_g] =                                                               \
-                    H5FL_fac_init((1u << H5SL_fac_nused_g) * sizeof(H5SL_node_t *));                         \
+                    H5FL_fac_init((((size_t)1) << H5SL_fac_nused_g) * sizeof(H5SL_node_t *));                \
                 H5SL_fac_nused_g++;                                                                          \
             }                                                                                                \
                                                                                                              \
@@ -198,9 +198,9 @@
 #define H5SL_SHRINK(X, LVL)                                                                                  \
     {                                                                                                        \
         /* Check if we can reduce the allocation of forward pointers */                                      \
-        if (LVL <= 1u << (X->log_nalloc - 1)) {                                                              \
+        if (LVL <= ((size_t)1) << (X->log_nalloc - 1)) {                                                     \
             H5SL_node_t **_tmp;                                                                              \
-            HDassert(LVL == 1U << (X->log_nalloc - 1));                                                      \
+            HDassert(LVL == ((size_t)1) << (X->log_nalloc - 1));                                             \
             X->log_nalloc--;                                                                                 \
                                                                                                              \
             /* Allocate space for new forward pointers */                                                    \

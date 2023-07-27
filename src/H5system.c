@@ -961,6 +961,7 @@ H5_strndup(const char *s, size_t n)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
 #endif /* H5_HAVE_WIN32_API */
 
 /* dirname() and basename() are not easily ported to Windows and basename

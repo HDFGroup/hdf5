@@ -1461,7 +1461,12 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## VFD on Linux systems.
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
-
+  *mingw*)
+    AC_DEFINE([HAVE_WINDOWS], [1], [Define if this is a Windows machine])
+    AC_DEFINE([HAVE_WIN32_API], [1], [Define if on the Windows platform using the Win32 API])
+    AC_DEFINE([HAVE_MINGW], [1], [Define if using MinGW])
+    H5_CPPFLAGS="-D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO $H5_CPPFLAGS"
+    ;;
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
@@ -1737,6 +1742,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
 
   LL_PATH="$LD_LIBRARY_PATH"
 
+  # CROSS-COMPILING: Assume 'yes' now that libaec is so prevalent
   AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_RUN_IFELSE(
             [AC_LANG_PROGRAM([
@@ -1745,7 +1751,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
                 /* SZ_encoder_enabled returns 1 if encoder is present */
                 return SZ_encoder_enabled() != 1;
             ]])]
-        , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)]
+        , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no], [hdf5_cv_szlib_can_encode=yes])]
    )
 
   AC_DEFINE([HAVE_FILTER_SZIP], [1],
@@ -1928,8 +1934,8 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## supported a priori. POSIX.1-2001 requires that a conformant
     ## system need only support one of SYSTEM or PROCESS scopes.
     ##
-    ## For cross-compiling, we've added a pessimistic 'no'. You can
-    ## hand-hack the config file if you know otherwise.
+    ## CROSS-COMPILING: Use a pessimistic 'no'. You can hand-hack the config
+    ##                  file if you know otherwise.
     AC_MSG_CHECKING([Pthreads supports system scope])
     AC_CACHE_VAL([hdf5_cv_system_scope_threads],
       [AC_RUN_IFELSE(
@@ -3416,6 +3422,7 @@ esac
 ## The machine's conversion gets the correct value.  We define the macro and disable
 ## this kind of test until we figure out what algorithm they use.
 ##
+## CROSS-COMPILING: Assume 'no'
 AC_MSG_CHECKING([if using special algorithm to convert long double to (unsigned) long values])
 
 ## NOTE: Place all configure test programs into cmake's source file, then use a preprocessor directive
@@ -3430,7 +3437,7 @@ else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_long_special],
         [AC_RUN_IFELSE(
             [AC_LANG_SOURCE([$TEST_SRC])]
-    , [hdf5_cv_ldouble_to_long_special=yes], [hdf5_cv_ldouble_to_long_special=no],)])
+    , [hdf5_cv_ldouble_to_long_special=yes], [hdf5_cv_ldouble_to_long_special=no], [hdf5_cv_ldouble_to_long_special=no])])
 fi
 
 if test ${hdf5_cv_ldouble_to_long_special} = "yes"; then
@@ -3449,6 +3456,7 @@ fi
 ## ..., 7fffff..., the compiler uses a unknown algorithm.  We define a
 ## macro and skip the test for now until we know about the algorithm.
 ##
+## CROSS-COMPILING: Assume 'no'
 AC_MSG_CHECKING([if using special algorithm to convert (unsigned) long to long double values])
 
 TEST_SRC="`(echo \"#define H5_LONG_TO_LDOUBLE_SPECIAL_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
@@ -3459,7 +3467,7 @@ else
    AC_CACHE_VAL([hdf5_cv_long_to_ldouble_special],
         [AC_RUN_IFELSE(
             [AC_LANG_SOURCE([$TEST_SRC])]
-    , [hdf5_cv_long_to_ldouble_special=yes], [hdf5_cv_long_to_ldouble_special=no],)])
+    , [hdf5_cv_long_to_ldouble_special=yes], [hdf5_cv_long_to_ldouble_special=no], [hdf5_cv_long_to_ldouble_special=no])])
 fi
 
 if test ${hdf5_cv_long_to_ldouble_special} = "yes"; then
@@ -3481,6 +3489,7 @@ fi
 ## 0x4351ccf385ebc8a0ffcc... will make the converted values wildly wrong.
 ## This test detects this wrong behavior and disable the test.
 ##
+## CROSS-COMPILING: Assume 'yes'
 AC_MSG_CHECKING([if correctly converting long double to (unsigned) long long values])
 
 TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_LLONG_ACCURATE_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
@@ -3490,7 +3499,7 @@ if test ${ac_cv_sizeof_long_double} = 0; then
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
         [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
-        [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],[])])
+        [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no], [hdf5_cv_ldouble_to_llong_accurate=yes])])
 fi
 
 if test ${hdf5_cv_ldouble_to_llong_accurate} = "yes"; then
@@ -3510,6 +3519,7 @@ fi
 ## When the bit sequences are 003fff..., 007fff..., 00ffff..., 01ffff...,
 ## ..., 7fffff..., the converted values are twice as big as they should be.
 ##
+## CROSS-COMPILING: Assume 'yes'
 AC_MSG_CHECKING([if correctly converting (unsigned) long long to long double values])
 
 TEST_SRC="`(echo \"#define H5_LLONG_TO_LDOUBLE_CORRECT_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
@@ -3519,7 +3529,7 @@ if test ${ac_cv_sizeof_long_double} = 0; then
 else
    AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
         [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
-        [hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no],[])])
+        [hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no], [hdf5_cv_llong_to_ldouble_correct=yes])])
 fi
 
 if test ${hdf5_cv_llong_to_ldouble_correct} = "yes"; then
@@ -3534,6 +3544,7 @@ fi
 ## Set the flag to indicate that the machine is IBM ppc64le and cannot
 ## accurately convert some long double values.
 ##
+## CROSS-COMPILING: Assume 'yes'
 AC_MSG_CHECKING([if the system is IBM ppc64le and cannot correctly convert some long double values])
 
 TEST_SRC="`(echo \"#define H5_DISABLE_SOME_LDOUBLE_CONV_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
@@ -3543,7 +3554,7 @@ if test ${ac_cv_sizeof_long_double} = 0; then
 else
    AC_CACHE_VAL([hdf5_cv_disable_some_ldouble_conv],
         [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
-        [hdf5_cv_disable_some_ldouble_conv=yes], [hdf5_cv_disable_some_ldouble_conv=no],[])])
+        [hdf5_cv_disable_some_ldouble_conv=yes], [hdf5_cv_disable_some_ldouble_conv=no], [hdf5_cv_disable_some_ldouble_conv=yes])])
 fi
 
 if test ${hdf5_cv_disable_some_ldouble_conv} = "yes"; then
