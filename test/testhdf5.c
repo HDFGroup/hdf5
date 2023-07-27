@@ -89,7 +89,7 @@ main(int argc, char *argv[])
     /* Exit failure if errors encountered; else exit success. */
     /* No need to print anything since PerformTests() already does. */
     if (GetTestNumErrs() > 0)
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     else
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
 } /* end main() */

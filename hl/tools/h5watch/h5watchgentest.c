@@ -172,14 +172,14 @@ main(void)
 
     /* Create a copy of file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     /* Set to use the latest library format */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
 
     /* Create a file with the latest format */
     if ((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
 
     /* Initialization for one-dimensional dataset */
     cur_dims[0] = ONE_DIMS0;
@@ -341,7 +341,7 @@ main(void)
     if (H5Fclose(fid) < 0)
         goto done;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 done:
     H5E_BEGIN_TRY
@@ -356,5 +356,5 @@ done:
     H5Fclose(fid);
     H5E_END_TRY
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

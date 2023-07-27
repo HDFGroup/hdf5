@@ -83,9 +83,9 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(p_size > 0);
+    assert(f);
+    assert(p);
+    assert(p_size > 0);
 
     if (NULL == (mesg = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -209,9 +209,9 @@ H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(p);
+    assert(f);
+    assert(mesg);
+    assert(p);
 
     /* Version */
     *p++ = H5O_EFL_VERSION;
@@ -222,13 +222,13 @@ H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
     *p++ = 0;
 
     /* Number of slots */
-    HDassert(mesg->nalloc > 0);
+    assert(mesg->nalloc > 0);
     UINT16ENCODE(p, mesg->nused); /*yes, twice*/
-    HDassert(mesg->nused > 0 && mesg->nused <= mesg->nalloc);
+    assert(mesg->nused > 0 && mesg->nused <= mesg->nalloc);
     UINT16ENCODE(p, mesg->nused);
 
     /* Heap address */
-    HDassert(H5F_addr_defined(mesg->heap_addr));
+    assert(H5F_addr_defined(mesg->heap_addr));
     H5F_addr_encode(f, &p, mesg->heap_addr);
 
     /* Encode file list */
@@ -237,7 +237,7 @@ H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
          * The name should have been added to the heap when the dataset was
          * created.
          */
-        HDassert(mesg->slot[u].name_offset);
+        assert(mesg->slot[u].name_offset);
         H5F_ENCODE_LENGTH(f, p, mesg->slot[u].name_offset);
         H5F_ENCODE_LENGTH(f, p, (hsize_t)mesg->slot[u].offset);
         H5F_ENCODE_LENGTH(f, p, mesg->slot[u].size);
@@ -273,7 +273,7 @@ H5O__efl_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     /* Allocate destination message, if necessary */
     if (!dest && NULL == (dest = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
@@ -338,8 +338,8 @@ H5O__efl_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     ret_value = (size_t)H5F_SIZEOF_ADDR(f) +                /*heap address	*/
                 2 +                                         /*slots allocated*/
@@ -374,7 +374,7 @@ H5O__efl_reset(void *_mesg)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     /* reset */
     if (mesg->slot) {
@@ -456,8 +456,8 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
     FUNC_ENTER_PACKAGE_TAG(H5AC__COPIED_TAG)
 
     /* check args */
-    HDassert(efl_src);
-    HDassert(file_dst);
+    assert(efl_src);
+    assert(file_dst);
 
     /* Allocate space for the destination efl */
     if (NULL == (efl_dst = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
@@ -482,7 +482,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
     /* Insert "empty" name first */
     if (H5HL_insert(file_dst, heap, (size_t)1, "", &name_offset) < 0)
         HGOTO_ERROR(H5E_EFL, H5E_CANTINSERT, NULL, "can't insert file name into heap")
-    HDassert(0 == name_offset);
+    assert(0 == name_offset);
 
     /* allocate array of external file entries */
     if (efl_src->nalloc > 0) {
@@ -537,34 +537,33 @@ H5O__efl_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int ind
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Heap address:", mesg->heap_addr);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Heap address:", mesg->heap_addr);
 
-    HDfprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Slots used/allocated:", mesg->nused,
-              mesg->nalloc);
+    fprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Slots used/allocated:", mesg->nused,
+            mesg->nalloc);
 
     for (u = 0; u < mesg->nused; u++) {
         char buf[64];
 
         HDsnprintf(buf, sizeof(buf), "File %zu", u);
-        HDfprintf(stream, "%*s%s:\n", indent, "", buf);
+        fprintf(stream, "%*s%s:\n", indent, "", buf);
 
-        HDfprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(fwidth - 3, 0),
-                  "Name:", mesg->slot[u].name);
+        fprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(fwidth - 3, 0), "Name:", mesg->slot[u].name);
 
-        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(fwidth - 3, 0),
-                  "Name offset:", mesg->slot[u].name_offset);
+        fprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(fwidth - 3, 0),
+                "Name offset:", mesg->slot[u].name_offset);
 
-        HDfprintf(stream, "%*s%-*s %" PRIdMAX "\n", indent + 3, "", MAX(fwidth - 3, 0),
-                  "Offset of data in file:", (intmax_t)(mesg->slot[u].offset));
+        fprintf(stream, "%*s%-*s %" PRIdMAX "\n", indent + 3, "", MAX(fwidth - 3, 0),
+                "Offset of data in file:", (intmax_t)(mesg->slot[u].offset));
 
-        HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent + 3, "", MAX(fwidth - 3, 0),
-                  "Bytes reserved for data:", (mesg->slot[u].size));
+        fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent + 3, "", MAX(fwidth - 3, 0),
+                "Bytes reserved for data:", (mesg->slot[u].size));
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

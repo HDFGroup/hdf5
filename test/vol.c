@@ -579,12 +579,12 @@ fake_vol_info_to_str(const void *info, char **str)
 
     /* Verify the info is correct before continuing */
     if (val != INT_MAX) {
-        HDprintf("The value of info (%d) is incorrect\n", val);
+        printf("The value of info (%d) is incorrect\n", val);
         return FAIL;
     }
 
     /* Allocate the string long enough for the info */
-    if (NULL == (*str = (char *)HDcalloc(1, str_size)))
+    if (NULL == (*str = (char *)calloc(1, str_size)))
         return FAIL;
 
     HDsnprintf(*str, str_size, "%d", val);
@@ -628,7 +628,7 @@ fake_vol_free_info(void *info)
     herr_t ret_value = SUCCEED; /* Return value */
 
     if (info)
-        HDfree(info);
+        free(info);
 
     return ret_value;
 } /* end fake_vol_free_info() */
@@ -715,9 +715,9 @@ test_vol_registration(void)
         TEST_ERROR;
 
     /* Test registering a VOL connector with an incompatible version # */
-    if (NULL == (bad_fake_vol_class = HDmalloc(sizeof(H5VL_class_t))))
+    if (NULL == (bad_fake_vol_class = malloc(sizeof(H5VL_class_t))))
         TEST_ERROR;
-    HDmemcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
+    memcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
     bad_fake_vol_class->version = H5VL_VERSION + 1;
     H5E_BEGIN_TRY
     {
@@ -726,7 +726,7 @@ test_vol_registration(void)
     H5E_END_TRY;
     if (H5I_INVALID_HID != vol_id)
         FAIL_PUTS_ERROR("should not be able to register a connector with an incompatible version #");
-    HDfree(bad_fake_vol_class);
+    free(bad_fake_vol_class);
     bad_fake_vol_class = NULL;
 
     /* Load a VOL interface
@@ -807,7 +807,7 @@ error:
     H5E_END_TRY;
 
     if (bad_fake_vol_class)
-        HDfree(bad_fake_vol_class);
+        free(bad_fake_vol_class);
 
     return FAIL;
 } /* end test_vol_registration() */
@@ -2192,7 +2192,7 @@ test_async_vol_props(void)
     if (conn_env_str) {
         if (HDsetenv(HDF5_VOL_CONNECTOR, conn_env_str, TRUE) < 0)
             TEST_ERROR;
-        HDfree(conn_env_str);
+        free(conn_env_str);
 
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR;
@@ -2209,7 +2209,7 @@ error:
         H5VLunregister_connector(vol_id);
     }
     H5E_END_TRY;
-    HDfree(conn_env_str);
+    free(conn_env_str);
 
     return FAIL;
 } /* end test_async_vol_props() */
@@ -2345,7 +2345,7 @@ test_get_vol_name(void)
     /* Skip the connectors other than the native and pass_through connector */
     if (HDstrcmp(conn_env_str, "native") && HDstrcmp(conn_env_str, "pass_through")) {
         SKIPPED();
-        HDprintf("    only test the native or internal pass_through connector\n");
+        printf("    only test the native or internal pass_through connector\n");
         return SUCCEED;
     }
 
@@ -2510,7 +2510,7 @@ test_info_to_str(void)
 
     /* Free the string being returned */
     if (ret_str)
-        HDfree(ret_str);
+        free(ret_str);
 
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
@@ -2655,12 +2655,12 @@ main(void)
     nerrors += test_query_optional() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        printf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        exit(EXIT_FAILURE);
     }
 
     HDputs("All Virtual Object Layer (VOL) tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 } /* end main() */

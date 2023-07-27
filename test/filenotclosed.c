@@ -34,7 +34,7 @@
 static void
 catch_signal(int H5_ATTR_UNUSED signo)
 {
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* catch_signal() */
 
 /*-------------------------------------------------------------------------
@@ -80,7 +80,7 @@ main(void)
     if (!contig_addr_vfd) {
         SKIPPED();
         HDputs("    Temporary skipped for a spilt/multi driver");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     h5_reset();
@@ -136,9 +136,9 @@ main(void)
     /* The file is not closed. */
     /* The library will call H5_term_library to shut down the library. */
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("*** TEST FAILED ***");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }

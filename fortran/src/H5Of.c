@@ -128,7 +128,7 @@ h5olink_c(hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, size_t_f *namelen,
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -273,7 +273,7 @@ h5oget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *namelen, int_f 
 
 done:
     if (c_group_name)
-        HDfree(c_group_name);
+        free(c_group_name);
     return ret_value;
 }
 
@@ -383,7 +383,7 @@ h5oexists_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -454,7 +454,7 @@ h5oset_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentlen)
 
 done:
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     return ret_value;
 }
 
@@ -506,9 +506,9 @@ h5oset_comment_by_name_c(hid_t_f *object_id, _fcd name, size_t_f *namelen, _fcd 
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     return ret_value;
 }
 
@@ -544,7 +544,7 @@ h5oget_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentsize, hssize
      * Allocate buffer to hold comment name
      */
 
-    if (NULL == (c_comment = (char *)HDmalloc(c_commentsize)))
+    if (NULL == (c_comment = (char *)malloc(c_commentsize)))
         HGOTO_DONE(FAIL);
 
     /*
@@ -563,7 +563,7 @@ h5oget_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentsize, hssize
 
 done:
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
 
     return ret_value;
 }
@@ -609,7 +609,7 @@ h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, _fcd c
      * Allocate buffer to hold comment name
      */
 
-    if (NULL == (c_comment = (char *)HDmalloc(c_commentsize)))
+    if (NULL == (c_comment = (char *)malloc(c_commentsize)))
         HGOTO_DONE(FAIL);
 
     /*
@@ -621,7 +621,7 @@ h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, _fcd c
         HGOTO_DONE(FAIL);
 
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     *bufsize = (size_t_f)c_bufsize;
 
@@ -630,16 +630,16 @@ h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, _fcd c
      */
     if (c_comment) {
         HD5packFstring(c_comment, _fcdtocp(comment), c_commentsize - 1);
-        HDfree(c_comment);
+        free(c_comment);
     }
 
     return ret_value;
 
 done:
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }

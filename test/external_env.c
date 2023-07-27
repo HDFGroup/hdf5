@@ -94,7 +94,7 @@ test_path_env(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -214,6 +214,6 @@ error:
     }
     H5E_END_TRY;
     nerrors = MAX(1, nerrors);
-    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */

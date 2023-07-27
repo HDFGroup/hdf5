@@ -172,7 +172,7 @@ H5FD__family_get_default_config(H5FD_family_fapl_t *fa_out)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(fa_out);
+    assert(fa_out);
 
     fa_out->memb_size = H5FD_FAM_DEF_MEM_SIZE;
 
@@ -226,7 +226,7 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(old_filename);
+    assert(old_filename);
 
     old_filename_len = HDstrlen(old_filename);
     if (0 == old_filename_len)
@@ -796,7 +796,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
             unsigned n = MAX(64, 2 * file->amembs);
             H5FD_t **x;
 
-            HDassert(n > 0);
+            assert(n > 0);
             if (NULL == (x = (H5FD_t **)H5MM_realloc(file->memb, n * sizeof(H5FD_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to reallocate members")
             file->amembs = n;
@@ -942,8 +942,8 @@ H5FD__family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f1->nmembs >= 1 && f1->memb[0]);
-    HDassert(f2->nmembs >= 1 && f2->memb[0]);
+    assert(f1->nmembs >= 1 && f1->memb[0]);
+    assert(f2->nmembs >= 1 && f2->memb[0]);
 
     ret_value = H5FDcmp(f1->memb[0], f2->memb[0]);
 
@@ -1137,7 +1137,7 @@ H5FD__family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
      * with `i' equal to that member. If all members have zero EOF then exit
      * loop with i==0.
      */
-    HDassert(file->nmembs > 0);
+    assert(file->nmembs > 0);
     for (i = (int)file->nmembs - 1; i >= 0; --i) {
         if ((eof = H5FD_get_eof(file->memb[i], type)) != 0)
             break;
@@ -1252,7 +1252,7 @@ H5FD__family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
             tempreq = SIZE_MAX;
         req = MIN(size, (size_t)tempreq);
 
-        HDassert(u < file->nmembs);
+        assert(u < file->nmembs);
 
         if (H5FDread(file->memb[u], type, dxpl_id, sub, req, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "member file read failed")
@@ -1317,7 +1317,7 @@ H5FD__family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, 
             tempreq = SIZE_MAX;
         req = MIN(size, (size_t)tempreq);
 
-        HDassert(u < file->nmembs);
+        assert(u < file->nmembs);
 
         if (H5FDwrite(file->memb[u], type, dxpl_id, sub, req, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "member file write failed")
@@ -1500,7 +1500,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(filename);
+    assert(filename);
 
     /* Get the driver info (for the member fapl)
      * The family_open call accepts H5P_DEFAULT, so we'll accept that here, too.

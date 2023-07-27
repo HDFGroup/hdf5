@@ -101,19 +101,19 @@ main(int argc, char *argv[])
     (void)HDsetvbuf(stderr, (char *)NULL, _IOLBF, 0);
     (void)HDsetvbuf(stdout, (char *)NULL, _IOLBF, 0);
 
-    if ((opt = (struct Options *)HDcalloc(1, sizeof(struct Options))) == NULL)
+    if ((opt = (struct Options *)calloc(1, sizeof(struct Options))) == NULL)
         goto err;
 
     if (argv[1] && (HDstrcmp("-V", argv[1]) == 0)) {
         print_version(PROGRAMNAME);
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /*
      * validate the number of command line arguments
      */
     if (argc < 2) {
-        (void)HDfprintf(stderr, err1, argc);
+        (void)fprintf(stderr, err1, argc);
         usage(argv[0]);
         goto err;
     }
@@ -140,7 +140,7 @@ main(int argc, char *argv[])
                     opt->fcount++;
                 }
                 else {
-                    (void)HDfprintf(stderr, err9, argv[i]);
+                    (void)fprintf(stderr, err9, argv[i]);
                     goto err;
                 }
 
@@ -159,7 +159,7 @@ main(int argc, char *argv[])
 
             case 5: /* get outfile found */
                 if (HDstrlen(argv[i]) > MAX_PATH_NAME_LENGTH) {
-                    (void)HDfprintf(stderr, err10, argv[i]);
+                    (void)fprintf(stderr, err10, argv[i]);
                     goto err;
                 }
                 (void)HDstrcpy(opt->outfile, argv[i]);
@@ -168,7 +168,7 @@ main(int argc, char *argv[])
 
             case 6: /* -h found; help, then exit */
                 help(argv[0]);
-                HDexit(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
                 break;
 
             case 7: /* -d found; look for dimensions */
@@ -176,7 +176,7 @@ main(int argc, char *argv[])
 
             case 8: /* read dimensions */
                 if (parseDimensions(in, argv[i]) == -1) {
-                    (void)HDfprintf(stderr, err6, argv[i]);
+                    (void)fprintf(stderr, err6, argv[i]);
                     goto err;
                 }
                 break;
@@ -186,7 +186,7 @@ main(int argc, char *argv[])
 
             case 10: /* read path name */
                 if (parsePathInfo(&in->path, argv[i]) == -1) {
-                    (void)HDfprintf(stderr, err5, argv[i]);
+                    (void)fprintf(stderr, err5, argv[i]);
                     goto err;
                 }
                 break;
@@ -196,7 +196,7 @@ main(int argc, char *argv[])
 
             case 12: /* read data type */
                 if (getInputClass(in, argv[i]) == -1) {
-                    (void)HDfprintf(stderr, err7, argv[i]);
+                    (void)fprintf(stderr, err7, argv[i]);
                     goto err;
                 }
 
@@ -213,7 +213,7 @@ main(int argc, char *argv[])
 
             case 14: /* read data size */
                 if (getInputSize(in, (int)HDstrtol(argv[i], NULL, BASE_10)) == -1) {
-                    (void)HDfprintf(stderr, err8, argv[i]);
+                    (void)fprintf(stderr, err8, argv[i]);
                     goto err;
                 }
                 /*set default value for output-size */
@@ -222,14 +222,14 @@ main(int argc, char *argv[])
 
             case ERR: /* command syntax error */
             default:
-                (void)HDfprintf(stderr, "%s", err2);
+                (void)fprintf(stderr, "%s", err2);
                 usage(argv[0]);
                 goto err;
         }
     }
 
     if (FALSE == outfile_named) {
-        (void)HDfprintf(stderr, "%s", err3);
+        (void)fprintf(stderr, "%s", err3);
         usage(argv[0]);
         goto err;
     }
@@ -242,35 +242,35 @@ main(int argc, char *argv[])
     for (i = 0; i < opt->fcount; i++) {
         in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
-            HDfree(in->sizeOfDimension);
+            free(in->sizeOfDimension);
         if (in->sizeOfChunk)
-            HDfree(in->sizeOfChunk);
+            free(in->sizeOfChunk);
         if (in->maxsizeOfDimension)
-            HDfree(in->maxsizeOfDimension);
+            free(in->maxsizeOfDimension);
         if (in->externFilename)
-            HDfree(in->externFilename);
+            free(in->externFilename);
         if (in->data)
-            HDfree(in->data);
+            free(in->data);
     }
-    HDfree(opt);
+    free(opt);
 
     return EXIT_SUCCESS;
 err:
-    (void)HDfprintf(stderr, "%s", err4);
+    (void)fprintf(stderr, "%s", err4);
     for (i = 0; i < opt->fcount; i++) {
         in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
-            HDfree(in->sizeOfDimension);
+            free(in->sizeOfDimension);
         if (in->sizeOfChunk)
-            HDfree(in->sizeOfChunk);
+            free(in->sizeOfChunk);
         if (in->maxsizeOfDimension)
-            HDfree(in->maxsizeOfDimension);
+            free(in->maxsizeOfDimension);
         if (in->externFilename)
-            HDfree(in->externFilename);
+            free(in->externFilename);
         if (in->data)
-            HDfree(in->data);
+            free(in->data);
     }
-    HDfree(opt);
+    free(opt);
 
     return EXIT_FAILURE;
 }
@@ -329,7 +329,7 @@ gtoken(char *s)
         }
 
         if (token == ERR)
-            (void)HDfprintf(stderr, err1, s);
+            (void)fprintf(stderr, err1, s);
     }
     else { /* filename */
         token = FILNAME;
@@ -375,8 +375,8 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
      */
     if (in->inputClass == 4 /* "IN" */ || in->inputClass == 3 /* "FP" */ || in->inputClass == 7 /* "UIN" */) {
 
-        if ((strm = HDfopen(infile, READ_OPEN_FLAGS)) == NULL) {
-            (void)HDfprintf(stderr, err1, infile);
+        if ((strm = fopen(infile, READ_OPEN_FLAGS)) == NULL) {
+            (void)fprintf(stderr, err1, infile);
             goto error;
         }
     }
@@ -385,8 +385,8 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
      *-------------------------------------------------------------------------
      */
     else {
-        if ((strm = HDfopen(infile, "r")) == NULL) {
-            (void)HDfprintf(stderr, err1, infile);
+        if ((strm = fopen(infile, "r")) == NULL) {
+            (void)fprintf(stderr, err1, infile);
             goto error;
         }
     }
@@ -395,12 +395,12 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
         case 0: /*  TEXTIN */
         case 4: /*  IN  */
             if (allocateIntegerStorage(in) == -1) {
-                (void)HDfprintf(stderr, err2, infile);
+                (void)fprintf(stderr, err2, infile);
                 goto error;
             }
 
             if (readIntegerData(strm, in) == -1) {
-                (void)HDfprintf(stderr, err4, infile);
+                (void)fprintf(stderr, err4, infile);
                 goto error;
             }
             break;
@@ -409,12 +409,12 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
         case 2: /*  TEXTFPE  */
         case 3: /*  FP  */
             if (allocateFloatStorage(in) == -1) {
-                (void)HDfprintf(stderr, err3, infile);
+                (void)fprintf(stderr, err3, infile);
                 goto error;
             }
 
             if (readFloatData(strm, in) == -1) {
-                (void)HDfprintf(stderr, err5, infile);
+                (void)fprintf(stderr, err5, infile);
                 goto error;
             }
             break;
@@ -422,13 +422,13 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
         case 5: /*  STR  */
             if (in->h5dumpInput) {
                 if (processStrHDFData(strm, in, file_id) == -1) {
-                    (void)HDfprintf(stderr, err11, infile);
+                    (void)fprintf(stderr, err11, infile);
                     goto error;
                 }
             }
             else {
                 if (processStrData(strm, in, file_id) == -1) {
-                    (void)HDfprintf(stderr, err11, infile);
+                    (void)fprintf(stderr, err11, infile);
                     goto error;
                 }
             }
@@ -438,17 +438,17 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
         case 6: /* TEXTUIN */
         case 7: /* UIN */
             if (allocateUIntegerStorage(in) == -1) {
-                (void)HDfprintf(stderr, err6, infile);
+                (void)fprintf(stderr, err6, infile);
                 goto error;
             }
             if (readUIntegerData(strm, in) == -1) {
-                (void)HDfprintf(stderr, err7, infile);
+                (void)fprintf(stderr, err7, infile);
                 goto error;
             }
             break;
 
         default:
-            (void)HDfprintf(stderr, "%s", err10);
+            (void)fprintf(stderr, "%s", err10);
             goto error;
     }
 
@@ -492,7 +492,7 @@ readIntegerData(FILE *strm, struct Input *in)
                     in08 = (H5DT_INT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
                         if (HDfscanf(strm, "%hd", &temp16) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         (*in08) = (H5DT_INT8)temp16;
@@ -503,17 +503,17 @@ readIntegerData(FILE *strm, struct Input *in)
                     in08 = (H5DT_INT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
                         if (HDfread((char *)in08, sizeof(H5DT_INT8), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readIntegerData %d (0x%.8X)\n", *in08, *in08);
+                        printf("readIntegerData %d (0x%.8X)\n", *in08, *in08);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
@@ -524,7 +524,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in16++) {
                         if (HDfscanf(strm, "%hd", in16) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
@@ -534,7 +534,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in16++) {
                         if (HDfread((char *)&temp16, sizeof(H5DT_INT16), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -544,13 +544,13 @@ readIntegerData(FILE *strm, struct Input *in)
                         */
                         *in16 = temp16;
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readIntegerData %d (0x%.8X)\n", *in16, temp16);
+                        printf("readIntegerData %d (0x%.8X)\n", *in16, temp16);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
@@ -561,7 +561,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in32++) {
                         if (HDfscanf(strm, "%d", in32) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
@@ -570,7 +570,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in32++) {
                         if (HDfread((char *)&temp32, sizeof(H5DT_INT32), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -580,13 +580,13 @@ readIntegerData(FILE *strm, struct Input *in)
                         */
                         *in32 = temp32;
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
+                        printf("readIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
@@ -597,7 +597,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in64++) {
                         if (HDfscanf(strm, "%s", buffer) < 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         *in64 = (H5DT_INT64)HDstrtoll(buffer, NULL, 10);
@@ -607,7 +607,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in64++) {
                         if (HDfread((char *)&temp64, sizeof(H5DT_INT64), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -617,19 +617,19 @@ readIntegerData(FILE *strm, struct Input *in)
                         */
                         *in64 = temp64;
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readIntegerData %d (0x%.8X)\n", *in64, temp64);
+                        printf("readIntegerData %d (0x%.8X)\n", *in64, temp64);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
 
         default:
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             break;
     }
     return (0);
@@ -663,7 +663,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                     in08 = (H5DT_UINT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
                         if (HDfscanf(strm, "%hu", &temp16) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         (*in08) = (H5DT_UINT8)temp16;
@@ -674,14 +674,14 @@ readUIntegerData(FILE *strm, struct Input *in)
                     in08 = (H5DT_UINT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
                         if (HDfread((char *)in08, sizeof(H5DT_UINT8), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
@@ -692,7 +692,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in16++) {
                         if (HDfscanf(strm, "%hu", in16) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
@@ -701,7 +701,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in16++) {
                         if (HDfread((char *)&temp16, sizeof(H5DT_UINT16), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -711,13 +711,13 @@ readUIntegerData(FILE *strm, struct Input *in)
                         */
                         *in16 = temp16;
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readUIntegerData %d (0x%.4X = 0x%.4X)\n", *in16, *in16, temp16);
+                        printf("readUIntegerData %d (0x%.4X = 0x%.4X)\n", *in16, *in16, temp16);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
@@ -728,7 +728,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in32++) {
                         if (HDfscanf(strm, "%u", in32) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
@@ -737,7 +737,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in32++) {
                         if (HDfread((char *)&temp32, sizeof(H5DT_UINT32), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -747,13 +747,13 @@ readUIntegerData(FILE *strm, struct Input *in)
                         */
                         *in32 = temp32;
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readUIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
+                        printf("readUIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
@@ -764,7 +764,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in64++) {
                         if (HDfscanf(strm, "%s", buffer) < 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         *in64 = (H5DT_UINT64)HDstrtoll(buffer, NULL, 10);
@@ -774,7 +774,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in64++) {
                         if (HDfread((char *)&temp64, sizeof(H5DT_UINT64), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -784,19 +784,19 @@ readUIntegerData(FILE *strm, struct Input *in)
                         */
                         *in64 = temp64;
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readUIntegerData %ld (0x%.8X = 0x%.8X)\n", *in64, *in64, temp64);
+                        printf("readUIntegerData %ld (0x%.8X = 0x%.8X)\n", *in64, *in64, temp64);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
 
         default:
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             break;
     }
     return (0);
@@ -829,7 +829,7 @@ readFloatData(FILE *strm, struct Input *in)
                 case 1: /* TEXTFP */
                     for (i = 0; i < len; i++, fp32++) {
                         if (HDfscanf(strm, "%f", fp32) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
@@ -842,7 +842,7 @@ readFloatData(FILE *strm, struct Input *in)
 
                     for (i = 0; i < len; i++, fp32++) {
                         if (HDfscanf(strm, "%f", fp32) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
@@ -854,7 +854,7 @@ readFloatData(FILE *strm, struct Input *in)
                     bfp32 = (uint32_t *)in->data;
                     for (i = 0; i < len; i++, bfp32++) {
                         if (HDfread((char *)&temp32, sizeof(uint32_t), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -864,13 +864,13 @@ readFloatData(FILE *strm, struct Input *in)
                         */
                         *bfp32 = temp32;
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readFloatData %ld (0x%.8X = 0x%.8X)\n", *bfp32, *bfp32, temp32);
+                        printf("readFloatData %ld (0x%.8X = 0x%.8X)\n", *bfp32, *bfp32, temp32);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
@@ -881,7 +881,7 @@ readFloatData(FILE *strm, struct Input *in)
                 case 1: /* TEXTFP */
                     for (i = 0; i < len; i++, fp64++) {
                         if (HDfscanf(strm, "%lf", fp64) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
@@ -894,7 +894,7 @@ readFloatData(FILE *strm, struct Input *in)
 
                     for (i = 0; i < len; i++, fp64++) {
                         if (HDfscanf(strm, "%lf", fp64) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                     }
@@ -906,7 +906,7 @@ readFloatData(FILE *strm, struct Input *in)
                     bfp64 = (uint64_t *)in->data;
                     for (i = 0; i < len; i++, bfp64++) {
                         if (HDfread((char *)&temp64, sizeof(uint64_t), 1, strm) != 1) {
-                            (void)HDfprintf(stderr, "%s", err1);
+                            (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -916,19 +916,19 @@ readFloatData(FILE *strm, struct Input *in)
                         */
                         *bfp64 = temp64;
 #ifdef H5DEBUGIMPORT
-                        HDprintf("readFloatData %ld (0x%.16lX)\n", *bfp64, temp64);
+                        printf("readFloatData %ld (0x%.16lX)\n", *bfp64, temp64);
 #endif
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err2);
+                    (void)fprintf(stderr, "%s", err2);
                     return (-1);
             }
             break;
 
         default:
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             break;
     }
     return (0);
@@ -1111,7 +1111,7 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
      *-------------------------------------------------------------------------
      */
 #ifdef H5DEBUGIMPORT
-    HDprintf("processStrHDFData DATATYPE STRING\n");
+    printf("processStrHDFData DATATYPE STRING\n");
 #endif
 
     if ((type_id = H5Tcopy(H5T_C_S1)) < 0)
@@ -1149,7 +1149,7 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
     }
     H5E_END_TRY;
 #ifdef H5DEBUGIMPORT
-    HDprintf("processStrHDFData DATATYPE STRING groups created\n");
+    printf("processStrHDFData DATATYPE STRING groups created\n");
 #endif
 
     if ((space_id = H5Screate_simple(in->rank, in->sizeOfDimension, NULL)) < 0)
@@ -1163,7 +1163,7 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
         goto out;
 
 #ifdef H5DEBUGIMPORT
-    HDprintf("processStrHDFData DATATYPE STRING ready to process strings\n");
+    printf("processStrHDFData DATATYPE STRING ready to process strings\n");
 #endif
     line = 0;
     j    = 0;
@@ -1173,27 +1173,27 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
         str2 = NULL;
         str3 = NULL;
 #ifdef H5DEBUGIMPORT
-        HDprintf("processStrHDFData DATATYPE STRING[%llu]={%s}\n", (unsigned long long)line, str1);
+        printf("processStrHDFData DATATYPE STRING[%llu]={%s}\n", (unsigned long long)line, str1);
 #endif
         /* process string to remove the first and last quote char */
         str2 = strchr(str1, '"');
         if (str2 != NULL) {
 #ifdef H5DEBUGIMPORT
-            HDprintf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
+            printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
 #endif
             str2++;
 #ifdef H5DEBUGIMPORT
-            HDprintf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
+            printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
 #endif
             str3 = strrchr(str2, '"');
             if (str3 != NULL) {
 #ifdef H5DEBUGIMPORT
-                HDprintf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str3), str3);
+                printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str3), str3);
 #endif
                 *str3 = '\0';
 
 #ifdef H5DEBUGIMPORT
-                HDprintf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
+                printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", HDstrlen(str2), str2);
 #endif
 
                 if (HDstrlen(str2) > 0) {
@@ -1202,8 +1202,8 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
                     hsize_t count[1] = {1};
 
 #ifdef H5DEBUGIMPORT
-                    HDprintf("processStrHDFData DATATYPE STRING[%llu] store %s\n", (unsigned long long)line,
-                             str2);
+                    printf("processStrHDFData DATATYPE STRING[%llu] store %s\n", (unsigned long long)line,
+                           str2);
 #endif
                     if ((fspace_id = H5Dget_space(dset_id)) < 0)
                         goto out;
@@ -1225,7 +1225,7 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
         j++;
     }
 #ifdef H5DEBUGIMPORT
-    HDprintf("processStrHDFData DATATYPE STRING eof reached\n");
+    printf("processStrHDFData DATATYPE STRING eof reached\n");
 #endif
 
     /* close */
@@ -1238,7 +1238,7 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
 
 out:
 #ifdef H5DEBUGIMPORT
-    HDprintf("processStrHDFData DATATYPE STRING error exit\n");
+    printf("processStrHDFData DATATYPE STRING error exit\n");
 #endif
     /* disable error reporting */
     H5E_BEGIN_TRY
@@ -1267,35 +1267,35 @@ allocateIntegerStorage(struct Input *in)
 
     switch (in->inputSize) {
         case 8:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_INT8))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT8))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 16:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_INT16))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT16))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 32:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_INT32))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT32))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_INT64))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT64))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         default:
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             break;
     }
     return (0);
@@ -1314,35 +1314,35 @@ allocateUIntegerStorage(struct Input *in)
 
     switch (in->inputSize) {
         case 8:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_UINT8))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT8))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 16:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_UINT16))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT16))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 32:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_UINT32))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT32))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_UINT64))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT64))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         default:
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             break;
     }
     return (0);
@@ -1361,21 +1361,21 @@ allocateFloatStorage(struct Input *in)
 
     switch (in->inputSize) {
         case 32:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_FLOAT32))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_FLOAT32))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_FLOAT64))) == NULL) {
-                (void)HDfprintf(stderr, "%s", err1);
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_FLOAT64))) == NULL) {
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         default:
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             break;
     }
     return (0);
@@ -1446,24 +1446,24 @@ processConfigurationFile(char *infile, struct Input *in)
     /* 0 for big endian, 1 for little endian. */
     if ((*((volatile uint8_t *)(&ibyte))) == 0x67) {
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err11e);
+            (void)fprintf(stderr, "%s", err11e);
             return (-1);
         }
     }
     else {
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err11e);
+            (void)fprintf(stderr, "%s", err11e);
             return (-1);
         }
     }
     in->inputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-    HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
     in->inputArchitecture = 0; /* default to NATIVE */
 
-    if ((strm = HDfopen(infile, "r")) == NULL) {
-        (void)HDfprintf(stderr, err1, infile);
+    if ((strm = fopen(infile, "r")) == NULL) {
+        (void)fprintf(stderr, err1, infile);
         goto error;
     }
 
@@ -1471,7 +1471,7 @@ processConfigurationFile(char *infile, struct Input *in)
     if ((scanret == 1) && !HDstrcmp("HDF5", key)) {
 #ifdef H5DEBUGIMPORT
         int pndx;
-        HDprintf("\nh5dump file\n");
+        printf("\nh5dump file\n");
 #endif
         in->h5dumpInput = 1;
         scanret         = HDfscanf(strm, "%254s", temp); /* filename */
@@ -1480,51 +1480,51 @@ processConfigurationFile(char *infile, struct Input *in)
         while (scanret == 1) {
             if (!HDstrcmp("DATASET", key)) { /* PATH */
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATASET key\n");
+                printf("h5dump DATASET key\n");
 #endif
                 if (in->configOptionVector[PATH] == 1) {
-                    (void)HDfprintf(stderr, err3a, infile);
+                    (void)fprintf(stderr, err3a, infile);
                     goto error;
                 }
                 if (HDfscanf(strm, "%254s", temp) != 1) {
-                    (void)HDfprintf(stderr, "%s", err18);
+                    (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATASET %s found\n", temp);
+                printf("h5dump DATASET %s found\n", temp);
 #endif
                 if (parsePathInfo(&in->path, temp) == -1) {
-                    (void)HDfprintf(stderr, err3b, infile);
+                    (void)fprintf(stderr, err3b, infile);
                     goto error;
                 }
                 in->configOptionVector[PATH] = 1;
                 scanret                      = HDfscanf(strm, "%254s", temp); /* start bracket */
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATASET %s found\n", temp);
+                printf("h5dump DATASET %s found\n", temp);
 #endif
             }                                      /* if(!HDstrcmp("DATASET", key))  PATH */
             else if (!HDstrcmp("DATATYPE", key)) { /* INPUT-CLASS */
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATATYPE key\n");
+                printf("h5dump DATATYPE key\n");
 #endif
                 if (in->configOptionVector[INPUT_CLASS] == 1) {
-                    (void)HDfprintf(stderr, err4a, infile);
+                    (void)fprintf(stderr, err4a, infile);
                     goto error;
                 }
 
                 if (HDfscanf(strm, "%254s", temp) != 1) {
-                    (void)HDfprintf(stderr, "%s", err18);
+                    (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATATYPE %s found\n", temp);
+                printf("h5dump DATATYPE %s found\n", temp);
 #endif
                 if ((kindex = getInputClassType(in, temp)) == -1) {
-                    (void)HDfprintf(stderr, err4b, infile);
+                    (void)fprintf(stderr, err4b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATATYPE type %d inputClass\n", in->inputClass);
+                printf("h5dump DATATYPE type %d inputClass\n", in->inputClass);
 #endif
 
                 in->configOptionVector[INPUT_CLASS] = 1;
@@ -1539,80 +1539,80 @@ processConfigurationFile(char *infile, struct Input *in)
                         in->outputClass = 2;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATATYPE type %d outputClass\n", in->outputClass);
+                printf("h5dump DATATYPE type %d outputClass\n", in->outputClass);
 #endif
 
                 if (in->inputClass == 5) { /* STRING */
                     int get_next_prop = 1;
                     in->outputClass   = -1;
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump DATATYPE STRING found\n");
+                    printf("h5dump DATATYPE STRING found\n");
 #endif
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump DATATYPE STRING %s found\n", temp);
+                    printf("h5dump DATATYPE STRING %s found\n", temp);
 #endif
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* string properties */
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
                     while (get_next_prop) {
                         if (!HDstrcmp("STRSIZE", temp)) { /* STRSIZE */
                             if (HDfscanf(strm, "%254s", temp) != 1) {
-                                (void)HDfprintf(stderr, "%s", err19);
+                                (void)fprintf(stderr, "%s", err19);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump DATATYPE STRING STRSIZE %s found\n", temp);
+                            printf("h5dump DATATYPE STRING STRSIZE %s found\n", temp);
 #endif
                             if (HDstrcmp("H5T_VARIABLE;", temp) != 0) {
                                 char *more = temp;
                                 ival       = (int)HDstrtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
-                                    (void)HDfprintf(stderr, err5b, infile);
+                                    (void)fprintf(stderr, err5b, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
-                                HDprintf("h5dump DATATYPE STRING %d InputSize\n", in->inputSize);
+                                printf("h5dump DATATYPE STRING %d InputSize\n", in->inputSize);
 #endif
                             }
                         }
                         else if (!HDstrcmp("STRPAD", temp)) {         /* STRPAD */
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* STRPAD type */
-                                (void)HDfprintf(stderr, "%s", err18);
+                                (void)fprintf(stderr, "%s", err18);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump DATATYPE STRING STRPAD %s found\n", temp);
+                            printf("h5dump DATATYPE STRING STRPAD %s found\n", temp);
 #endif
                         }
                         else if (!HDstrcmp("CSET", key)) {            /* CSET */
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* CSET type */
-                                (void)HDfprintf(stderr, "%s", err18);
+                                (void)fprintf(stderr, "%s", err18);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump DATATYPE STRING CSET %s found\n", temp);
+                            printf("h5dump DATATYPE STRING CSET %s found\n", temp);
 #endif
                         }
                         else if (!HDstrcmp("CTYPE", temp)) {          /* CTYPE */
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* CTYPE type */
-                                (void)HDfprintf(stderr, "%s", err18);
+                                (void)fprintf(stderr, "%s", err18);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump DATATYPE STRING  CTYPE %s found\n", temp);
+                            printf("h5dump DATATYPE STRING  CTYPE %s found\n", temp);
 #endif
                         } /* if(!HDstrcmp("CSET", key)) */
                         if (HDfscanf(strm, "%254s", temp) != 1) {
-                            (void)HDfprintf(stderr, "%s", err18);
+                            (void)fprintf(stderr, "%s", err18);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump DATATYPE STRING %s found\n", temp);
+                        printf("h5dump DATATYPE STRING %s found\n", temp);
 #endif
                         if (!HDstrcmp("}", temp)) { /* end bracket */
                             get_next_prop = 0;
@@ -1624,58 +1624,58 @@ processConfigurationFile(char *infile, struct Input *in)
                 hsize_t temp_dims[MAX_NUM_DIMENSION];
 
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATASPACE key\n");
+                printf("h5dump DATASPACE key\n");
 #endif
                 if (HDfscanf(strm, "%254s", temp) != 1) {
-                    (void)HDfprintf(stderr, "%s", err18);
+                    (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
                 if (!HDstrcmp("SCALAR", temp)) { /* SCALAR */
                     in->rank = 0;
                 }                                   /* if(!HDstrcmp("SCALAR", key)) */
                 else if (!HDstrcmp("NULL", temp)) { /* NULL */
-                    (void)HDfprintf(stderr, err6b, infile);
+                    (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }                                     /* else if(!HDstrcmp("NULL", key)) */
                 else if (!HDstrcmp("SIMPLE", temp)) { /* SIMPLE */
                     int icount = 0;
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump DATASPACE SIMPLE found\n");
+                    printf("h5dump DATASPACE SIMPLE found\n");
 #endif
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                        (void)HDfprintf(stderr, err6b, infile);
+                        (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                    printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
-                        (void)HDfprintf(stderr, err6b, infile);
+                        (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                    printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                     if (!HDstrcmp("(", temp)) { /* start paren */
                         int get_next_dim = 1;
                         int i            = 0;
 
                         if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
-                            (void)HDfprintf(stderr, err16c, infile);
+                            (void)fprintf(stderr, err16c, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                        printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                         while (get_next_dim) {
                             char *more        = temp;
                             temp_dims[icount] = HDstrtoull(more, &more, 10);
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
-                                (void)HDfprintf(stderr, err6b, infile);
+                                (void)fprintf(stderr, err6b, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                            printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                             if (!HDstrcmp(")", temp)) { /* end paren */
                                 in->rank                     = ++icount;
@@ -1685,71 +1685,71 @@ processConfigurationFile(char *infile, struct Input *in)
                             else { /* Dimension */
                                 icount++;
                                 if (icount > MAX_NUM_DIMENSION) {
-                                    (void)HDfprintf(stderr, "Invalid value for rank.\n");
+                                    (void)fprintf(stderr, "Invalid value for rank.\n");
                                     goto error;
                                 }
                             }
                         } /* while (get_next_dim) */
 
-                        if ((in->sizeOfDimension = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) ==
+                        if ((in->sizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) ==
                             NULL) {
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump DATASPACE SIMPLE %ld rank\n", in->rank);
+                        printf("h5dump DATASPACE SIMPLE %ld rank\n", in->rank);
 #endif
                         for (i = 0; i < in->rank; i++) {
                             in->sizeOfDimension[i] = temp_dims[i];
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump DATASPACE SIMPLE dims[%ld]:", in->rank);
+                        printf("h5dump DATASPACE SIMPLE dims[%ld]:", in->rank);
                         for (pndx = 0; pndx < in->rank; pndx++) {
-                            HDprintf(" %ld", in->sizeOfDimension[pndx]);
+                            printf(" %ld", in->sizeOfDimension[pndx]);
                         }
-                        HDprintf("\n");
+                        printf("\n");
 #endif
                         in->configOptionVector[DIM] = 1;
                     } /* if(!HDstrcmp("(", key))  start paren */
                     else {
-                        (void)HDfprintf(stderr, err5b, infile);
+                        (void)fprintf(stderr, err5b, infile);
                         goto error;
                     }
                     if (HDfscanf(strm, "%254s", temp) != 1) {
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                    printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                     if (!HDstrcmp("/", temp)) { /* / max dims */
                         if ((in->maxsizeOfDimension =
-                                 (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+                                 (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
                             goto error;
                         }
                         if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
-                            (void)HDfprintf(stderr, err6b, infile);
+                            (void)fprintf(stderr, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                        printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                         if (!HDstrcmp("(", temp)) { /* start paren */
                             int get_next_dim = 1;
                             int i            = 0;
 
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump DATASPACE SIMPLE process max dim values\n");
+                            printf("h5dump DATASPACE SIMPLE process max dim values\n");
 #endif
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* max dim with optional comma */
-                                (void)HDfprintf(stderr, err16c, infile);
+                                (void)fprintf(stderr, err16c, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                            printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                             while (get_next_dim) {
 #ifdef H5DEBUGIMPORT
-                                HDprintf("h5dump DATASPACE SIMPLE get max dim value\n");
+                                printf("h5dump DATASPACE SIMPLE get max dim value\n");
 #endif
                                 if (!HDstrcmp("H5S_UNLIMITED", temp) ||
                                     !HDstrcmp("H5S_UNLIMITED,", temp)) { /* unlimited */
@@ -1761,11 +1761,11 @@ processConfigurationFile(char *infile, struct Input *in)
                                     in->maxsizeOfDimension[i] = HDstrtoull(more, &more, 10);
                                 }
                                 if (HDfscanf(strm, "%254s", temp) != 1) { /* max dim or end paren */
-                                    (void)HDfprintf(stderr, err16c, infile);
+                                    (void)fprintf(stderr, err16c, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
-                                HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                                printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                                 if (!HDstrcmp(")", temp)) { /* end paren */
                                     get_next_dim = 0;
@@ -1773,85 +1773,85 @@ processConfigurationFile(char *infile, struct Input *in)
                                 else { /* comma */
                                     i++;
                                     if (i >= MAX_NUM_DIMENSION) {
-                                        (void)HDfprintf(stderr, "Invalid value for rank.\n");
+                                        (void)fprintf(stderr, "Invalid value for rank.\n");
                                         goto error;
                                     }
                                 }
                             } /* while (get_next_dim) */
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump DATASPACE SIMPLE maxdims[%ld]:", in->rank);
+                            printf("h5dump DATASPACE SIMPLE maxdims[%ld]:", in->rank);
                             for (pndx = 0; pndx < in->rank; pndx++) {
-                                HDprintf(" %ld", in->maxsizeOfDimension[pndx]);
+                                printf(" %ld", in->maxsizeOfDimension[pndx]);
                             }
-                            HDprintf("\n");
-                            HDprintf("h5dump DATASPACE SIMPLE get max dim finished\n");
+                            printf("\n");
+                            printf("h5dump DATASPACE SIMPLE get max dim finished\n");
 #endif
                         } /* if(!HDstrcmp("(", key))  start paren */
                         else {
-                            (void)HDfprintf(stderr, err16c, infile);
+                            (void)fprintf(stderr, err16c, infile);
                             goto error;
                         }
                         scanret = HDfscanf(strm, "%254s", temp); /* end bracket */
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump DATASPACE SIMPLE %s found\n", temp);
+                        printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                     } /* if(!HDstrcmp("/", key)) max dims separator */
                 }     /* else if(!HDstrcmp("SIMPLE", key)) */
                 else {
-                    (void)HDfprintf(stderr, err5b, infile);
+                    (void)fprintf(stderr, err5b, infile);
                     goto error;
                 }
             } /* else if(!HDstrcmp("DATASPACE", key))  RANK and DIMENSIONS */
             else if (!HDstrcmp("STORAGE_LAYOUT", key)) { /* CHUNKED-DIMENSION-SIZES */
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump STORAGE_LAYOUT key\n");
+                printf("h5dump STORAGE_LAYOUT key\n");
 #endif
                 if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                    (void)HDfprintf(stderr, err6b, infile);
+                    (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump STORAGE_LAYOUT %s found\n", temp);
+                printf("h5dump STORAGE_LAYOUT %s found\n", temp);
 #endif
                 if (HDfscanf(strm, "%254s", temp) != 1) { /* CHUNKED */
-                    (void)HDfprintf(stderr, err6b, infile);
+                    (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump STORAGE_LAYOUT %s found\n", temp);
+                printf("h5dump STORAGE_LAYOUT %s found\n", temp);
 #endif
                 if (!HDstrcmp("CHUNKED", temp)) { /* CHUNKED */
-                    if ((in->sizeOfChunk = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-                        (void)HDfprintf(stderr, "Unable to allocate dynamic memory.\n");
+                    if ((in->sizeOfChunk = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+                        (void)fprintf(stderr, "Unable to allocate dynamic memory.\n");
                         goto error;
                     }
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
-                        (void)HDfprintf(stderr, err6b, infile);
+                        (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+                    printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
 #endif
                     if (!HDstrcmp("(", temp)) { /* start paren */
                         int get_next_dim = 1;
                         int icount       = 0;
 
                         if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
-                            (void)HDfprintf(stderr, err16c, infile);
+                            (void)fprintf(stderr, err16c, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+                        printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
 #endif
                         while (get_next_dim) {
                             char *more              = temp;
                             in->sizeOfChunk[icount] = HDstrtoull(more, &more, 10);
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
-                                (void)HDfprintf(stderr, err6b, infile);
+                                (void)fprintf(stderr, err6b, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+                            printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
 #endif
                             if (!HDstrcmp(")", temp)) { /* end paren */
                                 in->configOptionVector[RANK] = 1;
@@ -1860,47 +1860,47 @@ processConfigurationFile(char *infile, struct Input *in)
                             else { /* Dimension */
                                 icount++;
                                 if (icount > MAX_NUM_DIMENSION) {
-                                    (void)HDfprintf(stderr, "Invalid value for rank.\n");
+                                    (void)fprintf(stderr, "Invalid value for rank.\n");
                                     goto error;
                                 }
                             }
                         } /* while (get_next_dim) */
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump STORAGE_LAYOUT CHUNKED dims [%ld]:", in->rank);
+                        printf("h5dump STORAGE_LAYOUT CHUNKED dims [%ld]:", in->rank);
                         for (pndx = 0; pndx < in->rank; pndx++) {
-                            HDprintf(" %ld", in->sizeOfChunk[pndx]);
+                            printf(" %ld", in->sizeOfChunk[pndx]);
                         }
-                        HDprintf("\n");
+                        printf("\n");
 #endif
                         in->configOptionVector[DIM] = 1;
                     } /* if(!HDstrcmp("(", key))  start paren */
                     else {
-                        (void)HDfprintf(stderr, err5b, infile);
+                        (void)fprintf(stderr, err5b, infile);
                         goto error;
                     }
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* SIZE */
-                        (void)HDfprintf(stderr, err6b, infile);
+                        (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+                    printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
 #endif
                     if (!HDstrcmp("SIZE", temp)) { /* SIZE */
                         if (HDfscanf(strm, "%d", (&ival)) != 1) {
-                            (void)HDfprintf(stderr, "%s", err19);
+                            (void)fprintf(stderr, "%s", err19);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump STORAGE_LAYOUT CHUNKED SIZE %d found\n", ival);
+                        printf("h5dump STORAGE_LAYOUT CHUNKED SIZE %d found\n", ival);
 #endif
                     }
                     while (HDstrcmp("}", temp) != 0) {
                         if (HDfscanf(strm, "%254s", temp) != 1) { /* end bracket */
-                            (void)HDfprintf(stderr, "%s", err18);
+                            (void)fprintf(stderr, "%s", err18);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+                        printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
 #endif
                     }
                     in->configOptionVector[CHUNK] = 1;
@@ -1908,135 +1908,135 @@ processConfigurationFile(char *infile, struct Input *in)
             }     /* else if(!HDstrcmp("STORAGE_LAYOUT", key))  CHUNKED-DIMENSION-SIZES */
             else if (!HDstrcmp("FILTERS", key)) { /* FILTERS */
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump FILTERS key\n");
+                printf("h5dump FILTERS key\n");
 #endif
                 if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                    (void)HDfprintf(stderr, err6b, infile);
+                    (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump FILTERS %s found\n", temp);
+                printf("h5dump FILTERS %s found\n", temp);
 #endif
                 if (HDfscanf(strm, "%254s", temp) != 1) {
-                    (void)HDfprintf(stderr, err6b, infile);
+                    (void)fprintf(stderr, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump FILTERS %s found\n", temp);
+                printf("h5dump FILTERS %s found\n", temp);
 #endif
                 if (!HDstrcmp("COMPRESSION", temp)) { /* COMPRESSION */
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump FILTERS COMPRESSION found\n");
+                    printf("h5dump FILTERS COMPRESSION found\n");
 #endif
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* DEFLATE */
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump FILTERS COMPRESSION %s found\n", temp);
+                    printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* bgin bracket */
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump FILTERS COMPRESSION %s found\n", temp);
+                    printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* LEVEL */
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump FILTERS COMPRESSION %s found\n", temp);
+                    printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
                     if (HDfscanf(strm, "%d", (&ival)) != 1) {
-                        (void)HDfprintf(stderr, "%s", err19);
+                        (void)fprintf(stderr, "%s", err19);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump FILTERS COMPRESSION LEVEL %d found\n", ival);
+                    printf("h5dump FILTERS COMPRESSION LEVEL %d found\n", ival);
 #endif
                     in->compressionParam = ival;
                     if (HDfscanf(strm, "%254s", temp) != 1) { /* end bracket */
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump FILTERS COMPRESSION %s found\n", temp);
+                    printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
                     in->compressionType              = 0; /* ONLY GZIP supported */
                     in->configOptionVector[COMPRESS] = 1;
                 }
                 else if (!HDstrcmp("CONTIGUOUS", temp)) { /* CONTIGUOUS */
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump FILTERS CONTIGUOUS found\n");
+                    printf("h5dump FILTERS CONTIGUOUS found\n");
 #endif
                     in->configOptionVector[COMPRESS] = 0;
                 }
                 else if (!HDstrcmp("NONE", temp)) { /* NONE */
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump FILTERS NONE found\n");
+                    printf("h5dump FILTERS NONE found\n");
 #endif
                     in->configOptionVector[COMPRESS] = 0;
                 }
                 if (HDfscanf(strm, "%254s", temp) != 1) { /* end bracket */
-                    (void)HDfprintf(stderr, "%s", err18);
+                    (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump FILTERS %s found\n", temp);
+                printf("h5dump FILTERS %s found\n", temp);
 #endif
             }
             else if (!HDstrcmp("SUBSET", key)) { /* reduce dimensions */
                 hsize_t temp_dims[MAX_NUM_DIMENSION];
                 int     get_next_prop = 1;
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump SUBSET key\n");
+                printf("h5dump SUBSET key\n");
 #endif
                 if (HDfscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                    (void)HDfprintf(stderr, err20, infile);
+                    (void)fprintf(stderr, err20, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump SUBSET %s found\n", temp);
+                printf("h5dump SUBSET %s found\n", temp);
 #endif
                 if (HDfscanf(strm, "%254s", temp) != 1) { /* SUBSET keyword */
-                    (void)HDfprintf(stderr, "%s", err18);
+                    (void)fprintf(stderr, "%s", err18);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump SUBSET %s found\n", temp);
+                printf("h5dump SUBSET %s found\n", temp);
 #endif
                 while (get_next_prop) {
                     if (!HDstrcmp("COUNT", temp)) { /* COUNT */
                         int icount = 0;
                         if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
-                            (void)HDfprintf(stderr, err6b, infile);
+                            (void)fprintf(stderr, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump SUBSET %s found\n", temp);
+                        printf("h5dump SUBSET %s found\n", temp);
 #endif
                         if (!HDstrcmp("(", temp)) { /* start paren */
                             int get_next_dim = 1;
                             int i            = 0;
 
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
-                                (void)HDfprintf(stderr, err16c, infile);
+                                (void)fprintf(stderr, err16c, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump SUBSET COUNT [%s] found\n", temp);
+                            printf("h5dump SUBSET COUNT [%s] found\n", temp);
 #endif
                             while (get_next_dim) {
                                 char *more        = temp;
                                 temp_dims[icount] = HDstrtoull(more, &more, 10);
                                 if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
-                                    (void)HDfprintf(stderr, err6b, infile);
+                                    (void)fprintf(stderr, err6b, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
-                                HDprintf("h5dump SUBSET COUNT %s found\n", temp);
+                                printf("h5dump SUBSET COUNT %s found\n", temp);
 #endif
                                 if (!HDstrcmp(");", temp)) { /* end paren */
                                     in->rank                     = ++icount;
@@ -2046,7 +2046,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 else { /* Dimension */
                                     icount++;
                                     if (icount >= MAX_NUM_DIMENSION) {
-                                        (void)HDfprintf(stderr, "Invalid value for rank.\n");
+                                        (void)fprintf(stderr, "Invalid value for rank.\n");
                                         goto error;
                                     }
                                 }
@@ -2055,11 +2055,11 @@ processConfigurationFile(char *infile, struct Input *in)
                                 in->sizeOfDimension[i] = temp_dims[i];
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump SUBSET COUNT dims: [%d]", in->rank);
+                            printf("h5dump SUBSET COUNT dims: [%d]", in->rank);
                             for (pndx = 0; pndx < in->rank; pndx++) {
-                                HDprintf(" %ld", in->sizeOfDimension[pndx]);
+                                printf(" %ld", in->sizeOfDimension[pndx]);
                             }
-                            HDprintf("\n");
+                            printf("\n");
 #endif
                             in->configOptionVector[DIM] = 1;
                         }                           /* if(!HDstrcmp("(", key))  start paren */
@@ -2067,32 +2067,32 @@ processConfigurationFile(char *infile, struct Input *in)
                     if (!HDstrcmp("BLOCK", temp)) { /* BLOCK */
                         int icount = 0;
                         if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
-                            (void)HDfprintf(stderr, err6b, infile);
+                            (void)fprintf(stderr, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        HDprintf("h5dump SUBSET %s found\n", temp);
+                        printf("h5dump SUBSET %s found\n", temp);
 #endif
                         if (!HDstrcmp("(", temp)) { /* start paren */
                             int get_next_dim = 1;
                             int i            = 0;
 
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
-                                (void)HDfprintf(stderr, err16c, infile);
+                                (void)fprintf(stderr, err16c, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump SUBSET BLOCK [%s] found\n", temp);
+                            printf("h5dump SUBSET BLOCK [%s] found\n", temp);
 #endif
                             while (get_next_dim) {
                                 char *more        = temp;
                                 temp_dims[icount] = HDstrtoull(more, &more, 10);
                                 if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
-                                    (void)HDfprintf(stderr, err6b, infile);
+                                    (void)fprintf(stderr, err6b, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
-                                HDprintf("h5dump SUBSET BLOCK %s found\n", temp);
+                                printf("h5dump SUBSET BLOCK %s found\n", temp);
 #endif
                                 if (!HDstrcmp(");", temp)) { /* end paren */
                                     in->rank                     = ++icount;
@@ -2102,7 +2102,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 else { /* Dimension */
                                     icount++;
                                     if (icount > MAX_NUM_DIMENSION) {
-                                        (void)HDfprintf(stderr, "Invalid value for rank.\n");
+                                        (void)fprintf(stderr, "Invalid value for rank.\n");
                                         goto error;
                                     }
                                 }
@@ -2111,21 +2111,21 @@ processConfigurationFile(char *infile, struct Input *in)
                                 in->sizeOfDimension[i] = in->sizeOfDimension[i] * temp_dims[i];
                             }
 #ifdef H5DEBUGIMPORT
-                            HDprintf("h5dump SUBSET BLOCK dims: [%d]", in->rank);
+                            printf("h5dump SUBSET BLOCK dims: [%d]", in->rank);
                             for (pndx = 0; pndx < in->rank; pndx++) {
-                                HDprintf(" %ld", in->sizeOfDimension[pndx]);
+                                printf(" %ld", in->sizeOfDimension[pndx]);
                             }
-                            HDprintf("\n");
+                            printf("\n");
 #endif
                             in->configOptionVector[DIM] = 1;
                         } /* if(!HDstrcmp("(", key))  start paren */
                     }     /* if(!HDstrcmp("BLOCK", temp))  BLOCK */
                     if (HDfscanf(strm, "%254s", temp) != 1) {
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
-                    HDprintf("h5dump SUBSET %s found\n", temp);
+                    printf("h5dump SUBSET %s found\n", temp);
 #endif
                     if (!HDstrcmp("}", temp)) { /* end bracket */
                         get_next_prop = 0;
@@ -2134,7 +2134,7 @@ processConfigurationFile(char *infile, struct Input *in)
             }                                  /* else if(!HDstrcmp("SUBSET", key)) */
             else if (!HDstrcmp("DATA", key)) { /* FINISHED */
 #ifdef H5DEBUGIMPORT
-                HDprintf("h5dump DATA key\n");
+                printf("h5dump DATA key\n");
 #endif
                 scanret = 0;
                 break;
@@ -2142,50 +2142,50 @@ processConfigurationFile(char *infile, struct Input *in)
             scanret = HDfscanf(strm, "%254s", key);
         }
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump path");
+        printf("h5dump path");
         for (pndx = 0; pndx < in->path.count; pndx++) {
-            HDprintf(" : %s", in->path.group[pndx]);
+            printf(" : %s", in->path.group[pndx]);
         }
-        HDprintf("\n");
-        HDprintf("h5dump inputClass=%d\n", in->inputClass);
-        HDprintf("h5dump inputSize=%d\n", in->inputSize);
-        HDprintf("h5dump inputArchitecture=%d\n", in->inputArchitecture);
-        HDprintf("h5dump inputByteOrder=%d\n", in->inputByteOrder);
-        HDprintf("h5dump rank=%d\n", in->rank);
-        HDprintf("h5dump outputClass=%d\n", in->outputClass);
-        HDprintf("h5dump outputSize=%d\n", in->outputSize);
-        HDprintf("h5dump outputArchitecture=%d\n", in->outputArchitecture);
-        HDprintf("h5dump outputByteOrder=%d\n", in->outputByteOrder);
-        HDprintf("h5dump compressionType=%d\n", in->compressionType);
-        HDprintf("h5dump compressionParam=%d\n", in->compressionParam);
-        HDprintf("h5dump externFilename=%s\n", in->externFilename);
-        HDprintf("h5dump sizeOfDimensions:\n");
+        printf("\n");
+        printf("h5dump inputClass=%d\n", in->inputClass);
+        printf("h5dump inputSize=%d\n", in->inputSize);
+        printf("h5dump inputArchitecture=%d\n", in->inputArchitecture);
+        printf("h5dump inputByteOrder=%d\n", in->inputByteOrder);
+        printf("h5dump rank=%d\n", in->rank);
+        printf("h5dump outputClass=%d\n", in->outputClass);
+        printf("h5dump outputSize=%d\n", in->outputSize);
+        printf("h5dump outputArchitecture=%d\n", in->outputArchitecture);
+        printf("h5dump outputByteOrder=%d\n", in->outputByteOrder);
+        printf("h5dump compressionType=%d\n", in->compressionType);
+        printf("h5dump compressionParam=%d\n", in->compressionParam);
+        printf("h5dump externFilename=%s\n", in->externFilename);
+        printf("h5dump sizeOfDimensions:\n");
         for (pndx = 0; pndx < in->rank; pndx++) {
-            HDprintf("  %ld\n", in->sizeOfDimension[pndx]);
+            printf("  %ld\n", in->sizeOfDimension[pndx]);
         }
 #endif
     }
     else {
 #ifdef H5DEBUGIMPORT
-        HDprintf("original option keyword parsing\n");
+        printf("original option keyword parsing\n");
 #endif
         while (scanret == 1) {
             if ((kindex = mapKeywordToIndex(key)) == -1) {
-                (void)HDfprintf(stderr, err2, key, infile);
+                (void)fprintf(stderr, err2, key, infile);
                 goto error;
             }
             switch (kindex) {
                 case 0: /* PATH */
                     if (in->configOptionVector[PATH] == 1) {
-                        (void)HDfprintf(stderr, err3a, infile);
+                        (void)fprintf(stderr, err3a, infile);
                         goto error;
                     }
                     if (HDfscanf(strm, "%254s", temp) != 1) {
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
                     if (parsePathInfo(&in->path, temp) == -1) {
-                        (void)HDfprintf(stderr, err3b, infile);
+                        (void)fprintf(stderr, err3b, infile);
                         goto error;
                     }
                     in->configOptionVector[PATH] = 1;
@@ -2193,16 +2193,16 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 1: /* INPUT-CLASS */
                     if (in->configOptionVector[INPUT_CLASS] == 1) {
-                        (void)HDfprintf(stderr, err4a, infile);
+                        (void)fprintf(stderr, err4a, infile);
                         goto error;
                     }
 
                     if (HDfscanf(strm, "%254s", temp) != 1) {
-                        (void)HDfprintf(stderr, "%s", err18);
+                        (void)fprintf(stderr, "%s", err18);
                         goto error;
                     }
                     if (getInputClass(in, temp) == -1) {
-                        (void)HDfprintf(stderr, err4b, infile);
+                        (void)fprintf(stderr, err4b, infile);
                         goto error;
                     }
 
@@ -2221,15 +2221,15 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 2: /* INPUT-SIZE */
                     if (in->configOptionVector[INPUT_SIZE] == 1) {
-                        (void)HDfprintf(stderr, err5a, infile);
+                        (void)fprintf(stderr, err5a, infile);
                         goto error;
                     }
                     if (HDfscanf(strm, "%254d", (&ival)) != 1) {
-                        (void)HDfprintf(stderr, "%s", err19);
+                        (void)fprintf(stderr, "%s", err19);
                         goto error;
                     }
                     if (getInputSize(in, ival) == -1) {
-                        (void)HDfprintf(stderr, err5b, infile);
+                        (void)fprintf(stderr, err5b, infile);
                         goto error;
                     }
                     in->configOptionVector[INPUT_SIZE] = 1;
@@ -2241,12 +2241,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 3: /* RANK */
                     if (in->configOptionVector[RANK] == 1) {
-                        (void)HDfprintf(stderr, err6a, infile);
+                        (void)fprintf(stderr, err6a, infile);
                         goto error;
                     }
 
                     if (getRank(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err6b, infile);
+                        (void)fprintf(stderr, err6b, infile);
                         goto error;
                     }
                     in->configOptionVector[RANK] = 1;
@@ -2254,16 +2254,16 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 4: /* DIMENSION-SIZES */
                     if (in->configOptionVector[DIM] == 1) {
-                        (void)HDfprintf(stderr, err7a, infile);
+                        (void)fprintf(stderr, err7a, infile);
                         goto error;
                     }
 
                     if (in->configOptionVector[RANK] == 0) {
-                        (void)HDfprintf(stderr, err7b, infile);
+                        (void)fprintf(stderr, err7b, infile);
                         goto error;
                     }
                     if (getDimensionSizes(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err7c, infile);
+                        (void)fprintf(stderr, err7c, infile);
                         goto error;
                     }
                     in->configOptionVector[DIM] = 1;
@@ -2271,12 +2271,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 5: /* OUTPUT-CLASS */
                     if (in->configOptionVector[OUTPUT_CLASS] == 1) {
-                        (void)HDfprintf(stderr, err8a, infile);
+                        (void)fprintf(stderr, err8a, infile);
                         goto error;
                     }
 
                     if (getOutputClass(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err8b, infile);
+                        (void)fprintf(stderr, err8b, infile);
                         goto error;
                     }
                     in->configOptionVector[OUTPUT_CLASS] = 1;
@@ -2284,12 +2284,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 6: /* OUTPUT-SIZE */
                     if (in->configOptionVector[OUTPUT_SIZE] == 1) {
-                        (void)HDfprintf(stderr, err9a, infile);
+                        (void)fprintf(stderr, err9a, infile);
                         goto error;
                     }
 
                     if (getOutputSize(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err9b, infile);
+                        (void)fprintf(stderr, err9b, infile);
                         goto error;
                     }
                     in->configOptionVector[OUTPUT_SIZE] = 1;
@@ -2297,12 +2297,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 7: /* OUTPUT-ARCHITECTURE */
                     if (in->configOptionVector[OUTPUT_ARCH] == 1) {
-                        (void)HDfprintf(stderr, err10a, infile);
+                        (void)fprintf(stderr, err10a, infile);
                         goto error;
                     }
 
                     if (getOutputArchitecture(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err10b, infile);
+                        (void)fprintf(stderr, err10b, infile);
                         goto error;
                     }
                     in->configOptionVector[OUTPUT_ARCH] = 1;
@@ -2310,12 +2310,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 8: /* OUTPUT-BYTE-ORDER */
                     if (in->configOptionVector[OUTPUT_B_ORDER] == 1) {
-                        (void)HDfprintf(stderr, err11a, infile);
+                        (void)fprintf(stderr, err11a, infile);
                         goto error;
                     }
 
                     if (getOutputByteOrder(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err11b, infile);
+                        (void)fprintf(stderr, err11b, infile);
                         goto error;
                     }
                     in->configOptionVector[OUTPUT_B_ORDER] = 1;
@@ -2323,17 +2323,17 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 9: /* CHUNKED-DIMENSION-SIZES */
                     if (in->configOptionVector[CHUNK] == 1) {
-                        (void)HDfprintf(stderr, err12a, infile);
+                        (void)fprintf(stderr, err12a, infile);
                         goto error;
                     }
                     /* can't appear before dimension sizes have been provided */
                     if (in->configOptionVector[DIM] == 0) {
-                        (void)HDfprintf(stderr, err12b, infile);
+                        (void)fprintf(stderr, err12b, infile);
                         goto error;
                     }
 
                     if (getChunkedDimensionSizes(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err12c, infile);
+                        (void)fprintf(stderr, err12c, infile);
                         goto error;
                     }
                     in->configOptionVector[CHUNK] = 1;
@@ -2341,12 +2341,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 10: /* COMPRESSION-TYPE */
                     if (in->configOptionVector[COMPRESS] == 1) {
-                        (void)HDfprintf(stderr, err13a, infile);
+                        (void)fprintf(stderr, err13a, infile);
                         goto error;
                     }
 
                     if (getCompressionType(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err13b, infile);
+                        (void)fprintf(stderr, err13b, infile);
                         goto error;
                     }
                     in->configOptionVector[COMPRESS] = 1;
@@ -2359,12 +2359,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 11: /* COMPRESSION-PARAM */
                     if (in->configOptionVector[COMPRESS_PARAM] == 1) {
-                        (void)HDfprintf(stderr, err14a, infile);
+                        (void)fprintf(stderr, err14a, infile);
                         goto error;
                     }
 
                     if (getCompressionParameter(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err14b, infile);
+                        (void)fprintf(stderr, err14b, infile);
                         goto error;
                     }
 
@@ -2377,12 +2377,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 12: /* EXTERNAL-STORAGE */
                     if (in->configOptionVector[EXTERNALSTORE] == 1) {
-                        (void)HDfprintf(stderr, err15a, infile);
+                        (void)fprintf(stderr, err15a, infile);
                         goto error;
                     }
 
                     if (getExternalFilename(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err15b, infile);
+                        (void)fprintf(stderr, err15b, infile);
                         goto error;
                     }
                     in->configOptionVector[EXTERNALSTORE] = 1;
@@ -2390,16 +2390,16 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 13: /* MAXIMUM-DIMENSIONS */
                     if (in->configOptionVector[EXTEND] == 1) {
-                        (void)HDfprintf(stderr, err16a, infile);
+                        (void)fprintf(stderr, err16a, infile);
                         goto error;
                     }
                     /* can't appear before dimension sizes have been provided */
                     if (in->configOptionVector[DIM] == 0) {
-                        (void)HDfprintf(stderr, err16b, infile);
+                        (void)fprintf(stderr, err16b, infile);
                         goto error;
                     }
                     if (getMaximumDimensionSizes(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err16c, infile);
+                        (void)fprintf(stderr, err16c, infile);
                         goto error;
                     }
                     in->configOptionVector[EXTEND] = 1;
@@ -2407,12 +2407,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 14: /* INPUT-BYTE-ORDER */
                     if (in->configOptionVector[INPUT_B_ORDER] == 1) {
-                        (void)HDfprintf(stderr, err11c, infile);
+                        (void)fprintf(stderr, err11c, infile);
                         goto error;
                     }
 
                     if (getInputByteOrder(in, strm) == -1) {
-                        (void)HDfprintf(stderr, err11d, infile);
+                        (void)fprintf(stderr, err11d, infile);
                         goto error;
                     }
                     in->configOptionVector[INPUT_B_ORDER] = 1;
@@ -2430,7 +2430,7 @@ processConfigurationFile(char *infile, struct Input *in)
         */
 
         if (validateConfigurationParameters(in) == -1) {
-            (void)HDfprintf(stderr, err17, infile);
+            (void)fprintf(stderr, err17, infile);
             goto error;
         }
     }
@@ -2463,21 +2463,21 @@ validateConfigurationParameters(struct Input *in)
         return (0);
 
     if ((in->configOptionVector[DIM] != 1) || (in->configOptionVector[RANK] != 1)) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
     if (in->configOptionVector[EXTERNALSTORE] == 1) {
         if ((in->configOptionVector[COMPRESS] == 1) || (in->configOptionVector[CHUNK] == 1) ||
             (in->configOptionVector[EXTEND] == 1)) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
     }
 
     if ((in->configOptionVector[COMPRESS] == 1) || (in->configOptionVector[EXTEND] == 1)) {
         if (in->configOptionVector[CHUNK] != 1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
     }
@@ -2485,20 +2485,20 @@ validateConfigurationParameters(struct Input *in)
     /* Arch can't be STD if O/p class is FP */
     if (in->outputArchitecture == 1)
         if (in->outputClass == 1) {
-            (void)HDfprintf(stderr, "%s", err4a);
+            (void)fprintf(stderr, "%s", err4a);
             return (-1);
         }
 
     /* Arch can't be IEEE if O/p class is IN */
     if (in->outputArchitecture == 2)
         if (in->outputClass == 0) {
-            (void)HDfprintf(stderr, "%s", err4b);
+            (void)fprintf(stderr, "%s", err4b);
             return (-1);
         }
 
     if (in->outputClass == 1)
         if (in->outputSize != 32 && in->outputSize != 64) {
-            (void)HDfprintf(stderr, "%s", err5);
+            (void)fprintf(stderr, "%s", err5);
             return (-1);
         }
 
@@ -2526,7 +2526,7 @@ parsePathInfo(struct path_info *path, char *temp)
 
     token = HDstrtok(temp, delimiter);
     if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
     HDstrcpy(path->group[i++], token);
@@ -2536,7 +2536,7 @@ parsePathInfo(struct path_info *path, char *temp)
         if (token == NULL)
             break;
         if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
-            (void)HDfprintf(stderr, "%s", err1);
+            (void)fprintf(stderr, "%s", err1);
             return (-1);
         }
         HDstrcpy(path->group[i++], token);
@@ -2565,8 +2565,8 @@ parseDimensions(struct Input *in, char *strm)
         i++;
     }
     in->rank = i + 1;
-    if ((in->sizeOfDimension = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-        (void)HDfprintf(stderr, "%s", err1);
+    if ((in->sizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
@@ -2593,12 +2593,12 @@ getOutputClass(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for output class.\n";
 
     if (HDfscanf(strm, "%254s", temp) != 1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
     if ((kindex = OutputClassStrToInt(temp)) == -1) {
-        (void)HDfprintf(stderr, "%s", err2);
+        (void)fprintf(stderr, "%s", err2);
         return (-1);
     }
 
@@ -2628,7 +2628,7 @@ getOutputSize(struct Input *in, FILE *strm)
     const char *err2                     = "Invalid value for output size.\n";
 
     if (HDfscanf(strm, "%d", (&ival)) != 1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
@@ -2637,7 +2637,7 @@ getOutputSize(struct Input *in, FILE *strm)
             in->outputSize = ival;
             return (0);
         }
-    (void)HDfprintf(stderr, "%s", err2);
+    (void)fprintf(stderr, "%s", err2);
     return (-1);
 }
 
@@ -2648,7 +2648,7 @@ getInputClass(struct Input *in, char *temp)
     const char *err1 = "Invalid value for input class.\n";
 
     if ((kindex = InputClassStrToInt(temp)) == -1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
@@ -2669,18 +2669,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 4;
@@ -2690,18 +2690,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 4;
@@ -2711,18 +2711,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 4;
@@ -2732,18 +2732,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 4;
@@ -2753,18 +2753,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 4;
@@ -2774,18 +2774,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 4;
@@ -2795,18 +2795,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 4;
@@ -2816,18 +2816,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 4;
@@ -2837,18 +2837,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 7;
@@ -2858,18 +2858,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 7;
@@ -2879,18 +2879,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 7;
@@ -2900,18 +2900,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 7;
@@ -2921,18 +2921,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 7;
@@ -2942,18 +2942,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 7;
@@ -2963,18 +2963,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 7;
@@ -2984,18 +2984,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 7;
@@ -3005,7 +3005,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3017,7 +3017,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3029,7 +3029,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3041,7 +3041,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3053,7 +3053,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3065,7 +3065,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3077,7 +3077,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3089,7 +3089,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3101,7 +3101,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3113,7 +3113,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3125,18 +3125,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 3;
@@ -3146,18 +3146,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 3;
@@ -3167,18 +3167,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 3;
@@ -3188,18 +3188,18 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = 3;
@@ -3221,7 +3221,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3233,7 +3233,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3245,7 +3245,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3262,18 +3262,18 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!HDstrcmp(buffer, "H5T_STD_B8BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = -1;
@@ -3281,18 +3281,18 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!HDstrcmp(buffer, "H5T_STD_B8LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = -1;
@@ -3300,18 +3300,18 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!HDstrcmp(buffer, "H5T_STD_B16BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = -1;
@@ -3319,18 +3319,18 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!HDstrcmp(buffer, "H5T_STD_B16LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = -1;
@@ -3338,18 +3338,18 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!HDstrcmp(buffer, "H5T_STD_B32BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = -1;
@@ -3357,18 +3357,18 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!HDstrcmp(buffer, "H5T_STD_B32LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = -1;
@@ -3376,18 +3376,18 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!HDstrcmp(buffer, "H5T_STD_B64BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = -1;
@@ -3395,18 +3395,18 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!HDstrcmp(buffer, "H5T_STD_B64LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)HDfprintf(stderr, "%s", err2);
+            (void)fprintf(stderr, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
 #ifdef H5DEBUGIMPORT
-        HDprintf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
 
         kindex = -1;
@@ -3437,7 +3437,7 @@ getInputClassType(struct Input *in, char *buffer)
     }
 
     if (kindex == -1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
@@ -3445,9 +3445,9 @@ getInputClassType(struct Input *in, char *buffer)
     if (in->configOptionVector[OUTPUT_SIZE] == 0)
         in->outputSize = in->inputSize;
 #ifdef H5DEBUGIMPORT
-    HDprintf("h5dump DATATYPE InClass %d inputSize\n", in->inputSize);
-    HDprintf("h5dump DATATYPE InClass %d outputSize\n", in->outputSize);
-    HDprintf("h5dump DATATYPE InClass %d outputArchitecture\n", in->outputArchitecture);
+    printf("h5dump DATATYPE InClass %d inputSize\n", in->inputSize);
+    printf("h5dump DATATYPE InClass %d outputSize\n", in->outputSize);
+    printf("h5dump DATATYPE InClass %d outputArchitecture\n", in->outputArchitecture);
 #endif
 
     in->inputClass = kindex;
@@ -3478,7 +3478,7 @@ getInputSize(struct Input *in, int ival)
             in->inputSize = ival;
             return (0);
         }
-    (void)HDfprintf(stderr, "%s", err1);
+    (void)fprintf(stderr, "%s", err1);
     return (-1);
 }
 
@@ -3491,12 +3491,12 @@ getInputByteOrder(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for input byte-order.\n";
 
     if (HDfscanf(strm, "%254s", temp) != 1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
     if ((kindex = OutputByteOrderStrToInt(temp)) == -1) {
-        (void)HDfprintf(stderr, "%s", err2);
+        (void)fprintf(stderr, "%s", err2);
         return (-1);
     }
 
@@ -3513,7 +3513,7 @@ getRank(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for rank.\n";
 
     if (HDfscanf(strm, "%d", (&ival)) != 1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
     if (ival >= MIN_NUM_DIMENSION && ival <= MAX_NUM_DIMENSION) {
@@ -3521,7 +3521,7 @@ getRank(struct Input *in, FILE *strm)
         return (0);
     }
 
-    (void)HDfprintf(stderr, "%s", err2);
+    (void)fprintf(stderr, "%s", err2);
     return (-1);
 }
 
@@ -3536,8 +3536,8 @@ getDimensionSizes(struct Input *in, FILE *strm)
     const char *err2 =
         "No. of dimensions for which dimension sizes provided is not equal to provided rank.\n";
 
-    if ((in->sizeOfDimension = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-        (void)HDfprintf(stderr, "%s", err1);
+    if ((in->sizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
@@ -3545,7 +3545,7 @@ getDimensionSizes(struct Input *in, FILE *strm)
         in->sizeOfDimension[i++] = ullval;
 
     if (in->rank != i) {
-        (void)HDfprintf(stderr, "%s", err2);
+        (void)fprintf(stderr, "%s", err2);
         return (-1);
     }
     return (0);
@@ -3562,8 +3562,8 @@ getChunkedDimensionSizes(struct Input *in, FILE *strm)
         "No. of dimensions for which chunked dimension sizes provided is not equal to provided rank.\n";
     const char *err3 = "The CHUNKED-DIMENSION-SIZES cannot exceed the sizes of DIMENSION-SIZES\n";
 
-    if ((in->sizeOfChunk = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-        (void)HDfprintf(stderr, "%s", err1);
+    if ((in->sizeOfChunk = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
@@ -3571,13 +3571,13 @@ getChunkedDimensionSizes(struct Input *in, FILE *strm)
         in->sizeOfChunk[i++] = ullval;
 
     if (in->rank != i) {
-        (void)HDfprintf(stderr, "%s", err2);
+        (void)fprintf(stderr, "%s", err2);
         return (-1);
     }
 
     for (i = 0; i < in->rank; i++)
         if (in->sizeOfChunk[i] > in->sizeOfDimension[i]) {
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
         }
     return (0);
@@ -3595,8 +3595,8 @@ getMaximumDimensionSizes(struct Input *in, FILE *strm)
     const char *err3 = "The MAXIMUM-DIMENSIONS cannot be less than the sizes of DIMENSION-SIZES. Exception: "
                        "can be -1 to indicate unlimited size\n";
 
-    if ((in->maxsizeOfDimension = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-        (void)HDfprintf(stderr, "%s", err1);
+    if ((in->maxsizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
@@ -3608,14 +3608,14 @@ getMaximumDimensionSizes(struct Input *in, FILE *strm)
     }
 
     if (in->rank != i) {
-        (void)HDfprintf(stderr, "%s", err2);
+        (void)fprintf(stderr, "%s", err2);
         return (-1);
     }
 
     for (i = 0; i < in->rank; i++) {
         if (in->maxsizeOfDimension[i] != H5S_UNLIMITED)
             if (in->maxsizeOfDimension[i] < in->sizeOfDimension[i]) {
-                (void)HDfprintf(stderr, "%s", err3);
+                (void)fprintf(stderr, "%s", err3);
                 return (-1);
             }
     }
@@ -3631,12 +3631,12 @@ getOutputArchitecture(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for output architecture.\n";
 
     if (HDfscanf(strm, "%254s", temp) != 1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
     if ((kindex = OutputArchStrToInt(temp)) == -1) {
-        (void)HDfprintf(stderr, "%s", err2);
+        (void)fprintf(stderr, "%s", err2);
         return (-1);
     }
 
@@ -3664,12 +3664,12 @@ getOutputByteOrder(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for output byte-order.\n";
 
     if (HDfscanf(strm, "%254s", temp) != 1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
     if ((kindex = OutputByteOrderStrToInt(temp)) == -1) {
-        (void)HDfprintf(stderr, "%s", err2);
+        (void)fprintf(stderr, "%s", err2);
         return (-1);
     }
 
@@ -3697,12 +3697,12 @@ getCompressionType(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for compression.\n";
 
     if (HDfscanf(strm, "%254s", temp) != 1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
     if ((kindex = CompressionTypeStrToInt(temp)) == -1) {
-        (void)HDfprintf(stderr, "%s", err2);
+        (void)fprintf(stderr, "%s", err2);
         return (-1);
     }
 
@@ -3739,19 +3739,19 @@ getCompressionParameter(struct Input *in, FILE *strm)
     switch (in->compressionType) {
         case 0: /* GZIP */
             if (HDfscanf(strm, "%d", (&ival)) != 1) {
-                (void)HDfprintf(stderr, "%s", err1);
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
 
             if (ival < 0 || ival > 9) {
-                (void)HDfprintf(stderr, "%s", err2);
+                (void)fprintf(stderr, "%s", err2);
                 return (-1);
             }
             in->compressionParam = ival;
             return (0);
 
         default:
-            (void)HDfprintf(stderr, "%s", err3);
+            (void)fprintf(stderr, "%s", err3);
             return (-1);
     }
 }
@@ -3764,12 +3764,12 @@ getExternalFilename(struct Input *in, FILE *strm)
     const char *err1 = "Unable to get 'string' value.\n";
 
     if (HDfscanf(strm, "%254s", temp) != 1) {
-        (void)HDfprintf(stderr, "%s", err1);
+        (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
 
     temp_len           = HDstrlen(temp);
-    in->externFilename = (char *)HDmalloc((temp_len + 1) * sizeof(char));
+    in->externFilename = (char *)malloc((temp_len + 1) * sizeof(char));
     (void)HDstrcpy(in->externFilename, temp);
     in->externFilename[temp_len] = '\0';
     return (0);
@@ -3836,7 +3836,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err2);
+                            (void)fprintf(stderr, "%s", err2);
                             return (-1);
                     }
                     switch (in->outputByteOrder) {
@@ -3851,7 +3851,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err3);
+                            (void)fprintf(stderr, "%s", err3);
                             return (-1);
                     }
                     break;
@@ -3870,7 +3870,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -3887,7 +3887,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -3904,7 +3904,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -3921,19 +3921,19 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err2);
+                            (void)fprintf(stderr, "%s", err2);
                             return (-1);
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err4);
+                    (void)fprintf(stderr, "%s", err4);
                     return (-1);
             }
             break;
@@ -3951,7 +3951,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err2);
+                            (void)fprintf(stderr, "%s", err2);
                             return (-1);
                     }
                     switch (in->outputByteOrder) {
@@ -3966,13 +3966,13 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err3);
+                            (void)fprintf(stderr, "%s", err3);
                             return (-1);
                     }
                     break;
 
                 case 1:
-                    (void)HDfprintf(stderr, "%s", err5);
+                    (void)fprintf(stderr, "%s", err5);
                     return (-1);
 
                 case 2:
@@ -3989,7 +3989,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4006,19 +4006,19 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err2);
+                            (void)fprintf(stderr, "%s", err2);
                             return (-1);
                     }
                     break;
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err4);
+                    (void)fprintf(stderr, "%s", err4);
                     return (-1);
             }
             break;
@@ -4044,7 +4044,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err2);
+                            (void)fprintf(stderr, "%s", err2);
                             return (-1);
                     }
                     switch (in->outputByteOrder) {
@@ -4059,7 +4059,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err3);
+                            (void)fprintf(stderr, "%s", err3);
                             return (-1);
                     }
                     break;
@@ -4078,7 +4078,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4095,7 +4095,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4112,7 +4112,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4129,29 +4129,29 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)HDfprintf(stderr, "%s", err3);
+                                    (void)fprintf(stderr, "%s", err3);
                                     return (-1);
                             }
                             break;
 
                         default:
-                            (void)HDfprintf(stderr, "%s", err2);
+                            (void)fprintf(stderr, "%s", err2);
                             return (-1);
                     }
                     break;
 
                 case 2:
-                    (void)HDfprintf(stderr, "%s", err6);
+                    (void)fprintf(stderr, "%s", err6);
                     return (-1);
 
                 default:
-                    (void)HDfprintf(stderr, "%s", err4);
+                    (void)fprintf(stderr, "%s", err4);
                     return (-1);
             }
             break;
 
         default:
-            (void)HDfprintf(stderr, "%s", err1);
+            (void)fprintf(stderr, "%s", err1);
             return (-1);
     }
     return new_type;
@@ -4191,7 +4191,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err2);
+                                (void)fprintf(stderr, "%s", err2);
                                 return (-1);
                         }
                         switch (in->inputByteOrder) {
@@ -4206,7 +4206,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err3);
+                                (void)fprintf(stderr, "%s", err3);
                                 return (-1);
                         }
                         break;
@@ -4225,7 +4225,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4242,7 +4242,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4259,7 +4259,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4276,19 +4276,19 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err2);
+                                (void)fprintf(stderr, "%s", err2);
                                 return (-1);
                         }
                         break;
 
                     default:
-                        (void)HDfprintf(stderr, "%s", err4);
+                        (void)fprintf(stderr, "%s", err4);
                         return (-1);
                 }
                 break;
@@ -4306,7 +4306,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err2);
+                                (void)fprintf(stderr, "%s", err2);
                                 return (-1);
                         }
                         switch (in->inputByteOrder) {
@@ -4321,13 +4321,13 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err3);
+                                (void)fprintf(stderr, "%s", err3);
                                 return (-1);
                         }
                         break;
 
                     case 1:
-                        (void)HDfprintf(stderr, "%s", err5);
+                        (void)fprintf(stderr, "%s", err5);
                         return (-1);
 
                     case 2:
@@ -4344,7 +4344,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4361,19 +4361,19 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err2);
+                                (void)fprintf(stderr, "%s", err2);
                                 return (-1);
                         }
                         break;
 
                     default:
-                        (void)HDfprintf(stderr, "%s", err4);
+                        (void)fprintf(stderr, "%s", err4);
                         return (-1);
                 }
                 break;
@@ -4399,7 +4399,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err2);
+                                (void)fprintf(stderr, "%s", err2);
                                 return (-1);
                         }
                         switch (in->inputByteOrder) {
@@ -4414,7 +4414,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err3);
+                                (void)fprintf(stderr, "%s", err3);
                                 return (-1);
                         }
                         break;
@@ -4433,7 +4433,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4450,7 +4450,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4467,7 +4467,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4484,29 +4484,29 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)HDfprintf(stderr, "%s", err3);
+                                        (void)fprintf(stderr, "%s", err3);
                                         return (-1);
                                 }
                                 break;
 
                             default:
-                                (void)HDfprintf(stderr, "%s", err2);
+                                (void)fprintf(stderr, "%s", err2);
                                 return (-1);
                         }
                         break;
 
                     case 2:
-                        (void)HDfprintf(stderr, "%s", err6);
+                        (void)fprintf(stderr, "%s", err6);
                         return (-1);
 
                     default:
-                        (void)HDfprintf(stderr, "%s", err4);
+                        (void)fprintf(stderr, "%s", err4);
                         return (-1);
                 }
                 break;
 
             default:
-                (void)HDfprintf(stderr, "%s", err1);
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
         }
     }
@@ -4532,7 +4532,7 @@ createInputDataType(struct Input *in)
                         break;
 
                     default:
-                        (void)HDfprintf(stderr, "%s", err2);
+                        (void)fprintf(stderr, "%s", err2);
                         return (-1);
                 }
                 break;
@@ -4550,13 +4550,13 @@ createInputDataType(struct Input *in)
                         break;
 
                     default:
-                        (void)HDfprintf(stderr, "%s", err2);
+                        (void)fprintf(stderr, "%s", err2);
                         return (-1);
                 }
                 break;
 
             case 5:
-                (void)HDfprintf(stderr, "%s", err1);
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
                 break;
 
@@ -4580,13 +4580,13 @@ createInputDataType(struct Input *in)
                         break;
 
                     default:
-                        (void)HDfprintf(stderr, "%s", err2);
+                        (void)fprintf(stderr, "%s", err2);
                         return (-1);
                 }
                 break;
 
             default:
-                (void)HDfprintf(stderr, "%s", err1);
+                (void)fprintf(stderr, "%s", err1);
                 return (-1);
         }
     }
@@ -4624,7 +4624,7 @@ process(struct Options *opt)
     {
         if ((file_id = H5Fopen(opt->outfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
             if ((file_id = H5Fcreate(opt->outfile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) == FAIL) {
-                (void)HDfprintf(stderr, err1, opt->outfile);
+                (void)fprintf(stderr, err1, opt->outfile);
                 return (-1);
             }
         }
@@ -4635,13 +4635,13 @@ process(struct Options *opt)
         in = &(opt->infiles[k].in);
         if (opt->infiles[k].config == 1) {
             if (processConfigurationFile(opt->infiles[k].configfile, in) == -1) {
-                (void)HDfprintf(stderr, err2, opt->infiles[k].configfile);
+                (void)fprintf(stderr, err2, opt->infiles[k].configfile);
                 return (-1);
             }
         }
 
         if (processDataFile(opt->infiles[k].datafile, in, file_id) == -1) {
-            (void)HDfprintf(stderr, err3, opt->infiles[k].datafile);
+            (void)fprintf(stderr, err3, opt->infiles[k].datafile);
             return (-1);
         }
 
@@ -4683,7 +4683,7 @@ process(struct Options *opt)
             intype  = createInputDataType(in);
             outtype = createOutputDataType(in);
 #ifdef H5DEBUGIMPORT
-            HDprintf("process intype %ld outtype %ld\n", intype, outtype);
+            printf("process intype %ld outtype %ld\n", intype, outtype);
 #endif
 
             /* create property list */
@@ -4700,8 +4700,8 @@ process(struct Options *opt)
 
             if (in->configOptionVector[EXTERNALSTORE] == 1) {
                 /* creating the external file if it doesn't exist */
-                if ((extfile = HDfopen(in->externFilename, "ab")) == NULL) {
-                    (void)HDfprintf(stderr, "%s", err4);
+                if ((extfile = fopen(in->externFilename, "ab")) == NULL) {
+                    (void)fprintf(stderr, "%s", err4);
                     H5Pclose(proplist);
                     H5Sclose(dataspace);
                     H5Fclose(file_id);
@@ -4724,7 +4724,7 @@ process(struct Options *opt)
                 /* create data set */
                 if ((dataset = H5Dcreate2(handle, in->path.group[j], outtype, dataspace, H5P_DEFAULT,
                                           proplist, H5P_DEFAULT)) < 0) {
-                    (void)HDfprintf(stderr, "%s", err5);
+                    (void)fprintf(stderr, "%s", err5);
                     H5Pclose(proplist);
                     H5Sclose(dataspace);
                     H5Fclose(file_id);
@@ -4737,7 +4737,7 @@ process(struct Options *opt)
 
             /* write dataset */
             if (H5Dwrite(dataset, intype, H5S_ALL, H5S_ALL, H5P_DEFAULT, (VOIDP)in->data) < 0) {
-                (void)HDfprintf(stderr, "%s", err6);
+                (void)fprintf(stderr, "%s", err6);
                 H5Dclose(dataset);
                 H5Pclose(proplist);
                 H5Sclose(dataspace);
@@ -4813,292 +4813,292 @@ swap_uint64(uint64_t val)
 void
 help(char *name)
 {
-    (void)HDfprintf(stdout, "Name:\n\n");
-    (void)HDfprintf(stdout, "\t%s\n\n", name);
-    (void)HDfprintf(stdout, "\t  TOOL NAME:\n");
-    (void)HDfprintf(stdout, "\t   %s\n", name);
-    (void)HDfprintf(stdout, "\t   SYNTAX:\n");
-    (void)HDfprintf(stdout, "\t   %s -h[elp], OR\n", name);
-    (void)HDfprintf(stdout, "\t   %s <infile> -c[onfig] <configfile> [<infile> -c[config] <configfile>...]",
-                    name);
-    (void)HDfprintf(stdout, "\t\t\t\t      -o[utfile] <outfile>\n\n");
-    (void)HDfprintf(stdout, "\t   PURPOSE:\n");
-    (void)HDfprintf(stdout, "\t   To convert data stored in one or more ASCII or binary files\n");
-    (void)HDfprintf(stdout, "\t  into one or more datasets (in accordance with the \n");
-    (void)HDfprintf(stdout, "\t  user-specified type and storage properties) in an existing \n");
-    (void)HDfprintf(stdout, "\t  or new HDF5 file.\n\n");
-    (void)HDfprintf(stdout, "\t   DESCRIPTION:\n");
-    (void)HDfprintf(stdout, "\t  The primary objective of the utility is to convert floating\n");
-    (void)HDfprintf(stdout, "\t  point or integer data stored in ASCII text or binary form \n");
-    (void)HDfprintf(stdout, "\t  into a data-set according to the type and storage properties\n");
-    (void)HDfprintf(stdout, "\t  specified by the user. The utility can also accept ASCII\n");
-    (void)HDfprintf(stdout, "\t  text files and store the contents in a compact form as an\n");
-    (void)HDfprintf(stdout, "\t  array of one-dimensional strings.\n\n");
-    (void)HDfprintf(stdout, "\t  The input data to be written as a data-set can be provided\n");
-    (void)HDfprintf(stdout, "\t  to the utility in one of the following forms:\n");
-    (void)HDfprintf(stdout, "\t  1. ASCII text file with numeric data (floating point or \n");
-    (void)HDfprintf(stdout, "\t  integer data). \n");
-    (void)HDfprintf(stdout, "\t  2. Binary file with native floating point data (32-bit or \n");
-    (void)HDfprintf(stdout, "\t  64-bit) \n");
-    (void)HDfprintf(stdout, "\t  3. Binary file with native integer (signed or unsigned)\n");
-    (void)HDfprintf(stdout, "\t  data (8-bit or 16-bit or 32-bit or 64-bit). \n");
-    (void)HDfprintf(stdout, "\t  4. ASCII text file containing strings (text data).\n");
-    (void)HDfprintf(stdout, "\t    \n");
-    (void)HDfprintf(stdout, "\t  Every input file is associated with a configuration file \n");
-    (void)HDfprintf(stdout, "\t  also provided as an input to the utility. (See Section \n");
-    (void)HDfprintf(stdout, "\t  \"CONFIGURATION FILE\" to know how it is to be organized).\n");
-    (void)HDfprintf(stdout, "\t  The class, size and dimensions of the input data is \n");
-    (void)HDfprintf(stdout, "\t  specified in this configuration file. A point to note is\n");
-    (void)HDfprintf(stdout, "\t  that the floating point data in the ASCII text file may be\n");
-    (void)HDfprintf(stdout, "\t  organized in the fixed floating form (for example 323.56)\n");
-    (void)HDfprintf(stdout, "\t  or in a scientific notation (for example 3.23E+02). A \n");
-    (void)HDfprintf(stdout, "\t  different input-class specification is to be used for both\n");
-    (void)HDfprintf(stdout, "\t  forms.\n\n");
-    (void)HDfprintf(stdout, "\t  The utility extracts the input data from the input file \n");
-    (void)HDfprintf(stdout, "\t  according to the specified parameters and saves it into \n");
-    (void)HDfprintf(stdout, "\t  an H5 dataset. \n\n");
-    (void)HDfprintf(stdout, "\t  The user can specify output type and storage properties in \n");
-    (void)HDfprintf(stdout, "\t  the configuration file. The user is required to specify the \n");
-    (void)HDfprintf(stdout, "\t  path of the dataset. If the groups in the path leading to \n");
-    (void)HDfprintf(stdout, "\t  the data-set do not exist, the groups will be created by the\n");
-    (void)HDfprintf(stdout, "\t  utility. If no group is specified, the dataset will be\n");
-    (void)HDfprintf(stdout, "\t  created under the root group.\n\n");
-    (void)HDfprintf(stdout, "\t  In addition to the name, the user is also required to \n");
-    (void)HDfprintf(stdout, "\t  provide the class and size of output data to be written to \n");
-    (void)HDfprintf(stdout, "\t  the dataset and may optionally specify the output-architecture,\n");
-    (void)HDfprintf(stdout, "\t  and the output-byte-order. If output-architecture is not \n");
-    (void)HDfprintf(stdout, "\t  specified the default is NATIVE. Output-byte-orders are fixed\n");
-    (void)HDfprintf(stdout, "\t  for some architectures and may be specified only if output-\n");
-    (void)HDfprintf(stdout, "\t  architecture is IEEE, UNIX or STD.\n\n");
-    (void)HDfprintf(stdout, "\t   Also, layout and other storage properties such as \n");
-    (void)HDfprintf(stdout, "\t  compression, external storage and extendible data-sets may be\n");
-    (void)HDfprintf(stdout, "\t  optionally specified.  The layout and storage properties \n");
-    (void)HDfprintf(stdout, "\t  denote how raw data is to be organized on the disk. If these \n");
-    (void)HDfprintf(stdout, "\t  options are not specified the default is Contiguous layout \n");
-    (void)HDfprintf(stdout, "\t  and storage.\n\n");
-    (void)HDfprintf(stdout, "\t  The dataset can be organized in any of the following ways:\n");
-    (void)HDfprintf(stdout, "\t  1. Contiguous.\n");
-    (void)HDfprintf(stdout, "\t  2. Chunked.\n");
-    (void)HDfprintf(stdout, "\t  3. External Storage File    (has to be contiguous)\n");
-    (void)HDfprintf(stdout, "\t  4. Extendible data sets     (has to be chunked)\n");
-    (void)HDfprintf(stdout, "\t  5. Compressed.        (has to be chunked)\n");
-    (void)HDfprintf(stdout, "\t  6. Compressed & Extendible  (has to be chunked)\n\n");
-    (void)HDfprintf(stdout, "\t  If the user wants to store raw data in a non-HDF file then \n");
-    (void)HDfprintf(stdout, "\t  the external storage file option is to be used and the name \n");
-    (void)HDfprintf(stdout, "\t  of the file is to be specified. \n\n");
-    (void)HDfprintf(stdout, "\t  If the user wants the dimensions of the data-set to be\n");
-    (void)HDfprintf(stdout, "\t  unlimited, the extendible data set option can be chosen. \n\n");
-    (void)HDfprintf(stdout, "\t  The user may also specify the type of compression and the \n");
-    (void)HDfprintf(stdout, "\t  level to which the data set must be compresses by setting \n");
-    (void)HDfprintf(stdout, "\t  the compressed option.\n\n");
-    (void)HDfprintf(stdout, "\t   SYNOPSIS:\n");
-    (void)HDfprintf(stdout, "\t  h5import -h[elp], OR\n");
-    (void)HDfprintf(stdout, "\t  h5import <infile> -c[onfig] <configfile> \
+    (void)fprintf(stdout, "Name:\n\n");
+    (void)fprintf(stdout, "\t%s\n\n", name);
+    (void)fprintf(stdout, "\t  TOOL NAME:\n");
+    (void)fprintf(stdout, "\t   %s\n", name);
+    (void)fprintf(stdout, "\t   SYNTAX:\n");
+    (void)fprintf(stdout, "\t   %s -h[elp], OR\n", name);
+    (void)fprintf(stdout, "\t   %s <infile> -c[onfig] <configfile> [<infile> -c[config] <configfile>...]",
+                  name);
+    (void)fprintf(stdout, "\t\t\t\t      -o[utfile] <outfile>\n\n");
+    (void)fprintf(stdout, "\t   PURPOSE:\n");
+    (void)fprintf(stdout, "\t   To convert data stored in one or more ASCII or binary files\n");
+    (void)fprintf(stdout, "\t  into one or more datasets (in accordance with the \n");
+    (void)fprintf(stdout, "\t  user-specified type and storage properties) in an existing \n");
+    (void)fprintf(stdout, "\t  or new HDF5 file.\n\n");
+    (void)fprintf(stdout, "\t   DESCRIPTION:\n");
+    (void)fprintf(stdout, "\t  The primary objective of the utility is to convert floating\n");
+    (void)fprintf(stdout, "\t  point or integer data stored in ASCII text or binary form \n");
+    (void)fprintf(stdout, "\t  into a data-set according to the type and storage properties\n");
+    (void)fprintf(stdout, "\t  specified by the user. The utility can also accept ASCII\n");
+    (void)fprintf(stdout, "\t  text files and store the contents in a compact form as an\n");
+    (void)fprintf(stdout, "\t  array of one-dimensional strings.\n\n");
+    (void)fprintf(stdout, "\t  The input data to be written as a data-set can be provided\n");
+    (void)fprintf(stdout, "\t  to the utility in one of the following forms:\n");
+    (void)fprintf(stdout, "\t  1. ASCII text file with numeric data (floating point or \n");
+    (void)fprintf(stdout, "\t  integer data). \n");
+    (void)fprintf(stdout, "\t  2. Binary file with native floating point data (32-bit or \n");
+    (void)fprintf(stdout, "\t  64-bit) \n");
+    (void)fprintf(stdout, "\t  3. Binary file with native integer (signed or unsigned)\n");
+    (void)fprintf(stdout, "\t  data (8-bit or 16-bit or 32-bit or 64-bit). \n");
+    (void)fprintf(stdout, "\t  4. ASCII text file containing strings (text data).\n");
+    (void)fprintf(stdout, "\t    \n");
+    (void)fprintf(stdout, "\t  Every input file is associated with a configuration file \n");
+    (void)fprintf(stdout, "\t  also provided as an input to the utility. (See Section \n");
+    (void)fprintf(stdout, "\t  \"CONFIGURATION FILE\" to know how it is to be organized).\n");
+    (void)fprintf(stdout, "\t  The class, size and dimensions of the input data is \n");
+    (void)fprintf(stdout, "\t  specified in this configuration file. A point to note is\n");
+    (void)fprintf(stdout, "\t  that the floating point data in the ASCII text file may be\n");
+    (void)fprintf(stdout, "\t  organized in the fixed floating form (for example 323.56)\n");
+    (void)fprintf(stdout, "\t  or in a scientific notation (for example 3.23E+02). A \n");
+    (void)fprintf(stdout, "\t  different input-class specification is to be used for both\n");
+    (void)fprintf(stdout, "\t  forms.\n\n");
+    (void)fprintf(stdout, "\t  The utility extracts the input data from the input file \n");
+    (void)fprintf(stdout, "\t  according to the specified parameters and saves it into \n");
+    (void)fprintf(stdout, "\t  an H5 dataset. \n\n");
+    (void)fprintf(stdout, "\t  The user can specify output type and storage properties in \n");
+    (void)fprintf(stdout, "\t  the configuration file. The user is required to specify the \n");
+    (void)fprintf(stdout, "\t  path of the dataset. If the groups in the path leading to \n");
+    (void)fprintf(stdout, "\t  the data-set do not exist, the groups will be created by the\n");
+    (void)fprintf(stdout, "\t  utility. If no group is specified, the dataset will be\n");
+    (void)fprintf(stdout, "\t  created under the root group.\n\n");
+    (void)fprintf(stdout, "\t  In addition to the name, the user is also required to \n");
+    (void)fprintf(stdout, "\t  provide the class and size of output data to be written to \n");
+    (void)fprintf(stdout, "\t  the dataset and may optionally specify the output-architecture,\n");
+    (void)fprintf(stdout, "\t  and the output-byte-order. If output-architecture is not \n");
+    (void)fprintf(stdout, "\t  specified the default is NATIVE. Output-byte-orders are fixed\n");
+    (void)fprintf(stdout, "\t  for some architectures and may be specified only if output-\n");
+    (void)fprintf(stdout, "\t  architecture is IEEE, UNIX or STD.\n\n");
+    (void)fprintf(stdout, "\t   Also, layout and other storage properties such as \n");
+    (void)fprintf(stdout, "\t  compression, external storage and extendible data-sets may be\n");
+    (void)fprintf(stdout, "\t  optionally specified.  The layout and storage properties \n");
+    (void)fprintf(stdout, "\t  denote how raw data is to be organized on the disk. If these \n");
+    (void)fprintf(stdout, "\t  options are not specified the default is Contiguous layout \n");
+    (void)fprintf(stdout, "\t  and storage.\n\n");
+    (void)fprintf(stdout, "\t  The dataset can be organized in any of the following ways:\n");
+    (void)fprintf(stdout, "\t  1. Contiguous.\n");
+    (void)fprintf(stdout, "\t  2. Chunked.\n");
+    (void)fprintf(stdout, "\t  3. External Storage File    (has to be contiguous)\n");
+    (void)fprintf(stdout, "\t  4. Extendible data sets     (has to be chunked)\n");
+    (void)fprintf(stdout, "\t  5. Compressed.        (has to be chunked)\n");
+    (void)fprintf(stdout, "\t  6. Compressed & Extendible  (has to be chunked)\n\n");
+    (void)fprintf(stdout, "\t  If the user wants to store raw data in a non-HDF file then \n");
+    (void)fprintf(stdout, "\t  the external storage file option is to be used and the name \n");
+    (void)fprintf(stdout, "\t  of the file is to be specified. \n\n");
+    (void)fprintf(stdout, "\t  If the user wants the dimensions of the data-set to be\n");
+    (void)fprintf(stdout, "\t  unlimited, the extendible data set option can be chosen. \n\n");
+    (void)fprintf(stdout, "\t  The user may also specify the type of compression and the \n");
+    (void)fprintf(stdout, "\t  level to which the data set must be compresses by setting \n");
+    (void)fprintf(stdout, "\t  the compressed option.\n\n");
+    (void)fprintf(stdout, "\t   SYNOPSIS:\n");
+    (void)fprintf(stdout, "\t  h5import -h[elp], OR\n");
+    (void)fprintf(stdout, "\t  h5import <infile> -c[onfig] <configfile> \
                     [<infile> -c[config] <confile2>...] -o[utfile] <outfile>\n\n");
-    (void)HDfprintf(stdout, "\t   -h[elp]:\n");
-    (void)HDfprintf(stdout, "\t           Prints this summary of usage, and exits.\n\n");
-    (void)HDfprintf(stdout, "\t   <infile(s)>:\n");
-    (void)HDfprintf(stdout, "\t           Name of the Input file(s), containing a \n");
-    (void)HDfprintf(stdout, "\t    single n-dimensional floating point or integer array \n");
-    (void)HDfprintf(stdout, "\t    in either ASCII text, native floating point(32-bit \n");
-    (void)HDfprintf(stdout, "\t    or 64-bit) or native integer(8-bit or 16-bit or \n");
-    (void)HDfprintf(stdout, "\t    32-bit or 64-bit). Data to be specified in the order\n");
-    (void)HDfprintf(stdout, "\t    of fastest changing dimensions first.\n\n");
-    (void)HDfprintf(stdout, "\t  -c[config] <configfile>:\n");
-    (void)HDfprintf(stdout, "\t    Every input file should be associated with a \n");
-    (void)HDfprintf(stdout, "\t    configuration file and this is done by the -c option.\n");
-    (void)HDfprintf(stdout, "\t    <configfile> is the name of the configuration file.\n");
-    (void)HDfprintf(stdout, "\t    (See Section \"CONFIGURATION FILE\")\n\n");
-    (void)HDfprintf(stdout, "\t   -o[utfile] <outfile>:\n");
-    (void)HDfprintf(stdout, "\t           Name of the HDF5 output file. Data from one or more \n");
-    (void)HDfprintf(stdout, "\t    input files are stored as one or more data sets in \n");
-    (void)HDfprintf(stdout, "\t    <outfile>. The output file may be an existing file or \n");
-    (void)HDfprintf(stdout, "\t    it maybe new in which case it will be created.\n\n\n");
-    (void)HDfprintf(stdout, "\t   CONFIGURATION FILE:\n");
-    (void)HDfprintf(stdout, "\t  The configuration file is an ASCII text file and must be \n");
-    (void)HDfprintf(stdout, "\t  the ddl formatted file (without data values) produced by h5dump \n");
-    (void)HDfprintf(stdout, "\t  when used with the options '-o outfilename -b' of a single dataset (-d) \n");
-    (void)HDfprintf(stdout, "\t  OR organized as \"CONFIG-KEYWORD VALUE\" pairs, one pair on each \n");
-    (void)HDfprintf(stdout, "\t  line.\n\n");
-    (void)HDfprintf(stdout, "\t   The configuration file may have the following keywords each \n");
-    (void)HDfprintf(stdout, "\t   followed by an acceptable value.\n\n");
-    (void)HDfprintf(stdout, "\t  Required KEYWORDS:\n");
-    (void)HDfprintf(stdout, "\t    PATH\n");
-    (void)HDfprintf(stdout, "\t    INPUT-CLASS\n");
-    (void)HDfprintf(stdout, "\t    INPUT-SIZE\n");
-    (void)HDfprintf(stdout, "\t    INPUT-BYTE-ORDER\n");
-    (void)HDfprintf(stdout, "\t    RANK\n");
-    (void)HDfprintf(stdout, "\t    DIMENSION-SIZES\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-CLASS\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-SIZE\n\n");
-    (void)HDfprintf(stdout, "\t  Optional KEYWORDS:\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-ARCHITECTURE\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-BYTE-ORDER\n");
-    (void)HDfprintf(stdout, "\t    CHUNKED-DIMENSION-SIZES\n");
-    (void)HDfprintf(stdout, "\t    COMPRESSION-TYPE\n");
-    (void)HDfprintf(stdout, "\t    COMPRESSION-PARAM\n");
-    (void)HDfprintf(stdout, "\t    EXTERNAL-STORAGE\n");
-    (void)HDfprintf(stdout, "\t    MAXIMUM-DIMENSIONS\n\n\n");
-    (void)HDfprintf(stdout, "\t    Values for keywords:\n");
-    (void)HDfprintf(stdout, "\t    PATH:\n");
-    (void)HDfprintf(stdout, "\t      Strings separated by spaces to represent\n");
-    (void)HDfprintf(stdout, "\t      the path of the data-set. If the groups in\n");
-    (void)HDfprintf(stdout, "\t      the path do not exist, they will be created. \n");
-    (void)HDfprintf(stdout, "\t      For example,\n");
-    (void)HDfprintf(stdout, "\t        PATH grp1/grp2/dataset1\n");
-    (void)HDfprintf(stdout, "\t        PATH: keyword\n");
-    (void)HDfprintf(stdout, "\t        grp1: group under the root. If\n");
-    (void)HDfprintf(stdout, "\t              non-existent will be created.\n");
-    (void)HDfprintf(stdout, "\t        grp2: group under grp1. If \n");
-    (void)HDfprintf(stdout, "\t              non-existent will be created \n");
-    (void)HDfprintf(stdout, "\t              under grp1.\n");
-    (void)HDfprintf(stdout, "\t        dataset1: the name of the data-set \n");
-    (void)HDfprintf(stdout, "\t            to be created.\n\n");
-    (void)HDfprintf(stdout, "\t               INPUT-CLASS:\n");
-    (void)HDfprintf(stdout, "\t      String denoting the type of input data.\n");
-    (void)HDfprintf(stdout, "\t      (\"TEXTIN\", \"TEXTFP\", \"FP\", \"IN\", \n");
-    (void)HDfprintf(stdout, "\t      \"STR\", \"TEXTUIN\", \"UIN\"). \n");
-    (void)HDfprintf(stdout, "\t      INPUT-CLASS \"TEXTIN\" denotes an ASCII text \n");
-    (void)HDfprintf(stdout, "\t      file with signed integer data in ASCII form,\n");
-    (void)HDfprintf(stdout, "\t      INPUT-CLASS \"TEXTUIN\" denotes an ASCII text \n");
-    (void)HDfprintf(stdout, "\t      file with unsigned integer data in ASCII form,\n");
-    (void)HDfprintf(stdout, "\t      \"TEXTFP\" denotes an ASCII text file containing\n");
-    (void)HDfprintf(stdout, "\t      floating point data in the fixed notation\n");
-    (void)HDfprintf(stdout, "\t      (325.34),\n");
-    (void)HDfprintf(stdout, "\t      \"FP\" denotes a floating point binary file,\n");
-    (void)HDfprintf(stdout, "\t      \"IN\" denotes a signed integer binary file,\n");
-    (void)HDfprintf(stdout, "\t      \"UIN\" denotes an unsigned integer binary file,\n");
-    (void)HDfprintf(stdout, "\t       & \"STR\" denotes an ASCII text file the \n");
-    (void)HDfprintf(stdout, "\t      contents of which should be stored as an 1-D \n");
-    (void)HDfprintf(stdout, "\t      array of strings.\n");
-    (void)HDfprintf(stdout, "\t      If INPUT-CLASS is \"STR\", then RANK, \n");
-    (void)HDfprintf(stdout, "\t      DIMENSION-SIZES, OUTPUT-CLASS, OUTPUT-SIZE, \n");
-    (void)HDfprintf(stdout, "\t      OUTPUT-ARCHITECTURE and OUTPUT-BYTE-ORDER \n");
-    (void)HDfprintf(stdout, "\t      will be ignored.\n\n\n");
-    (void)HDfprintf(stdout, "\t    INPUT-SIZE:\n");
-    (void)HDfprintf(stdout, "\t      Integer denoting the size of the input data \n");
-    (void)HDfprintf(stdout, "\t      (8, 16, 32, 64). \n\n");
-    (void)HDfprintf(stdout, "\t      For floating point,\n");
-    (void)HDfprintf(stdout, "\t      INPUT-SIZE can be 32 or 64.\n");
-    (void)HDfprintf(stdout, "\t      For integers (signed and unsigned)\n");
-    (void)HDfprintf(stdout, "\t      INPUT-SIZE can be 8, 16, 32 or 64.\n\n");
-    (void)HDfprintf(stdout, "\t    RANK:\n");
-    (void)HDfprintf(stdout, "\t      Integer denoting the number of dimensions.\n\n");
-    (void)HDfprintf(stdout, "\t    DIMENSION-SIZES:\n");
-    (void)HDfprintf(stdout, "\t            Integers separated by spaces to denote the \n");
-    (void)HDfprintf(stdout, "\t      dimension sizes for the no. of dimensions \n");
-    (void)HDfprintf(stdout, "\t      determined by rank.\n\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-CLASS:\n");
-    (void)HDfprintf(stdout, "\t      String dentoting data type of the dataset to \n");
-    (void)HDfprintf(stdout, "\t      be written (\"IN\",\"FP\", \"UIN\")\n\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-SIZE:\n");
-    (void)HDfprintf(stdout, "\t      Integer denoting the size of the data in the \n");
-    (void)HDfprintf(stdout, "\t      output dataset to be written.\n");
-    (void)HDfprintf(stdout, "\t      If OUTPUT-CLASS is \"FP\", OUTPUT-SIZE can be \n");
-    (void)HDfprintf(stdout, "\t      32 or 64.\n");
-    (void)HDfprintf(stdout, "\t      If OUTPUT-CLASS is \"IN\" or \"UIN\", OUTPUT-SIZE\n");
-    (void)HDfprintf(stdout, "\t      can be 8, 16, 32 or 64.\n\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-ARCHITECTURE:\n");
-    (void)HDfprintf(stdout, "\t      STRING denoting the type of output \n");
-    (void)HDfprintf(stdout, "\t      architecture. Can accept the following values\n");
-    (void)HDfprintf(stdout, "\t      STD\n");
-    (void)HDfprintf(stdout, "\t      IEEE\n");
-    (void)HDfprintf(stdout, "\t      INTEL\n");
-    (void)HDfprintf(stdout, "\t      CRAY\n");
-    (void)HDfprintf(stdout, "\t      MIPS\n");
-    (void)HDfprintf(stdout, "\t      ALPHA\n");
-    (void)HDfprintf(stdout, "\t      NATIVE (default)\n");
-    (void)HDfprintf(stdout, "\t      UNIX\n\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-BYTE-ORDER:\n");
-    (void)HDfprintf(stdout, "\t      String denoting the output-byte-order. Ignored\n");
-    (void)HDfprintf(stdout, "\t      if the OUTPUT-ARCHITECTURE is not specified or\n");
-    (void)HDfprintf(stdout, "\t      if it is IEEE, UNIX or STD. Can accept the \n");
-    (void)HDfprintf(stdout, "\t      following values.\n");
-    (void)HDfprintf(stdout, "\t      BE (default)\n");
-    (void)HDfprintf(stdout, "\t      LE\n\n");
-    (void)HDfprintf(stdout, "\t    CHUNKED-DIMENSION-SIZES:\n");
-    (void)HDfprintf(stdout, "\t      Integers separated by spaces to denote the \n");
-    (void)HDfprintf(stdout, "\t      dimension sizes of the chunk for the no. of \n");
-    (void)HDfprintf(stdout, "\t      dimensions determined by rank. Required field\n");
-    (void)HDfprintf(stdout, "\t      to denote that the dataset will be stored with\n");
-    (void)HDfprintf(stdout, "\t      chunked storage. If this field is absent the\n");
-    (void)HDfprintf(stdout, "\t      dataset will be stored with contiguous storage.\n\n");
-    (void)HDfprintf(stdout, "\t    COMPRESSION-TYPE:\n");
-    (void)HDfprintf(stdout, "\t      String denoting the type of compression to be\n");
-    (void)HDfprintf(stdout, "\t      used with the chunked storage. Requires the\n");
-    (void)HDfprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES to be specified. The only \n");
-    (void)HDfprintf(stdout, "\t      currently supported compression method is GZIP. \n");
-    (void)HDfprintf(stdout, "\t      Will accept the following value\n");
-    (void)HDfprintf(stdout, "\t      GZIP\n\n");
-    (void)HDfprintf(stdout, "\t    COMPRESSION-PARAM:\n");
-    (void)HDfprintf(stdout, "\t      Integer used to denote compression level and \n");
-    (void)HDfprintf(stdout, "\t      this option is to be always specified when \n");
-    (void)HDfprintf(stdout, "\t      the COMPRESSION-TYPE option is specified. The\n");
-    (void)HDfprintf(stdout, "\t      values are applicable only to GZIP \n");
-    (void)HDfprintf(stdout, "\t      compression.\n");
-    (void)HDfprintf(stdout, "\t      Value 1-9: The level of Compression. \n");
-    (void)HDfprintf(stdout, "\t        1 will result in the fastest \n");
-    (void)HDfprintf(stdout, "\t        compression while 9 will result in \n");
-    (void)HDfprintf(stdout, "\t        the best compression ratio. The default\n");
-    (void)HDfprintf(stdout, "\t        level of compression is 6.\n\n");
-    (void)HDfprintf(stdout, "\t    EXTERNAL-STORAGE:\n");
-    (void)HDfprintf(stdout, "\t      String to denote the name of the non-HDF5 file \n");
-    (void)HDfprintf(stdout, "\t      to store data to. Cannot be used if CHUNKED-\n");
-    (void)HDfprintf(stdout, "\t      DIMENSIONS or COMPRESSION-TYPE or EXTENDIBLE-\n");
-    (void)HDfprintf(stdout, "\t      DATASET is specified.\n");
-    (void)HDfprintf(stdout, "\t      Value <external-filename>: the name of the \n");
-    (void)HDfprintf(stdout, "\t      external file as a string to be used.\n\n");
-    (void)HDfprintf(stdout, "\t    MAXIMUM-DIMENSIONS:\n");
-    (void)HDfprintf(stdout, "\t      Integers separated by spaces to denote the \n");
-    (void)HDfprintf(stdout, "\t      maximum dimension sizes of all the \n");
-    (void)HDfprintf(stdout, "\t      dimensions determined by rank. Requires the\n");
-    (void)HDfprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES to be specified. A value of \n");
-    (void)HDfprintf(stdout, "\t      -1 for any dimension implies UNLIMITED \n");
-    (void)HDfprintf(stdout, "\t      DIMENSION size for that particular dimension.\n\n");
-    (void)HDfprintf(stdout, "\t   EXAMPLES:\n");
-    (void)HDfprintf(stdout, "\t  1. Configuration File may look like:\n\n");
-    (void)HDfprintf(stdout, "\t    PATH work h5 pkamat First-set\n");
-    (void)HDfprintf(stdout, "\t    INPUT-CLASS TEXTFP\n");
-    (void)HDfprintf(stdout, "\t    RANK 3\n");
-    (void)HDfprintf(stdout, "\t    DIMENSION-SIZES 5 2 4\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-CLASS FP\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-SIZE 64\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-ARCHITECTURE IEEE\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-BYTE-ORDER LE\n");
-    (void)HDfprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES 2 2 2 \n\n");
-    (void)HDfprintf(stdout, "\t  The above configuration will accept a floating point array \n");
-    (void)HDfprintf(stdout, "\t  (5 x 2 x 4)  in an ASCII file with the rank and dimension sizes \n");
-    (void)HDfprintf(stdout, "\t  specified and will save it in a chunked data-set (of pattern \n");
-    (void)HDfprintf(stdout, "\t  2 X 2 X 2) of 64-bit floating point in the little-endian order \n");
-    (void)HDfprintf(stdout, "\t  and IEEE architecture. The dataset will be stored at\n");
-    (void)HDfprintf(stdout, "\t  \"/work/h5/pkamat/First-set\"\n\n");
-    (void)HDfprintf(stdout, "\t  2. Another configuration could be:\n\n");
-    (void)HDfprintf(stdout, "\t    PATH Second-set\n");
-    (void)HDfprintf(stdout, "\t    INPUT-CLASS IN  \n");
-    (void)HDfprintf(stdout, "\t    RANK 5\n");
-    (void)HDfprintf(stdout, "\t    DIMENSION-SIZES 6 3 5 2 4\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-CLASS IN\n");
-    (void)HDfprintf(stdout, "\t    OUTPUT-SIZE 32\n");
-    (void)HDfprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES 2 2 2 2 2\n");
-    (void)HDfprintf(stdout, "\t    EXTENDIBLE-DATASET 1 3 \n");
-    (void)HDfprintf(stdout, "\t    COMPRESSION-TYPE GZIP\n");
-    (void)HDfprintf(stdout, "\t    COMPRESSION-PARAM 7\n\n\n");
-    (void)HDfprintf(stdout, "\t  The above configuration will accept an integer array \n");
-    (void)HDfprintf(stdout, "\t  (6 X 3 X 5 x 2 x 4)  in a binary file with the rank and \n");
-    (void)HDfprintf(stdout, "\t  dimension sizes specified and will save it in a chunked data-set\n");
-    (void)HDfprintf(stdout, "\t  (of pattern 2 X 2 X 2 X 2 X 2) of 32-bit floating point in \n");
-    (void)HDfprintf(stdout, "\t  native format (as output-architecture is not specified). The \n");
-    (void)HDfprintf(stdout, "\t  first and the third dimension will be defined as unlimited. The \n");
-    (void)HDfprintf(stdout, "\t  data-set will be compressed using GZIP and a compression level \n");
-    (void)HDfprintf(stdout, "\t  of 7.\n");
-    (void)HDfprintf(stdout, "\t  The dataset will be stored at \"/Second-set\"\n\n");
+    (void)fprintf(stdout, "\t   -h[elp]:\n");
+    (void)fprintf(stdout, "\t           Prints this summary of usage, and exits.\n\n");
+    (void)fprintf(stdout, "\t   <infile(s)>:\n");
+    (void)fprintf(stdout, "\t           Name of the Input file(s), containing a \n");
+    (void)fprintf(stdout, "\t    single n-dimensional floating point or integer array \n");
+    (void)fprintf(stdout, "\t    in either ASCII text, native floating point(32-bit \n");
+    (void)fprintf(stdout, "\t    or 64-bit) or native integer(8-bit or 16-bit or \n");
+    (void)fprintf(stdout, "\t    32-bit or 64-bit). Data to be specified in the order\n");
+    (void)fprintf(stdout, "\t    of fastest changing dimensions first.\n\n");
+    (void)fprintf(stdout, "\t  -c[config] <configfile>:\n");
+    (void)fprintf(stdout, "\t    Every input file should be associated with a \n");
+    (void)fprintf(stdout, "\t    configuration file and this is done by the -c option.\n");
+    (void)fprintf(stdout, "\t    <configfile> is the name of the configuration file.\n");
+    (void)fprintf(stdout, "\t    (See Section \"CONFIGURATION FILE\")\n\n");
+    (void)fprintf(stdout, "\t   -o[utfile] <outfile>:\n");
+    (void)fprintf(stdout, "\t           Name of the HDF5 output file. Data from one or more \n");
+    (void)fprintf(stdout, "\t    input files are stored as one or more data sets in \n");
+    (void)fprintf(stdout, "\t    <outfile>. The output file may be an existing file or \n");
+    (void)fprintf(stdout, "\t    it maybe new in which case it will be created.\n\n\n");
+    (void)fprintf(stdout, "\t   CONFIGURATION FILE:\n");
+    (void)fprintf(stdout, "\t  The configuration file is an ASCII text file and must be \n");
+    (void)fprintf(stdout, "\t  the ddl formatted file (without data values) produced by h5dump \n");
+    (void)fprintf(stdout, "\t  when used with the options '-o outfilename -b' of a single dataset (-d) \n");
+    (void)fprintf(stdout, "\t  OR organized as \"CONFIG-KEYWORD VALUE\" pairs, one pair on each \n");
+    (void)fprintf(stdout, "\t  line.\n\n");
+    (void)fprintf(stdout, "\t   The configuration file may have the following keywords each \n");
+    (void)fprintf(stdout, "\t   followed by an acceptable value.\n\n");
+    (void)fprintf(stdout, "\t  Required KEYWORDS:\n");
+    (void)fprintf(stdout, "\t    PATH\n");
+    (void)fprintf(stdout, "\t    INPUT-CLASS\n");
+    (void)fprintf(stdout, "\t    INPUT-SIZE\n");
+    (void)fprintf(stdout, "\t    INPUT-BYTE-ORDER\n");
+    (void)fprintf(stdout, "\t    RANK\n");
+    (void)fprintf(stdout, "\t    DIMENSION-SIZES\n");
+    (void)fprintf(stdout, "\t    OUTPUT-CLASS\n");
+    (void)fprintf(stdout, "\t    OUTPUT-SIZE\n\n");
+    (void)fprintf(stdout, "\t  Optional KEYWORDS:\n");
+    (void)fprintf(stdout, "\t    OUTPUT-ARCHITECTURE\n");
+    (void)fprintf(stdout, "\t    OUTPUT-BYTE-ORDER\n");
+    (void)fprintf(stdout, "\t    CHUNKED-DIMENSION-SIZES\n");
+    (void)fprintf(stdout, "\t    COMPRESSION-TYPE\n");
+    (void)fprintf(stdout, "\t    COMPRESSION-PARAM\n");
+    (void)fprintf(stdout, "\t    EXTERNAL-STORAGE\n");
+    (void)fprintf(stdout, "\t    MAXIMUM-DIMENSIONS\n\n\n");
+    (void)fprintf(stdout, "\t    Values for keywords:\n");
+    (void)fprintf(stdout, "\t    PATH:\n");
+    (void)fprintf(stdout, "\t      Strings separated by spaces to represent\n");
+    (void)fprintf(stdout, "\t      the path of the data-set. If the groups in\n");
+    (void)fprintf(stdout, "\t      the path do not exist, they will be created. \n");
+    (void)fprintf(stdout, "\t      For example,\n");
+    (void)fprintf(stdout, "\t        PATH grp1/grp2/dataset1\n");
+    (void)fprintf(stdout, "\t        PATH: keyword\n");
+    (void)fprintf(stdout, "\t        grp1: group under the root. If\n");
+    (void)fprintf(stdout, "\t              non-existent will be created.\n");
+    (void)fprintf(stdout, "\t        grp2: group under grp1. If \n");
+    (void)fprintf(stdout, "\t              non-existent will be created \n");
+    (void)fprintf(stdout, "\t              under grp1.\n");
+    (void)fprintf(stdout, "\t        dataset1: the name of the data-set \n");
+    (void)fprintf(stdout, "\t            to be created.\n\n");
+    (void)fprintf(stdout, "\t               INPUT-CLASS:\n");
+    (void)fprintf(stdout, "\t      String denoting the type of input data.\n");
+    (void)fprintf(stdout, "\t      (\"TEXTIN\", \"TEXTFP\", \"FP\", \"IN\", \n");
+    (void)fprintf(stdout, "\t      \"STR\", \"TEXTUIN\", \"UIN\"). \n");
+    (void)fprintf(stdout, "\t      INPUT-CLASS \"TEXTIN\" denotes an ASCII text \n");
+    (void)fprintf(stdout, "\t      file with signed integer data in ASCII form,\n");
+    (void)fprintf(stdout, "\t      INPUT-CLASS \"TEXTUIN\" denotes an ASCII text \n");
+    (void)fprintf(stdout, "\t      file with unsigned integer data in ASCII form,\n");
+    (void)fprintf(stdout, "\t      \"TEXTFP\" denotes an ASCII text file containing\n");
+    (void)fprintf(stdout, "\t      floating point data in the fixed notation\n");
+    (void)fprintf(stdout, "\t      (325.34),\n");
+    (void)fprintf(stdout, "\t      \"FP\" denotes a floating point binary file,\n");
+    (void)fprintf(stdout, "\t      \"IN\" denotes a signed integer binary file,\n");
+    (void)fprintf(stdout, "\t      \"UIN\" denotes an unsigned integer binary file,\n");
+    (void)fprintf(stdout, "\t       & \"STR\" denotes an ASCII text file the \n");
+    (void)fprintf(stdout, "\t      contents of which should be stored as an 1-D \n");
+    (void)fprintf(stdout, "\t      array of strings.\n");
+    (void)fprintf(stdout, "\t      If INPUT-CLASS is \"STR\", then RANK, \n");
+    (void)fprintf(stdout, "\t      DIMENSION-SIZES, OUTPUT-CLASS, OUTPUT-SIZE, \n");
+    (void)fprintf(stdout, "\t      OUTPUT-ARCHITECTURE and OUTPUT-BYTE-ORDER \n");
+    (void)fprintf(stdout, "\t      will be ignored.\n\n\n");
+    (void)fprintf(stdout, "\t    INPUT-SIZE:\n");
+    (void)fprintf(stdout, "\t      Integer denoting the size of the input data \n");
+    (void)fprintf(stdout, "\t      (8, 16, 32, 64). \n\n");
+    (void)fprintf(stdout, "\t      For floating point,\n");
+    (void)fprintf(stdout, "\t      INPUT-SIZE can be 32 or 64.\n");
+    (void)fprintf(stdout, "\t      For integers (signed and unsigned)\n");
+    (void)fprintf(stdout, "\t      INPUT-SIZE can be 8, 16, 32 or 64.\n\n");
+    (void)fprintf(stdout, "\t    RANK:\n");
+    (void)fprintf(stdout, "\t      Integer denoting the number of dimensions.\n\n");
+    (void)fprintf(stdout, "\t    DIMENSION-SIZES:\n");
+    (void)fprintf(stdout, "\t            Integers separated by spaces to denote the \n");
+    (void)fprintf(stdout, "\t      dimension sizes for the no. of dimensions \n");
+    (void)fprintf(stdout, "\t      determined by rank.\n\n");
+    (void)fprintf(stdout, "\t    OUTPUT-CLASS:\n");
+    (void)fprintf(stdout, "\t      String dentoting data type of the dataset to \n");
+    (void)fprintf(stdout, "\t      be written (\"IN\",\"FP\", \"UIN\")\n\n");
+    (void)fprintf(stdout, "\t    OUTPUT-SIZE:\n");
+    (void)fprintf(stdout, "\t      Integer denoting the size of the data in the \n");
+    (void)fprintf(stdout, "\t      output dataset to be written.\n");
+    (void)fprintf(stdout, "\t      If OUTPUT-CLASS is \"FP\", OUTPUT-SIZE can be \n");
+    (void)fprintf(stdout, "\t      32 or 64.\n");
+    (void)fprintf(stdout, "\t      If OUTPUT-CLASS is \"IN\" or \"UIN\", OUTPUT-SIZE\n");
+    (void)fprintf(stdout, "\t      can be 8, 16, 32 or 64.\n\n");
+    (void)fprintf(stdout, "\t    OUTPUT-ARCHITECTURE:\n");
+    (void)fprintf(stdout, "\t      STRING denoting the type of output \n");
+    (void)fprintf(stdout, "\t      architecture. Can accept the following values\n");
+    (void)fprintf(stdout, "\t      STD\n");
+    (void)fprintf(stdout, "\t      IEEE\n");
+    (void)fprintf(stdout, "\t      INTEL\n");
+    (void)fprintf(stdout, "\t      CRAY\n");
+    (void)fprintf(stdout, "\t      MIPS\n");
+    (void)fprintf(stdout, "\t      ALPHA\n");
+    (void)fprintf(stdout, "\t      NATIVE (default)\n");
+    (void)fprintf(stdout, "\t      UNIX\n\n");
+    (void)fprintf(stdout, "\t    OUTPUT-BYTE-ORDER:\n");
+    (void)fprintf(stdout, "\t      String denoting the output-byte-order. Ignored\n");
+    (void)fprintf(stdout, "\t      if the OUTPUT-ARCHITECTURE is not specified or\n");
+    (void)fprintf(stdout, "\t      if it is IEEE, UNIX or STD. Can accept the \n");
+    (void)fprintf(stdout, "\t      following values.\n");
+    (void)fprintf(stdout, "\t      BE (default)\n");
+    (void)fprintf(stdout, "\t      LE\n\n");
+    (void)fprintf(stdout, "\t    CHUNKED-DIMENSION-SIZES:\n");
+    (void)fprintf(stdout, "\t      Integers separated by spaces to denote the \n");
+    (void)fprintf(stdout, "\t      dimension sizes of the chunk for the no. of \n");
+    (void)fprintf(stdout, "\t      dimensions determined by rank. Required field\n");
+    (void)fprintf(stdout, "\t      to denote that the dataset will be stored with\n");
+    (void)fprintf(stdout, "\t      chunked storage. If this field is absent the\n");
+    (void)fprintf(stdout, "\t      dataset will be stored with contiguous storage.\n\n");
+    (void)fprintf(stdout, "\t    COMPRESSION-TYPE:\n");
+    (void)fprintf(stdout, "\t      String denoting the type of compression to be\n");
+    (void)fprintf(stdout, "\t      used with the chunked storage. Requires the\n");
+    (void)fprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES to be specified. The only \n");
+    (void)fprintf(stdout, "\t      currently supported compression method is GZIP. \n");
+    (void)fprintf(stdout, "\t      Will accept the following value\n");
+    (void)fprintf(stdout, "\t      GZIP\n\n");
+    (void)fprintf(stdout, "\t    COMPRESSION-PARAM:\n");
+    (void)fprintf(stdout, "\t      Integer used to denote compression level and \n");
+    (void)fprintf(stdout, "\t      this option is to be always specified when \n");
+    (void)fprintf(stdout, "\t      the COMPRESSION-TYPE option is specified. The\n");
+    (void)fprintf(stdout, "\t      values are applicable only to GZIP \n");
+    (void)fprintf(stdout, "\t      compression.\n");
+    (void)fprintf(stdout, "\t      Value 1-9: The level of Compression. \n");
+    (void)fprintf(stdout, "\t        1 will result in the fastest \n");
+    (void)fprintf(stdout, "\t        compression while 9 will result in \n");
+    (void)fprintf(stdout, "\t        the best compression ratio. The default\n");
+    (void)fprintf(stdout, "\t        level of compression is 6.\n\n");
+    (void)fprintf(stdout, "\t    EXTERNAL-STORAGE:\n");
+    (void)fprintf(stdout, "\t      String to denote the name of the non-HDF5 file \n");
+    (void)fprintf(stdout, "\t      to store data to. Cannot be used if CHUNKED-\n");
+    (void)fprintf(stdout, "\t      DIMENSIONS or COMPRESSION-TYPE or EXTENDIBLE-\n");
+    (void)fprintf(stdout, "\t      DATASET is specified.\n");
+    (void)fprintf(stdout, "\t      Value <external-filename>: the name of the \n");
+    (void)fprintf(stdout, "\t      external file as a string to be used.\n\n");
+    (void)fprintf(stdout, "\t    MAXIMUM-DIMENSIONS:\n");
+    (void)fprintf(stdout, "\t      Integers separated by spaces to denote the \n");
+    (void)fprintf(stdout, "\t      maximum dimension sizes of all the \n");
+    (void)fprintf(stdout, "\t      dimensions determined by rank. Requires the\n");
+    (void)fprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES to be specified. A value of \n");
+    (void)fprintf(stdout, "\t      -1 for any dimension implies UNLIMITED \n");
+    (void)fprintf(stdout, "\t      DIMENSION size for that particular dimension.\n\n");
+    (void)fprintf(stdout, "\t   EXAMPLES:\n");
+    (void)fprintf(stdout, "\t  1. Configuration File may look like:\n\n");
+    (void)fprintf(stdout, "\t    PATH work h5 pkamat First-set\n");
+    (void)fprintf(stdout, "\t    INPUT-CLASS TEXTFP\n");
+    (void)fprintf(stdout, "\t    RANK 3\n");
+    (void)fprintf(stdout, "\t    DIMENSION-SIZES 5 2 4\n");
+    (void)fprintf(stdout, "\t    OUTPUT-CLASS FP\n");
+    (void)fprintf(stdout, "\t    OUTPUT-SIZE 64\n");
+    (void)fprintf(stdout, "\t    OUTPUT-ARCHITECTURE IEEE\n");
+    (void)fprintf(stdout, "\t    OUTPUT-BYTE-ORDER LE\n");
+    (void)fprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES 2 2 2 \n\n");
+    (void)fprintf(stdout, "\t  The above configuration will accept a floating point array \n");
+    (void)fprintf(stdout, "\t  (5 x 2 x 4)  in an ASCII file with the rank and dimension sizes \n");
+    (void)fprintf(stdout, "\t  specified and will save it in a chunked data-set (of pattern \n");
+    (void)fprintf(stdout, "\t  2 X 2 X 2) of 64-bit floating point in the little-endian order \n");
+    (void)fprintf(stdout, "\t  and IEEE architecture. The dataset will be stored at\n");
+    (void)fprintf(stdout, "\t  \"/work/h5/pkamat/First-set\"\n\n");
+    (void)fprintf(stdout, "\t  2. Another configuration could be:\n\n");
+    (void)fprintf(stdout, "\t    PATH Second-set\n");
+    (void)fprintf(stdout, "\t    INPUT-CLASS IN  \n");
+    (void)fprintf(stdout, "\t    RANK 5\n");
+    (void)fprintf(stdout, "\t    DIMENSION-SIZES 6 3 5 2 4\n");
+    (void)fprintf(stdout, "\t    OUTPUT-CLASS IN\n");
+    (void)fprintf(stdout, "\t    OUTPUT-SIZE 32\n");
+    (void)fprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES 2 2 2 2 2\n");
+    (void)fprintf(stdout, "\t    EXTENDIBLE-DATASET 1 3 \n");
+    (void)fprintf(stdout, "\t    COMPRESSION-TYPE GZIP\n");
+    (void)fprintf(stdout, "\t    COMPRESSION-PARAM 7\n\n\n");
+    (void)fprintf(stdout, "\t  The above configuration will accept an integer array \n");
+    (void)fprintf(stdout, "\t  (6 X 3 X 5 x 2 x 4)  in a binary file with the rank and \n");
+    (void)fprintf(stdout, "\t  dimension sizes specified and will save it in a chunked data-set\n");
+    (void)fprintf(stdout, "\t  (of pattern 2 X 2 X 2 X 2 X 2) of 32-bit floating point in \n");
+    (void)fprintf(stdout, "\t  native format (as output-architecture is not specified). The \n");
+    (void)fprintf(stdout, "\t  first and the third dimension will be defined as unlimited. The \n");
+    (void)fprintf(stdout, "\t  data-set will be compressed using GZIP and a compression level \n");
+    (void)fprintf(stdout, "\t  of 7.\n");
+    (void)fprintf(stdout, "\t  The dataset will be stored at \"/Second-set\"\n\n");
 }
 
 void
 usage(char *name)
 {
-    (void)HDfprintf(stdout, "\nusage:\t%s -h[elp], OR\n", name);
-    (void)HDfprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
+    (void)fprintf(stdout, "\nusage:\t%s -h[elp], OR\n", name);
+    (void)fprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
-                    name);
+                  name);
 }

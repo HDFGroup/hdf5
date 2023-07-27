@@ -88,10 +88,10 @@ H5O__chunk_add(H5F_t *f, H5O_t *oh, unsigned idx, unsigned cont_chunkno)
     FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
 
     /* check args */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(idx < oh->nchunks);
-    HDassert(idx > 0);
+    assert(f);
+    assert(oh);
+    assert(idx < oh->nchunks);
+    assert(idx > 0);
 
     /* Allocate space for the object header data structure */
     if (NULL == (chk_proxy = H5FL_CALLOC(H5O_chunk_proxy_t)))
@@ -154,9 +154,9 @@ H5O__chunk_protect(H5F_t *f, H5O_t *oh, unsigned idx)
     FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
 
     /* check args */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(idx < oh->nchunks);
+    assert(f);
+    assert(oh);
+    assert(idx < oh->nchunks);
 
     /* Check for protecting first chunk */
     if (0 == idx) {
@@ -179,7 +179,7 @@ H5O__chunk_protect(H5F_t *f, H5O_t *oh, unsigned idx)
 
         /* Construct the user data for protecting chunk proxy */
         /* (and _not_ decoding it) */
-        HDmemset(&chk_udata, 0, sizeof(chk_udata));
+        memset(&chk_udata, 0, sizeof(chk_udata));
         chk_udata.oh      = oh;
         chk_udata.chunkno = idx;
         chk_udata.size    = oh->chunk[idx].size;
@@ -190,8 +190,8 @@ H5O__chunk_protect(H5F_t *f, H5O_t *oh, unsigned idx)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
 
         /* Sanity check */
-        HDassert(chk_proxy->oh == oh);
-        HDassert(chk_proxy->chunkno == idx);
+        assert(chk_proxy->oh == oh);
+        assert(chk_proxy->chunkno == idx);
     } /* end else */
 
     /* Set return value */
@@ -226,8 +226,8 @@ H5O__chunk_unprotect(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, hbool_t dirtied)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(chk_proxy);
+    assert(f);
+    assert(chk_proxy);
 
     /* Check for releasing first chunk */
     if (0 == chk_proxy->chunkno) {
@@ -276,8 +276,8 @@ H5O__chunk_resize(H5O_t *oh, H5O_chunk_proxy_t *chk_proxy)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
-    HDassert(chk_proxy);
+    assert(oh);
+    assert(chk_proxy);
 
     /* Check for resizing first chunk */
     if (0 == chk_proxy->chunkno) {
@@ -317,14 +317,14 @@ H5O__chunk_update_idx(H5F_t *f, H5O_t *oh, unsigned idx)
     FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
 
     /* check args */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(idx < oh->nchunks);
-    HDassert(idx > 0);
+    assert(f);
+    assert(oh);
+    assert(idx < oh->nchunks);
+    assert(idx > 0);
 
     /* Construct the user data for protecting chunk proxy */
     /* (and _not_ decoding it) */
-    HDmemset(&chk_udata, 0, sizeof(chk_udata));
+    memset(&chk_udata, 0, sizeof(chk_udata));
     chk_udata.oh      = oh;
     chk_udata.chunkno = idx;
     chk_udata.size    = oh->chunk[idx].size;
@@ -367,10 +367,10 @@ H5O__chunk_delete(H5F_t *f, H5O_t *oh, unsigned idx)
     FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
 
     /* check args */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(idx < oh->nchunks);
-    HDassert(idx > 0);
+    assert(f);
+    assert(oh);
+    assert(idx < oh->nchunks);
+    assert(idx > 0);
 
     /* Get the chunk proxy */
     if (NULL == (chk_proxy = H5O__chunk_protect(f, oh, idx)))
@@ -408,7 +408,7 @@ H5O__chunk_dest(H5O_chunk_proxy_t *chk_proxy)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(chk_proxy);
+    assert(chk_proxy);
 
     /* Decrement reference count of object header */
     if (H5O__dec_rc(chk_proxy->oh) < 0)

@@ -77,7 +77,7 @@ dset_ok(hid_t fid, const char *dset_name)
         goto error;
 
     /* Read the data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         goto error;
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0)
         goto error;
@@ -90,7 +90,7 @@ dset_ok(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         goto error;
 
-    HDfree(data);
+    free(data);
 
     return TRUE;
 
@@ -102,7 +102,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(data);
+    free(data);
 
     return FALSE;
 } /* end dset_ok() */
@@ -255,13 +255,13 @@ main(void)
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
-        HDprintf("Can't check if VFD is compatible with default VFD\n");
-        HDexit(EXIT_FAILURE);
+        printf("Can't check if VFD is compatible with default VFD\n");
+        exit(EXIT_FAILURE);
     }
 
     if (!driver_is_default_vfd_compatible) {
-        HDprintf("Skipping SWMR tests for VFD incompatible with default VFD\n");
-        HDexit(EXIT_SUCCESS);
+        printf("Skipping SWMR tests for VFD incompatible with default VFD\n");
+        exit(EXIT_SUCCESS);
     }
 
     /* TEST 1 */
@@ -433,12 +433,12 @@ main(void)
         SKIPPED();
 
     if (!vfd_supports_swmr)
-        HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
+        printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     h5_cleanup(FILENAME, fapl_id);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

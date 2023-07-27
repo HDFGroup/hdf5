@@ -238,7 +238,7 @@ H5P__copy_merge_comm_dt_list(H5O_copy_dtype_merge_list_t **value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     src_dt_list = *value;
@@ -301,7 +301,7 @@ H5P__ocpy_merge_comm_dt_list_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
@@ -333,7 +333,7 @@ H5P__ocpy_merge_comm_dt_list_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
@@ -368,8 +368,8 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt_list_ptr);
-    HDassert(size);
+    assert(dt_list_ptr);
+    assert(size);
 
     /* Iterate over merge committed dtype list */
     dt_list = *dt_list_ptr;
@@ -429,9 +429,9 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(dt_list);
+    assert(pp);
+    assert(*pp);
+    assert(dt_list);
 
     /* Start off with NULL (default value) */
     *dt_list = NULL;
@@ -445,7 +445,7 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
         if (NULL == (tmp_dt_list->path = H5MM_strdup(*(const char **)pp)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed")
         *pp += len + 1;
-        HDassert(len == HDstrlen(tmp_dt_list->path));
+        assert(len == HDstrlen(tmp_dt_list->path));
 
         /* Add copied node to dtype list */
         if (dt_list_tail) {
@@ -497,7 +497,7 @@ H5P__ocpy_merge_comm_dt_list_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Free the merge named dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
@@ -526,7 +526,7 @@ H5P__ocpy_merge_comm_dt_list_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
@@ -563,15 +563,15 @@ H5P__ocpy_merge_comm_dt_list_cmp(const void *_dt_list1, const void *_dt_list2, s
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(_dt_list1);
-    HDassert(_dt_list2);
-    HDassert(size == sizeof(H5O_copy_dtype_merge_list_t *));
+    assert(_dt_list1);
+    assert(_dt_list2);
+    assert(size == sizeof(H5O_copy_dtype_merge_list_t *));
 
     /* Walk through the lists, comparing each path.  For the lists to be the
      * same, the paths must be in the same order. */
     while (dt_list1 && dt_list2) {
-        HDassert(dt_list1->path);
-        HDassert(dt_list2->path);
+        assert(dt_list1->path);
+        assert(dt_list2->path);
 
         /* Compare paths */
         ret_value = HDstrcmp(dt_list1->path, dt_list2->path);
@@ -611,7 +611,7 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     /* Free the merge named dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);

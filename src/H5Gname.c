@@ -116,7 +116,7 @@ H5G__component(const char *name, size_t *size_p)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(name);
+    assert(name);
 
     while ('/' == *name)
         name++;
@@ -151,7 +151,7 @@ H5G_normalize(const char *name)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(name);
+    assert(name);
 
     /* Duplicate the name, to return */
     if (NULL == (norm = H5MM_strdup(name)))
@@ -215,13 +215,13 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
 
     /* Get component of each name */
     fullpath = H5RS_get_str(fullpath_r);
-    HDassert(fullpath);
+    assert(fullpath);
     fullpath = H5G__component(fullpath, &nchars1);
-    HDassert(fullpath);
+    assert(fullpath);
     prefix = H5RS_get_str(prefix_r);
-    HDassert(prefix);
+    assert(prefix);
     prefix = H5G__component(prefix, &nchars2);
-    HDassert(prefix);
+    assert(prefix);
 
     /* Check if we have a real string for each component */
     while (*fullpath && *prefix) {
@@ -235,9 +235,9 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
 
                 /* Get next component of each name */
                 fullpath = H5G__component(fullpath, &nchars1);
-                HDassert(fullpath);
+                assert(fullpath);
                 prefix = H5G__component(prefix, &nchars2);
-                HDassert(prefix);
+                assert(prefix);
             } /* end if */
             else
                 HGOTO_DONE(FALSE)
@@ -275,8 +275,8 @@ H5G__build_fullpath(const char *prefix, const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(prefix);
-    HDassert(name);
+    assert(prefix);
+    assert(name);
 
     /* Create full path */
     if (NULL == (ret_value = H5RS_create(prefix)))
@@ -310,12 +310,12 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(prefix_r);
-    HDassert(name);
+    assert(prefix_r);
+    assert(name);
 
     /* Get the raw string for the user path */
     prefix = H5RS_get_str(prefix_r);
-    HDassert(prefix);
+    assert(prefix);
 
     /* Create reference counted string for path */
     ret_value = H5G__build_fullpath(prefix, name);
@@ -342,13 +342,13 @@ H5G__name_init(H5G_name_t *name, const char *path)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(name);
+    assert(name);
 
     /* Set the initial paths for a name object */
     name->full_path_r = H5RS_create(path);
-    HDassert(name->full_path_r);
+    assert(name->full_path_r);
     name->user_path_r = H5RS_create(path);
-    HDassert(name->user_path_r);
+    assert(name->user_path_r);
     name->obj_hidden = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -374,9 +374,9 @@ H5G_name_set(const H5G_name_t *loc, H5G_name_t *obj, const char *name)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(loc);
-    HDassert(obj);
-    HDassert(name);
+    assert(loc);
+    assert(obj);
+    assert(name);
 
     /* Free & reset the object's previous paths info (if they exist) */
     H5G_name_free(obj);
@@ -428,13 +428,13 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(src);
-    HDassert(dst);
+    assert(src);
+    assert(dst);
 #if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
-    HDassert(dst->full_path_r == NULL);
-    HDassert(dst->user_path_r == NULL);
+    assert(dst->full_path_r == NULL);
+    assert(dst->user_path_r == NULL);
 #endif /* H5_USING_MEMCHECKER */
-    HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
+    assert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
     H5MM_memcpy(dst, src, sizeof(H5G_name_t));
@@ -476,7 +476,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(loc);
+    assert(loc);
 
     /* If the user path is available and it's not "hidden", use it */
     if (loc->path->user_path_r != NULL && loc->path->obj_hidden == 0) {
@@ -533,10 +533,10 @@ H5G_name_reset(H5G_name_t *name)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(name);
+    assert(name);
 
     /* Clear the group hier. name to an empty state */
-    HDmemset(name, 0, sizeof(H5G_name_t));
+    memset(name, 0, sizeof(H5G_name_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_name_reset() */
@@ -560,7 +560,7 @@ H5G_name_free(H5G_name_t *name)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(name);
+    assert(name);
 
     if (name->full_path_r) {
         H5RS_decr(name->full_path_r);
@@ -600,14 +600,14 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(path_r_ptr && *path_r_ptr);
-    HDassert(full_suffix);
-    HDassert(src_path);
-    HDassert(dst_path);
+    assert(path_r_ptr && *path_r_ptr);
+    assert(full_suffix);
+    assert(src_path);
+    assert(dst_path);
 
     /* Get pointer to path to update */
     path = H5RS_get_str(*path_r_ptr);
-    HDassert(path);
+    assert(path);
 
     /* Check if path needs to be updated */
     full_suffix_len = HDstrlen(full_suffix);
@@ -692,7 +692,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(obj_ptr);
+    assert(obj_ptr);
 
     /* Get the symbol table entry */
     switch (H5I_get_type(obj_id)) {
@@ -736,8 +736,8 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
     } /* end switch */
-    HDassert(oloc);
-    HDassert(obj_path);
+    assert(oloc);
+    assert(obj_path);
 
     /* Check if the object has a full path still */
     if (!obj_path->full_path_r)
@@ -880,7 +880,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 H5RS_str_t *rs;          /* Ref-counted string for new path */
 
                 /* Sanity check */
-                HDassert(names->dst_full_path_r);
+                assert(names->dst_full_path_r);
 
                 /* Get pointers to paths of interest */
                 full_path = H5RS_get_str(obj_path->full_path_r);
@@ -888,8 +888,8 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 dst_path  = H5RS_get_str(names->dst_full_path_r);
 
                 /* Make certain that the source and destination names are full (not relative) paths */
-                HDassert(*src_path == '/');
-                HDassert(*dst_path == '/');
+                assert(*src_path == '/');
+                assert(*dst_path == '/');
 
                 /* Get pointer to "full suffix" */
                 full_suffix = full_path + HDstrlen(src_path);
@@ -947,7 +947,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(src_file);
+    assert(src_file);
 
     /* Check if the object we are manipulating has a path */
     if (src_full_path_r) {
@@ -1089,10 +1089,10 @@ H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo, 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(path);
-    HDassert(linfo);
-    HDassert(udata->loc);
-    HDassert(udata->path == NULL);
+    assert(path);
+    assert(linfo);
+    assert(udata->loc);
+    assert(udata->path == NULL);
 
     /* Check for hard link with correct address */
     if (linfo->type == H5L_TYPE_HARD) {
@@ -1165,7 +1165,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
     herr_t          ret_value = SUCCEED; /* Return value             */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
 
     FUNC_ENTER_NOAPI(FAIL)
 

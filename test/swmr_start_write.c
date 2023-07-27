@@ -71,7 +71,7 @@ create_file(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned 
     hid_t sid;  /* Dataspace ID */
     hid_t aid;  /* Attribute ID */
 
-    HDassert(filename);
+    assert(filename);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)
@@ -87,7 +87,7 @@ create_file(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned 
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Creating file without SWMR access\n");
+        fprintf(verbose_file, "Creating file without SWMR access\n");
 
     /* Create the file */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
@@ -145,7 +145,7 @@ create_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file, 
     hsize_t  chunk_dims[2] = {1, CHUNK_SIZE};    /* Chunk dimensions */
     unsigned u, v;                               /* Local index variable */
 
-    HDassert(index_type);
+    assert(index_type);
 
     /* Create datatype for creating datasets */
     if ((tid = create_symbol_datatype()) < 0)
@@ -174,7 +174,7 @@ create_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file, 
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Creating datasets\n");
+        fprintf(verbose_file, "Creating datasets\n");
 
     /* Create the datasets */
     for (u = 0; u < NLEVELS; u++)
@@ -219,11 +219,11 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
     unsigned long rec_to_flush;                         /* # of records left to write before flush */
     unsigned long u, v;                                 /* Local index variables */
 
-    HDassert(fid >= 0);
+    assert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Create a dataspace for the record to add */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -306,7 +306,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Closing datasets\n");
+        fprintf(verbose_file, "Closing datasets\n");
 
     /* Close the datasets */
     for (u = 0; u < NLEVELS; u++)
@@ -320,27 +320,27 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
 static void
 usage(void)
 {
-    HDprintf("\n");
-    HDprintf("Usage error!\n");
-    HDprintf("\n");
-    HDprintf("Usage: swmr_start_write [-f <# of records to write between flushing file contents>]\n");
-    HDprintf("    [-i <index type>] [-c <deflate compression level>]\n");
-    HDprintf("    [-r <random seed>] [-q] <# of records>\n");
-    HDprintf("\n");
-    HDprintf("<# of records to write between flushing file contents> should be 0\n");
-    HDprintf("(for no flushing) or between 1 and (<# of records> - 1).\n");
-    HDprintf("\n");
-    HDprintf("<index type> should be b2 or ea\n");
-    HDprintf("\n");
-    HDprintf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
-    HDprintf("\n");
-    HDprintf("<# of records> must be specified.\n");
-    HDprintf("\n");
-    HDprintf("Defaults to flushing every 10000 records ('-f 10000'),\n");
-    HDprintf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
-    HDprintf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
-    HDprintf("\n");
-    HDexit(EXIT_FAILURE);
+    printf("\n");
+    printf("Usage error!\n");
+    printf("\n");
+    printf("Usage: swmr_start_write [-f <# of records to write between flushing file contents>]\n");
+    printf("    [-i <index type>] [-c <deflate compression level>]\n");
+    printf("    [-r <random seed>] [-q] <# of records>\n");
+    printf("\n");
+    printf("<# of records to write between flushing file contents> should be 0\n");
+    printf("(for no flushing) or between 1 and (<# of records> - 1).\n");
+    printf("\n");
+    printf("<index type> should be b2 or ea\n");
+    printf("\n");
+    printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
+    printf("\n");
+    printf("<# of records> must be specified.\n");
+    printf("\n");
+    printf("Defaults to flushing every 10000 records ('-f 10000'),\n");
+    printf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
+    printf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
+    printf("\n");
+    exit(EXIT_FAILURE);
 } /* usage() */
 
 /*
@@ -375,7 +375,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* Compress dataset chunks */
                     case 'c':
-                        comp_level = HDatoi(argv[u + 1]);
+                        comp_level = atoi(argv[u + 1]);
                         if (comp_level < -1 || comp_level > 9)
                             usage();
                         u += 2;
@@ -406,7 +406,7 @@ main(int argc, char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;
-                        temp     = HDatoi(argv[u + 1]);
+                        temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();
                         else
@@ -449,33 +449,33 @@ main(int argc, char *argv[])
         char verbose_name[1024];
 
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
-        if (NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
-            HDfprintf(stderr, "Can't open verbose output file!\n");
-            HDexit(EXIT_FAILURE);
+        if (NULL == (verbose_file = fopen(verbose_name, "w"))) {
+            fprintf(stderr, "Can't open verbose output file!\n");
+            exit(EXIT_FAILURE);
         }
     } /* end if */
 
     /* Emit informational message */
     if (verbose) {
-        HDfprintf(verbose_file, "Parameters:\n");
-        HDfprintf(verbose_file, "\tindex type = %s\n", index_type);
-        HDfprintf(verbose_file, "\tcompression level = %d\n", comp_level);
-        HDfprintf(verbose_file, "\t# of records between flushes = %ld\n", flush_count);
-        HDfprintf(verbose_file, "\t# of records to write = %ld\n", nrecords);
+        fprintf(verbose_file, "Parameters:\n");
+        fprintf(verbose_file, "\tindex type = %s\n", index_type);
+        fprintf(verbose_file, "\tcompression level = %d\n", comp_level);
+        fprintf(verbose_file, "\t# of records between flushes = %ld\n", flush_count);
+        fprintf(verbose_file, "\t# of records to write = %ld\n", nrecords);
     } /* end if */
 
     /* ALWAYS emit the random seed for possible debugging */
-    HDfprintf(stdout, "Using writer random seed: %u\n", random_seed);
+    fprintf(stdout, "Using writer random seed: %u\n", random_seed);
 
     /* Create the test file */
     if ((fid = create_file(FILENAME, verbose, verbose_file, random_seed)) < 0) {
-        HDfprintf(stderr, "Error creating the file...\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error creating the file...\n");
+        exit(EXIT_FAILURE);
     }
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Generating symbol names\n");
+        fprintf(verbose_file, "Generating symbol names\n");
 
     /* Generate dataset names */
     if (generate_symbols() < 0)
@@ -483,14 +483,14 @@ main(int argc, char *argv[])
 
     /* Create the datasets in the file */
     if (create_datasets(fid, comp_level, verbose, verbose_file, index_type) < 0) {
-        HDfprintf(stderr, "Error creating datasets...\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error creating datasets...\n");
+        exit(EXIT_FAILURE);
     }
 
     /* Enable SWMR writing mode */
     if (H5Fstart_swmr_write(fid) < 0) {
-        HDfprintf(stderr, "Error starting SWMR writing mode...\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error starting SWMR writing mode...\n");
+        exit(EXIT_FAILURE);
     }
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -498,32 +498,32 @@ main(int argc, char *argv[])
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Adding records\n");
+        fprintf(verbose_file, "Adding records\n");
 
     /* Append records to datasets */
     if (add_records(fid, verbose, verbose_file, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
-        HDfprintf(stderr, "Error appending records to datasets!\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error appending records to datasets!\n");
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Releasing symbols\n");
+        fprintf(verbose_file, "Releasing symbols\n");
 
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
-        HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error releasing symbols!\n");
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Closing the file\n");
+        fprintf(verbose_file, "Closing the file\n");
 
     /* Close objects opened */
     if (H5Fclose(fid) < 0) {
-        HDfprintf(stderr, "Error closing file!\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error closing file!\n");
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

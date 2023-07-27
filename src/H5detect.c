@@ -41,7 +41,7 @@ static const char *FileHeader = "\n\
  */
 #undef NDEBUG
 #include "H5private.h"
-/* Do NOT use HDfprintf in this file as it is not linked with the library,
+/* Do NOT use fprintf in this file as it is not linked with the library,
  * which contains the H5system.c file in which the function is defined.
  */
 #include "H5Tpublic.h"
@@ -132,12 +132,12 @@ precision(detected_t *d)
         int           _i, _j, _last = (-1);                                                                  \
         const char   *_mesg;                                                                                 \
                                                                                                              \
-        HDmemset(&INFO, 0, sizeof(INFO));                                                                    \
+        memset(&INFO, 0, sizeof(INFO));                                                                      \
         INFO.varname = #VAR;                                                                                 \
         INFO.size    = sizeof(TYPE);                                                                         \
                                                                                                              \
         /* Initialize padding mask */                                                                        \
-        HDmemset(_pad_mask, 0, sizeof(_pad_mask));                                                           \
+        memset(_pad_mask, 0, sizeof(_pad_mask));                                                             \
                                                                                                              \
         /* Padding bits.  Set a variable to 4.0, then flip each bit and see if                               \
          * the modified variable is equal ("==") to the original.  Build a                                   \
@@ -147,11 +147,11 @@ precision(detected_t *d)
          * and interfere with detection of the various properties below unless we                            \
          * know to ignore them. */                                                                           \
         _v1 = (TYPE)4.0L;                                                                                    \
-        HDmemcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                   \
+        memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                     \
         for (_i = 0; _i < (int)sizeof(TYPE); _i++)                                                           \
             for (_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char)(_byte_mask << 1)) { \
                 _buf1[_i] ^= _byte_mask;                                                                     \
-                HDmemcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                   \
+                memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                     \
                 H5_GCC_CLANG_DIAG_OFF("float-equal")                                                         \
                 if (_v1 != _v2)                                                                              \
                     _pad_mask[_i] |= _byte_mask;                                                             \
@@ -164,8 +164,8 @@ precision(detected_t *d)
             _v3 = _v1;                                                                                       \
             _v1 += _v2;                                                                                      \
             _v2 /= (TYPE)256.0L;                                                                             \
-            HDmemcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                               \
-            HDmemcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                               \
+            memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                 \
+            memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                                 \
             _j = byte_cmp(sizeof(TYPE), _buf3, _buf1, _pad_mask);                                            \
             if (_j >= 0) {                                                                                   \
                 INFO.perm[_i] = _j;                                                                          \
@@ -366,9 +366,9 @@ H5T__init_native(void)\n\
     dt->shared->u.atomic.prec = %d;\n\
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
-                d[i].offset,                            /*offset        */
-                d[i].precision);                        /*precision        */
-        /*HDassert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that byte-order doesn't change */
+                d[i].offset,                          /*offset        */
+                d[i].precision);                      /*precision        */
+        /*assert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that byte-order doesn't change */
 
         /* The part unique to floating point types */
         fprintf(rawoutstream, "\
@@ -547,7 +547,7 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned char 
     unsigned char  aa, bb;
 
     for (i = 0; i < nbytes; i++) {
-        HDassert(perm[i] < (int)nbytes);
+        assert(perm[i] < (int)nbytes);
         if ((aa = (unsigned char)(a[perm[i]] & pad_mask[perm[i]])) !=
             (bb = (unsigned char)(b[perm[i]] & pad_mask[perm[i]]))) {
             unsigned int j;
@@ -613,7 +613,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
              *          It could have some other endianness and fall into this
              *          case - JKM & QAK)
              */
-            HDassert(0 == n % 2);
+            assert(0 == n % 2);
             if (mesg)
                 *mesg = "VAX";
             for (i = 0; i < n; i += 2) {
@@ -624,7 +624,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
     }
     else {
         fprintf(stderr, "Failed to detect byte order of %d-byte floating point.\n", n);
-        HDexit(1);
+        exit(1);
     }
 }
 
@@ -914,7 +914,7 @@ main(int argc, char *argv[])
     /* First check if filename is string "NULL" */
     if (fname != NULL) {
         /* binary output */
-        if ((f = HDfopen(fname, "w")) != NULL)
+        if ((f = fopen(fname, "w")) != NULL)
             rawoutstream = f;
     }
     if (!rawoutstream)

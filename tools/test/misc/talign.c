@@ -51,7 +51,7 @@ main(void)
     int    result = 0;
     herr_t error  = 1;
 
-    HDprintf("%-70s", "Testing alignment in compound datatypes");
+    printf("%-70s", "Testing alignment in compound datatypes");
 
     HDstrcpy(string5, "Hi!");
     HDunlink(fname);
@@ -122,7 +122,7 @@ main(void)
     H5Dclose(set);
 
     /* Now open the set, and read it back in */
-    data = (char *)HDmalloc(H5Tget_size(fix));
+    data = (char *)malloc(H5Tget_size(fix));
 
     if (!data) {
         HDperror("malloc() failed");
@@ -146,39 +146,39 @@ out:
 
         result = 1;
         mname  = H5Tget_member_name(fix, 0);
-        HDprintf("%14s (%2d) %6s = %s\n", mname ? mname : "(null)", (int)H5Tget_member_offset(fix, 0),
-                 string5, (char *)(data + H5Tget_member_offset(fix, 0)));
+        printf("%14s (%2d) %6s = %s\n", mname ? mname : "(null)", (int)H5Tget_member_offset(fix, 0), string5,
+               (char *)(data + H5Tget_member_offset(fix, 0)));
         if (mname)
             H5free_memory(mname);
 
         fptr  = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
         mname = H5Tget_member_name(fix, 1);
-        HDprintf("Data comparison:\n"
-                 "%14s (%2d) %6f = %f\n"
-                 "                    %6f = %f\n",
-                 mname ? mname : "(null)", (int)H5Tget_member_offset(fix, 1), (double)fok[0], (double)fptr[0],
-                 (double)fok[1], (double)fptr[1]);
+        printf("Data comparison:\n"
+               "%14s (%2d) %6f = %f\n"
+               "                    %6f = %f\n",
+               mname ? mname : "(null)", (int)H5Tget_member_offset(fix, 1), (double)fok[0], (double)fptr[0],
+               (double)fok[1], (double)fptr[1]);
         if (mname)
             H5free_memory(mname);
 
         fptr  = (float *)((void *)(data + H5Tget_member_offset(fix, 2)));
         mname = H5Tget_member_name(fix, 2);
-        HDprintf("%14s (%2d) %6f = %f\n"
-                 "                    %6f = %6f\n",
-                 mname ? mname : "(null)", (int)H5Tget_member_offset(fix, 2), (double)fnok[0],
-                 (double)fptr[0], (double)fnok[1], (double)fptr[1]);
+        printf("%14s (%2d) %6f = %f\n"
+               "                    %6f = %6f\n",
+               mname ? mname : "(null)", (int)H5Tget_member_offset(fix, 2), (double)fnok[0], (double)fptr[0],
+               (double)fnok[1], (double)fptr[1]);
         if (mname)
             H5free_memory(mname);
 
         fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
-        HDprintf("\n"
-                 "Short circuit\n"
-                 "                    %6f = %f\n"
-                 "                    %6f = %f\n"
-                 "                    %6f = %f\n"
-                 "                    %6f = %f\n",
-                 (double)fok[0], (double)fptr[0], (double)fok[1], (double)fptr[1], (double)fnok[0],
-                 (double)fptr[2], (double)fnok[1], (double)fptr[3]);
+        printf("\n"
+               "Short circuit\n"
+               "                    %6f = %f\n"
+               "                    %6f = %f\n"
+               "                    %6f = %f\n"
+               "                    %6f = %f\n",
+               (double)fok[0], (double)fptr[0], (double)fok[1], (double)fptr[1], (double)fnok[0],
+               (double)fptr[2], (double)fnok[1], (double)fptr[3]);
         HDputs("*FAILED - compound type alignmnent problem*");
     }
     else {
@@ -186,7 +186,7 @@ out:
     }
 
     if (data)
-        HDfree(data);
+        free(data);
     H5Sclose(spc);
     H5Tclose(cs6);
     H5Tclose(cmp);
@@ -197,6 +197,6 @@ out:
     H5Pclose(plist);
     H5Fclose(fil);
     HDunlink(fname);
-    HDfflush(stdout);
+    fflush(stdout);
     return result;
 }

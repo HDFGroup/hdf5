@@ -268,7 +268,7 @@ H5P__dapl_vds_file_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -292,7 +292,7 @@ H5P__dapl_vds_file_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -329,7 +329,7 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* encode the length of the prefix */
@@ -372,14 +372,14 @@ H5P__dapl_vds_file_pref_dec(const void **_pp, void *_value)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(vds_file_pref);
+    assert(pp);
+    assert(*pp);
+    assert(vds_file_pref);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -415,7 +415,7 @@ H5P__dapl_vds_file_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -435,7 +435,7 @@ H5P__dapl_vds_file_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNU
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     *(char **)value = H5MM_xstrdup(*(const char **)value);
 
@@ -485,7 +485,7 @@ H5P__dapl_vds_file_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UN
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -508,7 +508,7 @@ H5P__dapl_efile_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -532,7 +532,7 @@ H5P__dapl_efile_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -569,7 +569,7 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* encode the length of the prefix */
@@ -612,14 +612,14 @@ H5P__dapl_efile_pref_dec(const void **_pp, void *_value)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(efile_pref);
+    assert(pp);
+    assert(*pp);
+    assert(efile_pref);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -655,7 +655,7 @@ H5P__dapl_efile_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -675,7 +675,7 @@ H5P__dapl_efile_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     *(char **)value = H5MM_xstrdup(*(const char **)value);
 
@@ -725,7 +725,7 @@ H5P__dapl_efile_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -873,7 +873,7 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
 
     /* Sanity checks */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(size);
+    assert(size);
 
     /* Determine if this is the default value, in which case only encode
      * enc_size (as 255).  Also set size needed for encoding. */
@@ -884,11 +884,11 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
     else {
         enc_value = (uint64_t) * (const size_t *)value;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size > 0);
+        assert(enc_size > 0);
         *size += (1 + enc_size);
     } /* end else */
 
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* Encode the size */
@@ -928,13 +928,13 @@ H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Determine if enc_size indicates that this is the default value, in which
      * case set value to H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF and return */
@@ -973,7 +973,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
 
     /* Sanity checks */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(size);
+    assert(size);
 
     /* Determine if this is the default value, in which case only encode
      * enc_size (as 255).  Also set size needed for encoding. */
@@ -984,11 +984,11 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
     else {
         enc_value = (uint64_t) * (const size_t *)value;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size > 0);
+        assert(enc_size > 0);
         *size += (1 + enc_size);
     } /* end else */
 
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* Encode the size */
@@ -1028,13 +1028,13 @@ H5P__decode_chunk_cache_nbytes(const void **_pp, void *_value)
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Determine if enc_size indicates that this is the default value, in which
      * case set value to H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF and return */
@@ -1143,8 +1143,8 @@ H5P__dacc_vds_view_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(view);
-    HDassert(size);
+    assert(view);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode EDC property */
@@ -1175,9 +1175,9 @@ H5P__dacc_vds_view_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(view);
+    assert(pp);
+    assert(*pp);
+    assert(view);
 
     /* Decode EDC property */
     *view = (H5D_vds_view_t) * (*pp)++;
@@ -1316,7 +1316,7 @@ H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D
     info.func  = func;
     info.udata = udata;
 
-    HDmemset(info.boundary, 0, sizeof(info.boundary));
+    memset(info.boundary, 0, sizeof(info.boundary));
     /* boundary can be 0 to indicate no boundary is set */
     for (u = 0; u < ndims; u++) {
         if (boundary[u] != (boundary[u] & 0xffffffff)) /* negative value (including H5S_UNLIMITED) */
@@ -1366,7 +1366,7 @@ H5Pget_append_flush(hid_t plist_id, unsigned ndims, hsize_t boundary[], H5D_appe
 
     /* Assign return values */
     if (boundary) {
-        HDmemset(boundary, 0, ndims * sizeof(hsize_t));
+        memset(boundary, 0, ndims * sizeof(hsize_t));
         if (info.ndims > 0)
             for (u = 0; u < info.ndims && u < ndims; u++)
                 boundary[u] = info.boundary[u];

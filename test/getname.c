@@ -1470,7 +1470,7 @@ test_main(hid_t file_id, hid_t fapl)
         char *name3;
 
         /* Include the extra null character */
-        name3 = (char *)HDmalloc(name_len + 1);
+        name3 = (char *)malloc(name_len + 1);
         if (!name3)
             TEST_ERROR;
 
@@ -1493,7 +1493,7 @@ test_main(hid_t file_id, hid_t fapl)
         if (HDstrcmp(name3, "/g") != 0)
             TEST_ERROR;
 
-        HDfree(name3);
+        free(name3);
     }
 
     /* Close */
@@ -3327,7 +3327,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset in /Group1");
     if ((dataset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[1])) < 0)
         FAIL_STACK_ERROR;
@@ -3343,7 +3343,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to /Group1");
     if ((group = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[2])) < 0)
         FAIL_STACK_ERROR;
@@ -3359,7 +3359,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to datatype in /Group1");
     if ((tid1 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[3])) < 0)
         FAIL_STACK_ERROR;
@@ -3375,7 +3375,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset in nested group");
     if ((dataset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[4])) < 0)
         FAIL_STACK_ERROR;
@@ -3391,7 +3391,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to nested group");
     if ((group = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[5])) < 0)
         FAIL_STACK_ERROR;
@@ -3407,7 +3407,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset created via hard link");
     if ((dataset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[6])) < 0)
         FAIL_STACK_ERROR;
@@ -3423,7 +3423,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to root group");
     if ((group = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[7])) < 0)
         FAIL_STACK_ERROR;

@@ -54,11 +54,11 @@ HD5f2cstring(_fcd fdesc, size_t len)
         /*EMPTY*/;
 
     /* Allocate C string */
-    if (NULL == (cstr = (char *)HDmalloc((size_t)(i + 2))))
+    if (NULL == (cstr = (char *)malloc((size_t)(i + 2))))
         return NULL;
 
     /* Copy text from FORTRAN to C string */
-    HDmemcpy(cstr, str, (size_t)(i + 1));
+    memcpy(cstr, str, (size_t)(i + 1));
 
     /* Terminate C string */
     cstr[i + 1] = '\0';
@@ -94,10 +94,10 @@ HD5packFstring(char *src, char *dest, size_t dst_len)
 
     /* Copy over the string information, up to the length of the src */
     /* (Don't copy the NUL terminator from the C string to the FORTRAN string */
-    HDmemcpy(dest, src, MIN(src_len, dst_len));
+    memcpy(dest, src, MIN(src_len, dst_len));
 
     /* Pad out any remaining space in the FORTRAN string with ' 's */
     if (src_len < dst_len)
-        HDmemset(&dest[src_len], ' ', dst_len - src_len);
+        memset(&dest[src_len], ' ', dst_len - src_len);
 
 } /* HD5packFstring */

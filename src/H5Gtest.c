@@ -560,8 +560,8 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(user_path_len);
-    HDassert(obj_hidden);
+    assert(user_path_len);
+    assert(obj_hidden);
 
     /* Get pointer to object for ID */
     if (NULL == (obj_ptr = H5VL_object(obj_id)))
@@ -611,7 +611,7 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object type")
     } /* end switch */
-    HDassert(obj_path);
+    assert(obj_path);
 
     /* Retrieve a copy of the user path and put it into the buffer */
     if (obj_path->user_path_r) {
@@ -723,8 +723,8 @@ H5G__verify_cached_stabs_test_cb(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, h
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(H5F_addr_defined(addr));
 
     /* Load the node */
     if (NULL == (sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
@@ -777,7 +777,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
 
     if (targ_oh) {
-        HDassert(ret_value == H5_ITER_ERROR);
+        assert(ret_value == H5_ITER_ERROR);
         if (H5O_unprotect(&targ_oloc, targ_oh, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release object header");
     } /* end if */
@@ -815,7 +815,7 @@ H5G__verify_cached_stabs_test(hid_t gid)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(gid >= 0);
+    assert(gid >= 0);
 
     /* Check args */
     if (NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))

@@ -1036,10 +1036,10 @@ test_LD_elmts_one(const char *file, const char *dname, const char *fields)
 
     /* Loop through different variations of extending the dataset */
     for (i = 0; i < ONE_NTESTS; i++) {
-        HDmemset(vbuf1, 0, TEST_BUF_SIZE * sizeof(test_valid_fields1));
-        HDmemset(vbuf2, 0, TEST_BUF_SIZE * sizeof(test_valid_fields2));
-        HDmemset(ccbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
-        HDmemset(iibuf, 0, TEST_BUF_SIZE * sizeof(int));
+        memset(vbuf1, 0, TEST_BUF_SIZE * sizeof(test_valid_fields1));
+        memset(vbuf2, 0, TEST_BUF_SIZE * sizeof(test_valid_fields2));
+        memset(ccbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
+        memset(iibuf, 0, TEST_BUF_SIZE * sizeof(int));
 
         ext_dims[0] = (hsize_t)((int)prev_dims[0] + one_tests[i]);
 
@@ -1247,10 +1247,10 @@ test_LD_elmts_two(const char *file, const char *dname, const char *fields)
 
     /* Loop through different variations of extending the dataset */
     for (i = 0; i < TWO_NTESTS; i++) {
-        HDmemset(vbuf1, 0, TEST_BUF_SIZE * sizeof(test_valid_fields1));
-        HDmemset(vbuf2, 0, TEST_BUF_SIZE * sizeof(test_valid_fields2));
-        HDmemset(ccbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
-        HDmemset(iibuf, 0, TEST_BUF_SIZE * sizeof(int));
+        memset(vbuf1, 0, TEST_BUF_SIZE * sizeof(test_valid_fields1));
+        memset(vbuf2, 0, TEST_BUF_SIZE * sizeof(test_valid_fields2));
+        memset(ccbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
+        memset(iibuf, 0, TEST_BUF_SIZE * sizeof(int));
 
         ext_dims[0] = (hsize_t)((int)prev_dims[0] + two_tests[i][0]);
         ext_dims[1] = (hsize_t)((int)prev_dims[1] + two_tests[i][1]);
@@ -1350,19 +1350,19 @@ main(void)
     int nerrors = 0;
 
     /* Set up temporary buffers for tests: test_LD_elmts_one() & test_LD_elmts_two() */
-    if (NULL == (ibuf = (int *)HDmalloc(sizeof(int) * TEST_BUF_SIZE)))
+    if (NULL == (ibuf = (int *)malloc(sizeof(int) * TEST_BUF_SIZE)))
         FAIL_STACK_ERROR;
-    if (NULL == (iibuf = (int *)HDmalloc(sizeof(int) * TEST_BUF_SIZE)))
-        FAIL_STACK_ERROR;
-
-    if (NULL == (cbuf = (set_t *)HDmalloc(sizeof(set_t) * TEST_BUF_SIZE)))
-        FAIL_STACK_ERROR;
-    if (NULL == (ccbuf = (set_t *)HDmalloc(sizeof(set_t) * TEST_BUF_SIZE)))
+    if (NULL == (iibuf = (int *)malloc(sizeof(int) * TEST_BUF_SIZE)))
         FAIL_STACK_ERROR;
 
-    if (NULL == (vbuf1 = (test_valid_fields1 *)HDmalloc(sizeof(test_valid_fields1) * TEST_BUF_SIZE)))
+    if (NULL == (cbuf = (set_t *)malloc(sizeof(set_t) * TEST_BUF_SIZE)))
         FAIL_STACK_ERROR;
-    if (NULL == (vbuf2 = (test_valid_fields2 *)HDmalloc(sizeof(test_valid_fields2) * TEST_BUF_SIZE)))
+    if (NULL == (ccbuf = (set_t *)malloc(sizeof(set_t) * TEST_BUF_SIZE)))
+        FAIL_STACK_ERROR;
+
+    if (NULL == (vbuf1 = (test_valid_fields1 *)malloc(sizeof(test_valid_fields1) * TEST_BUF_SIZE)))
+        FAIL_STACK_ERROR;
+    if (NULL == (vbuf2 = (test_valid_fields2 *)malloc(sizeof(test_valid_fields2) * TEST_BUF_SIZE)))
         FAIL_STACK_ERROR;
 
     /*
@@ -1414,17 +1414,17 @@ main(void)
 
     /* Free temporary buffers */
     if (ibuf)
-        HDfree(ibuf);
+        free(ibuf);
     if (iibuf)
-        HDfree(iibuf);
+        free(iibuf);
     if (cbuf)
-        HDfree(cbuf);
+        free(cbuf);
     if (ccbuf)
-        HDfree(ccbuf);
+        free(ccbuf);
     if (vbuf1)
-        HDfree(vbuf1);
+        free(vbuf1);
     if (vbuf2)
-        HDfree(vbuf2);
+        free(vbuf2);
 
     /* check for errors */
     if (nerrors)

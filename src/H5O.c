@@ -2235,7 +2235,7 @@ H5O__are_mdc_flushes_disabled(const H5O_loc_t *oloc, hbool_t *are_disabled)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(are_disabled);
+    assert(are_disabled);
 
     if (H5AC_cork(oloc->file, oloc->addr, H5AC__GET_CORKED, are_disabled) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve object's cork status");

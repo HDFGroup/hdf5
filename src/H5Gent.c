@@ -85,9 +85,9 @@ H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, const uint8_t *p_end, H5
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
-    HDassert(pp);
-    HDassert(ent);
+    assert(f);
+    assert(pp);
+    assert(ent);
 
     /* decode entries */
     for (u = 0; u < n; u++) {
@@ -126,9 +126,9 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, const uint8
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(pp);
-    HDassert(ent);
+    assert(f);
+    assert(pp);
+    assert(ent);
 
     if (H5_IS_BUFFER_OVERFLOW(*pp, ent->name_off, p_end))
         HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, FAIL, "image pointer is out of bounds")
@@ -154,7 +154,7 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, const uint8
             break;
 
         case H5G_CACHED_STAB:
-            HDassert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+            assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
             if (H5_IS_BUFFER_OVERFLOW(*pp, H5F_SIZEOF_ADDR(f) * 2, p_end))
                 HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, FAIL, "image pointer is out of bounds")
             H5F_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
@@ -204,9 +204,9 @@ H5G__ent_encode_vec(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsign
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
-    HDassert(pp);
-    HDassert(ent);
+    assert(f);
+    assert(pp);
+    assert(ent);
 
     /* encode entries */
     for (u = 0; u < n; u++)
@@ -242,8 +242,8 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(pp);
+    assert(f);
+    assert(pp);
 
     /* Check for actual entry to encode */
     if (ent) {
@@ -259,7 +259,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
                 break;
 
             case H5G_CACHED_STAB:
-                HDassert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+                assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
                 H5F_addr_encode(f, pp, ent->cache.stab.btree_addr);
                 H5F_addr_encode(f, pp, ent->cache.stab.heap_addr);
                 break;
@@ -283,7 +283,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 
     /* fill with zero */
     if (*pp < p_ret)
-        HDmemset(*pp, 0, (size_t)(p_ret - *pp));
+        memset(*pp, 0, (size_t)(p_ret - *pp));
     *pp = p_ret;
 
 done:
@@ -319,9 +319,9 @@ H5G__ent_copy(H5G_entry_t *dst, H5G_entry_t *src, H5_copy_depth_t depth)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(src);
-    HDassert(dst);
-    HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
+    assert(src);
+    assert(dst);
+    assert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
     H5MM_memcpy(dst, src, sizeof(H5G_entry_t));
@@ -357,10 +357,10 @@ H5G__ent_reset(H5G_entry_t *ent)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(ent);
+    assert(ent);
 
     /* Clear the symbol table entry to an empty state */
-    HDmemset(ent, 0, sizeof(H5G_entry_t));
+    memset(ent, 0, sizeof(H5G_entry_t));
     ent->header = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI_VOID
@@ -389,10 +389,10 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
-    HDassert(heap);
-    HDassert(name);
-    HDassert(lnk);
+    assert(f);
+    assert(heap);
+    assert(name);
+    assert(lnk);
 
     /* Reset the new entry */
     H5G__ent_reset(ent);
@@ -428,7 +428,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
                     if ((stab_exists = H5O_msg_exists(&targ_oloc, H5O_STAB_ID)) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for STAB message")
 
-                    HDassert(!stab_exists);
+                    assert(!stab_exists);
                 } /* end else */
 #endif            /* NDEBUG */
             }     /* end if */
@@ -528,47 +528,47 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth, con
     nested_indent = indent + 3;
     nested_fwidth = MAX(0, fwidth - 3);
 
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-              "Name offset into private heap:", (unsigned long)(ent->name_off));
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+            "Name offset into private heap:", (unsigned long)(ent->name_off));
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object header address:", ent->header);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object header address:", ent->header);
 
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cache info type:");
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cache info type:");
     switch (ent->type) {
         case H5G_NOTHING_CACHED:
-            HDfprintf(stream, "Nothing Cached\n");
+            fprintf(stream, "Nothing Cached\n");
             break;
 
         case H5G_CACHED_STAB:
-            HDfprintf(stream, "Symbol Table\n");
+            fprintf(stream, "Symbol Table\n");
 
-            HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Cached entry information:");
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
-                      "B-tree address:", ent->cache.stab.btree_addr);
+            fprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Cached entry information:");
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
+                    "B-tree address:", ent->cache.stab.btree_addr);
 
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
-                      "Heap address:", ent->cache.stab.heap_addr);
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
+                    "Heap address:", ent->cache.stab.heap_addr);
             break;
 
         case H5G_CACHED_SLINK:
-            HDfprintf(stream, "Symbolic Link\n");
-            HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Cached information:");
-            HDfprintf(stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
-                      "Link value offset:", (unsigned long)(ent->cache.slink.lval_offset));
+            fprintf(stream, "Symbolic Link\n");
+            fprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Cached information:");
+            fprintf(stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
+                    "Link value offset:", (unsigned long)(ent->cache.slink.lval_offset));
             if (heap) {
                 lval = (const char *)H5HL_offset_into(heap, ent->cache.slink.lval_offset);
-                HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
-                          "Link value:", (lval == NULL) ? "" : lval);
+                fprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
+                        "Link value:", (lval == NULL) ? "" : lval);
             } /* end if */
             else
-                HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth,
-                          "Warning: Invalid heap address given, name not displayed!");
+                fprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth,
+                        "Warning: Invalid heap address given, name not displayed!");
             break;
 
         case H5G_CACHED_ERROR:
         case H5G_NCACHED:
         default:
-            HDfprintf(stream, "*** Unknown symbol type %d\n", ent->type);
+            fprintf(stream, "*** Unknown symbol type %d\n", ent->type);
             break;
     } /* end switch */
 

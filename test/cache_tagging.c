@@ -1810,7 +1810,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
         TEST_ERROR;
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -1967,14 +1967,14 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_rename_tags */
 
@@ -2023,7 +2023,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
         TEST_ERROR;
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2159,14 +2159,14 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_delete_tags */
 
@@ -2690,7 +2690,7 @@ check_dataset_write_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2803,14 +2803,14 @@ check_dataset_write_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_write_tags */
 
@@ -2854,7 +2854,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2990,14 +2990,14 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_write_tags */
 
@@ -3043,7 +3043,7 @@ check_dataset_read_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3152,14 +3152,14 @@ check_dataset_read_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_read_tags */
 
@@ -3206,7 +3206,7 @@ check_dataset_size_retrieval(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3315,14 +3315,14 @@ check_dataset_size_retrieval(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_size_retrieval */
 
@@ -3370,7 +3370,7 @@ check_dataset_extend_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3479,14 +3479,14 @@ check_dataset_extend_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_extend_tags */
 
@@ -3817,7 +3817,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3950,14 +3950,14 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_link_removal_tags */
 
@@ -4006,7 +4006,7 @@ check_link_getname_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -4129,14 +4129,14 @@ check_link_getname_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_link_getname_tags */
 
@@ -4532,7 +4532,7 @@ check_invalid_tag_application(void)
     PASSED();
 #else
     SKIPPED();
-    HDprintf("    test skipped because sanity checking on tag value is disabled.\n");
+    printf("    test skipped because sanity checking on tag value is disabled.\n");
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     return 0;
@@ -4575,7 +4575,7 @@ main(void)
     /* Only run with sec2/default driver */
     if (!h5_using_default_driver(NULL)) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* ========== */
@@ -4601,13 +4601,13 @@ main(void)
         if (test_type == TEST_DEFAULT) {
 
             if (!nerrs)
-                HDprintf("Testing standard tag application cases w/ default fcpl:\n");
+                printf("Testing standard tag application cases w/ default fcpl:\n");
             fcpl = fcpl_default;
         }
         else if (test_type == TEST_SHMESG) {
 
             if (!nerrs)
-                HDprintf("Testing standard tag application cases w/ shared messages:\n");
+                printf("Testing standard tag application cases w/ shared messages:\n");
             fcpl = fcpl_shmesg_all;
         }
         else {
@@ -4638,7 +4638,7 @@ main(void)
     } /* end for */
 
     if (!nerrs)
-        HDprintf("Testing other specific tag application cases:\n");
+        printf("Testing other specific tag application cases:\n");
     if (!nerrs)
         nerrs += check_group_creation_tags();
     if (!nerrs)

@@ -93,8 +93,8 @@ H5ES__event_new(H5VL_t *connector, void *token)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(connector);
-    HDassert(token);
+    assert(connector);
+    assert(token);
 
     /* Create vol object for token */
     if (NULL == (request = H5VL_create_object(token, connector))) {
@@ -137,7 +137,7 @@ H5ES__event_free(H5ES_event_t *ev)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ev);
+    assert(ev);
 
     /* The 'app_func_name', 'app_file_name', and 'api_name' strings are statically allocated (by the compiler)
      * and are not allocated, so there's no need to free them.
@@ -183,7 +183,7 @@ H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ev);
+    assert(ev);
 
     /* Remove the event from the event list */
     H5ES__list_remove(el, ev);

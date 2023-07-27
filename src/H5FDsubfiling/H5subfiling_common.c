@@ -154,7 +154,7 @@ H5_get_subfiling_object(int64_t object_id)
 
         /* Create subfiling context cache if it doesn't exist */
         if (!sf_context_cache) {
-            if (NULL == (sf_context_cache = HDcalloc(DEFAULT_CONTEXT_CACHE_SIZE, sizeof(*sf_context_cache))))
+            if (NULL == (sf_context_cache = calloc(DEFAULT_CONTEXT_CACHE_SIZE, sizeof(*sf_context_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling context cache");
             sf_context_cache_size        = DEFAULT_CONTEXT_CACHE_SIZE;
@@ -171,7 +171,7 @@ H5_get_subfiling_object(int64_t object_id)
 
             new_size = (sf_context_cache_size * 3) / 2;
 
-            if (NULL == (tmp_realloc = HDrealloc(sf_context_cache, new_size * sizeof(*sf_context_cache))))
+            if (NULL == (tmp_realloc = realloc(sf_context_cache, new_size * sizeof(*sf_context_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling context cache");
 
@@ -179,14 +179,14 @@ H5_get_subfiling_object(int64_t object_id)
             sf_context_cache_size = new_size;
 
             /* Clear newly-allocated entries */
-            HDmemset(&sf_context_cache[old_num_entries], 0,
-                     (sf_context_cache_size - old_num_entries) * sizeof(*sf_context_cache));
+            memset(&sf_context_cache[old_num_entries], 0,
+                   (sf_context_cache_size - old_num_entries) * sizeof(*sf_context_cache));
 
             /*
              * If we had to make more space, the given object index
              * should always fall within range after a single re-allocation
              */
-            HDassert((size_t)obj_index < sf_context_cache_size);
+            assert((size_t)obj_index < sf_context_cache_size);
         }
 
         /*
@@ -194,14 +194,14 @@ H5_get_subfiling_object(int64_t object_id)
          * application exit, context entry indices should just be
          * consecutive
          */
-        HDassert((size_t)obj_index <= sf_context_cache_num_entries);
+        assert((size_t)obj_index <= sf_context_cache_num_entries);
         if ((size_t)obj_index < sf_context_cache_num_entries)
             ret_value = sf_context_cache[obj_index];
         else {
-            HDassert(!sf_context_cache[sf_context_cache_num_entries]);
+            assert(!sf_context_cache[sf_context_cache_num_entries]);
 
             /* Allocate a new subfiling context object */
-            if (NULL == (ret_value = HDcalloc(1, sizeof(subfiling_context_t))))
+            if (NULL == (ret_value = calloc(1, sizeof(subfiling_context_t))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate subfiling context object");
 
@@ -211,8 +211,7 @@ H5_get_subfiling_object(int64_t object_id)
     else if (obj_type == SF_TOPOLOGY) {
         /* Create subfiling topology cache if it doesn't exist */
         if (!sf_topology_cache) {
-            if (NULL ==
-                (sf_topology_cache = HDcalloc(DEFAULT_TOPOLOGY_CACHE_SIZE, sizeof(*sf_topology_cache))))
+            if (NULL == (sf_topology_cache = calloc(DEFAULT_TOPOLOGY_CACHE_SIZE, sizeof(*sf_topology_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling topology cache");
             sf_topology_cache_size        = DEFAULT_TOPOLOGY_CACHE_SIZE;
@@ -229,7 +228,7 @@ H5_get_subfiling_object(int64_t object_id)
 
             new_size = (sf_topology_cache_size * 3) / 2;
 
-            if (NULL == (tmp_realloc = HDrealloc(sf_topology_cache, new_size * sizeof(*sf_topology_cache))))
+            if (NULL == (tmp_realloc = realloc(sf_topology_cache, new_size * sizeof(*sf_topology_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling topology cache");
 
@@ -237,14 +236,14 @@ H5_get_subfiling_object(int64_t object_id)
             sf_topology_cache_size = new_size;
 
             /* Clear newly-allocated entries */
-            HDmemset(&sf_topology_cache[old_num_entries], 0,
-                     (sf_topology_cache_size - old_num_entries) * sizeof(*sf_topology_cache));
+            memset(&sf_topology_cache[old_num_entries], 0,
+                   (sf_topology_cache_size - old_num_entries) * sizeof(*sf_topology_cache));
 
             /*
              * If we had to make more space, the given object index
              * should always fall within range after a single re-allocation
              */
-            HDassert((size_t)obj_index < sf_topology_cache_size);
+            assert((size_t)obj_index < sf_topology_cache_size);
         }
 
         /*
@@ -252,14 +251,14 @@ H5_get_subfiling_object(int64_t object_id)
          * application exit, topology entry indices should just be
          * consecutive
          */
-        HDassert((size_t)obj_index <= sf_topology_cache_num_entries);
+        assert((size_t)obj_index <= sf_topology_cache_num_entries);
         if ((size_t)obj_index < sf_topology_cache_num_entries)
             ret_value = sf_topology_cache[obj_index];
         else {
-            HDassert(!sf_topology_cache[sf_topology_cache_num_entries]);
+            assert(!sf_topology_cache[sf_topology_cache_num_entries]);
 
             /* Allocate a new subfiling topology object */
-            if (NULL == (ret_value = HDmalloc(sizeof(sf_topology_t))))
+            if (NULL == (ret_value = malloc(sizeof(sf_topology_t))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate subfiling topology object");
 
@@ -268,7 +267,7 @@ H5_get_subfiling_object(int64_t object_id)
     }
 #ifdef H5_SUBFILING_DEBUG
     else
-        HDprintf("%s: Unknown subfiling object type for ID %" PRId64 "\n", __func__, object_id);
+        printf("%s: Unknown subfiling object type for ID %" PRId64 "\n", __func__, object_id);
 #endif
 
 done:
@@ -308,15 +307,15 @@ H5_free_subfiling_object(int64_t object_id)
         if (H5_free_subfiling_object_int(sf_context) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
 
-        HDassert(sf_context_cache_num_entries > 0);
-        HDassert(sf_context == sf_context_cache[sf_context_cache_num_entries - 1]);
+        assert(sf_context_cache_num_entries > 0);
+        assert(sf_context == sf_context_cache[sf_context_cache_num_entries - 1]);
         sf_context_cache[sf_context_cache_num_entries - 1] = NULL;
         sf_context_cache_num_entries--;
     }
     else {
         sf_topology_t *sf_topology;
 
-        HDassert(obj_type == SF_TOPOLOGY);
+        assert(obj_type == SF_TOPOLOGY);
 
         if (NULL == (sf_topology = H5_get_subfiling_object(object_id)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
@@ -325,8 +324,8 @@ H5_free_subfiling_object(int64_t object_id)
         if (H5_free_subfiling_topology(sf_topology) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology");
 
-        HDassert(sf_topology_cache_num_entries > 0);
-        HDassert(sf_topology == sf_topology_cache[sf_topology_cache_num_entries - 1]);
+        assert(sf_topology_cache_num_entries > 0);
+        assert(sf_topology == sf_topology_cache[sf_topology_cache_num_entries - 1]);
         sf_topology_cache[sf_topology_cache_num_entries - 1] = NULL;
         sf_topology_cache_num_entries--;
     }
@@ -342,7 +341,7 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(sf_context);
+    assert(sf_context);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized))) {
         /* Assume MPI is finalized or worse, and try to clean up what we can */
@@ -400,16 +399,16 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
     sf_context->sf_group_size = -1;
     sf_context->sf_group_rank = -1;
 
-    HDfree(sf_context->subfile_prefix);
+    free(sf_context->subfile_prefix);
     sf_context->subfile_prefix = NULL;
 
-    HDfree(sf_context->config_file_prefix);
+    free(sf_context->config_file_prefix);
     sf_context->config_file_prefix = NULL;
 
-    HDfree(sf_context->h5_filename);
+    free(sf_context->h5_filename);
     sf_context->h5_filename = NULL;
 
-    HDfree(sf_context->sf_fids);
+    free(sf_context->sf_fids);
     sf_context->sf_fids = NULL;
 
     /*
@@ -420,7 +419,7 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
      */
     sf_context->topology = NULL;
 
-    HDfree(sf_context);
+    free(sf_context);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
@@ -432,7 +431,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(topology);
+    assert(topology);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized))) {
         /* Assume MPI is finalized or worse, but clean up what we can */
@@ -448,7 +447,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
         for (size_t i = 0; i < sf_topology_cache_num_entries; i++)
             if (topology == sf_topology_cache[i])
                 topology_cached = TRUE;
-        HDassert(topology_cached);
+        assert(topology_cached);
     }
 #endif
 
@@ -456,25 +455,25 @@ H5_free_subfiling_topology(sf_topology_t *topology)
     topology->n_io_concentrators = 0;
 
     if (topology->app_layout) {
-        HDfree(topology->app_layout->layout);
+        free(topology->app_layout->layout);
         topology->app_layout->layout = NULL;
 
-        HDfree(topology->app_layout->node_ranks);
+        free(topology->app_layout->node_ranks);
         topology->app_layout->node_ranks = NULL;
 
-        HDfree(topology->app_layout);
+        free(topology->app_layout);
     }
 
     topology->app_layout = NULL;
 
-    HDfree(topology->io_concentrators);
+    free(topology->io_concentrators);
     topology->io_concentrators = NULL;
 
     if (!mpi_finalized)
         if (H5_mpi_comm_free(&topology->app_comm) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
 
-    HDfree(topology);
+    free(topology);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
@@ -674,7 +673,7 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
 
         HDsnprintf(sf_context->sf_logfile_name, PATH_MAX, "%s.log.%d", sf_context->h5_filename, mpi_rank);
 
-        if (NULL == (sf_context->sf_logfile = HDfopen(sf_context->sf_logfile_name, "a")))
+        if (NULL == (sf_context->sf_logfile = fopen(sf_context->sf_logfile_name, "a")))
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                                         "couldn't open subfiling debug logfile");
 
@@ -758,7 +757,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
-    HDassert(context_id_out);
+    assert(context_id_out);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
@@ -960,11 +959,11 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
     int                         mpi_code;
     herr_t                      ret_value = SUCCEED;
 
-    HDassert(subfiling_config);
-    HDassert(MPI_COMM_NULL != comm);
-    HDassert(MPI_COMM_NULL != node_comm);
-    HDassert(app_topology_out);
-    HDassert(!*app_topology_out);
+    assert(subfiling_config);
+    assert(MPI_COMM_NULL != comm);
+    assert(MPI_COMM_NULL != node_comm);
+    assert(app_topology_out);
+    assert(!*app_topology_out);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &comm_rank)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
@@ -990,7 +989,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                     errno          = 0;
                     ioc_select_val = HDstrtol(env_value, NULL, 0);
                     if ((ERANGE == errno)) {
-                        HDprintf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
+                        printf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
                         ioc_select_val = 1;
                     }
 
@@ -1017,9 +1016,9 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                 errno          = 0;
                 ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
-                    HDprintf("invalid IOC selection strategy string '%s' for strategy "
-                             "SELECT_IOC_EVERY_NTH_RANK; defaulting to SELECT_IOC_ONE_PER_NODE\n",
-                             ioc_sel_str);
+                    printf("invalid IOC selection strategy string '%s' for strategy "
+                           "SELECT_IOC_EVERY_NTH_RANK; defaulting to SELECT_IOC_ONE_PER_NODE\n",
+                           ioc_sel_str);
 
                     ioc_select_val     = 1;
                     ioc_selection_type = SELECT_IOC_ONE_PER_NODE;
@@ -1053,9 +1052,9 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                 errno          = 0;
                 ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
-                    HDprintf("invalid IOC selection strategy string '%s' for strategy SELECT_IOC_TOTAL; "
-                             "defaulting to SELECT_IOC_ONE_PER_NODE\n",
-                             ioc_sel_str);
+                    printf("invalid IOC selection strategy string '%s' for strategy SELECT_IOC_TOTAL; "
+                           "defaulting to SELECT_IOC_ONE_PER_NODE\n",
+                           ioc_sel_str);
 
                     ioc_select_val     = 1;
                     ioc_selection_type = SELECT_IOC_ONE_PER_NODE;
@@ -1099,7 +1098,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
     if (find_cached_topology_info(comm, subfiling_config, iocs_per_node, &app_topology) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                 "can't check for cached subfiling topology object");
-    HDassert(!app_topology || (app_topology->selection_type == ioc_selection_type));
+    assert(!app_topology || (app_topology->selection_type == ioc_selection_type));
 
     if (!app_topology) {
         /* Generate an ID for the application topology object */
@@ -1122,10 +1121,10 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
 
         if (init_app_layout(app_topology, comm, node_comm) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize application layout");
-        HDassert(app_topology->app_layout);
-        HDassert(app_topology->app_layout->layout);
-        HDassert(app_topology->app_layout->node_ranks);
-        HDassert(app_topology->app_layout->node_count > 0);
+        assert(app_topology->app_layout);
+        assert(app_topology->app_layout->layout);
+        assert(app_topology->app_layout->node_ranks);
+        assert(app_topology->app_layout->node_count > 0);
 
         /*
          * Now that the application node count has been determined, adjust the
@@ -1187,8 +1186,8 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
     char  *env_value = HDgetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA);
     herr_t ret_value = SUCCEED;
 
-    HDassert(ioc_selection_type);
-    HDassert(ioc_sel_info_str);
+    assert(ioc_selection_type);
+    assert(ioc_sel_info_str);
 
     *ioc_sel_info_str = NULL;
 
@@ -1260,7 +1259,7 @@ find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config, l
     int32_t                     stripe_count;
     herr_t                      ret_value = SUCCEED;
 
-    HDassert(subf_config);
+    assert(subf_config);
 
     ioc_selection_type = subf_config->ioc_selection;
     stripe_count       = subf_config->stripe_count;
@@ -1270,7 +1269,7 @@ find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config, l
         int            result;
         int            mpi_code;
 
-        HDassert(cached_topology);
+        assert(cached_topology);
 
         /*
          * If the selection types differ, just reject the cached topology
@@ -1290,8 +1289,8 @@ find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config, l
         }
 
         if (cached_topology->selection_type == SELECT_IOC_ONE_PER_NODE) {
-            HDassert(iocs_per_node >= 1);
-            HDassert(cached_topology->app_layout->node_count > 0);
+            assert(iocs_per_node >= 1);
+            assert(cached_topology->app_layout->node_count > 0);
 
             /*
              * If a IOCs-per-node setting was set in the environment and would
@@ -1333,12 +1332,12 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
     int           mpi_code;
     herr_t        ret_value = SUCCEED;
 
-    HDassert(app_topology);
-    HDassert(!app_topology->app_layout);
-    HDassert(MPI_COMM_NULL != comm);
-    HDassert(MPI_COMM_NULL != node_comm);
+    assert(app_topology);
+    assert(!app_topology->app_layout);
+    assert(MPI_COMM_NULL != comm);
+    assert(MPI_COMM_NULL != node_comm);
 
-    if (NULL == (app_layout = HDcalloc(1, sizeof(*app_layout))))
+    if (NULL == (app_layout = calloc(1, sizeof(*app_layout))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate application layout structure");
 
@@ -1351,7 +1350,7 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(node_comm, &app_layout->node_local_size)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
 
-    if (NULL == (app_layout->layout = HDmalloc((size_t)app_layout->world_size * sizeof(*app_layout->layout))))
+    if (NULL == (app_layout->layout = malloc((size_t)app_layout->world_size * sizeof(*app_layout->layout))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate application layout array");
 
@@ -1371,10 +1370,10 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
         if (app_layout->layout[i].node_local_rank == 0)
             app_layout->node_count++;
 
-    HDassert(app_layout->node_count > 0);
+    assert(app_layout->node_count > 0);
 
     if (NULL ==
-        (app_layout->node_ranks = HDmalloc((size_t)app_layout->node_count * sizeof(*app_layout->node_ranks))))
+        (app_layout->node_ranks = malloc((size_t)app_layout->node_count * sizeof(*app_layout->node_ranks))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate application layout node rank array");
 
@@ -1384,7 +1383,7 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
      */
     for (size_t i = 0, node_rank_index = 0; i < (size_t)app_layout->world_size; i++) {
         if (app_layout->layout[i].node_local_rank == 0) {
-            HDassert(node_rank_index < (size_t)app_layout->node_count);
+            assert(node_rank_index < (size_t)app_layout->node_count);
             app_layout->node_ranks[node_rank_index++] = app_layout->layout[i].rank;
         }
     }
@@ -1394,9 +1393,9 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
 done:
     if (ret_value < 0) {
         if (app_layout) {
-            HDfree(app_layout->layout);
-            HDfree(app_layout->node_ranks);
-            HDfree(app_layout);
+            free(app_layout->layout);
+            free(app_layout->node_ranks);
+            free(app_layout);
         }
     }
 
@@ -1429,9 +1428,9 @@ gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_com
     int       mpi_code;
     herr_t    ret_value = SUCCEED;
 
-    HDassert(app_layout);
-    HDassert(app_layout->layout);
-    HDassert(MPI_COMM_NULL != comm);
+    assert(app_layout);
+    assert(app_layout->layout);
+    assert(MPI_COMM_NULL != comm);
 
     sf_world_rank   = app_layout->world_rank;
     sf_world_size   = app_layout->world_size;
@@ -1482,7 +1481,7 @@ gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_com
 #else
         int aggr_comm_size = 0;
 
-        HDassert(MPI_COMM_NULL != intra_comm);
+        assert(MPI_COMM_NULL != intra_comm);
 
         /* Split the file communicator into a sub-group of one rank per node */
         if (MPI_SUCCESS != (mpi_code = MPI_Comm_split(comm, node_local_rank, sf_world_rank, &aggr_comm)))
@@ -1494,7 +1493,7 @@ gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_com
         /* Allocate a partial layout info array to aggregate into from node-local ranks */
         if (node_local_rank == 0) {
             if (NULL ==
-                (layout_info_partial = HDmalloc((size_t)node_local_size * sizeof(*layout_info_partial))))
+                (layout_info_partial = malloc((size_t)node_local_size * sizeof(*layout_info_partial))))
                 /* Push error, but participate in gather operation */
                 H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate layout info array");
@@ -1509,10 +1508,10 @@ gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_com
         if (node_local_rank == 0) {
             int send_size = 4 * node_local_size;
 
-            if (NULL == (recv_counts = HDmalloc((size_t)aggr_comm_size * sizeof(*recv_counts))))
+            if (NULL == (recv_counts = malloc((size_t)aggr_comm_size * sizeof(*recv_counts))))
                 H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate receive counts array");
-            if (NULL == (recv_displs = HDmalloc((size_t)aggr_comm_size * sizeof(*recv_displs))))
+            if (NULL == (recv_displs = malloc((size_t)aggr_comm_size * sizeof(*recv_displs))))
                 H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate receive displacements array");
 
@@ -1529,8 +1528,8 @@ gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_com
                                            recv_counts, recv_displs, MPI_INT, aggr_comm)))
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code);
 
-            HDfree(recv_displs);
-            HDfree(recv_counts);
+            free(recv_displs);
+            free(recv_counts);
             recv_displs = NULL;
             recv_counts = NULL;
         }
@@ -1546,9 +1545,9 @@ gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_com
     }
 
 done:
-    HDfree(recv_displs);
-    HDfree(recv_counts);
-    HDfree(layout_info_partial);
+    free(recv_displs);
+    free(recv_counts);
+    free(layout_info_partial);
 
     if (H5_mpi_comm_free(&aggr_comm) < 0)
         H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
@@ -1613,19 +1612,19 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
     int           max_iocs         = 0;
     herr_t        ret_value        = SUCCEED;
 
-    HDassert(app_topology);
-    HDassert(!app_topology->io_concentrators);
-    HDassert(app_topology->n_io_concentrators > 0);
-    HDassert(app_topology->app_layout);
-    HDassert(app_topology->app_layout->layout);
-    HDassert(app_topology->app_layout->node_count > 0);
+    assert(app_topology);
+    assert(!app_topology->io_concentrators);
+    assert(app_topology->n_io_concentrators > 0);
+    assert(app_topology->app_layout);
+    assert(app_topology->app_layout->layout);
+    assert(app_topology->app_layout->node_count > 0);
 
     app_layout = app_topology->app_layout;
 
     max_iocs = app_topology->n_io_concentrators;
 
-    if (NULL == (app_topology->io_concentrators =
-                     HDmalloc((size_t)max_iocs * sizeof(*app_topology->io_concentrators))))
+    if (NULL ==
+        (app_topology->io_concentrators = malloc((size_t)max_iocs * sizeof(*app_topology->io_concentrators))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate array of I/O concentrator ranks");
 
@@ -1639,13 +1638,13 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
             if (app_topology->n_io_concentrators > app_layout->node_count)
                 iocs_per_node = app_topology->n_io_concentrators / app_layout->node_count;
 
-            HDassert(app_layout->node_ranks);
+            assert(app_layout->node_ranks);
 
             for (size_t i = 0; i < (size_t)app_layout->node_count; i++) {
                 int node_index = app_layout->node_ranks[i];
                 int local_size = app_layout->layout[node_index].node_local_size;
 
-                HDassert(total_ioc_count < app_topology->n_io_concentrators);
+                assert(total_ioc_count < app_topology->n_io_concentrators);
                 io_concentrators[total_ioc_count] = app_layout->layout[node_index++].rank;
 
                 if (app_layout->world_rank == io_concentrators[total_ioc_count]) {
@@ -1661,7 +1660,7 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
                     if (j >= (size_t)local_size)
                         break;
 
-                    HDassert(total_ioc_count < app_topology->n_io_concentrators);
+                    assert(total_ioc_count < app_topology->n_io_concentrators);
                     io_concentrators[total_ioc_count] = app_layout->layout[node_index++].rank;
 
                     if (app_layout->world_rank == io_concentrators[total_ioc_count]) {
@@ -1687,7 +1686,7 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
             int num_iocs_assigned = 0;
             int world_size        = app_layout->world_size;
 
-            HDassert(rank_stride > 0);
+            assert(rank_stride > 0);
 
             for (int i = 0; num_iocs_assigned < max_iocs; num_iocs_assigned++) {
                 int ioc_index = rank_stride * i++;
@@ -1721,7 +1720,7 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
 done:
     if (ret_value < 0) {
         if (app_topology)
-            HDfree(app_topology->io_concentrators);
+            free(app_topology->io_concentrators);
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -1751,15 +1750,15 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(sf_context->topology == NULL);
-    HDassert(sf_context->sf_context_id >= 0);
-    HDassert(base_filename);
-    HDassert(file_id != UINT64_MAX);
-    HDassert(subfiling_config);
-    HDassert(app_topology);
-    HDassert(app_topology->n_io_concentrators > 0);
-    HDassert(MPI_COMM_NULL != file_comm);
+    assert(sf_context);
+    assert(sf_context->topology == NULL);
+    assert(sf_context->sf_context_id >= 0);
+    assert(base_filename);
+    assert(file_id != UINT64_MAX);
+    assert(subfiling_config);
+    assert(app_topology);
+    assert(app_topology->n_io_concentrators > 0);
+    assert(MPI_COMM_NULL != file_comm);
 
     sf_context->h5_file_id      = file_id;
     sf_context->sf_fids         = NULL;
@@ -1835,7 +1834,7 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
             sf_context->sf_num_fids++;
 
         if (NULL ==
-            (sf_context->sf_fids = HDmalloc((size_t)sf_context->sf_num_fids * sizeof(*sf_context->sf_fids))))
+            (sf_context->sf_fids = malloc((size_t)sf_context->sf_num_fids * sizeof(*sf_context->sf_fids))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate subfile IDs array");
 
         for (int i = 0; i < sf_context->sf_num_fids; i++)
@@ -1890,7 +1889,7 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling stripe count (%d)",
                                 sf_context->sf_num_subfiles);
 
-    HDassert(sf_context->sf_num_subfiles >= app_topology->n_io_concentrators);
+    assert(sf_context->sf_num_subfiles >= app_topology->n_io_concentrators);
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -1934,8 +1933,8 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
 {
     herr_t ret_value = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(sf_context->h5_file_id != UINT64_MAX);
+    assert(sf_context);
+    assert(sf_context->h5_file_id != UINT64_MAX);
 
     /*
      * Save the HDF5 file ID (e.g., inode) to subfile context mapping.
@@ -1998,8 +1997,7 @@ record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_in
     herr_t ret_value = SUCCEED;
 
     if (!sf_open_file_map) {
-        if (NULL ==
-            (sf_open_file_map = HDmalloc((size_t)DEFAULT_FILE_MAP_ENTRIES * sizeof(*sf_open_file_map))))
+        if (NULL == (sf_open_file_map = malloc((size_t)DEFAULT_FILE_MAP_ENTRIES * sizeof(*sf_open_file_map))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate open file mapping");
 
         sf_file_map_size = DEFAULT_FILE_MAP_ENTRIES;
@@ -2028,8 +2026,8 @@ record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_in
     if (index == sf_file_map_size) {
         void *tmp_realloc;
 
-        if (NULL == (tmp_realloc = HDrealloc(sf_open_file_map,
-                                             ((size_t)(sf_file_map_size * 2) * sizeof(*sf_open_file_map)))))
+        if (NULL == (tmp_realloc = realloc(sf_open_file_map,
+                                           ((size_t)(sf_file_map_size * 2) * sizeof(*sf_open_file_map)))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "couldn't reallocate open file mapping");
 
@@ -2133,13 +2131,13 @@ ioc_open_files(int64_t file_context_id, int file_acc_flags)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
                                 "couldn't get subfiling object from context ID");
 
-    HDassert(sf_context->h5_file_id != UINT64_MAX);
-    HDassert(sf_context->h5_filename);
-    HDassert(sf_context->sf_fids);
-    HDassert(sf_context->sf_num_subfiles > 0);
-    HDassert(sf_context->sf_num_fids > 0);
-    HDassert(sf_context->topology);
-    HDassert(sf_context->topology->ioc_idx >= 0); /* Only IOC ranks should be here */
+    assert(sf_context->h5_file_id != UINT64_MAX);
+    assert(sf_context->h5_filename);
+    assert(sf_context->sf_fids);
+    assert(sf_context->sf_num_subfiles > 0);
+    assert(sf_context->sf_num_fids > 0);
+    assert(sf_context->topology);
+    assert(sf_context->topology->ioc_idx >= 0); /* Only IOC ranks should be here */
 
     /* Get the basename of the full HDF5 filename */
     if (H5_basename(sf_context->h5_filename, &base) < 0)
@@ -2160,7 +2158,7 @@ ioc_open_files(int64_t file_context_id, int file_acc_flags)
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't get HDF5 file dirname");
     }
 
-    if (NULL == (filepath = HDmalloc(PATH_MAX)))
+    if (NULL == (filepath = malloc(PATH_MAX)))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfile filename");
 
@@ -2233,7 +2231,7 @@ done:
 
     H5MM_free(base);
     H5MM_free(subfile_dir);
-    HDfree(filepath);
+    free(filepath);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
@@ -2266,10 +2264,10 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
     int     ret                = 0;
     herr_t  ret_value          = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(base_filename);
-    HDassert(config_dir);
-    HDassert(subfile_dir);
+    assert(sf_context);
+    assert(base_filename);
+    assert(config_dir);
+    assert(subfile_dir);
 
     if (sf_context->h5_file_id == UINT64_MAX)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid HDF5 file ID %" PRIu64,
@@ -2282,7 +2280,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
     if (*subfile_dir == '\0')
         subfile_dir = ".";
 
-    if (NULL == (config_filename = HDmalloc(PATH_MAX)))
+    if (NULL == (config_filename = malloc(PATH_MAX)))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling configuration filename");
 
@@ -2309,11 +2307,11 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         int n_subfiles = sf_context->sf_num_subfiles;
         int num_digits;
 
-        if (NULL == (config_file = HDfopen(config_filename, "w+")))
+        if (NULL == (config_file = fopen(config_filename, "w+")))
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                                         "couldn't create/truncate subfiling configuration file");
 
-        if (NULL == (line_buf = HDmalloc(PATH_MAX)))
+        if (NULL == (line_buf = malloc(PATH_MAX)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "couldn't allocate buffer for writing to subfiling configuration file");
 
@@ -2366,8 +2364,8 @@ done:
                                     "couldn't close subfiling configuration file");
     }
 
-    HDfree(line_buf);
-    HDfree(config_filename);
+    free(line_buf);
+    free(config_filename);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
@@ -2396,11 +2394,11 @@ open_config_file(const char *base_filename, const char *config_dir, uint64_t fil
     int     ret                = 0;
     herr_t  ret_value          = SUCCEED;
 
-    HDassert(base_filename);
-    HDassert(config_dir);
-    HDassert(file_id != UINT64_MAX);
-    HDassert(mode);
-    HDassert(config_file_out);
+    assert(base_filename);
+    assert(config_dir);
+    assert(file_id != UINT64_MAX);
+    assert(mode);
+    assert(config_file_out);
 
     *config_file_out = NULL;
 
@@ -2410,7 +2408,7 @@ open_config_file(const char *base_filename, const char *config_dir, uint64_t fil
     if (*config_dir == '\0')
         config_dir = ".";
 
-    if (NULL == (config_filename = HDmalloc(PATH_MAX)))
+    if (NULL == (config_filename = malloc(PATH_MAX)))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling configuration filename");
 
@@ -2430,7 +2428,7 @@ open_config_file(const char *base_filename, const char *config_dir, uint64_t fil
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                                     "couldn't check existence of subfiling configuration file");
 
-    if (NULL == (config_file = HDfopen(config_filename, mode)))
+    if (NULL == (config_file = fopen(config_filename, mode)))
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                                     "couldn't open subfiling configuration file");
 
@@ -2443,7 +2441,7 @@ done:
                                     "couldn't close subfiling configuration file");
     }
 
-    HDfree(config_filename);
+    free(config_filename);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
@@ -2468,7 +2466,7 @@ H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size, int64
     long    config_file_len   = 0;
     herr_t  ret_value         = SUCCEED;
 
-    HDassert(config_file);
+    assert(config_file);
 
     if (HDfseek(config_file, 0, SEEK_END) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL,
@@ -2482,7 +2480,7 @@ H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size, int64
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL,
                                     "couldn't seek to beginning of subfiling configuration file");
 
-    if (NULL == (config_buf = HDmalloc((size_t)config_file_len + 1)))
+    if (NULL == (config_buf = malloc((size_t)config_file_len + 1)))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for reading from subfiling configuration file");
 
@@ -2528,7 +2526,7 @@ H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size, int64
     }
 
 done:
-    HDfree(config_buf);
+    free(config_buf);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
@@ -2542,7 +2540,7 @@ done:
  *              between MPI ranks.
  *
  *              The resolved filepath returned through `resolved_filepath`
- *              must be freed by the caller with HDfree.
+ *              must be freed by the caller with free.
  *
  * Return       Non-negative on success/Negative on failure
  *
@@ -2563,8 +2561,8 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     int     mpi_code;
     herr_t  ret_value = SUCCEED;
 
-    HDassert(filepath);
-    HDassert(resolved_filepath);
+    assert(filepath);
+    assert(resolved_filepath);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
@@ -2579,12 +2577,12 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
 
                 /* If filepath is just the filename, set up path using CWD */
                 if (!HDstrcmp(file_dirname, ".")) {
-                    if (NULL == (resolved_path = HDmalloc(PATH_MAX)))
+                    if (NULL == (resolved_path = malloc(PATH_MAX)))
                         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                                 "can't allocate buffer for filepath");
                     if (H5_basename(filepath, &file_basename) < 0)
                         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file basename");
-                    if (NULL == (cwd = HDmalloc(PATH_MAX)))
+                    if (NULL == (cwd = malloc(PATH_MAX)))
                         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                                 "can't allocate buffer for CWD");
 
@@ -2626,7 +2624,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't resolve filepath");
 
     if (mpi_rank != 0) {
-        if (NULL == (resolved_path = HDmalloc(path_len)))
+        if (NULL == (resolved_path = malloc(path_len)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate file name buffer");
     }
 
@@ -2641,7 +2639,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     *resolved_filepath = resolved_path;
 
 done:
-    HDfree(cwd);
+    free(cwd);
     H5MM_free(file_basename);
     H5MM_free(file_dirname);
 
@@ -2656,7 +2654,7 @@ done:
                 H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
         }
 
-        HDfree(resolved_path);
+        free(resolved_path);
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -3086,7 +3084,7 @@ H5_subfiling_terminate(void)
         sf_context_cache_size        = 0;
         sf_context_cache_num_entries = 0;
 
-        HDfree(sf_context_cache);
+        free(sf_context_cache);
         sf_context_cache = NULL;
     }
     if (sf_topology_cache) {
@@ -3100,13 +3098,13 @@ H5_subfiling_terminate(void)
         sf_topology_cache_size        = 0;
         sf_topology_cache_num_entries = 0;
 
-        HDfree(sf_topology_cache);
+        free(sf_topology_cache);
         sf_topology_cache = NULL;
     }
 
     /* Clean up the file ID to context object mapping */
     sf_file_map_size = 0;
-    HDfree(sf_open_file_map);
+    free(sf_open_file_map);
     sf_open_file_map = NULL;
 
 done:
@@ -3124,7 +3122,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
 
     /* Retrieve the subfiling object for the newly-created context ID */
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id))) {
-        HDprintf("%s: couldn't get subfiling object from context ID\n", __func__);
+        printf("%s: couldn't get subfiling object from context ID\n", __func__);
         goto done;
     }
 
@@ -3133,12 +3131,12 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
     if (sf_context->sf_logfile) {
         HDvfprintf(sf_context->sf_logfile, fmt, log_args);
         HDfputs("\n", sf_context->sf_logfile);
-        HDfflush(sf_context->sf_logfile);
+        fflush(sf_context->sf_logfile);
     }
     else {
         HDvprintf(fmt, log_args);
         HDputs("");
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     H5FD_ioc_end_thread_exclusive();

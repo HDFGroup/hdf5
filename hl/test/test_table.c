@@ -136,8 +136,8 @@ h5file_open(const char *fname, unsigned flags)
 
     /* open */
     if ((fid = H5Fopen(data_file, flags, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "Error: Cannot open file <%s>\n", data_file);
-        HDexit(1);
+        fprintf(stderr, "Error: Cannot open file <%s>\n", data_file);
+        exit(1);
     }
 
     return fid;
@@ -153,11 +153,11 @@ cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf)
     if ((HDstrcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi || !H5_FLT_ABS_EQUAL(rbuf[i].pressure, wbuf[j].pressure) ||
         !H5_DBL_ABS_EQUAL(rbuf[i].temperature, wbuf[j].temperature)) {
-        HDfprintf(stderr, "read and write buffers have differences\n");
-        HDfprintf(stderr, "%s %ld %f %f %d\n", rbuf[i].name, rbuf[i].longi, (double)rbuf[i].pressure,
-                  rbuf[i].temperature, rbuf[i].lati);
-        HDfprintf(stderr, "%s %ld %f %f %d\n", wbuf[j].name, wbuf[j].longi, (double)wbuf[j].pressure,
-                  wbuf[j].temperature, wbuf[j].lati);
+        fprintf(stderr, "read and write buffers have differences\n");
+        fprintf(stderr, "%s %ld %f %f %d\n", rbuf[i].name, rbuf[i].longi, (double)rbuf[i].pressure,
+                rbuf[i].temperature, rbuf[i].lati);
+        fprintf(stderr, "%s %ld %f %f %d\n", wbuf[j].name, wbuf[j].longi, (double)wbuf[j].pressure,
+                wbuf[j].temperature, wbuf[j].lati);
         return -1;
     }
     return 0;
@@ -1023,10 +1023,9 @@ test_table(hid_t fid, int do_write)
                     if (rbuf[i].lati != position_in[i - NRECORDS_ADD + 1].lati ||
                         rbuf[i].longi != position_in[i - NRECORDS_ADD + 1].longi ||
                         !H5_FLT_ABS_EQUAL(rbuf[i].pressure, pressure_in[i - NRECORDS_ADD + 1])) {
-                        HDfprintf(stderr, "%ld %f %d\n", rbuf[i].longi, (double)rbuf[i].pressure,
-                                  rbuf[i].lati);
-                        HDfprintf(stderr, "%ld %f %d\n", position_in[i].longi, (double)pressure_in[i],
-                                  position_in[i].lati);
+                        fprintf(stderr, "%ld %f %d\n", rbuf[i].longi, (double)rbuf[i].pressure, rbuf[i].lati);
+                        fprintf(stderr, "%ld %f %d\n", position_in[i].longi, (double)pressure_in[i],
+                                position_in[i].lati);
                         goto out;
                     }
                 }
@@ -1464,9 +1463,9 @@ test_table(hid_t fid, int do_write)
     HL_TESTING2("getting field info");
 
     /* allocate */
-    names_out = (char **)HDmalloc(sizeof(char *) * (size_t)NFIELDS);
+    names_out = (char **)malloc(sizeof(char *) * (size_t)NFIELDS);
     for (i = 0; i < NFIELDS; i++) {
-        names_out[i] = (char *)HDmalloc(sizeof(char) * 255);
+        names_out[i] = (char *)malloc(sizeof(char) * 255);
     }
 
     /* Get field info */
@@ -1481,9 +1480,9 @@ test_table(hid_t fid, int do_write)
 
     /* release */
     for (i = 0; i < NFIELDS; i++) {
-        HDfree(names_out[i]);
+        free(names_out[i]);
     }
-    HDfree(names_out);
+    free(names_out);
 
     PASSED();
 

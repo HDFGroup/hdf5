@@ -310,7 +310,7 @@ void
 h5_restore_err(void)
 {
     /* Restore the original error reporting routine */
-    HDassert(err_func != NULL);
+    assert(err_func != NULL);
     H5Eset_auto2(H5E_DEFAULT, err_func, NULL);
     err_func = NULL;
 }
@@ -330,12 +330,12 @@ h5_restore_err(void)
 void
 h5_reset(void)
 {
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
     H5close();
 
     /* Save current error stack reporting routine and redirect to our local one */
-    HDassert(err_func == NULL);
+    assert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 
@@ -390,12 +390,12 @@ h5_reset(void)
 void
 h5_test_init(void)
 {
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
     H5close();
 
     /* Save current error stack reporting routine and redirect to our local one */
-    HDassert(err_func == NULL);
+    assert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 } /* end h5_test_init() */
@@ -534,7 +534,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     if (!base_name || !fullname || size < 1)
         return NULL;
 
-    HDmemset(fullname, 0, size);
+    memset(fullname, 0, size);
 
     /* Determine if driver is set by environment variable. If it is,
      * only generate a suffix if fixing the filename for the superblock
@@ -626,13 +626,13 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
             if (mpi_rank == 0)
-                HDprintf("*** Hint ***\n"
-                         "You can use environment variable HDF5_PARAPREFIX to "
-                         "run parallel test files in a\n"
-                         "different directory or to add file type prefix. e.g.,\n"
-                         "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
-                         "   export HDF5_PARAPREFIX\n"
-                         "*** End of Hint ***\n");
+                printf("*** Hint ***\n"
+                       "You can use environment variable HDF5_PARAPREFIX to "
+                       "run parallel test files in a\n"
+                       "different directory or to add file type prefix. e.g.,\n"
+                       "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+                       "   export HDF5_PARAPREFIX\n"
+                       "*** End of Hint ***\n");
 
             explained = TRUE;
 #ifdef HDF5_PARAPREFIX
@@ -958,13 +958,13 @@ h5_show_hostname(void)
 
         if (mpi_initialized && !mpi_finalized) {
             MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-            HDprintf("MPI-process %d.", mpi_rank);
+            printf("MPI-process %d.", mpi_rank);
         }
         else
-            HDprintf("thread 0.");
+            printf("thread 0.");
     }
 #else
-    HDprintf("thread %" PRIu64 ".", H5TS_thread_id());
+    printf("thread %" PRIu64 ".", H5TS_thread_id());
 #endif
 #ifdef H5_HAVE_WIN32_API
 
@@ -989,11 +989,11 @@ h5_show_hostname(void)
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
     if (HDgethostname(hostname, (size_t)80) < 0)
-        HDprintf(" gethostname failed\n");
+        printf(" gethostname failed\n");
     else
-        HDprintf(" hostname=%s\n", hostname);
+        printf(" hostname=%s\n", hostname);
 #else
-    HDprintf(" gethostname not supported\n");
+    printf(" gethostname not supported\n");
 #endif
 #ifdef H5_HAVE_WIN32_API
     WSACleanup();
@@ -1037,7 +1037,7 @@ h5_set_info_object(void)
             /* copy key/value pair into temporary buffer */
             len  = HDstrcspn(valp, ";");
             next = &valp[len];
-            if (NULL == (key_val = (char *)HDcalloc(1, len + 1)))
+            if (NULL == (key_val = (char *)calloc(1, len + 1)))
                 return -1;
 
             /* increment the next pointer past the terminating semicolon */
@@ -1080,16 +1080,16 @@ h5_set_info_object(void)
 
                 /* actually set the darned thing */
                 if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    HDprintf("MPI_Info_set failed\n");
+                    printf("MPI_Info_set failed\n");
                     ret_value = -1;
                 }
             }
 
             valp = next;
-            HDfree(key_val);
+            free(key_val);
         } while (next && *next);
 
-        HDfree(envp);
+        free(envp);
     }
 
     return ret_value;
@@ -1109,17 +1109,17 @@ h5_dump_info_object(MPI_Info info)
     int  flag;
     int  i, nkeys;
 
-    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
+    printf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info == MPI_INFO_NULL) {
-        HDprintf("object is MPI_INFO_NULL\n");
+        printf("object is MPI_INFO_NULL\n");
     }
     else {
         MPI_Info_get_nkeys(info, &nkeys);
-        HDprintf("object has %d items\n", nkeys);
+        printf("object has %d items\n", nkeys);
         for (i = 0; i < nkeys; i++) {
             MPI_Info_get_nthkey(info, i, key);
             MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
-            HDprintf("%s=%s\n", key, value);
+            printf("%s=%s\n", key, value);
         }
     }
 }
@@ -1208,7 +1208,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
                 }     /* end for */
             }
             else {
-                HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+                assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
                 for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     /* Create the filename to query */
                     HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
@@ -1309,9 +1309,9 @@ print_func(const char *format, ...)
     va_list arglist;
     int     ret_value;
 
-    HDva_start(arglist, format);
+    va_start(arglist, format);
     ret_value = HDvprintf(format, arglist);
-    HDva_end(arglist);
+    va_end(arglist);
     return ret_value;
 }
 
@@ -1388,7 +1388,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     int          len;
     static char *env = NULL;
 
-    HDassert(name);
+    assert(name);
 
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -1396,7 +1396,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     if (mpi_initialized && !mpi_finalized) {
         MPI_Comm_rank(comm, &mpi_rank);
         MPI_Comm_size(comm, &mpi_size);
-        HDassert(root < mpi_size);
+        assert(root < mpi_size);
 
         /* The root task does the getenv call
          * and sends the result to the other tasks */
@@ -1417,16 +1417,16 @@ getenv_all(MPI_Comm comm, int root, const char *name)
             MPI_Bcast(&len, 1, MPI_INT, root, comm);
             if (len >= 0) {
                 if (env == NULL)
-                    env = (char *)HDmalloc((size_t)len + 1);
+                    env = (char *)malloc((size_t)len + 1);
                 else if (HDstrlen(env) < (size_t)len)
-                    env = (char *)HDrealloc(env, (size_t)len + 1);
+                    env = (char *)realloc(env, (size_t)len + 1);
 
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
                 env[len] = '\0';
             }
             else {
                 if (env)
-                    HDfree(env);
+                    free(env);
                 env = NULL;
             }
         }
@@ -1437,7 +1437,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     else {
         /* use original getenv */
         if (env)
-            HDfree(env);
+            free(env);
         env = HDgetenv(name);
     } /* end if */
 
@@ -1476,7 +1476,7 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Allocate copy buffer */
-    if (NULL == (buf = HDcalloc((size_t)1, (size_t)READ_BUF_SIZE)))
+    if (NULL == (buf = calloc((size_t)1, (size_t)READ_BUF_SIZE)))
         goto error;
 
     /* Copy old file into temporary file */
@@ -1497,7 +1497,7 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Release memory */
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -1507,7 +1507,7 @@ error:
         HDclose(fd_old);
     if (fd_new > 0)
         HDclose(fd_new);
-    HDfree(buf);
+    free(buf);
     return -1;
 } /* end h5_make_local_copy() */
 
@@ -1625,20 +1625,20 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
     FILE *signalfile = NULL;
 
     /* Create signal file (which will send signal to some other process) */
-    signalfile = HDfopen(TMP_SIGNAL_FILE, "w+");
+    signalfile = fopen(TMP_SIGNAL_FILE, "w+");
 
     /* Write messages to signal file, if provided */
     if (arg2 != NULL) {
-        HDassert(arg1);
-        HDfprintf(signalfile, "%s\n%s\n", arg1, arg2);
+        assert(arg1);
+        fprintf(signalfile, "%s\n%s\n", arg1, arg2);
     } /* end if */
     else if (arg1 != NULL) {
-        HDassert(arg2 == NULL);
-        HDfprintf(signalfile, "%s\n", arg1);
+        assert(arg2 == NULL);
+        fprintf(signalfile, "%s\n", arg1);
     } /* end if */
     else {
-        HDassert(arg1 == NULL);
-        HDassert(arg2 == NULL);
+        assert(arg1 == NULL);
+        assert(arg2 == NULL);
     } /* end else */
 
     HDfclose(signalfile);
@@ -1685,7 +1685,7 @@ h5_wait_message(const char *waitfor)
     HDtime(&t0);
 
     /* Wait for return signal from some other process */
-    while ((returnfile = HDfopen(waitfor, "r")) == NULL) {
+    while ((returnfile = fopen(waitfor, "r")) == NULL) {
 
         /* make note of current time. */
         HDtime(&t1);
@@ -1694,7 +1694,7 @@ h5_wait_message(const char *waitfor)
             it was likely never sent and we should fail rather
             than loop infinitely */
         if (HDdifftime(t1, t0) > MESSAGE_TIMEOUT) {
-            HDfprintf(stdout, "Error communicating between processes. Make sure test script is running.\n");
+            fprintf(stdout, "Error communicating between processes. Make sure test script is running.\n");
             TEST_ERROR;
         } /* end if */
     }     /* end while */
@@ -1838,17 +1838,17 @@ h5_get_dummy_vfd_class(void)
     H5FD_class_t *vfd_class = NULL; /* Dummy VFD that will be returned */
 
     /* Create the class and initialize everything to zero/NULL */
-    if (NULL == (vfd_class = (H5FD_class_t *)HDmalloc(sizeof(H5FD_class_t))))
+    if (NULL == (vfd_class = (H5FD_class_t *)malloc(sizeof(H5FD_class_t))))
         TEST_ERROR;
 
     /* Copy the dummy VFD */
-    HDmemcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
+    memcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
 
     return vfd_class;
 
 error:
     if (vfd_class)
-        HDfree(vfd_class);
+        free(vfd_class);
     return NULL;
 } /* h5_get_dummy_vfd_class */
 
@@ -1878,7 +1878,7 @@ h5_get_dummy_vol_class(void)
     H5VL_class_t *vol_class = NULL; /* Dummy VOL class that will be returned */
 
     /* Create the class and initialize everything to zero/NULL */
-    if (NULL == (vol_class = (H5VL_class_t *)HDcalloc((size_t)1, sizeof(H5VL_class_t))))
+    if (NULL == (vol_class = (H5VL_class_t *)calloc((size_t)1, sizeof(H5VL_class_t))))
         TEST_ERROR;
 
     /* Fill in the minimum parameters to make a VOL connector class that
@@ -1891,7 +1891,7 @@ h5_get_dummy_vol_class(void)
 
 error:
     if (vol_class)
-        HDfree(vol_class);
+        free(vol_class);
     return NULL;
 } /* h5_get_dummy_vol_class */
 
@@ -1935,15 +1935,15 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     int   ret_value = 0; /* for error handling */
 
     /* Open files for reading */
-    f1ptr = HDfopen(f1name, "rb");
+    f1ptr = fopen(f1name, "rb");
     if (f1ptr == NULL) {
-        HDfprintf(stderr, "Unable to fopen() %s\n", f1name);
+        fprintf(stderr, "Unable to fopen() %s\n", f1name);
         ret_value = -1;
         goto done;
     }
-    f2ptr = HDfopen(f2name, "rb");
+    f2ptr = fopen(f2name, "rb");
     if (f2ptr == NULL) {
-        HDfprintf(stderr, "Unable to fopen() %s\n", f2name);
+        fprintf(stderr, "Unable to fopen() %s\n", f2name);
         ret_value = -1;
         goto done;
     }
@@ -1956,8 +1956,8 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     f2size = HDftell(f2ptr);
 
     if (f1size != f2size) {
-        HDfprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", (hsize_t)f1size,
-                  (hsize_t)f2size);
+        fprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", (hsize_t)f1size,
+                (hsize_t)f2size);
         ret_value = -1;
         goto done;
     }
@@ -1975,7 +1975,7 @@ h5_compare_file_bytes(char *f1name, char *f2name)
             goto done;
         }
         if (f1char != f2char) {
-            HDfprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", (hsize_t)ii, f1char, f2char);
+            fprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", (hsize_t)ii, f1char, f2char);
             ret_value = -1;
             goto done;
         }
@@ -2075,7 +2075,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 
     max_buf = 4096 * sizeof(char);
 
-    orig_ptr = HDfopen(orig, "rb");
+    orig_ptr = fopen(orig, "rb");
     if (NULL == orig_ptr) {
         ret_value = -1;
         goto done;
@@ -2085,14 +2085,14 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     fsize = (hsize_t)HDftell(orig_ptr);
     HDrewind(orig_ptr);
 
-    dest_ptr = HDfopen(dest, "wb");
+    dest_ptr = fopen(dest, "wb");
     if (NULL == dest_ptr) {
         ret_value = -1;
         goto done;
     }
 
     read_size = MIN(fsize, max_buf);
-    dup_buf   = HDmalloc(read_size);
+    dup_buf   = malloc(read_size);
     if (NULL == dup_buf) {
         ret_value = -1;
         goto done;
@@ -2114,7 +2114,7 @@ done:
     if (dest_ptr != NULL)
         HDfclose(dest_ptr);
     if (dup_buf != NULL)
-        HDfree(dup_buf);
+        free(dup_buf);
     return ret_value;
 } /* end h5_duplicate_file_by_bytes() */
 
@@ -2192,7 +2192,7 @@ h5_using_default_driver(const char *drv_name)
 {
     hbool_t ret_val = TRUE;
 
-    HDassert(H5_DEFAULT_VFD == H5FD_SEC2);
+    assert(H5_DEFAULT_VFD == H5FD_SEC2);
 
     if (!drv_name)
         drv_name = HDgetenv(HDF5_DRIVER);
@@ -2224,8 +2224,8 @@ h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel)
     hid_t         driver_id  = H5I_INVALID_HID;
     herr_t        ret_value  = SUCCEED;
 
-    HDassert(fapl_id >= 0);
-    HDassert(driver_is_parallel);
+    assert(fapl_id >= 0);
+    assert(driver_is_parallel);
 
     if (fapl_id == H5P_DEFAULT)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
@@ -2267,8 +2267,8 @@ h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatib
     hid_t         driver_id  = H5I_INVALID_HID;
     herr_t        ret_value  = SUCCEED;
 
-    HDassert(fapl_id >= 0);
-    HDassert(default_vfd_compatible);
+    assert(fapl_id >= 0);
+    assert(default_vfd_compatible);
 
     if (fapl_id == H5P_DEFAULT)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;

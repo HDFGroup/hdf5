@@ -82,8 +82,8 @@ test_cont(char *filename, hid_t fapl)
 
     TESTING("object header continuation block");
 
-    HDmemset(&oh_locA, 0, sizeof(oh_locA));
-    HDmemset(&oh_locB, 0, sizeof(oh_locB));
+    memset(&oh_locA, 0, sizeof(oh_locA));
+    memset(&oh_locB, 0, sizeof(oh_locB));
 
     /* Create the file to operate on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -230,7 +230,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Create an object header */
-    HDmemset(&oh_loc, 0, sizeof(oh_loc));
+    memset(&oh_loc, 0, sizeof(oh_loc));
     if (H5O_create(f, (size_t)2048, (size_t)1, H5P_GROUP_CREATE_DEFAULT, &oh_loc /*out*/) < 0)
         FAIL_STACK_ERROR;
 
@@ -360,7 +360,7 @@ test_ohdr_swmr(hbool_t new_format)
     } /* end else */
 
     /* Initialize data */
-    wbuf = (int *)HDcalloc(compact_size, sizeof(int));
+    wbuf = (int *)calloc(compact_size, sizeof(int));
     n    = 0;
     for (u = 0; u < compact_size; u++)
         wbuf[u] = n++;
@@ -440,7 +440,7 @@ test_ohdr_swmr(hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Free the buffer */
-    HDfree(wbuf);
+    free(wbuf);
 
     PASSED();
 
@@ -455,7 +455,7 @@ error:
         H5Pclose(plist);
         H5Pclose(fapl);
         HDremove(FILE_OHDR_SWMR);
-        HDfree(wbuf);
+        free(wbuf);
     }
     H5E_END_TRY;
 
@@ -949,9 +949,9 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
      **********************************************/
 
     buf_size = HDstrlen(ATTR_LONG) + 1;
-    if (NULL == (in_buf = (char *)HDcalloc(buf_size, sizeof(char))))
+    if (NULL == (in_buf = (char *)calloc(buf_size, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (out_buf = (char *)HDcalloc(buf_size, sizeof(char))))
+    if (NULL == (out_buf = (char *)calloc(buf_size, sizeof(char))))
         TEST_ERROR;
 
     /* Create a string attribute on the dataset
@@ -982,7 +982,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
         TEST_ERROR;
 
     /* modify the string attribute */
-    HDmemset(in_buf, 0, buf_size);
+    memset(in_buf, 0, buf_size);
     HDstrcpy(in_buf, ATTR_LONG);
     if (H5Awrite(aid, H5T_NATIVE_CHAR, in_buf) < 0)
         TEST_ERROR;
@@ -1052,8 +1052,8 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
         TEST_ERROR;
 
     /* Free memory */
-    HDfree(in_buf);
-    HDfree(out_buf);
+    free(in_buf);
+    free(out_buf);
 
     PASSED();
     return SUCCEED;
@@ -1069,8 +1069,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(in_buf);
-    HDfree(out_buf);
+    free(in_buf);
+    free(out_buf);
 
     return FAIL;
 } /* test_minimized_dset_ohdr_attribute_addition */
@@ -1905,7 +1905,7 @@ main(void)
              * (using default group creation property list only because it's convenient)
              */
             TESTING("object header creation");
-            HDmemset(&oh_loc, 0, sizeof(oh_loc));
+            memset(&oh_loc, 0, sizeof(oh_loc));
             if (H5O_create(f, (size_t)64, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_loc /*out*/) < 0)
                 FAIL_STACK_ERROR;
             PASSED();

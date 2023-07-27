@@ -89,8 +89,8 @@ typedef struct H5FD_splitter_t {
 #if H5FD_SPLITTER_DEBUG_OP_CALLS
 #define H5FD_SPLITTER_LOG_CALL(name)                                                                         \
     do {                                                                                                     \
-        HDprintf("called %s()\n", (name));                                                                   \
-        HDfflush(stdout);                                                                                    \
+        printf("called %s()\n", (name));                                                                     \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define H5FD_SPLITTER_LOG_CALL(name) /* no-op */
@@ -253,7 +253,7 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
-    HDassert(id_out_ptr != NULL);
+    assert(id_out_ptr != NULL);
 
     if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a file access property list");
@@ -404,9 +404,9 @@ H5FD__splitter_populate_config(H5FD_splitter_vfd_config_t *vfd_config, H5FD_spli
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(fapl_out);
+    assert(fapl_out);
 
-    HDmemset(fapl_out, 0, sizeof(H5FD_splitter_fapl_t));
+    memset(fapl_out, 0, sizeof(H5FD_splitter_fapl_t));
 
     if (!vfd_config) {
         vfd_config = H5MM_calloc(sizeof(H5FD_splitter_vfd_config_t));
@@ -523,8 +523,8 @@ H5FD__splitter_get_default_wo_path(char *new_path, size_t new_path_len, const ch
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(new_path);
-    HDassert(base_filename);
+    assert(new_path);
+    assert(base_filename);
 
     /* Check that output buffer can hold base filename + `_wo` suffix */
     old_filename_len = HDstrlen(base_filename);
@@ -612,8 +612,8 @@ H5FD__splitter_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (!H5F_addr_defined(addr))
@@ -713,7 +713,7 @@ H5FD__splitter_fapl_copy(const void *_old_fa)
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
-    HDassert(old_fa_ptr);
+    assert(old_fa_ptr);
 
     new_fa_ptr = H5FL_CALLOC(H5FD_splitter_fapl_t);
     if (NULL == new_fa_ptr)
@@ -758,7 +758,7 @@ H5FD__splitter_fapl_free(void *_fapl)
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(fapl);
+    assert(fapl);
 
     if (H5I_dec_ref(fapl->rw_fapl_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close R/W FAPL ID")
@@ -849,7 +849,7 @@ H5FD__splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, ha
      */
     if (!file_ptr->logfp) {
         if (file_ptr->fa.log_file_path[0] != '\0') {
-            file_ptr->logfp = HDfopen(file_ptr->fa.log_file_path, "w");
+            file_ptr->logfp = fopen(file_ptr->fa.log_file_path, "w");
             if (file_ptr->logfp == NULL)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open log file")
         } /* end if logfile path given */
@@ -908,7 +908,7 @@ H5FD__splitter_close(H5FD_t *_file)
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     if (H5I_dec_ref(file->fa.rw_fapl_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close R/W FAPL")
@@ -959,8 +959,8 @@ H5FD__splitter_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     if ((ret_value = H5FD_get_eoa(file->rw_file, type)) == HADDR_UNDEF)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, HADDR_UNDEF, "unable to get eoa")
@@ -990,9 +990,9 @@ H5FD__splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t ad
     H5FD_SPLITTER_LOG_CALL(__func__)
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->rw_file);
-    HDassert(file->wo_file);
+    assert(file);
+    assert(file->rw_file);
+    assert(file->wo_file);
 
     if (H5FD_set_eoa(file->rw_file, type, addr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "H5FDset_eoa failed for R/W file")
@@ -1027,8 +1027,8 @@ H5FD__splitter_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     if (HADDR_UNDEF == (ret_value = H5FD_get_eof(file->rw_file, type)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "unable to get eof")
@@ -1055,9 +1055,9 @@ H5FD__splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
-    HDassert(file);
-    HDassert(file->rw_file);
-    HDassert(file->wo_file);
+    assert(file);
+    assert(file->rw_file);
+    assert(file->wo_file);
 
     if (H5FDtruncate(file->rw_file, dxpl_id, closing) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to truncate R/W file")
@@ -1094,8 +1094,8 @@ H5FD__splitter_sb_size(H5FD_t *_file)
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     if (file->rw_file)
         ret_value = H5FD_sb_size(file->rw_file);
@@ -1122,8 +1122,8 @@ H5FD__splitter_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     if (file->rw_file && H5FD_sb_encode(file->rw_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL, "unable to encode the superblock in R/W file")
@@ -1153,8 +1153,8 @@ H5FD__splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *b
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     if (H5FD_sb_load(file->rw_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode the superblock in R/W file")
@@ -1183,8 +1183,8 @@ H5FD__splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
-    HDassert(f1);
-    HDassert(f2);
+    assert(f1);
+    assert(f2);
 
     ret_value = H5FD_cmp(f1->rw_file, f2->rw_file);
 
@@ -1211,9 +1211,9 @@ H5FD__splitter_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(file);
-    HDassert(file->rw_file);
-    HDassert(file_handle);
+    assert(file);
+    assert(file->rw_file);
+    assert(file_handle);
 
     /* Only do for R/W channel */
     if (H5FD_get_vfd_handle(file->rw_file, file->fa.rw_fapl_id, file_handle) < 0)
@@ -1241,8 +1241,8 @@ H5FD__splitter_lock(H5FD_t *_file, hbool_t rw)
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     /* Place the lock on each file */
     if (H5FD_lock(file->rw_file, rw) < 0)
@@ -1275,8 +1275,8 @@ H5FD__splitter_unlock(H5FD_t *_file)
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     /* Remove the lock on each file */
     if (H5FD_unlock(file->rw_file) < 0)
@@ -1320,7 +1320,7 @@ H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(file);
+    assert(file);
 
     switch (op_code) {
         /* Unknown op code */
@@ -1366,8 +1366,8 @@ H5FD__splitter_query(const H5FD_t *_file, unsigned long *flags /* out */)
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     if (file) {
-        HDassert(file);
-        HDassert(file->rw_file);
+        assert(file);
+        assert(file->rw_file);
 
         if (H5FDquery(file->rw_file, flags) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to query R/W file");
@@ -1403,8 +1403,8 @@ H5FD__splitter_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     /* Allocate memory for each file, only return the return value for R/W file. */
     if ((ret_value = H5FDalloc(file->rw_file, type, dxpl_id, size)) == HADDR_UNDEF)
@@ -1437,8 +1437,8 @@ H5FD__splitter_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     /* Retrieve memory type mapping for R/W channel only */
     if (H5FD_get_fs_type_map(file->rw_file, type_map) < 0)
@@ -1467,8 +1467,8 @@ H5FD__splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(file);
-    HDassert(file->rw_file);
+    assert(file);
+    assert(file->rw_file);
 
     if (H5FDfree(file->rw_file, type, dxpl_id, addr, size) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free for R/W file")
@@ -1499,7 +1499,7 @@ H5FD__splitter_delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(filename);
+    assert(filename);
 
     /* Get the driver info */
     if (H5P_FILE_ACCESS_DEFAULT == fapl_id) {
@@ -1566,9 +1566,9 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(file);
-    HDassert(atfunc && *atfunc);
-    HDassert(msg && *msg);
+    assert(file);
+    assert(atfunc && *atfunc);
+    assert(msg && *msg);
 
     if (file->logfp != NULL) {
         size_t size;

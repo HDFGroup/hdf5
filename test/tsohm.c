@@ -610,17 +610,17 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
  */
 #define TSOHM_S1H_VERIFY_DATA(dset_id, dtype_id)                                                             \
     {                                                                                                        \
-        HDmemset(&rdata, 0, sizeof(rdata));                                                                  \
+        memset(&rdata, 0, sizeof(rdata));                                                                    \
         if (0 > H5Dread((dset_id), (dtype_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata)) {                     \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
-            HDprintf("Can't read data\n");                                                                   \
+            printf("Can't read data\n");                                                                     \
             goto error;                                                                                      \
         }                                                                                                    \
         if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str) != 0) {       \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
-            HDprintf("incorrect read data\n");                                                               \
+            printf("incorrect read data\n");                                                                 \
             goto error;                                                                                      \
         }                                                                                                    \
     } /* TSOHM_S1H_VERIFY_DATA() definition */
@@ -632,7 +632,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
         test_file_closing = FALSE;
 
     /* Initialize wdata */
-    HDmemset(&wdata, 0, sizeof(wdata));
+    memset(&wdata, 0, sizeof(wdata));
     wdata.i1 = 11;
     HDstrcpy(wdata.str, "string");
     wdata.i2 = 22;
@@ -645,7 +645,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
     wdata.f1 = 0.0F;
 
     /* Initialize rdata */
-    HDmemset(&rdata, 0, sizeof(rdata));
+    memset(&rdata, 0, sizeof(rdata));
 
     dtype1_id = make_dtype_1();
     if (dtype1_id < 0)
@@ -1169,7 +1169,7 @@ sohm_attr_helper(hid_t fcpl_id)
 
         /* Verify */
         attr_read_id = (op_index == 2) ? attr_id2 : attr_id;
-        HDmemset(rdata, 0, sizeof(rdata));
+        memset(rdata, 0, sizeof(rdata));
         ret = H5Aread(attr_read_id, H5T_NATIVE_INT, rdata);
         CHECK_I(ret, "H5Aread");
         for (x = 0; x < (size_t)dims; ++x)
@@ -1422,12 +1422,12 @@ size2_verify_plist1(hid_t plist)
     /* Check fill value */
     dtype1_id = make_dtype_1();
     CHECK_I(dtype1_id, "make_dtype_1");
-    HDmemset(&fill1_correct, '1', sizeof(fill1_correct));
+    memset(&fill1_correct, '1', sizeof(fill1_correct));
 
     ret = H5Pget_fill_value(plist, dtype1_id, &fill1);
     CHECK_I(ret, "H5Pget_fill_value");
 
-    ret = HDmemcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
+    ret = memcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
     VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype1_id);
@@ -1493,12 +1493,12 @@ size2_verify_plist2(hid_t plist)
     /* Check fill value */
     dtype2_id = make_dtype_2();
     CHECK_I(dtype2_id, "make_dtype_2");
-    HDmemset(&fill2_correct, '2', (size_t)DTYPE2_SIZE);
+    memset(&fill2_correct, '2', (size_t)DTYPE2_SIZE);
 
     ret = H5Pget_fill_value(plist, dtype2_id, &fill2);
     CHECK_I(ret, "H5Pget_fill_value");
 
-    ret = HDmemcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
+    ret = memcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
     VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype2_id);
@@ -1523,21 +1523,21 @@ static void
 size2_dump_struct(const char *name, size2_helper_struct *sizes)
 {
     HDputs(name);
-    HDprintf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
-    HDprintf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset,
-             (unsigned long long)(sizes->first_dset - sizes->empty_size));
-    HDprintf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset,
-             (unsigned long long)(sizes->second_dset - sizes->first_dset));
-    HDprintf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1,
-             (unsigned long long)(sizes->dsets1 - sizes->second_dset));
-    HDprintf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2,
-             (unsigned long long)(sizes->dsets2 - sizes->dsets1));
-    HDprintf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved,
-             (unsigned long long)(sizes->interleaved - sizes->dsets2));
-    HDprintf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1,
-             (unsigned long long)(sizes->attrs1 - sizes->interleaved));
-    HDprintf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2,
-             (unsigned long long)(sizes->attrs2 - sizes->attrs1));
+    printf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
+    printf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset,
+           (unsigned long long)(sizes->first_dset - sizes->empty_size));
+    printf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset,
+           (unsigned long long)(sizes->second_dset - sizes->first_dset));
+    printf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1,
+           (unsigned long long)(sizes->dsets1 - sizes->second_dset));
+    printf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2,
+           (unsigned long long)(sizes->dsets2 - sizes->dsets1));
+    printf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved,
+           (unsigned long long)(sizes->interleaved - sizes->dsets2));
+    printf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1,
+           (unsigned long long)(sizes->attrs1 - sizes->interleaved));
+    printf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2,
+           (unsigned long long)(sizes->attrs2 - sizes->attrs1));
 } /* size2_dump_struct */
 #endif /* NOT_NOW */
 
@@ -1624,8 +1624,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* fill1 and fill2 are fill values for the two datatypes.
      * We'll set them in the DCPL.
      */
-    HDmemset(&fill1, '1', sizeof(dtype1_struct));
-    HDmemset(&fill2, '2', (size_t)DTYPE2_SIZE);
+    memset(&fill1, '1', sizeof(dtype1_struct));
+    memset(&fill2, '2', (size_t)DTYPE2_SIZE);
 
     dcpl1_id = H5Pcreate(H5P_DATASET_CREATE);
     CHECK_I(dcpl1_id, "H5Pcreate");
@@ -1668,8 +1668,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     size2_verify_plist2(dcpl2_id);
 
     /* Set up attribute data */
-    HDmemset(attr_string1, 0, (size_t)NAME_BUF_SIZE);
-    HDmemset(attr_string2, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string1, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string2, 0, (size_t)NAME_BUF_SIZE);
     HDstrcpy(attr_string1, LONG_STRING);
     HDstrcpy(attr_string2, LONG_STRING);
     attr_string2[1] = '1'; /* The second string starts "01 index..." */
@@ -2078,8 +2078,8 @@ size2_verify(void)
     group2_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
     CHECK_I(group2_id, "H5Gopen2");
 
-    HDmemset(attr_string, 0, (size_t)NAME_BUF_SIZE);
-    HDmemset(attr_correct_string, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_correct_string, 0, (size_t)NAME_BUF_SIZE);
     HDstrcpy(attr_correct_string, LONG_STRING);
     HDstrcpy(attr_name, "00 index");
 
@@ -3278,7 +3278,7 @@ test_sohm_extlink(void)
     CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -3717,9 +3717,9 @@ test_sohm_external_dtype(void)
     CHECK_I(dset1_tid, "H5Dget_type");
 
     /* Allocate space and initialize data */
-    orig = (s1_t *)HDmalloc(NX * NY * sizeof(s1_t));
+    orig = (s1_t *)malloc(NX * NY * sizeof(s1_t));
     if (orig == NULL)
-        CHECK_I(-1, "HDmalloc");
+        CHECK_I(-1, "malloc");
     for (i = 0; i < NX * NY; i++) {
         s_ptr    = (s1_t *)orig + i;
         s_ptr->a = (int)(i * 3 + 1);
@@ -3782,7 +3782,7 @@ test_sohm_external_dtype(void)
     CHECK_I(ret, "H5Pclose");
     ret = H5Fclose(file2);
     CHECK_I(ret, "H5Fclose");
-    HDfree(orig);
+    free(orig);
 } /* test_sohm_external_dtype */
 
 /****************************************************************

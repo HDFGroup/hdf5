@@ -44,8 +44,8 @@ H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD_t *raw_file, 
 
     FUNC_ENTER_PACKAGE;
 
-    HDassert(history_out);
-    HDassert(raw_file);
+    assert(history_out);
+    assert(raw_file);
 
     /* Set early so we can clean up properly on errors */
     history_out->record_locs = NULL;
@@ -167,9 +167,9 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 
     FUNC_ENTER_PACKAGE;
 
-    HDassert(buf != NULL);
-    HDassert(history != NULL);
-    HDassert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
+    assert(buf != NULL);
+    assert(history != NULL);
+    assert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
 
     if (HDstrncmp((const char *)buf, H5FD_ONION_HISTORY_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature")
@@ -179,7 +179,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 
     ptr = buf + 8;
 
-    HDmemcpy(&ui64, ptr, 8);
+    memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT64DECODE(ui8p, n_revisions);
     ptr += 8;
@@ -206,19 +206,19 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
             uint64_t record_size;
             uint64_t phys_addr;
 
-            HDmemcpy(&ui64, ptr, 8);
+            memcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
             UINT64DECODE(ui8p, phys_addr);
             H5_CHECKED_ASSIGN(rloc->phys_addr, haddr_t, phys_addr, uint64_t);
             ptr += 8;
 
-            HDmemcpy(&ui64, ptr, 8);
+            memcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
             UINT64DECODE(ui8p, record_size);
             H5_CHECKED_ASSIGN(rloc->record_size, hsize_t, record_size, uint64_t);
             ptr += 8;
 
-            HDmemcpy(&ui32, ptr, 4);
+            memcpy(&ui32, ptr, 4);
             ui8p = (uint8_t *)&ui32;
             UINT32DECODE(ui8p, rloc->checksum);
             ptr += 4;
@@ -227,7 +227,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 
     sum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
 
-    HDmemcpy(&ui32, ptr, 4);
+    memcpy(&ui32, ptr, 4);
     ui8p = (uint8_t *)&ui32;
     UINT32DECODE(ui8p, history->checksum);
     ptr += 4;
@@ -269,17 +269,17 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
 
     FUNC_ENTER_PACKAGE_NOERR;
 
-    HDassert(history != NULL);
-    HDassert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
-    HDassert(buf != NULL);
-    HDassert(checksum != NULL);
+    assert(history != NULL);
+    assert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
+    assert(buf != NULL);
+    assert(checksum != NULL);
 
-    HDmemcpy(ptr, H5FD_ONION_HISTORY_SIGNATURE, 4);
+    memcpy(ptr, H5FD_ONION_HISTORY_SIGNATURE, 4);
     ptr += 4;
     UINT32ENCODE(ptr, vers_u32);
     UINT64ENCODE(ptr, history->n_revisions);
     if (history->n_revisions > 0) {
-        HDassert(history->record_locs != NULL);
+        assert(history->record_locs != NULL);
         for (uint64_t i = 0; i < history->n_revisions; i++) {
             H5FD_onion_record_loc_t *rloc = &history->record_locs[i];
 

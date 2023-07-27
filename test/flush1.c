@@ -138,7 +138,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
         STACK_ERROR;
 
     /* Write some data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         STACK_ERROR;
     for (i = 0; i < NELEMENTS; i++)
         data[i] = i;
@@ -152,7 +152,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         STACK_ERROR;
 
-    HDfree(data);
+    free(data);
 
     return SUCCEED;
 
@@ -165,7 +165,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(data);
+    free(data);
 
     return FAIL;
 } /* end add_dset_to_file() */
@@ -312,18 +312,18 @@ main(void)
         SKIPPED();
 
     if (!vfd_supports_swmr)
-        HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
+        printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     /* Flush console output streams */
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
 
     /* DO NOT CLOSE FILE ID! */
     if (H5Pclose(fapl_id) < 0)
         STACK_ERROR;
 
     /* _exit() is necessary since we want a hard close of the library */
-    HD_exit(EXIT_SUCCESS);
+    _exit(EXIT_SUCCESS);
 
 error:
     H5E_BEGIN_TRY
@@ -332,5 +332,5 @@ error:
     }
     H5E_END_TRY;
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

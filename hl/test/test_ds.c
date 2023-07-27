@@ -214,11 +214,11 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All dimension scales tests passed.\n");
+    printf("All dimension scales tests passed.\n");
     return 0;
 
 error:
-    HDprintf("***** %d DIMENSION SCALES TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d DIMENSION SCALES TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
 
@@ -1111,7 +1111,7 @@ test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx)
                     ret_value = SUCCEED;
                 }
                 else if (H5DSis_attached(did, dsid, idx) == 0) {
-                    HDprintf(" scale not attached ");
+                    printf(" scale not attached ");
                 }
             }
         }
@@ -1175,13 +1175,13 @@ test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *scalename
     if ((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if (H5DSis_attached(did, dsid, idx) == 1) {
             if ((name_len = H5DSget_scale_name(dsid, NULL, (size_t)0)) > 0) {
-                name_out = (char *)HDmalloc(((size_t)name_len + 1) * sizeof(char));
+                name_out = (char *)malloc(((size_t)name_len + 1) * sizeof(char));
                 if (name_out != NULL) {
                     if (H5DSget_scale_name(dsid, name_out, (size_t)name_len + 1) >= 0) {
                         if (HDstrncmp(scalename, name_out, (size_t)name_len) == 0) {
                             ret_value = SUCCEED;
                         }
-                        HDfree(name_out);
+                        free(name_out);
                         name_out = NULL;
                     }
                 }
@@ -2371,7 +2371,7 @@ test_simple(void)
     char         snames[3];
     int          i, j;
 
-    HDprintf("Testing API functions\n");
+    printf("Testing API functions\n");
 
     /*-------------------------------------------------------------------------
      * create a file for the test
@@ -3161,8 +3161,8 @@ test_simple(void)
         goto out;
 
     /* allocate */
-    dim0_labeld = (char *)HDmalloc((size_t)dim0_label_size * sizeof(char));
-    dim1_labeld = (char *)HDmalloc((size_t)dim1_label_size * sizeof(char));
+    dim0_labeld = (char *)malloc((size_t)dim0_label_size * sizeof(char));
+    dim1_labeld = (char *)malloc((size_t)dim1_label_size * sizeof(char));
     if (dim0_labeld == NULL || dim1_labeld == NULL)
         goto out;
     if (H5DSget_label(did, DIM0, dim0_labeld, (size_t)dim0_label_size) < 0)
@@ -3174,11 +3174,11 @@ test_simple(void)
     if (HDstrncmp(DIM1_LABEL, dim1_labeld, (size_t)(dim1_label_size - 1)) != 0)
         goto out;
     if (dim0_labeld) {
-        HDfree(dim0_labeld);
+        free(dim0_labeld);
         dim0_labeld = NULL;
     }
     if (dim1_labeld) {
-        HDfree(dim1_labeld);
+        free(dim1_labeld);
         dim1_labeld = NULL;
     }
 
@@ -3225,7 +3225,7 @@ test_simple(void)
         goto out;
 
     /* allocate a  buffer */
-    name_out = (char *)HDmalloc(((size_t)name_len + 1) * sizeof(char));
+    name_out = (char *)malloc(((size_t)name_len + 1) * sizeof(char));
     if (name_out == NULL)
         goto out;
 
@@ -3236,7 +3236,7 @@ test_simple(void)
     if (HDstrncmp("Latitude set 0", name_out, (size_t)name_len) != 0)
         goto out;
     if (name_out) {
-        HDfree(name_out);
+        free(name_out);
         name_out = NULL;
     }
 
@@ -3497,7 +3497,7 @@ test_simple(void)
                         goto out;
                     break;
                 default:
-                    HDassert(0);
+                    assert(0);
                     break;
             } /*switch*/
         }     /*for*/
@@ -3627,7 +3627,7 @@ read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
         goto out;
 
     if (nelmts) {
-        buf = (char *)HDmalloc(((size_t)nelmts * size));
+        buf = (char *)malloc(((size_t)nelmts * size));
         if (buf == NULL)
             goto out;
         if (H5Dread(scale_id, mtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
@@ -3635,7 +3635,7 @@ read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 
         for (i = 0; i < nelmts; i++) {
             if (buf[i] != data[i]) {
-                HDprintf("read and write buffers differ\n");
+                printf("read and write buffers differ\n");
                 goto out;
             }
         }
@@ -3649,7 +3649,7 @@ read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
     if (H5Tclose(mtid) < 0)
         goto out;
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     return ret;
 
@@ -3661,7 +3661,7 @@ out:
         H5Tclose(tid);
         H5Tclose(mtid);
         if (buf) {
-            HDfree(buf);
+            free(buf);
         }
     }
     H5E_END_TRY;
@@ -3839,7 +3839,7 @@ test_errors(void)
     hid_t   sidds      = -1;                     /* space ID */
     hsize_t pal_dims[] = {9, 3};
 
-    HDprintf("Testing error conditions\n");
+    printf("Testing error conditions\n");
 
     /*-------------------------------------------------------------------------
      * create a file, spaces, dataset and group ids
@@ -4213,7 +4213,7 @@ test_iterators(void)
     char    dname[30];                           /* dataset name */
     int     i;
 
-    HDprintf("Testing iterators\n");
+    printf("Testing iterators\n");
 
     /*-------------------------------------------------------------------------
      * create a file, spaces, dataset and group ids
@@ -4403,7 +4403,7 @@ test_rank(void)
     float   buff[1] = {1};
     int     i;
 
-    HDprintf("Testing ranks\n");
+    printf("Testing ranks\n");
 
     /*-------------------------------------------------------------------------
      * create a file, a dataset, scales
@@ -4610,7 +4610,7 @@ test_types(void)
     const char    *s1_str               = "ABC";
     const char    *s2_str               = "ABCD";
 
-    HDprintf("Testing scales with several datatypes\n");
+    printf("Testing scales with several datatypes\n");
 
     /*-------------------------------------------------------------------------
      * create a file for the test
@@ -4788,7 +4788,7 @@ test_data(void)
     hsize_t londims[1];    /* array to hold dimensions */
     float   fill = -99;    /* fill value */
 
-    HDprintf("Testing reading ASCII data and generate HDF5 data with scales\n");
+    printf("Testing reading ASCII data and generate HDF5 data with scales\n");
 
     /*-------------------------------------------------------------------------
      * create a file for the test
@@ -4818,7 +4818,7 @@ test_data(void)
     if (H5LTmake_dataset_float(fid, "lat", 1, latdims, latbuf) < 0)
         goto out;
 
-    HDfree(latbuf);
+    free(latbuf);
     latbuf = NULL;
 
     /* read the longitude */
@@ -4829,7 +4829,7 @@ test_data(void)
     if (H5LTmake_dataset_float(fid, "lon", 1, londims, lonbuf) < 0)
         goto out;
 
-    HDfree(lonbuf);
+    free(lonbuf);
     lonbuf = NULL;
 
     /* make a dataset for the data. a fill value is set */
@@ -4849,7 +4849,7 @@ test_data(void)
     if (H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, vals) < 0)
         goto out;
 
-    HDfree(vals);
+    free(vals);
     vals = NULL;
 
     if (H5Dclose(did) < 0)
@@ -4924,11 +4924,11 @@ out:
     H5_FAILED();
 
     if (latbuf)
-        HDfree(latbuf);
+        free(latbuf);
     if (lonbuf)
-        HDfree(lonbuf);
+        free(lonbuf);
     if (vals)
-        HDfree(vals);
+        free(vals);
     return FAIL;
 }
 
@@ -4957,20 +4957,20 @@ read_data(const char *fname, int ndims, hsize_t *dims, float **buf)
     const char *data_file = H5_get_srcdir_filename(fname);
 
     /* read first data file */
-    f = HDfopen(data_file, "r");
+    f = fopen(data_file, "r");
     if (f == NULL) {
-        HDprintf("Could not open file %s\n", data_file);
+        printf("Could not open file %s\n", data_file);
         return -1;
     }
 
     for (i = 0, nelms = 1; i < ndims; i++) {
         if (HDfscanf(f, "%s %u", str, &j) && HDferror(f)) {
-            HDprintf("fscanf error in file %s\n", data_file);
+            printf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
         } /* end if */
         if (HDfscanf(f, "%d", &n) < 0 && HDferror(f)) {
-            HDprintf("fscanf error in file %s\n", data_file);
+            printf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
         } /* end if */
@@ -4978,17 +4978,17 @@ read_data(const char *fname, int ndims, hsize_t *dims, float **buf)
         nelms *= (size_t)n;
     }
 
-    *buf = (float *)HDmalloc(nelms * sizeof(float));
+    *buf = (float *)malloc(nelms * sizeof(float));
 
     if (*buf == NULL) {
-        HDprintf("memory allocation failed\n");
+        printf("memory allocation failed\n");
         HDfclose(f);
         return -1;
     }
 
     for (j = 0; j < nelms; j++) {
         if (HDfscanf(f, "%f", &val) < 0 && HDferror(f)) {
-            HDprintf("fscanf error in file %s\n", data_file);
+            printf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
         } /* end if */
@@ -5018,7 +5018,7 @@ test_errors2(void)
     int     nscales;          /* number of scales in DIM */
     int     count;            /* visitor data */
 
-    HDprintf("Testing parameter errors\n");
+    printf("Testing parameter errors\n");
 
     /*-------------------------------------------------------------------------
      * create a file, a dataset, scales

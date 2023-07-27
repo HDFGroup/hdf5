@@ -598,7 +598,7 @@ test_dangle_force(void)
         TEST_ERROR;
 
     /* Allocate the array of object IDs */
-    if (NULL == (objs = (hid_t *)HDcalloc((size_t)count, sizeof(hid_t))))
+    if (NULL == (objs = (hid_t *)calloc((size_t)count, sizeof(hid_t))))
         TEST_ERROR;
 
     /* Get the list of open IDs */
@@ -620,14 +620,14 @@ test_dangle_force(void)
     HDremove(filename);
 
     /* Release object ID array */
-    HDfree(objs);
+    free(objs);
 
     PASSED();
     return 0;
 
 error:
     if (objs)
-        HDfree(objs);
+        free(objs);
     return 1;
 }
 

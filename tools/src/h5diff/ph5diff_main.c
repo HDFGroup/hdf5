@@ -67,7 +67,7 @@ main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
 
     if (g_nTasks == 1) {
-        HDprintf("Only 1 task available...doing serial diff\n");
+        printf("Only 1 task available...doing serial diff\n");
 
         g_Parallel = 0;
 
@@ -141,11 +141,11 @@ ph5diff_worker(int nID)
             {
                 /* Open the files */
                 if ((file1_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
-                    HDprintf("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[0]);
+                    printf("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[0]);
                     MPI_Abort(MPI_COMM_WORLD, 0);
                 }
                 if ((file2_id = H5Fopen(filenames[1], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
-                    HDprintf("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[1]);
+                    printf("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[1]);
                     MPI_Abort(MPI_COMM_WORLD, 0);
                 }
                 /* enable error reporting */
@@ -160,7 +160,7 @@ ph5diff_worker(int nID)
 
             /* Make certain we've received the filenames and opened the files already */
             if (file1_id < 0 || file2_id < 0) {
-                HDprintf("ph5diff_worker: ERROR: work received before/without filenames\n");
+                printf("ph5diff_worker: ERROR: work received before/without filenames\n");
                 break;
             }
 
@@ -188,7 +188,7 @@ ph5diff_worker(int nID)
                     char out_data[PRINT_DATA_MAX_SIZE];
                     int  tmp;
 
-                    HDmemset(out_data, 0, PRINT_DATA_MAX_SIZE);
+                    memset(out_data, 0, PRINT_DATA_MAX_SIZE);
                     i = 0;
 
                     rewind(overflow_file);
@@ -198,7 +198,7 @@ ph5diff_worker(int nID)
                             MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA,
                                      MPI_COMM_WORLD);
                             i = 0;
-                            HDmemset(out_data, 0, PRINT_DATA_MAX_SIZE);
+                            memset(out_data, 0, PRINT_DATA_MAX_SIZE);
                         }
                     }
 
@@ -210,8 +210,8 @@ ph5diff_worker(int nID)
                     overflow_file = NULL;
                 }
 
-                HDfflush(stdout);
-                HDmemset(outBuff, 0, OUTBUFF_SIZE);
+                fflush(stdout);
+                memset(outBuff, 0, OUTBUFF_SIZE);
                 outBuffOffset = 0;
 
                 MPI_Send(&diffs, sizeof(diffs), MPI_BYTE, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
@@ -225,7 +225,7 @@ ph5diff_worker(int nID)
             break;
         }
         else {
-            HDprintf("ph5diff_worker: ERROR: invalid tag (%d) received\n", Status.MPI_TAG);
+            printf("ph5diff_worker: ERROR: invalid tag (%d) received\n", Status.MPI_TAG);
             break;
         }
     }
@@ -252,7 +252,7 @@ print_manager_output(void)
 {
     /* If there was something we buffered, let's print it now */
     if ((outBuffOffset > 0) && g_Parallel) {
-        HDprintf("%s", outBuff);
+        printf("%s", outBuff);
 
         if (overflow_file) {
             int tmp;
@@ -263,12 +263,12 @@ print_manager_output(void)
             overflow_file = NULL;
         }
 
-        HDfflush(stdout);
-        HDmemset(outBuff, 0, OUTBUFF_SIZE);
+        fflush(stdout);
+        memset(outBuff, 0, OUTBUFF_SIZE);
         outBuffOffset = 0;
     }
     else if ((outBuffOffset > 0) && !g_Parallel) {
-        HDfprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
+        fprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
     }
 }
 
@@ -303,5 +303,5 @@ h5diff_exit(int status)
     /* Always exit(0), since MPI implementations do weird stuff when they
      *  receive a non-zero exit value. - QAK
      */
-    HDexit(status);
+    exit(status);
 }

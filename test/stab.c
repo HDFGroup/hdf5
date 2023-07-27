@@ -136,7 +136,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
     if (HDstrcmp(comment, "hello world") != 0) {
         H5_FAILED();
         HDputs("    Read the wrong comment string from the group.");
-        HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
+        printf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
         TEST_ERROR;
     }
     if (H5Gclose(g1) < 0)
@@ -214,7 +214,7 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Group names */
-    name1 = (char *)HDmalloc((size_t)LONG_NAME_LEN);
+    name1 = (char *)malloc((size_t)LONG_NAME_LEN);
     for (i = 0; i < LONG_NAME_LEN; i++)
         name1[i] = (char)('A' + i % 26);
     name1[LONG_NAME_LEN - 1] = '\0';
@@ -247,8 +247,8 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Release name buffers */
-    HDfree(name2);
-    HDfree(name1);
+    free(name2);
+    free(name1);
 
     PASSED();
     return 0;
@@ -259,8 +259,8 @@ error:
         H5Gclose(g1);
         H5Gclose(g2);
         H5Fclose(fid);
-        HDfree(name2);
-        HDfree(name1);
+        free(name2);
+        free(name1);
     }
     H5E_END_TRY;
     return 1;
@@ -669,9 +669,9 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Construct very long object name template */
-    if (NULL == (objname = (char *)HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))))
+    if (NULL == (objname = (char *)malloc((size_t)(LONG_COMPACT_LENGTH + 1))))
         TEST_ERROR;
-    HDmemset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
+    memset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
     objname[LONG_COMPACT_LENGTH] = '\0';
 
     /* Re-open file */
@@ -753,7 +753,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Free object name */
-    HDfree(objname);
+    free(objname);
     objname = NULL;
 
     /* Close top group */
@@ -789,7 +789,7 @@ error:
     H5E_END_TRY;
 
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     return 1;
 } /* end long_compact() */

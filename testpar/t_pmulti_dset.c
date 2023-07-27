@@ -160,15 +160,15 @@ test_pmdset(size_t niter, unsigned flags)
         dcpl_id[i] = -1;
 
     /* Allocate buffers */
-    if (NULL == (rbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (rbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (erbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (erbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (wbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (wbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (efbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (efbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (dset_usage = (unsigned char *)HDmalloc(max_dsets * MAX_DSET_X * MAX_DSET_Y)))
+    if (NULL == (dset_usage = (unsigned char *)malloc(max_dsets * MAX_DSET_X * MAX_DSET_Y)))
         T_PMD_ERROR;
 
     /* Initialize buffer indices */
@@ -312,8 +312,8 @@ test_pmdset(size_t niter, unsigned flags)
         } /* end for */
 
         /* Initialize read buffer and expected read buffer */
-        (void)HDmemset(rbuf, 0, buf_size);
-        (void)HDmemset(erbuf, 0, buf_size);
+        (void)memset(rbuf, 0, buf_size);
+        (void)memset(erbuf, 0, buf_size);
 
         /* Initialize write buffer */
         for (j = 0; j < max_dsets; j++)
@@ -323,7 +323,7 @@ test_pmdset(size_t niter, unsigned flags)
                                                 (j * MAX_DSET_X * MAX_DSET_Y) + (k * MAX_DSET_Y) + l);
 
         /* Initialize expected file buffer */
-        (void)HDmemset(efbuf, 0, buf_size);
+        (void)memset(efbuf, 0, buf_size);
 
         /* Set last_read to TRUE so we don't reopen the file on the first
          * iteration */
@@ -384,7 +384,7 @@ test_pmdset(size_t niter, unsigned flags)
 
                 /* Reset dataset usage array, if writing */
                 if (!do_read)
-                    HDmemset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
+                    memset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
 
                 /* Iterate over processes */
                 for (l = 0; l < (size_t)mpi_size; l++) {
@@ -473,7 +473,7 @@ test_pmdset(size_t niter, unsigned flags)
                         /* Reset dataset usage array if reading, since in this case we don't care
                          * about overlapping selections between processes */
                         if (do_read)
-                            HDmemset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
+                            memset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
 
                         /* Generate points */
                         for (m = 0; m < npoints; m++) {
