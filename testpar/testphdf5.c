@@ -47,7 +47,7 @@ hid_t       fapl; /* file access property list */
 
 #ifdef USE_PAUSE
 /* pause the process for a moment to allow debugger to attach if desired. */
-/* Will pause more if greenlight file is not persent but will eventually */
+/* Will pause more if greenlight file is not present but will eventually */
 /* continue. */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -256,7 +256,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     ret_pl = H5Pcreate(H5P_FILE_ACCESS);
-    VRFY((ret_pl >= 0), "H5P_FILE_ACCESS");
+    VRFY((ret_pl >= 0), "H5Pcreate succeeded");
 
     if (l_facc_type == FACC_DEFAULT)
         return (ret_pl);
@@ -264,11 +264,11 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
     if (l_facc_type == FACC_MPIO) {
         /* set Parallel access with communicator */
         ret = H5Pset_fapl_mpio(ret_pl, comm, info);
-        VRFY((ret >= 0), "");
+        VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
         ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
-        VRFY((ret >= 0), "");
+        VRFY((ret >= 0), "H5Pset_all_coll_metadata_ops succeeded");
         ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
-        VRFY((ret >= 0), "");
+        VRFY((ret >= 0), "H5Pset_coll_metadata_write succeeded");
         return (ret_pl);
     }
 
@@ -276,14 +276,14 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
         hid_t mpio_pl;
 
         mpio_pl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY((mpio_pl >= 0), "");
+        VRFY((mpio_pl >= 0), "H5Pcreate succeeded");
         /* set Parallel access with communicator */
         ret = H5Pset_fapl_mpio(mpio_pl, comm, info);
-        VRFY((ret >= 0), "");
+        VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
 
         /* setup file access template */
         ret_pl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY((ret_pl >= 0), "");
+        VRFY((ret_pl >= 0), "H5Pcreate succeeded");
         /* set Parallel access with communicator */
         ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
         VRFY((ret >= 0), "H5Pset_fapl_split succeeded");
@@ -325,7 +325,7 @@ main(int argc, char **argv)
 
     /* Attempt to turn off atexit post processing so that in case errors
      * happen during the test and the process is aborted, it will not get
-     * hang in the atexit post processing in which it may try to make MPI
+     * hung in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0) {

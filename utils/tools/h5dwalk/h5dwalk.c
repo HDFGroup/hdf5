@@ -299,8 +299,8 @@ distribute_separator_add(struct distribute_option *option, uint64_t separator)
         pos = low;
 
     if (pos < count)
-        HDmemmove(&option->separators[low + 1], &option->separators[low],
-                  sizeof(*option->separators) * (uint64_t)(count - pos));
+        memmove(&option->separators[low + 1], &option->separators[low],
+                sizeof(*option->separators) * (uint64_t)(count - pos));
 
     option->separators[pos] = separator;
     return 0;
@@ -774,7 +774,7 @@ fill_file_list(mfu_flist new_flist, const char *config_filename, int myrank, int
         }
         linebuf[0] = 0;
     }
-    HDfclose(config);
+    fclose(config);
     return index;
 }
 
@@ -1317,7 +1317,7 @@ process_input_file(char *inputname, int myrank, int size)
     if (output_log_file) {
         dh5tool_flist_write_text(output_log_file, flist1);
     }
-    HDfclose(config);
+    fclose(config);
 
     mfu_flist_free(&flist1);
     return 0;

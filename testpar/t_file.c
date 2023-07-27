@@ -156,7 +156,7 @@ test_page_buffer_access(void)
     {
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VRFY((file_id < 0), "H5Fcreate failed");
 
     /* disable collective metadata writes for page buffering to work */
@@ -467,7 +467,6 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     VRFY((f != NULL), "");
 
     cache_ptr = f->shared->cache;
-    VRFY((cache_ptr->magic == H5C__H5C_T_MAGIC), "");
 
     cache_ptr->ignore_tags = TRUE;
     H5C_stats__reset(cache_ptr);
@@ -634,7 +633,6 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     VRFY((f != NULL), "");
 
     cache_ptr = f->shared->cache;
-    VRFY((cache_ptr->magic == H5C__H5C_T_MAGIC), "");
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -713,7 +711,6 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
         entry_ptr = cache_ptr->index[i];
 
         while (entry_ptr != NULL) {
-            assert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             assert(entry_ptr->is_dirty == FALSE);
 
             if (!entry_ptr->is_pinned && !entry_ptr->is_protected) {
@@ -995,7 +992,7 @@ test_delete(void)
     {
         is_hdf5 = H5Fis_accessible(filename, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VRFY((is_hdf5 != SUCCEED), "H5Fis_accessible");
 
     /* Release file-access plist */

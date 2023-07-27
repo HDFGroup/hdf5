@@ -18,8 +18,8 @@
 
 #include "t_filters_parallel.h"
 
-const char *FILENAME[] = {"t_filters_parallel", NULL};
-char        filenames[1][256];
+static const char *FILENAME[] = {"t_filters_parallel", NULL};
+char               filenames[1][256];
 
 static MPI_Comm comm = MPI_COMM_WORLD;
 static MPI_Info info = MPI_INFO_NULL;
@@ -3420,7 +3420,7 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     {
         VRFY((H5Dwrite(dset_id, memtype, memspace, filespace, dxpl_id, data) < 0), "Dataset write succeeded");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Verify space allocation status */
     verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
@@ -3617,7 +3617,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     {
         VRFY((H5Dwrite(dset_id, memtype, memspace, filespace, dxpl_id, data) < 0), "Dataset write succeeded");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Verify space allocation status */
     verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
@@ -8213,7 +8213,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
             VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) < 0),
                  "Dataset read succeeded");
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /*

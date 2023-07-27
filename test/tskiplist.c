@@ -95,13 +95,13 @@ test_skiplist_init(void)
     memcpy(sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
 
     /* Sort random numbers */
-    HDqsort(sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_sort);
+    qsort(sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_sort);
 
     /* Copy random values to reverse sorted array */
     memcpy(rev_sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
 
     /* Sort random numbers */
-    HDqsort(rev_sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_rev_sort);
+    qsort(rev_sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_rev_sort);
 } /* end test_skiplist_init() */
 
 /****************************************************************

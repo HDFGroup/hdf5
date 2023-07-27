@@ -162,7 +162,7 @@ Pflock(int fd, int operation)
     flk.l_pid    = 0; /* not used with set */
 
     /* Lock or unlock */
-    if (HDfcntl(fd, F_SETLK, &flk) < 0)
+    if (fcntl(fd, F_SETLK, &flk) < 0)
         return -1;
 
     return 0;
@@ -948,11 +948,10 @@ char *
 Wstrcasestr_wrap(const char *haystack, const char *needle)
 {
     if (needle && !*needle)
-        return haystack;
+        return (char *)haystack;
     else
         return StrStrIA(haystack, needle);
 }
-
 #endif /* H5_HAVE_WIN32_API */
 
 /* dirname() and basename() are not easily ported to Windows and basename
@@ -1260,7 +1259,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
             }
         }
 
-        if (l_opts[i].name == NULL) {
+        if (l_opts && l_opts[i].name == NULL) {
             /* exhausted all of the l_opts we have and still didn't match */
             if (H5_opterr)
                 fprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);

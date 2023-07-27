@@ -2233,13 +2233,11 @@ datum_serialize(const H5F_t *f, void H5_ATTR_NDEBUG_UNUSED *image_ptr, size_t le
     assert(f);
     assert(f->shared);
     assert(f->shared->cache);
-    assert(f->shared->cache->magic == H5C__H5C_T_MAGIC);
     assert(f->shared->cache->aux_ptr);
 
     aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
 
     assert(aux_ptr);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     entry_ptr->aux_ptr = aux_ptr;
 
@@ -2463,7 +2461,6 @@ datum_notify(H5C_notify_action_t action, void *thing)
             }
 
             assert(entry_ptr->aux_ptr);
-            assert(entry_ptr->aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
             aux_ptr            = entry_ptr->aux_ptr;
             entry_ptr->aux_ptr = NULL;
 
@@ -2826,8 +2823,7 @@ insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
 
             aux_ptr = ((H5AC_aux_t *)(cache_ptr->aux_ptr));
 
-            if (!((aux_ptr != NULL) && (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC) &&
-                  (aux_ptr->dirty_bytes == 0))) {
+            if (!(aux_ptr != NULL && aux_ptr->dirty_bytes == 0)) {
 
                 nerrors++;
                 if (verbose) {
@@ -3420,8 +3416,7 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
 
                 aux_ptr = ((H5AC_aux_t *)(file_ptr->shared->cache->aux_ptr));
 
-                if (!((aux_ptr != NULL) && (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC) &&
-                      (aux_ptr->dirty_bytes == 0))) {
+                if (!(aux_ptr != NULL && aux_ptr->dirty_bytes == 0)) {
 
                     nerrors++;
                     if (verbose) {
@@ -3638,12 +3633,6 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             fprintf(stdout, "%d:%s: Can't get cache_ptr.\n", world_mpi_rank, __func__);
         }
     }
-    else if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-        nerrors++;
-        if (verbose) {
-            fprintf(stdout, "%d:%s: Bad cache_ptr magic.\n", world_mpi_rank, __func__);
-        }
-    }
     else {
         cache_ptr->ignore_tags = TRUE;
         *fid_ptr               = fid;
@@ -3691,14 +3680,6 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             nerrors++;
             if (verbose) {
                 fprintf(stdout, "%d:%s: cache_ptr->aux_ptr == NULL.\n", world_mpi_rank, __func__);
-            }
-        }
-        else if (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC) {
-
-            nerrors++;
-            if (verbose) {
-                fprintf(stdout, "%d:%s: cache_ptr->aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC.\n",
-                        world_mpi_rank, __func__);
             }
         }
         else if (((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy != metadata_write_strategy) {
@@ -6386,7 +6367,7 @@ trace_file_check(int metadata_write_strategy)
 
         /* Clean up the trace file */
         if (trace_file_ptr != NULL) {
-            HDfclose(trace_file_ptr);
+            fclose(trace_file_ptr);
             trace_file_ptr = NULL;
             HDremove(trace_file_name);
         }
@@ -6695,7 +6676,7 @@ main(int argc, char **argv)
 
     /* Attempt to turn off atexit post processing so that in case errors
      * happen during the test and the process is aborted, it will not get
-     * hang in the atexit post processing in which it may try to make MPI
+     * hung in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0)
