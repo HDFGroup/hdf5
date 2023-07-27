@@ -983,6 +983,7 @@ Wstrcasestr_wrap(const char *haystack, const char *needle)
     else
         return StrStrIA(haystack, needle);
 }
+
 #endif /* H5_HAVE_WIN32_API */
 
 /* dirname() and basename() are not easily ported to Windows and basename
