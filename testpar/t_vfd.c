@@ -105,7 +105,7 @@ static unsigned vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size
  * They are derived from test_selection_io() in test/vfd.c and modified for parallel testing.
  */
 
-/* 
+/*
  * Global declarations for selection I/O tests`
  */
 
@@ -123,27 +123,27 @@ int sel_dim0 = SEL_IO_DIM0;
 int sel_dim1 = SEL_IO_DIM1;
 
 /* Write buffers */
-int *wbuf1 = NULL;
-int *wbuf2 = NULL;
+int *wbuf1    = NULL;
+int *wbuf2    = NULL;
 int *wbufs[2] = {NULL, NULL};
 
 /* File buffers */
-int *fbuf1 = NULL;
-int *fbuf2 = NULL;
-int *fbufs[2] = {NULL, NULL};                        /* Array of file buffers     */
+int *fbuf1    = NULL;
+int *fbuf2    = NULL;
+int *fbufs[2] = {NULL, NULL}; /* Array of file buffers     */
 
 /* Expected read buffers */
-int *erbuf1 = NULL;
-int *erbuf2 = NULL; 
-int *erbufs[2] = {NULL, NULL};                     /* Array of expected read buffers */
+int *erbuf1    = NULL;
+int *erbuf2    = NULL;
+int *erbufs[2] = {NULL, NULL}; /* Array of expected read buffers */
 
-/* iotypes for testing: 
+/* iotypes for testing:
     H5FD_MPIO_INDEPENDENT
     H5FD_MPIO_COLLECTIVE
-    --H5FD_MPIO_COLLECTIVE_IO 
-    --H5FD_MPIO_INDIVIDUAL_IO 
+    --H5FD_MPIO_COLLECTIVE_IO
+    --H5FD_MPIO_INDIVIDUAL_IO
 */
-#define iotypes     3
+#define iotypes 3
 
 #define P_TEST_ERROR                                                                                         \
     do {                                                                                                     \
@@ -166,34 +166,34 @@ int *erbufs[2] = {NULL, NULL};                     /* Array of expected read buf
         }                                                                                                    \
     } while (0)
 
-
 /* Utility functions for selection I/O */
-static herr_t test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t block[], 
-    H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], 
-    size_t element_sizes[], uint32_t rbufcount, int *erb[], hbool_t shorten_rbufs);
+static herr_t test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t block[],
+                                            H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[],
+                                            hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
+                                            uint32_t rbufcount, int *erb[], hbool_t shorten_rbufs);
 
-static herr_t test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count, 
-    hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], int *wb[]);
+static herr_t test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
+                                      hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
+                                      size_t element_sizes[], int *wb[]);
 
 /* Test functions for selection I/O */
 static void test_selection_io(int mpi_rank, int mpi_size);
 static void test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl);
-static void test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, 
-    H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[], hid_t file_spaces[], 
-    hsize_t dims1[]);
-static void test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
-    H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[], hid_t file_spaces[], 
-    hsize_t dims2[]);
-static void test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
-    H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[], hid_t file_spaces[], 
-    hsize_t dims1[], hsize_t dims2[]);
+static void test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H5FD_mem_t type,
+                                       haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[],
+                                       hid_t file_spaces[], hsize_t dims1[]);
+static void test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H5FD_mem_t type,
+                                       haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[],
+                                       hid_t file_spaces[], hsize_t dims2[]);
+static void test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H5FD_mem_t type,
+                                          haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[],
+                                          hid_t file_spaces[], hsize_t dims1[], hsize_t dims2[]);
 static void test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
-    H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[], hid_t file_spaces[], 
-    hsize_t dims1[], hsize_t dims2[]);
-
+                                            H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[],
+                                            hid_t mem_spaces[], hid_t file_spaces[], hsize_t dims1[],
+                                            hsize_t dims2[]);
 
 /****************************************************************************/
-
 
 /****************************************************************************/
 /***************************** Utility Functions ****************************/
@@ -4348,22 +4348,21 @@ test_vector_io(int mpi_rank, int mpi_size)
 
 } /* test_vector_io() */
 
-
 /*
  * Utilty routine to perform the actual selection I/O read
  */
 static herr_t
-test_selection_io_read_verify(hid_t dxpl, int mpi_rank, 
-                              hsize_t start[], hsize_t block[], H5FD_t *lf, H5FD_mem_t type, uint32_t count, 
-                              hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
-                              uint32_t rbufcount, int *erb[], hbool_t shorten_rbufs)
+test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t block[], H5FD_t *lf,
+                              H5FD_mem_t type, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[],
+                              haddr_t offsets[], size_t element_sizes[], uint32_t rbufcount, int *erb[],
+                              hbool_t shorten_rbufs)
 {
-    int *rbuf1 = NULL;
-    int *rbuf2 = NULL;
-    int *rbufs[2] = {NULL, NULL};
+    int   *rbuf1    = NULL;
+    int   *rbuf2    = NULL;
+    int   *rbufs[2] = {NULL, NULL};
     size_t bufsize;
-    int  i;
-    int  j;
+    int    i;
+    int    j;
 
     bufsize = (hsize_t)(sel_dim0 * sel_dim1) * sizeof(int);
     if ((rbuf1 = malloc(bufsize)) == NULL)
@@ -4393,14 +4392,15 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank,
     /* Verify result */
     for (i = 0; i < (int)rbufcount; i++) {
         hsize_t endblock = MIN((start[i] + block[i]), (hsize_t)(sel_dim0 * sel_dim1));
-        //printf("mpi_rank = %d: start[i]=%lu, block[i]=%lu, MIN is %lu\n", 
-         //       mpi_rank, start[i], block[i], endblock);
+        // printf("mpi_rank = %d: start[i]=%lu, block[i]=%lu, MIN is %lu\n",
+        //        mpi_rank, start[i], block[i], endblock);
         for (j = (int)start[i]; j < (int)endblock; j++)
             if (rbufs[i][j] != erb[i][j]) {
                 H5_FAILED();
                 AT();
-                printf("data read from file does not match expected values at mapping array location %d: %d\n",
-                         i, mpi_rank);
+                printf(
+                    "data read from file does not match expected values at mapping array location %d: %d\n",
+                    i, mpi_rank);
                 printf("expected data: \n");
                 for (j = 0; j < sel_dim0 * sel_dim1; j++) {
                     printf("%6d", erb[i][j]);
@@ -4417,24 +4417,27 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank,
             }
     }
 
-    if(rbuf1) free(rbuf1);
-    if(rbuf2) free(rbuf2);
+    if (rbuf1)
+        free(rbuf1);
+    if (rbuf2)
+        free(rbuf2);
     return 0;
 
 error:
-    if(rbuf1) free(rbuf1);
-    if(rbuf2) free(rbuf2);
+    if (rbuf1)
+        free(rbuf1);
+    if (rbuf2)
+        free(rbuf2);
     return -1;
 
 } /* end test_selection_io_read_verify() */
 
 /*
- * Utilty routine to perform the actual selection I/O write 
+ * Utilty routine to perform the actual selection I/O write
  */
 static herr_t
-test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count, 
-                        hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[], 
-                        size_t element_sizes[], int *wb[])
+test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[],
+                        hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[], int *wb[])
 {
     const void **bufs = NULL; /* Avoids cast/const warnings */
     int          i;
@@ -4444,7 +4447,7 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
         goto error;
 
     /* Update write buffer */
-     for (i = 0; i < (int)count; i++) {
+    for (i = 0; i < (int)count; i++) {
         if (wb[i] && (i == 0 || wb[i] != wb[i - 1]))
             for (j = 0; j < (sel_dim0 * sel_dim1); j++)
                 wb[i][j] += 2 * (sel_dim0 * sel_dim1);
@@ -4452,20 +4455,20 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
     }
 
     /* Issue write call */
-    if (H5FDwrite_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
-                            bufs) < 0)
+    if (H5FDwrite_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes, bufs) < 0)
         goto error;
 
-    if (bufs) free(bufs);
+    if (bufs)
+        free(bufs);
 
     return 0;
 
 error:
-    if (bufs) free(bufs);
+    if (bufs)
+        free(bufs);
     return -1;
 
 } /* end test_selection_io_write() */
-
 
 /*
  * Perform the following tests that use shortened arrays for wbuf and element sizes
@@ -4475,24 +4478,22 @@ error:
  * --Reset selections
  */
 static void
-test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
-                                H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[],
-                                hid_t mem_spaces[], hid_t file_spaces[], 
-                                hsize_t dims1[], hsize_t dims2[])
+test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H5FD_mem_t type,
+                                haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[],
+                                hid_t file_spaces[], hsize_t dims1[], hsize_t dims2[])
 {
-    hsize_t    start[2];    /* start for hyperslab          */
-    hsize_t    stride[2];   /* stride for hyperslab         */
-    hsize_t    count[2];    /* count for hyperslab          */
-    hsize_t    block[2];    /* block for hyperslab          */
+    hsize_t start[2];                 /* start for hyperslab          */
+    hsize_t stride[2];                /* stride for hyperslab         */
+    hsize_t count[2];                 /* count for hyperslab          */
+    hsize_t block[2];                 /* block for hyperslab          */
     hsize_t verify_start[2] = {0, 0}; /* Starting block for verified data */
     hsize_t verify_block[2] = {0, 0}; /* Block size for verified data */
-    int i;
-    int j;
-    int i2;
-    int j2;
+    int     i;
+    int     j;
+    int     i2;
+    int     j2;
 
     int shorten_element_sizes; /* Whether to shorten the element sizes array */
-
 
     for (shorten_element_sizes = 0; shorten_element_sizes <= 1; shorten_element_sizes++) {
         /*
@@ -4503,7 +4504,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
 
         /* Strided selection in memory (1D) */
         block[0]  = 1;
-        count[0]  = (hsize_t)(((sel_dim0 * sel_dim1 ) / 2) / mpi_size);
+        count[0]  = (hsize_t)(((sel_dim0 * sel_dim1) / 2) / mpi_size);
         stride[0] = 2;
         start[0]  = (hsize_t)mpi_rank * stride[0] * count[0];
         if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
@@ -4536,7 +4537,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         count[1]  = (hsize_t)sel_dim1;
         stride[0] = 2;
         stride[1] = 1;
-        start[0]  =  1 + ((hsize_t)mpi_rank * stride[0] * count[0]);
+        start[0]  = 1 + ((hsize_t)mpi_rank * stride[0] * count[0]);
         start[1]  = 0;
         if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
             P_TEST_ERROR;
@@ -4545,8 +4546,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         verify_block[1] = (count[0] * count[1] * stride[0]);
 
         /* Issue write call */
-        if (test_selection_io_write(dxpl, lf, type, 2, 
-                                    mem_spaces, file_spaces, addrs, element_sizes,
+        if (test_selection_io_write(dxpl, lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes,
                                     (int **)wbufs) < 0)
             P_TEST_ERROR;
 
@@ -4558,13 +4558,13 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         for (i = 1, i2 = 0, j2 = 1; i < sel_dim0; i += 2)
             for (j = 0; j < sel_dim1; j++) {
                 assert(i2 < sel_dim0);
-                fbuf2[i2*sel_dim1 + j2] = wbuf2[i*sel_dim1 + j];
+                fbuf2[i2 * sel_dim1 + j2] = wbuf2[i * sel_dim1 + j];
                 j2 += 2;
                 if (j2 >= sel_dim1) {
-                        i2++;
-                        j2 = 1;
+                    i2++;
+                    j2 = 1;
                 }
-            } 
+            }
 
         /* Update expected read bufs */
         for (i = 0; i < (sel_dim0 * sel_dim1); i++)
@@ -4573,21 +4573,20 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
             erbuf1[2 * i] = wbuf1[2 * i];
         for (i = 0; i < sel_dim0; i++)
             for (j = 0; j < sel_dim1; j++)
-                erbuf2[i*sel_dim1 + j] = -1;
+                erbuf2[i * sel_dim1 + j] = -1;
         for (i = 1; i < sel_dim0; i += 2)
             for (j = 0; j < sel_dim1; j++)
-                erbuf2[i*sel_dim1 + j] = wbuf2[i*sel_dim1 + j];
+                erbuf2[i * sel_dim1 + j] = wbuf2[i * sel_dim1 + j];
 
         /* Read and verify */
-        if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                          lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                          (int **)erbufs, FALSE) < 0)
+        if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 2, mem_spaces,
+                                          file_spaces, addrs, element_sizes, 2, (int **)erbufs, FALSE) < 0)
             P_TEST_ERROR;
 
         MPI_Barrier(comm);
 
-        /* 
-         * Reset selections 
+        /*
+         * Reset selections
          */
         if (H5Sselect_all(mem_spaces[0]) < 0)
             P_TEST_ERROR;
@@ -4632,9 +4631,8 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
             P_TEST_ERROR;
 
         /* Read entire file buffer and verify */
-        if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                          lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                          (int **)fbufs, FALSE) < 0)
+        if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 2, mem_spaces,
+                                          file_spaces, addrs, element_sizes, 2, (int **)fbufs, FALSE) < 0)
             P_TEST_ERROR;
 
         MPI_Barrier(comm);
@@ -4706,8 +4704,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
             wbufs[1] = wbufs[0];
 
         /* Issue write call */
-        if (test_selection_io_write(dxpl, lf, type, 2, 
-                                    mem_spaces, file_spaces, addrs, element_sizes,
+        if (test_selection_io_write(dxpl, lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes,
                                     (int **)wbufs) < 0)
             P_TEST_ERROR;
 
@@ -4718,7 +4715,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         for (i = 0, i2 = 0, j2 = 0; i < sel_dim0; i += 2)
             for (j = 0; j < sel_dim1; j++) {
                 assert(i2 < sel_dim0);
-                fbuf1[(i2 * sel_dim1) + j2] = wbuf2[i*sel_dim1 + j];
+                fbuf1[(i2 * sel_dim1) + j2] = wbuf2[i * sel_dim1 + j];
                 j2 += 2;
                 if (j2 >= sel_dim1) {
                     i2++;
@@ -4728,7 +4725,7 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         for (i = 1, i2 = 0, j2 = 1; i < sel_dim0; i += 2)
             for (j = 0; j < sel_dim1; j++) {
                 assert(i2 < sel_dim0);
-                fbuf2[i2*sel_dim1 + j2] = wbuf2[i*sel_dim1 + j];
+                fbuf2[i2 * sel_dim1 + j2] = wbuf2[i * sel_dim1 + j];
                 j2 += 2;
                 if (j2 >= sel_dim1) {
                     i2++;
@@ -4739,24 +4736,24 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         /* Update expected read buf */
         for (i = 0; i < sel_dim0; i++)
             for (j = 0; j < sel_dim1; j++)
-                erbuf2[i*sel_dim1 + j] = -1;
+                erbuf2[i * sel_dim1 + j] = -1;
         for (i = 0; i < sel_dim0; i += 2)
             for (j = 0; j < sel_dim1; j++)
-                erbuf2[i*sel_dim1 + j] = wbuf2[i*sel_dim1 + j];
+                erbuf2[i * sel_dim1 + j] = wbuf2[i * sel_dim1 + j];
         for (i = 1; i < sel_dim0; i += 2)
             for (j = 0; j < sel_dim1; j++)
-                erbuf2[i*sel_dim1 + j] = wbuf2[i*sel_dim1 + j];
+                erbuf2[i * sel_dim1 + j] = wbuf2[i * sel_dim1 + j];
 
         /* Read and verify */
-        if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                          lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 1,
-                                          (int **)&erbufs[1], shorten_element_sizes ? TRUE : FALSE) < 0)
+        if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 2, mem_spaces,
+                                          file_spaces, addrs, element_sizes, 1, (int **)&erbufs[1],
+                                          shorten_element_sizes ? TRUE : FALSE) < 0)
             P_TEST_ERROR;
 
         MPI_Barrier(comm);
 
-        /* 
-         * Reset selections 
+        /*
+         * Reset selections
          */
         if (H5Sselect_all(mem_spaces[0]) < 0)
             P_TEST_ERROR;
@@ -4793,9 +4790,8 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
         verify_block[0] = (block[0] * block[1]);
         verify_start[1] = start[0] * block[1];
         verify_block[1] = (block[0] * block[1]);
-        if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                          lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                          (int **)fbufs, FALSE) < 0)
+        if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 2, mem_spaces,
+                                          file_spaces, addrs, element_sizes, 2, (int **)fbufs, FALSE) < 0)
             P_TEST_ERROR;
 
         MPI_Barrier(comm);
@@ -4831,21 +4827,20 @@ test_selection_io_types_shorten(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dx
  * --Reset selections
  */
 static void
-test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
-                              H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[],
-                              hid_t mem_spaces[], hid_t file_spaces[], hsize_t dims1[], hsize_t dims2[])
+test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H5FD_mem_t type,
+                              haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[],
+                              hid_t file_spaces[], hsize_t dims1[], hsize_t dims2[])
 {
-    hsize_t    start[2];    /* start for hyperslab          */
-    hsize_t    stride[2];   /* stride for hyperslab         */
-    hsize_t    count[2];    /* count for hyperslab          */
-    hsize_t    block[2];    /* block for hyperslab          */
+    hsize_t start[2];                 /* start for hyperslab          */
+    hsize_t stride[2];                /* stride for hyperslab         */
+    hsize_t count[2];                 /* count for hyperslab          */
+    hsize_t block[2];                 /* block for hyperslab          */
     hsize_t verify_start[2] = {0, 0}; /* Starting block for verified data */
     hsize_t verify_block[2] = {0, 0}; /* Block size for verified data */
-    int i;
-    int j;
-    int i2;
-    int j2;
-
+    int     i;
+    int     j;
+    int     i2;
+    int     j2;
 
     /*
      * Test 1: Strided 1D (memory) <> Strided 2D (file) I/O
@@ -4871,8 +4866,7 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
         P_TEST_ERROR;
 
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[0], &file_spaces[1], &addrs[1], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1], element_sizes,
                                 (int **)&wbufs[0]) < 0)
         P_TEST_ERROR;
 
@@ -4881,7 +4875,7 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     /* Update file buf */
     for (i = 1, i2 = 0, j2 = 1; i < (sel_dim0 * sel_dim1); i += 2) {
         assert(i2 < sel_dim0);
-        fbuf2[(i2*sel_dim1) + j2] = wbuf1[i];
+        fbuf2[(i2 * sel_dim1) + j2] = wbuf1[i];
         j2 += 2;
         if (j2 >= sel_dim1) {
             i2++;
@@ -4898,15 +4892,15 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     /* Read and verify */
     verify_start[0] = start[0];
     verify_block[0] = (count[0] * stride[0]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&erbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-    /* 
-     * Reset selections 
+    /*
+     * Reset selections
      */
     if (H5Sselect_all(file_spaces[1]) < 0)
         P_TEST_ERROR;
@@ -4935,9 +4929,9 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     /* Read entire file buffer and verify */
     verify_start[0] = start[0];
     verify_block[0] = block[0];
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -4966,8 +4960,7 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
         P_TEST_ERROR;
 
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[1], &file_spaces[0], &addrs[0], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0], element_sizes,
                                 (int **)&wbufs[1]) < 0)
         P_TEST_ERROR;
 
@@ -4977,7 +4970,7 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     for (i = 0, i2 = 0; i < sel_dim0; i += 2)
         for (j = 0; j < sel_dim1; j++) {
             assert(i2 < (sel_dim0 * sel_dim1));
-            fbuf1[i2] = wbuf2[i*sel_dim1 + j];
+            fbuf1[i2] = wbuf2[i * sel_dim1 + j];
             i2 += 2;
         }
 
@@ -4987,20 +4980,20 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
             erbuf2[(i * sel_dim1) + j] = -1;
     for (i = 0; i < sel_dim0; i += 2)
         for (j = 0; j < sel_dim1; j++)
-            erbuf2[(i*sel_dim1) + j] = wbuf2[i*sel_dim1 + j];
+            erbuf2[(i * sel_dim1) + j] = wbuf2[i * sel_dim1 + j];
 
     /* Read and verify */
     verify_start[0] = start[0] * count[1];
     verify_block[0] = (count[0] * count[1] * stride[0]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
-                                      element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&erbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-    /* 
-     * Reset selections 
+    /*
+     * Reset selections
      */
     if (H5Sselect_all(file_spaces[0]) < 0)
         P_TEST_ERROR;
@@ -5031,11 +5024,10 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
     /* Read entire file buffer and verify */
     verify_start[0] = start[0] * block[1];
     verify_block[0] = (block[0] * block[1]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
-                                      element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
-
 
     MPI_Barrier(comm);
 
@@ -5054,24 +5046,23 @@ test_selection_io_types_1d_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl
  * --Reset selections
  */
 static void
-test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
-                           H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[],
-                           hid_t mem_spaces[], hid_t file_spaces[], hsize_t dims2[])
+test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H5FD_mem_t type,
+                           haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[], hid_t file_spaces[],
+                           hsize_t dims2[])
 {
-    hsize_t    start[2];    /* start for hyperslab          */
-    hsize_t    stride[2];   /* stride for hyperslab         */
-    hsize_t    count[2];    /* count for hyperslab          */
-    hsize_t    block[2];    /* block for hyperslab          */
+    hsize_t start[2];                 /* start for hyperslab          */
+    hsize_t stride[2];                /* stride for hyperslab         */
+    hsize_t count[2];                 /* count for hyperslab          */
+    hsize_t block[2];                 /* block for hyperslab          */
     hsize_t verify_start[2] = {0, 0}; /* Starting block for verified data */
     hsize_t verify_block[2] = {0, 0}; /* Block size for verified data */
-    int i;
-    int j;
-    int i2;
-    int j2;
+    int     i;
+    int     j;
+    int     i2;
+    int     j2;
 
-
-    /* 
-     * Test 1: Simple 2D contiguous I/O 
+    /*
+     * Test 1: Simple 2D contiguous I/O
      */
 
     /* Contiguous selection in file and memory */
@@ -5089,8 +5080,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
         P_TEST_ERROR;
 
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
                                 (int **)&wbufs[1]) < 0)
         P_TEST_ERROR;
 
@@ -5099,27 +5089,26 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Update file buf */
     for (i = 0; i < sel_dim0; i++)
         for (j = 0; j < sel_dim1; j++)
-            fbuf2[(i*sel_dim1) + j] = wbuf2[(i * sel_dim1) + j];
+            fbuf2[(i * sel_dim1) + j] = wbuf2[(i * sel_dim1) + j];
 
     /* Read and verify */
     verify_start[0] = start[0] * block[1];
     verify_block[0] = (block[0] * block[1]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
-
 
     /*
      * Test 2: Strided (memory) <> Contiguous(file) 2D I/O
      */
     /* Contiguous selection in file */
-    count[0]  = (hsize_t)((sel_dim0 / 2) / mpi_size);
-    count[1]  = (hsize_t)sel_dim1;
-    start[0]  = 1 + ((hsize_t)mpi_rank * count[0]);
-    start[1]  = 0;
+    count[0] = (hsize_t)((sel_dim0 / 2) / mpi_size);
+    count[1] = (hsize_t)sel_dim1;
+    start[0] = 1 + ((hsize_t)mpi_rank * count[0]);
+    start[1] = 0;
     if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         P_TEST_ERROR;
 
@@ -5134,39 +5123,38 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
         P_TEST_ERROR;
 
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
                                 (int **)&wbufs[1]) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
     /* Update file buf */
-    for (i = 0; i < sel_dim0/ 2; i++)
+    for (i = 0; i < sel_dim0 / 2; i++)
         for (j = 0; j < sel_dim1; j++) {
-            fbuf2[((i + 1) * sel_dim1) + j] = wbuf2[(((2*i)+1) * sel_dim1) + j];
+            fbuf2[((i + 1) * sel_dim1) + j] = wbuf2[(((2 * i) + 1) * sel_dim1) + j];
         }
 
     /* Update expected read buf */
     for (i = 0; i < sel_dim0; i++)
         for (j = 0; j < sel_dim1; j++)
-            erbuf2[(i*sel_dim1) + j] = -1;
-    for (i = 0; i < sel_dim0/ 2; i++)
+            erbuf2[(i * sel_dim1) + j] = -1;
+    for (i = 0; i < sel_dim0 / 2; i++)
         for (j = 0; j < sel_dim1; j++)
-            erbuf2[(((2*i) + 1) * sel_dim1) + j] = wbuf2[(((2*i)+1) * sel_dim1) + j];
+            erbuf2[(((2 * i) + 1) * sel_dim1) + j] = wbuf2[(((2 * i) + 1) * sel_dim1) + j];
 
     /* Read and verify */
     verify_start[0] = start[0] * count[1];
     verify_block[0] = (count[0] * count[1] * stride[0]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&erbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-    /* 
-     * Reset selections 
+    /*
+     * Reset selections
      */
     if (H5Sselect_all(mem_spaces[1]) < 0)
         P_TEST_ERROR;
@@ -5190,9 +5178,9 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Read entire file buffer and verify */
     verify_start[0] = start[0] * block[1];
     verify_block[0] = (block[0] * block[1]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, 
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5204,12 +5192,12 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Strided selection in file */
     block[0]  = 1;
     block[1]  = 1;
-    count[0] = (hsize_t)(sel_dim0 / mpi_size);
-    count[1] = (hsize_t)sel_dim1 / 2;
+    count[0]  = (hsize_t)(sel_dim0 / mpi_size);
+    count[1]  = (hsize_t)sel_dim1 / 2;
     stride[0] = 1;
     stride[1] = 2;
-    start[0] = (hsize_t)mpi_rank * count[0];
-    start[1] = 1;
+    start[0]  = (hsize_t)mpi_rank * count[0];
+    start[1]  = 1;
     if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
         P_TEST_ERROR;
 
@@ -5218,8 +5206,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
         P_TEST_ERROR;
 
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
                                 (int **)&wbufs[1]) < 0)
         P_TEST_ERROR;
 
@@ -5228,29 +5215,29 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Update file buf */
     for (i = 0; i < sel_dim0; i++)
         for (j = 0; j < sel_dim1 / 2; j++)
-            fbuf2[i*sel_dim1 + (2 * j) + 1] = wbuf2[i * sel_dim1 + (j+1)];
+            fbuf2[i * sel_dim1 + (2 * j) + 1] = wbuf2[i * sel_dim1 + (j + 1)];
 
     /* Update expected read buf */
     for (i = 0; i < sel_dim0; i++)
         for (j = 0; j < sel_dim1; j++)
-            erbuf2[i*sel_dim1 + j] = -1;
+            erbuf2[i * sel_dim1 + j] = -1;
     for (i = 0; i < sel_dim0; i++)
-        for (j = 0; j < sel_dim1/2; j++)
-            erbuf2[i*sel_dim1 + (j + 1)] = wbuf2[i*sel_dim1 + (j+1)];
+        for (j = 0; j < sel_dim1 / 2; j++)
+            erbuf2[i * sel_dim1 + (j + 1)] = wbuf2[i * sel_dim1 + (j + 1)];
 
     /* Read and verify */
     verify_start[0] = start[0] * count[1] * stride[1];
     verify_block[0] = (count[0] * count[1] * stride[1]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&erbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-   /* 
-    * Reset selections 
-    */
+    /*
+     * Reset selections
+     */
     if (H5Sselect_all(mem_spaces[1]) < 0)
         P_TEST_ERROR;
     if (H5Sselect_all(file_spaces[1]) < 0)
@@ -5273,9 +5260,9 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Read entire file buffer and verify */
     verify_start[0] = start[0] * block[1];
     verify_block[0] = (block[0] * block[1]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, 
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5302,8 +5289,8 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Strided selection (across dim 1) in memory */
     block[0]  = 1;
     block[1]  = 1;
-    count[0]  = (hsize_t)(sel_dim0/ mpi_size);
-    count[1]  = (hsize_t)sel_dim1/ 2;
+    count[0]  = (hsize_t)(sel_dim0 / mpi_size);
+    count[1]  = (hsize_t)sel_dim1 / 2;
     stride[0] = 1;
     stride[1] = 2;
     start[0]  = (hsize_t)mpi_rank * count[0];
@@ -5311,10 +5298,8 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
         P_TEST_ERROR;
 
-
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
                                 (int **)&wbufs[1]) < 0)
         P_TEST_ERROR;
 
@@ -5324,7 +5309,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     for (i = 0, i2 = 1, j2 = 0; i < sel_dim0; i++)
         for (j = 1; j < sel_dim1; j += 2) {
             assert(i2 < sel_dim0);
-            fbuf2[i2*sel_dim1 + j2] = wbuf2[i*sel_dim1+ j];
+            fbuf2[i2 * sel_dim1 + j2] = wbuf2[i * sel_dim1 + j];
             if (++j2 == sel_dim1) {
                 i2 += 2;
                 j2 = 0;
@@ -5334,22 +5319,22 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Update expected read buf */
     for (i = 0; i < sel_dim0; i++)
         for (j = 0; j < sel_dim1; j++)
-            erbuf2[i*sel_dim1+j] = -1;
+            erbuf2[i * sel_dim1 + j] = -1;
     for (i = 0; i < sel_dim0; i++)
         for (j = 1; j < sel_dim1; j += 2)
-            erbuf2[i*sel_dim1 + j] = wbuf2[i*sel_dim1+ j];
+            erbuf2[i * sel_dim1 + j] = wbuf2[i * sel_dim1 + j];
     /* Read and verify */
     verify_start[0] = start[0] * count[1] * stride[1];
     verify_block[0] = (count[0] * count[1] * stride[1]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&erbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-    /* 
-     * Reset selections 
+    /*
+     * Reset selections
      */
     if (H5Sselect_all(file_spaces[1]) < 0)
         P_TEST_ERROR;
@@ -5373,9 +5358,9 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Read entire file buffer and verify */
     verify_start[0] = start[0] * block[1];
     verify_block[0] = (block[0] * block[1]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                      element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[1],
+                                      &file_spaces[1], &addrs[1], element_sizes, 1, (int **)&fbufs[1],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5384,7 +5369,7 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
 
 } /* test_selection_io_types_2d() */
 
-/* 
+/*
  * Perform the following tests for 1 dimensional spaces:
  * --Test 1: Simple 1D contiguous I/O in both file and memory spaces
  * --Test 2: Strided (memory) <> Contiguous (file) 1D I/O
@@ -5395,18 +5380,17 @@ test_selection_io_types_2d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
  * --Reset selections
  */
 static void
-test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, 
-                           H5FD_mem_t type, haddr_t addrs[], size_t element_sizes[],
-                           hid_t mem_spaces[], hid_t file_spaces[], hsize_t dims1[])
+test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H5FD_mem_t type,
+                           haddr_t addrs[], size_t element_sizes[], hid_t mem_spaces[], hid_t file_spaces[],
+                           hsize_t dims1[])
 {
-    hsize_t    start[2];    /* start for hyperslab          */
-    hsize_t    stride[2];   /* stride for hyperslab         */
-    hsize_t    count[2];    /* count for hyperslab          */
-    hsize_t    block[2];    /* block for hyperslab          */
+    hsize_t start[2];                 /* start for hyperslab          */
+    hsize_t stride[2];                /* stride for hyperslab         */
+    hsize_t count[2];                 /* count for hyperslab          */
+    hsize_t block[2];                 /* block for hyperslab          */
     hsize_t verify_start[2] = {0, 0}; /* Starting block for verified data */
     hsize_t verify_block[2] = {0, 0}; /* Block size for verified data */
-    int i;
-
+    int     i;
 
     /*
      * Test 1: Simple 1D contiguous I/O
@@ -5423,17 +5407,14 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
         P_TEST_ERROR;
 
-
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
-                                (int **)&wbufs[0]) < 0) 
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
+                                (int **)&wbufs[0]) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-
-   /* Update file buf */
+    /* Update file buf */
     for (i = 0; i < sel_dim0 * sel_dim1; i++)
         fbuf1[i] = wbuf1[i];
 
@@ -5441,14 +5422,13 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     verify_start[0] = start[0];
     verify_block[0] = block[0];
 
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, 
-                                      lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                      element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-        
     /*
      * Test 2: Strided (memory) <> Contiguous (file) 1D I/O
      */
@@ -5456,7 +5436,7 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     assert(sel_dim1 / 2 == (sel_dim1 + 1) / 2);
 
     /* Contiguous selection in file */
-    count[0]  = (hsize_t)(((sel_dim0 * sel_dim1) / 2) / mpi_size);
+    count[0] = (hsize_t)(((sel_dim0 * sel_dim1) / 2) / mpi_size);
     start[0] = 1 + ((hsize_t)mpi_rank * count[0]);
     if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         P_TEST_ERROR;
@@ -5468,10 +5448,8 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
         P_TEST_ERROR;
 
-
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
                                 (int **)&wbufs[0]) < 0)
         P_TEST_ERROR;
 
@@ -5487,19 +5465,18 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     for (i = 0; i < (sel_dim0 * sel_dim1) / 2; i++)
         erbuf1[(2 * i) + 1] = wbuf1[(2 * i) + 1];
 
-
     /* Read and verify */
     verify_start[0] = start[0];
     verify_block[0] = (count[0] * stride[0]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                      element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&erbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-    /* 
-     * Reset selections 
+    /*
+     * Reset selections
      */
     if (H5Sselect_all(mem_spaces[0]) < 0)
         P_TEST_ERROR;
@@ -5519,9 +5496,9 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Read entire file buffer and verify */
     verify_start[0] = start[0];
     verify_block[0] = block[0];
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, 
-                                      lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                      element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5533,21 +5510,20 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     assert(sel_dim1 / 2 == (sel_dim1 + 1) / 2);
 
     /* Strided selection in file */
-    block[0] = 1;
+    block[0]  = 1;
     count[0]  = (hsize_t)(((sel_dim0 * sel_dim1) / 2) / mpi_size); /* count is this value from twice above */
-    stride[0] = 2; /* stride is this value from twice above */
-    start[0] = 1 + ((hsize_t)mpi_rank * stride[0] * count[0]);
+    stride[0] = 2;                                                 /* stride is this value from twice above */
+    start[0]  = 1 + ((hsize_t)mpi_rank * stride[0] * count[0]);
     if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
         P_TEST_ERROR;
 
     /* Contiguous selection in memory */
-    start[0]  = 1 + ((hsize_t)mpi_rank * count[0]);
+    start[0] = 1 + ((hsize_t)mpi_rank * count[0]);
     if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         P_TEST_ERROR;
 
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
                                 (int **)&wbufs[0]) < 0)
         P_TEST_ERROR;
 
@@ -5566,15 +5542,15 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Read and verify */
     verify_start[0] = start[0];
     verify_block[0] = count[0];
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                     lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                     element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&erbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-    /* 
-     * Reset selections 
+    /*
+     * Reset selections
      */
     if (H5Sselect_all(mem_spaces[0]) < 0)
         P_TEST_ERROR;
@@ -5594,9 +5570,9 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Read entire file buffer and verify */
     verify_start[0] = start[0];
     verify_block[0] = block[0];
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, 
-                                      lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                      element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5611,18 +5587,17 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     block[0]  = 1;
     count[0]  = (hsize_t)(((sel_dim0 * sel_dim1) / 2) / mpi_size);
     stride[0] = 2;
-    start[0] = 0 + ((hsize_t)mpi_rank * stride[0] * count[0]);
+    start[0]  = 0 + ((hsize_t)mpi_rank * stride[0] * count[0]);
     if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
         P_TEST_ERROR;
 
     /* Strided selection in memory */
-    start[0]  = 1 + ((hsize_t)mpi_rank * stride[0] * count[0]);
+    start[0] = 1 + ((hsize_t)mpi_rank * stride[0] * count[0]);
     if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
         P_TEST_ERROR;
 
     /* Issue write call */
-    if (test_selection_io_write(dxpl, lf, type, 1, 
-                                &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
+    if (test_selection_io_write(dxpl, lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
                                 (int **)&wbufs[0]) < 0)
         P_TEST_ERROR;
 
@@ -5641,15 +5616,15 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Read and verify */
     verify_start[0] = start[0];
     verify_block[0] = (count[0] * stride[0]);
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                      element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&erbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
 
-    /* 
-     * Reset selections 
+    /*
+     * Reset selections
      */
     if (H5Sselect_all(mem_spaces[0]) < 0)
         P_TEST_ERROR;
@@ -5669,9 +5644,9 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
     /* Read entire file buffer and verify */
     verify_start[0] = start[0];
     verify_block[0] = block[0];
-    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block,
-                                      lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                      element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+    if (test_selection_io_read_verify(dxpl, mpi_rank, verify_start, verify_block, lf, type, 1, &mem_spaces[0],
+                                      &file_spaces[0], &addrs[0], element_sizes, 1, (int **)&fbufs[0],
+                                      FALSE) < 0)
         P_TEST_ERROR;
 
     MPI_Barrier(comm);
@@ -5695,33 +5670,32 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl,
 static void
 test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
 {
-    hid_t mem_spaces[2]  = {H5I_INVALID_HID, H5I_INVALID_HID};  /* memory dataspaces vector */
-    hid_t file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID};  /* file dataspaces vector */
-    hsize_t dims1[1];   /* 1d dimension sizes */
-    hsize_t dims2[2];   /* 2d dimension sizes */
+    hid_t   mem_spaces[2]  = {H5I_INVALID_HID, H5I_INVALID_HID}; /* memory dataspaces vector */
+    hid_t   file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vector */
+    hsize_t dims1[1];                                            /* 1d dimension sizes */
+    hsize_t dims2[2];                                            /* 2d dimension sizes */
 
-    H5FD_mem_t type;    /* File type */
-    haddr_t addrs[2];   /* File allocation address */
-    size_t element_sizes[2] = {sizeof(int), sizeof(int)};   /* Element size */
-    size_t bufsize;     /* Buffer size */
-    int i;
-    int j;
+    H5FD_mem_t type;                                          /* File type */
+    haddr_t    addrs[2];                                      /* File allocation address */
+    size_t     element_sizes[2] = {sizeof(int), sizeof(int)}; /* Element size */
+    size_t     bufsize;                                       /* Buffer size */
+    int        i;
+    int        j;
 
     curr_nerrors = nerrors;
 
-    /* 
+    /*
      *  Default dimension sizes for mpi_size 1 or 2:
      *  int sel_dim0 = SELECT_IO_DIM0;
      *  int sel_dim1 = SELECT_IO_DIM1;
      */
     if (mpi_size >= 3) {
         sel_dim0 = mpi_size * 2;
-        sel_dim1 = mpi_size * 4;        
+        sel_dim1 = mpi_size * 4;
     }
 
-    dims1[0] = (hsize_t)(sel_dim0 * sel_dim1);   
-    dims2[0] = (hsize_t)sel_dim0, 
-    dims2[1] = (hsize_t)sel_dim1;        
+    dims1[0] = (hsize_t)(sel_dim0 * sel_dim1);
+    dims2[0] = (hsize_t)sel_dim0, dims2[1] = (hsize_t)sel_dim1;
 
     /* Create dataspaces - location 0 will be 1D and location 1 will be 2D */
     if ((mem_spaces[0] = H5Screate_simple(1, dims1, NULL)) < 0)
@@ -5733,7 +5707,8 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     if ((file_spaces[1] = H5Screate_simple(2, dims2, NULL)) < 0)
         P_TEST_ERROR;
 
-//printf("mpi_size is %d, mpi_rank is %d, sel_dim0 is %d, sel_dim1 is %d\n", mpi_size, mpi_rank, sel_dim0, sel_dim1);
+    // printf("mpi_size is %d, mpi_rank is %d, sel_dim0 is %d, sel_dim1 is %d\n", mpi_size, mpi_rank,
+    // sel_dim0, sel_dim1);
 
     /* Initialize global buffers:
      * --wbuf1, wbuf2: write buffers
@@ -5763,7 +5738,7 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     if ((erbuf1 = malloc(bufsize)) == NULL)
         P_TEST_ERROR;
 
-    if ((erbuf2 =  malloc(bufsize)) == NULL)
+    if ((erbuf2 = malloc(bufsize)) == NULL)
         P_TEST_ERROR;
 
     erbufs[0] = erbuf1;
@@ -5778,24 +5753,24 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
 
     /* Loop over memory types */
     for (type = 1; type < H5FD_MEM_NTYPES; type++) {
-    //for (type = 1; type < 2; type++) {
+        // for (type = 1; type < 2; type++) {
 
         addrs[0] = H5FDalloc(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
         addrs[1] = H5FDalloc(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
 
 #ifdef OUT
-if(MAINPROCESS)
-printf("type is %u, addrs[0]=%d, addrs[1]=%d\n", type, addrs[0], addrs[1]);
+        if (MAINPROCESS)
+            printf("type is %u, addrs[0]=%d, addrs[1]=%d\n", type, addrs[0], addrs[1]);
 #endif
 
-        test_selection_io_types_1d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, 
-                                   mem_spaces, file_spaces, dims1);
-        test_selection_io_types_2d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, 
-                                   mem_spaces, file_spaces, dims2);
-        test_selection_io_types_1d_2d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, 
-                                      mem_spaces, file_spaces, dims1, dims2);
-        test_selection_io_types_shorten(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, 
-                                        mem_spaces, file_spaces, dims1, dims2);
+        test_selection_io_types_1d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, mem_spaces,
+                                   file_spaces, dims1);
+        test_selection_io_types_2d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, mem_spaces,
+                                   file_spaces, dims2);
+        test_selection_io_types_1d_2d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, mem_spaces,
+                                      file_spaces, dims1, dims2);
+        test_selection_io_types_shorten(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, mem_spaces,
+                                        file_spaces, dims1, dims2);
 
     } /* end for */
 
@@ -5808,12 +5783,18 @@ printf("type is %u, addrs[0]=%d, addrs[1]=%d\n", type, addrs[0], addrs[1]);
     }
 
     /* Free the buffers */
-    if (wbuf1) free(wbuf1);
-    if (wbuf2) free(wbuf2);
-    if (fbuf1) free(fbuf1);
-    if (fbuf2) free(fbuf2);
-    if (erbuf1) free(erbuf1);
-    if (erbuf2) free(erbuf2);
+    if (wbuf1)
+        free(wbuf1);
+    if (wbuf2)
+        free(wbuf2);
+    if (fbuf1)
+        free(fbuf1);
+    if (fbuf2)
+        free(fbuf2);
+    if (erbuf1)
+        free(erbuf1);
+    if (erbuf2)
+        free(erbuf2);
 
     CHECK_PASSED();
 
@@ -5822,22 +5803,22 @@ printf("type is %u, addrs[0]=%d, addrs[1]=%d\n", type, addrs[0], addrs[1]);
 } /* test_selection_io_real() */
 
 /*
- * These tests for selection I/O are derived from test_selection_io() in 
+ * These tests for selection I/O are derived from test_selection_io() in
  * test/vfd.c and modified for parallel testing.
  */
 static void
 test_selection_io(int mpi_rank, int mpi_size)
 {
-    H5FD_t *lf = NULL;              /* VFD struct ptr */
-    hid_t fapl = H5I_INVALID_HID;   /* File access property list */
-    char filename[1024];            /* Test file name */
-    unsigned flags = 0;             /* File access flags */
+    H5FD_t  *lf   = NULL;            /* VFD struct ptr */
+    hid_t    fapl = H5I_INVALID_HID; /* File access property list */
+    char     filename[1024];         /* Test file name */
+    unsigned flags = 0;              /* File access flags */
 
-    unsigned collective;                    /* Types of I/O for testing */
-    hid_t dxpl = H5I_INVALID_HID;           /* Dataset transfer property list */
-    hid_t def_dxpl = H5I_INVALID_HID;       /* dxpl: independent access */
-    hid_t col_xfer_dxpl = H5I_INVALID_HID;  /* dxpl: collective access with collective I/O */
-    hid_t ind_io_dxpl = H5I_INVALID_HID;    /* dxpl: collective access with individual I/O */
+    unsigned collective;                      /* Types of I/O for testing */
+    hid_t    dxpl          = H5I_INVALID_HID; /* Dataset transfer property list */
+    hid_t    def_dxpl      = H5I_INVALID_HID; /* dxpl: independent access */
+    hid_t    col_xfer_dxpl = H5I_INVALID_HID; /* dxpl: collective access with collective I/O */
+    hid_t    ind_io_dxpl   = H5I_INVALID_HID; /* dxpl: collective access with individual I/O */
 
     /* If I use fapl in this call, I got an environment printout */
     h5_fixname(SELECT_FNAME, H5P_DEFAULT, filename, sizeof(filename));
@@ -5850,7 +5831,7 @@ test_selection_io(int mpi_rank, int mpi_size)
 
     /* Create file */
     flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
-    
+
     if (NULL == (lf = H5FDopen(filename, flags, fapl, HADDR_UNDEF)))
         P_TEST_ERROR;
 
@@ -5868,33 +5849,33 @@ test_selection_io(int mpi_rank, int mpi_size)
         P_TEST_ERROR;
     if (H5Pset_dxpl_mpio_collective_opt(ind_io_dxpl, H5FD_MPIO_INDIVIDUAL_IO) < 0)
         P_TEST_ERROR;
-    
+
     for (collective = 0; collective < iotypes; collective++) {
-    //for (collective = 0; collective < 1; collective++) {
+        // for (collective = 0; collective < 1; collective++) {
         if (collective)
             dxpl = collective == 1 ? col_xfer_dxpl : ind_io_dxpl;
         else
             dxpl = def_dxpl;
 
-    if(MAINPROCESS) {
-        if (collective) {
-            if (collective == 1)
-                printf("     Testing with Collective access: collective I/O         ");
+        if (MAINPROCESS) {
+            if (collective) {
+                if (collective == 1)
+                    printf("     Testing with Collective access: collective I/O         ");
+                else
+                    printf("     Testing with Collective_access: Individual I/O         ");
+            }
             else
-                printf("     Testing with Collective_access: Individual I/O         ");
-        } else
-            printf("     Testing with Independent access                        ");
-    }
+                printf("     Testing with Independent access                        ");
+        }
 
         /* Perform the actual tests */
         test_selection_io_real(mpi_rank, mpi_size, lf, dxpl);
-
     }
 
     /* Close file */
     if (H5FDclose(lf) < 0)
         P_TEST_ERROR;
-    
+
     /* Close the fapl */
     if (H5Pclose(fapl) < 0)
         P_TEST_ERROR;
@@ -5906,9 +5887,8 @@ test_selection_io(int mpi_rank, int mpi_size)
     if (H5Pclose(ind_io_dxpl) < 0)
         P_TEST_ERROR;
 
-    //if (MAINPROCESS && HDremove(filename) < 0)
-     //   P_TEST_ERROR;
-
+    // if (MAINPROCESS && HDremove(filename) < 0)
+    //    P_TEST_ERROR;
 
 } /* test_selection_io() */
 
@@ -5934,7 +5914,7 @@ main(int argc, char **argv)
 #endif
     int mpi_size;
     int mpi_rank;
-    int      ret;
+    int ret;
 
 #ifdef H5_HAVE_SUBFILING_VFD
     if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
@@ -6025,4 +6005,4 @@ finish:
     /* cannot just return (nerrs) because exit code is limited to 1byte */
     return (nerrors != 0);
 
-}  /* main() */
+} /* main() */
