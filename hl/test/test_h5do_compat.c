@@ -84,7 +84,7 @@ error:
         H5Sclose(sid);
         H5Pclose(dcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return H5I_INVALID_HID;
 
@@ -223,7 +223,7 @@ error:
         H5Sclose(mem_sid);
         H5Sclose(file_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -247,8 +247,8 @@ main(void)
 {
 #ifdef H5_NO_DEPRECATED_SYMBOLS
 
-    HDputs("Direct chunk read/write wrapper tests SKIPPED.");
-    HDputs("(Backward compatibility not configured)");
+    puts("Direct chunk read/write wrapper tests SKIPPED.");
+    puts("(Backward compatibility not configured)");
     return EXIT_SUCCESS;
 
 #else
@@ -275,11 +275,11 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All direct chunk read/write wrapper tests passed.");
+    puts("All direct chunk read/write wrapper tests passed.");
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return EXIT_FAILURE;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end main() */

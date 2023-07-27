@@ -27,20 +27,20 @@
  *    This tool uses H5LD_memb_t data structure declared in H5LDprivate.h
  */
 
-const char          *progname         = "h5watch"; /* tool name */
+static const char   *progname         = "h5watch"; /* tool name */
 static char         *g_list_of_fields = NULL;      /* command line input for "list_of_fields" */
 static char         *g_dup_fields     = NULL;      /* copy of "list_of_fields" */
 static H5LD_memb_t **g_listv          = NULL;      /* vector info for "list_of_fields" */
 
-static hbool_t  g_monitor_size_only = FALSE; /* monitor changes in dataset dimension sizes */
+static bool     g_monitor_size_only = false; /* monitor changes in dataset dimension sizes */
 static unsigned g_polling_interval  = 1;     /* polling interval to check appended data */
 
-static hbool_t  g_label         = FALSE;  /* label compound values */
+static bool     g_label         = false;  /* label compound values */
 static int      g_display_width = 80;     /* output width in characters */
-static hbool_t  g_simple_output = FALSE;  /* make output more machine-readable */
+static bool     g_simple_output = false;  /* make output more machine-readable */
 static unsigned g_retry = DEFAULT_RETRY;  /* # of times to try opening the file if somehow file is unstable */
-static hbool_t  g_display_hex    = FALSE; /* display data in hexadecimal format : LATER */
-static hbool_t  g_user_interrupt = FALSE; /* Flag to indicate that user interrupted execution */
+static bool     g_display_hex    = false; /* display data in hexadecimal format : LATER */
+static bool     g_user_interrupt = false; /* Flag to indicate that user interrupted execution */
 
 static herr_t doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank);
 static herr_t slicendump(hid_t did, hsize_t *prev_dims, hsize_t *cur_dims, hsize_t *start, hsize_t *block,
@@ -190,7 +190,7 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
     if (g_display_hex) {
         /* Print all data in hexadecimal format if the `-x' or `--hexdump'
          * command line switch was given. */
-        info.raw = TRUE;
+        info.raw = true;
     } /* end if */
 
     /* Print the values. */
@@ -437,7 +437,7 @@ process_cmpd_fields(hid_t fid, char *dsetname)
     }
 
     /* Estimate the number of comma-separated fields in "g_list of_fields" */
-    len = HDstrlen(g_list_of_fields) / 2 + 2;
+    len = strlen(g_list_of_fields) / 2 + 2;
 
     /* Allocate memory for a list vector of H5LD_memb_t structures to store "g_list_of_fields" info */
     if ((g_listv = (H5LD_memb_t **)calloc(len, sizeof(H5LD_memb_t *))) == NULL) {
@@ -485,7 +485,7 @@ check_dataset(hid_t fid, char *dsetname)
     unsigned     u;                      /* Local index variable */
     hsize_t      cur_dims[H5S_MAX_RANK]; /* size of dataspace dimensions */
     hsize_t      max_dims[H5S_MAX_RANK]; /* maximum size of dataspace dimensions */
-    hbool_t      unlim_max_dims = FALSE; /* whether dataset has unlimited or max. dimension setting */
+    bool         unlim_max_dims = false; /* whether dataset has unlimited or max. dimension setting */
     void        *edata;
     H5E_auto2_t  func;
     H5D_layout_t layout;
@@ -541,7 +541,7 @@ check_dataset(hid_t fid, char *dsetname)
     /* Check whether dataset has unlimited dimension or max. dimension setting */
     for (u = 0; u < (unsigned)ndims; u++)
         if (max_dims[u] == H5S_UNLIMITED || cur_dims[u] != max_dims[u]) {
-            unlim_max_dims = TRUE;
+            unlim_max_dims = true;
             break;
         }
 
@@ -673,7 +673,7 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'w': /* --width=N */
-                g_display_width = (int)HDstrtol(H5_optarg, NULL, 0);
+                g_display_width = (int)strtol(H5_optarg, NULL, 0);
                 if (g_display_width < 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
@@ -681,20 +681,20 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'd': /* --dim */
-                g_monitor_size_only = TRUE;
+                g_monitor_size_only = true;
                 break;
 
             case 'S': /* --simple */
-                g_simple_output = TRUE;
+                g_simple_output = true;
                 break;
 
             case 'l': /* --label */
-                g_label = TRUE;
+                g_label = true;
                 break;
 
             case 'p': /* --polling=N */
-                /* g_polling_interval = HDstrtod(H5_optarg, NULL); */
-                if ((tmp = (int)HDstrtol(H5_optarg, NULL, 10)) <= 0) {
+                /* g_polling_interval = strtod(H5_optarg, NULL); */
+                if ((tmp = (int)strtol(H5_optarg, NULL, 10)) <= 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
@@ -715,13 +715,13 @@ parse_command_line(int argc, const char *const *argv)
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
-                    if ((g_list_of_fields = (char *)realloc(
-                             g_list_of_fields, HDstrlen(g_list_of_fields) + HDstrlen(str) + 2)) == NULL) {
+                    if ((g_list_of_fields = (char *)realloc(g_list_of_fields, strlen(g_list_of_fields) +
+                                                                                  strlen(str) + 2)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
-                    HDstrcat(g_list_of_fields, FIELD_SEP);
-                    HDstrcat(g_list_of_fields, str);
+                    strcat(g_list_of_fields, FIELD_SEP);
+                    strcat(g_list_of_fields, str);
                 }
 
                 break;
@@ -754,7 +754,7 @@ static void
 catch_signal(int H5_ATTR_UNUSED signo)
 {
     /* Set the flag to get out of the main loop */
-    g_user_interrupt = TRUE;
+    g_user_interrupt = true;
 } /* catch_signal() */
 
 /*-------------------------------------------------------------------------
@@ -843,7 +843,7 @@ main(int argc, char *argv[])
 
     do {
         while (fname && *fname) {
-            fid = h5tools_fopen(fname, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl, FALSE, drivername,
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl, false, drivername,
                                 sizeof drivername);
 
             if (fid >= 0) {
@@ -853,7 +853,7 @@ main(int argc, char *argv[])
 
             /* Shorten the file name; lengthen the object name */
             x     = dname;
-            dname = HDstrrchr(fname, '/');
+            dname = strrchr(fname, '/');
             if (x)
                 *x = '/';
             if (!dname)

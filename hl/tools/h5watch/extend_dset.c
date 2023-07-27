@@ -146,7 +146,7 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
         num_elmts *= (unsigned)ext_dims[i];
 
     /* Compound type */
-    if (!HDstrcmp(dname, DSET_CMPD_TWO)) {
+    if (!strcmp(dname, DSET_CMPD_TWO)) {
 
         memset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
         for (i = 0; i < num_elmts; i++) {
@@ -305,7 +305,7 @@ extend_dset_one(const char *file, char *dname, int action)
 
         /* Initialize data for the extended region of the dataset */
         /* Compound type */
-        if (!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
+        if (!strcmp(dname, DSET_CMPD) || !strcmp(dname, DSET_CMPD_ESC)) {
 
             memset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
             for (i = 0; i < action; i++) {
@@ -408,16 +408,16 @@ main(int argc, char *argv[])
     action1 = atoi(argv[3]);
     action2 = atoi(argv[4]);
 
-    if (!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
+    if (!strcmp(dname, DSET_CMPD) || !strcmp(dname, DSET_CMPD_ESC)) {
         if (extend_dset_one(fname, dname, action1) < 0)
             goto error;
     }
-    else if (!HDstrcmp(dname, DSET_ONE) || !HDstrcmp(dname, DSET_ALLOC_LATE) ||
-             !HDstrcmp(dname, DSET_ALLOC_EARLY)) {
+    else if (!strcmp(dname, DSET_ONE) || !strcmp(dname, DSET_ALLOC_LATE) ||
+             !strcmp(dname, DSET_ALLOC_EARLY)) {
         if (extend_dset_one(fname, dname, action1) < 0)
             goto error;
     }
-    else if (!HDstrcmp(dname, DSET_TWO) || !HDstrcmp(dname, DSET_CMPD_TWO)) {
+    else if (!strcmp(dname, DSET_TWO) || !strcmp(dname, DSET_CMPD_TWO)) {
         if (extend_dset_two(fname, dname, action1, action2) < 0)
             goto error;
     }

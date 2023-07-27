@@ -105,7 +105,7 @@
 #define yychar          H5LTyychar
 
 /* First part of user prologue.  */
-#line 20 "hl/src//H5LTparse.y"
+#line 19 "hl/src//H5LTparse.y"
 
 #include <stdio.h>
 #include <string.h>
@@ -121,8 +121,8 @@ extern int yyerror(const char *);
 /*structure for compound type information*/
 struct cmpd_info {
     hid_t       id;             /*type ID*/
-    hbool_t     is_field;       /*flag to lexer for compound member*/
-    hbool_t     first_memb;     /*flag for first compound member*/
+    bool        is_field;       /*flag to lexer for compound member*/
+    bool        first_memb;     /*flag for first compound member*/
 };
 
 /*stack for nested compound type*/
@@ -138,7 +138,7 @@ static int csindex = -1;                /*pointer to the top of compound stack*/
 struct arr_info {
     hsize_t             dims[H5S_MAX_RANK];     /*size of each dimension, limited to 32 dimensions*/
     unsigned            ndims;                  /*number of dimensions*/
-    hbool_t             is_dim;                 /*flag to lexer for dimension*/
+    bool                is_dim;                 /*flag to lexer for dimension*/
 };
 /*stack for nested array type*/
 static struct arr_info arr_stack[STACK_SIZE];
@@ -146,12 +146,12 @@ static int asindex = -1;               /*pointer to the top of array stack*/
 
 static H5T_str_t   str_pad;                /*variable for string padding*/
 static H5T_cset_t  str_cset;               /*variable for string character set*/
-static hbool_t     is_variable = 0;        /*variable for variable-length string*/
+static bool        is_variable = 0;        /*variable for variable-length string*/
 static size_t      str_size;               /*variable for string size*/
    
 static hid_t       enum_id;                /*type ID*/
-static hbool_t     is_enum = 0;            /*flag to lexer for enum type*/
-static hbool_t     is_enum_memb = 0;       /*flag to lexer for enum member*/
+static bool        is_enum = 0;            /*flag to lexer for enum type*/
+static bool        is_enum_memb = 0;       /*flag to lexer for enum member*/
 static char*       enum_memb_symbol;       /*enum member symbol string*/
 
 
@@ -682,16 +682,16 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   102,   102,   103,   105,   106,   107,   108,   110,   111,
-     112,   113,   114,   117,   118,   119,   120,   121,   122,   123,
-     124,   125,   126,   127,   128,   129,   130,   131,   132,   133,
-     134,   135,   136,   137,   138,   139,   140,   141,   142,   143,
-     146,   147,   148,   149,   150,   151,   152,   156,   155,   164,
-     165,   167,   167,   204,   212,   213,   216,   218,   218,   227,
-     228,   230,   231,   230,   238,   241,   248,   253,   245,   260,
-     262,   267,   274,   283,   290,   264,   314,   315,   317,   318,
-     319,   321,   322,   324,   325,   329,   328,   333,   334,   336,
-     336,   386,   388
+       0,   101,   101,   102,   104,   105,   106,   107,   109,   110,
+     111,   112,   113,   116,   117,   118,   119,   120,   121,   122,
+     123,   124,   125,   126,   127,   128,   129,   130,   131,   132,
+     133,   134,   135,   136,   137,   138,   139,   140,   141,   142,
+     145,   146,   147,   148,   149,   150,   151,   155,   154,   163,
+     164,   166,   166,   203,   211,   212,   215,   217,   217,   226,
+     227,   229,   230,   229,   237,   240,   247,   252,   244,   259,
+     261,   266,   273,   282,   289,   263,   313,   314,   316,   317,
+     318,   320,   321,   323,   324,   328,   327,   332,   333,   335,
+     335,   385,   387
 };
 #endif
 
@@ -1378,229 +1378,229 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* start: %empty  */
-#line 102 "hl/src//H5LTparse.y"
+#line 101 "hl/src//H5LTparse.y"
                 { memset(arr_stack, 0, STACK_SIZE*sizeof(struct arr_info)); /*initialize here?*/ }
 #line 1353 "hl/src//H5LTparse.c"
     break;
 
   case 3: /* start: ddl_type  */
-#line 103 "hl/src//H5LTparse.y"
+#line 102 "hl/src//H5LTparse.y"
                           { return (yyval.hid);}
 #line 1359 "hl/src//H5LTparse.c"
     break;
 
   case 13: /* integer_type: H5T_STD_I8BE_TOKEN  */
-#line 117 "hl/src//H5LTparse.y"
+#line 116 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I8BE); }
 #line 1365 "hl/src//H5LTparse.c"
     break;
 
   case 14: /* integer_type: H5T_STD_I8LE_TOKEN  */
-#line 118 "hl/src//H5LTparse.y"
+#line 117 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I8LE); }
 #line 1371 "hl/src//H5LTparse.c"
     break;
 
   case 15: /* integer_type: H5T_STD_I16BE_TOKEN  */
-#line 119 "hl/src//H5LTparse.y"
+#line 118 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I16BE); }
 #line 1377 "hl/src//H5LTparse.c"
     break;
 
   case 16: /* integer_type: H5T_STD_I16LE_TOKEN  */
-#line 120 "hl/src//H5LTparse.y"
+#line 119 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I16LE); }
 #line 1383 "hl/src//H5LTparse.c"
     break;
 
   case 17: /* integer_type: H5T_STD_I32BE_TOKEN  */
-#line 121 "hl/src//H5LTparse.y"
+#line 120 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I32BE); }
 #line 1389 "hl/src//H5LTparse.c"
     break;
 
   case 18: /* integer_type: H5T_STD_I32LE_TOKEN  */
-#line 122 "hl/src//H5LTparse.y"
+#line 121 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I32LE); }
 #line 1395 "hl/src//H5LTparse.c"
     break;
 
   case 19: /* integer_type: H5T_STD_I64BE_TOKEN  */
-#line 123 "hl/src//H5LTparse.y"
+#line 122 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I64BE); }
 #line 1401 "hl/src//H5LTparse.c"
     break;
 
   case 20: /* integer_type: H5T_STD_I64LE_TOKEN  */
-#line 124 "hl/src//H5LTparse.y"
+#line 123 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I64LE); }
 #line 1407 "hl/src//H5LTparse.c"
     break;
 
   case 21: /* integer_type: H5T_STD_U8BE_TOKEN  */
-#line 125 "hl/src//H5LTparse.y"
+#line 124 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U8BE); }
 #line 1413 "hl/src//H5LTparse.c"
     break;
 
   case 22: /* integer_type: H5T_STD_U8LE_TOKEN  */
-#line 126 "hl/src//H5LTparse.y"
+#line 125 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U8LE); }
 #line 1419 "hl/src//H5LTparse.c"
     break;
 
   case 23: /* integer_type: H5T_STD_U16BE_TOKEN  */
-#line 127 "hl/src//H5LTparse.y"
+#line 126 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U16BE); }
 #line 1425 "hl/src//H5LTparse.c"
     break;
 
   case 24: /* integer_type: H5T_STD_U16LE_TOKEN  */
-#line 128 "hl/src//H5LTparse.y"
+#line 127 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U16LE); }
 #line 1431 "hl/src//H5LTparse.c"
     break;
 
   case 25: /* integer_type: H5T_STD_U32BE_TOKEN  */
-#line 129 "hl/src//H5LTparse.y"
+#line 128 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U32BE); }
 #line 1437 "hl/src//H5LTparse.c"
     break;
 
   case 26: /* integer_type: H5T_STD_U32LE_TOKEN  */
-#line 130 "hl/src//H5LTparse.y"
+#line 129 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U32LE); }
 #line 1443 "hl/src//H5LTparse.c"
     break;
 
   case 27: /* integer_type: H5T_STD_U64BE_TOKEN  */
-#line 131 "hl/src//H5LTparse.y"
+#line 130 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U64BE); }
 #line 1449 "hl/src//H5LTparse.c"
     break;
 
   case 28: /* integer_type: H5T_STD_U64LE_TOKEN  */
-#line 132 "hl/src//H5LTparse.y"
+#line 131 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U64LE); }
 #line 1455 "hl/src//H5LTparse.c"
     break;
 
   case 29: /* integer_type: H5T_NATIVE_CHAR_TOKEN  */
-#line 133 "hl/src//H5LTparse.y"
+#line 132 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_CHAR); }
 #line 1461 "hl/src//H5LTparse.c"
     break;
 
   case 30: /* integer_type: H5T_NATIVE_SCHAR_TOKEN  */
-#line 134 "hl/src//H5LTparse.y"
+#line 133 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_SCHAR); }
 #line 1467 "hl/src//H5LTparse.c"
     break;
 
   case 31: /* integer_type: H5T_NATIVE_UCHAR_TOKEN  */
-#line 135 "hl/src//H5LTparse.y"
+#line 134 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_UCHAR); }
 #line 1473 "hl/src//H5LTparse.c"
     break;
 
   case 32: /* integer_type: H5T_NATIVE_SHORT_TOKEN  */
-#line 136 "hl/src//H5LTparse.y"
+#line 135 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_SHORT); }
 #line 1479 "hl/src//H5LTparse.c"
     break;
 
   case 33: /* integer_type: H5T_NATIVE_USHORT_TOKEN  */
-#line 137 "hl/src//H5LTparse.y"
+#line 136 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_USHORT); }
 #line 1485 "hl/src//H5LTparse.c"
     break;
 
   case 34: /* integer_type: H5T_NATIVE_INT_TOKEN  */
-#line 138 "hl/src//H5LTparse.y"
+#line 137 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_INT); }
 #line 1491 "hl/src//H5LTparse.c"
     break;
 
   case 35: /* integer_type: H5T_NATIVE_UINT_TOKEN  */
-#line 139 "hl/src//H5LTparse.y"
+#line 138 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_UINT); }
 #line 1497 "hl/src//H5LTparse.c"
     break;
 
   case 36: /* integer_type: H5T_NATIVE_LONG_TOKEN  */
-#line 140 "hl/src//H5LTparse.y"
+#line 139 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_LONG); }
 #line 1503 "hl/src//H5LTparse.c"
     break;
 
   case 37: /* integer_type: H5T_NATIVE_ULONG_TOKEN  */
-#line 141 "hl/src//H5LTparse.y"
+#line 140 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_ULONG); }
 #line 1509 "hl/src//H5LTparse.c"
     break;
 
   case 38: /* integer_type: H5T_NATIVE_LLONG_TOKEN  */
-#line 142 "hl/src//H5LTparse.y"
+#line 141 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_LLONG); }
 #line 1515 "hl/src//H5LTparse.c"
     break;
 
   case 39: /* integer_type: H5T_NATIVE_ULLONG_TOKEN  */
-#line 143 "hl/src//H5LTparse.y"
+#line 142 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_ULLONG); }
 #line 1521 "hl/src//H5LTparse.c"
     break;
 
   case 40: /* fp_type: H5T_IEEE_F32BE_TOKEN  */
-#line 146 "hl/src//H5LTparse.y"
+#line 145 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F32BE); }
 #line 1527 "hl/src//H5LTparse.c"
     break;
 
   case 41: /* fp_type: H5T_IEEE_F32LE_TOKEN  */
-#line 147 "hl/src//H5LTparse.y"
+#line 146 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F32LE); }
 #line 1533 "hl/src//H5LTparse.c"
     break;
 
   case 42: /* fp_type: H5T_IEEE_F64BE_TOKEN  */
-#line 148 "hl/src//H5LTparse.y"
+#line 147 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F64BE); }
 #line 1539 "hl/src//H5LTparse.c"
     break;
 
   case 43: /* fp_type: H5T_IEEE_F64LE_TOKEN  */
-#line 149 "hl/src//H5LTparse.y"
+#line 148 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F64LE); }
 #line 1545 "hl/src//H5LTparse.c"
     break;
 
   case 44: /* fp_type: H5T_NATIVE_FLOAT_TOKEN  */
-#line 150 "hl/src//H5LTparse.y"
+#line 149 "hl/src//H5LTparse.y"
                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_FLOAT); }
 #line 1551 "hl/src//H5LTparse.c"
     break;
 
   case 45: /* fp_type: H5T_NATIVE_DOUBLE_TOKEN  */
-#line 151 "hl/src//H5LTparse.y"
+#line 150 "hl/src//H5LTparse.y"
                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_DOUBLE); }
 #line 1557 "hl/src//H5LTparse.c"
     break;
 
   case 46: /* fp_type: H5T_NATIVE_LDOUBLE_TOKEN  */
-#line 152 "hl/src//H5LTparse.y"
+#line 151 "hl/src//H5LTparse.y"
                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_LDOUBLE); }
 #line 1563 "hl/src//H5LTparse.c"
     break;
 
   case 47: /* $@1: %empty  */
-#line 156 "hl/src//H5LTparse.y"
+#line 155 "hl/src//H5LTparse.y"
                             { csindex++; cmpd_stack[csindex].id = H5Tcreate(H5T_COMPOUND, 1); /*temporarily set size to 1*/ }
 #line 1569 "hl/src//H5LTparse.c"
     break;
 
   case 48: /* compound_type: H5T_COMPOUND_TOKEN $@1 '{' memb_list '}'  */
-#line 158 "hl/src//H5LTparse.y"
+#line 157 "hl/src//H5LTparse.y"
                             { (yyval.hid) = cmpd_stack[csindex].id; 
                               cmpd_stack[csindex].id = 0;
                               cmpd_stack[csindex].first_memb = 1; 
@@ -1610,13 +1610,13 @@ yyreduce:
     break;
 
   case 51: /* $@2: %empty  */
-#line 167 "hl/src//H5LTparse.y"
+#line 166 "hl/src//H5LTparse.y"
                                  { cmpd_stack[csindex].is_field = 1; /*notify lexer a compound member is parsed*/ }
 #line 1585 "hl/src//H5LTparse.c"
     break;
 
   case 52: /* memb_def: ddl_type $@2 field_name field_offset ';'  */
-#line 169 "hl/src//H5LTparse.y"
+#line 168 "hl/src//H5LTparse.y"
                         {   
                             size_t origin_size, new_size;
                             hid_t dtype_id = cmpd_stack[csindex].id;
@@ -1655,9 +1655,9 @@ yyreduce:
     break;
 
   case 53: /* field_name: STRING  */
-#line 205 "hl/src//H5LTparse.y"
+#line 204 "hl/src//H5LTparse.y"
                         {
-                            (yyval.sval) = HDstrdup(yylval.sval);
+                            (yyval.sval) = strdup(yylval.sval);
                             free(yylval.sval);
                             yylval.sval = NULL;
                         }
@@ -1665,25 +1665,25 @@ yyreduce:
     break;
 
   case 54: /* field_offset: %empty  */
-#line 212 "hl/src//H5LTparse.y"
+#line 211 "hl/src//H5LTparse.y"
                         { (yyval.ival) = 0; }
 #line 1640 "hl/src//H5LTparse.c"
     break;
 
   case 55: /* field_offset: ':' offset  */
-#line 214 "hl/src//H5LTparse.y"
+#line 213 "hl/src//H5LTparse.y"
                         { (yyval.ival) = yylval.ival; }
 #line 1646 "hl/src//H5LTparse.c"
     break;
 
   case 57: /* $@3: %empty  */
-#line 218 "hl/src//H5LTparse.y"
+#line 217 "hl/src//H5LTparse.y"
                                         { asindex++; /*pushd onto the stack*/ }
 #line 1652 "hl/src//H5LTparse.c"
     break;
 
   case 58: /* array_type: H5T_ARRAY_TOKEN $@3 '{' dim_list ddl_type '}'  */
-#line 220 "hl/src//H5LTparse.y"
+#line 219 "hl/src//H5LTparse.y"
                         { 
                           (yyval.hid) = H5Tarray_create2((yyvsp[-1].hid), arr_stack[asindex].ndims, arr_stack[asindex].dims);
                           arr_stack[asindex].ndims = 0;
@@ -1694,13 +1694,13 @@ yyreduce:
     break;
 
   case 61: /* $@4: %empty  */
-#line 230 "hl/src//H5LTparse.y"
+#line 229 "hl/src//H5LTparse.y"
                             { arr_stack[asindex].is_dim = 1; /*notice lexer of dimension size*/ }
 #line 1669 "hl/src//H5LTparse.c"
     break;
 
   case 62: /* $@5: %empty  */
-#line 231 "hl/src//H5LTparse.y"
+#line 230 "hl/src//H5LTparse.y"
                                 { unsigned ndims = arr_stack[asindex].ndims;
                                   arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival; 
                                   arr_stack[asindex].ndims++;
@@ -1710,13 +1710,13 @@ yyreduce:
     break;
 
   case 65: /* vlen_type: H5T_VLEN_TOKEN '{' ddl_type '}'  */
-#line 242 "hl/src//H5LTparse.y"
+#line 241 "hl/src//H5LTparse.y"
                             { (yyval.hid) = H5Tvlen_create((yyvsp[-1].hid)); H5Tclose((yyvsp[-1].hid)); }
 #line 1685 "hl/src//H5LTparse.c"
     break;
 
   case 66: /* @6: %empty  */
-#line 248 "hl/src//H5LTparse.y"
+#line 247 "hl/src//H5LTparse.y"
                             {   
                                 size_t size = (size_t)yylval.ival;
                                 (yyval.hid) = H5Tcreate(H5T_OPAQUE, size);
@@ -1725,7 +1725,7 @@ yyreduce:
     break;
 
   case 67: /* $@7: %empty  */
-#line 253 "hl/src//H5LTparse.y"
+#line 252 "hl/src//H5LTparse.y"
                             {  
                                 H5Tset_tag((yyvsp[-3].hid), yylval.sval);
                                 free(yylval.sval);
@@ -1735,13 +1735,13 @@ yyreduce:
     break;
 
   case 68: /* opaque_type: H5T_OPAQUE_TOKEN '{' OPQ_SIZE_TOKEN opaque_size ';' @6 OPQ_TAG_TOKEN opaque_tag ';' $@7 '}'  */
-#line 258 "hl/src//H5LTparse.y"
+#line 257 "hl/src//H5LTparse.y"
                             { (yyval.hid) = (yyvsp[-5].hid); }
 #line 1710 "hl/src//H5LTparse.c"
     break;
 
   case 71: /* $@8: %empty  */
-#line 267 "hl/src//H5LTparse.y"
+#line 266 "hl/src//H5LTparse.y"
                             {  
                                 if((yyvsp[-1].ival) == H5T_VARIABLE_TOKEN)
                                     is_variable = 1;
@@ -1752,7 +1752,7 @@ yyreduce:
     break;
 
   case 72: /* $@9: %empty  */
-#line 274 "hl/src//H5LTparse.y"
+#line 273 "hl/src//H5LTparse.y"
                             {
                                 if((yyvsp[-1].ival) == H5T_STR_NULLTERM_TOKEN)
                                     str_pad = H5T_STR_NULLTERM;
@@ -1765,7 +1765,7 @@ yyreduce:
     break;
 
   case 73: /* $@10: %empty  */
-#line 283 "hl/src//H5LTparse.y"
+#line 282 "hl/src//H5LTparse.y"
                             {  
                                 if((yyvsp[-1].ival) == H5T_CSET_ASCII_TOKEN)
                                     str_cset = H5T_CSET_ASCII;
@@ -1776,7 +1776,7 @@ yyreduce:
     break;
 
   case 74: /* @11: %empty  */
-#line 290 "hl/src//H5LTparse.y"
+#line 289 "hl/src//H5LTparse.y"
                             {
                                 if((yyvsp[-1].hid) == H5T_C_S1_TOKEN)
                                     (yyval.hid) = H5Tcopy(H5T_C_S1);
@@ -1787,7 +1787,7 @@ yyreduce:
     break;
 
   case 75: /* string_type: H5T_STRING_TOKEN '{' STRSIZE_TOKEN strsize ';' $@8 STRPAD_TOKEN strpad ';' $@9 CSET_TOKEN cset ';' $@10 CTYPE_TOKEN ctype ';' @11 '}'  */
-#line 297 "hl/src//H5LTparse.y"
+#line 296 "hl/src//H5LTparse.y"
                             {   
                                 hid_t str_id = (yyvsp[-1].hid);
 
@@ -1808,70 +1808,70 @@ yyreduce:
     break;
 
   case 76: /* strsize: H5T_VARIABLE_TOKEN  */
-#line 314 "hl/src//H5LTparse.y"
+#line 313 "hl/src//H5LTparse.y"
                                                {(yyval.ival) = H5T_VARIABLE_TOKEN;}
 #line 1783 "hl/src//H5LTparse.c"
     break;
 
   case 78: /* strpad: H5T_STR_NULLTERM_TOKEN  */
-#line 317 "hl/src//H5LTparse.y"
+#line 316 "hl/src//H5LTparse.y"
                                                {(yyval.ival) = H5T_STR_NULLTERM_TOKEN;}
 #line 1789 "hl/src//H5LTparse.c"
     break;
 
   case 79: /* strpad: H5T_STR_NULLPAD_TOKEN  */
-#line 318 "hl/src//H5LTparse.y"
+#line 317 "hl/src//H5LTparse.y"
                                                {(yyval.ival) = H5T_STR_NULLPAD_TOKEN;}
 #line 1795 "hl/src//H5LTparse.c"
     break;
 
   case 80: /* strpad: H5T_STR_SPACEPAD_TOKEN  */
-#line 319 "hl/src//H5LTparse.y"
+#line 318 "hl/src//H5LTparse.y"
                                                {(yyval.ival) = H5T_STR_SPACEPAD_TOKEN;}
 #line 1801 "hl/src//H5LTparse.c"
     break;
 
   case 81: /* cset: H5T_CSET_ASCII_TOKEN  */
-#line 321 "hl/src//H5LTparse.y"
+#line 320 "hl/src//H5LTparse.y"
                                              {(yyval.ival) = H5T_CSET_ASCII_TOKEN;}
 #line 1807 "hl/src//H5LTparse.c"
     break;
 
   case 82: /* cset: H5T_CSET_UTF8_TOKEN  */
-#line 322 "hl/src//H5LTparse.y"
+#line 321 "hl/src//H5LTparse.y"
                                             {(yyval.ival) = H5T_CSET_UTF8_TOKEN;}
 #line 1813 "hl/src//H5LTparse.c"
     break;
 
   case 83: /* ctype: H5T_C_S1_TOKEN  */
-#line 324 "hl/src//H5LTparse.y"
+#line 323 "hl/src//H5LTparse.y"
                                                {(yyval.hid) = H5T_C_S1_TOKEN;}
 #line 1819 "hl/src//H5LTparse.c"
     break;
 
   case 84: /* ctype: H5T_FORTRAN_S1_TOKEN  */
-#line 325 "hl/src//H5LTparse.y"
+#line 324 "hl/src//H5LTparse.y"
                                                {(yyval.hid) = H5T_FORTRAN_S1_TOKEN;}
 #line 1825 "hl/src//H5LTparse.c"
     break;
 
   case 85: /* $@12: %empty  */
-#line 329 "hl/src//H5LTparse.y"
+#line 328 "hl/src//H5LTparse.y"
                             { is_enum = 1; enum_id = H5Tenum_create((yyvsp[-1].hid)); H5Tclose((yyvsp[-1].hid)); }
 #line 1831 "hl/src//H5LTparse.c"
     break;
 
   case 86: /* enum_type: H5T_ENUM_TOKEN '{' integer_type ';' $@12 enum_list '}'  */
-#line 331 "hl/src//H5LTparse.y"
+#line 330 "hl/src//H5LTparse.y"
                             { is_enum = 0; /*reset*/ (yyval.hid) = enum_id; }
 #line 1837 "hl/src//H5LTparse.c"
     break;
 
   case 89: /* $@13: %empty  */
-#line 336 "hl/src//H5LTparse.y"
+#line 335 "hl/src//H5LTparse.y"
                                             {
                                                 is_enum_memb = 1; /*indicate member of enum*/
-                                                enum_memb_symbol = HDstrdup(yylval.sval); 
+                                                enum_memb_symbol = strdup(yylval.sval); 
                                                 free(yylval.sval);
                                                 yylval.sval = NULL;
                                             }
@@ -1879,7 +1879,7 @@ yyreduce:
     break;
 
   case 90: /* enum_def: enum_symbol $@13 enum_val ';'  */
-#line 343 "hl/src//H5LTparse.y"
+#line 342 "hl/src//H5LTparse.y"
                             {
                                 char char_val=(char)yylval.ival;
                                 short short_val=(short)yylval.ival;

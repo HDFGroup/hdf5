@@ -58,7 +58,7 @@ static particle_t testPart[NRECORDS] = {{"zero", 0, 0, 0.0F, 0.0},    {"one", 10
 static int
 cmp_par(size_t i, size_t j, particle_t *rbuf, particle_t *wbuf)
 {
-    if ((HDstrcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
+    if ((strcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi || !H5_FLT_ABS_EQUAL(rbuf[i].pressure, wbuf[j].pressure) ||
         !H5_DBL_ABS_EQUAL(rbuf[i].temperature, wbuf[j].temperature)) {
         return FAIL;
@@ -982,7 +982,7 @@ main(void)
     /* create a file using default properties */
     fid = H5Fcreate(TEST_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    HDputs("Testing packet table");
+    puts("Testing packet table");
 
     /* Test packet table with fixed length */
     if (test_packet_table(fid) < 0)

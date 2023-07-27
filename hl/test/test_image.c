@@ -304,7 +304,7 @@ out:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -494,7 +494,7 @@ out:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -579,11 +579,11 @@ test_generate(void)
     !
     */
 
-    if (HDfscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && HDferror(f)) {
+    if (fscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && ferror(f)) {
         printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
-    if (HDfscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && HDferror(f)) {
+    if (fscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && ferror(f)) {
         printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
@@ -614,13 +614,13 @@ test_generate(void)
         goto out;
 
     for (i = 0; i < n_elements; i++) {
-        if (HDfscanf(f, "%f ", &value) < 0 && HDferror(f)) {
+        if (fscanf(f, "%f ", &value) < 0 && ferror(f)) {
             printf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
         data[i] = value;
     }
-    HDfclose(f);
+    fclose(f);
     f = NULL;
 
     /*-------------------------------------------------------------------------
@@ -730,9 +730,9 @@ out:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (f)
-        HDfclose(f);
+        fclose(f);
     H5_FAILED();
     return retval;
 }
@@ -778,32 +778,32 @@ read_data(const char *fname, /*IN*/
         goto out;
     }
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (fscanf(f, "%s", str) < 0 && ferror(f)) {
         printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &color_planes) < 0 && HDferror(f)) {
+    if (fscanf(f, "%d", &color_planes) < 0 && ferror(f)) {
         printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (fscanf(f, "%s", str) < 0 && ferror(f)) {
         printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &h) < 0 && HDferror(f)) {
+    if (fscanf(f, "%d", &h) < 0 && ferror(f)) {
         printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (fscanf(f, "%s", str) < 0 && ferror(f)) {
         printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &w) < 0 && HDferror(f)) {
+    if (fscanf(f, "%d", &w) < 0 && ferror(f)) {
         printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
@@ -837,7 +837,7 @@ read_data(const char *fname, /*IN*/
 
     /* Read data elements */
     for (i = 0; i < n_elements; i++) {
-        if (HDfscanf(f, "%d", &n) < 0 && HDferror(f)) {
+        if (fscanf(f, "%d", &n) < 0 && ferror(f)) {
             printf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
@@ -849,7 +849,7 @@ read_data(const char *fname, /*IN*/
 
 out:
     if (f)
-        HDfclose(f);
+        fclose(f);
 
     return ret_val;
 } /* end read_data() */
@@ -895,34 +895,34 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
     }
 
     /* read the file ident string */
-    if (HDfgets(buffer, sizeof(buffer), file) == NULL) {
-        HDfclose(file);
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        fclose(file);
         return -1;
     }
 
     /* ensure it matches the palette file ident string */
-    if (HDstrncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 &&
-        HDstrncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0) {
-        HDfclose(file);
+    if (strncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 &&
+        strncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0) {
+        fclose(file);
         return -1;
     }
 
     /* read the version string */
-    if (HDfgets(buffer, sizeof(buffer), file) == NULL) {
-        HDfclose(file);
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        fclose(file);
         return -1;
     }
 
     /* ensure it matches the palette file version string */
-    if (HDstrncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 &&
-        HDstrncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0) {
-        HDfclose(file);
+    if (strncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 &&
+        strncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0) {
+        fclose(file);
         return -1;
     }
 
     /* read the number of colors */
-    if (HDfgets(buffer, sizeof(buffer), file) == NULL) {
-        HDfclose(file);
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        fclose(file);
         return -1;
     }
 
@@ -930,27 +930,27 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
     check for missing version or number of colors
     in this case it reads the first entry
     */
-    if (HDstrlen(buffer) > 4) {
-        HDfclose(file);
+    if (strlen(buffer) > 4) {
+        fclose(file);
         return -1;
     }
 
-    if (HDsscanf(buffer, "%u", &nentries) != 1) {
-        HDfclose(file);
+    if (sscanf(buffer, "%u", &nentries) != 1) {
+        fclose(file);
         return -1;
     }
 
     /* ensure there are a sensible number of colors in the palette */
     if ((nentries > 256) || (nentries > palette_size)) {
-        HDfclose(file);
+        fclose(file);
         return (-1);
     }
 
     /* read the palette entries */
     for (u = 0; u < nentries; u++) {
         /* extract the red, green and blue color components.  */
-        if (HDfscanf(file, "%u %u %u", &red, &green, &blue) != 3) {
-            HDfclose(file);
+        if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3) {
+            fclose(file);
             return -1;
         }
         /* store this palette entry */
@@ -960,7 +960,7 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
     }
 
     /* close file */
-    HDfclose(file);
+    fclose(file);
 
     return (int)nentries;
 }

@@ -49,7 +49,7 @@ leave(int ret)
     exit(ret);
 }
 
-FILE *fpGif = NULL;
+static FILE *fpGif = NULL;
 int
 main(int argc, char **argv)
 {
