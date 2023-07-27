@@ -16,7 +16,7 @@
 #include "H5TBprivate.h"
 
 /* Local routines */
-static herr_t H5DS_is_reserved(hid_t did, hbool_t *is_reserved);
+static herr_t H5DS_is_reserved(hid_t did, bool *is_reserved);
 
 /*-------------------------------------------------------------------------
  * Function: H5DSwith_new_ref
@@ -34,8 +34,8 @@ static herr_t H5DS_is_reserved(hid_t did, hbool_t *is_reserved);
 herr_t
 H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref)
 {
-    hbool_t config_flag = FALSE;
-    hbool_t native      = FALSE;
+    bool config_flag = false;
+    bool native      = false;
 
     if (!with_new_ref)
         return FAIL;
@@ -44,7 +44,7 @@ H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref)
         return FAIL;
 
 #ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
-    config_flag = TRUE;
+    config_flag = true;
 #endif
 
     *with_new_ref = (config_flag || !native);
@@ -144,16 +144,16 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     ds_list_t *dsbuf = NULL; /* array of attribute data in the DS pointing to the dataset */
     ds_list_t *dsbuf_w =
         NULL; /* array of "REFERENCE_LIST" attribute data to write when adding new reference to a dataset */
-    hobj_ref_t ref_to_ds; /* reference to the DS */
-    hobj_ref_t ref_j;     /* iterator reference */
+    hobj_ref_t ref_to_ds = HADDR_UNDEF; /* reference to the DS */
+    hobj_ref_t ref_j;                   /* iterator reference */
 
     /* Variables to be used when new references are used */
     nds_list_t  ndsl;
-    nds_list_t *ndsbuf   = NULL;
-    nds_list_t *ndsbuf_w = NULL;
-    H5R_ref_t   nref_to_ds;
+    nds_list_t *ndsbuf     = NULL;
+    nds_list_t *ndsbuf_w   = NULL;
+    H5R_ref_t   nref_to_ds = {0};
     H5R_ref_t   nref_j;
-    hbool_t     is_new_ref;
+    bool        is_new_ref;
 
     hvl_t      *buf = NULL; /* VL buffer to store in the attribute */
     hid_t       dsid_j;     /* DS dataset ID in DIMENSION_LIST */
@@ -163,7 +163,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     size_t      len;
     int         found_ds = 0;
     htri_t      is_scale;
-    hbool_t     is_reserved;
+    bool        is_reserved;
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -219,7 +219,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     /* Check if the dataset is a "reserved" dataset (image, table) */
     if (H5DS_is_reserved(did, &is_reserved) < 0)
         return FAIL;
-    if (is_reserved == TRUE)
+    if (is_reserved == true)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -689,7 +689,7 @@ out:
         H5Tclose(ntid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -742,7 +742,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
     int          found_dset = 0, found_ds = 0;
     int          have_ds = 0;
     htri_t       is_scale;
-    hbool_t      is_new_ref;
+    bool         is_new_ref;
     unsigned int tmp_idx;
     hid_t        tmp_id;
 
@@ -1186,7 +1186,7 @@ out:
             buf = NULL;
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -1231,7 +1231,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
     int         i;
     int         found_dset = 0, found_ds = 0;
     htri_t      is_scale;
-    hbool_t     is_new_ref;
+    bool        is_new_ref;
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -1522,7 +1522,7 @@ out:
         H5Tclose(tid);
         H5Tclose(ntid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf) {
         free(buf);
@@ -1591,7 +1591,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
     int        nscales;
     htri_t     has_dimlist;
     int        i;
-    hbool_t    is_new_ref;
+    bool       is_new_ref;
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -1680,7 +1680,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
                         if ((scale_id = H5Ropen_object(&nref, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                             goto out;
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
                 }
                 else {
                     /* get the reference */
@@ -1693,7 +1693,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
                         if ((scale_id = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &ref)) < 0)
                             goto out;
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
                 }
 
                 /* set the return IDX OUT value at current scale index */
@@ -1745,7 +1745,7 @@ out:
         H5Aclose(aid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -1941,7 +1941,7 @@ out:
         H5Aclose(aid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -2038,7 +2038,7 @@ H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     /* do only if the label name exists for the dimension */
     if (buf[idx] != NULL) {
         /* get the real string length */
-        nbytes = HDstrlen(buf[idx]);
+        nbytes = strlen(buf[idx]);
 
         /* compute the string length which will fit into the user's buffer */
         copy_len = MIN(size - 1, nbytes);
@@ -2085,7 +2085,7 @@ out:
         H5Aclose(aid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -2199,7 +2199,7 @@ out:
         H5Tclose(tid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (buf)
         free(buf);
     return FAIL;
@@ -2288,7 +2288,7 @@ H5DSis_scale(hid_t did)
             goto out;
 
         /* compare strings */
-        if (HDstrncmp(buf, DIMENSION_SCALE_CLASS, MIN(HDstrlen(DIMENSION_SCALE_CLASS), HDstrlen(buf))) == 0)
+        if (strncmp(buf, DIMENSION_SCALE_CLASS, MIN(strlen(DIMENSION_SCALE_CLASS), strlen(buf))) == 0)
             is_ds = 1;
 
         free(buf);
@@ -2307,7 +2307,7 @@ out:
             H5Aclose(aid);
             H5Tclose(tid);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return is_ds;
 }
@@ -2420,7 +2420,7 @@ out:
         H5Aclose(aid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf)
         free(buf);
@@ -2438,7 +2438,7 @@ out:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5DS_is_reserved(hid_t did, hbool_t *is_reserved)
+H5DS_is_reserved(hid_t did, bool *is_reserved)
 {
     htri_t has_class;
     hid_t  tid = H5I_INVALID_HID;
@@ -2450,7 +2450,7 @@ H5DS_is_reserved(hid_t did, hbool_t *is_reserved)
     if ((has_class = H5Aexists(did, "CLASS")) < 0)
         return FAIL;
     if (has_class == 0) {
-        *is_reserved = FALSE;
+        *is_reserved = false;
         return SUCCEED;
     }
 
@@ -2477,12 +2477,12 @@ H5DS_is_reserved(hid_t did, hbool_t *is_reserved)
     if (H5Aread(aid, tid, buf) < 0)
         goto error;
 
-    if (HDstrncmp(buf, IMAGE_CLASS, MIN(HDstrlen(IMAGE_CLASS), HDstrlen(buf))) == 0 ||
-        HDstrncmp(buf, PALETTE_CLASS, MIN(HDstrlen(PALETTE_CLASS), HDstrlen(buf))) == 0 ||
-        HDstrncmp(buf, TABLE_CLASS, MIN(HDstrlen(TABLE_CLASS), HDstrlen(buf))) == 0)
-        *is_reserved = TRUE;
+    if (strncmp(buf, IMAGE_CLASS, MIN(strlen(IMAGE_CLASS), strlen(buf))) == 0 ||
+        strncmp(buf, PALETTE_CLASS, MIN(strlen(PALETTE_CLASS), strlen(buf))) == 0 ||
+        strncmp(buf, TABLE_CLASS, MIN(strlen(TABLE_CLASS), strlen(buf))) == 0)
+        *is_reserved = true;
     else
-        *is_reserved = FALSE;
+        *is_reserved = false;
 
     free(buf);
 
@@ -2499,7 +2499,7 @@ error:
         H5Tclose(tid);
         H5Aclose(aid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(buf);
 

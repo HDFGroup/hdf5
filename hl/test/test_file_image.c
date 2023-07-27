@@ -114,7 +114,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             FAIL_PUTS_ERROR("malloc() failed");
 
         /* create file name */
-        HDsnprintf(filename[i], filenamelength, "image_file%d.h5", (int)i);
+        snprintf(filename[i], filenamelength, "image_file%d.h5", (int)i);
 
         /* create file */
         if ((file_id[i] = H5Fcreate(filename[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -335,7 +335,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             {
                 status1 = H5Dwrite(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             VERIFY(status1 < 0, "H5Dwrite() should have failed");
 
@@ -344,7 +344,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             {
                 status1 = H5Dset_extent(dset_id[i], dims4);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             VERIFY(status1 < 0, "H5Dset_extent() should have failed");
 
@@ -353,7 +353,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             {
                 status1 = H5Dwrite(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data4);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             VERIFY(status1 < 0, "H5Dwrite() should have failed");
 
@@ -408,13 +408,13 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
                         status2 = H5Fflush(file_id[i], H5F_SCOPE_GLOBAL);
 
                     VERIFY(status1 < 0 || status2 < 0, "writing and flushing attr should have failed");
-                } H5E_END_TRY;
+                } H5E_END_TRY
 
                 /* close attr and attr_space -- expect errors on close */
                 H5E_BEGIN_TRY {
                     H5Sclose(attr_space_id);
                     H5Aclose(attr_id);
-                } H5E_END_TRY;
+                } H5E_END_TRY
 #endif
                 if (H5Dclose(dset_id[i]) < 0)
                     FAIL_PUTS_ERROR("H5Dclose() failed");

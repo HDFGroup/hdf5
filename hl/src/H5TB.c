@@ -20,7 +20,7 @@
  *-------------------------------------------------------------------------
  */
 
-static hbool_t H5TB_find_field(const char *field, const char *field_list);
+static bool H5TB_find_field(const char *field, const char *field_list);
 
 static herr_t H5TB_attach_attributes(const char *table_title, hid_t loc_id, const char *dset_name,
                                      hsize_t nfields, hid_t tid);
@@ -155,7 +155,7 @@ H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsi
         if (NULL == (member_name = H5Tget_member_name(mem_type_id, (unsigned)i)))
             goto out;
 
-        HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_NAME", (int)i);
+        snprintf(attr_name, sizeof(attr_name), "FIELD_%d_NAME", (int)i);
 
         /* attach the attribute */
         if (H5LTset_attribute_string(loc_id, dset_name, attr_name, member_name) < 0)
@@ -177,7 +177,7 @@ H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsi
             goto out;
 
         for (i = 0; i < nfields; i++) {
-            HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
+            snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
             if ((attr_id = H5Acreate2(did, attr_name, field_types[i], sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto out;
@@ -1738,7 +1738,7 @@ H5TBcombine_tables(hid_t loc_id1, const char *dset_name1, hid_t loc_id2, const c
             /* get the member offset */
             member_offset = H5Tget_member_offset(tid_3, (unsigned)i);
 
-            HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
+            snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
             if ((attr_id = H5Acreate2(did_3, attr_name, member_type_id, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto out;
@@ -1973,7 +1973,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
     char          *member_name  = NULL;
     unsigned char *tmp_buf      = NULL;
     unsigned char *tmp_fill_buf = NULL;
-    hbool_t        inserted;
+    bool           inserted;
     herr_t         ret_val = -1;
 
     /* check the arguments */
@@ -2046,7 +2046,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
         goto out;
 
     curr_offset = 0;
-    inserted    = FALSE;
+    inserted    = false;
 
     /* insert the old fields, counting with the new one */
     for (i = 0; i < nfields + 1; i++) {
@@ -2067,7 +2067,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
 
             curr_offset += new_member_size;
 
-            inserted = TRUE;
+            inserted = true;
         } /* end if */
         else {
             /* get the member name */
@@ -2234,7 +2234,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
         /* get the member offset */
         member_offset = H5Tget_member_offset(tid_3, (unsigned)i);
 
-        HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
+        snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
         if ((attr_id = H5Acreate2(did_3, attr_name, member_type_id, sid_3, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
@@ -2257,7 +2257,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
      *-------------------------------------------------------------------------
      */
     if (fill_data) {
-        HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)(nfields - 1));
+        snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)(nfields - 1));
 
         /* get the member type */
         if ((member_type_id = H5Tget_member_type(tid_3, (unsigned)nfields - 1)) < 0)
@@ -2382,7 +2382,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
     char          *member_name  = NULL;
     unsigned char *tmp_buf      = NULL;
     unsigned char *tmp_fill_buf = NULL;
-    htri_t         has_fill     = FALSE;
+    htri_t         has_fill     = false;
     herr_t         ret_val      = -1;
 
     /* check the arguments */
@@ -2515,7 +2515,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
              *-------------------------------------------------------------------------
              */
 
-            HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
+            snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
             /* check if we have the _FILL attribute */
             if ((has_fill = H5Aexists(did_1, attr_name)) < 0)
@@ -2692,7 +2692,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
             /* get the member offset */
             member_offset = H5Tget_member_offset(tid_3, (unsigned)i);
 
-            HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
+            snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
             if ((attr_id = H5Acreate2(did_3, attr_name, member_type_id, sid_1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto out;
@@ -2808,7 +2808,7 @@ H5TBAget_title(hid_t loc_id, char *table_title)
  *
  * Purpose: Read the table attribute fill values
  *
- * Return: Success: TRUE/FALSE, Failure: -1
+ * Return: Success: true/false, Failure: -1
  *
  * Comments:
  *
@@ -2822,7 +2822,7 @@ H5TBAget_fill(hid_t loc_id, const char *dset_name, hid_t dset_id, unsigned char 
     hsize_t i;
     size_t *src_offset = NULL;
     char    attr_name[255];
-    htri_t  has_fill = FALSE;
+    htri_t  has_fill = false;
     htri_t  ret_val  = -1;
 
     /* check the arguments */
@@ -2841,7 +2841,7 @@ H5TBAget_fill(hid_t loc_id, const char *dset_name, hid_t dset_id, unsigned char 
         goto out;
 
     for (i = 0; i < nfields; i++) {
-        HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
+        snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
         /* Check if we have the _FILL attribute */
         if ((has_fill = H5Aexists(dset_id, attr_name)) < 0)
@@ -3068,11 +3068,11 @@ out:
  *
  * Purpose: Find a string field
  *
- * Return: Success: TRUE/FALSE, Failure: N/A
+ * Return: Success: true/false, Failure: N/A
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE static hbool_t
+H5_ATTR_PURE static bool
 H5TB_find_field(const char *field, const char *field_list)
 {
     const char *start = field_list;
@@ -3080,22 +3080,22 @@ H5TB_find_field(const char *field, const char *field_list)
 
     /* check the arguments */
     if (field == NULL)
-        return FALSE;
+        return false;
     if (field_list == NULL)
-        return FALSE;
+        return false;
 
-    while ((end = HDstrstr(start, ",")) != 0) {
+    while ((end = strstr(start, ",")) != 0) {
         ptrdiff_t count = end - start;
 
-        if (HDstrncmp(start, field, (size_t)count) == 0 && (size_t)count == HDstrlen(field))
-            return TRUE;
+        if (strncmp(start, field, (size_t)count) == 0 && (size_t)count == strlen(field))
+            return true;
         start = end + 1;
     } /* end while */
 
-    if (HDstrncmp(start, field, HDstrlen(field)) == 0)
-        return TRUE;
+    if (strncmp(start, field, strlen(field)) == 0)
+        return true;
 
-    return FALSE;
+    return false;
 } /* end H5TB_find_field() */
 
 /*-------------------------------------------------------------------------
@@ -3138,7 +3138,7 @@ H5TB_attach_attributes(const char *table_title, hid_t loc_id, const char *dset_n
         if (NULL == (member_name = H5Tget_member_name(tid, (unsigned)i)))
             goto out;
 
-        HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_NAME", (int)i);
+        snprintf(attr_name, sizeof(attr_name), "FIELD_%d_NAME", (int)i);
 
         /* attach the attribute */
         if (H5LTset_attribute_string(loc_id, dset_name, attr_name, member_name) < 0)

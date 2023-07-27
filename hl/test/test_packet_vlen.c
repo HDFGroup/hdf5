@@ -109,7 +109,7 @@ test_VLof_atomic(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -246,7 +246,7 @@ test_VLof_comptype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -418,7 +418,7 @@ test_compound_VL_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -582,7 +582,7 @@ test_VLof_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -652,9 +652,9 @@ verify_ptlengthtype(hid_t fid, const char *table_name, herr_t expected_value)
         ret = SUCCEED;
     else {
         char lenthtype[20];
-        HDstrcpy(lenthtype, "fixed-length");
+        strcpy(lenthtype, "fixed-length");
         if (expected_value == 1)
-            HDstrcpy(lenthtype, "variable-length");
+            strcpy(lenthtype, "variable-length");
         fprintf(stderr, "\nPacket table '%s' should be %s but is not\n", table_name, lenthtype);
         ret = FAIL;
     }
@@ -763,7 +763,7 @@ error: /* An error has occurred.  Clean up and exit. */
  */
 #define ATTR_RANK 1
 #define ATTR_DIM  3
-int attr_data[ATTR_DIM] = {256, 11945, -22107}; /* values to be written to attr */
+static int attr_data[ATTR_DIM] = {256, 11945, -22107}; /* values to be written to attr */
 
 static int
 adding_attribute(hid_t fid, const char *table_name, const char *attr_name)
@@ -969,7 +969,7 @@ error: /* An error has occurred.  Clean up and exit. */
  *-------------------------------------------------------------------------
  */
 static herr_t
-verify_accessors(hid_t fid, const char *table_name, hbool_t uses_vlen_type)
+verify_accessors(hid_t fid, const char *table_name, bool uses_vlen_type)
 {
     hid_t   ptable   = H5I_INVALID_HID; /* Packet table identifier */
     hid_t   dset_id  = H5I_INVALID_HID; /* Dataset associated with the pt */
@@ -990,7 +990,7 @@ verify_accessors(hid_t fid, const char *table_name, hbool_t uses_vlen_type)
     *buf = '\0';
     if ((name_size = H5Iget_name(dset_id, (char *)buf, NAME_BUF_SIZE)) < 0)
         goto error;
-    VERIFY(HDstrcmp(buf, table_name), "Names of dataset and packet table don't match");
+    VERIFY(strcmp(buf, table_name), "Names of dataset and packet table don't match");
 
     /* Get the packet table's datatype ID */
     if ((dtype_id = H5PTget_type(ptable)) < 0)
@@ -1006,10 +1006,10 @@ verify_accessors(hid_t fid, const char *table_name, hbool_t uses_vlen_type)
          * expected_value passed in, then print the error message.
          */
         char lenthtype[20];
-        if (uses_vlen_type == TRUE)
-            HDstrcpy(lenthtype, "variable-length");
+        if (uses_vlen_type == true)
+            strcpy(lenthtype, "variable-length");
         else
-            HDstrcpy(lenthtype, "fixed-length");
+            strcpy(lenthtype, "fixed-length");
         fprintf(stderr, "\nThe dataset '%s' should be %s but is not\n", table_name, lenthtype);
         goto error;
     }
@@ -1050,11 +1050,11 @@ test_accessors(void)
     if (fid < 0)
         goto error;
 
-    ret = verify_accessors(fid, PT_VLEN_ATOMIC, TRUE);
+    ret = verify_accessors(fid, PT_VLEN_ATOMIC, true);
     if (ret < 0)
         goto error;
 
-    ret = verify_accessors(fid, PT_FIXED_LEN, FALSE);
+    ret = verify_accessors(fid, PT_FIXED_LEN, false);
     if (ret < 0)
         goto error;
 
@@ -1144,7 +1144,7 @@ testfl_VLof_atomic(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1281,7 +1281,7 @@ testfl_VLof_comptype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1452,7 +1452,7 @@ testfl_compound_VL_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1616,7 +1616,7 @@ testfl_VLof_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1682,7 +1682,7 @@ test_packet_table_with_varlen(void)
     if (H5Fclose(fid) < 0)
         return FAIL;
 
-    HDputs("Testing packet table with various variable-length datatypes");
+    puts("Testing packet table with various variable-length datatypes");
 
     /* If any test fails, move on to subsequent test, but status will indicate
        there is a failure. */
@@ -1730,7 +1730,7 @@ test_packet_table_with_varlen(void)
     if (H5Fclose(fid) < 0)
         return FAIL;
 
-    HDputs("Testing packet table with various variable-length datatypes - H5PTcreate_fl");
+    puts("Testing packet table with various variable-length datatypes - H5PTcreate_fl");
 
     /* If any test fails, move on to subsequent test, but status will indicate
        there is a failure. */

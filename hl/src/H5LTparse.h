@@ -118,7 +118,7 @@ extern int H5LTyydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 69 "hl/src//H5LTparse.y"
+#line 68 "hl/src//H5LTparse.y"
 
     int     ival;         /*for integer token*/
     char    *sval;        /*for name string*/

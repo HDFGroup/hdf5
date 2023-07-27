@@ -103,7 +103,7 @@ generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *m
         goto done;
 
     /* Set up dataset's creation properties */
-    if (!HDstrcmp(dname, DSET_NONE))
+    if (!strcmp(dname, DSET_NONE))
         dcpl = H5P_DEFAULT;
     else {
         if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -114,11 +114,11 @@ generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *m
             goto done;
     } /* end else */
 
-    if (!HDstrcmp(dname, DSET_ALLOC_LATE)) {
+    if (!strcmp(dname, DSET_ALLOC_LATE)) {
         if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0)
             goto done;
     }
-    else if (!HDstrcmp(dname, DSET_ALLOC_EARLY)) {
+    else if (!strcmp(dname, DSET_ALLOC_EARLY)) {
         if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
             goto done;
     } /* end if-else */
