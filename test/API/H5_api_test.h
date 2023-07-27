@@ -20,7 +20,6 @@
 
 #include "H5_api_test_config.h"
 #include "H5_api_test_util.h"
-#include "H5_api_tests_disabled.h"
 
 /* Define H5VL_VERSION if not already defined */
 #ifndef H5VL_VERSION

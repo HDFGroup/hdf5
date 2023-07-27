@@ -432,10 +432,9 @@ test_open_object_invalid_params(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, object, or creation order aren't supported with "
+        HDprintf("    API functions for basic file, group, or object aren't supported with "
                  "this connector\n");
         return 0;
     }
@@ -460,10 +459,12 @@ test_open_object_invalid_params(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, OBJECT_OPEN_INVALID_PARAMS_TEST_GROUP_NAME, H5P_DEFAULT,
@@ -1550,7 +1551,7 @@ test_link_object_invalid_params(void)
         PART_BEGIN(H5Olink_invalid_lapl)
         {
             TESTING_2("H5Olink with an invalid LAPL");
-#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+
             H5E_BEGIN_TRY
             {
                 status =
@@ -1565,10 +1566,6 @@ test_link_object_invalid_params(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Olink_invalid_lapl);
-#endif
         }
         PART_END(H5Olink_invalid_lapl);
     }
@@ -1624,7 +1621,7 @@ test_incr_decr_object_refcount(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, stored datatype, basic or more object  "
+        HDprintf("    API functions for basic file, group, dataset, stored datatype, or object  "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -3844,7 +3841,8 @@ test_object_copy_group_with_soft_links(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, object, link, or soft link aren't supported with "
+        HDprintf("    API functions for basic file, group, object, link, iterate, or soft link aren't "
+                 "supported with "
                  "this connector\n");
         return 0;
     }
@@ -5075,12 +5073,10 @@ test_object_visit(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, object, dataset, attribute, stored datatype, "
-                 "iterate, or creation order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, object, dataset, attribute, stored datatype, or "
+                 "iterate aren't supported with this connector\n");
         return 0;
     }
 
@@ -5104,10 +5100,12 @@ test_object_visit(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, OBJECT_VISIT_TEST_SUBGROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -5187,7 +5185,7 @@ test_object_visit(void)
         PART_BEGIN(H5Ovisit_obj_name_decreasing)
         {
             TESTING_2("H5Ovisit by object name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
 
@@ -5205,16 +5203,18 @@ test_object_visit(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ovisit_obj_name_decreasing);
-#endif
         }
         PART_END(H5Ovisit_obj_name_decreasing);
 
         PART_BEGIN(H5Ovisit_create_order_increasing)
         {
             TESTING_2("H5Ovisit by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ovisit_create_order_increasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5239,6 +5239,12 @@ test_object_visit(void)
         PART_BEGIN(H5Ovisit_create_order_decreasing)
         {
             TESTING_2("H5Ovisit by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ovisit_create_order_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5347,7 +5353,7 @@ test_object_visit(void)
         PART_BEGIN(H5Ovisit_by_name_obj_name_decreasing)
         {
             TESTING_2("H5Ovisit_by_name by object name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
 
@@ -5382,16 +5388,18 @@ test_object_visit(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ovisit_by_name_obj_name_decreasing);
-#endif
         }
         PART_END(H5Ovisit_by_name_obj_name_decreasing);
 
         PART_BEGIN(H5Ovisit_by_name_create_order_increasing)
         {
             TESTING_2("H5Ovisit_by_name by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ovisit_by_name_create_order_increasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5433,6 +5441,12 @@ test_object_visit(void)
         PART_BEGIN(H5Ovisit_by_name_create_order_decreasing)
         {
             TESTING_2("H5Ovisit_by_name by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ovisit_by_name_create_order_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5583,9 +5597,9 @@ test_object_visit_soft_link(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, object, soft link, iterate, or creation order "
+        HDprintf("    API functions for basic file, group, object, soft link, or iterate "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -5610,10 +5624,12 @@ test_object_visit_soft_link(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, OBJECT_VISIT_SOFT_LINK_TEST_SUBGROUP_NAME, H5P_DEFAULT,
@@ -5747,7 +5763,7 @@ test_object_visit_soft_link(void)
         PART_BEGIN(H5Ovisit_obj_name_decreasing)
         {
             TESTING_2("H5Ovisit by object name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
 
@@ -5765,16 +5781,18 @@ test_object_visit_soft_link(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ovisit_obj_name_decreasing);
-#endif
         }
         PART_END(H5Ovisit_obj_name_decreasing);
 
         PART_BEGIN(H5Ovisit_create_order_increasing)
         {
             TESTING_2("H5Ovisit by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ovisit_create_order_increasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5799,6 +5817,12 @@ test_object_visit_soft_link(void)
         PART_BEGIN(H5Ovisit_create_order_decreasing)
         {
             TESTING_2("H5Ovisit by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ovisit_create_order_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5866,7 +5890,7 @@ test_object_visit_soft_link(void)
         PART_BEGIN(H5Ovisit_by_name_obj_name_decreasing)
         {
             TESTING_2("H5Ovisit_by_name by object name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
 
@@ -5903,16 +5927,18 @@ test_object_visit_soft_link(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ovisit_by_name_obj_name_decreasing);
-#endif
         }
         PART_END(H5Ovisit_by_name_obj_name_decreasing);
 
         PART_BEGIN(H5Ovisit_by_name_create_order_increasing)
         {
             TESTING_2("H5Ovisit_by_name by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ovisit_by_name_create_order_increasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5956,6 +5982,12 @@ test_object_visit_soft_link(void)
         PART_BEGIN(H5Ovisit_by_name_create_order_decreasing)
         {
             TESTING_2("H5Ovisit_by_name by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ovisit_by_name_create_order_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -6624,7 +6656,7 @@ test_close_invalid_objects(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, object, dataset, attribute, or stored datatype "
+        HDprintf("    API functions for basic file, group, or object "
                  "aren't supported with this connector\n");
         return 0;
     }

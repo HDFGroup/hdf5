@@ -84,8 +84,8 @@ test_single(void)
      * count = 2, release EFC, verify ref count = 1. Verifies a file can be
      * held open by the EFC.
      */
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
@@ -103,13 +103,13 @@ test_single(void)
     /* Test 2: Verify that subsequent efc_open requests return the cached top
      * level file pointer.  Open file 1 through EFC, close, open again, verify
      * file pointers are the same. */
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     ftmp1 = f1;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (f1 != ftmp1)
         TEST_ERROR;
@@ -124,8 +124,8 @@ test_single(void)
      * that the one added first is evicted.  Then reopen files in a different
      * order.  Open each file normally after closing through EFC the first time
      * to track ref counts. */
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
@@ -134,8 +134,8 @@ test_single(void)
     if (f1->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f2) < 0)
         FAIL_STACK_ERROR;
@@ -146,8 +146,8 @@ test_single(void)
     if (f2->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f3) < 0)
         FAIL_STACK_ERROR;
@@ -160,8 +160,8 @@ test_single(void)
     if (f3->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f4 = H5F__efc_open(f0, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f0->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f4) < 0)
         FAIL_STACK_ERROR;
@@ -176,7 +176,7 @@ test_single(void)
     if (f4->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL == (ftmp3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp3 = H5F__efc_open(f0->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, ftmp3) < 0)
         FAIL_STACK_ERROR;
@@ -189,7 +189,7 @@ test_single(void)
     if (f4->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL == (ftmp2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f0->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -202,7 +202,7 @@ test_single(void)
     if (f4->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL == (ftmp1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f0->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -215,7 +215,7 @@ test_single(void)
     if (f4->shared->nrefs != 1)
         TEST_ERROR;
 
-    if (NULL == (ftmp4 = H5F__efc_open(f0, filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp4 = H5F__efc_open(f0->shared->efc, filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, ftmp4) < 0)
         FAIL_STACK_ERROR;
@@ -249,8 +249,8 @@ test_single(void)
 
     /* Test 4: Verify that files kept open through the EFC are not evicted by
      * H5F__efc_release(). */
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp1 = H5F_open(filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
@@ -275,8 +275,8 @@ test_single(void)
      * filling up the cache.  Open 4 files while holding the first open.  Verify
      * that the second file is evicted.  Close the first file, reopen the
      * second, and verify that the first file is evicted. */
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp1 = H5F_open(filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
@@ -285,8 +285,8 @@ test_single(void)
     if (ftmp1->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f2) < 0)
         FAIL_STACK_ERROR;
@@ -295,16 +295,16 @@ test_single(void)
     if (ftmp2->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f3) < 0)
         FAIL_STACK_ERROR;
     if (ftmp2->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f4 = H5F__efc_open(f0, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f0->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f4) < 0)
         FAIL_STACK_ERROR;
@@ -317,7 +317,7 @@ test_single(void)
         FAIL_STACK_ERROR;
     if (ftmp1->shared->nrefs != 2)
         TEST_ERROR;
-    if (NULL == (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f2) < 0)
         FAIL_STACK_ERROR;
@@ -325,7 +325,7 @@ test_single(void)
         TEST_ERROR;
     if (ftmp2->shared->nrefs != 2)
         TEST_ERROR;
-    if (NULL == (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
@@ -349,8 +349,8 @@ test_single(void)
      * prevents further files from being cached.  Open and hold open 3 files
      * through the EFC, then open the fourth and verify that it was not added to
      * the EFC. */
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp1 = H5F_open(filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
@@ -359,8 +359,8 @@ test_single(void)
     if (ftmp1->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp2 = H5F_open(filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
@@ -369,8 +369,8 @@ test_single(void)
     if (ftmp2->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp3 = H5F_open(filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
@@ -379,8 +379,8 @@ test_single(void)
     if (ftmp3->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f4 = H5F__efc_open(f0, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f0->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f4) < 0)
         FAIL_STACK_ERROR;
@@ -422,11 +422,11 @@ test_single(void)
 
     /* Test 7: Test multiple file opens.  Open a file twice, close it once, then
      * verify that it is not evicted by H5F__efc_release(). */
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp1 = H5F_open(filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
@@ -504,11 +504,11 @@ test_graph_nocycle(void)
      */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f2) < 0)
         FAIL_STACK_ERROR;
@@ -532,10 +532,10 @@ test_graph_nocycle(void)
     if (NULL ==
         (ftmp1 = H5F_open(filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (f2 = H5F__efc_open(ftmp1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id,
-                                    fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(ftmp1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_try_close(ftmp1, NULL) < 0)
         FAIL_STACK_ERROR;
@@ -562,11 +562,11 @@ test_graph_nocycle(void)
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
 
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f2) < 0)
         FAIL_STACK_ERROR;
@@ -577,11 +577,11 @@ test_graph_nocycle(void)
     if (ftmp2->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL ==
-        (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f4 = H5F__efc_open(f3, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f3->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, f4) < 0)
         FAIL_STACK_ERROR;
@@ -614,13 +614,13 @@ test_graph_nocycle(void)
         FAIL_STACK_ERROR;
     if (NULL == (f1 = H5F_open(filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f1->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, f3) < 0)
         FAIL_STACK_ERROR;
@@ -638,7 +638,7 @@ test_graph_nocycle(void)
     if (ftmp3->shared->nrefs != 2)
         TEST_ERROR;
 
-    if (NULL == (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f2) < 0)
         FAIL_STACK_ERROR;
@@ -664,18 +664,18 @@ test_graph_nocycle(void)
      * files. */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f3) < 0)
         FAIL_STACK_ERROR;
@@ -703,25 +703,25 @@ test_graph_nocycle(void)
      * files. */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f4 = H5F__efc_open(f0, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f0->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f4) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (f4 = H5F__efc_open(f1, filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f1->shared->efc, filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f4) < 0)
         FAIL_STACK_ERROR;
@@ -729,15 +729,15 @@ test_graph_nocycle(void)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (f4 = H5F__efc_open(f2, filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f2->shared->efc, filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, f4) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f4 = H5F__efc_open(f3, filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f3->shared->efc, filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, f4) < 0)
         FAIL_STACK_ERROR;
@@ -826,7 +826,7 @@ test_graph_cycle(void)
      */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f0, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f0->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -837,7 +837,7 @@ test_graph_cycle(void)
     if (f0->shared->nrefs != 1)
         TEST_ERROR;
 
-    if (NULL == (ftmp0 = H5F__efc_open(f0, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f0->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -857,10 +857,10 @@ test_graph_cycle(void)
      * the file is part of another file's EFC. */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f1, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f1->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -877,10 +877,10 @@ test_graph_cycle(void)
     if (H5F_try_close(f1, NULL) < 0)
         FAIL_STACK_ERROR;
 
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f1, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f1->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -900,10 +900,10 @@ test_graph_cycle(void)
     /* Test 3: Simple 2 file cycle */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -916,10 +916,10 @@ test_graph_cycle(void)
     if (f0->shared->nrefs != 1)
         TEST_ERROR;
 
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -939,13 +939,13 @@ test_graph_cycle(void)
     /* Test 4: Simple 2 file cycle (indirectly referenced) */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -967,19 +967,19 @@ test_graph_cycle(void)
     /* Test 5: Parallel double cycle */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f2, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f2->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -999,19 +999,19 @@ test_graph_cycle(void)
     /* Test 6: Parallel double cycle with release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f2, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f2->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -1029,24 +1029,24 @@ test_graph_cycle(void)
     /* Test 7: Chained parallel double cycle */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp1) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f3, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f3->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -1070,24 +1070,24 @@ test_graph_cycle(void)
     /* Test 8: Chained parallel double cycle with release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp1) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f3, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f3->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -1111,10 +1111,10 @@ test_graph_cycle(void)
         FAIL_STACK_ERROR;
     if (NULL == (ftmp0 = H5F_open(filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -1140,12 +1140,12 @@ test_graph_cycle(void)
     /* Test 10: Simple 2 file cycle, extra ID on second file */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp1 = H5F_open(filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -1185,21 +1185,21 @@ test_graph_cycle(void)
     /* Test 11: Parallel double cycle, extra ID on a child file */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp2 = H5F_open(filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f2, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f2->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -1245,21 +1245,21 @@ test_graph_cycle(void)
     /* Test 12: Parallel double cycle, extra ID on a child file, with release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp2 = H5F_open(filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f2, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f2->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -1291,26 +1291,26 @@ test_graph_cycle(void)
     /* Test 13: Chained parallel double cycle, extra ID on a child file */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp1) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp3 = H5F_open(filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f3, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f3->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -1367,26 +1367,26 @@ test_graph_cycle(void)
      * release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp1) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp3 = H5F_open(filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f3, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f3->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -1422,22 +1422,22 @@ test_graph_cycle(void)
     /* Test 15: One local and one remote cycle */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f3, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f3->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -1478,22 +1478,22 @@ test_graph_cycle(void)
     /* Test 16: One local and one remote cycle, with release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f3, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f3->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -1532,24 +1532,24 @@ test_graph_cycle(void)
     /* Test 17: One local and one remote cycle, remote cycle held open */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp3 = H5F_open(filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f3, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f3->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -1596,24 +1596,24 @@ test_graph_cycle(void)
      * release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (NULL == (ftmp3 = H5F_open(filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f3, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f3->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -1663,42 +1663,42 @@ test_graph_cycle(void)
      * Also cycle between bottom (root) and top and cycles on the sides. */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f3, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f3->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f4 = H5F__efc_open(f1, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f1->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f4, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f4->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f4, ftmp1) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f4) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f5 = H5F__efc_open(f2, filename[5], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f5 = H5F__efc_open(f2->shared->efc, filename[5],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f5, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f5->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f5, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -1755,42 +1755,42 @@ test_graph_cycle(void)
      * release the files instead of closing. */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f3, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f3->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f4 = H5F__efc_open(f1, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f1->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f4, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f4->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f4, ftmp1) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f4) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f5 = H5F__efc_open(f2, filename[5], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f5 = H5F__efc_open(f2->shared->efc, filename[5],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f5, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f5->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f5, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -1844,33 +1844,33 @@ test_graph_cycle(void)
      * Also cycle between bottom (root) and top, cycles on sides held open. */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f3, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f3->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f4 = H5F__efc_open(f1, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f1->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f4, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f4->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f4, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -1878,10 +1878,10 @@ test_graph_cycle(void)
         FAIL_STACK_ERROR;
     if (NULL == (f4 = H5F_open(filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f5 = H5F__efc_open(f2, filename[5], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f5 = H5F__efc_open(f2->shared->efc, filename[5],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f5, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f5->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f5, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -1974,33 +1974,33 @@ test_graph_cycle(void)
      * Also release the files instead of closing. */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f2->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f3, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f3->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f3) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f4 = H5F__efc_open(f1, filename[4], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f4 = H5F__efc_open(f1->shared->efc, filename[4],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f4, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f4->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f4, ftmp1) < 0)
         FAIL_STACK_ERROR;
@@ -2008,10 +2008,10 @@ test_graph_cycle(void)
         FAIL_STACK_ERROR;
     if (NULL == (f4 = H5F_open(filename[4], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f5 = H5F__efc_open(f2, filename[5], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f5 = H5F__efc_open(f2->shared->efc, filename[5],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f5, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f5->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f5, ftmp2) < 0)
         FAIL_STACK_ERROR;
@@ -2086,67 +2086,67 @@ test_graph_cycle(void)
      * itself). */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f0, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f0->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, ftmp0) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
 
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f1, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f1->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f1->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp3 = H5F__efc_open(f1->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp3) < 0)
         FAIL_STACK_ERROR;
 
-    if (NULL == (ftmp0 = H5F__efc_open(f2, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f2->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp0) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f2, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f2->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp3 = H5F__efc_open(f2->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp3) < 0)
         FAIL_STACK_ERROR;
 
-    if (NULL == (ftmp0 = H5F__efc_open(f3, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f3->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp0) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f3, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f3->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f3, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f3->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp3 = H5F__efc_open(f3, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp3 = H5F__efc_open(f3->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp3) < 0)
         FAIL_STACK_ERROR;
@@ -2189,67 +2189,67 @@ test_graph_cycle(void)
      * itself).  Release the files instead of closing. */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f0, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f0->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, ftmp0) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f0, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f0->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
 
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f1, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f1->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f1->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp3 = H5F__efc_open(f1->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp3) < 0)
         FAIL_STACK_ERROR;
 
-    if (NULL == (ftmp0 = H5F__efc_open(f2, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f2->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp0) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f2, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f2->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp3 = H5F__efc_open(f2, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp3 = H5F__efc_open(f2->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f2, ftmp3) < 0)
         FAIL_STACK_ERROR;
 
-    if (NULL == (ftmp0 = H5F__efc_open(f3, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f3->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp0) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp1 = H5F__efc_open(f3, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp1 = H5F__efc_open(f3->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp2 = H5F__efc_open(f3, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp2 = H5F__efc_open(f3->shared->efc, filename[2], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp2) < 0)
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp3 = H5F__efc_open(f3, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp3 = H5F__efc_open(f3->shared->efc, filename[3], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f3, ftmp3) < 0)
         FAIL_STACK_ERROR;
@@ -2289,10 +2289,10 @@ test_graph_cycle(void)
     /* Test 25: File held open by EFC client interrupts cycle, with release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -2322,17 +2322,17 @@ test_graph_cycle(void)
     /* Test 26: File held open by EFC does not interrupt cycle, with release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f0, f1) < 0)
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f0, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f0->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (f0->shared->nrefs != 2)
         TEST_ERROR;
@@ -2356,10 +2356,10 @@ test_graph_cycle(void)
      * interrupt cycle, but parent file does (no valid way around it) */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -2367,10 +2367,10 @@ test_graph_cycle(void)
         FAIL_STACK_ERROR;
     if (NULL == (f2 = H5F_open(filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (f1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (f0->shared->nrefs != 2)
         TEST_ERROR;
@@ -2470,10 +2470,10 @@ test_graph_cycle(void)
      * release */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -2481,10 +2481,10 @@ test_graph_cycle(void)
         FAIL_STACK_ERROR;
     if (NULL == (f2 = H5F_open(filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (f1 = H5F__efc_open(f2, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f2->shared->efc, filename[1], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f3 = H5F__efc_open(f1, filename[3], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f3 = H5F__efc_open(f1->shared->efc, filename[3],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (f0->shared->nrefs != 2)
         TEST_ERROR;
@@ -2550,12 +2550,12 @@ test_graph_cycle(void)
         FAIL_STACK_ERROR;
     if (H5Pset_elink_file_cache_size(fapl_id, 0) < 0)
         TEST_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5Pset_elink_file_cache_size(fapl_id, 8) < 0)
         TEST_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (f0->shared->nrefs != 2)
         TEST_ERROR;
@@ -2586,10 +2586,10 @@ test_graph_cycle(void)
     /* Test 30: File without EFC does not interrupt cycle */
     if (NULL == (f0 = H5F_open(filename[0], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL ==
-        (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f1 = H5F__efc_open(f0->shared->efc, filename[1],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
-    if (NULL == (ftmp0 = H5F__efc_open(f1, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
+    if (NULL == (ftmp0 = H5F__efc_open(f1->shared->efc, filename[0], H5F_ACC_RDWR, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5F_efc_close(f1, ftmp0) < 0)
         FAIL_STACK_ERROR;
@@ -2597,8 +2597,8 @@ test_graph_cycle(void)
         FAIL_STACK_ERROR;
     if (H5Pset_elink_file_cache_size(fapl_id, 0) < 0)
         TEST_ERROR;
-    if (NULL ==
-        (f2 = H5F__efc_open(f1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
+    if (NULL == (f2 = H5F__efc_open(f1->shared->efc, filename[2],
+                                    H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR;
     if (H5Pset_elink_file_cache_size(fapl_id, 8) < 0)
         TEST_ERROR;

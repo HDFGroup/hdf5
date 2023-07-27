@@ -126,7 +126,6 @@ write_dataset_some_no_sel(hid_t file_id, hid_t dxpl_id)
     hsize_t    stride[EXAMPLE_DSET_DIMS];
     hsize_t    count[EXAMPLE_DSET_DIMS];
     hbool_t    no_selection;
-    size_t     i, j;
     hid_t      dset_id        = H5I_INVALID_HID;
     hid_t      dcpl_id        = H5I_INVALID_HID;
     hid_t      file_dataspace = H5I_INVALID_HID;

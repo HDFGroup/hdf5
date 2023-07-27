@@ -19,7 +19,7 @@
 #define FILE "groups.h5"
 
 int
-main()
+main(void)
 {
 
     hid_t  file_id, group1_id, group2_id, group3_id; /* identifiers */

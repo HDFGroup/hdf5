@@ -40,9 +40,6 @@ typedef struct complex_t {
  * Purpose      Tests various things about compound data types.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -73,9 +70,6 @@ test_compound_1()
  *              elements.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -100,9 +94,9 @@ test_compound_2()
     SUBTEST("Compound Element Reordering");
     try {
         // Sizes should be the same, but be careful just in case
-        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
-        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
-        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
+        buf  = static_cast<unsigned char *>(malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(malloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(malloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
             s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
@@ -114,7 +108,7 @@ test_compound_2()
             s_ptr->d    = i * 8 + 6;
             s_ptr->e    = i * 8 + 7;
         }
-        HDmemcpy(buf, orig, nelmts * sizeof(src_typ_t));
+        memcpy(buf, orig, nelmts * sizeof(src_typ_t));
 
         // Build hdf5 datatypes
         array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
@@ -161,9 +155,9 @@ test_compound_2()
             }
         }
         // Release resources
-        HDfree(buf);
-        HDfree(bkg);
-        HDfree(orig);
+        free(buf);
+        free(bkg);
+        free(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -186,9 +180,6 @@ test_compound_2()
  *              members which appear in the source.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -213,9 +204,9 @@ test_compound_3()
     SUBTEST("Compound Datatype Subset Conversions");
     try {
         /* Initialize */
-        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
-        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
-        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
+        buf  = static_cast<unsigned char *>(malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(malloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(malloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
             s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
@@ -271,9 +262,9 @@ test_compound_3()
         }
 
         /* Release resources */
-        HDfree(buf);
-        HDfree(bkg);
-        HDfree(orig);
+        free(buf);
+        free(bkg);
+        free(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -296,9 +287,6 @@ test_compound_3()
  *              smaller.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -328,9 +316,9 @@ test_compound_4()
     SUBTEST("Compound Element Shrinking & Reordering");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
-        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
-        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
+        buf  = static_cast<unsigned char *>(malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(malloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(malloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
             s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
@@ -390,9 +378,9 @@ test_compound_4()
         }     // for
 
         /* Release resources */
-        HDfree(buf);
-        HDfree(bkg);
-        HDfree(orig);
+        free(buf);
+        free(bkg);
+        free(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -416,9 +404,6 @@ test_compound_4()
  *              which must undergo a conversion.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -439,8 +424,8 @@ test_compound_5()
     hsize_t    dims[1] = {4};
     src_typ_t  src[2]  = {{"one", 102, {104, 105, 106, 107}}, {"two", 202, {204, 205, 206, 207}}};
     dst_typ_t *dst;
-    void      *buf      = HDcalloc(2, sizeof(dst_typ_t));
-    void      *bkg      = HDcalloc(2, sizeof(dst_typ_t));
+    void      *buf      = calloc(2, sizeof(dst_typ_t));
+    void      *bkg      = calloc(2, sizeof(dst_typ_t));
     ArrayType *array_dt = NULL;
 
     // Output message about test being performed
@@ -490,8 +475,8 @@ test_compound_5()
         }
 
         /* Free memory buffers */
-        HDfree(buf);
-        HDfree(bkg);
+        free(buf);
+        free(bkg);
         dst = NULL;
         PASSED();
     } // end of try block
@@ -511,9 +496,6 @@ test_compound_5()
  *              larger.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -539,9 +521,9 @@ test_compound_6()
     SUBTEST("Compound Element Growing");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
-        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
-        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
+        buf  = static_cast<unsigned char *>(malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(malloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(malloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
             s_ptr    = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->b = (i * 8 + 1) & 0x7fff;
@@ -574,9 +556,9 @@ test_compound_6()
         }
 
         /* Release resources */
-        HDfree(buf);
-        HDfree(bkg);
-        HDfree(orig);
+        free(buf);
+        free(bkg);
+        free(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -596,9 +578,6 @@ test_compound_6()
  *              overlaps the end of the compound datatype.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -662,9 +641,6 @@ test_compound_7()
  * Purpose      Tests member function setSize() on compound datatype
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use partial C version test_ooo_order)
- *              March, 2014
  *-------------------------------------------------------------------------
  */
 const H5std_string COMPFILE("tcompound_types.h5");
@@ -750,9 +726,6 @@ test_compound_set_size()
  * Purpose      Main compound datatype testing routine
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler
- *              January 2007
  *-------------------------------------------------------------------------
  */
 extern "C" void

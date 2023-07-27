@@ -55,7 +55,7 @@ main(void)
     hsize_t vdsdims[2] = {VDSDIM0, VDSDIM1}, /* Virtual datasets dimension */
         dims[1]        = {DIM0},             /* Source datasets dimensions */
         start[2],                            /* Hyperslab parameters */
-        stride[2], count[2], block[2];
+        count[2], block[2];
     hsize_t start_out[2], stride_out[2], count_out[2], block_out[2];
     int     wdata[DIM0],         /* Write buffer for source dataset */
         rdata[VDSDIM0][VDSDIM1], /* Read buffer for virtual dataset */

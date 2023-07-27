@@ -76,13 +76,14 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
                          hid_t space_id, hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id,
                          hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5G_loc_t loc;     /* Object location */
-    H5G_loc_t obj_loc; /* Location used to open group */
-    hbool_t   loc_found = FALSE;
-    H5T_t    *type, *dt; /* Datatype to use for attribute */
-    H5S_t    *space;     /* Dataspace to use for attribute */
-    H5A_t    *attr      = NULL;
-    void     *ret_value = NULL;
+    H5P_genplist_t *plist;
+    H5G_loc_t       loc;     /* Object location */
+    H5G_loc_t       obj_loc; /* Location used to open group */
+    hbool_t         loc_found = FALSE;
+    H5T_t          *type, *dt; /* Datatype to use for attribute */
+    H5S_t          *space;     /* Dataspace to use for attribute */
+    H5A_t          *attr      = NULL;
+    void           *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -90,6 +91,9 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
     if (0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, NULL, "no write intent on file")
+
+    if (NULL == (plist = H5P_object_verify(aapl_id, H5P_ATTRIBUTE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "AAPL is not an attribute access property list")
 
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
