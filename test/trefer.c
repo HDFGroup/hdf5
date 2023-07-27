@@ -1302,7 +1302,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     {
         dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (dset1 < 0) {
         VERIFY(libver_high <= H5F_LIBVER_V110, TRUE, "H5Dcreate2");
@@ -1465,7 +1465,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         {
             dset2 = H5Ropen_object(&rdata_NA[0], H5P_DEFAULT, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object");
 
         /* Close and release resources. */
@@ -1478,7 +1478,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         {
             ret = H5Dclose(dset2);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Dclose");
 
         /*
@@ -1633,7 +1633,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
             {
                 ret = H5Rget_obj_type3(&nvrbuf[j], H5P_DEFAULT, &obj_type);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             VERIFY(ret, FAIL, "H5Rget_obj_type3");
         } /* end for */
 
@@ -1758,7 +1758,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     {
         dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (dset1 < 0) {
 

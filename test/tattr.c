@@ -76,24 +76,25 @@
 #define ATTR1_NAME "Attr1"
 #define ATTR1_RANK 1
 #define ATTR1_DIM1 3
-int attr_data1[ATTR1_DIM1] = {512, -234, 98123}; /* Test data for 1st attribute */
+static int attr_data1[ATTR1_DIM1] = {512, -234, 98123}; /* Test data for 1st attribute */
 
 /* rank & dimensions for another attribute */
 #define ATTR1A_NAME "Attr1_a"
-int attr_data1a[ATTR1_DIM1] = {256, 11945, -22107};
+static int attr_data1a[ATTR1_DIM1] = {256, 11945, -22107};
 
 #define ATTR2_NAME "Attr2"
 #define ATTR2_RANK 2
 #define ATTR2_DIM1 2
 #define ATTR2_DIM2 2
-int attr_data2[ATTR2_DIM1][ATTR2_DIM2] = {{7614, -416}, {197814, -3}}; /* Test data for 2nd attribute */
+static int attr_data2[ATTR2_DIM1][ATTR2_DIM2] = {{7614, -416},
+                                                 {197814, -3}}; /* Test data for 2nd attribute */
 
 #define ATTR3_NAME "Attr3"
 #define ATTR3_RANK 3
 #define ATTR3_DIM1 2
 #define ATTR3_DIM2 2
 #define ATTR3_DIM3 2
-double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
+static double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
     {{2.3, -26.1}, {0.123, -10.0}}, {{973.23, -0.91827}, {2.0, 23.0}}}; /* Test data for 3rd attribute */
 
 #define ATTR4_NAME       "Attr4"
@@ -103,10 +104,10 @@ double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
 #define ATTR4_FIELDNAME1 "i"
 #define ATTR4_FIELDNAME2 "d"
 #define ATTR4_FIELDNAME3 "c"
-size_t attr4_field1_off = 0;
-size_t attr4_field2_off = 0;
-size_t attr4_field3_off = 0;
-struct attr4_struct {
+static size_t attr4_field1_off = 0;
+static size_t attr4_field2_off = 0;
+static size_t attr4_field3_off = 0;
+static struct attr4_struct {
     int    i;
     double d;
     char   c;
@@ -116,7 +117,7 @@ struct attr4_struct {
 
 #define ATTR5_NAME "Attr5"
 #define ATTR5_RANK 0
-float attr_data5 = -5.123F; /* Test data for 5th attribute */
+static float attr_data5 = -5.123F; /* Test data for 5th attribute */
 
 #define ATTR6_RANK 3
 #define ATTR6_DIM1 100
@@ -4540,21 +4541,21 @@ test_attr_corder_create_basic(hid_t fcpl, hid_t fapl)
 static void
 test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;                     /* HDF5 File ID            */
-    hid_t    dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t    my_dataset;              /* Current dataset ID        */
-    hid_t    sid;                     /* Dataspace ID            */
-    hid_t    attr;                    /* Attribute ID            */
-    hid_t    dcpl;                    /* Dataset creation property list ID */
-    unsigned max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t   is_empty;                /* Are there any attributes? */
-    htri_t   is_dense;                /* Are attributes stored densely? */
-    hsize_t  nattrs;                  /* Number of attributes on object */
-    char     attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned curr_dset;               /* Current dataset to work on */
-    unsigned u;                       /* Local index variable */
-    herr_t   ret;                     /* Generic return value        */
+    hid_t    fid;                          /* HDF5 File ID            */
+    hid_t    dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t    my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t    sid;                          /* Dataspace ID            */
+    hid_t    attr;                         /* Attribute ID            */
+    hid_t    dcpl;                         /* Dataset creation property list ID */
+    unsigned max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t   is_empty;                     /* Are there any attributes? */
+    htri_t   is_dense;                     /* Are attributes stored densely? */
+    hsize_t  nattrs;                       /* Number of attributes on object */
+    char     attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    unsigned curr_dset;                    /* Current dataset to work on */
+    unsigned u;                            /* Local index variable */
+    herr_t   ret;                          /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Compact Storage of Attributes with Creation Order Info\n"));
@@ -4742,23 +4743,23 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
 static void
 test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;                     /* HDF5 File ID            */
-    hid_t    dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t    my_dataset;              /* Current dataset ID        */
-    hid_t    sid;                     /* Dataspace ID            */
-    hid_t    attr;                    /* Attribute ID            */
-    hid_t    dcpl;                    /* Dataset creation property list ID */
-    unsigned max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t   is_empty;                /* Are there any attributes? */
-    htri_t   is_dense;                /* Are attributes stored densely? */
-    hsize_t  nattrs;                  /* Number of attributes on object */
-    hsize_t  name_count;              /* # of records in name index */
-    hsize_t  corder_count;            /* # of records in creation order index */
-    char     attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned curr_dset;               /* Current dataset to work on */
-    unsigned u;                       /* Local index variable */
-    herr_t   ret;                     /* Generic return value        */
+    hid_t    fid;                          /* HDF5 File ID            */
+    hid_t    dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t    my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t    sid;                          /* Dataspace ID            */
+    hid_t    attr;                         /* Attribute ID            */
+    hid_t    dcpl;                         /* Dataset creation property list ID */
+    unsigned max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t   is_empty;                     /* Are there any attributes? */
+    htri_t   is_dense;                     /* Are attributes stored densely? */
+    hsize_t  nattrs;                       /* Number of attributes on object */
+    hsize_t  name_count;                   /* # of records in name index */
+    hsize_t  corder_count;                 /* # of records in creation order index */
+    char     attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    unsigned curr_dset;                    /* Current dataset to work on */
+    unsigned u;                            /* Local index variable */
+    herr_t   ret;                          /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dense Storage of Attributes with Creation Order Info\n"));
@@ -5079,23 +5080,23 @@ test_attr_corder_create_reopen(hid_t fcpl, hid_t fapl)
 static void
 test_attr_corder_transition(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;                     /* HDF5 File ID            */
-    hid_t    dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t    my_dataset;              /* Current dataset ID        */
-    hid_t    sid;                     /* Dataspace ID            */
-    hid_t    attr;                    /* Attribute ID            */
-    hid_t    dcpl;                    /* Dataset creation property list ID */
-    unsigned max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t   is_empty;                /* Are there any attributes? */
-    htri_t   is_dense;                /* Are attributes stored densely? */
-    hsize_t  nattrs;                  /* Number of attributes on object */
-    hsize_t  name_count;              /* # of records in name index */
-    hsize_t  corder_count;            /* # of records in creation order index */
-    char     attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned curr_dset;               /* Current dataset to work on */
-    unsigned u;                       /* Local index variable */
-    herr_t   ret;                     /* Generic return value        */
+    hid_t    fid;                          /* HDF5 File ID            */
+    hid_t    dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t    my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t    sid;                          /* Dataspace ID            */
+    hid_t    attr;                         /* Attribute ID            */
+    hid_t    dcpl;                         /* Dataset creation property list ID */
+    unsigned max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t   is_empty;                     /* Are there any attributes? */
+    htri_t   is_dense;                     /* Are attributes stored densely? */
+    hsize_t  nattrs;                       /* Number of attributes on object */
+    hsize_t  name_count;                   /* # of records in name index */
+    hsize_t  corder_count;                 /* # of records in creation order index */
+    char     attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    unsigned curr_dset;                    /* Current dataset to work on */
+    unsigned u;                            /* Local index variable */
+    herr_t   ret;                          /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Storage Transitions of Attributes with Creation Order Info\n"));
@@ -5488,24 +5489,24 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
 static void
 test_attr_corder_delete(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;                     /* HDF5 File ID            */
-    hid_t    dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t    my_dataset;              /* Current dataset ID        */
-    hid_t    sid;                     /* Dataspace ID            */
-    hid_t    attr;                    /* Attribute ID            */
-    hid_t    dcpl;                    /* Dataset creation property list ID */
-    unsigned max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t   is_empty;                /* Are there any attributes? */
-    htri_t   is_dense;                /* Are attributes stored densely? */
-    hsize_t  nattrs;                  /* Number of attributes on object */
-    hsize_t  name_count;              /* # of records in name index */
-    hsize_t  corder_count;            /* # of records in creation order index */
-    unsigned reopen_file;             /* Whether to re-open the file before deleting group */
-    char     attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned curr_dset;               /* Current dataset to work on */
-    unsigned u;                       /* Local index variable */
-    herr_t   ret;                     /* Generic return value        */
+    hid_t    fid;                          /* HDF5 File ID            */
+    hid_t    dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t    my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t    sid;                          /* Dataspace ID            */
+    hid_t    attr;                         /* Attribute ID            */
+    hid_t    dcpl;                         /* Dataset creation property list ID */
+    unsigned max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t   is_empty;                     /* Are there any attributes? */
+    htri_t   is_dense;                     /* Are attributes stored densely? */
+    hsize_t  nattrs;                       /* Number of attributes on object */
+    hsize_t  name_count;                   /* # of records in name index */
+    hsize_t  corder_count;                 /* # of records in creation order index */
+    unsigned reopen_file;                  /* Whether to re-open the file before deleting group */
+    char     attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    unsigned curr_dset;                    /* Current dataset to work on */
+    unsigned u;                            /* Local index variable */
+    herr_t   ret;                          /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Object w/Dense Attribute Storage and Creation Order Info\n"));
@@ -5807,26 +5808,26 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
 static void
 test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
-    hid_t      fid;                     /* HDF5 File ID            */
-    hid_t      dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t      my_dataset;              /* Current dataset ID        */
-    hid_t      sid;                     /* Dataspace ID            */
-    hid_t      attr;                    /* Attribute ID            */
-    hid_t      dcpl;                    /* Dataset creation property list ID */
-    H5A_info_t ainfo;                   /* Attribute information */
-    unsigned   max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned   min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t     is_empty;                /* Are there any attributes? */
-    htri_t     is_dense;                /* Are attributes stored densely? */
-    hsize_t    nattrs;                  /* Number of attributes on object */
-    hsize_t    name_count;              /* # of records in name index */
-    hsize_t    corder_count;            /* # of records in creation order index */
-    unsigned   use_index;               /* Use index on creation order values */
-    char       attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    char       tmpname[NAME_BUF_SIZE];  /* Temporary attribute name */
-    unsigned   curr_dset;               /* Current dataset to work on */
-    unsigned   u;                       /* Local index variable */
-    herr_t     ret;                     /* Generic return value        */
+    hid_t      fid;                          /* HDF5 File ID            */
+    hid_t      dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t      my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t      sid;                          /* Dataspace ID            */
+    hid_t      attr;                         /* Attribute ID            */
+    hid_t      dcpl;                         /* Dataset creation property list ID */
+    H5A_info_t ainfo;                        /* Attribute information */
+    unsigned   max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned   min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t     is_empty;                     /* Are there any attributes? */
+    htri_t     is_dense;                     /* Are attributes stored densely? */
+    hsize_t    nattrs;                       /* Number of attributes on object */
+    hsize_t    name_count;                   /* # of records in name index */
+    hsize_t    corder_count;                 /* # of records in creation order index */
+    unsigned   use_index;                    /* Use index on creation order values */
+    char       attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    char       tmpname[NAME_BUF_SIZE];       /* Temporary attribute name */
+    unsigned   curr_dset;                    /* Current dataset to work on */
+    unsigned   u;                            /* Local index variable */
+    herr_t     ret;                          /* Generic return value        */
 
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
@@ -5850,9 +5851,9 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     for (use_index = FALSE; use_index <= TRUE; use_index++) {
         /* Output message about test being performed */
         if (use_index)
-            MESSAGE(5, ("Testing Querying Attribute Info By Index w/Creation Order Index\n"))
+            MESSAGE(5, ("Testing Querying Attribute Info By Index w/Creation Order Index\n"));
         else
-            MESSAGE(5, ("Testing Querying Attribute Info By Index w/o Creation Order Index\n"))
+            MESSAGE(5, ("Testing Querying Attribute Info By Index w/o Creation Order Index\n"));
 
         /* Create file */
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -6085,7 +6086,7 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_info(attr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Aget_info");
 
@@ -6093,7 +6094,7 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_info_by_name(fid, ".", GET_INFO_NULL_POINTER_ATTR_NAME, NULL, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Aget_info_by_name");
 
@@ -6101,7 +6102,7 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_info_by_idx(fid, ".", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Aget_info_by_idx");
 
@@ -6149,7 +6150,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename(fid, NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
@@ -6157,7 +6158,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename(fid, "", INVALID_RENAME_TEST_NEW_ATTR_NAME);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
@@ -6165,7 +6166,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
@@ -6173,7 +6174,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, "");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
@@ -6181,7 +6182,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename_by_name(fid, ".", NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
@@ -6189,7 +6190,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename_by_name(fid, ".", "", INVALID_RENAME_TEST_NEW_ATTR_NAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
@@ -6197,7 +6198,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, NULL, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
@@ -6205,7 +6206,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, "", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
@@ -6255,7 +6256,7 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_name(attr, 1, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VERIFY(err_ret, FAIL, "H5Aget_name");
 
@@ -6263,7 +6264,7 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_name_by_idx(fid, ".", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, 1, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VERIFY(err_ret, FAIL, "H5Aget_name_by_idx");
 
@@ -6289,30 +6290,30 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
 static void
 test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
-    hid_t           fid;                     /* HDF5 File ID            */
-    hid_t           dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t           my_dataset;              /* Current dataset ID        */
-    hid_t           sid;                     /* Dataspace ID            */
-    hid_t           attr;                    /* Attribute ID            */
-    hid_t           dcpl;                    /* Dataset creation property list ID */
-    H5A_info_t      ainfo;                   /* Attribute information */
-    unsigned        max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned        min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t          is_empty;                /* Are there any attributes? */
-    htri_t          is_dense;                /* Are attributes stored densely? */
-    hsize_t         nattrs;                  /* Number of attributes on object */
-    hsize_t         name_count;              /* # of records in name index */
-    hsize_t         corder_count;            /* # of records in creation order index */
-    H5_index_t      idx_type;                /* Type of index to operate on */
-    H5_iter_order_t order;                   /* Order within in the index */
-    unsigned        use_index;               /* Use index on creation order values */
-    char            attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    char            tmpname[NAME_BUF_SIZE];  /* Temporary attribute name */
-    unsigned        curr_dset;               /* Current dataset to work on */
-    unsigned        u;                       /* Local index variable */
-    herr_t          ret;                     /* Generic return value        */
+    hid_t           fid;                          /* HDF5 File ID            */
+    hid_t           dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t           my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t           sid;                          /* Dataspace ID            */
+    hid_t           attr;                         /* Attribute ID            */
+    hid_t           dcpl;                         /* Dataset creation property list ID */
+    H5A_info_t      ainfo;                        /* Attribute information */
+    unsigned        max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned        min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t          is_empty;                     /* Are there any attributes? */
+    htri_t          is_dense;                     /* Are attributes stored densely? */
+    hsize_t         nattrs;                       /* Number of attributes on object */
+    hsize_t         name_count;                   /* # of records in name index */
+    hsize_t         corder_count;                 /* # of records in creation order index */
+    H5_index_t      idx_type;                     /* Type of index to operate on */
+    H5_iter_order_t order;                        /* Order within in the index */
+    unsigned        use_index;                    /* Use index on creation order values */
+    char            attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    char            tmpname[NAME_BUF_SIZE];       /* Temporary attribute name */
+    unsigned        curr_dset;                    /* Current dataset to work on */
+    unsigned        u;                            /* Local index variable */
+    herr_t          ret;                          /* Generic return value        */
 
-    MESSAGE(5, ("Testing Deleting Attribute By Index\n"))
+    MESSAGE(5, ("Testing Deleting Attribute By Index\n"));
 
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
@@ -6343,36 +6344,36 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Increasing "
-                                        "Order w/Creation Order Index\n"))
+                                        "Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Increasing "
-                                        "Order w/o Creation Order Index\n"))
+                                        "Order w/o Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Decreasing "
-                                        "Order w/Creation Order Index\n"))
+                                        "Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Decreasing "
-                                        "Order w/o Creation Order Index\n"))
+                                        "Order w/o Creation Order Index\n"));
                     } /* end else */
                 }     /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Increasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Increasing Order w/o "
-                                        "Creation Order Index\n"))
+                                        "Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
-                                        "Creation Order Index\n"))
+                                        "Creation Order Index\n"));
                     } /* end else */
                 }     /* end else */
 
@@ -7264,30 +7265,30 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
 static void
 test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
-    hid_t            fid;                     /* HDF5 File ID            */
-    hid_t            dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t            my_dataset;              /* Current dataset ID        */
-    hid_t            sid;                     /* Dataspace ID            */
-    hid_t            attr;                    /* Attribute ID            */
-    hid_t            dcpl;                    /* Dataset creation property list ID */
-    unsigned         max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned         min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t           is_empty;                /* Are there any attributes? */
-    htri_t           is_dense;                /* Are attributes stored densely? */
-    hsize_t          nattrs;                  /* Number of attributes on object */
-    hsize_t          name_count;              /* # of records in name index */
-    hsize_t          corder_count;            /* # of records in creation order index */
-    H5_index_t       idx_type;                /* Type of index to operate on */
-    H5_iter_order_t  order;                   /* Order within in the index */
-    attr_iter_info_t iter_info;               /* Iterator info */
-    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
-    hsize_t          idx;                     /* Start index for iteration */
-    unsigned         use_index;               /* Use index on creation order values */
-    const char      *dsetname;                /* Name of dataset for attributes */
-    char             attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned         curr_dset;               /* Current dataset to work on */
-    unsigned         u;                       /* Local index variable */
-    herr_t           ret;                     /* Generic return value        */
+    hid_t            fid;                          /* HDF5 File ID            */
+    hid_t            dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t            my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t            sid;                          /* Dataspace ID            */
+    hid_t            attr;                         /* Attribute ID            */
+    hid_t            dcpl;                         /* Dataset creation property list ID */
+    unsigned         max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned         min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t           is_empty;                     /* Are there any attributes? */
+    htri_t           is_dense;                     /* Are attributes stored densely? */
+    hsize_t          nattrs;                       /* Number of attributes on object */
+    hsize_t          name_count;                   /* # of records in name index */
+    hsize_t          corder_count;                 /* # of records in creation order index */
+    H5_index_t       idx_type;                     /* Type of index to operate on */
+    H5_iter_order_t  order;                        /* Order within in the index */
+    attr_iter_info_t iter_info;                    /* Iterator info */
+    hbool_t         *visited = NULL;               /* Array of flags for visiting links */
+    hsize_t          idx;                          /* Start index for iteration */
+    unsigned         use_index;                    /* Use index on creation order values */
+    const char      *dsetname;                     /* Name of dataset for attributes */
+    char             attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    unsigned         curr_dset;                    /* Current dataset to work on */
+    unsigned         u;                            /* Local index variable */
+    herr_t           ret;                          /* Generic return value        */
 
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
@@ -7324,36 +7325,36 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
-                                        "Increasing Order w/Creation Order Index\n"))
+                                        "Increasing Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
-                                        "Increasing Order w/o Creation Order Index\n"))
+                                        "Increasing Order w/o Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
-                                        "Decreasing Order w/Creation Order Index\n"))
+                                        "Decreasing Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
-                                        "Decreasing Order w/o Creation Order Index\n"))
+                                        "Decreasing Order w/o Creation Order Index\n"));
                     } /* end else */
                 }     /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Increasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Increasing Order "
-                                        "w/o Creation Order Index\n"))
+                                        "w/o Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
-                                        "w/o Creation Order Index\n"))
+                                        "w/o Creation Order Index\n"));
                     } /* end else */
                 }     /* end else */
 
@@ -7668,27 +7669,27 @@ attr_open_by_idx_check(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
 static void
 test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
-    hid_t           fid;                     /* HDF5 File ID            */
-    hid_t           dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t           my_dataset;              /* Current dataset ID        */
-    hid_t           sid;                     /* Dataspace ID            */
-    hid_t           attr;                    /* Attribute ID            */
-    hid_t           dcpl;                    /* Dataset creation property list ID */
-    unsigned        max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned        min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t          is_empty;                /* Are there any attributes? */
-    htri_t          is_dense;                /* Are attributes stored densely? */
-    hsize_t         nattrs;                  /* Number of attributes on object */
-    hsize_t         name_count;              /* # of records in name index */
-    hsize_t         corder_count;            /* # of records in creation order index */
-    H5_index_t      idx_type;                /* Type of index to operate on */
-    H5_iter_order_t order;                   /* Order within in the index */
-    unsigned        use_index;               /* Use index on creation order values */
-    char            attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned        curr_dset;               /* Current dataset to work on */
-    unsigned        u;                       /* Local index variable */
-    hid_t           ret_id;                  /* Generic hid_t return value    */
-    herr_t          ret;                     /* Generic return value        */
+    hid_t           fid;                          /* HDF5 File ID            */
+    hid_t           dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t           my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t           sid;                          /* Dataspace ID            */
+    hid_t           attr;                         /* Attribute ID            */
+    hid_t           dcpl;                         /* Dataset creation property list ID */
+    unsigned        max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned        min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t          is_empty;                     /* Are there any attributes? */
+    htri_t          is_dense;                     /* Are attributes stored densely? */
+    hsize_t         nattrs;                       /* Number of attributes on object */
+    hsize_t         name_count;                   /* # of records in name index */
+    hsize_t         corder_count;                 /* # of records in creation order index */
+    H5_index_t      idx_type;                     /* Type of index to operate on */
+    H5_iter_order_t order;                        /* Order within in the index */
+    unsigned        use_index;                    /* Use index on creation order values */
+    char            attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    unsigned        curr_dset;                    /* Current dataset to work on */
+    unsigned        u;                            /* Local index variable */
+    hid_t           ret_id;                       /* Generic hid_t return value    */
+    herr_t          ret;                          /* Generic return value        */
 
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
@@ -7719,36 +7720,36 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Increasing "
-                                        "Order w/Creation Order Index\n"))
+                                        "Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Increasing "
-                                        "Order w/o Creation Order Index\n"))
+                                        "Order w/o Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Decreasing "
-                                        "Order w/Creation Order Index\n"))
+                                        "Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Decreasing "
-                                        "Order w/o Creation Order Index\n"))
+                                        "Order w/o Creation Order Index\n"));
                     } /* end else */
                 }     /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Increasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Increasing Order w/o "
-                                        "Creation Order Index\n"))
+                                        "Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order w/o "
-                                        "Creation Order Index\n"))
+                                        "Creation Order Index\n"));
                     } /* end else */
                 }     /* end else */
 
@@ -8039,26 +8040,26 @@ attr_open_check(hid_t fid, const char *dsetname, hid_t obj_id, unsigned max_attr
 static void
 test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
-    hid_t       fid;                     /* HDF5 File ID            */
-    hid_t       dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t       my_dataset;              /* Current dataset ID        */
-    hid_t       sid;                     /* Dataspace ID            */
-    hid_t       attr;                    /* Attribute ID            */
-    hid_t       dcpl;                    /* Dataset creation property list ID */
-    unsigned    max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned    min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t      is_empty;                /* Are there any attributes? */
-    htri_t      is_dense;                /* Are attributes stored densely? */
-    hsize_t     nattrs;                  /* Number of attributes on object */
-    hsize_t     name_count;              /* # of records in name index */
-    hsize_t     corder_count;            /* # of records in creation order index */
-    unsigned    use_index;               /* Use index on creation order values */
-    const char *dsetname;                /* Name of dataset for attributes */
-    char        attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned    curr_dset;               /* Current dataset to work on */
-    unsigned    u;                       /* Local index variable */
-    hid_t       ret_id;                  /* Generic hid_t return value    */
-    herr_t      ret;                     /* Generic return value        */
+    hid_t       fid;                          /* HDF5 File ID            */
+    hid_t       dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t       my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t       sid;                          /* Dataspace ID            */
+    hid_t       attr;                         /* Attribute ID            */
+    hid_t       dcpl;                         /* Dataset creation property list ID */
+    unsigned    max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t      is_empty;                     /* Are there any attributes? */
+    htri_t      is_dense;                     /* Are attributes stored densely? */
+    hsize_t     nattrs;                       /* Number of attributes on object */
+    hsize_t     name_count;                   /* # of records in name index */
+    hsize_t     corder_count;                 /* # of records in creation order index */
+    unsigned    use_index;                    /* Use index on creation order values */
+    const char *dsetname;                     /* Name of dataset for attributes */
+    char        attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    unsigned    curr_dset;                    /* Current dataset to work on */
+    unsigned    u;                            /* Local index variable */
+    hid_t       ret_id;                       /* Generic hid_t return value    */
+    herr_t      ret;                          /* Generic return value        */
 
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
@@ -8082,9 +8083,9 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
     for (use_index = FALSE; use_index <= TRUE; use_index++) {
         /* Print appropriate test message */
         if (use_index)
-            MESSAGE(5, ("Testing Opening Attributes By Name w/Creation Order Index\n"))
+            MESSAGE(5, ("Testing Opening Attributes By Name w/Creation Order Index\n"));
         else
-            MESSAGE(5, ("Testing Opening Attributes By Name w/o Creation Order Index\n"))
+            MESSAGE(5, ("Testing Opening Attributes By Name w/o Creation Order Index\n"));
 
         /* Create file */
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -8335,25 +8336,25 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
 static void
 test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
-    hid_t       fid;                     /* HDF5 File ID            */
-    hid_t       dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t       my_dataset;              /* Current dataset ID        */
-    hid_t       sid;                     /* Dataspace ID            */
-    hid_t       attr;                    /* Attribute ID            */
-    hid_t       dcpl;                    /* Dataset creation property list ID */
-    unsigned    max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned    min_dense;               /* Minimum # of links to store in group "densely" */
-    htri_t      is_empty;                /* Are there any attributes? */
-    htri_t      is_dense;                /* Are attributes stored densely? */
-    hsize_t     nattrs;                  /* Number of attributes on object */
-    hsize_t     name_count;              /* # of records in name index */
-    hsize_t     corder_count;            /* # of records in creation order index */
-    unsigned    use_index;               /* Use index on creation order values */
-    const char *dsetname;                /* Name of dataset for attributes */
-    char        attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned    curr_dset;               /* Current dataset to work on */
-    unsigned    u;                       /* Local index variable */
-    herr_t      ret;                     /* Generic return value        */
+    hid_t       fid;                          /* HDF5 File ID            */
+    hid_t       dset1, dset2, dset3;          /* Dataset IDs            */
+    hid_t       my_dataset = H5I_INVALID_HID; /* Current dataset ID        */
+    hid_t       sid;                          /* Dataspace ID            */
+    hid_t       attr;                         /* Attribute ID            */
+    hid_t       dcpl;                         /* Dataset creation property list ID */
+    unsigned    max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;                    /* Minimum # of links to store in group "densely" */
+    htri_t      is_empty;                     /* Are there any attributes? */
+    htri_t      is_dense;                     /* Are attributes stored densely? */
+    hsize_t     nattrs;                       /* Number of attributes on object */
+    hsize_t     name_count;                   /* # of records in name index */
+    hsize_t     corder_count;                 /* # of records in creation order index */
+    unsigned    use_index;                    /* Use index on creation order values */
+    const char *dsetname;                     /* Name of dataset for attributes */
+    char        attrname[NAME_BUF_SIZE];      /* Name of attribute */
+    unsigned    curr_dset;                    /* Current dataset to work on */
+    unsigned    u;                            /* Local index variable */
+    herr_t      ret;                          /* Generic return value        */
 
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
@@ -8377,9 +8378,9 @@ test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
     for (use_index = FALSE; use_index <= TRUE; use_index++) {
         /* Print appropriate test message */
         if (use_index)
-            MESSAGE(5, ("Testing Creating Attributes By Name w/Creation Order Index\n"))
+            MESSAGE(5, ("Testing Creating Attributes By Name w/Creation Order Index\n"));
         else
-            MESSAGE(5, ("Testing Creating Attributes By Name w/o Creation Order Index\n"))
+            MESSAGE(5, ("Testing Creating Attributes By Name w/o Creation Order Index\n"));
 
         /* Create file */
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -11494,7 +11495,7 @@ test_attr(void)
             test_attr_delete(my_fapl);     /* Test H5A code for deleting attributes */
 
             /* This next test uses its own file information */
-            test_attr_dtype_shared(my_fapl); /* Test using shared dataypes in attributes */
+            test_attr_dtype_shared(my_fapl); /* Test using shared datatypes in attributes */
 
             /* This next test uses its own file information */
             test_attr_duplicate_ids(my_fapl);

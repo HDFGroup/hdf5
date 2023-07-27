@@ -194,7 +194,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Sort the dataset names */
-    HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+    qsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Iterate through the datasets in the root group in various ways */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
@@ -233,7 +233,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
             (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3),
                                        dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     ret = H5Gclose(root_group);
@@ -264,7 +264,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         ret = (herr_t)H5Lget_name_by_idx(file, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3),
                                          dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     /* Test invalid indices for starting iteration */
@@ -274,7 +274,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     {
         ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test skipping exactly as many entries as in the group */
@@ -283,7 +283,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     {
         ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test skipping more entries than are in the group */
@@ -292,7 +292,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     {
         ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test all objects in group, when callback always returns 0 */
@@ -473,7 +473,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     {
         ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test skipping more attributes than there are */
@@ -482,7 +482,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     {
         ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test all attributes on dataset, when callback always returns 0 */
@@ -706,7 +706,7 @@ test_iter_group_large(hid_t fapl)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Need to sort the names in the root group, cause that's what the library does */
-    HDqsort(names, (size_t)(ITER_NGROUPS + 2), sizeof(iter_info), iter_strcmp2);
+    qsort(names, (size_t)(ITER_NGROUPS + 2), sizeof(iter_info), iter_strcmp2);
 
     /* Iterate through the file to see members of the root group */
     curr_name = &names[0];
@@ -804,7 +804,7 @@ test_grp_memb_funcs(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Sort the dataset names */
-    HDqsort(dnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+    qsort(dnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Iterate through the datasets in the root group in various ways */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
@@ -857,11 +857,11 @@ test_grp_memb_funcs(hid_t fapl)
             (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3),
                                        dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     /* Sort the dataset names */
-    HDqsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+    qsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Compare object names */
     for (i = 0; i < (int)ginfo.nlinks; i++) {
