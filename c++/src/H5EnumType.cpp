@@ -37,7 +37,6 @@ namespace H5 {
 //--------------------------------------------------------------------------
 // Function:    EnumType default constructor
 ///\brief       Default constructor: Creates a stub datatype
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::EnumType() : DataType()
 {
@@ -48,7 +47,6 @@ EnumType::EnumType() : DataType()
 ///\brief       Creates an EnumType object using the id of an existing datatype.
 ///\param       existing_id - IN: Id of an existing datatype
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::EnumType(const hid_t existing_id) : DataType(existing_id)
 {
@@ -57,7 +55,6 @@ EnumType::EnumType(const hid_t existing_id) : DataType(existing_id)
 //--------------------------------------------------------------------------
 // Function:    EnumType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::EnumType(const EnumType &original) : DataType(original)
 {
@@ -71,7 +68,6 @@ EnumType::EnumType(const EnumType &original) : DataType(original)
 // Description
 //              The DataType constructor calls the C API H5Tcreate to create
 //              the enum datatype.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size)
 {
@@ -82,7 +78,6 @@ EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size)
 ///\brief       Gets the enum datatype of the specified dataset.
 ///\param       dataset - IN: Dataset that this enum datatype associates with
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::EnumType(const DataSet &dataset) : DataType()
 {
@@ -100,7 +95,6 @@ EnumType::EnumType(const DataSet &dataset) : DataType()
 ///\brief       Creates a new enum datatype based on an integer datatype.
 ///\param       data_type - IN: Base datatype
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::EnumType(const IntType &data_type) : DataType()
 {
@@ -120,7 +114,6 @@ EnumType::EnumType(const IntType &data_type) : DataType()
 ///\param       dtype_name - IN: Enum datatype name
 ///\param       loc        - IN: Location of the type
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Dec 2016
 // Description
 //              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openEnumType(const char*) to
@@ -139,7 +132,6 @@ EnumType::EnumType(const H5Location &loc, const char *dtype_name) : DataType()
 ///\param       loc        - IN: Location of the type
 ///\param       dtype_name - IN: Enum datatype name
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Dec 2016
 // Description
 //              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openEnumType(const H5std_string&)
@@ -157,7 +149,6 @@ EnumType::EnumType(const H5Location &loc, const H5std_string &dtype_name) : Data
 ///             binary object description of this type.
 ///
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
 DataType *
 EnumType::decode() const
@@ -180,7 +171,6 @@ EnumType::decode() const
 ///\param       name  - IN: Name of the new member
 ///\param       value - IN: Pointer to the value of the new member
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void
 EnumType::insert(const char *name, void *value) const
@@ -197,7 +187,6 @@ EnumType::insert(const char *name, void *value) const
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function only in the type of
 ///             argument \a name.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void
 EnumType::insert(const H5std_string &name, void *value) const
@@ -212,7 +201,6 @@ EnumType::insert(const H5std_string &name, void *value) const
 ///\param       value - IN: Pointer to the value of the enum datatype
 ///\param       size  - IN: Size for the name
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5std_string
 EnumType::nameOf(void *value, size_t size) const
@@ -240,7 +228,6 @@ EnumType::nameOf(void *value, size_t size) const
 ///\param       name  -  IN: Name of the queried member
 ///\param       value - OUT: Pointer to the retrieved value
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void
 EnumType::valueOf(const char *name, void *value) const
@@ -257,7 +244,6 @@ EnumType::valueOf(const char *name, void *value) const
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function only in the type of
 ///             argument \a name.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void
 EnumType::valueOf(const H5std_string &name, void *value) const
@@ -273,7 +259,6 @@ EnumType::valueOf(const H5std_string &name, void *value) const
 ///             between 0 and \c N-1, where \c N is the value returned by the
 ///             member function \c EnumType::getNmembers.
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - May 16, 2002
 //--------------------------------------------------------------------------
 int
 EnumType::getMemberIndex(const char *name) const
@@ -290,7 +275,6 @@ EnumType::getMemberIndex(const char *name) const
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function only in the type of
 ///             argument \a name.
-// Programmer   Binh-Minh Ribler - May 16, 2002
 //--------------------------------------------------------------------------
 int
 EnumType::getMemberIndex(const H5std_string &name) const
@@ -303,7 +287,6 @@ EnumType::getMemberIndex(const H5std_string &name) const
 ///\brief       Returns the number of members in this enumeration datatype.
 ///\return      Number of members
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 int
 EnumType::getNmembers() const
@@ -323,7 +306,6 @@ EnumType::getNmembers() const
 ///\param       memb_no - IN: Index of the queried member
 ///\param       value   - OUT: Pointer to the retrieved value
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void
 EnumType::getMemberValue(unsigned memb_no, void *value) const
@@ -338,7 +320,6 @@ EnumType::getMemberValue(unsigned memb_no, void *value) const
 //--------------------------------------------------------------------------
 // Function:    EnumType destructor
 ///\brief       Properly terminates access to this enum datatype.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::~EnumType()
 {

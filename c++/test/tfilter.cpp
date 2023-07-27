@@ -68,9 +68,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Return       Success: Data chunk size
  *
  *              Failure: 0
- *
- * Programmer   Robb Matzke
- *              Tuesday, April 21, 1998
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -92,10 +89,6 @@ filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values
  * Purpose      Test null I/O filter by itself.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version, from dsets.c/test_filters)
- *              January, 2007
- *
  *-------------------------------------------------------------------------
  */
 const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};
@@ -139,10 +132,6 @@ test_null_filter()
  * Purpose      Test SZIP filter by itself.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (partly from dsets.c/test_filters)
- *              January, 2007
- *
  *-------------------------------------------------------------------------
  */
 const H5std_string DSET_SZIP_NAME("szipped dataset");
