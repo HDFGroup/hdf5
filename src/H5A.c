@@ -1218,7 +1218,7 @@ H5Aget_create_plist(hid_t attr_id)
     /* Get the acpl */
     if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5I_INVALID_HID,
-                    "unable to get creation property list for attribute")
+                    "unable to get creation property list for attribute");
 
     /* Set the return value */
     ret_value = vol_cb_args.args.get_acpl.acpl_id;
@@ -1591,7 +1591,7 @@ H5A__rename_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
         /* Rename the attribute */
         if (H5VL_attr_specific(vol_obj, loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute from '%s' to '%s'", old_name,
-                        new_name)
+                        new_name);
     }
 
 done:

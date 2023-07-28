@@ -141,7 +141,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
                     /* Reallocate the metadata accumulator buffer */
                     if (NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_alloc_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                    "unable to allocate metadata accumulator buffer")
+                                    "unable to allocate metadata accumulator buffer");
 
                     /* Note the new buffer size */
                     accum->alloc_size = new_alloc_size;
@@ -601,7 +601,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                             if (NULL ==
                                 (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_alloc_size)))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                            "unable to allocate metadata accumulator buffer")
+                                            "unable to allocate metadata accumulator buffer");
 
                             /* Note the new buffer size */
                             accum->alloc_size = new_alloc_size;
@@ -647,7 +647,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                         /* Grow the metadata accumulator buffer */
                         if (NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_size)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                        "unable to allocate metadata accumulator buffer")
+                                        "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
                         accum->alloc_size = new_size;
@@ -666,7 +666,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                             /* Shrink the accumulator buffer */
                             if (NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, tmp_size)))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                            "unable to allocate metadata accumulator buffer")
+                                            "unable to allocate metadata accumulator buffer");
 
                             /* Note the new buffer size */
                             accum->alloc_size = tmp_size;
@@ -698,7 +698,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     /* Reallocate the metadata accumulator buffer */
                     if (NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                    "unable to allocate metadata accumulator buffer")
+                                    "unable to allocate metadata accumulator buffer");
 
                     /* Note the new buffer size */
                     accum->alloc_size = new_size;

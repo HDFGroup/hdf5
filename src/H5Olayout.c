@@ -211,7 +211,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                 if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
-                                "memory allocation failed for compact data buffer")
+                                "memory allocation failed for compact data buffer");
                 H5MM_memcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
                 p += mesg->storage.u.compact.size;
             }
@@ -235,12 +235,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
                     if (H5_IS_BUFFER_OVERFLOW(p, mesg->storage.u.compact.size, p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
 
                     /* Allocate space for compact data */
                     if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
-                                    "memory allocation failed for compact data buffer")
+                                    "memory allocation failed for compact data buffer");
 
                     /* Compact data */
                     H5MM_memcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
@@ -274,7 +274,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Dimensionality */
                     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     mesg->u.chunk.ndims = *p++;
 
                     if (mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
@@ -285,12 +285,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* B-tree address */
                     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
 
                     if (H5_IS_BUFFER_OVERFLOW(p, (mesg->u.chunk.ndims * 4), p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
 
                     /* Chunk dimensions */
                     for (unsigned u = 0; u < mesg->u.chunk.ndims; u++) {
@@ -320,7 +320,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Get the chunked layout flags */
                     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     mesg->u.chunk.flags = *p++;
 
                     /* Check for valid flags */
@@ -333,7 +333,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Dimensionality */
                     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     mesg->u.chunk.ndims = *p++;
 
                     if (mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
@@ -342,7 +342,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Encoded # of bytes for each chunk dimension */
                     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     mesg->u.chunk.enc_bytes_per_dim = *p++;
 
                     if (mesg->u.chunk.enc_bytes_per_dim == 0 || mesg->u.chunk.enc_bytes_per_dim > 8)
@@ -351,7 +351,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     if (H5_IS_BUFFER_OVERFLOW(p, (mesg->u.chunk.ndims * mesg->u.chunk.enc_bytes_per_dim),
                                               p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
 
                     /* Chunk dimensions */
                     for (unsigned u = 0; u < mesg->u.chunk.ndims; u++) {
@@ -373,7 +373,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Chunk index type */
                     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     mesg->u.chunk.idx_type = (H5D_chunk_index_t)*p++;
 
                     if (mesg->u.chunk.idx_type >= H5D_CHUNK_IDX_NTYPES)
@@ -383,7 +383,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     switch (mesg->u.chunk.idx_type) {
                         case H5D_CHUNK_IDX_BTREE:
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
-                                        "v1 B-tree index type should never be in a v4 layout message")
+                                        "v1 B-tree index type should never be in a v4 layout message");
                             break;
 
                         case H5D_CHUNK_IDX_NONE: /* Implicit Index */
@@ -394,7 +394,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             if (mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
                                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f) + 4, p_end))
                                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                                "ran off end of input buffer while decoding")
+                                                "ran off end of input buffer while decoding");
                                 H5F_DECODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
                                 UINT32DECODE(p, mesg->storage.u.chunk.u.single.filter_mask);
                             }
@@ -407,12 +407,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             /* Fixed array creation parameters */
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = *p++;
 
                             if (0 == mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits)
                                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
-                                            "invalid fixed array creation parameter")
+                                            "invalid fixed array creation parameter");
 
                             /* Set the chunk operations */
                             mesg->storage.u.chunk.ops = H5D_COPS_FARRAY;
@@ -422,48 +422,48 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             /* Extensible array creation parameters */
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             mesg->u.chunk.u.earray.cparam.max_nelmts_bits = *p++;
 
                             if (0 == mesg->u.chunk.u.earray.cparam.max_nelmts_bits)
                                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
-                                            "invalid extensible array creation parameter")
+                                            "invalid extensible array creation parameter");
 
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             mesg->u.chunk.u.earray.cparam.idx_blk_elmts = *p++;
 
                             if (0 == mesg->u.chunk.u.earray.cparam.idx_blk_elmts)
                                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
-                                            "invalid extensible array creation parameter")
+                                            "invalid extensible array creation parameter");
 
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             mesg->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs = *p++;
 
                             if (0 == mesg->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs)
                                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
-                                            "invalid extensible array creation parameter")
+                                            "invalid extensible array creation parameter");
 
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             mesg->u.chunk.u.earray.cparam.data_blk_min_elmts = *p++;
 
                             if (0 == mesg->u.chunk.u.earray.cparam.data_blk_min_elmts)
                                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
-                                            "invalid extensible array creation parameter")
+                                            "invalid extensible array creation parameter");
 
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = *p++;
 
                             if (0 == mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits)
                                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
-                                            "invalid extensible array creation parameter")
+                                            "invalid extensible array creation parameter");
 
                             /* Set the chunk operations */
                             mesg->storage.u.chunk.ops = H5D_COPS_EARRAY;
@@ -472,12 +472,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         case H5D_CHUNK_IDX_BT2: /* v2 B-tree index */
                             if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             UINT32DECODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
 
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             mesg->u.chunk.u.btree2.cparam.split_percent = *p++;
 
                             if (mesg->u.chunk.u.btree2.cparam.split_percent == 0 ||
@@ -489,7 +489,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                            "ran off end of input buffer while decoding")
+                                            "ran off end of input buffer while decoding");
                             mesg->u.chunk.u.btree2.cparam.merge_percent = *p++;
 
                             if (mesg->u.chunk.u.btree2.cparam.merge_percent == 0 ||
@@ -511,7 +511,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Chunk index address */
                     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
                 }
 
@@ -566,7 +566,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Decode the version number of the heap block encoding */
                     if (H5_IS_BUFFER_OVERFLOW(heap_block_p, 1, heap_block_p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     heap_vers = (uint8_t)*heap_block_p++;
 
                     if ((uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS != heap_vers)
@@ -577,7 +577,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Number of entries */
                     if (H5_IS_BUFFER_OVERFLOW(heap_block_p, H5F_sizeof_size(f), heap_block_p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
 
                     /* Allocate entry list */
@@ -594,7 +594,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         avail_buffer_space = heap_block_p_end - heap_block_p + 1;
                         if (avail_buffer_space <= 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                        "ran off end of input buffer while decoding")
+                                        "ran off end of input buffer while decoding");
 
                         /* Source file name */
                         tmp_size = HDstrnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
@@ -608,14 +608,14 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         if (NULL ==
                             (mesg->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
-                                        "unable to allocate memory for source file name")
+                                        "unable to allocate memory for source file name");
                         H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         avail_buffer_space = heap_block_p_end - heap_block_p + 1;
                         if (avail_buffer_space <= 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                        "ran off end of input buffer while decoding")
+                                        "ran off end of input buffer while decoding");
 
                         /* Source dataset name */
                         tmp_size = HDstrnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
@@ -629,7 +629,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         if (NULL ==
                             (mesg->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
-                                        "unable to allocate memory for source dataset name")
+                                        "unable to allocate memory for source dataset name");
                         H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
@@ -638,7 +638,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                         if (avail_buffer_space <= 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, NULL,
-                                        "buffer overflow while decoding layout")
+                                        "buffer overflow while decoding layout");
 
                         if (H5S_SELECT_DESERIALIZE(&mesg->storage.u.virt.list[i].source_select, &heap_block_p,
                                                    (size_t)(avail_buffer_space)) < 0)
@@ -651,12 +651,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                         if (avail_buffer_space <= 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, NULL,
-                                        "buffer overflow while decoding layout")
+                                        "buffer overflow while decoding layout");
 
                         if (H5S_SELECT_DESERIALIZE(&mesg->storage.u.virt.list[i].source_dset.virtual_select,
                                                    &heap_block_p, (size_t)(avail_buffer_space)) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL,
-                                        "can't decode virtual space selection")
+                                        "can't decode virtual space selection");
 
                         /* Parse source file and dataset names for "printf"
                          * style format specifiers */
@@ -721,13 +721,13 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         /* Update min_dims */
                         if (H5D_virtual_update_min_dims(mesg, i) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-                                        "unable to update virtual dataset minimum dimensions")
+                                        "unable to update virtual dataset minimum dimensions");
                     }
 
                     /* Read stored checksum */
                     if (H5_IS_BUFFER_OVERFLOW(heap_block_p, 4, heap_block_p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     UINT32DECODE(heap_block_p, stored_chksum);
 
                     /* Compute checksum */
@@ -736,7 +736,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Verify checksum */
                     if (stored_chksum != computed_chksum)
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
-                                    "incorrect metadata checksum for global heap block")
+                                    "incorrect metadata checksum for global heap block");
 
                     /* Verify that the heap block size is correct */
                     if ((size_t)(heap_block_p - heap_block) != block_size)
@@ -863,7 +863,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 switch (mesg->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
-                                    "v1 B-tree index type should never be in a v4 layout message")
+                                    "v1 B-tree index type should never be in a v4 layout message");
                         break;
 
                     case H5D_CHUNK_IDX_NONE: /* Implicit */

@@ -142,7 +142,7 @@ H5S__mpio_all_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
         /* Create a LARGE derived datatype for this transfer */
         if (H5_mpio_create_large_type(total_bytes, 0, MPI_BYTE, new_type) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                        "couldn't create a large datatype from the all selection")
+                        "couldn't create a large datatype from the all selection");
         *count           = 1;
         *is_derived_type = TRUE;
     }
@@ -811,7 +811,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
         /* Create the compound datatype for this operation (> 2GB) */
         if (H5_mpio_create_large_type(elmt_size, 0, MPI_BYTE, &inner_type) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                        "couldn't create a large inner datatype in hyper selection")
+                        "couldn't create a large inner datatype in hyper selection");
 
     /*******************************************************
      *  Construct the type by walking the hyperslab dims
@@ -867,7 +867,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
             if (bigio_count < d[i].block) {
                 if (H5_mpio_create_large_type(d[i].block, 0, inner_type, &block_type) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                "couldn't create a large block datatype in hyper selection")
+                                "couldn't create a large block datatype in hyper selection");
             }
             else if (MPI_SUCCESS !=
                      (mpi_code = MPI_Type_contiguous((int)d[i].block, inner_type, &block_type)))
@@ -889,7 +889,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
             if (bigio_count < d[i].count) {
                 if (H5_mpio_create_large_type(d[i].count, stride_in_bytes, block_type, &outer_type) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                "couldn't create a large outer datatype in hyper selection")
+                                "couldn't create a large outer datatype in hyper selection");
             }
             /* otherwise a regular create_hvector will do */
             else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)d[i].count, /* count */
@@ -1017,7 +1017,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
     }
     else if (H5_mpio_create_large_type(elmt_size, 0, MPI_BYTE, &elmt_type) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                    "couldn't create a large element datatype in span_hyper selection")
+                    "couldn't create a large element datatype in span_hyper selection");
     elmt_type_is_derived = TRUE;
 
     /* Compute 'down' sizes for each dimension */
@@ -1165,11 +1165,11 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                     /* Re-allocate the buffers */
                     if (NULL == (tmp_disp = (MPI_Aint *)H5MM_realloc(disp, alloc_count * sizeof(MPI_Aint))))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL,
-                                    "can't allocate array of displacements")
+                                    "can't allocate array of displacements");
                     disp = tmp_disp;
                     if (NULL == (tmp_blocklen = (int *)H5MM_realloc(blocklen, alloc_count * sizeof(int))))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL,
-                                    "can't allocate array of block lengths")
+                                    "can't allocate array of block lengths");
                     blocklen = tmp_blocklen;
                 } /* end if */
 
@@ -1203,7 +1203,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                     if ((hsize_t)(blocklen[u]) > bigio_count) {
                         if (H5_mpio_create_large_type((hsize_t)blocklen[u], 0, *elmt_type, &temp_type) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                        "couldn't create a large element datatype in span_hyper selection")
+                                        "couldn't create a large element datatype in span_hyper selection");
                     } /* end if */
                     else if (MPI_SUCCESS !=
                              (mpi_code = MPI_Type_contiguous((int)blocklen[u], *elmt_type, &temp_type)))
@@ -1259,16 +1259,16 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                     /* Re-allocate the buffers */
                     if (NULL == (tmp_disp = (MPI_Aint *)H5MM_realloc(disp, alloc_count * sizeof(MPI_Aint))))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL,
-                                    "can't allocate array of displacements")
+                                    "can't allocate array of displacements");
                     disp = tmp_disp;
                     if (NULL == (tmp_blocklen = (int *)H5MM_realloc(blocklen, alloc_count * sizeof(int))))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL,
-                                    "can't allocate array of block lengths")
+                                    "can't allocate array of block lengths");
                     blocklen = tmp_blocklen;
                     if (NULL == (tmp_inner_type = (MPI_Datatype *)H5MM_realloc(
                                      inner_type, alloc_count * sizeof(MPI_Datatype))))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL,
-                                    "can't allocate array of inner MPI datatypes")
+                                    "can't allocate array of inner MPI datatypes");
                     inner_type = tmp_inner_type;
                 } /* end if */
 
@@ -1390,7 +1390,7 @@ H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int 
                     case H5S_SEL_NONE:
                         if (H5S__mpio_none_type(new_type, count, is_derived_type) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                        "couldn't convert 'none' selection to MPI type")
+                                        "couldn't convert 'none' selection to MPI type");
                         break;
 
                     case H5S_SEL_ALL:
@@ -1402,7 +1402,7 @@ H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int 
                         if (H5S__mpio_permute_type(space, elmt_size, permute_map, new_type, count,
                                                    is_derived_type) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                        "couldn't convert 'all' selection to MPI type")
+                                        "couldn't convert 'all' selection to MPI type");
                         break;
 
                     case H5S_SEL_ERROR:
@@ -1418,20 +1418,20 @@ H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int 
                     case H5S_SEL_NONE:
                         if (H5S__mpio_none_type(new_type, count, is_derived_type) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                        "couldn't convert 'none' selection to MPI type")
+                                        "couldn't convert 'none' selection to MPI type");
                         break;
 
                     case H5S_SEL_ALL:
                         if (H5S__mpio_all_type(space, elmt_size, new_type, count, is_derived_type) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                        "couldn't convert 'all' selection to MPI type")
+                                        "couldn't convert 'all' selection to MPI type");
                         break;
 
                     case H5S_SEL_POINTS:
                         if (H5S__mpio_point_type(space, elmt_size, new_type, count, is_derived_type,
                                                  do_permute, permute_map, is_permuted) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                        "couldn't convert 'point' selection to MPI type")
+                                        "couldn't convert 'point' selection to MPI type");
                         break;
 
                     case H5S_SEL_HYPERSLABS:
@@ -1439,12 +1439,12 @@ H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int 
                             if (H5S__mpio_reg_hyper_type(space, elmt_size, new_type, count, is_derived_type) <
                                 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                            "couldn't convert regular 'hyperslab' selection to MPI type")
+                                            "couldn't convert regular 'hyperslab' selection to MPI type");
                         } /* end if */
                         else if (H5S__mpio_span_hyper_type(space, elmt_size, new_type, count,
                                                            is_derived_type) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                        "couldn't convert irregular 'hyperslab' selection to MPI type")
+                                        "couldn't convert irregular 'hyperslab' selection to MPI type");
                         break;
 
                     case H5S_SEL_ERROR:

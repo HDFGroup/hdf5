@@ -691,7 +691,7 @@ H5D__farray_idx_depend(const H5D_chk_idx_info_t *idx_info)
     /* Make the fixed array a child flush dependency of the dataset's object header proxy */
     if (H5FA_depend(idx_info->storage->u.farray.fa, oh_proxy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                    "unable to create flush dependency on object header proxy")
+                    "unable to create flush dependency on object header proxy");
 
 done:
     /* Release the object header from the cache */
@@ -769,7 +769,7 @@ H5D__farray_idx_open(const H5D_chk_idx_info_t *idx_info)
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
         if (H5D__farray_idx_depend(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                        "unable to create flush dependency on object header")
+                        "unable to create flush dependency on object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -847,7 +847,7 @@ H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info)
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
         if (H5D__farray_idx_depend(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                        "unable to create flush dependency on object header")
+                        "unable to create flush dependency on object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

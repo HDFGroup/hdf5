@@ -647,7 +647,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
             /* Get info for directory entry */
             if (HDstat(path, &my_stat) == -1)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5_ITER_ERROR, "can't stat file %s -- error was: %s", path,
-                            HDstrerror(errno))
+                            HDstrerror(errno));
 
             /* If it is a directory, skip it */
             if (S_ISDIR(my_stat.st_mode))
@@ -802,7 +802,7 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, hbool
         /* Search for the plugin in this path */
         if (H5PL__find_plugin_in_path(search_params, found, H5PL_paths_g[u], plugin_info) < 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in path %s encountered an error",
-                        H5PL_paths_g[u])
+                        H5PL_paths_g[u]);
 
         /* Break out if found */
         if (*found) {
@@ -855,7 +855,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     /* Open the directory */
     if (!(dirp = HDopendir(dir)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory (%s). Please verify its existence",
-                    dir)
+                    dir);
 
     /* Iterate through all entries in the directory */
     while (NULL != (dp = HDreaddir(dirp))) {
@@ -885,7 +885,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
             /* Get info for directory entry */
             if (HDstat(path, &my_stat) == -1)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file %s -- error was: %s", path,
-                            HDstrerror(errno))
+                            HDstrerror(errno));
 
             /* If it is a directory, skip it */
             if (S_ISDIR(my_stat.st_mode)) {

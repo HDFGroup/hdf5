@@ -899,12 +899,12 @@ H5P__facc_set_def_driver(void)
         /* Get default file access pclass */
         if (NULL == (def_fapclass = (H5P_genclass_t *)H5I_object(H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_VFL, H5E_BADID, FAIL,
-                        "can't find object for default file access property class ID")
+                        "can't find object for default file access property class ID");
 
         /* Set new default VFL driver for default file access pclass */
         if (H5P__class_set(def_fapclass, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL,
-                        "can't set default VFL driver for default file access property list class")
+                        "can't set default VFL driver for default file access property list class");
 
         /* Get default file access plist */
         if (NULL == (def_fapl = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
@@ -2151,7 +2151,7 @@ H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts, size_t rdcc_nslots, 
     /* Check arguments */
     if (rdcc_w0 < 0.0 || rdcc_w0 > 1.0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
+                    "raw data cache w0 value must be between 0.0 and 1.0 inclusive");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
@@ -4871,7 +4871,7 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t H5_ATTR_PARALLEL_UNUSED evict_on_cl
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property")
 #else
     HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL,
-                "evict on close is currently not supported in parallel HDF5")
+                "evict on close is currently not supported in parallel HDF5");
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -5710,10 +5710,10 @@ H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_perc,
 
     if (min_meta_perc > 100)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "Minimum metadata fractions must be between 0 and 100 inclusive")
+                    "Minimum metadata fractions must be between 0 and 100 inclusive");
     if (min_raw_perc > 100)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "Minimum raw data fractions must be between 0 and 100 inclusive")
+                    "Minimum raw data fractions must be between 0 and 100 inclusive");
 
     if (min_meta_perc + min_raw_perc > 100)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,

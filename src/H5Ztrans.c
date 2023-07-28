@@ -422,7 +422,7 @@ H5Z__get_token(H5Z_token *current)
                     if (!isdigit(current->tok_end[0])) {
                         current->tok_type = H5Z_XFORM_ERROR;
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current,
-                                    "Invalidly formatted floating point number")
+                                    "Invalidly formatted floating point number");
                     }
 
                     while (isdigit(current->tok_end[0]))
@@ -472,7 +472,7 @@ H5Z__get_token(H5Z_token *current)
                 default:
                     current->tok_type = H5Z_XFORM_ERROR;
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current,
-                                "Unknown H5Z_token in data transform expression ")
+                                "Unknown H5Z_token in data transform expression ");
             }
 
             current->tok_end = current->tok_begin + 1;
@@ -719,7 +719,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             default:
                 H5Z__xform_destroy_parse_tree(term);
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-                            "bad transform type passed to data transform expression")
+                            "bad transform type passed to data transform expression");
         } /* end switch */
     }     /* end for */
 
@@ -893,7 +893,7 @@ H5Z__new_node(H5Z_token_type type)
 
     if (NULL == (ret_value = (H5Z_node *)H5MM_calloc(sizeof(H5Z_node))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "Ran out of memory trying to allocate space for nodes in the parse tree")
+                    "Ran out of memory trying to allocate space for nodes in the parse tree");
 
     ret_value->type = type;
 
@@ -979,7 +979,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void *array, size_t array_size
                 if (NULL == (data_xform_prop->dat_val_pointers->ptr_dat_val[i] = (void *)H5MM_malloc(
                                  array_size * H5T_get_size((H5T_t *)H5I_object(array_type)))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "Ran out of memory trying to allocate space for data in data transform")
+                                "Ran out of memory trying to allocate space for data in data transform");
 
                 H5MM_memcpy(data_xform_prop->dat_val_pointers->ptr_dat_val[i], array,
                             array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
@@ -1409,12 +1409,12 @@ H5Z_xform_create(const char *expr)
 
     if (NULL == (data_xform_prop->dat_val_pointers = (H5Z_datval_ptrs *)H5MM_malloc(sizeof(H5Z_datval_ptrs))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "unable to allocate memory for data transform array storage")
+                    "unable to allocate memory for data transform array storage");
 
     /* copy the user's string into the property */
     if (NULL == (data_xform_prop->xform_exp = (char *)H5MM_xstrdup(expr)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "unable to allocate memory for data transform expression")
+                    "unable to allocate memory for data transform expression");
 
     /* Find the number of times "x" is used in this equation, and allocate room for storing that many points
      * A more sophisticated check is needed to support scientific notation.
@@ -1439,7 +1439,7 @@ H5Z_xform_create(const char *expr)
         if (NULL ==
             (data_xform_prop->dat_val_pointers->ptr_dat_val = (void **)H5MM_calloc(count * sizeof(void *))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                        "unable to allocate memory for pointers in transform array")
+                        "unable to allocate memory for pointers in transform array");
 
     /* Initialize the num_ptrs field, which will be used to keep track of the number of copies
      * of the data we have for polynomial transforms */
@@ -1454,7 +1454,7 @@ H5Z_xform_create(const char *expr)
      * count should be the same num_ptrs */
     if (count != data_xform_prop->dat_val_pointers->num_ptrs)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
-                    "error copying the parse tree, did not find correct number of \"variables\"")
+                    "error copying the parse tree, did not find correct number of \"variables\"");
 
     /* Assign return value */
     ret_value = data_xform_prop;
@@ -1548,12 +1548,12 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
         /* Copy string */
         if (NULL == (new_data_xform_prop->xform_exp = (char *)H5MM_xstrdup((*data_xform_prop)->xform_exp)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "unable to allocate memory for data transform expression")
+                        "unable to allocate memory for data transform expression");
 
         if (NULL ==
             (new_data_xform_prop->dat_val_pointers = (H5Z_datval_ptrs *)H5MM_malloc(sizeof(H5Z_datval_ptrs))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "unable to allocate memory for data transform array storage")
+                        "unable to allocate memory for data transform array storage");
 
         /* Find the number of times "x" is used in this equation, and allocate room for storing that many
          * points */
@@ -1565,7 +1565,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
             if (NULL == (new_data_xform_prop->dat_val_pointers->ptr_dat_val =
                              (void **)H5MM_calloc(count * sizeof(void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                            "unable to allocate memory for pointers in transform array")
+                            "unable to allocate memory for pointers in transform array");
 
         /* Zero out num_pointers prior to H5Z_xform_cop_tree call; that call will increment it to the right
          * amount */
@@ -1581,7 +1581,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
          * count should be the same num_ptrs */
         if (count != new_data_xform_prop->dat_val_pointers->num_ptrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "error copying the parse tree, did not find correct number of \"variables\"")
+                        "error copying the parse tree, did not find correct number of \"variables\"");
 
         /* Copy new information on top of old information */
         *data_xform_prop = new_data_xform_prop;

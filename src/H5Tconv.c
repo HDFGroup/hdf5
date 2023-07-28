@@ -2305,7 +2305,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                                         (size_t)0, /*no striding (packed array)*/
                                         xbuf + src_memb->offset, xbkg + dst_memb->offset) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                                        "unable to convert compound datatype member")
+                                        "unable to convert compound datatype member");
                         memmove(xbuf + offset, xbuf + src_memb->offset, dst_memb->size);
                         offset += dst_memb->size;
                     } /* end if */
@@ -2336,7 +2336,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                                         (size_t)0, /*no striding (packed array)*/
                                         xbuf + offset, xbkg + dst_memb->offset) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                                        "unable to convert compound datatype member")
+                                        "unable to convert compound datatype member");
                     } /* end if */
                     else
                         offset -= dst_memb->size;
@@ -2490,7 +2490,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                         if (dst_memb->size > src->shared->size - offset) {
                             cdata->priv = H5T__conv_struct_free(priv);
                             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                        "conversion is unsupported by this function")
+                                        "conversion is unsupported by this function");
                         } /* end if */
                     }     /* end if */
                 }         /* end for */
@@ -2579,7 +2579,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                                         priv->dst_memb_id[src2dst[u]], nelmts, buf_stride, bkg_stride, xbuf,
                                         xbkg) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                                        "unable to convert compound datatype member")
+                                        "unable to convert compound datatype member");
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
                             memmove(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
@@ -2616,7 +2616,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                                         priv->dst_memb_id[src2dst[i]], nelmts, buf_stride, bkg_stride, xbuf,
                                         xbkg) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                                        "unable to convert compound datatype member")
+                                        "unable to convert compound datatype member");
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
                             memmove(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
@@ -2691,7 +2691,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
             j++;
         if (j >= dst->shared->u.enumer.nmembs)
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                        "source type is not a subset of destination type")
+                        "source type is not a subset of destination type");
         priv->src2dst[i] = (int)j;
     } /* end for */
 
@@ -2917,7 +2917,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                             memset(d, 0xff, dst->shared->size);
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                     }
                     else
                         H5MM_memcpy(d,
@@ -2954,7 +2954,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                             memset(d, 0xff, dst->shared->size);
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                     } /* end if */
                     else {
                         assert(priv->src2dst[md] >= 0);
@@ -3031,13 +3031,13 @@ H5T__conv_enum_numeric(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
 
             if (NULL == (tpath = H5T_path_find(src_parent, dst))) {
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                            "unable to convert between src and dest datatype")
+                            "unable to convert between src and dest datatype");
             }
             else if (!H5T_path_noop(tpath)) {
                 if ((src_parent_id = H5I_register(H5I_DATATYPE, H5T_copy(src_parent, H5T_COPY_ALL), FALSE)) <
                     0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-                                "unable to register types for conversion")
+                                "unable to register types for conversion");
 
                 /* Convert the data */
                 if (H5T_convert(tpath, src_parent_id, dst_id, nelmts, buf_stride, bkg_stride, _buf, bkg) < 0)
@@ -3129,7 +3129,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                      H5T_CSET_UTF8 == dst->shared->u.vlen.cset) ||
                     (H5T_CSET_ASCII == dst->shared->u.vlen.cset && H5T_CSET_UTF8 == src->shared->u.vlen.cset))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "The library doesn't convert between strings of ASCII and UTF")
+                                "The library doesn't convert between strings of ASCII and UTF");
             } /* end if */
 
             /* Variable-length types don't need a background buffer */
@@ -3177,7 +3177,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
             /* Set up conversion path for base elements */
             if (NULL == (tpath = H5T_path_find(src->shared->parent, dst->shared->parent)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                            "unable to convert between src and dest datatypes")
+                            "unable to convert between src and dest datatypes");
             else if (!H5T_path_noop(tpath)) {
                 H5T_t *tsrc_cpy = NULL, *tdst_cpy = NULL;
 
@@ -3198,7 +3198,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                 if (((tsrc_id = H5I_register(H5I_DATATYPE, tsrc_cpy, FALSE)) < 0) ||
                     ((tdst_id = H5I_register(H5I_DATATYPE, tdst_cpy, FALSE)) < 0))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-                                "unable to register types for conversion")
+                                "unable to register types for conversion");
             } /* end else-if */
             else
                 noop_conv = TRUE;
@@ -3206,13 +3206,13 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
             /* Check if we need a temporary buffer for this conversion */
             if ((parent_is_vlen = H5T_detect_class(dst->shared->parent, H5T_VLEN, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_SYSTEM, FAIL,
-                            "internal error when detecting variable-length class")
+                            "internal error when detecting variable-length class");
             if (tpath->cdata.need_bkg || parent_is_vlen) {
                 /* Set up initial background buffer */
                 tmp_buf_size = MAX(src_base_size, dst_base_size);
                 if (NULL == (tmp_buf = H5FL_BLK_CALLOC(vlen_seq, tmp_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for type conversion")
+                                "memory allocation failed for type conversion");
             } /* end if */
 
             /* Get the allocation info */
@@ -3308,7 +3308,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 conv_buf_size = H5T_VLEN_MIN_CONF_BUF_SIZE;
                                 if (NULL == (conv_buf = H5FL_BLK_CALLOC(vlen_seq, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                                "memory allocation failed for type conversion")
+                                                "memory allocation failed for type conversion");
                             } /* end if */
                             else if (conv_buf_size < MAX(src_size, dst_size)) {
                                 /* Only allocate conversion buffer in H5T_VLEN_MIN_CONF_BUF_SIZE increments */
@@ -3316,7 +3316,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                                 H5T_VLEN_MIN_CONF_BUF_SIZE;
                                 if (NULL == (conv_buf = H5FL_BLK_REALLOC(vlen_seq, conv_buf, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                                "memory allocation failed for type conversion")
+                                                "memory allocation failed for type conversion");
                                 memset(conv_buf, 0, conv_buf_size);
                             } /* end else-if */
 
@@ -3334,7 +3334,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 tmp_buf_size = conv_buf_size;
                                 if (NULL == (tmp_buf = H5FL_BLK_REALLOC(vlen_seq, tmp_buf, tmp_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                                "memory allocation failed for type conversion")
+                                                "memory allocation failed for type conversion");
                                 memset(tmp_buf, 0, tmp_buf_size);
                             } /* end if */
 
@@ -3356,7 +3356,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                         if (NULL ==
                                             (tmp_buf = H5FL_BLK_REALLOC(vlen_seq, tmp_buf, tmp_buf_size)))
                                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                                        "memory allocation failed for type conversion")
+                                                        "memory allocation failed for type conversion");
                                         memset(tmp_buf, 0, tmp_buf_size);
                                     } /* end if */
 
@@ -3399,7 +3399,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                     /* Delete sequence in destination location */
                                     if ((*(dst->shared->u.vlen.cls->del))(dst->shared->u.vlen.file, tmp) < 0)
                                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL,
-                                                    "unable to remove heap object")
+                                                    "unable to remove heap object");
                                 } /* end for */
                             }     /* end if */
                         }         /* end if */
@@ -3487,11 +3487,11 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
             /* Check the number and sizes of the dimensions */
             if (src->shared->u.array.ndims != dst->shared->u.array.ndims)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                            "array datatypes do not have the same number of dimensions")
+                            "array datatypes do not have the same number of dimensions");
             for (u = 0; u < src->shared->u.array.ndims; u++)
                 if (src->shared->u.array.dim[u] != dst->shared->u.array.dim[u])
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "array datatypes do not have the same sizes of dimensions")
+                                "array datatypes do not have the same sizes of dimensions");
 
             /* Array datatypes don't need a background buffer */
             cdata->need_bkg = H5T_BKG_NO;
@@ -3536,7 +3536,7 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
             /* Set up conversion path for base elements */
             if (NULL == (tpath = H5T_path_find(src->shared->parent, dst->shared->parent))) {
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                            "unable to convert between src and dest datatypes")
+                            "unable to convert between src and dest datatypes");
             }
             else if (!H5T_path_noop(tpath)) {
                 if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL),
@@ -3544,7 +3544,7 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
                     (tdst_id =
                          H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL), FALSE)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-                                "unable to register types for conversion")
+                                "unable to register types for conversion");
             }
 
             /* Check if we need a background buffer for this conversion */
@@ -3555,7 +3555,7 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
                 bkg_buf_size = src->shared->u.array.nelem * MAX(src->shared->size, dst->shared->size);
                 if (NULL == (bkg_buf = H5FL_BLK_CALLOC(array_seq, bkg_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for type conversion")
+                                "memory allocation failed for type conversion");
             } /* end if */
 
             /* Perform the actual conversion */
@@ -3736,7 +3736,7 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         if ((*(dst->shared->u.atomic.u.r.cls->setnull))(dst->shared->u.atomic.u.r.file, d,
                                                                         b) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL,
-                                        "can't set reference data to 'nil'")
+                                        "can't set reference data to 'nil'");
                     } /* end else-if */
                     else {
                         /* Get size of references */
@@ -3750,7 +3750,7 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             conv_buf_size = buf_size;
                             if (NULL == (conv_buf = H5FL_BLK_REALLOC(ref_seq, conv_buf, conv_buf_size)))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                            "memory allocation failed for type conversion")
+                                            "memory allocation failed for type conversion");
                             memset(conv_buf, 0, conv_buf_size);
                         } /* end if */
 
@@ -3989,7 +3989,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                         else if (except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
@@ -4022,7 +4022,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                         else if (except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
@@ -4046,7 +4046,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             H5T__bit_set(d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, TRUE);
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                         else if (except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
@@ -4080,7 +4080,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                         else if (except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
@@ -4125,7 +4125,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                         else if (except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
@@ -4165,7 +4165,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                         else if (except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
@@ -4465,7 +4465,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
 
                         goto padding;
                     }
@@ -4571,7 +4571,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
                 else {
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                "normalization method not implemented yet")
+                                "normalization method not implemented yet");
                 }
 
                 /*
@@ -4593,7 +4593,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
                 else {
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                "normalization method not implemented yet")
+                                "normalization method not implemented yet");
                 }
 
                 /*
@@ -4740,7 +4740,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                         else if (except_ret == H5T_CONV_HANDLED) {
                             reverse = FALSE;
                             goto next;
@@ -4868,7 +4868,7 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 (H5T_CSET_ASCII == dst->shared->u.atomic.u.s.cset &&
                  H5T_CSET_UTF8 == src->shared->u.atomic.u.s.cset))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "The library doesn't convert between strings of ASCII and UTF")
+                            "The library doesn't convert between strings of ASCII and UTF");
             if (src->shared->u.atomic.u.s.pad < 0 || src->shared->u.atomic.u.s.pad >= H5T_NSTR ||
                 dst->shared->u.atomic.u.s.pad < 0 || dst->shared->u.atomic.u.s.pad >= H5T_NSTR)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad character padding")
@@ -4999,7 +4999,7 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     case H5T_STR_ERROR:
                     default:
                         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                    "source string padding method not supported")
+                                    "source string padding method not supported");
                 } /* end switch */
 
                 /* Terminate or pad the destination */
@@ -5036,7 +5036,7 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     case H5T_STR_ERROR:
                     default:
                         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                    "destination string padding method not supported")
+                                    "destination string padding method not supported");
                 } /* end switch */
 
                 /*
@@ -7672,7 +7672,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             }
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                         }
                         else {                    /* +Infinity */
                             if (cb_struct.func) { /*If user's exception handler is present, use it*/
@@ -7696,7 +7696,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             }
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                         }
                         goto padding;
                     }
@@ -7728,7 +7728,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                     }
                     else {                    /* +Infinity */
                         if (cb_struct.func) { /*If user's exception handler is present, use it*/
@@ -7752,7 +7752,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         }
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                     }
                     goto padding;
                 }
@@ -7799,7 +7799,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
                 else {
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                "normalization method not implemented yet")
+                                "normalization method not implemented yet");
                 }
 
                 /*
@@ -7868,7 +7868,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                                                           d, cb_struct.user_data);
                             if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                             else if (except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -7896,7 +7896,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             }
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                         }
                         else if (first < dst.prec) {
                             if (truncated &&
@@ -7918,7 +7918,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             }
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                         }
                     }
                 }
@@ -7945,7 +7945,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             }
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                             else if (except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -7968,7 +7968,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                                 H5T__bit_set(d, (dst.offset + dst.prec - 1), (size_t)1, TRUE);
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                             else if (except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -7991,7 +7991,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                                 H5T__bit_set(d, dst.offset, dst.prec - 1, TRUE);
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                             else if (except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -8014,7 +8014,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             }
                             else if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                            "can't handle conversion exception")
+                                            "can't handle conversion exception");
                             else if (except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -8314,7 +8314,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
                 else {
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                "normalization method not implemented yet")
+                                "normalization method not implemented yet");
                 }
 
                 /* Handle mantissa part here */
@@ -8410,7 +8410,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
 
                         if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
-                                        "can't handle conversion exception")
+                                        "can't handle conversion exception");
                         else if (except_ret == H5T_CONV_HANDLED) {
                             reverse = FALSE;
                             goto padding;

@@ -1309,7 +1309,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
                 /* Allocate space for the modification time message */
                 if (H5O__msg_alloc(f, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now, &idx) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
-                                "unable to allocate space for modification time message")
+                                "unable to allocate space for modification time message");
 
                 /* Set the message's flags if appropriate */
                 oh->mesg[idx].flags = (uint8_t)mesg_flags;
@@ -1323,7 +1323,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
             if (NULL == oh->mesg[idx].native) {
                 if (NULL == (oh->mesg[idx].native = H5FL_MALLOC(time_t)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
-                                "memory allocation failed for modification time message")
+                                "memory allocation failed for modification time message");
             } /* end if */
 
             /* Update the message */
@@ -1551,7 +1551,7 @@ H5O__delete_oh(H5F_t *f, H5O_t *oh)
         /* Free any space referred to in the file from this message */
         if (H5O__delete_mesg(f, oh, curr_msg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL,
-                        "unable to delete file space for object header message")
+                        "unable to delete file space for object header message");
     } /* end for */
 
 done:
@@ -2256,7 +2256,7 @@ H5O_get_create_plist(const H5O_loc_t *loc, H5P_genplist_t *oc_plist)
         /* Set attribute storage values */
         if (H5P_set(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL,
-                        "can't set max. # of compact attributes in property list")
+                        "can't set max. # of compact attributes in property list");
         if (H5P_set(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list")
 
@@ -2562,7 +2562,7 @@ H5O__visit_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t *l
                     /* Add to list of visited objects */
                     if (H5SL_insert(udata->visited, new_node, new_node) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR,
-                                    "can't insert object node into visited list")
+                                    "can't insert object node into visited list");
                 } /* end if */
             }     /* end if */
         }         /* end if */
@@ -2696,7 +2696,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
             /* De-serialize object token into an object address */
             if (H5VL_native_token_to_addr(loc->oloc->file, H5I_FILE, oinfo.token, &(obj_pos->addr)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
-                            "can't deserialize object token into address")
+                            "can't deserialize object token into address");
 
             /* Add to list of visited objects */
             if (H5SL_insert(udata.visited, obj_pos, obj_pos) < 0)

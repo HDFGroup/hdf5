@@ -192,7 +192,7 @@ H5MF__sect_new(unsigned ctype, haddr_t sect_off, hsize_t sect_size)
     /* Create free space section node */
     if (NULL == (sect = H5FL_MALLOC(H5MF_free_section_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for direct block free list section")
+                    "memory allocation failed for direct block free list section");
 
     /* Set the information passed in */
     sect->sect_info.addr = sect_off;
@@ -548,7 +548,7 @@ H5MF__sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
         /* Absorb the section into the aggregator or vice versa */
         if (H5MF__aggr_absorb(udata->f, udata->aggr, *sect, udata->allow_sect_absorb) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL,
-                        "can't absorb section into aggregator or vice versa")
+                        "can't absorb section into aggregator or vice versa");
     } /* end else */
 
     /* Check for freeing section */

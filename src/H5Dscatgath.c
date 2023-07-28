@@ -758,7 +758,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
      */
     if (NULL == (tmp_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                    "memory allocation failed for temporary memory space list")
+                    "memory allocation failed for temporary memory space list");
 
     /* Build read operation to tconv buffer */
     for (i = 0; i < io_info->pieces_added; i++) {
@@ -813,7 +813,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                         if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i],
                                                  dset_info->type_info.dst_type_size, 0) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                                        "unable to initialize memory selection information")
+                                        "unable to initialize memory selection information");
                         mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
 
                         if ((size_t)io_info->sel_pieces[i]->piece_points !=
@@ -857,7 +857,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.dst_type_size,
                                      0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize memory selection information")
+                            "unable to initialize memory selection information");
             mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
 
             /* If the source and destination are compound types and subset of each other
@@ -995,7 +995,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
      */
     if (NULL == (write_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                    "memory allocation failed for temporary memory space list")
+                    "memory allocation failed for temporary memory space list");
 
     /* Build operations to read data to background buffer and to write data */
     for (i = 0; i < io_info->pieces_added; i++) {
@@ -1021,7 +1021,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.src_type_size,
                                      0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize memory selection information")
+                            "unable to initialize memory selection information");
             mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
 
             /* Create block memory space */
@@ -1098,19 +1098,19 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                         assert(!bkg_file_spaces && !bkg_addrs && !bkg_element_sizes && !bkg_bufs);
                         if (NULL == (bkg_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for memory space list")
+                                        "memory allocation failed for memory space list");
                         if (NULL == (bkg_file_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for file space list")
+                                        "memory allocation failed for file space list");
                         if (NULL == (bkg_addrs = H5MM_malloc(io_info->pieces_added * sizeof(haddr_t))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for piece address list")
+                                        "memory allocation failed for piece address list");
                         if (NULL == (bkg_element_sizes = H5MM_malloc(io_info->pieces_added * sizeof(size_t))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for element size list")
+                                        "memory allocation failed for element size list");
                         if (NULL == (bkg_bufs = H5MM_malloc(io_info->pieces_added * sizeof(const void *))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for write buffer list")
+                                        "memory allocation failed for write buffer list");
                     }
 
                     /* Use same (block) memory space, file space, address, and element size as write operation

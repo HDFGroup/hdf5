@@ -137,7 +137,7 @@ H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
             if (mesg->dirty)
                 if (H5O_msg_flush(udata->key->file, oh, mesg) < 0)
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTENCODE, H5_ITER_ERROR,
-                                "unable to encode object header message")
+                                "unable to encode object header message");
 
             assert(udata->key->encoding_size <= mesg->raw_size);
             udata->ret = memcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);

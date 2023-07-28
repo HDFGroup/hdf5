@@ -899,7 +899,7 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
 
     if (index_num >= nindexes)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index_num is greater than number of indexes in property list")
+                    "index_num is greater than number of indexes in property list");
 
     /* Get arrays of type flags and message sizes */
     if (H5P_get(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)

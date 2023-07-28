@@ -297,7 +297,7 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     /* Allocate space for the extensible array data structure */
     if (NULL == (hdr = H5EA__hdr_alloc(udata->f)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array shared header")
+                    "memory allocation failed for extensible array shared header");
 
     /* Set the extensible array header's address */
     hdr->addr = udata->addr;
@@ -532,7 +532,7 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent,
                                                       (void *)hdr->top_proxy) < 0)
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
-                                    "unable to destroy flush dependency between extensible array and proxy")
+                                    "unable to destroy flush dependency between extensible array and proxy");
                     hdr->parent = NULL;
                 } /* end if */
 
@@ -686,7 +686,7 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     /* Allocate the extensible array index block */
     if (NULL == (iblock = H5EA__iblock_alloc(hdr)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array index block")
+                    "memory allocation failed for extensible array index block");
 
     /* Set the extensible array index block's address */
     iblock->addr = hdr->idx_blk_addr;
@@ -1089,7 +1089,7 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     /* Allocate the extensible array super block */
     if (NULL == (sblock = H5EA__sblock_alloc(udata->hdr, udata->parent, udata->sblk_idx)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array super block")
+                    "memory allocation failed for extensible array super block");
 
     /* Set the extensible array super block's address */
     sblock->addr = udata->sblk_addr;
@@ -1495,7 +1495,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     /* Allocate the extensible array data block */
     if (NULL == (dblock = H5EA__dblock_alloc(udata->hdr, udata->parent, udata->nelmts)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array data block")
+                    "memory allocation failed for extensible array data block");
 
     assert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) ||
            (len == H5EA_DBLOCK_PREFIX_SIZE(dblock)));
@@ -1914,7 +1914,7 @@ H5EA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     /* Allocate the extensible array data block page */
     if (NULL == (dblk_page = H5EA__dblk_page_alloc(udata->hdr, udata->parent)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array data block page")
+                    "memory allocation failed for extensible array data block page");
 
     /* Set the extensible array data block page's information */
     dblk_page->addr = udata->dblk_page_addr;

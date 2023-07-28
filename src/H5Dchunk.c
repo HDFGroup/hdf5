@@ -852,7 +852,7 @@ H5D__chunk_construct(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset)
         if (dset->shared->curr_dims[u] && dset->shared->max_dims[u] != H5S_UNLIMITED &&
             dset->shared->max_dims[u] < dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                        "chunk size must be <= maximum dimension size for fixed-sized dimensions")
+                        "chunk size must be <= maximum dimension size for fixed-sized dimensions");
     } /* end for */
 
     /* Reset address and pointer of the array struct for the chunked storage index */
@@ -1187,7 +1187,7 @@ H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* Set up chunk mapping for single element */
         if (H5D__create_piece_map_single(dinfo, io_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                        "unable to create chunk selections for single element")
+                        "unable to create chunk selections for single element");
     } /* end if */
     else {
         hbool_t sel_hyper_flag; /* Whether file selection is a hyperslab */
@@ -1835,7 +1835,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
             if (H5S_combine_hyperslab(dinfo->file_space, H5S_SELECT_AND, coords, NULL, fm->chunk_dim, NULL,
                                       &tmp_fchunk) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL,
-                            "unable to combine file space selection with chunk block")
+                            "unable to combine file space selection with chunk block");
 
             /* Resize chunk's dataspace dimensions to size of chunk */
             if (H5S_set_extent_real(tmp_fchunk, fm->chunk_dim) < 0)
@@ -2654,13 +2654,13 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             if (num_chunks > (sizeof(chunk_mem_spaces_local) / sizeof(chunk_mem_spaces_local[0]))) {
                 if (NULL == (chunk_mem_spaces = H5MM_malloc(num_chunks * sizeof(H5S_t *))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for memory space list")
+                                "memory allocation failed for memory space list");
                 if (NULL == (chunk_file_spaces = H5MM_malloc(num_chunks * sizeof(H5S_t *))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for file space list")
+                                "memory allocation failed for file space list");
                 if (NULL == (chunk_addrs = H5MM_malloc(num_chunks * sizeof(haddr_t))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for chunk address list")
+                                "memory allocation failed for chunk address list");
             } /* end if */
             else {
                 chunk_mem_spaces  = chunk_mem_spaces_local;
@@ -2972,13 +2972,13 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             if (num_chunks > (sizeof(chunk_mem_spaces_local) / sizeof(chunk_mem_spaces_local[0]))) {
                 if (NULL == (chunk_mem_spaces = H5MM_malloc(num_chunks * sizeof(H5S_t *))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for memory space list")
+                                "memory allocation failed for memory space list");
                 if (NULL == (chunk_file_spaces = H5MM_malloc(num_chunks * sizeof(H5S_t *))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for file space list")
+                                "memory allocation failed for file space list");
                 if (NULL == (chunk_addrs = H5MM_malloc(num_chunks * sizeof(haddr_t))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for chunk address list")
+                                "memory allocation failed for chunk address list");
             } /* end if */
             else {
                 chunk_mem_spaces  = chunk_mem_spaces_local;
@@ -3072,7 +3072,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     if (H5D__chunk_file_alloc(&idx_info, NULL, &udata.chunk_block, &need_insert,
                                               chunk_info->scaled) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL,
-                                    "unable to insert/resize chunk on chunk level")
+                                    "unable to insert/resize chunk on chunk level");
 
                     /* Make sure the address of the chunk is returned. */
                     if (!H5_addr_defined(udata.chunk_block.offset))
@@ -3086,7 +3086,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                         if ((dset_info->dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata,
                                                                                           NULL) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL,
-                                        "unable to insert chunk addr into index")
+                                        "unable to insert chunk addr into index");
                 } /* end if */
 
                 /* Add chunk to list for selection I/O, if not performing multi dataset I/O */
@@ -3221,7 +3221,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     if (H5D__chunk_file_alloc(&idx_info, NULL, &udata.chunk_block, &need_insert,
                                               chunk_info->scaled) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL,
-                                    "unable to insert/resize chunk on chunk level")
+                                    "unable to insert/resize chunk on chunk level");
 
                     /* Make sure the address of the chunk is returned. */
                     if (!H5_addr_defined(udata.chunk_block.offset))
@@ -3259,7 +3259,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     if ((dset_info->dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata,
                                                                                       NULL) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL,
-                                    "unable to insert chunk addr into index")
+                                    "unable to insert chunk addr into index");
             } /* end else */
 
             /* Advance to next chunk in list */
@@ -4288,7 +4288,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                  */
                 if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                                "memory allocation failed for raw data chunk")
+                                "memory allocation failed for raw data chunk");
                 H5MM_memcpy(chunk, ent->chunk, chunk_size);
                 ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
                 ent->chunk = (uint8_t *)chunk;
@@ -4314,7 +4314,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                  */
                 if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                                "memory allocation failed for raw data chunk")
+                                "memory allocation failed for raw data chunk");
                 H5MM_memcpy(chunk, ent->chunk, chunk_size);
 
                 ent->chunk = (uint8_t *)H5D__chunk_mem_xfree(ent->chunk, old_pline);
@@ -4416,7 +4416,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 if (NULL == (chunk = H5D__chunk_mem_alloc(my_chunk_alloc,
                                                           (udata->new_unfilt_chunk ? old_pline : pline))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                                "memory allocation failed for raw data chunk")
+                                "memory allocation failed for raw data chunk");
                 if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, chunk_addr,
                                           my_chunk_alloc, chunk) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
@@ -4442,7 +4442,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                         if (NULL == (chunk = H5D__chunk_mem_alloc(my_chunk_alloc, pline))) {
                             (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                                        "memory allocation failed for raw data chunk")
+                                        "memory allocation failed for raw data chunk");
                         } /* end if */
                         H5MM_memcpy(chunk, tmp_chunk, chunk_size);
                         (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
@@ -4462,7 +4462,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                  * size in memory, so allocate memory big enough. */
                 if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_size, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                                "memory allocation failed for raw data chunk")
+                                "memory allocation failed for raw data chunk");
 
                 if (H5P_is_fill_value_defined(fill, &fill_status) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined")
@@ -4762,7 +4762,7 @@ H5D__chunk_allocated(const H5D_t *dset, hsize_t *nbytes)
     /* Iterate over the chunks */
     if ((sc->ops->iterate)(&idx_info, H5D__chunk_allocated_cb, &chunk_bytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                    "unable to retrieve allocated chunk information from index")
+                    "unable to retrieve allocated chunk information from index");
 
     /* Set number of bytes for caller */
     *nbytes = chunk_bytes;
@@ -4932,7 +4932,7 @@ H5D__chunk_allocate(const H5D_t *dset, hbool_t full_overwrite, const hsize_t old
             if (has_unfilt_edge_chunks) {
                 if (NULL == (unfilt_fill_buf = H5D__chunk_mem_alloc(orig_chunk_size, &def_pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for raw data chunk")
+                                "memory allocation failed for raw data chunk");
                 H5MM_memcpy(unfilt_fill_buf, fb_info.fill_buf, orig_chunk_size);
             } /* end if */
 
@@ -5063,7 +5063,7 @@ H5D__chunk_allocate(const H5D_t *dset, hbool_t full_overwrite, const hsize_t old
                     if (NULL ==
                         (fb_info.fill_buf = H5D__chunk_mem_realloc(fb_info.fill_buf, orig_chunk_size, pline)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                    "memory reallocation failed for raw data chunk")
+                                    "memory reallocation failed for raw data chunk");
                     fb_info.fill_buf_size = orig_chunk_size;
                 } /* end if */
 
@@ -5136,7 +5136,7 @@ H5D__chunk_allocate(const H5D_t *dset, hbool_t full_overwrite, const hsize_t old
                                                                 (chunk_fill_info.num_chunks + 1024) *
                                                                     sizeof(struct chunk_coll_fill_info))))
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for chunk fill info")
+                                        "memory allocation failed for chunk fill info");
 
                         chunk_fill_info.chunk_info = tmp_realloc;
                     }
@@ -6182,7 +6182,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
                     /* Remove the chunk from disk */
                     if ((sc->ops->remove)(&idx_info, &idx_udata) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL,
-                                    "unable to remove chunk entry from index")
+                                    "unable to remove chunk entry from index");
                 } /* end if */
             }     /* end else */
 
@@ -6572,12 +6572,12 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         /* Re-allocate memory for copying the chunk */
         if (NULL == (new_buf = H5MM_realloc(udata->buf, nbytes)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR,
-                        "memory allocation failed for raw data chunk")
+                        "memory allocation failed for raw data chunk");
         udata->buf = new_buf;
         if (udata->bkg) {
             if (NULL == (new_buf = H5MM_realloc(udata->bkg, nbytes)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR,
-                            "memory allocation failed for raw data chunk")
+                            "memory allocation failed for raw data chunk");
             udata->bkg = new_buf;
             if (!udata->cpy_info->expand_ref)
                 memset((uint8_t *)udata->bkg + buf_size, 0, (size_t)(nbytes - buf_size));
@@ -6841,7 +6841,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
     /* Call the index-specific "copy setup" routine */
     if ((storage_src->ops->copy_setup)(&idx_info_src, &idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "unable to set up index-specific chunk copying information")
+                    "unable to set up index-specific chunk copying information");
     copy_setup_done = TRUE;
 
     /* Create datatype ID for src datatype */
@@ -7193,7 +7193,7 @@ H5D__chunk_dump_index(H5D_t *dset, FILE *stream)
         /* Iterate over index and dump chunk info */
         if ((sc->ops->iterate)(&idx_info, H5D__chunk_dump_index_cb, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL,
-                        "unable to iterate over chunk index to dump chunk info")
+                        "unable to iterate over chunk index to dump chunk info");
     } /* end if */
 
 done:
@@ -7573,7 +7573,7 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         /* Allocate buffer for chunk data */
         if (NULL == (buf = H5MM_malloc(read_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR,
-                        "memory allocation failed for raw data chunk")
+                        "memory allocation failed for raw data chunk");
 
         /* Read the non-filtered edge chunk */
         if (H5F_block_read(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, read_size, buf) < 0)
@@ -7730,7 +7730,7 @@ H5D__chunk_index_empty(const H5D_t *dset, hbool_t *empty)
         if ((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_index_empty_cb, empty) <
             0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "unable to retrieve allocated chunk information from index")
+                        "unable to retrieve allocated chunk information from index");
     }
 
 done:
@@ -7817,7 +7817,7 @@ H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
         if ((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_num_chunks_cb,
                                                                 &num_chunks) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "unable to retrieve allocated chunk information from index")
+                        "unable to retrieve allocated chunk information from index");
         *nchunks = num_chunks;
     }
 
@@ -7938,7 +7938,7 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
         if ((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_chunk_info_cb, &udata) <
             0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "unable to retrieve allocated chunk information from index")
+                        "unable to retrieve allocated chunk information from index");
 
         /* Obtain requested info if the chunk is found */
         if (udata.found) {
@@ -8073,7 +8073,7 @@ H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned 
         if ((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_chunk_info_by_coord_cb,
                                                                 &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "unable to retrieve information of the chunk by its scaled coordinates")
+                        "unable to retrieve information of the chunk by its scaled coordinates");
 
         /* Obtain requested info if the chunk is found */
         if (udata.found) {

@@ -1234,7 +1234,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         /* allocate memory space for decompressed buffer */
         if (NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
-                        "memory allocation failed for scaleoffset decompression")
+                        "memory allocation failed for scaleoffset decompression");
 
         /* special case: minbits equal to full precision */
         if (minbits == p.size * 8) {

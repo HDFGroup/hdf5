@@ -267,7 +267,7 @@ H5_init_library(void)
         for (i = 0; i < NELMTS(initializer); i++) {
             if (initializer[i].func() < 0) {
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                    "unable to initialize %s interface", initializer[i].descr)
+                    "unable to initialize %s interface", initializer[i].descr);
             }
         }
         /* clang-format on */

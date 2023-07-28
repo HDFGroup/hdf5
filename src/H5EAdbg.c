@@ -396,7 +396,7 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     /* (Note: setting parent of data block to 'hdr' for this operation should be OK -QAK) */
     if (NULL == (dblock = H5EA__dblock_protect(hdr, hdr, addr, dblk_nelmts, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
-                    "unable to protect extensible array data block, address = %" PRIuHADDR, addr)
+                    "unable to protect extensible array data block, address = %" PRIuHADDR, addr);
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array data Block...\n", indent, "");

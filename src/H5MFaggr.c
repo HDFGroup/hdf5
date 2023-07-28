@@ -244,7 +244,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                             ((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
                             if (H5MF__aggr_free(f, other_alloc_type, other_aggr) < 0)
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF,
-                                            "can't free aggregation block")
+                                            "can't free aggregation block");
                         } /* end if */
 
                         /* Allocate space from the VFD (i.e. at the end of the file) */
@@ -291,7 +291,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                             ((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
                             if (H5MF__aggr_free(f, other_alloc_type, other_aggr) < 0)
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF,
-                                            "can't free aggregation block")
+                                            "can't free aggregation block");
                         } /* end if */
 
                         /* Allocate space from the VFD (i.e. at the end of the file) */
@@ -303,7 +303,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                         if (aggr->size > 0)
                             if (H5MF_xfree(f, alloc_type, aggr->addr, aggr->size) < 0)
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF,
-                                            "can't free aggregation block")
+                                            "can't free aggregation block");
 
                         /* If the block is not to be aligned, fold the eoa fragment
                          * into the newly allocated aggregator, as it could have
@@ -342,7 +342,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                 if (extended && aggr_frag_size)
                     if (H5MF_xfree(f, alloc_type, aggr_frag_addr, aggr_frag_size) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF,
-                                    "can't free aggregation fragment")
+                                    "can't free aggregation fragment");
             } /* end if */
             else {
                 /* Allocate space out of the block */
@@ -354,7 +354,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                 if (aggr_frag_size)
                     if (H5MF_xfree(f, alloc_type, aggr_frag_addr, aggr_frag_size) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF,
-                                    "can't free aggregation fragment")
+                                    "can't free aggregation fragment");
             } /* end else */
         }     /* end if */
         else {

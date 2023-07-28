@@ -942,7 +942,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
 
                         case H5O_TYPE_MAP:
                             HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL,
-                                        "maps not supported in native VOL connector")
+                                        "maps not supported in native VOL connector");
 
                         case H5O_TYPE_UNKNOWN:
                         case H5O_TYPE_NTYPES:

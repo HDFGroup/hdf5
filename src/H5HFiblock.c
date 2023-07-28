@@ -383,7 +383,7 @@ H5HF__man_iblock_root_create(H5HF_hdr_t *hdr, size_t min_dblock_size)
 
         if (H5HF__man_iblock_attach(iblock, 0, hdr->man_dtable.table_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL,
-                        "can't attach root direct block to parent indirect block")
+                        "can't attach root direct block to parent indirect block");
 
         /* Check for I/O filters on this heap */
         if (hdr->filter_len > 0) {
@@ -399,7 +399,7 @@ H5HF__man_iblock_root_create(H5HF_hdr_t *hdr, size_t min_dblock_size)
         /* Scan free space sections to set any 'parent' pointers to new indirect block */
         if (H5HF__space_create_root(hdr, iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL,
-                        "can't set free space section info to new root indirect block")
+                        "can't set free space section info to new root indirect block");
 
         /* Unlock first (previously the root) direct block */
         if (H5AC_unprotect(hdr->f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock,
@@ -734,7 +734,7 @@ H5HF__man_iblock_root_halve(H5HF_indirect_t *iblock)
                              H5FL_SEQ_REALLOC(H5HF_indirect_ptr_t, iblock->child_iblocks,
                                               (size_t)(indir_rows * hdr->man_dtable.cparam.width))))
                 HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
-                            "memory allocation failed for filtered direct entries")
+                            "memory allocation failed for filtered direct entries");
         } /* end if */
         else
             iblock->child_iblocks =
@@ -942,7 +942,7 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
      */
     if (NULL == (iblock = H5FL_MALLOC(H5HF_indirect_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for fractal heap indirect block")
+                    "memory allocation failed for fractal heap indirect block");
 
     /* Reset the metadata cache info for the heap header */
     memset(&iblock->cache_info, 0, sizeof(H5AC_info_t));
@@ -1004,12 +1004,12 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     if (H5F_USE_TMP_SPACE(hdr->f)) {
         if (HADDR_UNDEF == (*addr_p = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "file allocation failed for fractal heap indirect block")
+                        "file allocation failed for fractal heap indirect block");
     } /* end if */
     else {
         if (HADDR_UNDEF == (*addr_p = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, (hsize_t)iblock->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "file allocation failed for fractal heap indirect block")
+                        "file allocation failed for fractal heap indirect block");
     } /* end else */
     iblock->addr = *addr_p;
 
@@ -1020,7 +1020,7 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
         /* Attach new block to parent */
         if (H5HF__man_iblock_attach(iblock->parent, par_entry, *addr_p) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL,
-                        "can't attach indirect block to parent indirect block")
+                        "can't attach indirect block to parent indirect block");
 
         /* Compute the indirect block's offset in the heap's address space */
         /* (based on parent's block offset) */
@@ -1377,7 +1377,7 @@ H5HF__man_iblock_detach(H5HF_indirect_t *iblock, unsigned entry)
         if (iblock->nchildren == 1 && H5_addr_defined(iblock->ents[0].addr))
             if (H5HF__man_iblock_root_revert(iblock) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL,
-                            "can't convert root indirect block back to root direct block")
+                            "can't convert root indirect block back to root direct block");
 
         /* If the indirect block wasn't removed already (by reverting it) */
         if (!iblock->removed_from_cache) {
@@ -1393,7 +1393,7 @@ H5HF__man_iblock_detach(H5HF_indirect_t *iblock, unsigned entry)
                 if (iblock->nrows > 1 && max_child_row <= (iblock->nrows / 2))
                     if (H5HF__man_iblock_root_halve(iblock) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL,
-                                    "can't reduce size of root indirect block")
+                                    "can't reduce size of root indirect block");
             } /* end if */
         }     /* end if */
     }         /* end if */
@@ -1491,7 +1491,7 @@ H5HF__man_iblock_detach(H5HF_indirect_t *iblock, unsigned entry)
                 if (H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_IBLOCK, del_iblock->addr, (hsize_t)del_iblock->size) <
                     0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
-                                "unable to free fractal heap indirect block file space")
+                                "unable to free fractal heap indirect block file space");
             del_iblock->addr = HADDR_UNDEF;
 
             /* Mark block as removed from the cache */
@@ -1589,7 +1589,7 @@ H5HF__man_iblock_delete(H5HF_hdr_t *hdr, haddr_t iblock_addr, unsigned iblock_nr
                     /* Delete child direct block */
                     if (H5HF__man_dblock_delete(hdr->f, iblock->ents[entry].addr, dblock_size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
-                                    "unable to release fractal heap child direct block")
+                                    "unable to release fractal heap child direct block");
                 } /* end if */
                 else {
                     hsize_t  row_block_size; /* The size of blocks in this row */
@@ -1605,7 +1605,7 @@ H5HF__man_iblock_delete(H5HF_hdr_t *hdr, haddr_t iblock_addr, unsigned iblock_nr
                     if (H5HF__man_iblock_delete(hdr, iblock->ents[entry].addr, child_nrows, iblock, entry) <
                         0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
-                                    "unable to release fractal heap child indirect block")
+                                    "unable to release fractal heap child indirect block");
                 } /* end else */
             }     /* end if */
         }         /* end for */
@@ -1618,7 +1618,7 @@ H5HF__man_iblock_delete(H5HF_hdr_t *hdr, haddr_t iblock_addr, unsigned iblock_nr
         /* Check the indirect block's status in the metadata cache */
         if (H5AC_get_entry_status(hdr->f, iblock_addr, &iblock_status) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
-                        "unable to check metadata cache status for indirect block")
+                        "unable to check metadata cache status for indirect block");
 
         /* Check if indirect block is pinned */
         assert(!(iblock_status & H5AC_ES__IS_PINNED));
@@ -1699,7 +1699,7 @@ H5HF__man_iblock_size(H5F_t *f, H5HF_hdr_t *hdr, haddr_t iblock_addr, unsigned n
                     if (H5HF__man_iblock_size(f, hdr, iblock->ents[entry].addr, num_indirect_rows, iblock,
                                               entry, heap_size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL,
-                                    "unable to get fractal heap storage info for indirect block")
+                                    "unable to get fractal heap storage info for indirect block");
         } /* end for */
     }     /* end if */
 
@@ -1813,7 +1813,7 @@ H5HF__man_iblock_dest(H5HF_indirect_t *iblock)
     if (iblock->parent)
         if (H5HF__iblock_decr(iblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared indirect block")
+                        "can't decrement reference count on shared indirect block");
 
     /* Release entry tables */
     if (iblock->ents)

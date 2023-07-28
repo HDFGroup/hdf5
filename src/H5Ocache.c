@@ -841,7 +841,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                     /* Register the object header chunk as a parent of the virtual entry */
                     if (H5AC_proxy_entry_add_parent(chk_proxy->oh->proxy, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL,
-                                    "can't add object header chunk as parent of proxy")
+                                    "can't add object header chunk as parent of proxy");
                 }
             }
             break;
@@ -888,7 +888,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 /* Unregister the object header chunk as a parent of the virtual entry */
                 if (H5AC_proxy_entry_remove_parent(chk_proxy->oh->proxy, chk_proxy) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL,
-                                "can't remove object header chunk as parent of proxy")
+                                "can't remove object header chunk as parent of proxy");
             }
             break;
 
@@ -1392,7 +1392,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                      (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE)) ||
                     (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS))
                     HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL,
-                                "unknown message with 'fail if unknown' flag found")
+                                "unknown message with 'fail if unknown' flag found");
                 /* Check for "mark if unknown" message flag, etc. */
                 else if ((flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) && !(flags & H5O_MSG_FLAG_WAS_UNKNOWN) &&
                          (udata->file_intent & H5F_ACC_RDWR)) {
@@ -1421,7 +1421,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 if ((flags & H5O_MSG_FLAG_SHAREABLE) && H5O_msg_class_g[id] &&
                     !(H5O_msg_class_g[id]->share_flags & H5O_SHARE_IS_SHARABLE))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL,
-                                "message of unshareable class flagged as shareable")
+                                "message of unshareable class flagged as shareable");
 
                 /* Set message class for "known" messages */
                 mesg->type = H5O_msg_class_g[id];
@@ -1455,7 +1455,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 /* Decode ref. count message */
                 if (oh->version <= H5O_VERSION_1)
                     HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL,
-                                "object header version does not support reference count message")
+                                "object header version does not support reference count message");
                 refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, NULL, 0, &ioflags,
                                                                         mesg->raw_size, mesg->raw);
 

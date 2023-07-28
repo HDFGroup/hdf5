@@ -665,7 +665,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     /* Open the datatype synchronously */
     if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID,
-                    "unable to open named datatype synchronously")
+                    "unable to open named datatype synchronously");
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen2() */
@@ -700,7 +700,7 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* Open the datatype asynchronously */
     if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, token_ptr, &vol_obj)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID,
-                    "unable to open named datatype asynchronously")
+                    "unable to open named datatype asynchronously");
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -710,7 +710,7 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, H5I_INVALID_HID,
-                            "can't decrement count on datatype ID")
+                            "can't decrement count on datatype ID");
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -763,7 +763,7 @@ H5Tget_create_plist(hid_t dtype_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can't get default creation property list")
         if ((ret_value = H5P_copy_plist(tcpl_plist, TRUE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID,
-                        "unable to copy the creation property list")
+                        "unable to copy the creation property list");
     } /* end if */
     /* If the datatype is committed, retrieve further information */
     else {

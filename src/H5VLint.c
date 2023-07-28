@@ -198,7 +198,7 @@ H5VL_init_phase2(void)
     for (i = 0; i < NELMTS(initializer); i++) {
         if (initializer[i].func() < 0) {
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL,
-                "unable to initialize %s interface", initializer[i].descr)
+                "unable to initialize %s interface", initializer[i].descr);
         }
     }
 
@@ -444,7 +444,7 @@ H5VL__set_def_conn(void)
     /* Change the default VOL for the default file access pclass */
     if (H5P_reset_vol_class(def_fapclass, &H5VL_def_conn_s) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL,
-                    "can't set default VOL connector for default file access property class")
+                    "can't set default VOL connector for default file access property class");
 
     /* Get default file access plist */
     if (NULL == (def_fapl = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
@@ -1178,11 +1178,11 @@ H5VL__register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
     /* Copy the class structure so the caller can reuse or free it */
     if (NULL == (saved = H5FL_MALLOC(H5VL_class_t)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID,
-                    "memory allocation failed for VOL connector class struct")
+                    "memory allocation failed for VOL connector class struct");
     H5MM_memcpy(saved, cls, sizeof(H5VL_class_t));
     if (NULL == (saved->name = H5MM_strdup(cls->name)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID,
-                    "memory allocation failed for VOL connector name")
+                    "memory allocation failed for VOL connector name");
 
     /* Initialize the VOL connector */
     if (cls->initialize && cls->initialize(vipl_id) < 0)
@@ -1228,15 +1228,15 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_
     /* Check arguments */
     if (!cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "VOL connector class pointer cannot be NULL")
+                    "VOL connector class pointer cannot be NULL");
     if (H5VL_VERSION != cls->version)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector has incompatible version")
     if (!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the NULL pointer")
+                    "VOL connector class name cannot be the NULL pointer");
     if (0 == HDstrlen(cls->name))
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the empty string")
+                    "VOL connector class name cannot be the empty string");
     if (cls->info_cls.copy && !cls->info_cls.free)
         HGOTO_ERROR(
             H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
@@ -1259,7 +1259,7 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_
     if (op_data.found_id != H5I_INVALID_HID) {
         if (H5I_inc_ref(op_data.found_id, app_ref) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID,
-                        "unable to increment ref count on VOL connector")
+                        "unable to increment ref count on VOL connector");
         ret_value = op_data.found_id;
     } /* end if */
     else {
@@ -1307,7 +1307,7 @@ H5VL__register_connector_by_name(const char *name, hbool_t app_ref, hid_t vipl_i
     if (op_data.found_id != H5I_INVALID_HID) {
         if (H5I_inc_ref(op_data.found_id, app_ref) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID,
-                        "unable to increment ref count on VOL connector")
+                        "unable to increment ref count on VOL connector");
         ret_value = op_data.found_id;
     } /* end if */
     else {
@@ -1364,7 +1364,7 @@ H5VL__register_connector_by_value(H5VL_class_value_t value, hbool_t app_ref, hid
     if (op_data.found_id != H5I_INVALID_HID) {
         if (H5I_inc_ref(op_data.found_id, app_ref) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID,
-                        "unable to increment ref count on VOL connector")
+                        "unable to increment ref count on VOL connector");
         ret_value = op_data.found_id;
     } /* end if */
     else {
@@ -2179,7 +2179,7 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
         /* Release the VOL connector's object wrapping context */
         if ((*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL,
-                        "unable to release connector's object wrapping context")
+                        "unable to release connector's object wrapping context");
 
     /* Decrement refcount on connector */
     if (H5VL_conn_dec_rc(vol_wrap_ctx->connector) < 0)
@@ -2401,7 +2401,7 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
     if (NULL == vol_wrap_ctx || NULL == vol_wrap_ctx->connector)
         HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID,
-                    "VOL object wrap context or its connector is NULL???")
+                    "VOL object wrap context or its connector is NULL???");
 
     /* If the datatype is already VOL-managed, the datatype's vol_obj
      * field will get clobbered later, so disallow this.

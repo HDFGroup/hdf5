@@ -149,12 +149,12 @@ H5B2_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
     bt2->hdr = hdr;
     if (H5B2__hdr_incr(bt2->hdr) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL,
-                    "can't increment reference count on shared v2 B-tree header")
+                    "can't increment reference count on shared v2 B-tree header");
 
     /* Increment # of files using this v2 B-tree header */
     if (H5B2__hdr_fuse_incr(bt2->hdr) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL,
-                    "can't increment file reference count on shared v2 B-tree header")
+                    "can't increment file reference count on shared v2 B-tree header");
 
     /* Set file pointer for this v2 B-tree open context */
     bt2->f = f;
@@ -211,12 +211,12 @@ H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
     bt2->hdr = hdr;
     if (H5B2__hdr_incr(bt2->hdr) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL,
-                    "can't increment reference count on shared v2 B-tree header")
+                    "can't increment reference count on shared v2 B-tree header");
 
     /* Increment # of files using this v2 B-tree header */
     if (H5B2__hdr_fuse_incr(bt2->hdr) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL,
-                    "can't increment file reference count on shared v2 B-tree header")
+                    "can't increment file reference count on shared v2 B-tree header");
 
     /* Set file pointer for this v2 B-tree open context */
     bt2->f = f;
@@ -471,7 +471,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
         else if (cmp == 0) { /* Record is found */
             if (op && (op)(hdr->min_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
-                            "'found' callback failed for B-tree find operation")
+                            "'found' callback failed for B-tree find operation");
             *found = TRUE;
             HGOTO_DONE(SUCCEED);
         } /* end if */
@@ -486,7 +486,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
         else if (cmp == 0) { /* Record is found */
             if (op && (op)(hdr->max_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
-                            "'found' callback failed for B-tree find operation")
+                            "'found' callback failed for B-tree find operation");
             *found = TRUE;
             HGOTO_DONE(SUCCEED);
         } /* end if */
@@ -571,7 +571,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
-                            "'found' callback failed for B-tree find operation")
+                            "'found' callback failed for B-tree find operation");
             } /* end if */
 
             /* Unlock current node */
@@ -626,7 +626,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
-                            "'found' callback failed for B-tree find operation")
+                            "'found' callback failed for B-tree find operation");
             } /* end if */
 
             /* Check for record being the min or max for the tree */
@@ -637,7 +637,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
                         if (hdr->min_native_rec == NULL)
                             if (NULL == (hdr->min_native_rec = H5MM_malloc(hdr->cls->nrec_size)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL,
-                                            "memory allocation failed for v2 B-tree min record info")
+                                            "memory allocation failed for v2 B-tree min record info");
                         H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
                 }     /* end if */
@@ -646,7 +646,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
                         if (hdr->max_native_rec == NULL)
                             if (NULL == (hdr->max_native_rec = H5MM_malloc(hdr->cls->nrec_size)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL,
-                                            "memory allocation failed for v2 B-tree max record info")
+                                            "memory allocation failed for v2 B-tree max record info");
                         H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
                 }     /* end if */
@@ -780,7 +780,7 @@ H5B2_index(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_found_t op, voi
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                     HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
-                                "'found' callback failed for B-tree find operation")
+                                "'found' callback failed for B-tree find operation");
                 } /* end if */
 
                 /* Unlock current node */
@@ -911,11 +911,11 @@ H5B2_remove(H5B2_t *bt2, void *udata, H5B2_remove_t op, void *op_data)
             if (hdr->node_info[hdr->depth].nat_rec_fac)
                 if (H5FL_fac_term(hdr->node_info[hdr->depth].nat_rec_fac) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                                "can't destroy node's native record block factory")
+                                "can't destroy node's native record block factory");
             if (hdr->node_info[hdr->depth].node_ptr_fac)
                 if (H5FL_fac_term(hdr->node_info[hdr->depth].node_ptr_fac) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                                "can't destroy node's node pointer block factory")
+                                "can't destroy node's node pointer block factory");
 
             assert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
             hdr->depth = (uint16_t)(hdr->depth - depth_decreased);
@@ -989,11 +989,11 @@ H5B2_remove_by_idx(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_remove_
             if (hdr->node_info[hdr->depth].nat_rec_fac)
                 if (H5FL_fac_term(hdr->node_info[hdr->depth].nat_rec_fac) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                                "can't destroy node's native record block factory")
+                                "can't destroy node's native record block factory");
             if (hdr->node_info[hdr->depth].node_ptr_fac)
                 if (H5FL_fac_term(hdr->node_info[hdr->depth].node_ptr_fac) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                                "can't destroy node's node pointer block factory")
+                                "can't destroy node's node pointer block factory");
 
             assert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
             hdr->depth = (uint16_t)(hdr->depth - depth_decreased);
@@ -1086,7 +1086,7 @@ H5B2_neighbor(H5B2_t *bt2, H5B2_compare_t range, void *udata, H5B2_found_t op, v
     if (hdr->depth > 0) {
         if (H5B2__neighbor_internal(hdr, hdr->depth, &hdr->root, NULL, range, hdr, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
-                        "unable to find neighbor record in B-tree internal node")
+                        "unable to find neighbor record in B-tree internal node");
     } /* end if */
     else {
         if (H5B2__neighbor_leaf(hdr, &hdr->root, NULL, range, hdr, udata, op, op_data) < 0)
@@ -1230,7 +1230,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL,
-                            "'modify' callback failed for B-tree find operation")
+                            "'modify' callback failed for B-tree find operation");
             } /* end if */
 
             /* Mark the node as dirty if it changed */
@@ -1293,7 +1293,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL,
-                            "'modify' callback failed for B-tree find operation")
+                            "'modify' callback failed for B-tree find operation");
             } /* end if */
 
             /* Check for modified record being the min or max for the tree */
@@ -1304,7 +1304,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                         if (hdr->min_native_rec == NULL)
                             if (NULL == (hdr->min_native_rec = H5MM_malloc(hdr->cls->nrec_size)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL,
-                                            "memory allocation failed for v2 B-tree min record info")
+                                            "memory allocation failed for v2 B-tree min record info");
                         H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
                 }     /* end if */
@@ -1313,7 +1313,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                         if (hdr->max_native_rec == NULL)
                             if (NULL == (hdr->max_native_rec = H5MM_malloc(hdr->cls->nrec_size)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL,
-                                            "memory allocation failed for v2 B-tree max record info")
+                                            "memory allocation failed for v2 B-tree max record info");
                         H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
                 }     /* end if */
@@ -1413,7 +1413,7 @@ H5B2_close(H5B2_t *bt2)
          */
         if (H5B2__hdr_decr(bt2->hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared v2 B-tree header")
+                        "can't decrement reference count on shared v2 B-tree header");
 
         /* Delete v2 B-tree, starting with header (unprotects header) */
         if (H5B2__hdr_delete(hdr) < 0)
@@ -1426,7 +1426,7 @@ H5B2_close(H5B2_t *bt2)
          */
         if (H5B2__hdr_decr(bt2->hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared v2 B-tree header")
+                        "can't decrement reference count on shared v2 B-tree header");
 
     } /* end else */
 

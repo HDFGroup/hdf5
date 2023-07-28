@@ -359,7 +359,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 if (NULL == (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
                                  H5MM_xstrdup((const char *)*pp)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL,
-                                "can't duplicate compound member name string")
+                                "can't duplicate compound member name string");
 
                 /* Version 3 of the datatype message eliminated the padding to multiple of 8 bytes */
                 if (version >= H5O_DTYPE_VERSION_3) {
@@ -474,7 +474,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL,
                                             "can't release datatype info");
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                        "unable to create array datatype")
+                                        "unable to create array datatype");
                         }
 
                         /* Close the base type for the array */
@@ -535,7 +535,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                               dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].size) >
                                  dt->shared->u.compnd.memb[u].offset))
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
-                                        "member overlaps with previous member")
+                                        "member overlaps with previous member");
                 }
 
                 /* Update the maximum member position covered */
@@ -833,7 +833,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "byte order is not supported in file format yet")
+                                "byte order is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.lsb_pad) {
@@ -849,7 +849,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "bit padding is not supported in file format yet")
+                                "bit padding is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.msb_pad) {
@@ -865,7 +865,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "bit padding is not supported in file format yet")
+                                "bit padding is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.u.i.sign) {
@@ -880,7 +880,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_NSGN:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "sign scheme is not supported in file format yet")
+                                "sign scheme is not supported in file format yet");
             } /* end switch */
 
             UINT16ENCODE(*pp, dt->shared->u.atomic.offset);
@@ -909,7 +909,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "byte order is not supported in file format yet")
+                                "byte order is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.lsb_pad) {
@@ -925,7 +925,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "bit padding is not supported in file format yet")
+                                "bit padding is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.msb_pad) {
@@ -941,7 +941,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "bit padding is not supported in file format yet")
+                                "bit padding is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.u.f.pad) {
@@ -957,7 +957,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "bit padding is not supported in file format yet")
+                                "bit padding is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.u.f.norm) {
@@ -975,7 +975,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_NORM_ERROR:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "normalization scheme is not supported in file format yet")
+                                "normalization scheme is not supported in file format yet");
             } /* end switch */
 
             flags = (unsigned)(flags | ((dt->shared->u.atomic.u.f.sign << 8) & 0xff00));
@@ -1007,7 +1007,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "byte order is not supported in file format yet")
+                                "byte order is not supported in file format yet");
             } /* end switch */
             UINT16ENCODE(*pp, dt->shared->u.atomic.prec);
             break;
@@ -1044,7 +1044,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "byte order is not supported in file format yet")
+                                "byte order is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.lsb_pad) {
@@ -1060,7 +1060,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "bit padding is not supported in file format yet")
+                                "bit padding is not supported in file format yet");
             } /* end switch */
 
             switch (dt->shared->u.atomic.msb_pad) {
@@ -1076,7 +1076,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                                "bit padding is not supported in file format yet")
+                                "bit padding is not supported in file format yet");
             } /* end switch */
 
             UINT16ENCODE(*pp, dt->shared->u.atomic.offset);

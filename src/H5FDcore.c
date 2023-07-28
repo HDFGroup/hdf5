@@ -287,7 +287,7 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
             item->end   = end;
             if (H5SL_insert(file->dirty_list, item, &item->start) < 0)
                 HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't insert new dirty region: (%llu, %llu)\n",
-                            (unsigned long long)start, (unsigned long long)end)
+                            (unsigned long long)start, (unsigned long long)end);
         } /* end if */
         else {
             /* Store the new item endpoint if it's bigger */
@@ -1371,7 +1371,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         else {
             if (NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
+                            "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof);
         } /* end else */
 
         memset(x + file->eof, 0, (size_t)(new_eof - file->eof));
@@ -1524,7 +1524,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
                     (x = (unsigned char *)file->fi_callbacks.image_realloc(
                          file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "unable to allocate memory block with callback")
+                                "unable to allocate memory block with callback");
             } /* end if */
             else {
                 if (NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))

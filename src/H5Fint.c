@@ -369,10 +369,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set 'small data' cache size")
     if (H5P_set(new_plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &f->shared->low_bound) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
-                    "can't set 'low' bound for library format versions")
+                    "can't set 'low' bound for library format versions");
     if (H5P_set(new_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &f->shared->high_bound) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
-                    "can't set 'high' bound for library format versions")
+                    "can't set 'high' bound for library format versions");
     if (H5P_set(new_plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &(f->shared->read_attempts)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set 'read attempts ' flag")
     if (H5P_set(new_plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
@@ -388,11 +388,11 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME,
                     &(f->shared->page_buf->min_meta_perc)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
-                        "can't set minimum metadata fraction of page buffer")
+                        "can't set minimum metadata fraction of page buffer");
         if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->page_buf->min_raw_perc)) <
             0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
-                        "can't set minimum raw data fraction of page buffer")
+                        "can't set minimum raw data fraction of page buffer");
     } /* end if */
 #ifdef H5_HAVE_PARALLEL
     if (H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->shared->coll_md_read)) < 0)
@@ -667,7 +667,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
             case H5I_MAP:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR,
-                            "maps not supported in native VOL connector")
+                            "maps not supported in native VOL connector");
 
             case H5I_UNINIT:
             case H5I_BADID:
@@ -1280,7 +1280,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
                 size_t len = HDstrlen(mdc_log_location);
                 if (NULL == (f->shared->mdc_log_location = (char *)H5MM_calloc((len + 1) * sizeof(char))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
-                                "can't allocate memory for mdc log file name")
+                                "can't allocate memory for mdc log file name");
                 HDstrncpy(f->shared->mdc_log_location, mdc_log_location, len);
             }
             else
@@ -1847,7 +1847,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
         if (NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
-                        name, tent_flags)
+                        name, tent_flags);
     }
 
     /* Is the file already open? */
@@ -1873,12 +1873,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
         if ((flags & H5F_ACC_SWMR_WRITE) && 0 == (shared->flags & H5F_ACC_SWMR_WRITE))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                        "SWMR write access flag not the same for file that is already open")
+                        "SWMR write access flag not the same for file that is already open");
         if ((flags & H5F_ACC_SWMR_READ) &&
             !((shared->flags & H5F_ACC_SWMR_WRITE) || (shared->flags & H5F_ACC_SWMR_READ) ||
               (shared->flags & H5F_ACC_RDWR)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                        "SWMR read access flag not the same for file that is already open")
+                        "SWMR read access flag not the same for file that is already open");
 
         /* Allocate new "high-level" file struct */
         if ((file = H5F__new(shared, flags, fcpl_id, fapl_id, NULL)) == NULL)
@@ -1954,7 +1954,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         /* Collective metadata writes are not supported with page buffering */
         if (file->shared->coll_md_write)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                        "collective metadata writes are not supported with page buffering")
+                        "collective metadata writes are not supported with page buffering");
 
         /* Temporary: fail file create when page buffering feature is enabled for parallel */
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for parallel")
@@ -2102,7 +2102,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                         (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
                          file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
                         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                                    "file is not already open for SWMR writing")
+                                    "file is not already open for SWMR writing");
                 } /* end if */
                 else if ((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) ||
                          (file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
@@ -3653,7 +3653,7 @@ H5F__start_swmr_write(H5F_t *f)
     /* Check for correct file format version */
     if ((f->shared->low_bound < H5F_LIBVER_V110) || (f->shared->high_bound < H5F_LIBVER_V110))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
-                    "file format version does not support SWMR - needs to be 1.10 or greater")
+                    "file format version does not support SWMR - needs to be 1.10 or greater");
 
     /* Should not be marked for SWMR writing mode already */
     if (f->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
@@ -3749,7 +3749,7 @@ H5F__start_swmr_write(H5F_t *f)
                     /* Get dataset access properties */
                     if ((obj_apl_ids[u] = H5D_get_access_plist(obj)) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                    "unable to get dataset access property list")
+                                    "unable to get dataset access property list");
                     break;
 
                 case H5I_MAP:
@@ -3772,7 +3772,7 @@ H5F__start_swmr_write(H5F_t *f)
                 case H5I_NTYPES:
                 default:
                     HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL,
-                                "not a valid file object ID (dataset, group, or datatype)")
+                                "not a valid file object ID (dataset, group, or datatype)");
                     break;
             } /* end switch */
 
@@ -3935,7 +3935,7 @@ H5F__format_convert(H5F_t *f)
         if (H5_addr_defined(f->shared->sblock->ext_addr))
             if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL,
-                            "error in removing message from superblock extension")
+                            "error in removing message from superblock extension");
 
         /* Close freespace manager */
         if (H5MF_try_close(f) < 0)

@@ -681,7 +681,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 /* Decrement refcount on intermediate group's object header in memory */
                 if (H5O_dec_rc_by_loc(obj_loc.oloc) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL,
-                                "unable to decrement refcount on newly created object")
+                                "unable to decrement refcount on newly created object");
 
                 /* Close new group */
                 if (H5O_close(obj_loc.oloc, NULL) < 0)

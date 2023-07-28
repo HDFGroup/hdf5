@@ -212,19 +212,19 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of error class, message or stack")
+                        "unable to get group location of error class, message or stack");
 
         case H5I_VFL:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a virtual file driver (VFD)")
+                        "unable to get group location of a virtual file driver (VFD)");
 
         case H5I_VOL:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a virtual object layer (VOL) connector")
+                        "unable to get group location of a virtual object layer (VOL) connector");
 
         case H5I_SPACE_SEL_ITER:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a dataspace selection iterator")
+                        "unable to get group location of a dataspace selection iterator");
 
         case H5I_EVENTSET:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a event set")
@@ -867,7 +867,7 @@ H5G__loc_set_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     if (exists)
         if (H5O_msg_remove(obj_loc->oloc, H5O_NAME_ID, 0, TRUE) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL,
-                        "unable to delete existing comment object header message")
+                        "unable to delete existing comment object header message");
 
     /* Add the new message */
     if (udata->comment && *udata->comment) {

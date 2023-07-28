@@ -753,7 +753,7 @@ H5G__verify_cached_stabs_test_cb(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, h
             if ((sn->entry[i].cache.stab.btree_addr != stab.btree_addr) ||
                 (sn->entry[i].cache.stab.heap_addr != stab.heap_addr))
                 HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, H5_ITER_ERROR,
-                            "cached symbol table information is incorrect")
+                            "cached symbol table information is incorrect");
         }
         else if (sn->entry[i].type == H5G_CACHED_STAB)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, H5_ITER_ERROR, "nonexistent STAB message is cached")

@@ -242,7 +242,7 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     /* Check if using native VOL connector */
                     if (H5VL_object_is_native(file, &is_native) < 0)
                         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL,
-                                    "can't query if file uses native VOL connector")
+                                    "can't query if file uses native VOL connector");
 
                     /* Must use native VOL connector for this operation */
                     assert(is_native);
@@ -270,7 +270,7 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     /* Check if using native VOL connector */
                     if (H5VL_object_is_native(file, &is_native) < 0)
                         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL,
-                                    "can't query if file uses native VOL connector")
+                                    "can't query if file uses native VOL connector");
 
                     /* Must use native VOL connector for this operation */
                     assert(is_native);

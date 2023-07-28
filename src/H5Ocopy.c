@@ -718,7 +718,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
             if ((copy_type->post_copy_file)(oloc_src, mesg_src->native, oloc_dst, mesg_dst->native,
                                             &mesg_flags, cpy_info) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
-                            "unable to perform 'post copy' operation on message")
+                            "unable to perform 'post copy' operation on message");
 
             /* Verify that the flags did not change */
             assert(mesg_flags == (unsigned)mesg_dst->flags);
@@ -1506,7 +1506,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                     assert(!dst_root_loc.path);
                     if (NULL == (dst_root_loc.oloc = H5G_oloc(H5G_rootof(oloc_dst->file))))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                    "unable to get object location for root group")
+                                    "unable to get object location for root group");
                     if (NULL == (dst_root_loc.path = H5G_nameof(H5G_rootof(oloc_dst->file))))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
                 } /* end if */

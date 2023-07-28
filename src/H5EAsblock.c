@@ -99,7 +99,7 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx)
     /* Allocate memory for the index block */
     if (NULL == (sblock = H5FL_CALLOC(H5EA_sblock_t)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array super block")
+                    "memory allocation failed for extensible array super block");
 
     /* Share common array information */
     if (H5EA__hdr_incr(hdr) < 0)
@@ -119,7 +119,7 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx)
     /* Allocate buffer for data block addresses in super block */
     if (NULL == (sblock->dblk_addrs = H5FL_SEQ_MALLOC(haddr_t, sblock->ndblks)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for super block data block addresses")
+                    "memory allocation failed for super block data block addresses");
 
     /* Check if # of elements in data blocks requires paging */
     if (sblock->dblk_nelmts > hdr->dblk_page_nelmts) {
@@ -140,7 +140,7 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx)
         if (NULL ==
             (sblock->page_init = H5FL_BLK_CALLOC(page_init, sblock->ndblks * sblock->dblk_page_init_size)))
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                        "memory allocation failed for super block page init bitmask")
+                        "memory allocation failed for super block page init bitmask");
 
         /* Compute data block page size */
         sblock->dblk_page_size = (hdr->dblk_page_nelmts * hdr->cparam.raw_elmt_size) + H5EA_SIZEOF_CHKSUM;
@@ -184,7 +184,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, hbool_t *stats_chang
     /* Allocate the super block */
     if (NULL == (sblock = H5EA__sblock_alloc(hdr, parent, sblk_idx)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, HADDR_UNDEF,
-                    "memory allocation failed for extensible array super block")
+                    "memory allocation failed for extensible array super block");
 
     /* Set size of super block on disk */
     sblock->size = H5EA_SBLOCK_SIZE(sblock);
@@ -195,7 +195,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, hbool_t *stats_chang
     /* Allocate space for the super block on disk */
     if (HADDR_UNDEF == (sblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_SBLOCK, (hsize_t)sblock->size)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, HADDR_UNDEF,
-                    "file allocation failed for extensible array super block")
+                    "file allocation failed for extensible array super block");
     sblock->addr = sblock_addr;
 
     /* Reset data block addresses to "undefined" address value */
@@ -204,14 +204,14 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, hbool_t *stats_chang
     /* Cache the new extensible array super block */
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_SBLOCK, sblock_addr, sblock, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF,
-                    "can't add extensible array super block to cache")
+                    "can't add extensible array super block to cache");
     inserted = TRUE;
 
     /* Add super block as child of 'top' proxy */
     if (hdr->top_proxy) {
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, sblock) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, HADDR_UNDEF,
-                        "unable to add extensible array entry as child of array proxy")
+                        "unable to add extensible array entry as child of array proxy");
         sblock->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -293,7 +293,7 @@ H5EA__sblock_protect(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, 
         /* Add super block as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, sblock) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, NULL,
-                        "unable to add extensible array entry as child of array proxy")
+                        "unable to add extensible array entry as child of array proxy");
         sblock->top_proxy = hdr->top_proxy;
     }
 
@@ -426,7 +426,7 @@ H5EA__sblock_dest(H5EA_sblock_t *sblock)
         /* Decrement reference count on shared info */
         if (H5EA__hdr_decr(sblock->hdr) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared array header")
+                        "can't decrement reference count on shared array header");
         sblock->hdr = NULL;
     } /* end if */
 

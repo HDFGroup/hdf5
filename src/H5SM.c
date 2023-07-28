@@ -149,7 +149,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t *fc_plist, const H5O_loc_t *ext_loc)
     for (x = 0; x < table->num_indexes; ++x) {
         if (index_type_flags[x] & type_flags_used)
             HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, FAIL,
-                        "the same shared message type flag is assigned to more than one index")
+                        "the same shared message type flag is assigned to more than one index");
         type_flags_used |= index_type_flags[x];
     } /* end for */
 
@@ -1285,7 +1285,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
                     /* Put the message in the heap and record its new heap ID */
                     if (H5HF_insert(fheap, key.encoding_size, key.encoding, &shared.u.heap_id) < 0)
                         HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL,
-                                    "unable to insert message into fractal heap")
+                                    "unable to insert message into fractal heap");
 
                     list->messages[list_pos].location             = H5SM_IN_HEAP;
                     list->messages[list_pos].u.heap_loc.fheap_id  = shared.u.heap_id;
@@ -1451,7 +1451,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
                 if (NULL == bt2) {
                     if (NULL == (bt2 = H5B2_open(f, header->index_addr, f)))
                         HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL,
-                                    "unable to open v2 B-tree for SOHM index")
+                                    "unable to open v2 B-tree for SOHM index");
                 } /* end if */
 
                 if (H5B2_insert(bt2, &key) < 0)
@@ -2474,7 +2474,7 @@ H5SM_table_debug(H5F_t *f, haddr_t table_addr, FILE *stream, int indent, int fwi
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, FAIL, "unknown shared message table version")
     if (num_indexes == 0 || num_indexes > H5O_SHMESG_MAX_NINDEXES)
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, FAIL,
-                    "number of indexes must be between 1 and H5O_SHMESG_MAX_NINDEXES")
+                    "number of indexes must be between 1 and H5O_SHMESG_MAX_NINDEXES");
 
     /* Set up user data for callback */
     cache_udata.f = f;
@@ -2564,7 +2564,7 @@ H5SM_list_debug(H5F_t *f, haddr_t list_addr, FILE *stream, int indent, int fwidt
     }     /* end for */
     if (x == table->num_indexes)
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, FAIL,
-                    "list address doesn't match address for any indices in table")
+                    "list address doesn't match address for any indices in table");
 
     /* Set up user data for metadata cache callback */
     lst_cache_udata.f      = f;

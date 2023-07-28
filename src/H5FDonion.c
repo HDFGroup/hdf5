@@ -869,7 +869,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
                 }
                 else
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unknown token in the configure string: %s",
-                                token1)
+                                token1);
             }
 
             token1 = HDstrtok(NULL, ":");
@@ -1102,7 +1102,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, saved_size, head_buf) < 0) {
                     HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, NULL,
-                                "cannot write header to the backing onion file")
+                                "cannot write header to the backing onion file");
                 }
 
                 file->onion_eof = (haddr_t)saved_size;
@@ -1116,7 +1116,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 /* Write nascent history (with no revisions) to the backing onion file */
                 if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, saved_size + 1, size, hist_buf) < 0) {
                     HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, NULL,
-                                "cannot write history to the backing onion file")
+                                "cannot write history to the backing onion file");
                 }
 
                 file->header.history_size = size; /* record for later use */

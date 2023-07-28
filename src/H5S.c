@@ -116,7 +116,7 @@ H5S_init(void)
     /* Initialize the ID group for the dataspace selection iterator IDs */
     if (H5I_register_type(H5I_SPACE_SEL_ITER_CLS) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
-                    "unable to initialize dataspace selection iterator ID class")
+                    "unable to initialize dataspace selection iterator ID class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1183,11 +1183,11 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/], con
         for (u = 0; u < rank; u++)
             if (H5S_UNLIMITED == dims[u])
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "current dimension must have a specific size, not H5S_UNLIMITED")
+                            "current dimension must have a specific size, not H5S_UNLIMITED");
     if (max != NULL) {
         if (dims == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "maximum dimension specified, but no current dimensions specified")
+                        "maximum dimension specified, but no current dimensions specified");
         for (u = 0; u < rank; u++)
             if (max[u] != H5S_UNLIMITED && max[u] < dims[u])
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid maximum dimension size")
@@ -1315,7 +1315,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/], const hsize_t maxdims[/
     for (i = 0; i < rank; i++) {
         if (H5S_UNLIMITED == dims[i])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID,
-                        "current dimension must have a specific size, not H5S_UNLIMITED")
+                        "current dimension must have a specific size, not H5S_UNLIMITED");
         if (maxdims && H5S_UNLIMITED != maxdims[i] && maxdims[i] < dims[i])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "maxdims is smaller than dims")
     } /* end for */
@@ -1563,7 +1563,7 @@ H5S_decode(const unsigned char **p)
     /* Copy the extent into dataspace structure */
     if (NULL == (ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for dataspace conversion path table")
+                    "memory allocation failed for dataspace conversion path table");
     if (NULL == H5O_msg_copy(H5O_SDSPACE_ID, extent, &(ds->extent)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy object")
     if (H5S__extent_release(extent) < 0)

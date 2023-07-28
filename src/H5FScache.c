@@ -487,7 +487,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                 if (HADDR_UNDEF ==
                     (sect_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
                     HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL,
-                                "file allocation failed for free space sections")
+                                "file allocation failed for free space sections");
 
                 /* fspace->sect_size may change in size after H5MF_alloc().
                  * If increased in size, free the previous allocation and
@@ -503,7 +503,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                     if (HADDR_UNDEF ==
                         (sect_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FSPACE_SINFO, new_sect_size)))
                         HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL,
-                                    "file allocation failed for free space sections")
+                                    "file allocation failed for free space sections");
                     fspace->sect_size       = new_sect_size;
                     fspace->alloc_sect_size = new_sect_size;
                 }
@@ -547,7 +547,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                 if (HADDR_UNDEF ==
                     (new_sect_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
                     HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL,
-                                "file allocation failed for free space sections")
+                                "file allocation failed for free space sections");
 
                 fspace->alloc_sect_size = (size_t)fspace->sect_size;
                 assert(fspace->sinfo->cache_info.size == fspace->alloc_sect_size);
@@ -1022,7 +1022,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
                 if (!(des_flags & H5FS_DESERIALIZE_NO_ADD))
                     if (H5FS_sect_add(udata->f, fspace, new_sect, H5FS_ADD_DESERIALIZING, udata) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, NULL,
-                                    "can't add section to free space manager")
+                                    "can't add section to free space manager");
             } /* end for */
 
             if (fspace->tot_sect_count == old_tot_sect_count)

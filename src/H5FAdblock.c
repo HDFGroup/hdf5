@@ -143,7 +143,7 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr)
         H5_CHECK_OVERFLOW(dblk_size, /* From: */ hsize_t, /* To: */ size_t);
         if (NULL == (dblock->elmts = H5FL_BLK_MALLOC(chunk_elmts, (size_t)dblk_size)))
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL,
-                        "memory allocation failed for data block element buffer")
+                        "memory allocation failed for data block element buffer");
     } /* end else */
 
     /* Set the return value */
@@ -183,7 +183,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
     /* Allocate the data block */
     if (NULL == (dblock = H5FA__dblock_alloc(hdr)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, HADDR_UNDEF,
-                    "memory allocation failed for fixed array data block")
+                    "memory allocation failed for fixed array data block");
 
     /* Set size of data block on disk */
     hdr->stats.dblk_size = dblock->size = H5FA_DBLOCK_SIZE(dblock);
@@ -191,7 +191,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
     /* Allocate space for the data block on disk */
     if (HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FARRAY_DBLOCK, (hsize_t)dblock->size)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, HADDR_UNDEF,
-                    "file allocation failed for fixed array data block")
+                    "file allocation failed for fixed array data block");
     dblock->addr = dblock_addr;
 
     /* Don't initialize elements if paged */
@@ -199,7 +199,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
         /* Clear any elements in data block to fill value */
         if ((hdr->cparam.cls->fill)(dblock->elmts, (size_t)hdr->cparam.nelmts) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, HADDR_UNDEF,
-                        "can't set fixed array data block elements to class's fill value")
+                        "can't set fixed array data block elements to class's fill value");
 
     /* Cache the new fixed array data block */
     if (H5AC_insert_entry(hdr->f, H5AC_FARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
@@ -210,7 +210,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
     if (hdr->top_proxy) {
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblock) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, HADDR_UNDEF,
-                        "unable to add fixed array entry as child of array proxy")
+                        "unable to add fixed array entry as child of array proxy");
         dblock->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -278,14 +278,14 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, haddr_t dblk_addr, unsigned flags)
     if (NULL ==
         (dblock = (H5FA_dblock_t *)H5AC_protect(hdr->f, H5AC_FARRAY_DBLOCK, dblk_addr, &udata, flags)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, NULL,
-                    "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr)
+                    "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr);
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->top_proxy && NULL == dblock->top_proxy) {
         /* Add data block as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblock) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, NULL,
-                        "unable to add fixed array entry as child of array proxy")
+                        "unable to add fixed array entry as child of array proxy");
         dblock->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -358,7 +358,7 @@ H5FA__dblock_delete(H5FA_hdr_t *hdr, haddr_t dblk_addr)
     /* Protect data block */
     if (NULL == (dblock = H5FA__dblock_protect(hdr, dblk_addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
-                    "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr)
+                    "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr);
 
     /* Check if data block is paged */
     if (dblock->npages) {
@@ -374,7 +374,7 @@ H5FA__dblock_delete(H5FA_hdr_t *hdr, haddr_t dblk_addr)
             /* (OK to call if it doesn't exist in the cache) */
             if (H5AC_expunge_entry(hdr->f, H5AC_FARRAY_DBLK_PAGE, dblk_page_addr, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_FARRAY, H5E_CANTEXPUNGE, FAIL,
-                            "unable to remove array data block page from metadata cache")
+                            "unable to remove array data block page from metadata cache");
 
             /* Advance to next page address */
             dblk_page_addr += dblock->dblk_page_size;
@@ -429,7 +429,7 @@ H5FA__dblock_dest(H5FA_dblock_t *dblock)
         /* Decrement reference count on shared info */
         if (H5FA__hdr_decr(dblock->hdr) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared array header")
+                        "can't decrement reference count on shared array header");
         dblock->hdr = NULL;
     } /* end if */
 

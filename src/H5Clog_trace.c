@@ -229,7 +229,7 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
     n_chars = HDstrlen(log_location) + 1 + 39 + 1;
     if (NULL == (file_name = (char *)H5MM_calloc(n_chars * sizeof(char))))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
-                    "can't allocate memory for mdc log file name manipulation")
+                    "can't allocate memory for mdc log file name manipulation");
 
     /* Add the rank to the log file name when MPI is in use */
     if (-1 == mpi_rank)

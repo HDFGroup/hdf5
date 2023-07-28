@@ -151,7 +151,7 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     if (NULL == pentry->parents)
         if (NULL == (pentry->parents = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL,
-                        "unable to create skip list for parents of proxy entry")
+                        "unable to create skip list for parents of proxy entry");
 
     /* Insert parent address into skip list */
     if (H5SL_insert(pentry->parents, parent, &parent->addr) < 0)
@@ -241,7 +241,7 @@ H5AC__proxy_entry_add_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_ud
     /* Add flush dependency on parent for proxy entry */
     if (H5AC_create_flush_dependency(parent, pentry) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, H5_ITER_ERROR,
-                    "unable to set flush dependency for virtual entry")
+                    "unable to set flush dependency for virtual entry");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -273,7 +273,7 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, void *child)
         if (!H5_addr_defined(pentry->addr))
             if (HADDR_UNDEF == (pentry->addr = H5MF_alloc_tmp(f, 1)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
-                            "temporary file space allocation failed for proxy entry")
+                            "temporary file space allocation failed for proxy entry");
 
         /* Insert the proxy entry into the cache */
         if (H5AC_insert_entry(f, H5AC_PROXY_ENTRY, pentry->addr, pentry, H5AC__PIN_ENTRY_FLAG) < 0)
@@ -328,7 +328,7 @@ H5AC__proxy_entry_remove_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *
     /* Remove flush dependency on parent for proxy entry */
     if (H5AC_destroy_flush_dependency(parent, pentry) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, H5_ITER_ERROR,
-                    "unable to remove flush dependency for proxy entry")
+                    "unable to remove flush dependency for proxy entry");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

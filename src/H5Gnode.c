@@ -782,7 +782,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
                 if (H5HL_remove(f, udata->common.heap, sn->entry[idx].cache.slink.lval_offset,
                                 soft_link_len) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR,
-                                "unable to remove soft link from local heap")
+                                "unable to remove soft link from local heap");
             } /* end if */
         }     /* end else */
 
@@ -852,7 +852,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
 
                 if (H5O_link(&tmp_oloc, -1) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR,
-                                "unable to decrement object link count")
+                                "unable to decrement object link count");
             } /* end if */
         }     /* end for */
 
@@ -922,7 +922,7 @@ H5G__node_iterate(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
             /* Convert the entry to a link */
             if (H5G__ent_to_link(&lnk, udata->heap, &ents[u], name) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5_ITER_ERROR,
-                            "unable to convert symbol table entry to link")
+                            "unable to convert symbol table entry to link");
 
             /* Make the callback */
             ret_value = (udata->op)(&lnk, udata->op_data);
@@ -1331,7 +1331,7 @@ H5G__node_build_table(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr
         /* Convert the entry to a link */
         if (H5G__ent_to_link(&udata->ltable->lnks[linkno], udata->heap, &sn->entry[u], name) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5_ITER_ERROR,
-                        "unable to convert symbol table entry to link")
+                        "unable to convert symbol table entry to link");
     } /* end for */
 
 done:

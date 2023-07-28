@@ -1240,7 +1240,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
         if (config_ptr->set_initial_size && ((config_ptr->initial_size < config_ptr->min_size) ||
                                              (config_ptr->initial_size > config_ptr->max_size)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "initial_size must be in the interval [min_size, max_size]")
+                        "initial_size must be in the interval [min_size, max_size]");
         if ((config_ptr->min_clean_fraction < 0.0) || (config_ptr->min_clean_fraction > 1.0))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_clean_fraction must be in the interval [0.0, 1.0]")
         if (config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH)
@@ -1256,7 +1256,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
         if (config_ptr->incr_mode == H5C_incr__threshold) {
             if ((config_ptr->lower_hr_threshold < 0.0) || (config_ptr->lower_hr_threshold > 1.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "lower_hr_threshold must be in the range [0.0, 1.0]")
+                            "lower_hr_threshold must be in the range [0.0, 1.0]");
             if (config_ptr->increment < 1.0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "increment must be greater than or equal to 1.0")
 
@@ -1273,10 +1273,10 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
             case H5C_flash_incr__add_space:
                 if ((config_ptr->flash_multiple < 0.1) || (config_ptr->flash_multiple > 10.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "flash_multiple must be in the range [0.1, 10.0]")
+                                "flash_multiple must be in the range [0.1, 10.0]");
                 if ((config_ptr->flash_threshold < 0.1) || (config_ptr->flash_threshold > 1.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "flash_threshold must be in the range [0.1, 1.0]")
+                                "flash_threshold must be in the range [0.1, 1.0]");
                 break;
 
             default:
@@ -1320,7 +1320,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
         if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)
             if ((config_ptr->upper_hr_threshold > 1.0) || (config_ptr->upper_hr_threshold < 0.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "upper_hr_threshold must be in the interval [0.0, 1.0]")
+                            "upper_hr_threshold must be in the interval [0.0, 1.0]");
     } /* H5C_RESIZE_CFG__VALIDATE_DECREMENT */
 
     if ((tests & H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) != 0) {

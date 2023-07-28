@@ -3491,7 +3491,7 @@ H5Sget_select_hyper_nblocks(hid_t spaceid)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection")
     if (space->select.sel_info.hslab->unlim_dim >= 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                    "cannot get number of blocks for unlimited selection")
+                    "cannot get number of blocks for unlimited selection");
 
     ret_value = (hssize_t)H5S__get_select_hyper_nblocks(space, TRUE);
 
@@ -3625,13 +3625,13 @@ H5S__hyper_get_version_enc_size(H5S_t *space, hsize_t block_count, uint32_t *ver
         /* Fail for irregular hyperslab if exceeds 32 bits */
         if (count_up_version)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                        "The number of blocks in hyperslab selection exceeds 2^32")
+                        "The number of blocks in hyperslab selection exceeds 2^32");
         else if (bound_up_version)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                        "The end of bounding box in hyperslab selection exceeds 2^32")
+                        "The end of bounding box in hyperslab selection exceeds 2^32");
         else
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-                        "Dataspace hyperslab selection version out of bounds")
+                        "Dataspace hyperslab selection version out of bounds");
     } /* end if */
 
     /* Set the message version */
@@ -4062,7 +4062,7 @@ H5S__hyper_serialize(H5S_t *space, uint8_t **p)
                     break;
                 default:
                     HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                                "unknown offset info size for hyperslab")
+                                "unknown offset info size for hyperslab");
                     break;
             } /* end switch */
         }     /* end if */
@@ -4267,14 +4267,14 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
             /* decode size of offset info */
             if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 1, p_end))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                            "buffer overflow while decoding selection encoding size")
+                            "buffer overflow while decoding selection encoding size");
             enc_size = *(pp)++;
         }
         else {
             /* Skip over the remainder of the header */
             if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 4, p_end))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                            "buffer overflow while decoding selection header")
+                            "buffer overflow while decoding selection header");
             pp += 4;
             enc_size = H5S_SELECT_INFO_ENC_SIZE_8;
         } /* end else */
@@ -4310,7 +4310,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
         /* Verify the rank of the provided dataspace */
         if (rank != tmp_space->extent.rank)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-                        "rank of serialized selection does not match dataspace")
+                        "rank of serialized selection does not match dataspace");
 
     if (flags & H5S_HYPER_REGULAR) {
         hsize_t stride[H5S_MAX_RANK]; /* Hyperslab stride information */
@@ -4326,7 +4326,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
                 for (u = 0; u < tmp_space->extent.rank; u++) {
                     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 4 * sizeof(uint16_t), p_end))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                    "buffer overflow while decoding selection ranks")
+                                    "buffer overflow while decoding selection ranks");
 
                     UINT16DECODE(pp, start[u]);
                     UINT16DECODE(pp, stride[u]);
@@ -4345,7 +4345,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
                 for (u = 0; u < tmp_space->extent.rank; u++) {
                     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 4 * sizeof(uint32_t), p_end))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                    "buffer overflow while decoding selection ranks")
+                                    "buffer overflow while decoding selection ranks");
 
                     UINT32DECODE(pp, start[u]);
                     UINT32DECODE(pp, stride[u]);
@@ -4364,7 +4364,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
                 for (u = 0; u < tmp_space->extent.rank; u++) {
                     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 4 * sizeof(uint64_t), p_end))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                    "buffer overflow while decoding selection ranks")
+                                    "buffer overflow while decoding selection ranks");
 
                     UINT64DECODE(pp, start[u]);
                     UINT64DECODE(pp, stride[u]);
@@ -4403,21 +4403,21 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
             case H5S_SELECT_INFO_ENC_SIZE_2:
                 if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint16_t), p_end))
                     HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                "buffer overflow while decoding number of selection blocks")
+                                "buffer overflow while decoding number of selection blocks");
                 UINT16DECODE(pp, num_elem);
                 break;
 
             case H5S_SELECT_INFO_ENC_SIZE_4:
                 if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
                     HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                "buffer overflow while decoding number of selection blocks")
+                                "buffer overflow while decoding number of selection blocks");
                 UINT32DECODE(pp, num_elem);
                 break;
 
             case H5S_SELECT_INFO_ENC_SIZE_8:
                 if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint64_t), p_end))
                     HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                "buffer overflow while decoding number of selection blocks")
+                                "buffer overflow while decoding number of selection blocks");
                 UINT64DECODE(pp, num_elem);
                 break;
 
@@ -4436,7 +4436,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
                 case H5S_SELECT_INFO_ENC_SIZE_2:
                     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, rank * 2 * sizeof(uint16_t), p_end))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                    "buffer overflow while decoding selection coordinates")
+                                    "buffer overflow while decoding selection coordinates");
 
                     for (tstart = start, v = 0; v < rank; v++, tstart++)
                         UINT16DECODE(pp, *tstart);
@@ -4447,7 +4447,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
                 case H5S_SELECT_INFO_ENC_SIZE_4:
                     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, rank * 2 * sizeof(uint32_t), p_end))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                    "buffer overflow while decoding selection coordinates")
+                                    "buffer overflow while decoding selection coordinates");
 
                     for (tstart = start, v = 0; v < rank; v++, tstart++)
                         UINT32DECODE(pp, *tstart);
@@ -4458,7 +4458,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
                 case H5S_SELECT_INFO_ENC_SIZE_8:
                     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, rank * 2 * sizeof(uint64_t), p_end))
                         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                                    "buffer overflow while decoding selection coordinates")
+                                    "buffer overflow while decoding selection coordinates");
 
                     for (tstart = start, v = 0; v < rank; v++, tstart++)
                         UINT64DECODE(pp, *tstart);
@@ -4468,7 +4468,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
 
                 default:
                     HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                                "unknown offset info size for hyperslab")
+                                "unknown offset info size for hyperslab");
                     break;
             } /* end switch */
 
@@ -5708,11 +5708,11 @@ H5S__hyper_shape_same(H5S_t *space1, H5S_t *space2)
         if (NULL == space1->select.sel_info.hslab->span_lst)
             if (H5S__hyper_generate_spans(space1) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
-                            "can't construct span tree for hyperslab selection")
+                            "can't construct span tree for hyperslab selection");
         if (NULL == space2->select.sel_info.hslab->span_lst)
             if (H5S__hyper_generate_spans(space2) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
-                            "can't construct span tree for hyperslab selection")
+                            "can't construct span tree for hyperslab selection");
 
         /* If rank of space A is different (guaranteed greater) than
          *      rank of space B, walk down the span tree, verifying
@@ -6074,7 +6074,7 @@ H5S__hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ra
             /* Make span tree for current coordinate(s) */
             if (NULL == (new_span = H5S__hyper_coord_to_span(rank, coords)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL,
-                            "can't allocate hyperslab spans for coordinate")
+                            "can't allocate hyperslab spans for coordinate");
 
             /* Add new span to span tree list */
             tail_span->next = new_span;
@@ -6937,7 +6937,7 @@ H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             /* Project the base space's selection down in less dimensions */
             if (H5S__hyper_project_simple_lower(base_space, new_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL,
-                            "can't project hyperslab selection into less dimensions")
+                            "can't project hyperslab selection into less dimensions");
         } /* end if */
         else {
             assert(new_space->extent.rank > base_space->extent.rank);
@@ -6948,7 +6948,7 @@ H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             /* Project the base space's selection down in more dimensions */
             if (H5S__hyper_project_simple_higher(base_space, new_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL,
-                            "can't project hyperslab selection into less dimensions")
+                            "can't project hyperslab selection into less dimensions");
         } /* end else */
 
         /* Copy the status of the dimension information */
@@ -7513,7 +7513,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         if (need_a_and_b)
                             if (H5S__hyper_append_span(a_and_b, ndims, span_b->low, span_a->high, NULL) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                     } /* end if */
                     /* If there are down spans, check for the overlap in them and add to each appropriate list
                      */
@@ -7540,7 +7540,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(a_not_b, ndims, span_b->low, span_a->high,
                                                        down_a_not_b) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_not_b) < 0)
@@ -7555,7 +7555,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(a_and_b, ndims, span_b->low, span_a->high,
                                                        down_a_and_b) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_and_b) < 0)
@@ -7570,7 +7570,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(b_not_a, ndims, span_b->low, span_a->high,
                                                        down_b_not_a) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_b_not_a) < 0)
@@ -7627,7 +7627,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         if (need_a_and_b)
                             if (H5S__hyper_append_span(a_and_b, ndims, span_b->low, span_b->high, NULL) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                     } /* end if */
                     /* If there are down spans, check for the overlap in them and add to each appropriate list
                      */
@@ -7650,7 +7650,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(a_not_b, ndims, span_b->low, span_b->high,
                                                        down_a_not_b) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_not_b) < 0)
@@ -7665,7 +7665,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(a_and_b, ndims, span_b->low, span_b->high,
                                                        down_a_and_b) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_and_b) < 0)
@@ -7680,7 +7680,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(b_not_a, ndims, span_b->low, span_b->high,
                                                        down_b_not_a) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_b_not_a) < 0)
@@ -7716,7 +7716,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(b_not_a, ndims, span_b->low, span_a->low - 1,
                                                        span_b->down) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                     } /* end if */
                     else {
                         /* Keep going, nothing to split off */
@@ -7734,7 +7734,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         if (need_a_and_b)
                             if (H5S__hyper_append_span(a_and_b, ndims, span_a->low, span_a->high, NULL) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                     } /* end if */
                     /* If there are down spans, check for the overlap in them and add to each appropriate list
                      */
@@ -7757,7 +7757,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(a_not_b, ndims, span_a->low, span_a->high,
                                                        down_a_not_b) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_not_b) < 0)
@@ -7772,7 +7772,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(a_and_b, ndims, span_a->low, span_a->high,
                                                        down_a_and_b) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_and_b) < 0)
@@ -7787,7 +7787,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(b_not_a, ndims, span_a->low, span_a->high,
                                                        down_b_not_a) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_b_not_a) < 0)
@@ -7833,7 +7833,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(b_not_a, ndims, span_b->low, span_a->low - 1,
                                                        span_b->down) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                     } /* end if */
                     else {
                         /* Keep going, nothing to split off */
@@ -7851,7 +7851,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         if (need_a_and_b)
                             if (H5S__hyper_append_span(a_and_b, ndims, span_a->low, span_b->high, NULL) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                     } /* end if */
                     /* If there are down spans, check for the overlap in them and add to each appropriate list
                      */
@@ -7874,7 +7874,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(a_not_b, ndims, span_a->low, span_b->high,
                                                        down_a_not_b) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_not_b) < 0)
@@ -7889,7 +7889,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(a_and_b, ndims, span_a->low, span_b->high,
                                                        down_a_and_b) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_and_b) < 0)
@@ -7904,7 +7904,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                             if (H5S__hyper_append_span(b_not_a, ndims, span_a->low, span_b->high,
                                                        down_b_not_a) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_b_not_a) < 0)
@@ -10014,11 +10014,11 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
         if ((count[u] == H5S_UNLIMITED) || (block[u] == H5S_UNLIMITED)) {
             if (unlim_dim >= 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                            "cannot have more than one unlimited dimension in selection")
+                            "cannot have more than one unlimited dimension in selection");
             else {
                 if (count[u] == block[u]) /* Both are H5S_UNLIMITED */
                     HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                                "count and block cannot both be unlimited")
+                                "count and block cannot both be unlimited");
                 unlim_dim = (int)u;
             } /* end else */
         }     /* end if */
@@ -10066,7 +10066,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
         /* Check for invalid operation */
         if (unlim_dim >= 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                        "cannot modify unlimited selection with another unlimited selection")
+                        "cannot modify unlimited selection with another unlimited selection");
         if (!((op == H5S_SELECT_AND) || (op == H5S_SELECT_NOTA)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unsupported operation on unlimited selection")
         assert(space->select.sel_info.hslab->diminfo_valid);
@@ -10198,10 +10198,10 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
             /* Check for invalid operation */
             if (space->select.sel_info.hslab->unlim_dim >= 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                            "cannot modify unlimited selection with another unlimited selection")
+                            "cannot modify unlimited selection with another unlimited selection");
             if (!((op == H5S_SELECT_AND) || (op == H5S_SELECT_NOTB)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                            "unsupported operation with unlimited selection")
+                            "unsupported operation with unlimited selection");
 
             /* Get bounds of existing selection */
             if (H5S__hyper_bounds(space, bounds_start, bounds_end) < 0)
@@ -10239,7 +10239,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
             space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
             if (H5S__hyper_regular_and_single_block(space, start, opt_block) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTOPERATE, FAIL,
-                            "can't 'AND' single block against regular hyperslab")
+                            "can't 'AND' single block against regular hyperslab");
         } /* end if */
         else {
             /* Check if there's no hyperslab span information currently */
@@ -11021,7 +11021,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
             }
             else
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                            "insufficient elements in destination selection")
+                            "insufficient elements in destination selection");
         } while ((udata->skip > 0) || (udata->ds_low[udata->depth] > udata->ds_span[udata->depth]->high));
 
         /* Work downwards until skip is 0 */
@@ -11106,7 +11106,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                         1,
                                     udata->ds_span[udata->depth]->down) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                         }
                         else {
                             /* If we're not sharing the destination space's
@@ -11125,7 +11125,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                         1,
                                     copied_span_info) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                             if (H5S__hyper_free_span_info(copied_span_info) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                             copied_span_info = NULL;
@@ -11214,7 +11214,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
              * still elements to add, issue an error. */
             if (udata->nelem > 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                            "insufficient elements in destination selection")
+                            "insufficient elements in destination selection");
             break;
         } /* end else */
     } while ((udata->nelem > 0) || (udata->ds_low[udata->depth] > udata->ds_span[udata->depth]->high));
@@ -11247,7 +11247,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                         1,
                                     udata->ds_span[udata->depth]->down) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                         }
                         else {
                             /* If we're not sharing the destination space's
@@ -11266,7 +11266,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                         1,
                                     copied_span_info) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
-                                            "can't allocate hyperslab span")
+                                            "can't allocate hyperslab span");
                             if (H5S__hyper_free_span_info(copied_span_info) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                             copied_span_info = NULL;
@@ -11453,7 +11453,7 @@ H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper
                         if (H5S__hyper_proj_int_iterate(ss_span->down, sis_span->down, high - low + 1,
                                                         depth + 1, udata) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL,
-                                        "can't iterate over source selections")
+                                        "can't iterate over source selections");
                     } /* end if */
                     else {
                         assert(depth == udata->ss_rank - 1);
@@ -11681,7 +11681,7 @@ H5S__hyper_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
         if (NULL == src_space->select.sel_info.hslab->span_lst)
             if (H5S__hyper_generate_spans(src_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
-                            "can't construct span tree for source hyperslab selection")
+                            "can't construct span tree for source hyperslab selection");
 
         /* Simply point to existing span tree */
         ss_span_info = src_space->select.sel_info.hslab->span_lst;
@@ -11703,7 +11703,7 @@ H5S__hyper_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
         if (NULL == dst_space->select.sel_info.hslab->span_lst)
             if (H5S__hyper_generate_spans(dst_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
-                            "can't construct span tree for dsetination hyperslab selection")
+                            "can't construct span tree for dsetination hyperslab selection");
 
         /* Simply point to existing span tree */
         ds_span_info = dst_space->select.sel_info.hslab->span_lst;
@@ -11723,7 +11723,7 @@ H5S__hyper_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
     if (NULL == src_intersect_space->select.sel_info.hslab->span_lst)
         if (H5S__hyper_generate_spans(src_intersect_space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
-                        "can't construct span tree for source intersect hyperslab selection")
+                        "can't construct span tree for source intersect hyperslab selection");
 
     /* Initialize udata */
     /* We will use op_info[0] for nelem and op_info[1] for copied spans */

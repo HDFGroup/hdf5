@@ -657,7 +657,7 @@ H5P__decode(const void *buf)
     vers = (uint8_t)*p++;
     if ((uint8_t)H5P_ENCODE_VERS != vers)
         HGOTO_ERROR(H5E_PLIST, H5E_VERSION, FAIL, "bad version # of encoded information, expected %u, got %u",
-                    (unsigned)H5P_ENCODE_VERS, (unsigned)vers)
+                    (unsigned)H5P_ENCODE_VERS, (unsigned)vers);
 
     /* Get the type of the property list */
     type = (H5P_plist_type_t)*p++;
@@ -700,7 +700,7 @@ H5P__decode(const void *buf)
         if (prop->decode) {
             if ((prop->decode)((const void **)&p, value_buf) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL,
-                            "property decoding routine failed, property: '%s'", name)
+                            "property decoding routine failed, property: '%s'", name);
         } /* end if */
         else
             HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no decode callback for property: '%s'", name)

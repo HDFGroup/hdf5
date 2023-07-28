@@ -131,7 +131,7 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null VOL connector name is disallowed")
     if (0 == HDstrlen(name))
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "zero-length VOL connector name is disallowed")
+                    "zero-length VOL connector name is disallowed");
 
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
@@ -175,7 +175,7 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
     /* Check arguments */
     if (value < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "negative VOL connector value is disallowed")
+                    "negative VOL connector value is disallowed");
 
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
@@ -1006,7 +1006,7 @@ H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_
     /* Register the operation */
     if (H5VL__register_opt_operation(subcls, op_name, op_val) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register dynamic optional operation: '%s'",
-                    op_name)
+                    op_name);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1081,7 +1081,7 @@ H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
     /* Unregister the operation */
     if (H5VL__unregister_opt_operation(subcls, op_name) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREMOVE, FAIL, "can't unregister dynamic optional operation: '%s'",
-                    op_name)
+                    op_name);
 
 done:
     FUNC_LEAVE_API(ret_value)

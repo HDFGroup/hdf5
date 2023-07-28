@@ -228,7 +228,7 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
                         dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize > prec + offset ||
                         dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize > prec + offset)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                    "adjust sign, mantissa, and exponent fields first")
+                                    "adjust sign, mantissa, and exponent fields first");
                     break;
 
                 case H5T_NO_CLASS:

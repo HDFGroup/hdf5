@@ -2328,7 +2328,7 @@ H5CX_get_data_transform(H5Z_data_xform_t **data_transform)
                 /* Get the dataset transfer property list pointer */
                 if (NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
                     HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL,
-                                "can't get default dataset transfer property list")
+                                "can't get default dataset transfer property list");
 
             /* Get data transform info value */
             /* (Note: 'peek', not 'get' - if this turns out to be a problem, we may need
@@ -2383,7 +2383,7 @@ H5CX_get_vlen_alloc_info(H5T_vlen_alloc_info_t *vl_alloc_info)
                 /* Get the dataset transfer property list pointer */
                 if (NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
                     HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL,
-                                "can't get default dataset transfer property list")
+                                "can't get default dataset transfer property list");
 
             /* Get VL datatype alloc info values */
             if (H5P_get((*head)->ctx.dxpl, H5D_XFER_VLEN_ALLOC_NAME, &(*head)->ctx.vl_alloc_info.alloc_func) <
@@ -2742,7 +2742,7 @@ H5CX_get_ext_file_prefix(const char **extfile_prefix)
                 /* Get the dataset access property list pointer */
                 if (NULL == ((*head)->ctx.dapl = (H5P_genplist_t *)H5I_object((*head)->ctx.dapl_id)))
                     HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL,
-                                "can't get default dataset access property list")
+                                "can't get default dataset access property list");
 
             /* Get the prefix for the external file */
             /* (Note: 'peek', not 'get' - if this turns out to be a problem, we may need
@@ -2797,7 +2797,7 @@ H5CX_get_vds_prefix(const char **vds_prefix)
                 /* Get the dataset access property list pointer */
                 if (NULL == ((*head)->ctx.dapl = (H5P_genplist_t *)H5I_object((*head)->ctx.dapl_id)))
                     HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL,
-                                "can't get default dataset access property list")
+                                "can't get default dataset access property list");
 
             /* Get the prefix for the VDS */
             /* (Note: 'peek', not 'get' - if this turns out to be a problem, we may need

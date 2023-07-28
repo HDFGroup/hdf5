@@ -51,7 +51,7 @@ H5Tget_cset(hid_t type_id)
         dt = dt->shared->parent; /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_CSET_ERROR,
-                    "operation not defined for data type class")
+                    "operation not defined for data type class");
 
     /* result */
     if (H5T_IS_FIXED_STRING(dt->shared))

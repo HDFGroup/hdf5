@@ -129,7 +129,7 @@ H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
     /* Increment # of files using this array header */
     if (H5FA__hdr_fuse_incr(fa->hdr) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINC, NULL,
-                    "can't increment file reference count on shared array header")
+                    "can't increment file reference count on shared array header");
 
     /* Set file pointer for this array open context */
     fa->f = f;
@@ -180,7 +180,7 @@ H5FA_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     /* Allocate and initialize new fixed array wrapper */
     if (NULL == (fa = H5FA__new(f, fa_addr, FALSE, ctx_udata)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL,
-                    "allocation and/or initialization failed for fixed array wrapper")
+                    "allocation and/or initialization failed for fixed array wrapper");
 
     /* Set the return value */
     ret_value = fa;
@@ -218,7 +218,7 @@ H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
     /* Allocate and initialize new fixed array wrapper */
     if (NULL == (fa = H5FA__new(f, fa_addr, TRUE, ctx_udata)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL,
-                    "allocation and/or initialization failed for fixed array wrapper")
+                    "allocation and/or initialization failed for fixed array wrapper");
 
     /* Set the return value */
     ret_value = fa;
@@ -545,7 +545,7 @@ H5FA_close(H5FA_t *fa)
                 /* Check the header's status in the metadata cache */
                 if (H5AC_get_entry_status(fa->f, fa_addr, &hdr_status) < 0)
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL,
-                                "unable to check metadata cache status for fixed array header")
+                                "unable to check metadata cache status for fixed array header");
 
                 /* Sanity checks on header */
                 assert(hdr_status & H5AC_ES__IN_CACHE);
@@ -568,7 +568,7 @@ H5FA_close(H5FA_t *fa)
              */
             if (H5FA__hdr_decr(fa->hdr) < 0)
                 HGOTO_ERROR(H5E_FARRAY, H5E_CANTDEC, FAIL,
-                            "can't decrement reference count on shared array header")
+                            "can't decrement reference count on shared array header");
 
             /* Delete array, starting with header (unprotects header) */
             if (H5FA__hdr_delete(hdr) < 0)
@@ -581,7 +581,7 @@ H5FA_close(H5FA_t *fa)
              */
             if (H5FA__hdr_decr(fa->hdr) < 0)
                 HGOTO_ERROR(H5E_FARRAY, H5E_CANTDEC, FAIL,
-                            "can't decrement reference count on shared array header")
+                            "can't decrement reference count on shared array header");
         } /* end else */
     }     /* end if */
 
@@ -616,7 +616,7 @@ H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
     /* Lock the array header into memory */
     if (NULL == (hdr = H5FA__hdr_protect(f, fa_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL, "unable to protect fixed array header, address = %llu",
-                    (unsigned long long)fa_addr)
+                    (unsigned long long)fa_addr);
 
     /* Check for files using shared array header */
     if (hdr->file_rc)
@@ -668,7 +668,7 @@ H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata)
     /* Allocate space for a native array element */
     if (NULL == (elmt = H5FL_BLK_MALLOC(fa_native_elmt, fa->hdr->cparam.cls->nat_elmt_size)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, H5_ITER_ERROR,
-                    "memory allocation failed for fixed array element")
+                    "memory allocation failed for fixed array element");
 
     /* Iterate over all elements in array */
     for (u = 0; u < fa->hdr->stats.nelmts && ret_value == H5_ITER_CONT; u++) {

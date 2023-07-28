@@ -534,7 +534,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root entry should not exist yet")
         if (NULL == (sblock->root_ent = (H5G_entry_t *)H5MM_calloc(sizeof(H5G_entry_t))))
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL,
-                        "can't allocate space for root group symbol table entry")
+                        "can't allocate space for root group symbol table entry");
 
         /* Decode the root group symbol table entry */
         if (H5G_ent_decode(udata->f, (const uint8_t **)&image, sblock->root_ent, end) < 0)

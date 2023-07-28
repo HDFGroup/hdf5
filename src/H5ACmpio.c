@@ -491,7 +491,7 @@ H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t H5_ATTR_NDEBUG_UNUS
         case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
             if (H5C_construct_candidate_list__clean_cache((H5C_t *)cache_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,
-                            "H5C_construct_candidate_list__clean_cache() failed.")
+                            "H5C_construct_candidate_list__clean_cache() failed.");
             break;
 
         default:
@@ -2044,7 +2044,7 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
                 case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
                     if (H5AC__rsp__p0_only__flush_to_min_clean(f) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL,
-                                    "H5AC__rsp__p0_only__flush_to_min_clean() failed.")
+                                    "H5AC__rsp__p0_only__flush_to_min_clean() failed.");
                     break;
 
                 case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
@@ -2063,7 +2063,7 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
                 case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
                     if (H5AC__rsp__dist_md_write__flush_to_min_clean(f) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL,
-                                    "H5AC__rsp__dist_md_write__flush_to_min_clean() failed.")
+                                    "H5AC__rsp__dist_md_write__flush_to_min_clean() failed.");
                     break;
 
                 case H5AC_SYNC_POINT_OP__FLUSH_CACHE:

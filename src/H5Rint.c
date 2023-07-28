@@ -281,7 +281,7 @@ H5R__create_attr(const H5O_token_t *obj_token, size_t token_size, const char *at
     /* Make sure that attribute name is not longer than supported encode size */
     if (HDstrlen(attr_name) > H5R_MAX_STRING_LEN)
         HGOTO_ERROR(H5E_REFERENCE, H5E_ARGS, FAIL, "attribute name too long (%d > %d)",
-                    (int)HDstrlen(attr_name), H5R_MAX_STRING_LEN)
+                    (int)HDstrlen(attr_name), H5R_MAX_STRING_LEN);
 
     /* Create new reference */
     ref->info.obj.filename = NULL;
@@ -485,7 +485,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
      */
     if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID,
-                    "can't set VOL connector info in API context")
+                    "can't set VOL connector info in API context");
 
     /* Open the file */
     /* (Must open file read-write to allow for object modifications) */
@@ -515,7 +515,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
         /* Make the 'post open' callback */
         if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5I_INVALID_HID,
-                        "unable to make file 'post open' callback")
+                        "unable to make file 'post open' callback");
     } /* end if */
 
     /* Attach loc_id to reference */
@@ -1139,7 +1139,7 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
     /* Get the amount of space required to serialize the selection */
     if ((buf_size = H5S_SELECT_SERIAL_SIZE(space)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL,
-                    "Cannot determine amount of space needed for serializing selection")
+                    "Cannot determine amount of space needed for serializing selection");
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
     if (buf && *nalloc >= ((size_t)buf_size + 2 * sizeof(uint32_t))) {
@@ -1508,7 +1508,7 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbyt
 
         if (H5VL_native_token_to_addr(f, H5I_FILE, token, &oloc.addr) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTUNSERIALIZE, FAIL,
-                        "can't deserialize object token into address")
+                        "can't deserialize object token into address");
 
         /* Open and copy the dataset's dataspace */
         if (NULL == (space = H5S_read(&oloc)))

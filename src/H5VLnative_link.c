@@ -101,7 +101,7 @@ H5VL__native_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_lo
                     link_loc_p = cur_loc_p;
                 else if (cur_loc_p->oloc->file != link_loc_p->oloc->file)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "source and destination should be in the same file.")
+                                "source and destination should be in the same file.");
 
                 /* Create the link */
                 if (H5L__create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name, link_loc_p,

@@ -141,7 +141,7 @@ H5FA__hdr_init(H5FA_hdr_t *hdr, void *ctx_udata)
     if (hdr->cparam.cls->crt_context)
         if (NULL == (hdr->cb_ctx = (*hdr->cparam.cls->crt_context)(ctx_udata)))
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, FAIL,
-                        "unable to create fixed array client callback context")
+                        "unable to create fixed array client callback context");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -177,7 +177,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
             HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, HADDR_UNDEF, "element size must be greater than zero")
         if (cparam->max_dblk_page_nelmts_bits == 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "max. # of elements bits must be greater than zero")
+                        "max. # of elements bits must be greater than zero");
         if (cparam->nelmts == 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, HADDR_UNDEF, "# of elements must be greater than zero")
     }
@@ -186,7 +186,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FA__hdr_alloc(f)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, HADDR_UNDEF,
-                    "memory allocation failed for Fixed Array shared header")
+                    "memory allocation failed for Fixed Array shared header");
 
     hdr->dblk_addr = HADDR_UNDEF;
 
@@ -215,7 +215,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     if (hdr->top_proxy)
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, HADDR_UNDEF,
-                        "unable to add fixed array entry as child of array proxy")
+                        "unable to add fixed array entry as child of array proxy");
 
     /* Set address of array header to return */
     ret_value = hdr->addr;
@@ -420,7 +420,7 @@ H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags)
     /* Protect the header */
     if (NULL == (hdr = (H5FA_hdr_t *)H5AC_protect(f, H5AC_FARRAY_HDR, fa_addr, &udata, flags)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, NULL, "unable to protect fixed array header, address = %llu",
-                    (unsigned long long)fa_addr)
+                    (unsigned long long)fa_addr);
     hdr->f = f; /* (Must be set again here, in case the header was already in the cache -QAK) */
 
     /* Create top proxy, if it doesn't exist */
@@ -432,7 +432,7 @@ H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags)
         /* Add header as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, NULL,
-                        "unable to add fixed array entry as child of array proxy")
+                        "unable to add fixed array entry as child of array proxy");
     }
 
     /* Set return value */
@@ -464,7 +464,7 @@ H5FA__hdr_unprotect(H5FA_hdr_t *hdr, unsigned cache_flags)
     /* Unprotect the header */
     if (H5AC_unprotect(hdr->f, H5AC_FARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL,
-                    "unable to unprotect fixed array hdr, address = %llu", (unsigned long long)hdr->addr)
+                    "unable to unprotect fixed array hdr, address = %llu", (unsigned long long)hdr->addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -547,7 +547,7 @@ H5FA__hdr_dest(H5FA_hdr_t *hdr)
     if (hdr->cb_ctx) {
         if ((*hdr->cparam.cls->dst_context)(hdr->cb_ctx) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTRELEASE, FAIL,
-                        "unable to destroy fixed array client callback context")
+                        "unable to destroy fixed array client callback context");
     }
     hdr->cb_ctx = NULL;
 

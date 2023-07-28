@@ -1580,7 +1580,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         else {
             if (type != H5FD_MEM_DRAW)
                 HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL,
-                            "Metadata Coll opt property should be collective at this point")
+                            "Metadata Coll opt property should be collective at this point");
 
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)

@@ -185,7 +185,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
             if (NULL == (hdr->node_info[u].node_ptr_fac =
                              H5FL_fac_init(sizeof(H5B2_node_ptr_t) * (hdr->node_info[u].max_nrec + 1))))
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
-                            "can't create internal 'branch' node node pointer block factory")
+                            "can't create internal 'branch' node node pointer block factory");
         } /* end for */
     }     /* end if */
 
@@ -300,7 +300,7 @@ H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
     if (hdr->top_proxy)
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, HADDR_UNDEF,
-                        "unable to add v2 B-tree header as child of array proxy")
+                        "unable to add v2 B-tree header as child of array proxy");
 
     /* Set address of v2 B-tree header to return */
     ret_value = hdr->addr;
@@ -497,7 +497,7 @@ H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata, unsigned flags)
     /* Protect the header */
     if (NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, H5AC_BT2_HDR, hdr_addr, &udata, flags)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load v2 B-tree header, address = %llu",
-                    (unsigned long long)hdr_addr)
+                    (unsigned long long)hdr_addr);
     hdr->f = f; /* (Must be set again here, in case the header was already in the cache -QAK) */
 
     /* Create top proxy, if it doesn't exist */
@@ -548,7 +548,7 @@ H5B2__hdr_unprotect(H5B2_hdr_t *hdr, unsigned cache_flags)
     /* Unprotect the header */
     if (H5AC_unprotect(hdr->f, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL,
-                    "unable to unprotect v2 B-tree header, address = %llu", (unsigned long long)hdr->addr)
+                    "unable to unprotect v2 B-tree header, address = %llu", (unsigned long long)hdr->addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -597,11 +597,11 @@ H5B2__hdr_free(H5B2_hdr_t *hdr)
             if (hdr->node_info[u].nat_rec_fac)
                 if (H5FL_fac_term(hdr->node_info[u].nat_rec_fac) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL,
-                                "can't destroy node's native record block factory")
+                                "can't destroy node's native record block factory");
             if (hdr->node_info[u].node_ptr_fac)
                 if (H5FL_fac_term(hdr->node_info[u].node_ptr_fac) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL,
-                                "can't destroy node's node pointer block factory")
+                                "can't destroy node's node pointer block factory");
         } /* end for */
 
         /* Free the array of node info structs */
@@ -655,7 +655,7 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr)
         /* Check the v2 B-tree header's status in the metadata cache */
         if (H5AC_get_entry_status(hdr->f, hdr->addr, &hdr_status) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL,
-                        "unable to check metadata cache status for v2 B-tree header")
+                        "unable to check metadata cache status for v2 B-tree header");
 
         /* Sanity checks on v2 B-tree header */
         assert(hdr_status & H5AC_ES__IN_CACHE);

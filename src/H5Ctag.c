@@ -655,7 +655,7 @@ H5C_verify_tag(int id, haddr_t tag)
         else {
             if (tag == H5AC__SUPERBLOCK_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL,
-                            "H5AC__SUPERBLOCK_TAG applied to non-superblock entry")
+                            "H5AC__SUPERBLOCK_TAG applied to non-superblock entry");
         } /* end else */
 
         /* Free Space Manager */
@@ -675,7 +675,7 @@ H5C_verify_tag(int id, haddr_t tag)
         else {
             if (tag == H5AC__GLOBALHEAP_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL,
-                            "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry")
+                            "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry");
         } /* end else */
     }     /* end else */
 

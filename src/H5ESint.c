@@ -556,7 +556,7 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
                 /* Retrieve the execution time info */
                 if (H5VL_request_specific(ev->request, &vol_cb_args) < 0)
                     HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL,
-                                "unable to retrieve execution time info for operation")
+                                "unable to retrieve execution time info for operation");
             }
             else
                 /* Translate status */
@@ -656,7 +656,7 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
     else if (ev_status == H5VL_REQUEST_STATUS_CANT_CANCEL)
         /* Should never get a status of 'can't cancel' back from test / wait operation */
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADVALUE, H5_ITER_ERROR,
-                    "received \"can't cancel\" status for operation")
+                    "received \"can't cancel\" status for operation");
     else {
         /* Sanity check */
         assert(ev_status == H5VL_REQUEST_STATUS_IN_PROGRESS);

@@ -366,7 +366,7 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
         /* Get size of global heap object for virtual dataset */
         if (H5HG_get_obj_size(loc->file, &(layout.storage.u.virt.serial_list_hobjid), &virtual_heap_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "can't get global heap size for virtual dataset mapping")
+                        "can't get global heap size for virtual dataset mapping");
 
         /* Return heap size */
         bh_info->heap_size = (hsize_t)virtual_heap_size;

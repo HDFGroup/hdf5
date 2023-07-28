@@ -1166,7 +1166,7 @@ H5D__btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for source shared B-tree info")
     if (H5D__btree_shared_create(idx_info_dst->f, idx_info_dst->storage, idx_info_dst->layout) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
-                    "can't create wrapper for destination shared B-tree info")
+                    "can't create wrapper for destination shared B-tree info");
 
     /* Create the root of the B-tree that describes chunked storage in the dest. file */
     if (H5D__btree_idx_create(idx_info_dst) < 0)

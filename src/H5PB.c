@@ -880,7 +880,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                 /* Read page from VFD */
                 if (NULL == (new_page_buf = H5FL_FAC_MALLOC(page_buf->page_fac)))
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for page buffer entry")
+                                "memory allocation failed for page buffer entry");
 
                 /* Read page through the VFD layer, but make sure we don't read past the EOA. */
 
@@ -891,7 +891,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                 /* If the entire page falls outside the EOA, then fail */
                 if (search_addr > eoa)
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_BADVALUE, FAIL,
-                                "reading an entire page that is outside the file EOA")
+                                "reading an entire page that is outside the file EOA");
 
                 /* Adjust the read size to not go beyond the EOA */
                 if (search_addr + page_size > eoa)
@@ -1195,7 +1195,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     /* Allocate space for the page buffer */
                     if (NULL == (new_page_buf = H5FL_FAC_MALLOC(page_buf->page_fac)))
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTALLOC, FAIL,
-                                    "memory allocation failed for page buffer entry")
+                                    "memory allocation failed for page buffer entry");
                     memset(new_page_buf, 0, (size_t)offset);
                     memset((uint8_t *)new_page_buf + offset + access_size, 0,
                            page_size - ((size_t)offset + access_size));
@@ -1215,7 +1215,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     /* Allocate space for the page buffer */
                     if (NULL == (new_page_buf = H5FL_FAC_CALLOC(page_buf->page_fac)))
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTALLOC, FAIL,
-                                    "memory allocation failed for page buffer entry")
+                                    "memory allocation failed for page buffer entry");
 
                     /* Create the new loaded PB entry */
                     if (NULL == (page_entry = H5FL_CALLOC(H5PB_entry_t)))
@@ -1232,7 +1232,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     /* If the entire page falls outside the EOA, then fail */
                     if (search_addr > eoa)
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_BADVALUE, FAIL,
-                                    "writing to a page that is outside the file EOA")
+                                    "writing to a page that is outside the file EOA");
 
                     /* Retrieve the 'eof' for the file - The MPI-VFD EOF
                      * returned will most likely be HADDR_UNDEF, so skip

@@ -140,7 +140,7 @@ H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open, void *ctx_udata)
     /* Increment # of files using this array header */
     if (H5EA__hdr_fuse_incr(ea->hdr) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINC, NULL,
-                    "can't increment file reference count on shared array header")
+                    "can't increment file reference count on shared array header");
 
     /* Set file pointer for this array open context */
     ea->f = f;
@@ -192,7 +192,7 @@ H5EA_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
     /* Allocate and initialize new extensible array wrapper */
     if (NULL == (ea = H5EA__new(f, ea_addr, FALSE, ctx_udata)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL,
-                    "allocation and/or initialization failed for extensible array wrapper")
+                    "allocation and/or initialization failed for extensible array wrapper");
 
     /* Set the return value */
     ret_value = ea;
@@ -230,7 +230,7 @@ H5EA_open(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
     /* Allocate and initialize new extensible array wrapper */
     if (NULL == (ea = H5EA__new(f, ea_addr, TRUE, ctx_udata)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL,
-                    "allocation and/or initialization failed for extensible array wrapper")
+                    "allocation and/or initialization failed for extensible array wrapper");
 
     /* Set the return value */
     ret_value = ea;
@@ -399,7 +399,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                                     hdr->sblk_info[sblk_idx].dblk_nelmts);
                     if (!H5_addr_defined(dblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
-                                    "unable to create extensible array data block")
+                                    "unable to create extensible array data block");
 
                     /* Set data block address in index block */
                     iblock->dblk_addrs[dblk_idx] = dblk_addr;
@@ -451,7 +451,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                     sblk_addr = H5EA__sblock_create(hdr, iblock, &stats_changed, sblk_idx);
                     if (!H5_addr_defined(sblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
-                                    "unable to create extensible array super block")
+                                    "unable to create extensible array super block");
 
                     /* Set super block address in index block */
                     iblock->sblk_addrs[sblk_off] = sblk_addr;
@@ -486,7 +486,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                         H5EA__dblock_create(hdr, sblock, &stats_changed, dblk_off, sblock->dblk_nelmts);
                     if (!H5_addr_defined(dblk_addr))
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
-                                    "unable to create extensible array data block")
+                                    "unable to create extensible array data block");
 
                     /* Set data block address in index block */
                     sblock->dblk_addrs[dblk_idx] = dblk_addr;
@@ -685,7 +685,7 @@ H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt)
         hdr->stats.stored.max_idx_set = idx + 1;
         if (H5EA__hdr_modified(hdr) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTMARKDIRTY, FAIL,
-                        "unable to mark extensible array header as modified")
+                        "unable to mark extensible array header as modified");
     }
 
 done:
@@ -855,7 +855,7 @@ H5EA_close(H5EA_t *ea)
                 /* Check the header's status in the metadata cache */
                 if (H5AC_get_entry_status(ea->f, ea_addr, &hdr_status) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL,
-                                "unable to check metadata cache status for extensible array header")
+                                "unable to check metadata cache status for extensible array header");
 
                 /* Sanity checks on header */
                 assert(hdr_status & H5AC_ES__IN_CACHE);
@@ -878,7 +878,7 @@ H5EA_close(H5EA_t *ea)
              */
             if (H5EA__hdr_decr(ea->hdr) < 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEC, FAIL,
-                            "can't decrement reference count on shared array header")
+                            "can't decrement reference count on shared array header");
 
             /* Delete array, starting with header (unprotects header) */
             if (H5EA__hdr_delete(hdr) < 0)
@@ -891,7 +891,7 @@ H5EA_close(H5EA_t *ea)
              */
             if (H5EA__hdr_decr(ea->hdr) < 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEC, FAIL,
-                            "can't decrement reference count on shared array header")
+                            "can't decrement reference count on shared array header");
         } /* end else */
     }     /* end if */
 
@@ -926,7 +926,7 @@ H5EA_delete(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
     /* Lock the array header into memory */
     if (NULL == (hdr = H5EA__hdr_protect(f, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
-                    "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
+                    "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr);
 
     /* Check for files using shared array header */
     if (hdr->file_rc)
@@ -976,7 +976,7 @@ H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata)
     /* Allocate space for a native array element */
     if (NULL == (elmt = H5FL_BLK_MALLOC(ea_native_elmt, ea->hdr->cparam.cls->nat_elmt_size)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, H5_ITER_ERROR,
-                    "memory allocation failed for extensible array element")
+                    "memory allocation failed for extensible array element");
 
     /* Iterate over all elements in array */
     for (u = 0; u < ea->hdr->stats.stored.max_idx_set && ret_value == H5_ITER_CONT; u++) {

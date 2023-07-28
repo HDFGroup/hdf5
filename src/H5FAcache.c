@@ -454,7 +454,7 @@ H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent,
                                                       (void *)hdr->top_proxy) < 0)
                         HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL,
-                                    "unable to destroy flush dependency between fixed array and proxy")
+                                    "unable to destroy flush dependency between fixed array and proxy");
                     hdr->parent = NULL;
                 } /* end if */
 
@@ -1027,7 +1027,7 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     /* Allocate the fixed array data block page */
     if (NULL == (dblk_page = H5FA__dblk_page_alloc(udata->hdr, udata->nelmts)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for fixed array data block page")
+                    "memory allocation failed for fixed array data block page");
 
     /* Set the fixed array data block's information */
     dblk_page->addr = udata->dblk_page_addr;

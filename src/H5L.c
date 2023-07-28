@@ -152,7 +152,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
         if (same_connector)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "Objects are accessed through different VOL connectors and can't be linked")
+                        "Objects are accessed through different VOL connectors and can't be linked");
     }
 
     /* Construct a temporary source VOL object */
@@ -254,7 +254,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
         if (same_connector)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "Objects are accessed through different VOL connectors and can't be linked")
+                        "Objects are accessed through different VOL connectors and can't be linked");
     } /* end if */
 
     /* Construct a temporary source VOL object */
@@ -490,7 +490,7 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t link_l
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
         if (same_connector)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "Objects are accessed through different VOL connectors and can't be linked")
+                        "Objects are accessed through different VOL connectors and can't be linked");
     } /* end if */
 
     /* Construct a temporary VOL object */

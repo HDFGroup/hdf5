@@ -129,14 +129,14 @@ H5T_get_order(const H5T_t *dtype)
             /* Retrieve the number of members */
             if ((nmemb = H5T_get_nmembers(dtype)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR,
-                            "can't get number of members from compound data type")
+                            "can't get number of members from compound data type");
 
             /* Get order for each compound member type. */
             for (i = 0; i < nmemb; i++) {
                 /* Get order for member */
                 if ((memb_order = H5T_get_order(dtype->shared->u.compnd.memb[i].type)) == H5T_ORDER_ERROR)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5T_ORDER_ERROR,
-                                "can't get order for compound member")
+                                "can't get order for compound member");
 
                 /* Ignore the H5T_ORDER_NONE, write down the first non H5T_ORDER_NONE order. */
                 if (memb_order != H5T_ORDER_NONE && ret_value == H5T_ORDER_NONE)
@@ -241,7 +241,7 @@ H5T__set_order(H5T_t *dtype, H5T_order_t order)
             /* Retrieve the number of fields in the compound datatype */
             if ((nmemb = H5T_get_nmembers(dtype)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL,
-                            "can't get number of members from compound data type")
+                            "can't get number of members from compound data type");
 
             /* Check for uninitialized compound datatype */
             if (nmemb == 0)

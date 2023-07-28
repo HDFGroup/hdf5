@@ -92,7 +92,7 @@ H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent)
     /* Allocate memory for the data block */
     if (NULL == (dblk_page = H5FL_CALLOC(H5EA_dblk_page_t)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array data block page")
+                    "memory allocation failed for extensible array data block page");
 
     /* Share common array information */
     if (H5EA__hdr_incr(hdr) < 0)
@@ -105,7 +105,7 @@ H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent)
     /* Allocate buffer for elements in data block page */
     if (NULL == (dblk_page->elmts = H5EA__hdr_alloc_elmts(hdr, hdr->dblk_page_nelmts)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for data block page element buffer")
+                    "memory allocation failed for data block page element buffer");
 
     /* Set the return value */
     ret_value = dblk_page;
@@ -142,7 +142,7 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
     /* Allocate the data block page */
     if (NULL == (dblk_page = H5EA__dblk_page_alloc(hdr, parent)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, FAIL,
-                    "memory allocation failed for extensible array data block page")
+                    "memory allocation failed for extensible array data block page");
 
     /* Set info about data block page on disk */
     dblk_page->addr = addr;
@@ -151,7 +151,7 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
     /* Clear any elements in data block page to fill value */
     if ((hdr->cparam.cls->fill)(dblk_page->elmts, (size_t)hdr->dblk_page_nelmts) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, FAIL,
-                    "can't set extensible array data block page elements to class's fill value")
+                    "can't set extensible array data block page elements to class's fill value");
 
     /* Cache the new extensible array data block page */
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
@@ -162,7 +162,7 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
     if (hdr->top_proxy) {
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblk_page) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, FAIL,
-                        "unable to add extensible array entry as child of array proxy")
+                        "unable to add extensible array entry as child of array proxy");
         dblk_page->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -227,7 +227,7 @@ H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t dblk_pag
         /* Add data block page as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblk_page) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, NULL,
-                        "unable to add extensible array entry as child of array proxy")
+                        "unable to add extensible array entry as child of array proxy");
         dblk_page->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -304,14 +304,14 @@ H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page)
             /* Free buffer for data block page elements */
             if (H5EA__hdr_free_elmts(dblk_page->hdr, dblk_page->hdr->dblk_page_nelmts, dblk_page->elmts) < 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL,
-                            "unable to free extensible array data block element buffer")
+                            "unable to free extensible array data block element buffer");
             dblk_page->elmts = NULL;
         } /* end if */
 
         /* Decrement reference count on shared info */
         if (H5EA__hdr_decr(dblk_page->hdr) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared array header")
+                        "can't decrement reference count on shared array header");
         dblk_page->hdr = NULL;
     } /* end if */
 

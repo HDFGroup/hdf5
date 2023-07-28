@@ -913,13 +913,13 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                         /* Allocate dynamic arrays */
                         if (NULL == (addrs = H5MM_malloc(sizeof(addrs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for address list")
+                                        "memory allocation failed for address list");
                         if (NULL == (sizes = H5MM_malloc(sizeof(sizes_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for size list")
+                                        "memory allocation failed for size list");
                         if (NULL == (vec_bufs = H5MM_malloc(sizeof(vec_bufs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for buffer list")
+                                        "memory allocation failed for buffer list");
 
                         /* Copy the existing data */
                         (void)H5MM_memcpy(addrs, addrs_local, sizeof(addrs_local));
@@ -932,16 +932,16 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                         /* Reallocate arrays */
                         if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * sizeof(*addrs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for address list")
+                                        "memory reallocation failed for address list");
                         addrs = tmp_ptr;
                         if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * sizeof(*sizes) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for size list")
+                                        "memory reallocation failed for size list");
                         sizes = tmp_ptr;
                         if (NULL ==
                             (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * sizeof(*vec_bufs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for buffer list")
+                                        "memory reallocation failed for buffer list");
                         vec_bufs = tmp_ptr;
                     }
 
@@ -1152,7 +1152,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
             if ((offsets[i]) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
         }
     }
 
@@ -1314,7 +1314,7 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
             if ((offsets[i]) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
         }
     }
 
@@ -1554,13 +1554,13 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                         /* Allocate dynamic arrays */
                         if (NULL == (addrs = H5MM_malloc(sizeof(addrs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for address list")
+                                        "memory allocation failed for address list");
                         if (NULL == (sizes = H5MM_malloc(sizeof(sizes_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for size list")
+                                        "memory allocation failed for size list");
                         if (NULL == (vec_bufs = H5MM_malloc(sizeof(vec_bufs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for buffer list")
+                                        "memory allocation failed for buffer list");
 
                         /* Copy the existing data */
                         (void)H5MM_memcpy(addrs, addrs_local, sizeof(addrs_local));
@@ -1573,16 +1573,16 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                         /* Reallocate arrays */
                         if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * sizeof(*addrs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for address list")
+                                        "memory reallocation failed for address list");
                         addrs = tmp_ptr;
                         if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * sizeof(*sizes) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for size list")
+                                        "memory reallocation failed for size list");
                         sizes = tmp_ptr;
                         if (NULL ==
                             (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * sizeof(*vec_bufs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for buffer list")
+                                        "memory reallocation failed for buffer list");
                         vec_bufs = tmp_ptr;
                     }
 
@@ -1785,7 +1785,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
             if ((offsets[i]) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
         }
     }
 
@@ -1938,7 +1938,7 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
             if ((offsets[i]) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
         }
     }
 

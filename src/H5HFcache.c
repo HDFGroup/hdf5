@@ -972,7 +972,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
         /* Share parent block */
         if (H5HF__iblock_incr(iblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL,
-                        "can't increment reference count on shared indirect block")
+                        "can't increment reference count on shared indirect block");
 
         /* Set max. # of rows in this block */
         iblock->max_rows = iblock->nrows;
@@ -1783,7 +1783,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
         /* Share parent block */
         if (H5HF__iblock_incr(dblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL,
-                        "can't increment reference count on shared indirect block")
+                        "can't increment reference count on shared indirect block");
     } /* end if */
 
     /* Offset of heap within the heap's address space */
@@ -2141,7 +2141,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
                 if (HADDR_UNDEF ==
                     (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
-                                "file allocation failed for fractal heap direct block")
+                                "file allocation failed for fractal heap direct block");
 
                 /* Update information about compressed direct block's
                  * location & size
@@ -2196,7 +2196,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
                 if (HADDR_UNDEF ==
                     (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
-                                "file allocation failed for fractal heap direct block")
+                                "file allocation failed for fractal heap direct block");
 
                 /* Update information about compressed direct block's
                  * location & size
@@ -2238,7 +2238,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
             if (HADDR_UNDEF ==
                 (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, (hsize_t)write_size)))
                 HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
-                            "file allocation failed for fractal heap direct block")
+                            "file allocation failed for fractal heap direct block");
 
             /* Check for root direct block */
             if (NULL == dblock->parent) {
@@ -3094,7 +3094,7 @@ H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5HF_
 
                 if (!fd_exists)
                     HGOTO_ERROR(H5E_HEAP, H5E_SYSTEM, FAIL,
-                                "dblock in cache and not a flush dep child of iblock.")
+                                "dblock in cache and not a flush dep child of iblock.");
             } /* end if */
         }     /* end if */
 
@@ -3332,7 +3332,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
                             if (H5AC_get_entry_ptr_from_addr(f, child_iblock_addr, (void **)(&child_iblock)) <
                                 0)
                                 HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
-                                            "H5AC_get_entry_ptr_from_addr() failed.")
+                                            "H5AC_get_entry_ptr_from_addr() failed.");
                             assert(child_iblock);
                         } /* end else */
                     }     /* end if */
@@ -3366,7 +3366,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
 
                         if (!fd_exists)
                             HGOTO_ERROR(H5E_HEAP, H5E_SYSTEM, FAIL,
-                                        "iblock is not a flush dep parent of child_iblock.")
+                                        "iblock is not a flush dep parent of child_iblock.");
                     } /* end if */
 
                     /* if we protected the child iblock, unprotect it now */

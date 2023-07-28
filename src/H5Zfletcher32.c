@@ -115,7 +115,7 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
 
         if (NULL == (outbuf = H5MM_malloc(nbytes + FLETCHER_LEN)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
-                        "unable to allocate Fletcher32 checksum destination buffer")
+                        "unable to allocate Fletcher32 checksum destination buffer");
 
         dst = (unsigned char *)outbuf;
 

@@ -132,14 +132,14 @@ H5HF_size(const H5HF_t *fh, hsize_t *heap_size)
         if (H5HF__man_iblock_size(hdr->f, hdr, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows,
                                   NULL, 0, heap_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
-                        "unable to get fractal heap storage info for indirect block")
+                        "unable to get fractal heap storage info for indirect block");
 
     /* Check for B-tree storage of huge objects in fractal heap */
     if (H5_addr_defined(hdr->huge_bt2_addr)) {
         /* Open the huge object index v2 B-tree */
         if (NULL == (bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
-                        "unable to open v2 B-tree for tracking 'huge' objects")
+                        "unable to open v2 B-tree for tracking 'huge' objects");
 
         /* Get the B-tree storage */
         if (H5B2_size(bt2, heap_size) < 0)

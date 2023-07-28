@@ -412,7 +412,7 @@ H5Z__unregister(H5Z_filter_t filter_id)
 
     if (object.found)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL,
-                    "can't unregister filter because a dataset is still using it")
+                    "can't unregister filter because a dataset is still using it");
 
     /* Iterate through all opened groups, returns a failure if any of them uses the filter */
     if (H5I_iterate(H5I_GROUP, H5Z__check_unregister_group_cb, &object, FALSE) < 0)
@@ -420,7 +420,7 @@ H5Z__unregister(H5Z_filter_t filter_id)
 
     if (object.found)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL,
-                    "can't unregister filter because a group is still using it")
+                    "can't unregister filter because a group is still using it");
 
     /* Iterate through all opened files and flush them */
     if (H5I_iterate(H5I_FILE, H5Z__flush_file_cb, &object, FALSE) < 0)
@@ -1352,10 +1352,10 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                      * the filter */
                     if (pline->filter[idx].name)
                         HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered",
-                                    pline->filter[idx].name)
+                                    pline->filter[idx].name);
                     else
                         HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
-                                    "required filter (name unavailable) is not registered")
+                                    "required filter (name unavailable) is not registered");
                 }
             } /* end if */
 

@@ -217,7 +217,7 @@ H5PLreplace(const char *search_path, unsigned int idx)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty")
     else if (idx >= num_paths)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index path out of bounds for table - can't be more than %u", (num_paths - 1))
+                    "index path out of bounds for table - can't be more than %u", (num_paths - 1));
 
     /* Insert the search path into the path table */
     if (H5PL__replace_path(search_path, idx) < 0)
@@ -257,7 +257,7 @@ H5PLinsert(const char *search_path, unsigned int idx)
     num_paths = H5PL__get_num_paths();
     if ((0 != num_paths) && (idx >= num_paths))
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index path out of bounds for table - can't be more than %u", (num_paths - 1))
+                    "index path out of bounds for table - can't be more than %u", (num_paths - 1));
 
     /* Insert the search path into the path table */
     if (H5PL__insert_path(search_path, idx) < 0)
@@ -295,7 +295,7 @@ H5PLremove(unsigned int idx)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty")
     else if (idx >= num_paths)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index path out of bounds for table - can't be more than %u", (num_paths - 1))
+                    "index path out of bounds for table - can't be more than %u", (num_paths - 1));
 
     /* Delete the search path from the path table */
     if (H5PL__remove_path(idx) < 0)
@@ -346,7 +346,7 @@ H5PLget(unsigned int idx, char *path_buf, size_t buf_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty")
     else if (idx >= num_paths)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index path out of bounds for table - can't be more than %u", (num_paths - 1))
+                    "index path out of bounds for table - can't be more than %u", (num_paths - 1));
 
     /* Check if the search table is empty */
     if (H5PL__get_num_paths() == 0)

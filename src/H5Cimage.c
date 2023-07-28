@@ -645,7 +645,7 @@ H5C__load_cache_image(H5F_t *f)
     if (cache_ptr->delete_image) {
         if (H5F__super_ext_remove_msg(f, H5O_MDCI_MSG_ID) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL,
-                        "can't remove metadata cache image message from superblock extension")
+                        "can't remove metadata cache image message from superblock extension");
 
         /* Reset image block values */
         cache_ptr->image_len      = 0;
@@ -935,7 +935,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
                 (cache_ptr->image_addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, f, (hsize_t)p0_image_len,
                                                     &eoa_frag_addr, &eoa_frag_size)))
                 HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL,
-                            "can't allocate file space for metadata cache image")
+                            "can't allocate file space for metadata cache image");
         } /* end if */
         else
 #endif /* H5_HAVE_PARALLEL */
@@ -947,7 +947,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
                                                                    (hsize_t)(cache_ptr->image_data_len),
                                                                    &eoa_frag_addr, &eoa_frag_size)))
                 HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL,
-                            "can't allocate file space for metadata cache image")
+                            "can't allocate file space for metadata cache image");
 
         /* Make note of the eoa after allocation of the cache image
          * block.  This value is used for sanity checking when we
@@ -1044,7 +1044,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
             if (cache_ptr->image_ctl.flags & H5C_CI__GEN_MDC_IMAGE_BLK)
                 if (H5F__super_ext_remove_msg(f, H5O_MDCI_MSG_ID) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL,
-                                "can't remove MDC image msg from superblock ext")
+                                "can't remove MDC image msg from superblock ext");
 
             cache_ptr->image_ctl.generate_image = FALSE;
         } /* end else */
@@ -1841,7 +1841,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                 if (NULL == (entry_ptr->fd_parent_addrs = (haddr_t *)H5MM_calloc(
                                  sizeof(haddr_t) * (size_t)(entry_ptr->fd_parent_addrs))))
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for fd parent addr array")
+                                "memory allocation failed for fd parent addr array");
 
                 v = 0;
                 for (u = 0; u < entry_ptr->flush_dep_nparents; u++) {
@@ -2199,7 +2199,7 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
                     if (NULL == (entry_ptr->fd_parent_addrs = (haddr_t *)H5MM_malloc(
                                      sizeof(haddr_t) * (size_t)(entry_ptr->fd_parent_count))))
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
-                                    "memory allocation failed for fd parent addrs buffer")
+                                    "memory allocation failed for fd parent addrs buffer");
 
                 for (int i = 0; i < (int)(entry_ptr->fd_parent_count); i++) {
                     entry_ptr->fd_parent_addrs[i] = entry_ptr->flush_dep_parent[i]->addr;
@@ -2764,7 +2764,7 @@ H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create)
     /* Write metadata cache image message to superblock extension */
     if (H5F__super_ext_write_msg(f, H5O_MDCI_MSG_ID, &mdci_msg, create, mesg_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL,
-                    "can't write metadata cache image message to superblock extension")
+                    "can't write metadata cache image message to superblock extension");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

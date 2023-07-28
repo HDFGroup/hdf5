@@ -365,7 +365,7 @@ H5B2__split_root(H5B2_hdr_t *hdr)
     if (NULL == (hdr->node_info[hdr->depth].node_ptr_fac =
                      H5FL_fac_init(sizeof(H5B2_node_ptr_t) * (hdr->node_info[hdr->depth].max_nrec + 1))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
-                    "can't create internal 'branch' node node pointer block factory")
+                    "can't create internal 'branch' node node pointer block factory");
 
     /* Keep old root node pointer info */
     old_root_ptr = hdr->root;
@@ -1623,7 +1623,7 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, 
         /* Allocate space for the node pointers in memory */
         if (NULL == (node_ptrs = (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].node_ptr_fac)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "memory allocation failed for B-tree internal node pointers")
+                        "memory allocation failed for B-tree internal node pointers");
 
         /* Copy the node pointers */
         H5MM_memcpy(node_ptrs, internal->node_ptrs,
@@ -1646,7 +1646,7 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, 
     /* Allocate space for the native keys in memory */
     if (NULL == (native = (uint8_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].nat_rec_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for B-tree internal native keys")
+                    "memory allocation failed for B-tree internal native keys");
 
     /* Copy the native keys */
     H5MM_memcpy(native, node_native, (hdr->cls->nrec_size * curr_node->node_nrec));

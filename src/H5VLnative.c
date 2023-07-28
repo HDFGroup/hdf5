@@ -400,7 +400,7 @@ H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
         /* Make sure that the VOL object is a native connector object */
         if (H5VL_object_is_native(vol_obj_container, &is_native_vol_obj) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL,
-                        "can't determine if VOL object is native connector object")
+                        "can't determine if VOL object is native connector object");
 
         assert(is_native_vol_obj && "not a native VOL connector object");
     }
@@ -494,7 +494,7 @@ H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
         /* Make sure that the VOL object is a native connector object */
         if (H5VL_object_is_native(vol_obj_container, &is_native_vol_obj) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL,
-                        "can't determine if VOL object is native connector object")
+                        "can't determine if VOL object is native connector object");
 
         assert(is_native_vol_obj && "not a native VOL connector object");
     }

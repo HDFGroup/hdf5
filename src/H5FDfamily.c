@@ -1471,7 +1471,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
         }
         else
             HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL,
-                        "provided file name cannot generate unique sub-files")
+                        "provided file name cannot generate unique sub-files");
     }
 
     /* Delete all the family members */

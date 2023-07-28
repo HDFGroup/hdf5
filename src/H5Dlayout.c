@@ -216,7 +216,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                 switch (layout->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, 0,
-                                    "v1 B-tree index type found for layout message >v3")
+                                    "v1 B-tree index type found for layout message >v3");
 
                     case H5D_CHUNK_IDX_NONE:
                         /* nothing */

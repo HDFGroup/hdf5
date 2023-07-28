@@ -147,7 +147,7 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
     /* Retrieve the v2 B-tree's address in the file */
     if (H5B2_get_addr(hdr->huge_bt2, &hdr->huge_bt2_addr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
-                    "can't get v2 B-tree address for tracking 'huge' heap objects")
+                    "can't get v2 B-tree address for tracking 'huge' heap objects");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -296,7 +296,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
         /* Go create (& open) v2 B-tree */
         if (H5HF__huge_bt2_create(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL,
-                        "can't create v2 B-tree for tracking 'huge' heap objects")
+                        "can't create v2 B-tree for tracking 'huge' heap objects");
     } /* end if */
     else {
         /* Check if v2 B-tree is open yet */
@@ -304,7 +304,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
             /* Open existing v2 B-tree */
             if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for tracking 'huge' heap objects")
+                            "unable to open v2 B-tree for tracking 'huge' heap objects");
         } /* end if */
     }     /* end else */
     assert(hdr->huge_bt2);
@@ -366,7 +366,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
             /* Insert record for object in v2 B-tree */
             if (H5B2_insert(hdr->huge_bt2, &obj_rec) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL,
-                            "couldn't insert object tracking record in v2 B-tree")
+                            "couldn't insert object tracking record in v2 B-tree");
 
             /* Encode ID for user */
             *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_HUGE;
@@ -385,7 +385,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
             /* Insert record for object in v2 B-tree */
             if (H5B2_insert(hdr->huge_bt2, &obj_rec) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL,
-                            "couldn't insert object tracking record in v2 B-tree")
+                            "couldn't insert object tracking record in v2 B-tree");
 
             /* Encode ID for user */
             *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_HUGE;
@@ -497,7 +497,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
             /* Open existing v2 B-tree */
             if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for tracking 'huge' heap objects")
+                            "unable to open v2 B-tree for tracking 'huge' heap objects");
         } /* end if */
 
         if (hdr->filter_len > 0) {
@@ -583,7 +583,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
             /* Open existing v2 B-tree */
             if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for tracking 'huge' heap objects")
+                            "unable to open v2 B-tree for tracking 'huge' heap objects");
         } /* end if */
 
         if (hdr->filter_len > 0) {
@@ -679,7 +679,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
             /* Open existing v2 B-tree */
             if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for tracking 'huge' heap objects")
+                            "unable to open v2 B-tree for tracking 'huge' heap objects");
         } /* end if */
 
         if (hdr->filter_len > 0) {
@@ -830,7 +830,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
             /* Open existing v2 B-tree */
             if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for tracking 'huge' heap objects")
+                            "unable to open v2 B-tree for tracking 'huge' heap objects");
         }
 
         /* Get ID for looking up 'huge' object in v2 B-tree */
@@ -947,7 +947,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
         /* Open existing v2 B-tree */
         if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
-                        "unable to open v2 B-tree for tracking 'huge' heap objects")
+                        "unable to open v2 B-tree for tracking 'huge' heap objects");
     } /* end if */
 
     /* Skip over the flag byte */

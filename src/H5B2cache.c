@@ -452,7 +452,7 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent,
                                                       (void *)hdr->top_proxy) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL,
-                                    "unable to destroy flush dependency between v2 B-tree and proxy")
+                                    "unable to destroy flush dependency between v2 B-tree and proxy");
                     hdr->parent = NULL;
                 } /* end if */
 
@@ -636,13 +636,13 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     if (NULL ==
         (internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(udata->hdr->node_info[udata->depth].nat_rec_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for B-tree internal native keys")
+                    "memory allocation failed for B-tree internal native keys");
 
     /* Allocate space for the node pointers in memory */
     if (NULL == (internal->node_ptrs =
                      (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(udata->hdr->node_info[udata->depth].node_ptr_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for B-tree internal node pointers")
+                    "memory allocation failed for B-tree internal node pointers");
 
     /* Set the number of records in the leaf & it's depth */
     internal->nrec  = udata->nrec;

@@ -283,7 +283,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
             switch (cache_ptr->resize_ctl.flash_incr_mode) {
                 case H5C_flash_incr__off:
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,
-                                "flash_size_increase_possible but H5C_flash_incr__off?!")
+                                "flash_size_increase_possible but H5C_flash_incr__off?!");
                     break;
 
                 case H5C_flash_incr__add_space:
@@ -881,7 +881,7 @@ H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t n
         switch (cache_ptr->resize_ctl.flash_incr_mode) {
             case H5C_flash_incr__off:
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,
-                            "flash_size_increase_possible but H5C_flash_incr__off?!")
+                            "flash_size_increase_possible but H5C_flash_incr__off?!");
                 break;
 
             case H5C_flash_incr__add_space:
@@ -917,7 +917,7 @@ H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t n
         switch (cache_ptr->resize_ctl.flash_incr_mode) {
             case H5C_flash_incr__off:
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,
-                            "flash_size_increase_possible but H5C_flash_incr__off?!")
+                            "flash_size_increase_possible but H5C_flash_incr__off?!");
                 break;
 
             case H5C_flash_incr__add_space:
@@ -2482,7 +2482,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
                         (cache_ptr->entries_inserted_counter > 0) ||
                         (cache_ptr->entries_relocated_counter > 0))
                         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,
-                                    "flush_me_last entry serialization triggered restart")
+                                    "flush_me_last entry serialization triggered restart");
 
                     assert(entry_ptr->flush_dep_nunser_children == 0);
                     assert(entry_ptr->serialization_count == 0);

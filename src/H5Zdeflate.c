@@ -118,7 +118,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                     if (NULL == (new_outbuf = H5MM_realloc(outbuf, nalloc))) {
                         (void)inflateEnd(&z_strm);
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
-                                    "memory allocation failed for deflate uncompression")
+                                    "memory allocation failed for deflate uncompression");
                     } /* end if */
                     outbuf = new_outbuf;
 

@@ -362,7 +362,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             /* Find the conversion function */
             if (NULL == (tpath = H5T_path_find(super_type, nat_super_type)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-                            "unable to convert between src and dst data types")
+                            "unable to convert between src and dst data types");
 
             /* Retrieve member info and insert members into new enum type */
             if ((snmemb = H5T_get_nmembers(dtype)) <= 0)

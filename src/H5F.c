@@ -768,11 +768,11 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void *
     /* Asking for SWMR write access on a read-only file is invalid */
     if ((flags & H5F_ACC_SWMR_WRITE) && 0 == (flags & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID,
-                    "SWMR write access on a file open for read-only access is not allowed")
+                    "SWMR write access on a file open for read-only access is not allowed");
     /* Asking for SWMR read access on a non-read-only file is invalid */
     if ((flags & H5F_ACC_SWMR_READ) && (flags & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID,
-                    "SWMR read access on a file open for read-write access is not allowed")
+                    "SWMR read access on a file open for read-write access is not allowed");
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)

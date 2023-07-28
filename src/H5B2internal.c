@@ -103,14 +103,14 @@ H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, 
     /* Allocate space for the native keys in memory */
     if (NULL == (internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].nat_rec_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for B-tree internal native keys")
+                    "memory allocation failed for B-tree internal native keys");
     memset(internal->int_native, 0, hdr->cls->nrec_size * hdr->node_info[depth].max_nrec);
 
     /* Allocate space for the node pointers in memory */
     if (NULL ==
         (internal->node_ptrs = (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].node_ptr_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for B-tree internal node pointers")
+                    "memory allocation failed for B-tree internal node pointers");
     memset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth].max_nrec + 1));
 
     /* Set depth of the node */
@@ -207,7 +207,7 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
         /* Add internal node as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, internal) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL,
-                        "unable to add v2 B-tree internal node as child of proxy")
+                        "unable to add v2 B-tree internal node as child of proxy");
         internal->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -313,7 +313,7 @@ H5B2__neighbor_internal(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_n
         if (H5B2__neighbor_internal(hdr, (uint16_t)(depth - 1), &internal->node_ptrs[idx], neighbor_loc, comp,
                                     internal, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
-                        "unable to find neighbor record in B-tree internal node")
+                        "unable to find neighbor record in B-tree internal node");
     } /* end if */
     else {
         if (H5B2__neighbor_leaf(hdr, &internal->node_ptrs[idx], neighbor_loc, comp, internal, udata, op,
@@ -398,7 +398,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                 if (retries > 0 && (internal->node_ptrs[idx + 1].node_nrec < split_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__split1(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
@@ -410,7 +410,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                 if (retries > 0 && (internal->node_ptrs[idx - 1].node_nrec < split_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, (idx - 1)) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__split1(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
@@ -423,7 +423,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                                     (internal->node_ptrs[idx - 1].node_nrec < split_nrec))) {
                     if (H5B2__redistribute3(hdr, depth, internal, &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__split1(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
@@ -548,7 +548,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
             assert(changed == FALSE);
 
             HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL,
-                        "'modify' callback failed for B-tree update operation")
+                        "'modify' callback failed for B-tree update operation");
         } /* end if */
 
         /* Mark the node as dirty if it changed */
@@ -579,7 +579,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
             if (H5B2__update_internal(hdr, (uint16_t)(depth - 1), &internal_flags, &internal->node_ptrs[idx],
                                       status, next_pos, internal, udata, op, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL,
-                            "unable to update record in internal B-tree node")
+                            "unable to update record in internal B-tree node");
         } /* end if */
         else {
             if (H5B2__update_leaf(hdr, &internal->node_ptrs[idx], status, next_pos, internal, udata, op,
@@ -649,7 +649,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                         if (H5AC_unprotect(hdr->f, H5AC_BT2_INT, curr_node_ptr->addr, internal,
                                            internal_flags) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL,
-                                        "unable to release internal B-tree node")
+                                        "unable to release internal B-tree node");
                         internal = NULL;
 
                         /* Punt back to caller */
@@ -669,7 +669,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                 if (H5B2__insert_internal(hdr, depth, parent_cache_info_flags_ptr, curr_node_ptr, curr_pos,
                                           parent, udata) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL,
-                                "unable to insert record into internal B-tree node")
+                                "unable to insert record into internal B-tree node");
                 break;
 
             case H5B2_UPDATE_UNKNOWN:
@@ -894,7 +894,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
                 if (retries > 0 && (internal->node_ptrs[idx + 1].node_nrec > merge_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
@@ -906,7 +906,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
                 if (retries > 0 && (internal->node_ptrs[idx - 1].node_nrec > merge_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, (idx - 1)) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
@@ -919,7 +919,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
                                     (internal->node_ptrs[idx - 1].node_nrec > merge_nrec))) {
                     if (H5B2__redistribute3(hdr, depth, internal, &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__merge3(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
@@ -1159,7 +1159,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
                 if (retries > 0 && (internal->node_ptrs[idx + 1].node_nrec > merge_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
@@ -1171,7 +1171,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
                 if (retries > 0 && (internal->node_ptrs[idx - 1].node_nrec > merge_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, (idx - 1)) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
@@ -1184,7 +1184,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
                                     (internal->node_ptrs[idx - 1].node_nrec > merge_nrec))) {
                     if (H5B2__redistribute3(hdr, depth, internal, &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL,
-                                    "unable to redistribute child node records")
+                                    "unable to redistribute child node records");
                 } /* end if */
                 else {
                     if (H5B2__merge3(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,

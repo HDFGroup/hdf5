@@ -1813,13 +1813,13 @@ H5Tcopy(hid_t obj_id)
              */
             if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID,
-                            "unable to get datatype from the dataset")
+                            "unable to get datatype from the dataset");
             dset_tid = vol_cb_args.args.get_type.type_id;
 
             /* Unwrap the type ID */
             if (NULL == (dt = (H5T_t *)H5I_object(dset_tid)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5I_INVALID_HID,
-                            "received invalid datatype from the dataset")
+                            "received invalid datatype from the dataset");
         } break;
 
         case H5I_UNINIT:
@@ -2430,7 +2430,7 @@ H5T__register_int(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T
     /* Register conversion */
     if (H5T__register(pers, name, src, dst, &conv_func) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                    "unable to register internal datatype conversion routine")
+                    "unable to register internal datatype conversion routine");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2525,7 +2525,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
             if ((tmp_sid = H5I_register(H5I_DATATYPE, H5T_copy(old_path->src, H5T_COPY_ALL), FALSE)) < 0 ||
                 (tmp_did = H5I_register(H5I_DATATYPE, H5T_copy(old_path->dst, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                            "unable to register data types for conv query")
+                            "unable to register data types for conv query");
             memset(&cdata, 0, sizeof cdata);
             cdata.command = H5T_CONV_INIT;
             if (conv->is_app) {
@@ -3454,7 +3454,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
 
                     if (NULL == (s = H5MM_xstrdup(new_dt->shared->u.compnd.memb[i].name)))
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
-                                    "can't copy string for compound field's name")
+                                    "can't copy string for compound field's name");
                     new_dt->shared->u.compnd.memb[i].name = s;
                     if (NULL == (tmp = (*copyfn)(old_dt->shared->u.compnd.memb[i].type)))
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "can't copy compound field's datatype")
@@ -3517,17 +3517,17 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                     if (NULL == (new_dt->shared->u.enumer.name =
                                      H5MM_malloc(new_dt->shared->u.enumer.nalloc * sizeof(char *))))
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                                    "enam name array memory allocation failed")
+                                    "enam name array memory allocation failed");
                     if (NULL == (new_dt->shared->u.enumer.value =
                                      H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size)))
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                                    "enam value array memory allocation failed")
+                                    "enam value array memory allocation failed");
                     H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
                                 new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
                     for (i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
                         if (NULL == (s = H5MM_xstrdup(old_dt->shared->u.enumer.name[i])))
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
-                                        "can't copy string for enum value's name")
+                                        "can't copy string for enum value's name");
                         new_dt->shared->u.enumer.name[i] = s;
                     }
                 }
@@ -3718,7 +3718,7 @@ H5T_copy_reopen(H5T_t *old_dt)
             /* Insert opened named datatype into opened object list for the file */
             if (H5FO_insert(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr, new_dt->shared, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL,
-                            "can't insert datatype into list of open objects")
+                            "can't insert datatype into list of open objects");
 
             /* Increment object count for the object in the top file */
             if (H5FO_top_incr(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr) < 0)
@@ -4044,7 +4044,7 @@ H5T_close(H5T_t *dt)
             /* Remove the datatype from the list of opened objects in the file */
             if (H5FO_delete(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL,
-                            "can't remove datatype from list of open objects")
+                            "can't remove datatype from list of open objects");
             if (H5O_close(&dt->oloc, NULL) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header")
 
@@ -4885,7 +4885,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     if (0 == H5T_g.npaths) {
         if (NULL == (H5T_g.path = (H5T_path_t **)H5MM_malloc(128 * sizeof(H5T_path_t *))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                        "memory allocation failed for type conversion path table")
+                        "memory allocation failed for type conversion path table");
         H5T_g.apaths = 128;
         if (NULL == (H5T_g.path[0] = H5FL_CALLOC(H5T_path_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for no-op conversion path")
@@ -4978,10 +4978,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         assert(NULL == path->conv.u.app_func);
         if (path->src && (src_id = H5I_register(H5I_DATATYPE, H5T_copy(path->src, H5T_COPY_ALL), FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-                        "unable to register source conversion type for query")
+                        "unable to register source conversion type for query");
         if (path->dst && (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(path->dst, H5T_COPY_ALL), FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-                        "unable to register destination conversion type for query")
+                        "unable to register destination conversion type for query");
         path->cdata.command = H5T_CONV_INIT;
         if (conv->is_app) {
             if ((conv->u.app_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL,
@@ -5014,10 +5014,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
             continue;
         if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(path->src, H5T_COPY_ALL), FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-                        "unable to register src conversion type for query")
+                        "unable to register src conversion type for query");
         if ((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(path->dst, H5T_COPY_ALL), FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-                        "unable to register dst conversion type for query")
+                        "unable to register dst conversion type for query");
         path->cdata.command = H5T_CONV_INIT;
         if (H5T_g.soft[i].conv.is_app) {
             if ((H5T_g.soft[i].conv.u.app_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0,

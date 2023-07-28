@@ -179,7 +179,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     /* Protect data block */
     if (NULL == (dblock = H5FA__dblock_protect(hdr, addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
-                    "unable to protect fixed array data block, address = %llu", (unsigned long long)addr)
+                    "unable to protect fixed array data block, address = %llu", (unsigned long long)addr);
 
     /* Print opening message */
     fprintf(stream, "%*sFixed Array data Block...\n", indent, "");
@@ -236,7 +236,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                 } /* end for */
                 if (H5FA__dblk_page_unprotect(dblk_page, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL,
-                                "unable to release fixed array data block page")
+                                "unable to release fixed array data block page");
 
                 /* Advance to next page address */
                 dblk_page_addr += dblock->dblk_page_size;

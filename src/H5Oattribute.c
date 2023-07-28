@@ -270,7 +270,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
                 op.u.lib_op = H5O__attr_to_dense_cb;
                 if (H5O__msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL,
-                                "error converting attributes to dense storage")
+                                "error converting attributes to dense storage");
             } /* end if */
         }     /* end if */
 
@@ -816,7 +816,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
         if (mesg->flags & H5O_MSG_FLAG_SHARED)
             if (H5O__attr_update_shared(udata->f, oh, udata->attr, (H5O_shared_t *)mesg->native) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR,
-                            "unable to update attribute in shared storage")
+                            "unable to update attribute in shared storage");
 
         /* Indicate that the object header was modified */
         *oh_modified = H5O_MODIFY;
@@ -1005,7 +1005,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
             /* Update the shared attribute in the SOHM storage */
             if (H5O__attr_update_shared(udata->f, oh, (H5A_t *)mesg->native, NULL) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR,
-                            "unable to update attribute in shared storage")
+                            "unable to update attribute in shared storage");
         } /* end if */
         else {
             /* Sanity check */
@@ -1035,7 +1035,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
                  */
                 if (H5O__release_mesg(udata->f, oh, mesg, FALSE) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR,
-                                "unable to release previous attribute")
+                                "unable to release previous attribute");
 
                 *oh_modified = H5O_MODIFY_CONDENSE;
 
@@ -1044,7 +1044,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
                 if (H5O__msg_append_real(udata->f, oh, H5O_MSG_ATTR, (mesg->flags | H5O_MSG_FLAG_DONTSHARE),
                                          0, attr) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5_ITER_ERROR,
-                                "unable to relocate renamed attribute in header")
+                                "unable to relocate renamed attribute in header");
 
                 /* Sanity check */
                 assert(H5O_msg_is_shared(H5O_ATTR_ID, attr) == FALSE);
@@ -1798,7 +1798,7 @@ H5O__attr_bh_info(H5F_t *f, H5O_t *oh, H5_ih_info_t *bh_info)
                 /* Open the creation order index v2 B-tree */
                 if (NULL == (bt2_corder = H5B2_open(f, ainfo.corder_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL,
-                                "unable to open v2 B-tree for creation order index")
+                                "unable to open v2 B-tree for creation order index");
 
                 /* Get creation order index B-tree size */
                 if (H5B2_size(bt2_corder, &(bh_info->index_size)) < 0)

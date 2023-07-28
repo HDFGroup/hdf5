@@ -200,7 +200,7 @@ H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token, size_t t
         /* Get the amount of space required to serialize the selection */
         if ((data_size = H5S_SELECT_SERIAL_SIZE(space)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL,
-                        "Invalid amount of space for serializing selection")
+                        "Invalid amount of space for serializing selection");
 
         /* Increase buffer size to allow for the dataset token */
         data_size += (hssize_t)token_size;
@@ -661,7 +661,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         /* Check if using native VOL connector */
         if (H5VL_object_is_native(vol_obj, &is_native) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID,
-                        "can't query if file uses native VOL connector")
+                        "can't query if file uses native VOL connector");
 
         /* Must use native VOL connector for this operation */
         assert(is_native);

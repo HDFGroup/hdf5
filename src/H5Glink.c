@@ -272,7 +272,7 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
                 /* Serialize the address into a VOL token */
                 if (H5VL_native_addr_to_token(link_loc->file, H5I_FILE, lnk->u.hard.addr, &info->u.token) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTSERIALIZE, FAIL,
-                                "can't serialize address into object token")
+                                "can't serialize address into object token");
                 break;
 
             case H5L_TYPE_SOFT:
@@ -304,7 +304,7 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
                     if ((cb_ret = (link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size, NULL,
                                                            (size_t)0)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL,
-                                    "query buffer size callback returned failure")
+                                    "query buffer size callback returned failure");
 
                     info->u.val_size = (size_t)cb_ret;
                 } /* end if */

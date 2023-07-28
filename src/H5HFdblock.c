@@ -138,12 +138,12 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     if (H5F_USE_TMP_SPACE(hdr->f)) {
         if (HADDR_UNDEF == (dblock_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)dblock->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "file allocation failed for fractal heap direct block")
+                        "file allocation failed for fractal heap direct block");
     } /* end if */
     else {
         if (HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_DBLOCK, (hsize_t)dblock->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "file allocation failed for fractal heap direct block")
+                        "file allocation failed for fractal heap direct block");
     } /* end else */
 
     /* Attach to parent indirect block, if there is one */
@@ -673,7 +673,7 @@ H5HF__man_dblock_dest(H5HF_direct_t *dblock)
     if (dblock->parent)
         if (H5HF__iblock_decr(dblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared indirect block")
+                        "can't decrement reference count on shared indirect block");
 
     /* Free block's buffer */
     dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);

@@ -236,7 +236,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 if (filter->cd_nelmts % 2) {
                     if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                    "ran off end of input buffer while decoding")
+                                    "ran off end of input buffer while decoding");
                     p += 4; /* padding */
                 }
         }
@@ -401,7 +401,7 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                     dst->filter[i].name = (char *)H5MM_strdup(src->filter[i].name);
                     if (NULL == dst->filter[i].name)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                                    "memory allocation failed for filter name")
+                                    "memory allocation failed for filter name");
                 } /* end if */
                 else
                     dst->filter[i].name = dst->filter[i]._name;

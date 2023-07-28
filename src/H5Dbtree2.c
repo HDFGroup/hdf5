@@ -618,7 +618,7 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
     /* Make the v2 B-tree a child flush dependency of the dataset's object header proxy */
     if (H5B2_depend(idx_info->storage->u.btree2.bt2, oh_proxy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                    "unable to create flush dependency on object header proxy")
+                    "unable to create flush dependency on object header proxy");
 
 done:
     /* Release the object header from the cache */
@@ -676,7 +676,7 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
         if (H5D__btree2_idx_depend(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                        "unable to create flush dependency on object header")
+                        "unable to create flush dependency on object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -745,13 +745,13 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Retrieve the v2 B-tree's address in the file */
     if (H5B2_get_addr(idx_info->storage->u.btree2.bt2, &(idx_info->storage->idx_addr)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                    "can't get v2 B-tree address for tracking chunked dataset")
+                    "can't get v2 B-tree address for tracking chunked dataset");
 
     /* Check for SWMR writes to the file */
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
         if (H5D__btree2_idx_depend(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                        "unable to create flush dependency on object header")
+                        "unable to create flush dependency on object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

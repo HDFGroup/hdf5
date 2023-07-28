@@ -177,7 +177,7 @@ H5FD__free_cls(H5FD_class_t *cls, void H5_ATTR_UNUSED **request)
      */
     if (cls->terminate && cls->terminate() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEOBJ, FAIL, "virtual file driver '%s' did not terminate cleanly",
-                    cls->name)
+                    cls->name);
 
     H5MM_xfree(cls);
 
@@ -217,15 +217,15 @@ H5FDregister(const H5FD_class_t *cls)
         HGOTO_ERROR(H5E_ARGS, H5E_VERSION, H5I_INVALID_HID, "wrong file driver version #")
     if (!cls->open || !cls->close)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "'open' and/or 'close' methods are not defined")
+                    "'open' and/or 'close' methods are not defined");
     if (!cls->get_eoa || !cls->set_eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "'get_eoa' and/or 'set_eoa' methods are not defined")
+                    "'get_eoa' and/or 'set_eoa' methods are not defined");
     if (!cls->get_eof)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "'get_eof' method is not defined")
     if (!cls->read || !cls->write)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "'read' and/or 'write' method is not defined")
+                    "'read' and/or 'write' method is not defined");
     for (type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++)
         if (cls->fl_map[type] < H5FD_MEM_NOLIST || cls->fl_map[type] >= H5FD_MEM_NTYPES)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid free-list mapping")
@@ -277,7 +277,7 @@ H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
     /* Copy the class structure so the caller can reuse or free it */
     if (NULL == (saved = (H5FD_class_t *)H5MM_malloc(size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_INVALID_HID,
-                    "memory allocation failed for file driver class struct")
+                    "memory allocation failed for file driver class struct");
     H5MM_memcpy(saved, cls, size);
 
     /* Create the new class ID */
@@ -1698,7 +1698,7 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
 
     if ((!element_sizes) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "element_sizes parameter can't be NULL if count is positive")
+                    "element_sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
@@ -1795,7 +1795,7 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
 
     if ((!element_sizes) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "element_sizes parameter can't be NULL if count is positive")
+                    "element_sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
@@ -2172,7 +2172,7 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
     else if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
 
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
-                    "VFD ctl request failed (no ctl callback and fail if unknown flag is set)")
+                    "VFD ctl request failed (no ctl callback and fail if unknown flag is set)");
     }
 
 done:

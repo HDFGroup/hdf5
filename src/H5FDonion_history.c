@@ -192,7 +192,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     else {
         if (history->n_revisions != n_revisions)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0,
-                        "history argument suggests different revision count than encoded buffer")
+                        "history argument suggests different revision count than encoded buffer");
         if (NULL == history->record_locs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "list is NULL -- cannot populate")
 

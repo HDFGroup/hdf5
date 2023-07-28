@@ -121,7 +121,7 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else if (TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID,
-                    "dcpl_id is not a dataset create property list ID")
+                    "dcpl_id is not a dataset create property list ID");
 
     /* Set the DCPL for the API context */
     H5CX_set_dcpl(dcpl_id);
@@ -1696,7 +1696,7 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
     dst_buf_nelmts = dst_buf_size / type_size;
     if (dst_buf_nelmts == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "destination buffer is not large enough to hold one element")
+                    "destination buffer is not large enough to hold one element");
 
     /* Get number of elements in dataspace */
     if ((nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(src_space)) < 0)
@@ -2351,7 +2351,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
     /* Check arguments */
     if (NULL == offset && NULL == filter_mask && NULL == addr && NULL == size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "invalid arguments, must have at least one non-null output argument")
+                    "invalid arguments, must have at least one non-null output argument");
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
@@ -2422,7 +2422,7 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     if (NULL == filter_mask && NULL == addr && NULL == size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "invalid arguments, must have at least one non-null output argument")
+                    "invalid arguments, must have at least one non-null output argument");
     if (NULL == offset)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
 

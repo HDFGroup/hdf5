@@ -222,7 +222,7 @@ H5D__earray_crt_context(void *_udata)
     /* Allocate new context structure */
     if (NULL == (ctx = H5FL_MALLOC(H5D_earray_ctx_t)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL,
-                    "can't allocate extensible array client callback context")
+                    "can't allocate extensible array client callback context");
 
     /* Initialize the context */
     ctx->file_addr_len = H5F_SIZEOF_ADDR(udata->f);
@@ -575,7 +575,7 @@ H5D__earray_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
     /* Allocate context for debugging callback */
     if (NULL == (dbg_ctx = H5FL_MALLOC(H5D_earray_ctx_ud_t)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL,
-                    "can't allocate extensible array client callback context")
+                    "can't allocate extensible array client callback context");
 
     /* Set up the object header location info */
     H5O_loc_reset(&obj_loc);
@@ -695,7 +695,7 @@ H5D__earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
     /* Make the extensible array a child flush dependency of the dataset's object header */
     if (H5EA_depend(idx_info->storage->u.earray.ea, oh_proxy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                    "unable to create flush dependency on object header proxy")
+                    "unable to create flush dependency on object header proxy");
 
 done:
     /* Release the object header from the cache */
@@ -752,7 +752,7 @@ H5D__earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
         if (H5D__earray_idx_depend(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                        "unable to create flush dependency on object header")
+                        "unable to create flush dependency on object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -899,7 +899,7 @@ H5D__earray_idx_create(const H5D_chk_idx_info_t *idx_info)
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
         if (H5D__earray_idx_depend(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                        "unable to create flush dependency on object header")
+                        "unable to create flush dependency on object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

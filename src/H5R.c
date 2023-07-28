@@ -870,7 +870,7 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
                                               H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr), aapl_id,
                                               H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute: '%s'",
-                    H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr))
+                    H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr));
 
     /* Register the attribute and get an ID for it */
     if ((ret_value = H5VL_register(H5I_ATTR, opened_attr, (*vol_obj_ptr)->connector, TRUE)) < 0)
@@ -949,7 +949,7 @@ H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID,
-                            "can't decrement count on attribute ID")
+                            "can't decrement count on attribute ID");
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 

@@ -166,7 +166,7 @@ H5O__btreek_copy(const void *_mesg, void *_dest)
 
     if (!dest && NULL == (dest = (H5O_btreek_t *)H5MM_malloc(sizeof(H5O_btreek_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for shared message table message")
+                    "memory allocation failed for shared message table message");
 
     /* All this message requires is a shallow copy */
     *dest = *mesg;

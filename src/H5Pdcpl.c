@@ -636,7 +636,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                     if (NULL ==
                         (tmp_layout.storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL,
-                                    "unable to allocate memory for source file name")
+                                    "unable to allocate memory for source file name");
                     H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
                     *pp += tmp_size;
 
@@ -645,7 +645,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                     if (NULL ==
                         (tmp_layout.storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL,
-                                    "unable to allocate memory for source dataset name")
+                                    "unable to allocate memory for source dataset name");
                     H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
                     *pp += tmp_size;
 
@@ -713,7 +713,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                     /* Update min_dims */
                     if (H5D_virtual_update_min_dims(&tmp_layout, u) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,
-                                    "unable to update virtual dataset minimum dimensions")
+                                    "unable to update virtual dataset minimum dimensions");
                 } /* end for */
 
                 /* Point at the newly set up struct */
@@ -3031,7 +3031,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         /* Set up type conversion function */
         if (NULL == (tpath = H5T_path_find(type, type)))
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                        "unable to convert between src and dest data types")
+                        "unable to convert between src and dest data types");
 
         /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
         if (!H5T_path_noop(tpath)) {

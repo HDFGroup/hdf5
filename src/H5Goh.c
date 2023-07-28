@@ -336,12 +336,12 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
             /* Open the creation order index v2 B-tree */
             if (NULL == (bt2_corder = H5B2_open(loc->file, linfo.corder_bt2_addr, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for creation order index")
+                            "unable to open v2 B-tree for creation order index");
 
             /* Get creation order index B-tree size */
             if (H5B2_size(bt2_corder, &bh_info->index_size) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL,
-                            "can't retrieve B-tree storage info for creation order index")
+                            "can't retrieve B-tree storage info for creation order index");
         } /* end if */
 
         /* Get fractal heap size, if available */

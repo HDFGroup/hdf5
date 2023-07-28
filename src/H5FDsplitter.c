@@ -1336,7 +1336,7 @@ H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *
                  */
                 if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                     HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
-                                "VFD ctl request failed (unknown op code and fail if unknown flag is set)")
+                                "VFD ctl request failed (unknown op code and fail if unknown flag is set)");
             }
 
             break;
@@ -1522,7 +1522,7 @@ H5FD__splitter_delete(const char *filename, hid_t fapl_id)
         if (NULL == (fapl_ptr = (const H5FD_splitter_fapl_t *)H5P_peek_driver_info(plist))) {
             if (NULL == (default_fapl = H5FL_CALLOC(H5FD_splitter_fapl_t)))
                 HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
-                            "unable to allocate file access property list struct")
+                            "unable to allocate file access property list struct");
             if (H5FD__splitter_populate_config(NULL, default_fapl) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't initialize driver configuration info")
 

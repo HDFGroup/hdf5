@@ -154,7 +154,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         dset_info[i].nelmts = H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space);
         if (dset_info[i].nelmts != H5S_GET_SELECT_NPOINTS(dset_info[i].file_space))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "src and dest dataspaces have different number of elements selected")
+                        "src and dest dataspaces have different number of elements selected");
 
         /* Check for a NULL buffer */
         if (NULL == dset_info[i].buf.vp) {
@@ -199,7 +199,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                     /* Allocate buffer */
                     if (NULL == (orig_mem_space = (H5S_t **)H5MM_calloc(count * sizeof(H5S_t *))))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                                    "couldn't allocate original memory space array buffer")
+                                    "couldn't allocate original memory space array buffer");
                 }
                 else
                     /* Use local buffer */
@@ -243,7 +243,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                 (dset_info[i].dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC ||
                  dset_info[i].dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET))
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
-                            "read failed: dataset doesn't exist, no data can be read")
+                            "read failed: dataset doesn't exist, no data can be read");
 
             /* If we're never going to fill this dataset, just leave the junk in the user's buffer */
             if (dset_info[i].dset->shared->dcpl_cache.fill.fill_time != H5D_FILL_TIME_NEVER)
@@ -298,7 +298,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     /* Adjust I/O info for any parallel or selection I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "unable to adjust I/O info for parallel or selection I/O")
+                    "unable to adjust I/O info for parallel or selection I/O");
 #endif /* H5_HAVE_PARALLEL */
 
     /* Perform third phase of type info initialization */
@@ -348,23 +348,23 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.piece_count > 0) {
             if (NULL == (io_info.mem_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for memory space list")
+                            "memory allocation failed for memory space list");
             if (NULL == (io_info.file_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
             if (NULL == (io_info.addrs = H5MM_malloc(io_info.piece_count * sizeof(haddr_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for piece address list")
+                            "memory allocation failed for piece address list");
             if (NULL == (io_info.element_sizes = H5MM_malloc(io_info.piece_count * sizeof(size_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for element size list")
+                            "memory allocation failed for element size list");
             if (NULL == (io_info.rbufs = H5MM_malloc(io_info.piece_count * sizeof(void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for read buffer list")
+                            "memory allocation failed for read buffer list");
             if (io_info.max_tconv_type_size > 0)
                 if (NULL ==
                     (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "unable to allocate array of selected pieces")
+                                "unable to allocate array of selected pieces");
         }
 
         /* Loop with serial & single-dset read IO path */
@@ -551,7 +551,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             /* support parallel access of that yet */
             if (H5T_is_vl_storage(dset_info[i].type_info.mem_type) > 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                            "Parallel IO does not support writing VL or region reference datatypes yet")
+                            "Parallel IO does not support writing VL or region reference datatypes yet");
         } /* end if */
         else {
             H5FD_mpio_xfer_t io_xfer_mode; /* MPI I/O transfer mode */
@@ -571,7 +571,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         dset_info[i].nelmts = H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space);
         if (dset_info[i].nelmts != H5S_GET_SELECT_NPOINTS(dset_info[i].file_space))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "src and dest dataspaces have different number of elements selected")
+                        "src and dest dataspaces have different number of elements selected");
 
         /* Check for a NULL buffer */
         if (NULL == dset_info[i].buf.cvp) {
@@ -616,7 +616,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                     /* Allocate buffer */
                     if (NULL == (orig_mem_space = (H5S_t **)H5MM_calloc(count * sizeof(H5S_t *))))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                                    "couldn't allocate original memory space array buffer")
+                                    "couldn't allocate original memory space array buffer");
                 }
                 else
                     /* Use local buffer */
@@ -667,7 +667,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             /* Get the number of elements in file dataset's dataspace */
             if ((file_nelmts = H5S_GET_EXTENT_NPOINTS(dset_info[i].file_space)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                            "can't retrieve number of elements in file dataset")
+                            "can't retrieve number of elements in file dataset");
 
             /* Always allow fill values to be written if the dataset has a VL datatype */
             if (H5T_detect_class(dset_info[i].dset->shared->type, H5T_VLEN, FALSE))
@@ -702,7 +702,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     /* Adjust I/O info for any parallel or selection I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "unable to adjust I/O info for parallel or selection I/O")
+                    "unable to adjust I/O info for parallel or selection I/O");
 #endif /* H5_HAVE_PARALLEL */
 
     /* Perform third phase of type info initialization */
@@ -752,23 +752,23 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.piece_count > 0) {
             if (NULL == (io_info.mem_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for memory space list")
+                            "memory allocation failed for memory space list");
             if (NULL == (io_info.file_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
             if (NULL == (io_info.addrs = H5MM_malloc(io_info.piece_count * sizeof(haddr_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for piece address list")
+                            "memory allocation failed for piece address list");
             if (NULL == (io_info.element_sizes = H5MM_malloc(io_info.piece_count * sizeof(size_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for element size list")
+                            "memory allocation failed for element size list");
             if (NULL == (io_info.wbufs = H5MM_malloc(io_info.piece_count * sizeof(const void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for write buffer list")
+                            "memory allocation failed for write buffer list");
             if (io_info.max_tconv_type_size > 0)
                 if (NULL ==
                     (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "unable to allocate array of selected pieces")
+                                "unable to allocate array of selected pieces");
         }
 
         /* loop with serial & single-dset write IO path */
@@ -1298,7 +1298,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
                         if (H5D__mpio_get_no_coll_cause_strings(local_no_coll_cause_string, 512,
                                                                 global_no_coll_cause_string, 512) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                        "can't get reasons for breaking collective I/O")
+                                        "can't get reasons for breaking collective I/O");
 
                         HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
                                     "Can't perform independent write with filters in pipeline.\n"
@@ -1371,7 +1371,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
             if (io_info->tconv_buf_size > 0) {
                 if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, io_info->tconv_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for type conversion")
+                                "memory allocation failed for type conversion");
                 io_info->tconv_buf_allocated = TRUE;
             }
 
@@ -1379,7 +1379,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
             if (io_info->bkg_buf_size > 0) {
                 if (NULL == (io_info->bkg_buf = H5FL_BLK_MALLOC(type_conv, io_info->bkg_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for type conversion")
+                                "memory allocation failed for type conversion");
                 io_info->bkg_buf_allocated = TRUE;
             }
         }
@@ -1425,7 +1425,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
                 /* Allocate temporary buffer */
                 if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for type conversion")
+                                "memory allocation failed for type conversion");
                 io_info->tconv_buf_allocated = TRUE;
             } /* end if */
 
@@ -1446,7 +1446,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
                      * tconv element size is max(src, dst) and the bkg element size is dst */
                     if (NULL == (io_info->bkg_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                    "memory allocation failed for background conversion")
+                                    "memory allocation failed for background conversion");
                     io_info->bkg_buf_allocated = TRUE;
                 }
             }

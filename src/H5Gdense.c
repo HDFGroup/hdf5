@@ -1207,7 +1207,7 @@ H5G__dense_remove_fh_cb(const void *obj, size_t obj_len, void *_udata)
         /* Remove the record from the name index v2 B-tree */
         if (H5B2_remove(bt2, &bt2_udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL,
-                        "unable to remove link from creation order index v2 B-tree")
+                        "unable to remove link from creation order index v2 B-tree");
     } /* end if */
 
     /* Replace open objects' names, if requested */
@@ -1432,7 +1432,7 @@ H5G__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         /* Remove the record from the name index v2 B-tree */
         if (H5B2_remove(bt2, &other_bt2_udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5_ITER_ERROR,
-                        "unable to remove link from 'other' index v2 B-tree")
+                        "unable to remove link from 'other' index v2 B-tree");
     } /* end if */
 
     /* Replace open objects' names */

@@ -251,7 +251,7 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t ch
         /* Make "generic chunk" callback */
         if ((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, H5_ITER_ERROR,
-                        "failure in generic chunk iterator callback")
+                        "failure in generic chunk iterator callback");
 
         /* Update coordinates of chunk in dataset */
         curr_dim = (int)(ndims - 1);

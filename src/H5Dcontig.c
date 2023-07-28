@@ -394,7 +394,7 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
     for (u = 0; u < dset->shared->ndims; u++)
         if (dset->shared->max_dims[u] > dset->shared->curr_dims[u])
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                        "extendible contiguous non-external dataset not allowed")
+                        "extendible contiguous non-external dataset not allowed");
 
     /* Retrieve the number of elements in the dataspace */
     if ((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)

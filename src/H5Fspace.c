@@ -101,7 +101,7 @@ H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *
         /* Check for overlapping into file's temporary allocation space */
         if (H5_addr_gt((eoa + size), f->shared->tmp_addr))
             HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, HADDR_UNDEF,
-                        "'normal' file space allocation request will overlap into 'temporary' file space")
+                        "'normal' file space allocation request will overlap into 'temporary' file space");
     } /* end if */
 
     /* Call the file driver 'alloc' routine */

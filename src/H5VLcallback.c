@@ -3843,7 +3843,7 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
                                     (void *)&find_connector_ud);
             if (iter_ret < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_BADITER, NULL,
-                            "failed to iterate over available VOL connector plugins")
+                            "failed to iterate over available VOL connector plugins");
             else if (iter_ret) {
                 /* If one of the available VOL connector plugins is
                  * able to open the file, clear the error stack from any
@@ -5876,7 +5876,7 @@ H5VL_object_copy(const H5VL_object_t *src_obj, const H5VL_loc_params_t *src_loc_
     /* Make sure that the VOL connectors are the same */
     if (src_obj->connector->cls->value != dst_obj->connector->cls->value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                    "objects are accessed through different VOL connectors and can't be copied")
+                    "objects are accessed through different VOL connectors and can't be copied");
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(src_obj) < 0)
@@ -6920,7 +6920,7 @@ H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific
     /* Call the corresponding VOL callback */
     if ((cls->request_cls.specific)(req, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+                    "unable to execute asynchronous request specific callback");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6955,7 +6955,7 @@ H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+                    "unable to execute asynchronous request specific callback");
 
 done:
     /* Reset object wrapping info in API context */
@@ -6991,7 +6991,7 @@ H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_specific(req, cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+                    "unable to execute asynchronous request specific callback");
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -7025,7 +7025,7 @@ H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_optional_args_t 
     /* Call the corresponding VOL callback */
     if ((cls->request_cls.optional)(req, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+                    "unable to execute asynchronous request optional callback");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7060,7 +7060,7 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args)
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_optional(vol_obj->data, vol_obj->connector->cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+                    "unable to execute asynchronous request optional callback");
 
 done:
     /* Reset object wrapping info in API context */
@@ -7096,7 +7096,7 @@ H5VLrequest_optional(void *req, hid_t connector_id, H5VL_optional_args_t *args)
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_optional(req, cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+                    "unable to execute asynchronous request optional callback");
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)

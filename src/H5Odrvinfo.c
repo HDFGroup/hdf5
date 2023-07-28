@@ -183,7 +183,7 @@ H5O__drvinfo_copy(const void *_mesg, void *_dest)
 
     if (!dest && NULL == (dest = (H5O_drvinfo_t *)H5MM_malloc(sizeof(H5O_drvinfo_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for shared message table message")
+                    "memory allocation failed for shared message table message");
 
     /* Shallow copy the fields */
     *dest = *mesg;

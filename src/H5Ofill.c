@@ -568,7 +568,7 @@ H5O__fill_copy(const void *_src, void *_dst)
             /* Set up type conversion function */
             if (NULL == (tpath = H5T_path_find(src->type, dst->type)))
                 HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, NULL,
-                            "unable to convert between src and dst data types")
+                            "unable to convert between src and dst data types");
 
             /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
             if (!H5T_path_noop(tpath)) {

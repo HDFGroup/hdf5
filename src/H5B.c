@@ -1333,7 +1333,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                     if (NULL == (sibling = (H5B_t *)H5AC_protect(f, H5AC_BT, bt->left, &cache_udata,
                                                                  H5AC__NO_FLAGS_SET)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5B_INS_ERROR,
-                                    "unable to load node from tree")
+                                    "unable to load node from tree");
 
                     /* Copy right-most key from deleted node to right-most key
                      * in its left neighbor, but only if it is not the critical
@@ -1346,14 +1346,14 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
 
                     if (H5AC_unprotect(f, H5AC_BT, bt->left, sibling, H5AC__DIRTIED_FLAG) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR,
-                                    "unable to release node from tree")
+                                    "unable to release node from tree");
                     sibling = NULL; /* Make certain future references will be caught */
                 }                   /* end if */
                 if (H5_addr_defined(bt->right)) {
                     if (NULL == (sibling = (H5B_t *)H5AC_protect(f, H5AC_BT, bt->right, &cache_udata,
                                                                  H5AC__NO_FLAGS_SET)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5B_INS_ERROR,
-                                    "unable to unlink node from tree")
+                                    "unable to unlink node from tree");
 
                     /* Copy left-most key from deleted node to left-most key in
                      * its right neighbor, but only if it is not the critical
@@ -1365,7 +1365,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
 
                     if (H5AC_unprotect(f, H5AC_BT, bt->right, sibling, H5AC__DIRTIED_FLAG) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR,
-                                    "unable to release node from tree")
+                                    "unable to release node from tree");
                     sibling = NULL; /* Make certain future references will be caught */
                 }                   /* end if */
 

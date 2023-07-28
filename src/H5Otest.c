@@ -208,7 +208,7 @@ H5O__is_attr_empty_test(hid_t oid)
                 /* Retrieve # of records in name index */
                 if (H5B2_get_nrec(bt2_name, &nattrs) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL,
-                                "unable to retrieve # of records from name index")
+                                "unable to retrieve # of records from name index");
             } /* end if */
 
             /* Verify that attribute count in object header is correct */
@@ -480,7 +480,7 @@ H5O__check_msg_marked_test(hid_t oid, hbool_t flag_val)
             /* Check for "unknown" message having the correct flags */
             if (((idx_msg->flags & H5O_MSG_FLAG_WAS_UNKNOWN) > 0) != flag_val)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
-                            "'unknown' message has incorrect 'was unknown' flag value")
+                            "'unknown' message has incorrect 'was unknown' flag value");
 
             /* Break out of loop, to indicate that the "unknown" message was found */
             break;

@@ -179,7 +179,7 @@ H5G_mkroot(H5F_t *f, hbool_t create_root)
         /* Decrement refcount on root group's object header in memory */
         if (H5O_dec_rc_by_loc(root_loc.oloc) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL,
-                        "unable to decrement refcount on root group's object header")
+                        "unable to decrement refcount on root group's object header");
 
         /* Mark superblock dirty, so root group info is flushed */
         sblock_dirty = TRUE;

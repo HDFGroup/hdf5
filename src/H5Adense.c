@@ -618,7 +618,7 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
             /* Open the creation order index v2 B-tree */
             if (NULL == (bt2_corder = H5B2_open(op_data->f, op_data->corder_bt2_addr, NULL)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for creation order index")
+                            "unable to open v2 B-tree for creation order index");
 
             /* Create the "udata" information for v2 B-tree record modify */
             udata.f             = op_data->f;
@@ -937,7 +937,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
             /* Remove the record from the creation order index v2 B-tree */
             if (H5B2_remove(bt2_corder, &rm_udata, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL,
-                            "unable to remove attribute from creation order index v2 B-tree")
+                            "unable to remove attribute from creation order index v2 B-tree");
         }
     }
 
@@ -1251,7 +1251,7 @@ H5A__dense_remove_bt2_cb(const void *_record, void *_udata)
         /* Remove the record from the creation order index v2 B-tree */
         if (H5B2_remove(bt2_corder, udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL,
-                        "unable to remove attribute from creation order index v2 B-tree")
+                        "unable to remove attribute from creation order index v2 B-tree");
     } /* end if */
 
     /* Check for removing shared attribute */
@@ -1446,7 +1446,7 @@ H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         /* Remove the record from the "other" index v2 B-tree */
         if (H5B2_remove(bt2, &other_bt2_udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL,
-                        "unable to remove record from 'other' index v2 B-tree")
+                        "unable to remove record from 'other' index v2 B-tree");
     } /* end if */
 
     /* Check for removing shared attribute */

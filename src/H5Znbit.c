@@ -555,7 +555,7 @@ H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_v
             /* Check if base datatype is a variable-length string */
             if ((is_vlstring = H5T_is_variable_str(dtype_base)) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL,
-                            "cannot determine if datatype is a variable-length string")
+                            "cannot determine if datatype is a variable-length string");
 
             /* base datatype of VL or VL-string is not supported */
             if (dtype_base_class == H5T_VLEN || is_vlstring)
@@ -677,7 +677,7 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
                 /* Check if datatype is a variable-length string */
                 if ((is_vlstring = H5T_is_variable_str(dtype_member)) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL,
-                                "cannot determine if datatype is a variable-length string")
+                                "cannot determine if datatype is a variable-length string");
 
                 /* Because for some no-op datatype (VL datatype and VL string datatype), its
                  * size can not be retrieved correctly by using function call H5T_get_size,

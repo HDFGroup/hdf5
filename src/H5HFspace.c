@@ -239,7 +239,7 @@ H5HF__space_revert_root_cb(H5FS_section_info_t *_sect, void H5_ATTR_UNUSED *_uda
         assert(sect->u.single.parent);
         if (H5HF__iblock_decr(sect->u.single.parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on section's indirect block")
+                        "can't decrement reference count on section's indirect block");
 
         /* Reset parent information */
         sect->u.single.parent    = NULL;
@@ -318,7 +318,7 @@ H5HF__space_create_root_cb(H5FS_section_info_t *_sect, void *_udata)
     /* Increment ref. count on new root indirect block */
     if (H5HF__iblock_incr(root_iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL,
-                    "can't increment reference count on section's indirect block")
+                    "can't increment reference count on section's indirect block");
 
     /* Set parent info ("live" section must _NOT_ have a parent right now) */
     if (sect->sect_info.state == H5FS_SECT_SERIALIZED)

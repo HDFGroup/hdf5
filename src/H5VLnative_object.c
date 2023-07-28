@@ -107,7 +107,7 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
             /* Decode token */
             if (H5VL_native_token_to_addr(loc.oloc->file, H5I_FILE, token, &addr) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, NULL,
-                            "can't deserialize object token into address")
+                            "can't deserialize object token into address");
 
             /* Open the object */
             if (NULL == (ret_value = H5O__open_by_addr(&loc, addr, opened_type)))
@@ -218,7 +218,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                 /* Decode token */
                 if (H5VL_native_token_to_addr(obj_oloc.file, H5I_FILE, token, &obj_oloc.addr) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
-                                "can't deserialize object token into address")
+                                "can't deserialize object token into address");
 
                 /* Retrieve object's name */
                 if (H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, args->args.get_name.buf,
@@ -245,7 +245,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                 /* Decode token */
                 if (H5VL_native_token_to_addr(obj_oloc.file, H5I_FILE, token, &obj_oloc.addr) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
-                                "can't deserialize object token into address")
+                                "can't deserialize object token into address");
 
                 /* Get the # of links for object, and its type */
                 /* (To check to make certain that this object hasn't been deleted) */
@@ -347,7 +347,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
                 /* Check if the object exists */
                 if (H5G_loc_exists(&loc, loc_params->loc_data.loc_by_name.name, args->args.exists.exists) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists",
-                                loc_params->loc_data.loc_by_name.name)
+                                loc_params->loc_data.loc_by_name.name);
             } /* end if */
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown object exists parameters")
@@ -375,7 +375,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
                 if (H5VL_native_addr_to_token(loc.oloc->file, H5I_FILE, obj_loc.oloc->addr,
                                               args->args.lookup.token_ptr) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL,
-                                "can't serialize address into object token")
+                                "can't serialize address into object token");
 
                 /* Release the object location */
                 if (H5G_loc_free(&obj_loc) < 0)

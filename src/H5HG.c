@@ -178,7 +178,7 @@ H5HG__create(H5F_t *f, size_t size)
     /* Add this heap to the beginning of the CWFS list */
     if (H5F_cwfs_add(f, heap) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF,
-                    "unable to add global heap collection to file's CWFS")
+                    "unable to add global heap collection to file's CWFS");
 
     /* Add the heap to the cache */
     if (H5AC_insert_entry(f, H5AC_GHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)

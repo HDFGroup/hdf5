@@ -383,7 +383,7 @@ H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation)
 
         if (H5D__get_num_chunks(dset, dset->shared->space, &n_chunks_alloc) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "unable to retrieve number of allocated chunks in dataset")
+                        "unable to retrieve number of allocated chunks in dataset");
 
         assert(n_chunks_alloc <= n_chunks_total);
 
@@ -658,7 +658,7 @@ H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize)
     /* Get the dataset object header minimize flag for this call */
     if (H5CX_get_dset_min_ohdr_flag(minimize) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                    "can't get dataset object header minimize flag from API context")
+                    "can't get dataset object header minimize flag from API context");
 
     if (FALSE == *minimize)
         *minimize = H5F_get_min_dset_ohdr(file);
@@ -746,7 +746,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
         get_value = H5O_msg_size_oh(file, ohdr, H5O_FILL_ID, &old_fill_prop, 0);
         if (get_value == 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0,
-                        "can't get size of fill value (backwards compat) message")
+                        "can't get size of fill value (backwards compat) message");
         ret_value += get_value;
     }
 
@@ -885,7 +885,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
         /* Don't allow never writing fill values with variable-length types */
         if (fill_prop->fill_time == H5D_FILL_TIME_NEVER)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                        "Dataset doesn't support VL datatype when fill value is not defined")
+                        "Dataset doesn't support VL datatype when fill value is not defined");
     } /* end if */
 
     /* Determine whether fill value is defined or not */
@@ -904,7 +904,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     /* Check for invalid fill & allocation time setting */
     if (fill_prop->fill_defined == FALSE && fill_prop->fill_time == H5D_FILL_TIME_ALLOC)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "fill value writing on allocation set, but no fill value defined")
+                    "fill value writing on allocation set, but no fill value defined");
 
     /* Check if the fill value info changed */
     if (fill_changed) {
@@ -1627,7 +1627,7 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
                 if (info.ndims != (unsigned)rank)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                                "boundary dimension rank does not match dataset rank")
+                                "boundary dimension rank does not match dataset rank");
 
                 /* Validate boundary sizes */
                 for (u = 0; u < info.ndims; u++)
@@ -2047,7 +2047,7 @@ H5D_close(H5D_t *dataset)
     /* Check if anything failed in the middle... */
     if (free_failed)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "couldn't free a component of the dataset, but the dataset was freed anyway.")
+                    "couldn't free a component of the dataset, but the dataset was freed anyway.");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2301,7 +2301,7 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, hbool_t full_overwr
                         if (NULL ==
                             (layout->storage.u.compact.buf = H5MM_malloc(layout->storage.u.compact.size)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                        "unable to allocate memory for compact dataset")
+                                        "unable to allocate memory for compact dataset");
                         if (!full_overwrite)
                             memset(layout->storage.u.compact.buf, 0, layout->storage.u.compact.size);
                         layout->storage.u.compact.dirty = TRUE;
@@ -2350,7 +2350,7 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, hbool_t full_overwr
                       time_alloc == H5D_ALLOC_WRITE))
                     if (H5D__init_storage(dset, full_overwrite, old_dim) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                                    "unable to initialize dataset with fill value")
+                                    "unable to initialize dataset with fill value");
             } /* end if */
             else {
                 H5D_fill_value_t fill_status; /* The fill value status */
@@ -2366,7 +2366,7 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, hbool_t full_overwr
                      fill_status == H5D_FILL_VALUE_USER_DEFINED))
                     if (H5D__init_storage(dset, full_overwrite, old_dim) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                                    "unable to initialize dataset with fill value")
+                                    "unable to initialize dataset with fill value");
             } /* end else */
         }     /* end if */
 
@@ -2413,7 +2413,7 @@ H5D__init_storage(H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[])
                 /* Fill the compact dataset storage */
                 if (H5D__compact_fill(dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                                "unable to initialize compact dataset storage")
+                                "unable to initialize compact dataset storage");
             } /* end if */
             break;
 
@@ -2480,7 +2480,7 @@ H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size)
             if ((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
                 if (H5D__chunk_allocated(dset, storage_size) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                "can't retrieve chunked dataset allocated size")
+                                "can't retrieve chunked dataset allocated size");
             } /* end if */
             else
                 *storage_size = 0;
@@ -3590,7 +3590,7 @@ H5D_get_create_plist(const H5D_t *dset)
                 /* Reset address and pointer of the array struct for the chunked storage index */
                 if (H5D_chunk_idx_reset(&copied_layout.storage.u.chunk, TRUE) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                                "unable to reset chunked storage index in dest")
+                                "unable to reset chunked storage index in dest");
 
             /* Reset chunk index ops */
             copied_layout.storage.u.chunk.ops = NULL;
@@ -3626,7 +3626,7 @@ H5D_get_create_plist(const H5D_t *dset)
         /* Set up type conversion function */
         if (NULL == (tpath = H5T_path_find(dset->shared->type, copied_fill.type)))
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                        "unable to convert between src and dest data types")
+                        "unable to convert between src and dest data types");
 
         /* Convert disk form of fill value into memory form */
         if (!H5T_path_noop(tpath)) {

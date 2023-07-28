@@ -212,7 +212,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
             /* Create a selection iterator for scattering the elements to memory buffer */
             if (H5S_select_iter_init(mem_iter, space, dst_type_size, 0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize memory selection information")
+                            "unable to initialize memory selection information");
             mem_iter_init = TRUE;
 
             /* Scatter the data into memory */
@@ -377,12 +377,12 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
             /* Get the datatype conversion path for this operation */
             if (NULL == (fb_info->fill_to_mem_tpath = H5T_path_find(dset_type, fb_info->mem_type)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                            "unable to convert between src and dst datatypes")
+                            "unable to convert between src and dst datatypes");
 
             /* Get the inverse datatype conversion path for this operation */
             if (NULL == (fb_info->mem_to_dset_tpath = H5T_path_find(fb_info->mem_type, dset_type)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                            "unable to convert between src and dst datatypes")
+                            "unable to convert between src and dst datatypes");
 
             /* Check if we need to allocate a background buffer */
             if (H5T_path_bkg(fb_info->fill_to_mem_tpath) || H5T_path_bkg(fb_info->mem_to_dset_tpath)) {

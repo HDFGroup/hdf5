@@ -260,7 +260,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
         /* Check the free space section info's status in the metadata cache */
         if (H5AC_get_entry_status(f, fs_addr, &fspace_status) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
-                        "unable to check metadata cache status for free space section info")
+                        "unable to check metadata cache status for free space section info");
 
         fprintf(stderr, "%s: fspace_status = %0x: ", __func__, fspace_status);
         if (fspace_status) {
@@ -317,7 +317,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
         /* Check the free space section info's status in the metadata cache */
         if (H5AC_get_entry_status(f, fspace->sect_addr, &sinfo_status) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
-                        "unable to check metadata cache status for free space section info")
+                        "unable to check metadata cache status for free space section info");
 
         /* If the free space section info is in the cache, expunge it now */
         if (sinfo_status & H5AC_ES__IN_CACHE) {
@@ -341,7 +341,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 
                 if (H5AC_expunge_entry(f, H5AC_FSPACE_SINFO, fspace->sect_addr, cache_flags) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL,
-                                "unable to remove free space section info from cache")
+                                "unable to remove free space section info from cache");
             } /* end block */
 
 #ifdef H5FS_DEBUG
@@ -419,20 +419,20 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                     if (H5F_USE_TMP_SPACE(f)) {
                         if (HADDR_UNDEF == (fspace->sect_addr = H5MF_alloc_tmp(f, fspace->sect_size)))
                             HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL,
-                                        "file allocation failed for free space sections")
+                                        "file allocation failed for free space sections");
                     } /* end if */
                     else {
                         if (HADDR_UNDEF ==
                             (fspace->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
                             HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL,
-                                        "file allocation failed for free space sections")
+                                        "file allocation failed for free space sections");
                     } /* end if */
                     fspace->alloc_sect_size = (size_t)fspace->sect_size;
 
                     /* Mark free space header as dirty */
                     if (H5AC_mark_entry_dirty(fspace) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL,
-                                    "unable to mark free space header as dirty")
+                                    "unable to mark free space header as dirty");
                 } /* end if */
             }     /* end if */
             else
@@ -481,13 +481,13 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                         /* Mark free space header as dirty */
                         if (H5AC_mark_entry_dirty(fspace) < 0)
                             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL,
-                                        "unable to mark free space header as dirty")
+                                        "unable to mark free space header as dirty");
                     } /* end if */
                     else {
                         if ((status = H5MF_try_shrink(f, H5FD_MEM_FSPACE_SINFO, fspace->sect_addr,
                                                       fspace->alloc_sect_size)) < 0)
                             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMERGE, FAIL,
-                                        "can't check for absorbing section info")
+                                        "can't check for absorbing section info");
                         else if (status == FALSE) {
                             /* Section info can't "go away", but it's free.  Allow
                              *      header to record it
@@ -508,7 +508,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                             /* Mark free space header as dirty */
                             if (H5AC_mark_entry_dirty(fspace) < 0)
                                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL,
-                                            "unable to mark free space header as dirty")
+                                            "unable to mark free space header as dirty");
                         } /* end else */
                     }     /* end else */
                 }         /* end if */
@@ -527,7 +527,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                     /* Mark free space header as dirty */
                     if (H5AC_mark_entry_dirty(fspace) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL,
-                                    "unable to mark free space header as dirty")
+                                    "unable to mark free space header as dirty");
 
                     /* Free previous serialized sections disk space */
                     if (!H5F_IS_TMP_ADDR(f, old_sect_addr)) {
@@ -596,7 +596,7 @@ H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes
     if (nclasses > 0) {
         if (NULL == (fspace->sect_cls = H5FL_SEQ_MALLOC(H5FS_section_class_t, nclasses)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                        "memory allocation failed for free space section class array")
+                        "memory allocation failed for free space section class array");
 
         /* Initialize the section classes for this free space list */
         for (u = 0; u < nclasses; u++) {
@@ -889,7 +889,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
         /* Check whether free-space manager section info is in cache or not */
         if (H5AC_get_entry_status(f, fspace->sect_addr, &sinfo_status) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL,
-                        "unable to check metadata cache status for free-space section info")
+                        "unable to check metadata cache status for free-space section info");
 
         /* Load free-space manager section info */
         if (sinfo_status & H5AC_ES__IN_CACHE || !fspace->sinfo) {
@@ -931,7 +931,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
         /* Check whether free-space manager header is in cache or not */
         if (H5AC_get_entry_status(f, fspace->addr, &hdr_status) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL,
-                        "unable to check metadata cache status for free-space section info")
+                        "unable to check metadata cache status for free-space section info");
 
         if (hdr_status & H5AC_ES__IN_CACHE) {
             H5FS_hdr_cache_ud_t cache_udata; /* User-data for metadata cache callback */

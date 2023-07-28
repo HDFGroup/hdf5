@@ -165,12 +165,12 @@ H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get selection type")
     if (select_type == H5S_SEL_POINTS)
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                    "point selections not currently supported with virtual datasets")
+                    "point selections not currently supported with virtual datasets");
     if (H5S_SEL_ERROR == (select_type = H5S_GET_SELECT_TYPE(src_space)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get selection type")
     if (select_type == H5S_SEL_POINTS)
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                    "point selections not currently supported with virtual datasets")
+                    "point selections not currently supported with virtual datasets");
 
     /* Get number of elements in spaces */
     nelmts_vs = (hsize_t)H5S_GET_SELECT_NPOINTS(vspace);
@@ -190,10 +190,10 @@ H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,
              */
             if (H5S_get_select_num_elem_non_unlim(vspace, &nenu_vs) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL,
-                            "can't get number of elements in non-unlimited dimension")
+                            "can't get number of elements in non-unlimited dimension");
             if (H5S_get_select_num_elem_non_unlim(src_space, &nenu_ss) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL,
-                            "can't get number of elements in non-unlimited dimension")
+                            "can't get number of elements in non-unlimited dimension");
             if (nenu_vs != nenu_ss)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "numbers of elements in the non-unlimited dimensions is different for source and "
@@ -205,7 +205,7 @@ H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,
         /* Limited selections.  Check number of points is the same. */
         if (nelmts_vs != nelmts_ss)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "virtual and source space selections have different numbers of elements")
+                        "virtual and source space selections have different numbers of elements");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -247,7 +247,7 @@ H5D_virtual_check_mapping_post(const H5O_storage_virtual_ent_t *ent)
         /* Make sure virtual space uses hyperslab selection */
         if (H5S_GET_SELECT_TYPE(ent->source_dset.virtual_select) != H5S_SEL_HYPERSLABS)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
-                        "virtual selection with printf mapping must be hyperslab")
+                        "virtual selection with printf mapping must be hyperslab");
 
         /* Check that the number of elements in one block in the virtual
          * selection matches the total number of elements in the source
@@ -560,7 +560,7 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
         /* Allocate memory for the list */
         if (NULL == (virt->list = H5MM_calloc(virt->list_nused * sizeof(virt->list[0]))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                        "unable to allocate memory for virtual dataset entry list")
+                        "unable to allocate memory for virtual dataset entry list");
         virt->list_nalloc = virt->list_nused;
 
         /* Copy the list entries, though set source_dset.dset and sub_dset to
@@ -1468,20 +1468,20 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                            storage->list[i].source_dset.virtual_select);
                                     if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                                         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                                    "unable to release clipped virtual dataspace")
+                                                    "unable to release clipped virtual dataspace");
                                 } /* end if */
 
                                 /* Copy virtual selection */
                                 if (NULL == (storage->list[i].source_dset.clipped_virtual_select = H5S_copy(
                                                  storage->list[i].source_dset.virtual_select, FALSE, TRUE)))
                                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL,
-                                                "unable to copy virtual selection")
+                                                "unable to copy virtual selection");
 
                                 /* Clip virtual selection */
                                 if (H5S_hyper_clip_unlim(storage->list[i].source_dset.clipped_virtual_select,
                                                          clip_size))
                                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
-                                                "failed to clip unlimited selection")
+                                                "failed to clip unlimited selection");
                             } /* end if */
 
                             /* Close previous clipped source selection, if any
@@ -1491,20 +1491,20 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                        storage->list[i].source_select);
                                 if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                                     HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                                "unable to release clipped source dataspace")
+                                                "unable to release clipped source dataspace");
                             } /* end if */
 
                             /* Copy source selection */
                             if (NULL == (storage->list[i].source_dset.clipped_source_select =
                                              H5S_copy(storage->list[i].source_select, FALSE, TRUE)))
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL,
-                                            "unable to copy source selection")
+                                            "unable to copy source selection");
 
                             /* Clip source selection */
                             if (H5S_hyper_clip_unlim(storage->list[i].source_dset.clipped_source_select,
                                                      curr_dims[storage->list[i].unlim_dim_source]))
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
-                                            "failed to clip unlimited selection")
+                                            "failed to clip unlimited selection");
                         } /* end if */
 
                         /* Update cached values unlim_extent_source and
@@ -1532,7 +1532,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                 (storage->list[i].sub_dset = (H5O_storage_virtual_srcdset_t *)H5MM_calloc(
                                      H5D_VIRTUAL_DEF_SUB_DSET_SIZE * sizeof(H5O_storage_virtual_srcdset_t))))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                            "unable to allocate sub dataset array")
+                                            "unable to allocate sub dataset array");
                             storage->list[i].sub_dset_nalloc = H5D_VIRTUAL_DEF_SUB_DSET_SIZE;
                         } /* end if */
                         else {
@@ -1544,7 +1544,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                      storage->list[i].sub_dset, 2 * storage->list[i].sub_dset_nalloc *
                                                                     sizeof(H5O_storage_virtual_srcdset_t))))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                            "unable to extend sub dataset array")
+                                            "unable to extend sub dataset array");
                             storage->list[i].sub_dset = tmp_sub_dset;
 
                             /* Clear new space in sub_dset */
@@ -1569,7 +1569,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                                                storage->list[i].psfn_nsubs, j,
                                                                &storage->list[i].sub_dset[j].file_name) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                            "unable to build source file name")
+                                            "unable to build source file name");
 
                         /* Resolve dset name */
                         if (!storage->list[i].sub_dset[j].dset_name)
@@ -1579,7 +1579,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                                                storage->list[i].psdn_nsubs, j,
                                                                &storage->list[i].sub_dset[j].dset_name) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                            "unable to build source dataset name")
+                                            "unable to build source dataset name");
 
                         /* Resolve virtual selection for block */
                         if (!storage->list[i].sub_dset[j].virtual_select)
@@ -1587,7 +1587,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                 (storage->list[i].sub_dset[j].virtual_select = H5S_hyper_get_unlim_block(
                                      storage->list[i].source_dset.virtual_select, j)))
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                            "unable to get block in unlimited selection")
+                                            "unable to get block in unlimited selection");
 
                         /* Initialize clipped selections */
                         if (!storage->list[i].sub_dset[j].clipped_source_select)
@@ -1716,7 +1716,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                storage->list[i].source_dset.virtual_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                        "unable to release clipped virtual dataspace")
+                                        "unable to release clipped virtual dataspace");
                     } /* end if */
 
                     /* Copy virtual selection */
@@ -1743,7 +1743,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                    storage->list[i].source_select);
                             if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                            "unable to release clipped source dataspace")
+                                            "unable to release clipped source dataspace");
                         } /* end if */
 
                         /* Copy source selection */
@@ -1779,7 +1779,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                             if (storage->list[i].sub_dset[j].clipped_source_select)
                                 if (H5S_close(storage->list[i].sub_dset[j].clipped_source_select) < 0)
                                     HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                                "unable to release clipped source dataspace")
+                                                "unable to release clipped source dataspace");
 
                             /* Initialize clipped source selection to point to
                              * base source selection */
@@ -1793,7 +1793,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                             if (storage->list[i].sub_dset[j].clipped_virtual_select)
                                 if (H5S_close(storage->list[i].sub_dset[j].clipped_virtual_select) < 0)
                                     HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                                "unable to release clipped virtual dataspace")
+                                                "unable to release clipped virtual dataspace");
 
                             /* Initialize clipped virtual selection to point to
                              * unclipped virtual selection */
@@ -1924,7 +1924,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                                storage->list[i].source_dset.virtual_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                        "unable to release clipped virtual dataspace")
+                                        "unable to release clipped virtual dataspace");
                     } /* end if */
 
                     /* Copy virtual selection */
@@ -1938,7 +1938,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                                storage->list[i].source_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                        "unable to release clipped source dataspace")
+                                        "unable to release clipped source dataspace");
                     } /* end if */
 
                     /* Copy source selection */
@@ -2047,7 +2047,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                         if (NULL == (storage->list[i].sub_dset[j].virtual_select = H5S_hyper_get_unlim_block(
                                          storage->list[i].source_dset.virtual_select, j)))
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                        "unable to get block in unlimited selection")
+                                        "unable to get block in unlimited selection");
 
                     /* Close previous clipped source selection, if any */
                     if (storage->list[i].sub_dset[j].clipped_source_select !=
@@ -2055,7 +2055,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                         if (storage->list[i].sub_dset[j].clipped_source_select)
                             if (H5S_close(storage->list[i].sub_dset[j].clipped_source_select) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                            "unable to release clipped source dataspace")
+                                            "unable to release clipped source dataspace");
 
                         /* Initialize clipped source selection to point to base
                          * source selection */
@@ -2068,7 +2068,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                         if (storage->list[i].sub_dset[j].clipped_virtual_select)
                             if (H5S_close(storage->list[i].sub_dset[j].clipped_virtual_select) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                            "unable to release clipped virtual dataspace")
+                                            "unable to release clipped virtual dataspace");
 
                         /* Initialize clipped virtual selection to point to
                          * unclipped virtual selection */
@@ -2470,7 +2470,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                                 storage->list[i].sub_dset[j].clipped_virtual_select,
                                 &storage->list[i].sub_dset[j].clipped_source_select, TRUE) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
-                                        "can't project virtual intersection onto memory space")
+                                        "can't project virtual intersection onto memory space");
 
                         /* Set extents of virtual_select and
                          * clipped_virtual_select to virtual extent */
@@ -2490,13 +2490,13 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                             file_space, mem_space, storage->list[i].sub_dset[j].clipped_virtual_select,
                             &storage->list[i].sub_dset[j].projected_mem_space, TRUE) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
-                                    "can't project virtual intersection onto memory space")
+                                    "can't project virtual intersection onto memory space");
 
                     /* Check number of elements selected */
                     if ((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(
                              storage->list[i].sub_dset[j].projected_mem_space)) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL,
-                                    "unable to get number of elements in selection")
+                                    "unable to get number of elements in selection");
 
                     /* Check if anything is selected */
                     if (select_nelmts > (hssize_t)0) {
@@ -2506,7 +2506,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                             if (H5D__virtual_open_source_dset(dset, &storage->list[i],
                                                               &storage->list[i].sub_dset[j]) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL,
-                                            "unable to open source dataset")
+                                            "unable to open source dataset");
 
                         /* If the source dataset is not open, mark the selected
                          * elements as zero so projected_mem_space is freed */
@@ -2519,7 +2519,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                     if (select_nelmts == (hssize_t)0) {
                         if (H5S_close(storage->list[i].sub_dset[j].projected_mem_space) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                        "can't close projected memory space")
+                                        "can't close projected memory space");
                         storage->list[i].sub_dset[j].projected_mem_space = NULL;
                     } /* end if */
                     else
@@ -2535,13 +2535,13 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                         file_space, mem_space, storage->list[i].source_dset.clipped_virtual_select,
                         &storage->list[i].source_dset.projected_mem_space, TRUE) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
-                                "can't project virtual intersection onto memory space")
+                                "can't project virtual intersection onto memory space");
 
                 /* Check number of elements selected, add to tot_nelmts */
                 if ((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(
                          storage->list[i].source_dset.projected_mem_space)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL,
-                                "unable to get number of elements in selection")
+                                "unable to get number of elements in selection");
 
                 /* Check if anything is selected */
                 if (select_nelmts > (hssize_t)0) {
@@ -2663,7 +2663,7 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset
                                             source_dset->clipped_source_select, dset_info->file_space,
                                             &projected_src_space, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
-                        "can't project virtual intersection onto source space")
+                        "can't project virtual intersection onto source space");
 
         {
             /* Initialize source_dinfo */
@@ -2801,7 +2801,7 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
                 /* Get number of elements in fill dataspace */
                 if ((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(fill_space)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL,
-                                "unable to get number of elements in selection")
+                                "unable to get number of elements in selection");
 
                 /* Verify number of elements is correct.  Note that since we
                  * don't check for overlap we can't assert that these are equal
@@ -2860,7 +2860,7 @@ H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdse
                                             source_dset->clipped_source_select, dset_info->file_space,
                                             &projected_src_space, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
-                        "can't project virtual intersection onto source space")
+                        "can't project virtual intersection onto source space");
 
         {
             /* Initialize source_dinfo */
@@ -2939,7 +2939,7 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
      * written */
     if (tot_nelmts != nelmts)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                    "write requested to unmapped portion of virtual dataset")
+                    "write requested to unmapped portion of virtual dataset");
 
     /* Iterate over mappings */
     for (i = 0; i < storage->list_nused; i++) {

@@ -106,7 +106,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
         if (f_sh != H5F_SHARED(dinfo[i].dset->oloc.file))
             HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
-                        "different files detected in multi dataset I/O request")
+                        "different files detected in multi dataset I/O request");
 
         /* Set up memory type */
         dinfo[i].mem_type_id = mem_type_id[i];
@@ -174,10 +174,10 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
         /* Check for valid selections */
         if (H5S_SELECT_VALID(dinfo[i].file_space) != TRUE)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-                        "selection + offset not within extent for file dataspace")
+                        "selection + offset not within extent for file dataspace");
         if (H5S_SELECT_VALID(dinfo[i].mem_space) != TRUE)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-                        "selection + offset not within extent for memory dataspace")
+                        "selection + offset not within extent for memory dataspace");
 
         /* Set up buf */
         dinfo[i].buf = buf[i];
@@ -576,7 +576,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                     if (dset->shared->layout.u.chunk.idx_type != H5D_CHUNK_IDX_BTREE)
                         if (H5D__format_convert(dset) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL,
-                                        "unable to downgrade chunk indexing type for dataset")
+                                        "unable to downgrade chunk indexing type for dataset");
                     break;
 
                 case H5D_CONTIGUOUS:
@@ -585,7 +585,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                     if (dset->shared->layout.version > H5O_LAYOUT_VERSION_DEFAULT)
                         if (H5D__format_convert(dset) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL,
-                                        "unable to downgrade layout version for dataset")
+                                        "unable to downgrade layout version for dataset");
                     break;
 
                 case H5D_VIRTUAL:

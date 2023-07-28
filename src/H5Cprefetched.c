@@ -243,7 +243,7 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                 /* Destroy flush dependency with flush dependency parent */
                 if (H5C_destroy_flush_dependency(parent_ptr, entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
-                                "unable to destroy prefetched entry flush dependency")
+                                "unable to destroy prefetched entry flush dependency");
 
                 if (parent_ptr->prefetched) {
                     /* In prefetched entries, the fd_child_count field is

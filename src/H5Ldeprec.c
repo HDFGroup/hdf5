@@ -103,7 +103,7 @@ H5L__iterate2_shim(hid_t group_id, const char *name, const H5L_info2_t *linfo2, 
         if (H5L_TYPE_HARD == linfo2->type) {
             if (H5VLnative_token_to_addr(group_id, linfo2->u.token, &linfo.u.address) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTUNSERIALIZE, H5_ITER_ERROR,
-                            "can't deserialize object token into address")
+                            "can't deserialize object token into address");
         }
         else
             linfo.u.val_size = linfo2->u.val_size;
@@ -171,7 +171,7 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Literate1 is only meant to be used with the native VOL connector")
+                    "H5Literate1 is only meant to be used with the native VOL connector");
 
     /* Set location struct fields */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -258,7 +258,7 @@ H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Literate_by_name1 is only meant to be used with the native VOL connector")
+                    "H5Literate_by_name1 is only meant to be used with the native VOL connector");
 
     /* Set location struct fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -336,7 +336,7 @@ H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t l
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Lget_info1 is only meant to be used with the native VOL connector")
+                    "H5Lget_info1 is only meant to be used with the native VOL connector");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type             = H5VL_LINK_GET_INFO;
@@ -361,7 +361,7 @@ H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t l
             if (H5VL_native_token_to_addr(vol_obj_data, loc_params.obj_type, linfo2.u.token,
                                           &linfo->u.address) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTUNSERIALIZE, FAIL,
-                            "can't deserialize object token into address")
+                            "can't deserialize object token into address");
         } /* end if */
         else
             linfo->u.val_size = linfo2.u.val_size;
@@ -428,7 +428,7 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Lget_info_by_idx1 is only meant to be used with the native VOL connector")
+                    "H5Lget_info_by_idx1 is only meant to be used with the native VOL connector");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type             = H5VL_LINK_GET_INFO;
@@ -453,7 +453,7 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
             if (H5VL_native_token_to_addr(vol_obj_data, loc_params.obj_type, linfo2.u.token,
                                           &linfo->u.address) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTUNSERIALIZE, FAIL,
-                            "can't deserialize object token into address")
+                            "can't deserialize object token into address");
         } /* end if */
         else
             linfo->u.val_size = linfo2.u.val_size;
@@ -528,7 +528,7 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Lvisit1 is only meant to be used with the native VOL connector")
+                    "H5Lvisit1 is only meant to be used with the native VOL connector");
 
     /* Set up shim */
     shim_data.real_op      = op;
@@ -618,7 +618,7 @@ H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Lvisit_by_name1 is only meant to be used with the native VOL connector")
+                    "H5Lvisit_by_name1 is only meant to be used with the native VOL connector");
 
     /* Set location struct fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;

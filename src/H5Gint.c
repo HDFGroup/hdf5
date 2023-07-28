@@ -998,7 +998,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
                 /* Add to list of visited objects */
                 if (H5SL_insert(udata->visited, new_node, new_node) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5_ITER_ERROR,
-                                "can't insert object node into visited list")
+                                "can't insert object node into visited list");
             } /* end if */
 
             /* If it's a group, we recurse into it */

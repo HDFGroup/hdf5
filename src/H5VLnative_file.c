@@ -315,7 +315,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
                     /* Call the flush routine, for this file */
                     if (H5F__flush(f) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL,
-                                    "unable to flush file's cached information")
+                                    "unable to flush file's cached information");
                 } /* end else */
             }     /* end if */
 
@@ -637,7 +637,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             /* We might introduce a new feature flag in the future */
             if (!H5F_HAS_FEATURE(f, H5FD_FEAT_SUPPORTS_SWMR_IO))
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
-                            "must use a SWMR-compatible VFD for this public routine")
+                            "must use a SWMR-compatible VFD for this public routine");
 
             /* The real work */
             if (HADDR_UNDEF == (rel_eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
@@ -658,7 +658,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             /* We might introduce a new feature flag in the future */
             if (!H5F_HAS_FEATURE(f, H5FD_FEAT_SUPPORTS_SWMR_IO))
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
-                            "must use a SWMR-compatible VFD for this public routine")
+                            "must use a SWMR-compatible VFD for this public routine");
 
             /* Get the maximum of EOA and EOF */
             if (H5F__get_max_eof_eoa(f, &max_eof_eoa) < 0)
@@ -693,7 +693,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
         case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG: {
             if (H5F_set_min_dset_ohdr(f, opt_args->set_min_dset_ohdr_flag.minimize) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
-                            "cannot set file's dataset object header minimization flag")
+                            "cannot set file's dataset object header minimization flag");
 
             break;
         }

@@ -511,7 +511,7 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
         if (vl_alloc_info->alloc_func != NULL) {
             if (NULL == (vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                            "application memory allocation routine failed for VL data")
+                            "application memory allocation routine failed for VL data");
         }    /* end if */
         else /* Default to system malloc */
             if (NULL == (vl.p = malloc(len)))
@@ -686,7 +686,7 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
         if (NULL ==
             (t = (char *)(vl_alloc_info->alloc_func)((seq_len + 1) * base_size, vl_alloc_info->alloc_info)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                        "application memory allocation routine failed for VL data")
+                        "application memory allocation routine failed for VL data");
     }    /* end if */
     else /* Default to system malloc */
         if (NULL == (t = (char *)malloc((seq_len + 1) * base_size)))

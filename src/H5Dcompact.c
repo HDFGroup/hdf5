@@ -192,7 +192,7 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
     max_comp_data_size = H5O_MESG_MAX_SIZE - H5D__layout_meta_size(f, &(dset->shared->layout), FALSE);
     if (dset->shared->layout.storage.u.compact.size > max_comp_data_size)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "compact dataset size is bigger than header message maximum size")
+                    "compact dataset size is bigger than header message maximum size");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

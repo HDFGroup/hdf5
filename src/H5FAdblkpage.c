@@ -94,7 +94,7 @@ H5FA__dblk_page_alloc(H5FA_hdr_t *hdr, size_t nelmts)
     /* Allocate memory for the data block */
     if (NULL == (dblk_page = H5FL_CALLOC(H5FA_dblk_page_t)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for fixed array data block page")
+                    "memory allocation failed for fixed array data block page");
 
     /* Share common array information */
     if (H5FA__hdr_incr(hdr) < 0)
@@ -107,7 +107,7 @@ H5FA__dblk_page_alloc(H5FA_hdr_t *hdr, size_t nelmts)
     /* Allocate buffer for elements in data block page */
     if (NULL == (dblk_page->elmts = H5FL_BLK_MALLOC(page_elmts, nelmts * hdr->cparam.cls->nat_elmt_size)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for data block page element buffer")
+                    "memory allocation failed for data block page element buffer");
 
     /* Set the return value */
     ret_value = dblk_page;
@@ -149,7 +149,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
     /* Allocate the data block page */
     if (NULL == (dblk_page = H5FA__dblk_page_alloc(hdr, nelmts)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, FAIL,
-                    "memory allocation failed for fixed array data block page")
+                    "memory allocation failed for fixed array data block page");
 
     /* Set info about data block page on disk */
     dblk_page->addr = addr;
@@ -161,7 +161,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
     /* Clear any elements in data block page to fill value */
     if ((hdr->cparam.cls->fill)(dblk_page->elmts, nelmts) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL,
-                    "can't set fixed array data block page elements to class's fill value")
+                    "can't set fixed array data block page elements to class's fill value");
 
     /* Cache the new fixed array data block page */
     if (H5AC_insert_entry(hdr->f, H5AC_FARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
@@ -172,7 +172,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
     if (hdr->top_proxy) {
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblk_page) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL,
-                        "unable to add fixed array entry as child of array proxy")
+                        "unable to add fixed array entry as child of array proxy");
         dblk_page->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -240,7 +240,7 @@ H5FA__dblk_page_protect(H5FA_hdr_t *hdr, haddr_t dblk_page_addr, size_t dblk_pag
         /* Add data block page as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblk_page) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, NULL,
-                        "unable to add fixed array entry as child of array proxy")
+                        "unable to add fixed array entry as child of array proxy");
         dblk_page->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -326,7 +326,7 @@ H5FA__dblk_page_dest(H5FA_dblk_page_t *dblk_page)
         /* Decrement reference count on shared info */
         if (H5FA__hdr_decr(dblk_page->hdr) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared array header")
+                        "can't decrement reference count on shared array header");
         dblk_page->hdr = NULL;
     } /* end if */
 

@@ -964,7 +964,7 @@ H5O__msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence, un
         /* Call the iterator callback */
         if ((try_remove = (udata->op)(mesg->native, sequence, udata->op_data)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR,
-                        "object header message deletion callback failed")
+                        "object header message deletion callback failed");
     } /* end if */
     else {
         /* If there's no callback routine, does the sequence # match? */
@@ -1882,7 +1882,7 @@ H5O__delete_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
 
         if ((type->del)(f, oh, mesg->native) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL,
-                        "unable to delete file space for object header message")
+                        "unable to delete file space for object header message");
     } /* end if */
 
 done:

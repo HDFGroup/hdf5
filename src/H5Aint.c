@@ -520,7 +520,7 @@ H5A__open(const H5G_loc_t *loc, const char *attr_name)
     /* Read in attribute from object header */
     if (NULL == (attr = H5O__attr_open_by_name(loc->oloc, attr_name)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL,
-                    "unable to load attribute info from object header for attribute: '%s'", attr_name)
+                    "unable to load attribute info from object header for attribute: '%s'", attr_name);
 
     /* Finish initializing attribute */
     if (H5A__open_common(loc, attr) < 0)
@@ -716,7 +716,7 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
             /* Set up type conversion function */
             if (NULL == (tpath = H5T_path_find(attr->shared->dt, mem_type)))
                 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
-                            "unable to convert between src and dst datatypes")
+                            "unable to convert between src and dst datatypes");
 
             /* Check for type conversion required */
             if (!H5T_path_noop(tpath)) {
@@ -2218,15 +2218,15 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             /* create variable-length datatype at the destination file */
             if ((tid_dst = H5I_register(H5I_DATATYPE, attr_dst->shared->dt, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-                            "unable to register destination file datatype")
+                            "unable to register destination file datatype");
 
             /* Set up the conversion functions */
             if (NULL == (tpath_src_mem = H5T_path_find(attr_src->shared->dt, dt_mem)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-                            "unable to convert between src and mem datatypes")
+                            "unable to convert between src and mem datatypes");
             if (NULL == (tpath_mem_dst = H5T_path_find(dt_mem, attr_dst->shared->dt)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-                            "unable to convert between mem and dst datatypes")
+                            "unable to convert between mem and dst datatypes");
 
             /* Determine largest datatype size */
             if (0 == (src_dt_size = H5T_get_size(attr_src->shared->dt)))

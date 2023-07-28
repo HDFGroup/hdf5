@@ -308,7 +308,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
             if (NULL ==
                 (entry_ptr->image_ptr = H5MM_realloc(entry_ptr->image_ptr, new_len + H5C_IMAGE_EXTRA_SPACE)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for on disk image buffer")
+                            "memory allocation failed for on disk image buffer");
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
             H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + new_len, H5C_IMAGE_SANITY_VALUE,
@@ -546,7 +546,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
         if (NULL == entry_ptr->image_ptr) {
             if (NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for on disk image buffer")
+                            "memory allocation failed for on disk image buffer");
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
             H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
@@ -736,7 +736,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             if (entry_ptr->type->notify &&
                 (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_CLEANED, entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                            "can't notify client about entry dirty flag cleared")
+                            "can't notify client about entry dirty flag cleared");
 
             /* Propagate the clean flag up the flush dependency chain
              * if appropriate
@@ -862,7 +862,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                 if (entry_ptr->type->notify &&
                     (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_CLEANED, entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                                "can't notify client about entry dirty flag cleared")
+                                "can't notify client about entry dirty flag cleared");
             } /* end if */
 
             /* verify that the image has been freed */
@@ -1351,7 +1351,7 @@ H5C__mark_flush_dep_dirty(H5C_cache_entry_t *entry)
             (entry->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_DIRTIED,
                                                        entry->flush_dep_parent[u]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                        "can't notify parent about child entry dirty flag set")
+                        "can't notify parent about child entry dirty flag set");
     } /* end for */
 
 done:
@@ -1397,7 +1397,7 @@ H5C__mark_flush_dep_clean(H5C_cache_entry_t *entry)
             (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED,
                                                        entry->flush_dep_parent[i]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                        "can't notify parent about child entry dirty flag reset")
+                        "can't notify parent about child entry dirty flag reset");
     } /* end for */
 
 done:
@@ -1443,7 +1443,7 @@ H5C__mark_flush_dep_serialized(H5C_cache_entry_t *entry_ptr)
             (entry_ptr->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED,
                                                            entry_ptr->flush_dep_parent[i]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                        "can't notify parent about child entry serialized flag set")
+                        "can't notify parent about child entry serialized flag set");
     } /* end for */
 
 done:
@@ -1487,7 +1487,7 @@ H5C__mark_flush_dep_unserialized(H5C_cache_entry_t *entry_ptr)
             (entry_ptr->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED,
                                                            entry_ptr->flush_dep_parent[u]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                        "can't notify parent about child entry serialized flag reset")
+                        "can't notify parent about child entry serialized flag reset");
     } /* end for */
 
 done:
@@ -1674,7 +1674,7 @@ H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_e
                 fd_children_found++;
                 if (H5C_destroy_flush_dependency(pf_entry_ptr, entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
-                                "can't destroy pf entry child flush dependency")
+                                "can't destroy pf entry child flush dependency");
 
 #ifndef NDEBUG
                 /* Sanity check -- verify that the address of the parent
@@ -1836,7 +1836,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
 
         if (H5C__destroy_pf_entry_child_flush_deps(cache_ptr, pf_entry_ptr, fd_children) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
-                        "can't destroy pf entry child flush dependency(s).")
+                        "can't destroy pf entry child flush dependency(s).");
     } /* end if */
 
     /* Since the size of the on disk image is known exactly, there is
@@ -2402,7 +2402,7 @@ H5C_mark_entry_dirty(void *thing)
             if (entry_ptr->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                                "Can't propagate serialization status to fd parents")
+                                "Can't propagate serialization status to fd parents");
         } /* end if */
     }     /* end if */
     else if (entry_ptr->is_pinned) {
@@ -2446,7 +2446,7 @@ H5C_mark_entry_dirty(void *thing)
             if (entry_ptr->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                                "Can't propagate serialization status to fd parents")
+                                "Can't propagate serialization status to fd parents");
     } /* end if */
     else
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry is neither pinned nor protected??")
@@ -2515,7 +2515,7 @@ H5C_mark_entry_clean(void *_thing)
             if (entry_ptr->type->notify &&
                 (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_CLEANED, entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                            "can't notify client about entry dirty flag cleared")
+                            "can't notify client about entry dirty flag cleared");
 
             /* Propagate the clean up the flush dependency chain, if appropriate */
             if (entry_ptr->flush_dep_nparents > 0)
@@ -2562,12 +2562,12 @@ H5C_mark_entry_unserialized(void *thing)
             if (entry->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_unserialized(entry) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL,
-                                "Can't propagate serialization status to fd parents")
+                                "Can't propagate serialization status to fd parents");
         } /* end if */
     }     /* end if */
     else
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKUNSERIALIZED, FAIL,
-                    "Entry to unserialize is neither pinned nor protected??")
+                    "Entry to unserialize is neither pinned nor protected??");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2608,7 +2608,7 @@ H5C_mark_entry_serialized(void *_thing)
             if (entry->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_serialized(entry) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKSERIALIZED, FAIL,
-                                "Can't propagate flush dep serialize")
+                                "Can't propagate flush dep serialize");
         } /* end if */
     }     /* end if */
     else
@@ -2715,7 +2715,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
             if (entry_ptr->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                                "Can't propagate serialization status to fd parents")
+                                "Can't propagate serialization status to fd parents");
         } /* end if */
 
         /* Modify cache data structures */
@@ -2735,13 +2735,13 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
                 if (entry_ptr->type->notify &&
                     (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_DIRTIED, entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                                "can't notify client about entry dirty flag set")
+                                "can't notify client about entry dirty flag set");
 
                 /* Propagate the dirty flag up the flush dependency chain if appropriate */
                 if (entry_ptr->flush_dep_nparents > 0)
                     if (H5C__mark_flush_dep_dirty(entry_ptr) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL,
-                                    "Can't propagate flush dep dirty flag")
+                                    "Can't propagate flush dep dirty flag");
             } /* end if */
         }     /* end if */
     }         /* end if */
@@ -2813,7 +2813,7 @@ H5C_resize_entry(void *thing, size_t new_size)
             if (entry_ptr->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                                "Can't propagate serialization status to fd parents")
+                                "Can't propagate serialization status to fd parents");
         } /* end if */
 
         /* Release the current image */
@@ -3061,7 +3061,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 
                     if (NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL,
-                                    "memory allocation failed for on disk image buffer")
+                                    "memory allocation failed for on disk image buffer");
 #if H5C_DO_MEMORY_SANITY_CHECKS
                     H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
                                 H5C_IMAGE_EXTRA_SPACE);
@@ -3323,7 +3323,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
          */
         if (entry_ptr->type->notify && (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_LOAD, entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, NULL,
-                        "can't notify client about entry inserted into cache")
+                        "can't notify client about entry inserted into cache");
 
 #ifdef H5_HAVE_PARALLEL
     /* Make sure the size of the collective entries in the cache remain in check */
@@ -3555,7 +3555,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
             if (entry_ptr->flush_dep_nparents > 0)
                 if (H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                                "Can't propagate serialization status to fd parents")
+                                "Can't propagate serialization status to fd parents");
         } /* end if */
 
         /* Check for newly dirtied entry */
@@ -3588,7 +3588,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
             if (entry_ptr->type->notify &&
                 (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_CLEANED, entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                            "can't notify client about entry dirty flag cleared")
+                            "can't notify client about entry dirty flag cleared");
 
             /* Propagate the flush dep clean flag up the flush dependency chain
              * if appropriate
@@ -3642,7 +3642,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "entry not in hash table?!?")
             else if (test_entry_ptr != entry_ptr)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL,
-                            "hash table contains multiple entries for addr?!?")
+                            "hash table contains multiple entries for addr?!?");
 
             /* Set the 'free file space' flag for the flush, if needed */
             if (free_file_space)
@@ -3669,7 +3669,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "entry not in hash table?!?")
             else if (test_entry_ptr != entry_ptr)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL,
-                            "hash table contains multiple entries for addr?!?")
+                            "hash table contains multiple entries for addr?!?");
 
             if (H5C__flush_single_entry(f, entry_ptr,
                                         H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
@@ -3835,7 +3835,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
             if (NULL == (child_entry->flush_dep_parent =
                              H5FL_SEQ_MALLOC(H5C_cache_entry_ptr_t, H5C_FLUSH_DEP_PARENT_INIT)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                            "memory allocation failed for flush dependency parent list")
+                            "memory allocation failed for flush dependency parent list");
             child_entry->flush_dep_parent_nalloc = H5C_FLUSH_DEP_PARENT_INIT;
         } /* end if */
         else {
@@ -3846,7 +3846,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
                              H5FL_SEQ_REALLOC(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent,
                                               2 * child_entry->flush_dep_parent_nalloc)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                            "memory allocation failed for flush dependency parent list")
+                            "memory allocation failed for flush dependency parent list");
             child_entry->flush_dep_parent_nalloc *= 2;
         } /* end else */
         cache_ptr->entry_fd_height_change_counter++;
@@ -3870,7 +3870,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
         if (parent_entry->type->notify &&
             (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_DIRTIED, parent_entry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                        "can't notify parent about child entry dirty flag set")
+                        "can't notify parent about child entry dirty flag set");
     } /* end if */
 
     /* adjust the parent's number of unserialized children.  Note
@@ -3885,7 +3885,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
         if (parent_entry->type->notify &&
             (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED, parent_entry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                        "can't notify parent about child entry serialized flag reset")
+                        "can't notify parent about child entry serialized flag reset");
     } /* end if */
 
     /* Post-conditions, for successful operation */
@@ -3937,10 +3937,10 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry isn't pinned")
     if (NULL == child_entry->flush_dep_parent)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
-                    "Child entry doesn't have a flush dependency parent array")
+                    "Child entry doesn't have a flush dependency parent array");
     if (0 == parent_entry->flush_dep_nchildren)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
-                    "Parent entry flush dependency ref. count has no child dependencies")
+                    "Parent entry flush dependency ref. count has no child dependencies");
 
     /* Search for parent in child's parent array.  This is a linear search
      * because we do not expect large numbers of parents.  If this changes, we
@@ -3950,7 +3950,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
             break;
     if (u == child_entry->flush_dep_nparents)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
-                    "Parent entry isn't a flush dependency parent for child entry")
+                    "Parent entry isn't a flush dependency parent for child entry");
 
     /* Remove parent entry from child's parent array */
     if (u < (child_entry->flush_dep_nparents - 1))
@@ -3984,7 +3984,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
         if (parent_entry->type->notify &&
             (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, parent_entry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                        "can't notify parent about child entry dirty flag reset")
+                        "can't notify parent about child entry dirty flag reset");
     } /* end if */
 
     /* adjust parent entry's number of unserialized children */
@@ -3997,7 +3997,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
         if (parent_entry->type->notify &&
             (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, parent_entry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
-                        "can't notify parent about child entry serialized flag set")
+                        "can't notify parent about child entry serialized flag set");
     } /* end if */
 
     /* Shrink or free the parent array if appropriate */
@@ -4011,7 +4011,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
                          H5FL_SEQ_REALLOC(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent,
                                           child_entry->flush_dep_parent_nalloc / 4)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "memory allocation failed for flush dependency parent list")
+                        "memory allocation failed for flush dependency parent list");
         child_entry->flush_dep_parent_nalloc /= 4;
     } /* end if */
 
@@ -4130,10 +4130,10 @@ H5C_remove_entry(void *_entry)
      */
     if (entry->flush_dep_nparents > 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL,
-                    "can't remove entry with flush dependency parents from cache")
+                    "can't remove entry with flush dependency parents from cache");
     if (entry->flush_dep_nchildren > 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL,
-                    "can't remove entry with flush dependency children from cache")
+                    "can't remove entry with flush dependency children from cache");
 
     /* Additional internal cache consistency checks */
     assert(!entry->in_slist);

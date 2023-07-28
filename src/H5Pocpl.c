@@ -778,7 +778,7 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
          */
         if (cd_nelmts && *cd_nelmts > 256)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
-                        "probable uninitialized *cd_nelmts argument")
+                        "probable uninitialized *cd_nelmts argument");
         if (cd_nelmts && *cd_nelmts > 0 && !cd_values)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "client data values not supplied")
 
@@ -1677,7 +1677,7 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
          */
         if (cd_nelmts && *cd_nelmts > 256)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
-                        "probable uninitialized *cd_nelmts argument")
+                        "probable uninitialized *cd_nelmts argument");
         if (cd_nelmts && *cd_nelmts > 0 && !cd_values)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "client data values not supplied")
 
