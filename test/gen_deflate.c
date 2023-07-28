@@ -105,7 +105,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return EXIT_FAILURE;
 } /* end main() */

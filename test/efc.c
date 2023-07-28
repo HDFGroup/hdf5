@@ -18,7 +18,7 @@
 #include "H5Iprivate.h"
 #include "H5Pprivate.h" /* Property lists                       */
 
-const char *FILENAME[] = {"efc0", "efc1", "efc2", "efc3", "efc4", "efc5", NULL};
+static const char *FILENAME[] = {"efc0", "efc1", "efc2", "efc3", "efc4", "efc5", NULL};
 
 /* Windows doesn't have PATH_MAX */
 #ifndef PATH_MAX

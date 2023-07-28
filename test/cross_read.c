@@ -18,7 +18,7 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 
-const char *FILENAME[] = {"vms_data", "le_data", "be_data", NULL};
+static const char *FILENAME[] = {"vms_data", "le_data", "be_data", NULL};
 
 #define DATASETNAME   "Array_le"
 #define DATASETNAME1  "Array_be"
@@ -120,7 +120,7 @@ error:
     {
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end check_data_i() */
 
@@ -191,7 +191,7 @@ error:
     {
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end check_data_f() */
 
@@ -322,7 +322,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return nerrors;
 } /* end check_file() */
 

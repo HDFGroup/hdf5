@@ -63,26 +63,26 @@
    For errors occurring in the spawned process (from the test script), use
    the PROCESS_ERROR macro, which will send a signal to the main process so the
    main process can propagate errors correctly. */
-FILE *errorfile;
+static FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         errorfile = fopen(ERRFILE, "w+");                                                                    \
         fprintf(errorfile, "Error occurred in flushrefresh.\n");                                             \
         fflush(errorfile);                                                                                   \
-        HDfclose(errorfile);                                                                                 \
+        fclose(errorfile);                                                                                   \
         TEST_ERROR;                                                                                          \
-    }
+    } while (0)
 
 #define CLEANUP_FILES                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDremove(ERRFILE);                                                                                   \
         HDremove(FILENAME);                                                                                  \
         HDremove(SIGNAL_TO_SCRIPT);                                                                          \
         HDremove(SIGNAL_BETWEEN_PROCESSES_1);                                                                \
         HDremove(SIGNAL_BETWEEN_PROCESSES_2);                                                                \
         HDremove(SIGNAL_FROM_SCRIPT);                                                                        \
-    }
+    } while (0)
 
 /* ===================== */
 /* Function Declarations */
@@ -177,7 +177,7 @@ main(int argc, char *argv[])
     else {
         /* Illegal number of arguments supplied. Error. */
         fprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
-        PROCESS_ERROR
+        PROCESS_ERROR;
     } /* end if */
 
     return EXIT_SUCCESS;
@@ -1065,7 +1065,7 @@ flush_verification(const char *obj_pathname, const char *expected)
         oid    = H5Oopen(fid, obj_pathname, H5P_DEFAULT);
         status = H5Oget_info3(oid, &oinfo, H5O_INFO_BASIC);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Compare to expected result */
     if (HDstrcmp(expected, FLUSHED) == 0) {
@@ -1092,7 +1092,7 @@ flush_verification(const char *obj_pathname, const char *expected)
         H5Oclose(oid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return SUCCEED;
 
@@ -1356,7 +1356,7 @@ check_for_errors(void)
     FILE *file;
 
     if ((file = fopen(ERRFILE, "r"))) {
-        HDfclose(file);
+        fclose(file);
         HDremove(ERRFILE);
         return FAIL;
     } /* end if */

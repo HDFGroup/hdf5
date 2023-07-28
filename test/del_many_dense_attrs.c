@@ -19,7 +19,7 @@
 #include "h5test.h"
 
 /* The test file name */
-const char *FILENAME[] = {"del_many_dense_attrs", NULL};
+static const char *FILENAME[] = {"del_many_dense_attrs", NULL};
 
 #define ATTR_COUNT 64 /* The number of attributes */
 

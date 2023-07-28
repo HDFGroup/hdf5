@@ -271,7 +271,7 @@ error:
         H5Pclose(dcpl3);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(buf);
     free(buf_data);
@@ -477,7 +477,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_obj_dset_cork */
 
@@ -730,7 +730,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(buf);
     free(buf_data);
@@ -901,7 +901,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_group_cork */
 
@@ -1174,7 +1174,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_named_cork */
 
@@ -1464,7 +1464,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Odisable_mdc_flushes(aidg2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1473,7 +1473,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Odisable_mdc_flushes(aidd1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1482,7 +1482,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Oare_mdc_flushes_disabled(aidt2, &corked);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1506,7 +1506,7 @@ verify_multiple_cork(hbool_t swmr)
         ret = H5Oare_mdc_flushes_disabled(fid1, &corked);
         ret = H5Odisable_mdc_flushes(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1515,7 +1515,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Oenable_mdc_flushes(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1549,7 +1549,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_multiple_cork */
 
@@ -1651,7 +1651,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Odisable_mdc_flushes(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1690,7 +1690,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oenable_mdc_flushes(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1707,7 +1707,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oare_mdc_flushes_disabled(aid, &corked);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1750,7 +1750,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Odisable_mdc_flushes(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1775,7 +1775,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oenable_mdc_flushes(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1849,7 +1849,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_objs_cork() */
 
@@ -2197,7 +2197,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(wbuf);
     free(wbuf_data);

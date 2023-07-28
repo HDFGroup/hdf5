@@ -385,7 +385,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to read */
-                nrecords = HDatol(argv[u]);
+                nrecords = atol(argv[u]);
                 if (nrecords <= 0)
                     usage();
 

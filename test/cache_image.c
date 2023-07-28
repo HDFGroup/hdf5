@@ -19,7 +19,7 @@
 
 /* global variable declarations: */
 
-const char *FILENAMES[] = {"cache_image_test", NULL};
+static const char *FILENAMES[] = {"cache_image_test", NULL};
 
 /* local utility function declarations */
 static void create_datasets(hid_t file_id, int min_dset, int max_dset);
@@ -6218,7 +6218,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
                 failure_mssg = "SWMR start succeeded in file with cache image.";
             }
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     if (show_progress)
@@ -7584,7 +7584,6 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     if (verbose) {
 
         assert(cache_ptr);
-        assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
         fprintf(stdout, "index size / index dirty size = %lld / %lld\n", (long long)(cache_ptr->index_size),
                 (long long)(cache_ptr->dirty_index_size));

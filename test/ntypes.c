@@ -16,7 +16,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"ntypes", NULL};
+static const char *FILENAME[] = {"ntypes", NULL};
 
 #define DIM0 100
 #define DIM1 200
@@ -286,7 +286,7 @@ error:
         H5Tclose(dtype);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(ipoints2);
     free(icheck2);
@@ -605,7 +605,7 @@ error:
         H5Tclose(dtype);
         H5Tclose(native_type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -813,7 +813,7 @@ error:
         H5Tclose(native_type);
         H5Tclose(tid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1049,7 +1049,7 @@ error:
         H5Tclose(tid_m);
         H5Tclose(tid_m2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1271,7 +1271,7 @@ error:
         H5Tclose(tid2);
         H5Tclose(tid_m);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1425,7 +1425,7 @@ error:
         H5Tclose(tid);
         H5Tclose(tid_m);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1608,7 +1608,7 @@ error:
         H5Tclose(tid3);
         H5Tclose(tid_m);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1752,7 +1752,7 @@ error:
         H5Tclose(tid);
         H5Tclose(tid_m);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(ipoints3);
     free(icheck3);
@@ -1956,7 +1956,7 @@ error:
         H5Tclose(tid_m);
         H5Tclose(tid_m2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_vl_type() */
@@ -2091,7 +2091,7 @@ error:
         H5Tclose(sid1);
         H5Tclose(tid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_vlstr_dtype() */
@@ -2208,7 +2208,7 @@ error:
         H5Tclose(tid1);
         H5Tclose(sid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_str_dtype() */
@@ -2376,7 +2376,7 @@ error:
         H5Tclose(native_type);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_refer_dtype() */
@@ -2585,7 +2585,7 @@ error:
         H5Dclose(dset2);
         H5Dclose(dset1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_refer_dtype2() */
@@ -2679,7 +2679,7 @@ error:
         H5Dclose(dset);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_opaque_dtype */
@@ -2830,7 +2830,7 @@ error:
         H5Dclose(dataset1);
         H5Dclose(dataset2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_bitfield_dtype */
@@ -3037,7 +3037,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_ninteger() */
@@ -3112,7 +3112,7 @@ error:
         H5Fclose(file);
         h5_cleanup(FILENAME, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     nerrors = MAX(1, nerrors);
     printf("***** %d DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");

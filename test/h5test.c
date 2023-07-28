@@ -189,7 +189,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
     {
         H5Fdelete(filename, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* end h5_delete_test_file() */
 
@@ -292,15 +292,11 @@ h5_restore_err(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:  h5_reset
+ * Function:    h5_reset
  *
- * Purpose:  Reset the library by closing it.
+ * Purpose:     Reset the library by closing it
  *
- * Return:  void
- *
- * Programmer:  Robb Matzke
- *              Friday, November 20, 1998
- *
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 void
@@ -314,36 +310,6 @@ h5_reset(void)
     assert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
-
-/*
- * I commented this chunk of code out because it's not clear what diagnostics
- *      were being output and under what circumstances, and creating this file
- *      is throwing off debugging some of the tests.  I can't see any _direct_
- *      harm in keeping this section of code, but I can't see any _direct_
- *      benefit right now either.  If we figure out under which circumstances
- *      diagnostics are being output, we should enable this behavior based on
- *      appropriate configure flags/macros.  QAK - 2007/12/20
- */
-#ifdef OLD_WAY
-    {
-        char filename[1024];
-
-        /*
-         * Cause the library to emit some diagnostics early so they don't
-         * interfere with other formatted output.
-         */
-        HDsnprintf(filename, sizeof(filename), "/tmp/h5emit-%05d.h5", HDgetpid());
-        H5E_BEGIN_TRY
-        {
-            hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-            hid_t grp  = H5Gcreate2(file, "emit", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            H5Gclose(grp);
-            H5Fclose(file);
-            HDunlink(filename);
-        }
-        H5E_END_TRY;
-    }
-#endif /* OLD_WAY */
 }
 
 /*-------------------------------------------------------------------------
@@ -932,7 +898,7 @@ h5_show_hostname(void)
 
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
-    if (HDgethostname(hostname, (size_t)80) < 0)
+    if (gethostname(hostname, (size_t)80) < 0)
         printf(" gethostname failed\n");
     else
         printf(" hostname=%s\n", hostname);
@@ -1515,7 +1481,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1563,7 +1529,7 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
         assert(arg2 == NULL);
     } /* end else */
 
-    HDfclose(signalfile);
+    fclose(signalfile);
 
     HDrename(TMP_SIGNAL_FILE, send);
 } /* h5_send_message() */
@@ -1618,7 +1584,7 @@ h5_wait_message(const char *waitfor)
         } /* end if */
     }     /* end while */
 
-    HDfclose(returnfile);
+    fclose(returnfile);
     HDunlink(waitfor);
 
     return SUCCEED;
@@ -1883,11 +1849,11 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     HDrewind(f1ptr);
     HDrewind(f2ptr);
     for (ii = 0; ii < f1size; ii++) {
-        if (HDfread(&f1char, 1, 1, f1ptr) != 1) {
+        if (fread(&f1char, 1, 1, f1ptr) != 1) {
             ret_value = -1;
             goto done;
         }
-        if (HDfread(&f2char, 1, 1, f2ptr) != 1) {
+        if (fread(&f2char, 1, 1, f2ptr) != 1) {
             ret_value = -1;
             goto done;
         }
@@ -1900,9 +1866,9 @@ h5_compare_file_bytes(char *f1name, char *f2name)
 
 done:
     if (f1ptr)
-        HDfclose(f1ptr);
+        fclose(f1ptr);
     if (f2ptr)
-        HDfclose(f2ptr);
+        fclose(f2ptr);
     return ret_value;
 } /* end h5_compare_file_bytes() */
 
@@ -2013,20 +1979,20 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     }
 
     while (read_size > 0) {
-        if (HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
+        if (fread(dup_buf, read_size, 1, orig_ptr) != 1) {
             ret_value = -1;
             goto done;
         }
-        HDfwrite(dup_buf, read_size, 1, dest_ptr);
+        fwrite(dup_buf, read_size, 1, dest_ptr);
         fsize -= read_size;
         read_size = MIN(fsize, max_buf);
     }
 
 done:
     if (orig_ptr != NULL)
-        HDfclose(orig_ptr);
+        fclose(orig_ptr);
     if (dest_ptr != NULL)
-        HDfclose(dest_ptr);
+        fclose(dest_ptr);
     if (dup_buf != NULL)
         free(dup_buf);
     return ret_value;

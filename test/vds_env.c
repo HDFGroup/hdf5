@@ -15,7 +15,7 @@
  */
 #include "h5test.h"
 
-const char *FILENAME[] = {"vds_env_virt_0", "vds_env_virt_3", "vds_env_src_2", "vds_env%%_src2", NULL};
+static const char *FILENAME[] = {"vds_env_virt_0", "vds_env_virt_3", "vds_env_src_2", "vds_env%%_src2", NULL};
 
 /* I/O test config flags */
 #define TEST_IO_CLOSE_SRC      0x01u
@@ -304,7 +304,7 @@ error:
         H5Pclose(dapl);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_vds_prefix2 */

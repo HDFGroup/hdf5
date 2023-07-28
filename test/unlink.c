@@ -22,9 +22,9 @@
 #include "h5test.h"
 #include "H5Gpkg.h" /* Groups                */
 
-const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_b",    "lunlink",
-                          "filespace",       "slashes",        "resurrect_set", "resurrect_type",
-                          "resurrect_group", "unlink_chunked", "full_group",    NULL};
+static const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_b",    "lunlink",
+                                 "filespace",       "slashes",        "resurrect_set", "resurrect_type",
+                                 "resurrect_group", "unlink_chunked", "full_group",    NULL};
 
 /* Macros for test_create_unlink() & test_filespace */
 #define GROUPNAME                     "group"
@@ -112,7 +112,7 @@ test_one(hid_t file)
     {
         status = H5Ldelete(grp, ".", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Unlinking object w/o a name should have failed.");
     if (H5Gclose(grp) < 0)
@@ -131,7 +131,7 @@ error:
         H5Gclose(work);
         H5Gclose(grp);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_one() */
 
@@ -235,7 +235,7 @@ error:
         H5Gclose(work);
         H5Gclose(grp);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -277,7 +277,7 @@ error:
     {
         H5Gclose(work);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_symlink() */
 
@@ -338,7 +338,7 @@ error:
         H5Gclose(foo);
         H5Gclose(inner);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_rename() */
 
@@ -392,7 +392,7 @@ test_new_move(hid_t fapl)
             FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Move a group across files.  Should fail. */
     H5E_BEGIN_TRY
@@ -400,7 +400,7 @@ test_new_move(hid_t fapl)
         if (H5Lmove(grp_1, "group_move", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) != FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Move a group across groups in the same file. */
     if (H5Lmove(grp_1, "group_move", grp_2, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -436,7 +436,7 @@ error:
         H5Fclose(file_a);
         H5Fclose(file_b);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -1219,7 +1219,7 @@ test_filespace(hid_t fapl)
     {
         dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dataset >= 0) {
         H5Dclose(dataset);
         TEST_ERROR;
@@ -1261,7 +1261,7 @@ test_filespace(hid_t fapl)
     {
         group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (group >= 0) {
         H5Gclose(group);
         TEST_ERROR;
@@ -1311,7 +1311,7 @@ test_filespace(hid_t fapl)
     {
         status = H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         TEST_ERROR;
     if (H5Tclose(type) < 0)
@@ -1366,7 +1366,7 @@ test_filespace(hid_t fapl)
     {
         attr = H5Acreate2(dataset, ATTRNAME, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (attr >= 0) {
         H5Aclose(attr);
         TEST_ERROR;
@@ -1748,7 +1748,7 @@ error:
                 {
                     H5Gclose(gids[n]);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
             } /* end if */
         free(gids);
     } /* end if */
@@ -1756,7 +1756,7 @@ error:
     {
         H5Gclose(rootid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_unlink_rightleaf() */
@@ -1835,7 +1835,7 @@ error:
                 {
                     H5Gclose(gids[n]);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
             } /* end if */
         free(gids);
     } /* end if */
@@ -1843,7 +1843,7 @@ error:
     {
         H5Gclose(rootid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_unlink_rightnode() */
@@ -2208,7 +2208,7 @@ error:
                 {
                     H5Gclose(gids[n]);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
             } /* end if */
         free(gids);
     } /* end if */
@@ -2216,7 +2216,7 @@ error:
     {
         H5Gclose(rootid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_unlink_middlenode() */
@@ -2297,7 +2297,7 @@ error:
         H5Dclose(d);
         H5Fclose(f);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_resurrect_dataset() */
 
@@ -2374,7 +2374,7 @@ error:
         H5Tclose(type);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_resurrect_datatype() */
 
@@ -2449,7 +2449,7 @@ error:
         H5Gclose(group);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_resurrect_group() */
 
@@ -2544,7 +2544,7 @@ error:
         H5Dclose(dset_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_unlink_chunked_dataset() */
 
@@ -2702,7 +2702,7 @@ error:
         H5Gclose(gid);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_full_group_compact() */
 
@@ -2877,7 +2877,7 @@ error:
         H5Pclose(gcpl);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_full_group_dense() */
 

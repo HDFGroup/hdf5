@@ -128,7 +128,7 @@ test_non_extendible(hid_t file)
     {
         dset_addr = H5Dget_offset(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset_addr != HADDR_UNDEF)
         FAIL_STACK_ERROR;
 
@@ -175,7 +175,7 @@ error:
         H5Sclose(space);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_non_extendible() */
 
@@ -213,7 +213,7 @@ test_too_small(hid_t file)
     {
         dset = H5Dcreate2(file, "dset2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external file succeeded instead of failing.");
     if (H5Sclose(space) < 0)
@@ -231,7 +231,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_too_small() */
 
@@ -284,7 +284,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_large_enough_current_eventual() */
 
@@ -322,7 +322,7 @@ test_large_enough_current_not_eventual(hid_t file)
     {
         dset = H5Dcreate2(file, "dset4", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external file succeeded instead of failing.");
 
@@ -341,7 +341,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_large_enough_current_not_eventual() */
 
@@ -431,7 +431,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_unlimited() */
 
@@ -531,7 +531,7 @@ test_multiple_files(hid_t file)
     {
         dset = H5Dcreate2(file, "dset7", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external files succeeded instead of failing.");
 
@@ -550,7 +550,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_multiple_files() */
 
@@ -583,7 +583,7 @@ test_add_to_unlimited(void)
     {
         status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    H5Pset_external() succeeded when it should have failed.");
 
@@ -602,7 +602,7 @@ error:
     {
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_add_to_unlimited() */
 
@@ -634,7 +634,7 @@ test_overflow(void)
     {
         status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    H5Pset_external() succeeded when it should have failed.");
 
@@ -649,7 +649,7 @@ error:
     {
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_overflow() */
 
@@ -771,7 +771,7 @@ error:
         H5Sclose(hs_space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_read_file_set() */
 
@@ -894,7 +894,7 @@ error:
         H5Sclose(file_space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_write_file_set() */
 
@@ -988,7 +988,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_absolute() */
 
@@ -1075,7 +1075,7 @@ error:
         H5Sclose(space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_relative() */
 
@@ -1165,7 +1165,7 @@ test_path_relative_cwd(hid_t fapl)
     {
         dset3 = H5Dopen2(file, "dset1", dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset3 >= 0)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
@@ -1202,7 +1202,7 @@ test_path_relative_cwd(hid_t fapl)
     {
         dset3 = H5Dopen2(file, "dset1", dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset3 >= 0)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
@@ -1243,7 +1243,7 @@ error:
         H5Sclose(space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_relative_cwd() */
 
@@ -1345,7 +1345,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_h5d_get_access_plist() */
 
@@ -1471,7 +1471,7 @@ error:
         H5Pclose(fapl_id_new);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     nerrors = MAX(1, nerrors);
     printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;

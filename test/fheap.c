@@ -86,7 +86,7 @@
 #define NUM_PB_FS             6
 #define PAGE_BUFFER_PAGE_SIZE 4096
 
-const char *FILENAME[] = {"fheap", NULL};
+static const char *FILENAME[] = {"fheap", NULL};
 
 /* Types of tests to perform */
 typedef enum {
@@ -1818,7 +1818,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_create() */
 
@@ -1968,7 +1968,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_reopen() */
 
@@ -2142,7 +2142,7 @@ error:
         H5Fclose(file);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice() */
@@ -2242,7 +2242,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     {
         fh2 = H5HF_open(f, fh_addr);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fh2) {
         /* Close opened heap */
         H5HF_close(fh2);
@@ -2282,7 +2282,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     {
         fh = H5HF_open(f, fh_addr);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fh) {
         /* Close opened heap */
         H5HF_close(fh);
@@ -2318,7 +2318,7 @@ error:
             H5HF_close(fh2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_delete_open() */
 
@@ -2469,7 +2469,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     {
         fh = H5HF_create(f, &tmp_cparam);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (NULL != fh)
         FAIL_STACK_ERROR;
 
@@ -2633,7 +2633,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     {
         fh = H5HF_create(f, &tmp_cparam);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (NULL != fh)
         FAIL_STACK_ERROR;
 
@@ -2653,7 +2653,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_id_limits() */
 
@@ -2772,7 +2772,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_filtered_create() */
 
@@ -2908,7 +2908,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_size() */
 
@@ -3040,7 +3040,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_reopen_hdr() */
 
@@ -3111,7 +3111,7 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     {
         ret = H5HF_insert(fh, (size_t)0, shared_wobj_g, heap_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5Eclear2(H5E_DEFAULT);
@@ -3149,7 +3149,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_weird() */
 
@@ -3249,7 +3249,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_first() */
 
@@ -3341,7 +3341,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_second() */
 
@@ -3436,7 +3436,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_root_mult() */
 
@@ -3539,7 +3539,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_force_indirect() */
 
@@ -3642,7 +3642,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_fill_second() */
 
@@ -3751,7 +3751,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_third_direct() */
 
@@ -3844,7 +3844,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_first_row() */
 
@@ -3944,7 +3944,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_second_row() */
 
@@ -4041,7 +4041,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_second_row() */
 
@@ -4149,7 +4149,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_third_row() */
 
@@ -4244,7 +4244,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_fourth_row() */
 
@@ -4337,7 +4337,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_all_root_direct() */
 
@@ -4435,7 +4435,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_first_recursive_indirect() */
 
@@ -4542,7 +4542,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_second_direct_recursive_indirect() */
 
@@ -4641,7 +4641,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_first_recursive_indirect() */
 
@@ -4748,7 +4748,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_second_recursive_indirect() */
 
@@ -4853,7 +4853,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_second_recursive_indirect() */
 
@@ -4950,7 +4950,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_recursive_indirect_row() */
 
@@ -5056,7 +5056,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_2nd_recursive_indirect() */
 
@@ -5155,7 +5155,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_recursive_indirect_two_deep() */
 
@@ -5262,7 +5262,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_3rd_recursive_indirect() */
 
@@ -5370,7 +5370,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_first_3rd_recursive_indirect() */
 
@@ -5475,7 +5475,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_recursive_indirect_row() */
 
@@ -5580,7 +5580,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_all_3rd_recursive_indirect() */
 
@@ -5692,7 +5692,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_4th_recursive_indirect() */
 
@@ -5810,7 +5810,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_first_4th_recursive_indirect() */
 
@@ -5919,7 +5919,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_4th_recursive_indirect_row() */
 
@@ -6028,7 +6028,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_all_4th_recursive_indirect() */
 #endif /* ALL_INSERT_TESTS */
@@ -6159,7 +6159,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_5th_recursive_indirect() */
 
@@ -6251,7 +6251,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
     {
         ret = H5HF_remove(fh, heap_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_STACK_ERROR;
 
@@ -6280,7 +6280,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
     {
         ret = H5HF_remove(fh, heap_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5Eclear2(H5E_DEFAULT);
@@ -6290,7 +6290,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
     {
         ret = H5HF_read(fh, heap_id, shared_robj_g);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5Eclear2(H5E_DEFAULT);
@@ -6316,7 +6316,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_bogus() */
 
@@ -6477,7 +6477,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_one() */
 
@@ -6667,7 +6667,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_two() */
 
@@ -6833,7 +6833,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_one_larger() */
 
@@ -7070,7 +7070,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_two_larger() */
 
@@ -7367,7 +7367,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_three_larger() */
 
@@ -7488,7 +7488,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(heap_id);
     free(heap_id_data);
@@ -7562,7 +7562,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_root_direct() */
 
@@ -7647,7 +7647,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_two_direct() */
 
@@ -7714,7 +7714,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_first_row() */
 
@@ -7783,7 +7783,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_first_two_rows() */
 
@@ -7856,7 +7856,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_first_four_rows() */
 
@@ -7923,7 +7923,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_all_root_direct() */
 
@@ -7994,7 +7994,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_2nd_indirect() */
 
@@ -8069,7 +8069,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_3rd_indirect() */
 
@@ -8146,7 +8146,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_start_block() */
 
@@ -8241,7 +8241,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_start_block_add_back() */
 
@@ -8348,7 +8348,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_start_block_add_skipped() */
 
@@ -8439,7 +8439,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_2nd_block() */
 
@@ -8579,7 +8579,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_2nd_block_add_skipped() */
 
@@ -8744,7 +8744,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_one_partial_skip_2nd_block_add_skipped() */
 
@@ -8871,7 +8871,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_row_skip_add_skipped() */
 
@@ -8997,7 +8997,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_direct_skip_indirect_two_rows_add_skipped() */
 
@@ -9118,7 +9118,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_indirect_start_block_add_skipped() */
 
@@ -9246,7 +9246,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped() */
 
@@ -9386,7 +9386,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped() */
 
@@ -9551,7 +9551,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped() */
 
@@ -9702,7 +9702,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_indirect_two_rows_add_skipped() */
 
@@ -9884,7 +9884,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped() */
 
@@ -10010,7 +10010,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_skip_start_block_add_skipped() */
 
@@ -10149,7 +10149,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped() */
 
@@ -10298,7 +10298,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
 
@@ -10452,7 +10452,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped() */
 
@@ -10612,7 +10612,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped() */
 
@@ -10779,7 +10779,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped() */
 
@@ -10937,7 +10937,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped() */
 
@@ -11114,7 +11114,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
 
@@ -11328,7 +11328,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped()
    */
@@ -11526,7 +11526,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped() */
 
@@ -11760,7 +11760,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped()
    */
@@ -11890,7 +11890,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_frag_simple() */
 
@@ -12056,7 +12056,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_frag_direct() */
 
@@ -12164,7 +12164,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_frag_2nd_direct() */
 
@@ -12281,7 +12281,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_frag_3rd_direct() */
 
@@ -12428,7 +12428,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_huge_insert_one() */
 
@@ -12655,7 +12655,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_huge_insert_two() */
 
@@ -12957,7 +12957,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_huge_insert_three() */
 
@@ -13379,7 +13379,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_huge_insert_mix() */
 
@@ -13587,7 +13587,7 @@ error:
             H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_filtered_huge() */
 
@@ -13734,7 +13734,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_tiny_insert_one() */
 
@@ -13961,7 +13961,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_tiny_insert_two() */
 
@@ -14565,7 +14565,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_tiny_insert_mix() */
 
@@ -14735,7 +14735,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_filtered_man_root_direct() */
 
@@ -15058,7 +15058,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_filtered_man_root_indirect() */
 
@@ -15258,7 +15258,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_random() */
 
@@ -15472,7 +15472,7 @@ error:
             H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_random_pow2() */
 
@@ -15586,7 +15586,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     {
         ret = H5HF_write(fh, huge_heap_id, &id_changed, shared_wobj_g);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     assert(!id_changed);
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
         if (ret >= 0)
@@ -15602,7 +15602,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     {
         ret = H5HF_write(fh, tiny_heap_id, &id_changed, shared_wobj_g);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     assert(!id_changed);
     if (ret >= 0)
         TEST_ERROR;
@@ -15760,7 +15760,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_write() */
 
@@ -15929,7 +15929,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_bug1() */
 
@@ -16551,7 +16551,7 @@ error:
         H5Pclose(def_fcpl);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

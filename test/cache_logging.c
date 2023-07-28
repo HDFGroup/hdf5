@@ -16,7 +16,7 @@
 
 #define LOG_LOCATION "cache_logging.out"
 
-const char *FILENAME[] = {"cache_logging", NULL};
+static const char *FILENAME[] = {"cache_logging", NULL};
 
 #define N_GROUPS 100
 
