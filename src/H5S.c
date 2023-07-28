@@ -1715,7 +1715,7 @@ H5S_set_extent(H5S_t *space, const hsize_t *size)
             if (space->extent.max && H5S_UNLIMITED != space->extent.max[u] && space->extent.max[u] < size[u])
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
                             "dimension cannot exceed the existing maximal size (new: %llu max: %llu)",
-                            (unsigned long long)size[u], (unsigned long long)space->extent.max[u])
+                            (unsigned long long)size[u], (unsigned long long)space->extent.max[u]);
 
             /* Indicate that dimension size can be modified */
             ret_value = TRUE;

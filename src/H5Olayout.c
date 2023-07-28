@@ -572,7 +572,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     if ((uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS != heap_vers)
                         HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL,
                                     "bad version # of encoded VDS heap information, expected %u, got %u",
-                                    (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS, (unsigned)heap_vers)
+                                    (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS, (unsigned)heap_vers);
 
                     /* Number of entries */
                     if (H5_IS_BUFFER_OVERFLOW(heap_block_p, H5F_sizeof_size(f), heap_block_p_end))

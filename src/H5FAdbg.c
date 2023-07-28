@@ -224,7 +224,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                                                                  H5AC__READ_ONLY_FLAG)))
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
                                 "unable to protect fixed array data block page, address = %llu",
-                                (unsigned long long)dblk_page_addr)
+                                (unsigned long long)dblk_page_addr);
 
                 fprintf(stream, "%*sElements in page %zu:\n", indent, "", page_idx);
                 for (u = 0; u < dblk_page_nelmts; u++) {

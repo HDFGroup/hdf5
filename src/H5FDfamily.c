@@ -622,7 +622,7 @@ H5FD__family_sb_decode(H5FD_t *_file, const char H5_ATTR_UNUSED *name, const uns
         if (msize != file->pmem_size)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
                         "Family member size should be %lu.  But the size from file access property is %lu",
-                        (unsigned long)msize, (unsigned long)file->pmem_size)
+                        (unsigned long)msize, (unsigned long)file->pmem_size);
 
         /* Update member file size to the size saved in the superblock.
          * That's the size intended to be. */

@@ -3857,7 +3857,7 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
                                                          find_connector_ud.fapl_id, dxpl_id, req)))
                     HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL,
                                 "can't open file '%s' with VOL connector '%s'", name,
-                                find_connector_ud.cls->name)
+                                find_connector_ud.cls->name);
             }
             else
                 HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")

@@ -1522,7 +1522,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         if ((protected_entries > 0) && (protected_entries == cache_ptr->index_len))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                         "Only protected entries left in cache, protected_entries = %d",
-                        (int)protected_entries)
+                        (int)protected_entries);
     } /* main while loop */
 
     /* Invariants, after destroying all entries in the ring */

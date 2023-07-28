@@ -248,7 +248,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
         if ((addr + file->base_addr + size) > eoa)
             HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu",
                         (unsigned long long)(addr + file->base_addr), (unsigned long long)size,
-                        (unsigned long long)eoa)
+                        (unsigned long long)eoa);
     }
 
     /* Dispatch to driver */
@@ -300,7 +300,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
     if ((addr + file->base_addr + size) > eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu",
                     (unsigned long long)(addr + file->base_addr), (unsigned long long)size,
-                    (unsigned long long)eoa)
+                    (unsigned long long)eoa);
 
     /* Dispatch to driver */
     if ((file->cls->write)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)

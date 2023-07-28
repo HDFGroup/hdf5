@@ -357,7 +357,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
     if (NULL == (iblock = H5EA__iblock_protect(hdr, thing_acc)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array index block, address = %llu",
-                    (unsigned long long)hdr->idx_blk_addr)
+                    (unsigned long long)hdr->idx_blk_addr);
 
     /* Check if element is in index block */
     if (idx < hdr->cparam.idx_blk_elmts) {
@@ -414,7 +414,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                                        hdr->sblk_info[sblk_idx].dblk_nelmts, thing_acc)))
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                             "unable to protect extensible array data block, address = %llu",
-                            (unsigned long long)iblock->dblk_addrs[dblk_idx])
+                            (unsigned long long)iblock->dblk_addrs[dblk_idx]);
 
             /* Adjust index to offset in data block */
             elmt_idx %= hdr->sblk_info[sblk_idx].dblk_nelmts;
@@ -466,7 +466,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                                        thing_acc)))
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                             "unable to protect extensible array super block, address = %llu",
-                            (unsigned long long)iblock->sblk_addrs[sblk_off])
+                            (unsigned long long)iblock->sblk_addrs[sblk_off]);
 
             /* Compute the data block index in super block */
             dblk_idx = (size_t)(elmt_idx / sblock->dblk_nelmts);
@@ -550,7 +550,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                 if (NULL == (dblk_page = H5EA__dblk_page_protect(hdr, sblock, dblk_page_addr, thing_acc)))
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                                 "unable to protect extensible array data block page, address = %llu",
-                                (unsigned long long)dblk_page_addr)
+                                (unsigned long long)dblk_page_addr);
 
                 /* Check if there is already a dependency on the header */
                 if (will_extend && !dblk_page->has_hdr_depend) {
@@ -574,7 +574,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                                            sblock->dblk_nelmts, thing_acc)))
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                                 "unable to protect extensible array data block, address = %llu",
-                                (unsigned long long)sblock->dblk_addrs[dblk_idx])
+                                (unsigned long long)sblock->dblk_addrs[dblk_idx]);
 
                 /* Check if there is already a dependency on the header */
                 if (will_extend && !dblock->has_hdr_depend) {

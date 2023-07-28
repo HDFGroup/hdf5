@@ -1688,7 +1688,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
             if (H5EA__create_flush_depend((H5AC_info_t *)dblock->parent, (H5AC_info_t *)dblock) < 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                             "unable to create flush dependency between data block and parent, address = %llu",
-                            (unsigned long long)dblock->addr)
+                            (unsigned long long)dblock->addr);
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:

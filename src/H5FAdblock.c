@@ -328,7 +328,7 @@ H5FA__dblock_unprotect(H5FA_dblock_t *dblock, unsigned cache_flags)
     if (H5AC_unprotect(dblock->hdr->f, H5AC_FARRAY_DBLOCK, dblock->addr, dblock, cache_flags) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL,
                     "unable to unprotect fixed array data block, address = %llu",
-                    (unsigned long long)dblock->addr)
+                    (unsigned long long)dblock->addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

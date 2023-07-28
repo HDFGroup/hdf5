@@ -286,7 +286,7 @@ H5EA__sblock_protect(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, 
         (sblock = (H5EA_sblock_t *)H5AC_protect(hdr->f, H5AC_EARRAY_SBLOCK, sblk_addr, &udata, flags)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, NULL,
                     "unable to protect extensible array super block, address = %llu",
-                    (unsigned long long)sblk_addr)
+                    (unsigned long long)sblk_addr);
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->top_proxy && NULL == sblock->top_proxy) {
@@ -337,7 +337,7 @@ H5EA__sblock_unprotect(H5EA_sblock_t *sblock, unsigned cache_flags)
     if (H5AC_unprotect(sblock->hdr->f, H5AC_EARRAY_SBLOCK, sblock->addr, sblock, cache_flags) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
                     "unable to unprotect extensible array super block, address = %llu",
-                    (unsigned long long)sblock->addr)
+                    (unsigned long long)sblock->addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -369,7 +369,7 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, u
     if (NULL == (sblock = H5EA__sblock_protect(hdr, parent, sblk_addr, sblk_idx, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array super block, address = %llu",
-                    (unsigned long long)sblk_addr)
+                    (unsigned long long)sblk_addr);
 
     /* Iterate over data blocks */
     for (u = 0; u < sblock->ndblks; u++) {

@@ -286,7 +286,7 @@ H5EA__iblock_protect(H5EA_hdr_t *hdr, unsigned flags)
         (iblock = (H5EA_iblock_t *)H5AC_protect(hdr->f, H5AC_EARRAY_IBLOCK, hdr->idx_blk_addr, hdr, flags)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, NULL,
                     "unable to protect extensible array index block, address = %llu",
-                    (unsigned long long)hdr->idx_blk_addr)
+                    (unsigned long long)hdr->idx_blk_addr);
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->top_proxy && NULL == iblock->top_proxy) {
@@ -337,7 +337,7 @@ H5EA__iblock_unprotect(H5EA_iblock_t *iblock, unsigned cache_flags)
     if (H5AC_unprotect(iblock->hdr->f, H5AC_EARRAY_IBLOCK, iblock->addr, iblock, cache_flags) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
                     "unable to unprotect extensible array index block, address = %llu",
-                    (unsigned long long)iblock->addr)
+                    (unsigned long long)iblock->addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -368,7 +368,7 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
     if (NULL == (iblock = H5EA__iblock_protect(hdr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array index block, address = %llu",
-                    (unsigned long long)hdr->idx_blk_addr)
+                    (unsigned long long)hdr->idx_blk_addr);
 
     /* Check for index block having data block pointers */
     if (iblock->ndblk_addrs > 0) {

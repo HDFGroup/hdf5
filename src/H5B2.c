@@ -1390,7 +1390,7 @@ H5B2_close(H5B2_t *bt2)
             if (H5AC_get_entry_status(bt2->f, bt2_addr, &hdr_status) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL,
                             "unable to check metadata cache status for v2 B-tree header, address = %llu",
-                            (unsigned long long)bt2_addr)
+                            (unsigned long long)bt2_addr);
 
             /* Sanity checks on header */
             assert(hdr_status & H5AC_ES__IN_CACHE);

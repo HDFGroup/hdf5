@@ -233,7 +233,7 @@ H5FA__dblk_page_protect(H5FA_hdr_t *hdr, haddr_t dblk_page_addr, size_t dblk_pag
                                                               &udata, flags)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, NULL,
                     "unable to protect fixed array data block page, address = %llu",
-                    (unsigned long long)dblk_page_addr)
+                    (unsigned long long)dblk_page_addr);
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->top_proxy && NULL == dblk_page->top_proxy) {
@@ -290,7 +290,7 @@ H5FA__dblk_page_unprotect(H5FA_dblk_page_t *dblk_page, unsigned cache_flags)
     if (H5AC_unprotect(dblk_page->hdr->f, H5AC_FARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, cache_flags) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL,
                     "unable to unprotect fixed array data block page, address = %llu",
-                    (unsigned long long)dblk_page->addr)
+                    (unsigned long long)dblk_page->addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

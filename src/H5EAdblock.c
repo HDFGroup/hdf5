@@ -296,7 +296,7 @@ H5EA__dblock_protect(H5EA_hdr_t *hdr, void *parent, haddr_t dblk_addr, size_t db
         (dblock = (H5EA_dblock_t *)H5AC_protect(hdr->f, H5AC_EARRAY_DBLOCK, dblk_addr, &udata, flags)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, NULL,
                     "unable to protect extensible array data block, address = %llu",
-                    (unsigned long long)dblk_addr)
+                    (unsigned long long)dblk_addr);
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->top_proxy && NULL == dblock->top_proxy) {
@@ -348,7 +348,7 @@ H5EA__dblock_unprotect(H5EA_dblock_t *dblock, unsigned cache_flags)
     if (H5AC_unprotect(dblock->hdr->f, H5AC_EARRAY_DBLOCK, dblock->addr, dblock, cache_flags) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
                     "unable to unprotect extensible array data block, address = %llu",
-                    (unsigned long long)dblock->addr)
+                    (unsigned long long)dblock->addr);
 
 done:
 
@@ -382,7 +382,7 @@ H5EA__dblock_delete(H5EA_hdr_t *hdr, void *parent, haddr_t dblk_addr, size_t dbl
     if (NULL == (dblock = H5EA__dblock_protect(hdr, parent, dblk_addr, dblk_nelmts, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array data block, address = %llu",
-                    (unsigned long long)dblk_addr)
+                    (unsigned long long)dblk_addr);
 
     /* Check if this is a paged data block */
     if (dblk_nelmts > hdr->dblk_page_nelmts) {

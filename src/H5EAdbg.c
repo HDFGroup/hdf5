@@ -192,7 +192,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
     if (NULL == (iblock = H5EA__iblock_protect(hdr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array index block, address = %llu",
-                    (unsigned long long)hdr->idx_blk_addr)
+                    (unsigned long long)hdr->idx_blk_addr);
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array Index Block...\n", indent, "");
@@ -309,7 +309,7 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
         (sblock = H5EA__sblock_protect(hdr, (H5EA_iblock_t *)hdr, addr, sblk_idx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array super block, address = %llu",
-                    (unsigned long long)addr)
+                    (unsigned long long)addr);
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array Super Block...\n", indent, "");

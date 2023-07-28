@@ -324,7 +324,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
     if (NULL == (dblock = H5FA__dblock_protect(hdr, hdr->dblk_addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect fixed array data block, address = %llu",
-                    (unsigned long long)hdr->dblk_addr)
+                    (unsigned long long)hdr->dblk_addr);
 
     /* Check for paging data block */
     if (!dblock->npages) {
@@ -369,7 +369,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
             (dblk_page = H5FA__dblk_page_protect(hdr, dblk_page_addr, dblk_page_nelmts, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
                         "unable to protect fixed array data block page, address = %llu",
-                        (unsigned long long)dblk_page_addr)
+                        (unsigned long long)dblk_page_addr);
 
         /* Set the element in the data block page */
         H5MM_memcpy(((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), elmt,
@@ -430,7 +430,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
         if (NULL == (dblock = H5FA__dblock_protect(hdr, hdr->dblk_addr, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
                         "unable to protect fixed array data block, address = %llu",
-                        (unsigned long long)hdr->dblk_addr)
+                        (unsigned long long)hdr->dblk_addr);
 
         /* Check for paged data block */
         if (!dblock->npages)
@@ -475,7 +475,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
                                                                  H5AC__READ_ONLY_FLAG)))
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
                                 "unable to protect fixed array data block page, address = %llu",
-                                (unsigned long long)dblk_page_addr)
+                                (unsigned long long)dblk_page_addr);
 
                 /* Retrieve element from data block */
                 H5MM_memcpy(elmt, ((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx),

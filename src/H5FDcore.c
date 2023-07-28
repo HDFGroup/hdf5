@@ -1366,7 +1366,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                              file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "unable to allocate memory block of %llu bytes with callback",
-                            (unsigned long long)new_eof)
+                            (unsigned long long)new_eof);
         } /* end if */
         else {
             if (NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
