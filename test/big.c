@@ -412,7 +412,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     if (H5Fclose(file) < 0)
         goto error;
     free(buf);
-    HDfclose(out);
+    fclose(out);
     PASSED();
     return 0;
 
@@ -426,11 +426,11 @@ error:
         H5Sclose(mem_space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (buf)
         free(buf);
     if (out)
-        HDfclose(out);
+        fclose(out);
     return 1;
 }
 
@@ -477,8 +477,8 @@ reader(char *filename, hid_t fapl)
     while (HDfgets(ln, (int)sizeof(ln), script)) {
         if ('#' != ln[0])
             break;
-        i            = (int)HDstrtol(ln + 1, &s, 10);
-        hs_offset[0] = HDstrtoull(s, NULL, 0);
+        i            = (int)strtol(ln + 1, &s, 10);
+        hs_offset[0] = strtoull(s, NULL, 0);
         fprintf(stdout, "#%03d 0x%016" PRIxHSIZE "%47s", i, hs_offset[0], "");
         fflush(stdout);
 
@@ -517,7 +517,7 @@ reader(char *filename, hid_t fapl)
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
     free(buf);
-    HDfclose(script);
+    fclose(script);
 
     return nerrors;
 
@@ -529,11 +529,11 @@ error:
         H5Sclose(fspace);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (buf)
         free(buf);
     if (script)
-        HDfclose(script);
+        fclose(script);
     return 1;
 }
 
@@ -717,7 +717,7 @@ main(int ac, char **av)
             ac--;
             av++;
             if (ac > 0) {
-                family_size_def = (hsize_t)HDstrtoull(*av, NULL, 0);
+                family_size_def = (hsize_t)strtoull(*av, NULL, 0);
             }
             else {
                 printf("***Missing fsize value***\n");

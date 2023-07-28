@@ -30,7 +30,7 @@
 #define FILTER3_ID 259
 #define FILTER4_ID 260
 
-const char *FILENAME[] = {"filter_plugin", NULL};
+static const char *FILENAME[] = {"filter_plugin", NULL};
 #define FILENAME_BUF_SIZE 1024
 
 /* Dataset names */
@@ -50,10 +50,10 @@ const char *FILENAME[] = {"filter_plugin", NULL};
 #define HYPERSLAB_SIZE2   50
 
 /* Global size arrays */
-const hsize_t sizes_g[2]       = {DSET_DIM1, DSET_DIM2};                 /* Dataset dimensions   */
-const hsize_t hs_sizes_g[2]    = {HYPERSLAB_SIZE1, HYPERSLAB_SIZE2};     /* Hyperslab sizes      */
-const hsize_t hs_offsets_g[2]  = {HYPERSLAB_OFFSET1, HYPERSLAB_OFFSET2}; /* Hyperslab offsets    */
-const hsize_t chunk_sizes_g[2] = {CHUNK_DIM1, CHUNK_DIM2};               /* Chunk dimensions     */
+static const hsize_t sizes_g[2]       = {DSET_DIM1, DSET_DIM2};                 /* Dataset dimensions   */
+static const hsize_t hs_sizes_g[2]    = {HYPERSLAB_SIZE1, HYPERSLAB_SIZE2};     /* Hyperslab sizes      */
+static const hsize_t hs_offsets_g[2]  = {HYPERSLAB_OFFSET1, HYPERSLAB_OFFSET2}; /* Hyperslab offsets    */
+static const hsize_t chunk_sizes_g[2] = {CHUNK_DIM1, CHUNK_DIM2};               /* Chunk dimensions     */
 
 /* Limit random number within 20000 */
 #define RANDOM_LIMIT 20000
@@ -64,10 +64,10 @@ const hsize_t chunk_sizes_g[2] = {CHUNK_DIM1, CHUNK_DIM2};               /* Chun
 #define TOP_LEVEL_GROUP_NAME "top-level group"
 
 /* Global arrays in which to save data */
-int **orig_deflate_g = NULL;
-int **orig_dynlib1_g = NULL;
-int **orig_dynlib2_g = NULL;
-int **orig_dynlib4_g = NULL;
+static int **orig_deflate_g = NULL;
+static int **orig_dynlib1_g = NULL;
+static int **orig_dynlib2_g = NULL;
+static int **orig_dynlib4_g = NULL;
 
 /*-------------------------------------------------------------------------
  * Function:  free_2D_array
@@ -1333,7 +1333,7 @@ test_filter_numbers(void)
         id     = H5Z_FILTER_MAX + 1;
         status = H5Pget_filter_by_id2(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL, &filter_config);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should fail */
     if (status != FAIL)
@@ -1344,7 +1344,7 @@ test_filter_numbers(void)
         id     = -1;
         status = H5Pget_filter_by_id2(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL, &filter_config);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should fail */
     if (status != FAIL)
@@ -1358,7 +1358,7 @@ test_filter_numbers(void)
         id     = H5Z_FILTER_MAX + 1;
         status = H5Pget_filter_by_id1(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should fail */
     if (status != FAIL)
@@ -1369,7 +1369,7 @@ test_filter_numbers(void)
         id     = -1;
         status = H5Pget_filter_by_id1(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should fail */
     if (status != FAIL)
@@ -1388,7 +1388,7 @@ error:
     {
         H5Pclose(dcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_filter_numbers() */
 

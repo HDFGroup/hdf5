@@ -19,7 +19,7 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 
-const char *FILENAME[] = {"mtime", NULL};
+static const char *FILENAME[] = {"mtime", NULL};
 
 #define TESTFILE1 "tmtimeo.h5"
 #define MTIME1    1055531866

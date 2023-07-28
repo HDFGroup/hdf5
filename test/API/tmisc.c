@@ -2396,8 +2396,8 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     CHECK_PTR(new_fp, "fopen");
 
     /* Write the user block to the new file */
-    written = HDfwrite(user_block, (size_t)1, size, new_fp);
-    VERIFY(written, size, "HDfwrite");
+    written = fwrite(user_block, (size_t)1, size, new_fp);
+    VERIFY(written, size, "fwrite");
 
     /* Open the old file */
     old_fp = fopen(old_name, "rb");
@@ -2408,19 +2408,19 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     CHECK_PTR(copy_buf, "malloc");
 
     /* Copy data from the old file to the new file */
-    while ((read_in = HDfread(copy_buf, (size_t)1, (size_t)MISC13_COPY_BUF_SIZE, old_fp)) > 0) {
+    while ((read_in = fread(copy_buf, (size_t)1, (size_t)MISC13_COPY_BUF_SIZE, old_fp)) > 0) {
         /* Write the data to the new file */
-        written = HDfwrite(copy_buf, (size_t)1, read_in, new_fp);
-        VERIFY(written, read_in, "HDfwrite");
+        written = fwrite(copy_buf, (size_t)1, read_in, new_fp);
+        VERIFY(written, read_in, "fwrite");
     }
 
     /* Close the old file */
-    ret = HDfclose(old_fp);
-    VERIFY(ret, 0, "HDfclose");
+    ret = fclose(old_fp);
+    VERIFY(ret, 0, "fclose");
 
     /* Close the new file */
-    ret = HDfclose(new_fp);
-    VERIFY(ret, 0, "HDfclose");
+    ret = fclose(new_fp);
+    VERIFY(ret, 0, "fclose");
 
     /* Free the copy buffer */
     free(copy_buf);
@@ -4835,7 +4835,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR1_LEN);
@@ -4861,7 +4861,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);
@@ -4931,7 +4931,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR3_LEN);
@@ -4977,7 +4977,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);
@@ -5039,7 +5039,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);

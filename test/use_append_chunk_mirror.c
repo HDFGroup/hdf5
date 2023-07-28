@@ -258,7 +258,7 @@ main(int argc, char *argv[])
     /* Fork process */
     /* ============ */
     if (UC_opts.launch == UC_READWRITE) {
-        if ((childpid = HDfork()) < 0) {
+        if ((childpid = fork()) < 0) {
             HDperror("fork");
             Hgoto_error(1);
         }
@@ -353,7 +353,7 @@ main(int argc, char *argv[])
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE) {
-        if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0) {
+        if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
             HDperror("waitpid");
             Hgoto_error(1);
         }

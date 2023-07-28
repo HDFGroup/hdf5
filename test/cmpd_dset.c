@@ -19,7 +19,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", NULL};
+static const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", NULL};
 
 const char *DSET_NAME[] = {"contig_src_subset", "chunk_src_subset", "contig_dst_subset", "chunk_dst_subset",
                            NULL};
@@ -1678,7 +1678,7 @@ test_pack_ooo(void)
 
         /* Reshape free_order to remove j (which is no longer free) */
         if (j < (num_free - 1))
-            HDmemmove(&free_order[j], &free_order[j + 1], (num_free - j - 1) * sizeof(free_order[0]));
+            memmove(&free_order[j], &free_order[j + 1], (num_free - j - 1) * sizeof(free_order[0]));
     } /* end for */
 
     /* Generate order to insert inner compound type */

@@ -15,7 +15,7 @@
  */
 #include "h5test.h"
 
-const char *FILENAME[] = {"dangle", NULL};
+static const char *FILENAME[] = {"dangle", NULL};
 
 #define MAX_DANGLE 1000
 
@@ -78,7 +78,7 @@ test_dangle_dataset(H5F_close_degree_t degree)
             0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
@@ -94,7 +94,7 @@ test_dangle_dataset(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -166,7 +166,7 @@ test_dangle_group(H5F_close_degree_t degree)
     {
         gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0)
         TEST_ERROR;
 
@@ -184,7 +184,7 @@ test_dangle_group(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -262,7 +262,7 @@ test_dangle_datatype1(H5F_close_degree_t degree)
         if (H5Tcommit2(fid, TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -277,7 +277,7 @@ test_dangle_datatype1(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -359,7 +359,7 @@ test_dangle_datatype2(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -444,7 +444,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
         if ((aid = H5Acreate2(dsid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
@@ -463,7 +463,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;

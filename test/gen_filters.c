@@ -98,7 +98,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_filters_endianess() */
 
@@ -208,7 +208,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 

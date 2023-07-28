@@ -105,7 +105,7 @@ error:
         H5Pclose(pl);
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (-1);
 } /* end test_encode_decode() */

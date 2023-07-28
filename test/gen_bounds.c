@@ -236,7 +236,7 @@ error:
         H5Fclose(fid);
         free(buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* gen_earliest_latest */
 
@@ -351,7 +351,7 @@ error:
         H5Fclose(fid);
         free(buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* gen_earliest_v18 */
 
@@ -461,7 +461,7 @@ error:
         H5Fclose(fid);
         free(buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* gen_latest_latest */
 
@@ -577,7 +577,7 @@ error:
         H5Fclose(fid);
         free(buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* gen_v18_latest */
 
@@ -739,7 +739,7 @@ error:
         H5Fclose(fid);
         free(buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* gen_v18_v18 */
 
@@ -952,7 +952,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -1203,7 +1203,7 @@ error:
         H5Fclose(fid);
         free(dwbuf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 

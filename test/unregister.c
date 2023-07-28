@@ -16,7 +16,7 @@
 
 #include "H5CXprivate.h" /* API Contexts                         */
 
-const char *FILENAME[] = {"unregister_filter_1", "unregister_filter_2", NULL};
+static const char *FILENAME[] = {"unregister_filter_1", "unregister_filter_2", NULL};
 
 #define GROUP_NAME        "test_group"
 #define DSET_NAME         "test_dataset"
@@ -33,7 +33,7 @@ static size_t do_nothing(unsigned int flags, size_t cd_nelmts, const unsigned in
                          size_t *buf_size, void **buf);
 
 /* Dummy filter for test_unregister_filters only */
-const H5Z_class2_t H5Z_DUMMY[1] = {{
+static const H5Z_class2_t H5Z_DUMMY[1] = {{
     H5Z_CLASS_T_VERS, /* H5Z_class_t version              */
     H5Z_FILTER_DUMMY, /* Filter ID number                 */
     1, 1,             /* Encoding and decoding enabled    */
@@ -149,7 +149,7 @@ test_unregister_filters(hid_t fapl_id)
     {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
@@ -200,7 +200,7 @@ test_unregister_filters(hid_t fapl_id)
     {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
@@ -255,7 +255,7 @@ error:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(buf);
     free(buf_data);

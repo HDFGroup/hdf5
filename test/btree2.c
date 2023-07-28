@@ -24,7 +24,7 @@
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
-const char *FILENAME[] = {"btree2", "btree2_tmp", NULL};
+static const char *FILENAME[] = {"btree2", "btree2_tmp", NULL};
 
 #define INSERT_SPLIT_ROOT_NREC     63
 #define INSERT_SPLIT_ROOT_NREC_REC 64
@@ -616,7 +616,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, find_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -674,7 +674,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, find_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -739,7 +739,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, find_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -779,7 +779,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_insert_basic() */
 
@@ -922,7 +922,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC + 2), find_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -961,7 +961,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_split_root() */
 
@@ -1111,7 +1111,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level1_2leaf_redistrib() */
 
@@ -1267,7 +1267,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level1_side_split() */
 
@@ -1407,7 +1407,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level1_3leaf_redistrib() */
 
@@ -1526,7 +1526,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level1_middle_split() */
 
@@ -1676,7 +1676,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC * 30), find_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -1716,7 +1716,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_make_level2() */
 
@@ -1941,7 +1941,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level2_leaf_redistrib() */
 
@@ -2170,7 +2170,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level2_leaf_split() */
 
@@ -2339,7 +2339,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level2_2internal_redistrib() */
 
@@ -2513,7 +2513,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level2_2internal_split() */
 
@@ -2688,7 +2688,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level2_3internal_redistrib() */
 
@@ -2866,7 +2866,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_insert_level2_3internal_split() */
 
@@ -3030,7 +3030,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY * 3), find_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -3038,7 +3038,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     {
         ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY * 3), find_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -3072,7 +3072,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     {
         ret = H5B2_insert(bt2, &record);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -3107,7 +3107,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     free(records);
     return 1;
 } /* test_insert_lots() */
@@ -3204,7 +3204,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -3281,7 +3281,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -3358,7 +3358,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -3452,7 +3452,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -3512,7 +3512,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_update_basic() */
 
@@ -3716,7 +3716,7 @@ test_update_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC + 2), index_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -3770,7 +3770,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_update_split_root() */
 
@@ -3924,7 +3924,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_update_level1_2leaf_redistrib() */
 
@@ -4084,7 +4084,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_update_level1_side_split() */
 
@@ -4228,7 +4228,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_update_level1_3leaf_redistrib() */
 
@@ -4350,7 +4350,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_update_level1_middle_split() */
 
@@ -4519,7 +4519,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -4696,7 +4696,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -4883,7 +4883,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -4938,7 +4938,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_update_make_level2() */
 
@@ -5094,7 +5094,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     {
         ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -5102,7 +5102,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     {
         ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -5186,7 +5186,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     free(records);
 
     return 1;
@@ -5240,7 +5240,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_remove(bt2, &record, NULL, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -5280,7 +5280,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_remove(bt2, &record, NULL, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -5364,7 +5364,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     {
         ret = H5B2_remove(bt2, &record, NULL, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -5498,7 +5498,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_basic() */
 
@@ -5566,7 +5566,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
     {
         ret = H5B2_remove(bt2, &record, NULL, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -5719,7 +5719,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_noredistrib() */
 
@@ -5912,7 +5912,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_redistrib() */
 
@@ -6087,7 +6087,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_2leaf_merge() */
 
@@ -6209,7 +6209,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_3leaf_merge() */
 
@@ -6432,7 +6432,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_promote() */
 
@@ -6577,7 +6577,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_promote_2leaf_redistrib() */
 
@@ -6722,7 +6722,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_promote_3leaf_redistrib() */
 
@@ -6864,7 +6864,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_promote_2leaf_merge() */
 
@@ -7006,7 +7006,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_promote_3leaf_merge() */
 
@@ -7141,7 +7141,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level1_collapse() */
 
@@ -7423,7 +7423,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_promote() */
 
@@ -7571,7 +7571,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_promote_2internal_redistrib() */
 
@@ -7719,7 +7719,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_promote_3internal_redistrib() */
 
@@ -7868,7 +7868,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_promote_2internal_merge() */
 
@@ -8017,7 +8017,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_promote_3internal_merge() */
 
@@ -8140,7 +8140,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_2internal_merge_left() */
 
@@ -8263,7 +8263,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_2internal_merge_right() */
 
@@ -8386,7 +8386,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_3internal_merge() */
 
@@ -8508,7 +8508,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_remove_level2_collapse_right() */
 
@@ -8580,7 +8580,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* gen_l4_btree2() */
@@ -9013,7 +9013,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (fd > 0)
         HDclose(fd);
@@ -9084,7 +9084,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param
     {
         ret = H5B2_neighbor(bt2, H5B2_COMPARE_LESS, &search, neighbor_cb, &record);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -9164,7 +9164,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param
     {
         ret = H5B2_neighbor(bt2, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -9242,7 +9242,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     free(records);
     return 1;
 } /* test_find_neighbor() */
@@ -9512,7 +9512,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_delete() */
 
@@ -9576,7 +9576,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     {
         ret = H5B2_modify(bt2, &record, modify_cb, &modify);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -9627,7 +9627,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     {
         ret = H5B2_modify(bt2, &record, modify_cb, &modify);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -9678,7 +9678,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     {
         ret = H5B2_modify(bt2, &record, modify_cb, &modify);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -9729,7 +9729,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     {
         ret = H5B2_modify(bt2, &record, modify_cb, &modify);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR;
@@ -9754,7 +9754,7 @@ error:
             H5B2_close(bt2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_modify() */
 
@@ -9891,7 +9891,7 @@ error:
         H5Fclose(file0);
         H5Fclose(file00);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_open_twice_diff() */
 
@@ -10051,7 +10051,7 @@ error:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

@@ -52,36 +52,36 @@
 #include "szlib.h"
 #endif
 
-const char *FILENAME[] = {"dataset",             /* 0 */
-                          "compact_dataset",     /* 1 */
-                          "dset_offset",         /* 2 */
-                          "max_compact_dataset", /* 3 */
-                          "simple",              /* 4 */
-                          "set_local",           /* 5 */
-                          "random_chunks",       /* 6 */
-                          "huge_chunks",         /* 7 */
-                          "chunk_cache",         /* 8 */
-                          "big_chunk",           /* 9 */
-                          "chunk_fast",          /* 10 */
-                          "chunk_expand",        /* 11 */
-                          "chunk_fixed",         /* 12 */
-                          "copy_dcpl_newfile",   /* 13 */
-                          "partial_chunks",      /* 14 */
-                          "layout_extend",       /* 15 */
-                          "zero_chunk",          /* 16 */
-                          "chunk_single",        /* 17 */
-                          "swmr_non_latest",     /* 18 */
-                          "earray_hdr_fd",       /* 19 */
-                          "farray_hdr_fd",       /* 20 */
-                          "bt2_hdr_fd",          /* 21 */
-                          "storage_size",        /* 22 */
-                          "dls_01_strings",      /* 23 */
-                          "power2up",            /* 24 */
-                          "version_bounds",      /* 25 */
-                          "alloc_0sized",        /* 26 */
-                          "h5s_block",           /* 27 */
-                          "h5s_plist",           /* 28 */
-                          NULL};
+static const char *FILENAME[] = {"dataset",             /* 0 */
+                                 "compact_dataset",     /* 1 */
+                                 "dset_offset",         /* 2 */
+                                 "max_compact_dataset", /* 3 */
+                                 "simple",              /* 4 */
+                                 "set_local",           /* 5 */
+                                 "random_chunks",       /* 6 */
+                                 "huge_chunks",         /* 7 */
+                                 "chunk_cache",         /* 8 */
+                                 "big_chunk",           /* 9 */
+                                 "chunk_fast",          /* 10 */
+                                 "chunk_expand",        /* 11 */
+                                 "chunk_fixed",         /* 12 */
+                                 "copy_dcpl_newfile",   /* 13 */
+                                 "partial_chunks",      /* 14 */
+                                 "layout_extend",       /* 15 */
+                                 "zero_chunk",          /* 16 */
+                                 "chunk_single",        /* 17 */
+                                 "swmr_non_latest",     /* 18 */
+                                 "earray_hdr_fd",       /* 19 */
+                                 "farray_hdr_fd",       /* 20 */
+                                 "bt2_hdr_fd",          /* 21 */
+                                 "storage_size",        /* 22 */
+                                 "dls_01_strings",      /* 23 */
+                                 "power2up",            /* 24 */
+                                 "version_bounds",      /* 25 */
+                                 "alloc_0sized",        /* 26 */
+                                 "h5s_block",           /* 27 */
+                                 "h5s_plist",           /* 28 */
+                                 NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
 
@@ -413,7 +413,7 @@ test_create(hid_t file)
         dataset = H5Dcreate2(file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT,
                              H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
         HDputs("    Library allowed overwrite of existing dataset.");
@@ -440,7 +440,7 @@ test_create(hid_t file)
     {
         dataset = H5Dopen2(file, "does_not_exist", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
         HDputs("    Opened a non-existent dataset.");
@@ -464,7 +464,7 @@ test_create(hid_t file)
         dataset = H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms,
                              H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
         HDputs("    Opened a dataset with incorrect chunking parameters.");
@@ -942,7 +942,7 @@ test_compact_io(hid_t fapl)
             {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
                 continue;
@@ -1036,7 +1036,7 @@ error:
         H5Fclose(file);
         H5Fclose(verfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_compact_io() */
@@ -1166,7 +1166,7 @@ test_max_compact(hid_t fapl)
     {
         H5Dcreate2(file, DSET_COMPACT_MAX2_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, plist, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Close file */
     if (H5Sclose(space) < 0)
@@ -1193,7 +1193,7 @@ error:
         H5Dclose(dataset);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_max_compact() */
@@ -1251,7 +1251,7 @@ test_layout_extend(hid_t fapl)
             FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create dataset with extendible dataspace (unlimited max_dims) should fail */
     H5E_BEGIN_TRY
@@ -1260,7 +1260,7 @@ test_layout_extend(hid_t fapl)
             FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create property list for contiguous dataset creation */
     if ((dcpl_contig = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -1274,7 +1274,7 @@ test_layout_extend(hid_t fapl)
         if (H5Dcreate2(fid, "contig", H5T_NATIVE_INT, sid_fix, H5P_DEFAULT, dcpl_contig, H5P_DEFAULT) != FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create dataset with extendible dataspace (unlimited max_dims) should fail*/
     H5E_BEGIN_TRY
@@ -1283,7 +1283,7 @@ test_layout_extend(hid_t fapl)
             FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create property list for chunked dataset creation */
     if ((dcpl_chunked = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -1339,7 +1339,7 @@ error:
         H5Dclose(did_unlim);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_layout_extend() */
@@ -1466,7 +1466,7 @@ test_conv_buffer(hid_t fid)
     {
         status = H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, xfer_list, cfrR);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Library shouldn't allow conversion buffer too small");
@@ -1524,7 +1524,7 @@ error:
         H5Tclose(arr_type5);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_conv_buffer() */
@@ -1610,7 +1610,7 @@ error:
         H5Dclose(dataset);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_tconv() */
@@ -1630,7 +1630,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Function:  can_apply_bogus
  *
  * Purpose:   A bogus 'can apply' callback that returns 0 for H5T_NATIVE_DOUBLE
- *            dataype, but returns 1 for all other datatypes
+ *            datatype, but returns 1 for all other datatypes
  *
  * Return:    Success:    Described above
  *            Failure:    0
@@ -2003,7 +2003,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         {
             status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
 
@@ -2021,7 +2021,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         {
             status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
     }
@@ -2070,7 +2070,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         {
             status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
 
@@ -2088,7 +2088,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         {
             status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
     }
@@ -2134,7 +2134,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         {
             status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
 
@@ -2153,7 +2153,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         {
             status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
     } /* end if */
@@ -2201,7 +2201,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         {
             status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
 
@@ -2219,7 +2219,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         {
             status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
     }
@@ -2471,7 +2471,7 @@ test_get_filter_info(void)
     {
         err = H5Zget_filter_info(-1, &flags);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (err >= 0)
         TEST_ERROR;
 
@@ -3017,7 +3017,7 @@ test_missing_filter(hid_t file)
     {
         ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         printf("    Line %d: Should not be able to read dataset data\n", __LINE__);
@@ -5679,7 +5679,7 @@ error:
         H5Sclose(space);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_multiopen() */
 
@@ -5787,7 +5787,7 @@ error:
         H5Sclose(space);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_types() */
 
@@ -5863,7 +5863,7 @@ test_can_apply(hid_t file)
     {
         dsid = H5Dcreate2(file, DSET_CAN_APPLY_NAME, H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dsid >= 0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't have created dataset!\n", __LINE__);
@@ -5876,7 +5876,7 @@ test_can_apply(hid_t file)
     {
         dsid = H5Dcreate2(file, DSET_CAN_APPLY_NAME, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dsid >= 0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't have created dataset!\n", __LINE__);
@@ -6225,7 +6225,7 @@ error:
         H5Tclose(strtid);
         H5Tclose(vlentid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_optional_filters() */
 
@@ -6290,7 +6290,7 @@ test_can_apply_szip(hid_t
         {
             ret = H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
             printf("    Line %d: Shouldn't be able to set szip filter\n", __LINE__);
@@ -6303,7 +6303,7 @@ test_can_apply_szip(hid_t
         {
             ret = H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
             printf("    Line %d: Shouldn't be able to set szip filter\n", __LINE__);
@@ -6326,7 +6326,7 @@ test_can_apply_szip(hid_t
             dsid = H5Dcreate2(file, DSET_CAN_APPLY_SZIP_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
                               H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (dsid <= 0) {
             H5_FAILED();
             printf("    Line %d: Should have created dataset!\n", __LINE__);
@@ -6388,7 +6388,7 @@ test_can_apply_szip(hid_t
             dsid = H5Dcreate2(file, DSET_CAN_APPLY_SZIP_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
                               H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (dsid >= 0) {
             H5_FAILED();
             printf("    Line %d: Shouldn't have created dataset!\n", __LINE__);
@@ -6794,7 +6794,7 @@ error:
         H5Pclose(dcpl1);
         H5Pclose(dcpl2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_compare_dcpl() */
 
@@ -6954,7 +6954,7 @@ error:
         H5Pclose(dcpl1_copy);
         H5Pclose(dcpl2_copy);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_copy_dcpl() */
 
@@ -7037,7 +7037,7 @@ test_filter_delete(hid_t file)
     {
         ret = H5Pget_filter_by_id2(dcpl1, H5Z_FILTER_DEFLATE, &flags, NULL, NULL, (size_t)0, NULL, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't have deleted filter!\n", __LINE__);
@@ -7049,7 +7049,7 @@ test_filter_delete(hid_t file)
     {
         ret = H5Premove_filter(dcpl1, H5Z_FILTER_DEFLATE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't have deleted filter!\n", __LINE__);
@@ -7099,7 +7099,7 @@ error:
         H5Dclose(dsid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 #else
     (void)file; /* Silence compiler */
@@ -7186,7 +7186,7 @@ error:
         if (buf)
             free(buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end auxread_fdata() */
 
@@ -7260,7 +7260,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_filters_endianess() */
 
@@ -7318,7 +7318,7 @@ test_zero_dims(hid_t file)
     {
         d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (d > 0) {
         H5Dclose(d);
         FAIL_PUTS_ERROR("created dataset with undefined chunk dimensions");
@@ -7329,7 +7329,7 @@ test_zero_dims(hid_t file)
     {
         ret = H5Pset_chunk(dcpl, 1, &dzero);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret > 0)
         FAIL_PUTS_ERROR("set zero-sized chunk dimensions");
 
@@ -7399,7 +7399,7 @@ test_zero_dims(hid_t file)
     {
         d2 = H5Dcreate2(file, ZERODIM_DATASET2, H5T_NATIVE_INT, s2, H5P_DEFAULT, dcpl2, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (d2 > 0) {
         H5Dclose(d2);
         FAIL_PUTS_ERROR("created dataset with undefined chunk dimensions");
@@ -7410,7 +7410,7 @@ test_zero_dims(hid_t file)
     {
         ret = H5Pset_chunk(dcpl2, 2, dzero2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret > 0)
         FAIL_PUTS_ERROR("set zero-sized chunk dimensions");
 
@@ -7466,7 +7466,7 @@ error:
         H5Dclose(d2);
         H5Sclose(s2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_zero_dims() */
 
@@ -7714,7 +7714,7 @@ error:
         H5Sclose(s);
         H5Sclose(sid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(rdata);
     free(wdata);
@@ -8255,7 +8255,7 @@ error:
         H5Dclose(d);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_random_chunks_real() */
 
@@ -8291,7 +8291,6 @@ test_random_chunks(hid_t fapl)
     nerrors += test_random_chunks_real("Write/read on randomly selected chunks w/implicit index", TRUE, fapl);
 
     return nerrors;
-    ;
 } /* end test_random_chunks() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -8370,7 +8369,7 @@ test_deprec(hid_t file)
     {
         dataset = H5Dcreate1(file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
         HDputs("    Library allowed overwrite of existing dataset.");
@@ -8395,7 +8394,7 @@ test_deprec(hid_t file)
     {
         dataset = H5Dopen1(file, "does_not_exist");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
         HDputs("    Opened a non-existent dataset.");
@@ -8448,7 +8447,7 @@ test_deprec(hid_t file)
     {
         dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
         HDputs("    Opened a dataset with incorrect chunking parameters.");
@@ -8570,7 +8569,7 @@ test_huge_chunks(hid_t fapl)
     {
         ret = H5Pset_chunk(dcpl, 1, &chunk_dim);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_PUTS_ERROR("    Set chunk size with too large of chunk dimensions.");
 
@@ -8582,7 +8581,7 @@ test_huge_chunks(hid_t fapl)
     {
         ret = H5Pset_chunk(dcpl, 3, chunk_dim2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_PUTS_ERROR("    Set chunk size with too large of chunk dimensions.");
 
@@ -8601,7 +8600,7 @@ test_huge_chunks(hid_t fapl)
     {
         dsid = H5Dcreate2(fid, HUGE_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dsid >= 0)
         FAIL_PUTS_ERROR("    1-D Dataset with too large of chunk dimensions created.");
 
@@ -8628,7 +8627,7 @@ test_huge_chunks(hid_t fapl)
     {
         dsid = H5Dcreate2(fid, HUGE_DATASET2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dsid >= 0)
         FAIL_PUTS_ERROR("    n-D Dataset with too large of chunk dimensions created.");
 
@@ -8653,7 +8652,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_huge_chunks() */
 
@@ -8918,7 +8917,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_chunk_cache() */
 
@@ -9281,7 +9280,7 @@ error:
         H5Sclose(t_sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(wdata);
     free(rdata1);
@@ -9704,7 +9703,7 @@ error:
         H5Fclose(fid);
         H5Pclose(my_fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_chunk_fast() */
 
@@ -9839,7 +9838,7 @@ error:
         H5Sclose(scalar_sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_reopen_chunk_fast() */
 
@@ -9981,7 +9980,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(wbuf);
     free(rbuf);
@@ -10162,7 +10161,7 @@ test_chunk_expand(hid_t fapl)
                 {
                     dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (dsid >= 0)
                     FAIL_PUTS_ERROR("should fail to create dataset when allocation time is early");
 
@@ -10170,7 +10169,7 @@ test_chunk_expand(hid_t fapl)
                 {
                     dsid2 = H5Dcreate2(fid, "dset2", H5T_NATIVE_UINT, sid2, H5P_DEFAULT, dcpl2, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (dsid2 >= 0)
                     FAIL_PUTS_ERROR("should fail to create dataset when allocation time is early");
 
@@ -10267,7 +10266,7 @@ test_chunk_expand(hid_t fapl)
                     {
                         status = H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem);
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
                     if (status >= 0)
                         FAIL_PUTS_ERROR("should fail to write to dataset when allocation time is not early");
 
@@ -10276,7 +10275,7 @@ test_chunk_expand(hid_t fapl)
                         status =
                             H5Dwrite(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &write_elem2);
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
                     if (status >= 0)
                         FAIL_PUTS_ERROR("should fail to write to dataset when allocation time is not early");
                 } /* end for */
@@ -10363,7 +10362,7 @@ test_chunk_expand(hid_t fapl)
                             status =
                                 H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem);
                         }
-                        H5E_END_TRY;
+                        H5E_END_TRY
                         if (status >= 0)
                             FAIL_PUTS_ERROR(
                                 "should fail to write to dataset when allocation time is not early");
@@ -10373,7 +10372,7 @@ test_chunk_expand(hid_t fapl)
                             status =
                                 H5Dwrite(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &write_elem2);
                         }
-                        H5E_END_TRY;
+                        H5E_END_TRY
                         if (status >= 0)
                             FAIL_PUTS_ERROR(
                                 "should fail to write to dataset when allocation time is not early");
@@ -10502,7 +10501,7 @@ test_chunk_expand(hid_t fapl)
                     {
                         status = H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem);
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
                     if (status >= 0)
                         FAIL_PUTS_ERROR("should fail to write to dataset when allocation time is not early");
 
@@ -10511,7 +10510,7 @@ test_chunk_expand(hid_t fapl)
                         status =
                             H5Dwrite(dsid2, H5T_NATIVE_UINT, scalar_sid, sid2, H5P_DEFAULT, &write_elem2);
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
                     if (status >= 0)
                         FAIL_PUTS_ERROR("should fail to write to dataset when allocation time is not early");
                 } /* end for */
@@ -10571,7 +10570,7 @@ error:
         H5Sclose(scalar_sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_chunk_expand() */
 
@@ -11101,7 +11100,7 @@ error:
         H5Sclose(mem_id);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(wbuf_big);
     free(rbuf_big);
@@ -11398,7 +11397,7 @@ error:
         H5Sclose(sid_max);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (wbuf)
         free(wbuf);
     if (rbuf)
@@ -11483,7 +11482,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_idx_compatible() */
 
@@ -11622,7 +11621,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_unfiltered_edge_chunks() */
 
@@ -11755,7 +11754,7 @@ error:
         H5Sclose(scalar_sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_large_chunk_shrink() */
 
@@ -11796,7 +11795,7 @@ test_zero_dim_dset(hid_t fapl)
             {
                 ret = H5Pset_libver_bounds(fapl, low, high);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
                 continue;
@@ -11858,7 +11857,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_zero_dim_dset() */
 
@@ -12129,7 +12128,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_swmr_non_latest() */
 
@@ -12250,7 +12249,7 @@ error:
         H5Sclose(sid);
         H5Sclose(msid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_earray_hdr_fd() */
 
@@ -12371,7 +12370,7 @@ error:
         H5Sclose(sid);
         H5Sclose(msid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_farray_hdr_fd() */
 
@@ -12498,7 +12497,7 @@ error:
         H5Sclose(sid);
         H5Sclose(msid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_bt2_hdr_fd() */
 
@@ -12985,7 +12984,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_storage_size() */
 
@@ -13051,7 +13050,7 @@ test_power2up(hid_t fapl)
     {
         status = H5Dset_extent(did, ext_dims);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         TEST_ERROR;
 
@@ -13078,7 +13077,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_power2up() */
 
@@ -13387,7 +13386,7 @@ error:
     {
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_scatter() */
 
@@ -13751,7 +13750,7 @@ error:
     {
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_gather() */
 
@@ -13981,7 +13980,7 @@ error:
     {
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_scatter_error() */
 
@@ -14144,7 +14143,7 @@ error:
     {
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_gather_error() */
 
@@ -14506,7 +14505,7 @@ test_compact_open_close_dirty(hid_t fapl)
         {
             did = H5Dopen2(fid, DSET_COMPACT_MAX_NAME, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (did < 0)
             TEST_ERROR;
         if (H5Dclose(did) < 0)
@@ -14552,7 +14551,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_compact_open_close_dirty() */
 
@@ -14637,7 +14636,7 @@ test_versionbounds(void)
             {
                 ret = H5Pset_libver_bounds(fapl, low, high);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
                 continue;
@@ -14658,7 +14657,7 @@ test_versionbounds(void)
             {
                 vdset = H5Dcreate2(vfile, V_DSET, H5T_NATIVE_INT, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (vdset > 0) /* dataset created successfully */
             {
@@ -14715,7 +14714,7 @@ error:
         H5Fclose(srcfile);
         H5Fclose(vfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_versionbounds() */
 
@@ -14791,7 +14790,7 @@ test_object_header_minimization_dcpl(void)
     {
         ret = H5Pget_dset_no_attrs_hint(H5I_INVALID_HID, &minimize);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
 
@@ -14800,7 +14799,7 @@ test_object_header_minimization_dcpl(void)
     {
         ret = H5Pset_dset_no_attrs_hint(H5I_INVALID_HID, FALSE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
 
@@ -14809,7 +14808,7 @@ test_object_header_minimization_dcpl(void)
     {
         ret = H5Pset_dset_no_attrs_hint(H5I_INVALID_HID, TRUE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
 
@@ -14818,7 +14817,7 @@ test_object_header_minimization_dcpl(void)
     {
         ret = H5Pget_dset_no_attrs_hint(dcpl_id, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
 
@@ -14841,7 +14840,7 @@ error:
         H5Pclose(dcpl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_object_header_minimization_dcpl() */
 
@@ -14896,7 +14895,7 @@ test_h5s_block(void)
     {
         ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_BLOCK, H5P_DEFAULT, buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
 
@@ -14959,7 +14958,7 @@ error:
         H5Dclose(dset_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_h5s_block() */
@@ -15025,7 +15024,7 @@ test_h5s_plist(void)
         ret = H5Pset_dataset_io_hyperslab_selection(dxpl_id, 0, H5S_SELECT_SET, &start, &stride, &count,
                                                     &block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
     H5E_BEGIN_TRY
@@ -15034,7 +15033,7 @@ test_h5s_plist(void)
         ret = H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_NOOP, &start, &stride, &count,
                                                     &block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
     H5E_BEGIN_TRY
@@ -15043,7 +15042,7 @@ test_h5s_plist(void)
         ret =
             H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_SET, NULL, &stride, &count, &block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
     H5E_BEGIN_TRY
@@ -15054,7 +15053,7 @@ test_h5s_plist(void)
                                                        &block);
         stride = 1;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
     H5E_BEGIN_TRY
@@ -15063,7 +15062,7 @@ test_h5s_plist(void)
         ret =
             H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_SET, &start, &stride, NULL, &block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
 
@@ -15074,7 +15073,7 @@ test_h5s_plist(void)
         /* H5S_PLIST for memory dataspace */
         ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_PLIST, H5S_ALL, H5P_DEFAULT, buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
 
@@ -15133,7 +15132,7 @@ test_h5s_plist(void)
         ret = H5Pset_dataset_io_hyperslab_selection(dxpl_id_copy, H5S_MAX_RANK + 1, H5S_SELECT_OR, &start,
                                                     &stride, &count, &block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret == SUCCEED)
         TEST_ERROR;
 
@@ -15198,7 +15197,7 @@ error:
         H5Dclose(dset_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_h5s_plist() */
@@ -15389,7 +15388,7 @@ error:
         H5Dclose(dset_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_0sized_dset_metadata_alloc() */

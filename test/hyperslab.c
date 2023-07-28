@@ -111,7 +111,7 @@ print_ref(size_t nx, size_t ny, size_t nz)
         init_full(array, nx, ny, nz);
         print_array(array, nx, ny, nz);
         free(array);
-    } /* end if */
+    }
 } /* end print_ref() */
 
 /*-------------------------------------------------------------------------

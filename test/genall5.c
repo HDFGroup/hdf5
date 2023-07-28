@@ -1044,7 +1044,7 @@ os_grp_0(hid_t fid, const char *group_name)
 {
     hid_t        gid  = -1;
     hid_t        fapl = -1;
-    H5F_libver_t low, high;
+    H5F_libver_t low = H5F_LIBVER_ERROR, high = H5F_LIBVER_ERROR;
 
     herr_t ret;
 
@@ -1244,7 +1244,7 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
     hid_t        gid = -1;
     unsigned     u;
     hid_t        fapl = -1;
-    H5F_libver_t low, high;
+    H5F_libver_t low = H5F_LIBVER_ERROR, high = H5F_LIBVER_ERROR;
     herr_t       ret;
 
     if (pass) { /* get the file's file access property list */

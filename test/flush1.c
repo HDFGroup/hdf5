@@ -24,9 +24,9 @@
 #define H5FD_TESTING
 #include "H5FDpkg.h" /* File drivers             */
 
-const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
-                          "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
-                          "noflush_extend", "noflush_extend-swmr", NULL};
+static const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
+                                 "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
+                                 "noflush_extend", "noflush_extend-swmr", NULL};
 
 /* Number and size of dataset dims, chunk size, etc. */
 #define NDIMS            1
@@ -93,7 +93,7 @@ error:
         H5Gclose(gid);
         H5Gclose(top_gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end create_file() */
@@ -154,7 +154,7 @@ error:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(data);
 
@@ -318,7 +318,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     exit(EXIT_FAILURE);
 } /* end main() */

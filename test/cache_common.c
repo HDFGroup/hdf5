@@ -1304,9 +1304,7 @@ free_icr(test_entry_t *entry, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
     assert(entry == &(entries[entry->type][entry->index]));
     assert(entry == entry->self);
     assert(entry->cache_ptr != NULL);
-    assert(entry->cache_ptr->magic == H5C__H5C_T_MAGIC);
     assert((entry->header.destroy_in_progress) || (entry->header.addr == entry->addr));
-    assert(entry->header.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(entry->header.size == entry->size);
     assert((entry->type == VARIABLE_ENTRY_TYPE) || (entry->size == entry_sizes[entry->type]));
     assert(entry->header.tl_next == NULL);
@@ -1632,7 +1630,6 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
     assert(file_ptr);
     cache_ptr = file_ptr->shared->cache;
     assert(cache_ptr != NULL);
-    assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     assert(entry_ptr != NULL);
     assert(entry_ptr == entry_ptr->self);
     assert(entry_ptr->header.addr == entry_ptr->addr);
@@ -2938,7 +2935,7 @@ mark_entry_dirty(int32_t type, int32_t idx)
 void
 move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, hbool_t main_addr)
 {
-    herr_t        result;
+    herr_t        result   = 0;
     hbool_t       done     = TRUE; /* will set to FALSE if we have work to do */
     haddr_t       old_addr = HADDR_UNDEF;
     haddr_t       new_addr = HADDR_UNDEF;
@@ -4666,11 +4663,11 @@ destroy_flush_dependency(int32_t par_type, int32_t par_idx, int32_t chd_type, in
                 break;
         assert(i < chd_entry_ptr->flush_dep_npar);
         if (i < chd_entry_ptr->flush_dep_npar - 1)
-            HDmemmove(&chd_entry_ptr->flush_dep_par_type[i], &chd_entry_ptr->flush_dep_par_type[i + 1],
-                      (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
+            memmove(&chd_entry_ptr->flush_dep_par_type[i], &chd_entry_ptr->flush_dep_par_type[i + 1],
+                    (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
         if (i < chd_entry_ptr->flush_dep_npar - 1)
-            HDmemmove(&chd_entry_ptr->flush_dep_par_idx[i], &chd_entry_ptr->flush_dep_par_idx[i + 1],
-                      (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
+            memmove(&chd_entry_ptr->flush_dep_par_idx[i], &chd_entry_ptr->flush_dep_par_idx[i + 1],
+                    (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
         chd_entry_ptr->flush_dep_npar--;
         par_entry_ptr->flush_dep_nchd--;
         if (par_entry_ptr->flush_dep_nchd == 0) {
@@ -4796,7 +4793,7 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
     int64_t cache_hits     = 0;
     int64_t cache_accesses = 0;
     double  expected_hit_rate;
-    double  hit_rate;
+    double  hit_rate  = 0.0;
     H5F_t  *file_ptr  = NULL;
     H5C_t  *cache_ptr = NULL;
 
@@ -4817,16 +4814,6 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
                 pass         = FALSE;
                 failure_mssg = "NULL cache pointer";
             }
-        }
-    }
-
-    /* verify that we can access the cache data structure */
-    if (pass) {
-
-        if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-
-            pass         = FALSE;
-            failure_mssg = "Can't access cache resize_ctl.";
         }
     }
 
@@ -4916,15 +4903,15 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
 {
     herr_t   result;
     size_t   expected_max_size;
-    size_t   max_size;
+    size_t   max_size = 0;
     size_t   expected_min_clean_size;
-    size_t   min_clean_size;
+    size_t   min_clean_size = 0;
     size_t   expected_cur_size;
-    size_t   cur_size;
+    size_t   cur_size = 0;
     uint32_t expected_cur_num_entries;
-    int      cur_num_entries;
-    H5F_t   *file_ptr  = NULL;
-    H5C_t   *cache_ptr = NULL;
+    int      cur_num_entries = 0;
+    H5F_t   *file_ptr        = NULL;
+    H5C_t   *cache_ptr       = NULL;
 
     /* get a pointer to the files internal data structure */
     if (pass) {
@@ -4943,16 +4930,6 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
                 pass         = FALSE;
                 failure_mssg = "NULL cache pointer";
             }
-        }
-    }
-
-    /* verify that we can access the cache data structure */
-    if (pass) {
-
-        if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-
-            pass         = FALSE;
-            failure_mssg = "Can't access cache data structure.";
         }
     }
 
@@ -5109,8 +5086,7 @@ validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, hbool_t 
     /* verify that we can access the internal version of the cache config */
     if (pass) {
 
-        if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC) ||
-            (cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER)) {
+        if (cache_ptr == NULL || cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER) {
 
             pass = FALSE;
             HDsnprintf(tmp_msg_buf, sizeof(tmp_msg_buf), "Can't access cache resize_ctl #%d.", test_num);
@@ -5190,7 +5166,6 @@ dump_LRU(H5F_t * file_ptr)
     H5C_t *cache_ptr = file_ptr->shared->cache;
 
     assert(cache_ptr);
-    assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     entry_ptr = cache_ptr->LRU_head_ptr;
 

@@ -22,8 +22,8 @@
  */
 /* #define NO_FILLING */
 
-const char *FILENAME[] = {"fillval_1", "fillval_2", "fillval_3", "fillval_4", "fillval_5",
-                          "fillval_6", "fillval_7", "fillval_8", "fillval_9", NULL};
+static const char *FILENAME[] = {"fillval_1", "fillval_2", "fillval_3", "fillval_4", "fillval_5",
+                                 "fillval_6", "fillval_7", "fillval_8", "fillval_9", NULL};
 
 /* Common type for compound datatype operations */
 typedef struct {
@@ -81,7 +81,7 @@ error:
     {
         H5Tclose(ret_value);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -131,7 +131,7 @@ error:
         H5Tclose(str_id);
         H5Tclose(ret_value);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end create_compound_vl_type() */
 
@@ -187,7 +187,7 @@ test_getset(void)
     {
         H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fill_i != 0) {
         H5_FAILED();
         HDputs("    H5Pget_fill_value() should return default 0");
@@ -256,7 +256,7 @@ error:
         H5Tclose(type_si);
         H5Tclose(type_ss);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -369,7 +369,7 @@ error:
     H5E_BEGIN_TRY
     {
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_getset_vl() */
 
@@ -495,7 +495,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
             if (H5Dcreate2(file, "dset7", H5T_NATIVE_LONG, space, H5P_DEFAULT, dcpl, H5P_DEFAULT) != FAIL)
                 goto error;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /* II. Test early space allocation cases */
@@ -548,7 +548,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         if (H5Dcreate2(file, "dset7", H5T_NATIVE_LONG, space, H5P_DEFAULT, dcpl, H5P_DEFAULT) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Close everything */
     if (H5D_COMPACT != layout) {
@@ -824,7 +824,7 @@ error:
         H5Dclose(dset8);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -852,8 +852,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     int                i, j, *buf = NULL, odd;
     unsigned           u;
     comp_datatype      rd_c, fill_c, should_be_c;
-    comp_datatype     *buf_c = NULL;
-    H5D_space_status_t allocation;
+    comp_datatype     *buf_c      = NULL;
+    H5D_space_status_t allocation = H5D_SPACE_STATUS_ERROR;
 
     fill_c.a = 0;
     fill_c.x = 0;
@@ -1156,7 +1156,7 @@ error:
         H5Sclose(fspace);
         H5Sclose(mspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1352,7 +1352,7 @@ error:
         H5Tclose(ctype_id);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return nerrors;
 }
 
@@ -1981,7 +1981,7 @@ error:
         H5Sclose(fspace);
         H5Sclose(mspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_extend_cases() */
@@ -2128,7 +2128,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 
 skip:
@@ -2140,7 +2140,7 @@ skip:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 0;
 } /* end test_extend() */
 
@@ -2291,7 +2291,7 @@ error:
         H5Dclose(dset2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -2411,7 +2411,7 @@ error:
         H5Sclose(fspace);
         H5Sclose(rspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2555,7 +2555,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return nerrors;
 }
 

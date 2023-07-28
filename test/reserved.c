@@ -13,7 +13,7 @@
 #include "h5test.h"
 
 #ifdef BROKEN
-const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
+static const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
 
 /*-------------------------------------------------------------------------
  * Function:    rsrv_heap

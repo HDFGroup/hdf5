@@ -50,7 +50,7 @@ hbool_t core_file_driver_failed = FALSE;
 
 /* global variable declarations: */
 
-const char *FILENAME[] = {"cache_test", NULL};
+static const char *FILENAME[] = {"cache_test", NULL};
 
 /* private typedef declarations: */
 
@@ -11198,7 +11198,7 @@ check_expunge_entry(unsigned paged)
     size_t        entry_size;
     H5F_t        *file_ptr = NULL;
     test_entry_t *base_addr;
-    test_entry_t *entry_ptr;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("H5C_expunge_entry() functionality (paged aggregation)");
@@ -11468,7 +11468,7 @@ check_multiple_read_protect(unsigned paged)
 #if H5C_COLLECT_CACHE_STATS
     H5C_t *cache_ptr = NULL;
 #endif /* H5C_COLLECT_CACHE_STATS */
-    test_entry_t *entry_ptr;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("multiple read only protects on a single entry (paged aggr)");
@@ -14031,8 +14031,8 @@ static unsigned
 check_double_pin_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("pin a pinned entry error (paged aggregation)");
@@ -14113,8 +14113,8 @@ static unsigned
 check_double_unpin_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("unpin an unpinned entry error (paged aggregation)");
@@ -14204,8 +14204,8 @@ static unsigned
 check_pin_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("pin entry related errors (paged aggregation)");
@@ -14308,8 +14308,8 @@ check_pin_entry_errs(unsigned paged)
 static unsigned
 check_double_protect_err(unsigned paged)
 {
-    H5F_t             *file_ptr = NULL;
-    test_entry_t      *entry_ptr;
+    H5F_t             *file_ptr  = NULL;
+    test_entry_t      *entry_ptr = NULL;
     H5C_cache_entry_t *cache_entry_ptr;
 
     if (paged)
@@ -14388,8 +14388,8 @@ static unsigned
 check_double_unprotect_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("unprotect an unprotected entry error (paged aggregation)");
@@ -14466,8 +14466,8 @@ static unsigned
 check_mark_entry_dirty_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("mark entry dirty related errors (paged aggregation)");
@@ -14542,8 +14542,8 @@ static unsigned
 check_expunge_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("expunge entry related errors (paged aggregation)");
@@ -14651,12 +14651,12 @@ static unsigned
 check_move_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr  = NULL;
-    H5C_t        *cache_ptr = NULL;
-    test_entry_t *entry_ptr = NULL;
-    test_entry_t *entry_0_0_ptr;
-    test_entry_t *entry_0_1_ptr;
-    test_entry_t *entry_1_0_ptr;
+    H5F_t        *file_ptr      = NULL;
+    H5C_t        *cache_ptr     = NULL;
+    test_entry_t *entry_ptr     = NULL;
+    test_entry_t *entry_0_0_ptr = NULL;
+    test_entry_t *entry_0_1_ptr = NULL;
+    test_entry_t *entry_1_0_ptr = NULL;
 
     if (paged)
         TESTING("move entry related errors (paged aggregation)");
@@ -14765,8 +14765,8 @@ static unsigned
 check_resize_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("resize entry related errors (paged aggregation)");
@@ -14863,8 +14863,8 @@ static unsigned
 check_unprotect_ro_dirty_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("unprotect a read only entry dirty error (paged aggregation)");
@@ -14980,8 +14980,8 @@ check_unprotect_ro_dirty_err(unsigned paged)
 static unsigned
 check_protect_ro_rw_err(unsigned paged)
 {
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
     void         *thing_ptr = NULL;
 
     if (paged)
@@ -24623,17 +24623,6 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
     if (pass) {
 
-        result = H5C_get_cache_auto_resize_config((const H5C_t *)&test_auto_size_ctl, &test_auto_size_ctl);
-
-        if (result != FAIL) {
-
-            pass         = FALSE;
-            failure_mssg = "H5C_get_cache_auto_resize_config accepted bad cache_ptr.\n";
-        }
-    }
-
-    if (pass) {
-
         result = H5C_get_cache_auto_resize_config(cache_ptr, NULL);
 
         if (result != FAIL) {
@@ -33700,13 +33689,6 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
 
             if (verbose)
                 fprintf(stdout, "%s: H5C_create() failed.\n", __func__);
-        }
-        else if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-            pass         = FALSE;
-            failure_mssg = "Bad cache_ptr magic.";
-
-            if (verbose)
-                fprintf(stdout, "%s: Bad cache_ptr magic.\n", __func__);
         }
     }
 

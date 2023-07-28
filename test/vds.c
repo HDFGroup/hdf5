@@ -26,9 +26,9 @@ typedef enum {
     TEST_API_NTESTS
 } test_api_config_t;
 
-const char *FILENAME[] = {"vds_virt_0", "vds_virt_1", "vds_src_0",  "vds_src_1", "vds%%_src",
-                          "vds_dapl",   "vds_virt_2", "vds_virt_3", "vds_src_2", "vds_src_3",
-                          "vds%%_src2", "vds_dapl2",  NULL};
+static const char *FILENAME[] = {"vds_virt_0", "vds_virt_1", "vds_src_0",  "vds_src_1", "vds%%_src",
+                                 "vds_dapl",   "vds_virt_2", "vds_virt_3", "vds_src_2", "vds_src_3",
+                                 "vds%%_src2", "vds_dapl2",  NULL};
 
 /* Define to enable verbose test output */
 /* #define VDS_TEST_VERBOSE 1 */
@@ -507,7 +507,7 @@ error:
         H5Fclose(file);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (plist_buf)
         free(plist_buf);
 
@@ -1161,7 +1161,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(ex_dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_api() */
@@ -1431,7 +1431,7 @@ error:
         H5Pclose(dapl);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (HDsetenv("HDF5_VDS_PREFIX", "", 1) < 0)
         TEST_ERROR_SUPPRESSED;
@@ -4364,7 +4364,7 @@ error:
         H5Sclose(memspace);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(srcfilename);
     free(srcfilename_map);
@@ -7378,7 +7378,7 @@ error:
         H5Pclose(srcdcpl);
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_unlim() */
@@ -11084,7 +11084,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(srcfilename);
     free(srcfilename_map);
@@ -12121,7 +12121,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(srcdcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_all() */
@@ -12273,7 +12273,7 @@ error:
         H5Sclose(src_sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_dapl_values() */
 

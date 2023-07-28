@@ -438,7 +438,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to append */
-                nseconds = HDatol(argv[u]);
+                nseconds = atol(argv[u]);
                 if (nseconds <= 0)
                     usage();
 

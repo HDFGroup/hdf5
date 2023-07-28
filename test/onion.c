@@ -90,18 +90,18 @@ static unsigned int flags_create_s = 0;
  */
 
 /* twenty-six four-character words beginning with 'a' -> 104 bytes */
-const unsigned char *a_list_s =
+static const unsigned char *a_list_s =
     (const unsigned char *)"abetableacedacesacheacidacneadzeafaragedagesaidsairsajarallyalum"
                            "amokantsapesarcsareaartsasksaspsavidaxes";
 uint64_t a_list_size_s = 104;
 
 /* fifty-three four-character words beginning with 'b' -> 212 bytes */
-const unsigned char *b_list_s =
+static const unsigned char *b_list_s =
     (const unsigned char *)"badebailbaitbalebanebarebaskbeambeanbearbeenbeerbeltbentbestbide"
                            "bikebilebindbirdbiteblipblueboarboatbobsbodyboilboldbollboltbond"
                            "boneboobboorboosbootbradbragbratbraybrewbritbrowbuckbudsbunkbunt"
                            "buoyburnburybustbuys";
-uint64_t b_list_size_s = 212;
+static uint64_t b_list_size_s = 212;
 
 /* Allocate and populate filepaths with h5_fixname'd strings as appropriate.
  * Should be released with onion_filepaths_destroy() when done.
@@ -733,7 +733,7 @@ test_fapl(void)
     {
         ret = H5Pset_fapl_onion(H5I_INVALID_HID, &info_in);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
 
@@ -742,7 +742,7 @@ test_fapl(void)
     {
         ret = H5Pset_fapl_onion(fapl_id, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
 
@@ -752,7 +752,7 @@ test_fapl(void)
     {
         ret = H5Pset_fapl_onion(fapl_id, &info_in);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
     info_in.version--;
@@ -763,7 +763,7 @@ test_fapl(void)
     {
         ret = H5Pset_fapl_onion(fapl_id, &info_in);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
 
@@ -773,7 +773,7 @@ test_fapl(void)
     {
         ret = H5Pset_fapl_onion(fapl_id, &info_in);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
     info_in.page_size = ONION_TEST_PAGE_SIZE_1;
@@ -784,7 +784,7 @@ test_fapl(void)
     {
         ret = H5Pset_fapl_onion(fapl_id, &info_in);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
 
@@ -794,7 +794,7 @@ test_fapl(void)
     {
         ret = H5Pset_fapl_onion(fapl_id, &info_in);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
     info_in.backing_fapl_id = H5P_DEFAULT;
@@ -809,7 +809,7 @@ test_fapl(void)
     {
         ret = H5Pget_fapl_onion(fapl_id, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
 
@@ -818,7 +818,7 @@ test_fapl(void)
     {
         ret = H5Pget_fapl_onion(H5I_INVALID_HID, &info_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
 
@@ -827,7 +827,7 @@ test_fapl(void)
     {
         ret = H5Pget_fapl_onion(fapl_id_sec2, &info_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
 
@@ -911,9 +911,10 @@ test_header_encode_decode(void)
     ptr      = exp + H5FD_ONION_ENCODED_SIZE_HEADER - 4;
     UINT32ENCODE(ptr, checksum);
 
-    hdr.version    = H5FD_ONION_HEADER_VERSION_CURR;
-    hdr.flags      = 12;
-    hdr.origin_eof = 8589934609ull, hdr.page_size = 4096;
+    hdr.version      = H5FD_ONION_HEADER_VERSION_CURR;
+    hdr.flags        = 12;
+    hdr.origin_eof   = 8589934609ull;
+    hdr.page_size    = 4096;
     hdr.history_addr = 123456;
     hdr.history_size = 88;
 
@@ -944,7 +945,7 @@ test_header_encode_decode(void)
     {
         size_ret = H5FD__onion_header_decode(exp, &hdr_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
 
@@ -958,7 +959,7 @@ test_header_encode_decode(void)
     {
         size_ret = H5FD__onion_header_decode(exp, &hdr_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
 
@@ -967,7 +968,7 @@ test_header_encode_decode(void)
     {
         size_ret = H5FD__onion_header_decode(exp, &hdr_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
 
@@ -1058,7 +1059,7 @@ test_history_encode_decode_empty(void)
     {
         size_ret = H5FD__onion_history_decode(exp, &history_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
 
@@ -1071,7 +1072,7 @@ test_history_encode_decode_empty(void)
     {
         size_ret = H5FD__onion_history_decode(exp, &history_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
 
@@ -1080,7 +1081,7 @@ test_history_encode_decode_empty(void)
     {
         size_ret = H5FD__onion_history_decode(exp, &history_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
 
@@ -1284,7 +1285,7 @@ test_revision_record_encode_decode(void)
         0, 0, 0, 0,                             /* Bytes 080-083:   checksum (populated below) */
         /* ENTRY 1 */
         0, 0xF0, 0x2E, 0, 0, 0, 0, 0,           /* Bytes 084-091:   entry 1: logical offset */
-        0xA7, 0, 0, 0, 0, 0, 0, 0,              /* Bytes 092-099:   entry 1: physical address */
+        0xA7, 0, 0, 0, 0, 0, 0, 0,              /* Bytes 092-099:   entry 1: physical address */ 
         0, 0, 0, 0,                             /* Bytes 100-103:   checksum (populated below) */
         /* ENTRY 2 */
         0, 0x50, 0x15, 0, 0, 0x20, 0, 0,        /* Bytes 104-111:   entry 2: logical offset */
@@ -1420,7 +1421,7 @@ test_revision_record_encode_decode(void)
     {
         size_ret = H5FD__onion_revision_record_decode(exp, &r_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
     exp[2] = 'R'; /* reset */
@@ -1431,7 +1432,7 @@ test_revision_record_encode_decode(void)
     {
         size_ret = H5FD__onion_revision_record_decode(exp, &r_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
 
@@ -1441,7 +1442,7 @@ test_revision_record_encode_decode(void)
     {
         size_ret = H5FD__onion_revision_record_decode(exp, &r_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (0 != size_ret)
         TEST_ERROR;
     exp[4] = H5FD_ONION_REVISION_RECORD_VERSION_CURR; /* reset */
@@ -1857,7 +1858,7 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     {
         err_ret = H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 1, act_buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (err_ret != FAIL)
         TEST_ERROR;
 
@@ -1971,7 +1972,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
         {
             vfile_raw = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Check if onion history for onion-open created file */
         if (NULL != vfile_raw)
@@ -2007,7 +2008,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     {
         vfile_ro = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     /* check if onionization (creation) not complete; nothing to open */
     if (vfile_ro != NULL)
         TEST_ERROR;
@@ -2094,7 +2095,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     {
         vfile_raw = H5FDopen(paths->recovery, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (NULL != vfile_raw)
         TEST_ERROR;
 
@@ -2191,7 +2192,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_create_oniontarget() */
@@ -2545,7 +2546,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_several_revisions_with_logical_gaps() */
@@ -2642,7 +2643,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(buf_vfy);
 
@@ -2853,7 +2854,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_page_aligned_history_create() */
@@ -3189,7 +3190,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(wdata);
     free(rdata);
@@ -3448,7 +3449,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(wdata);
     free(rdata);
@@ -3810,7 +3811,7 @@ error:
         H5Sclose(space);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_integration_create_delete_objects */
@@ -4085,7 +4086,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_integration_dset_extension */
@@ -4265,7 +4266,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -4647,7 +4648,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -4887,7 +4888,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(wdata);
     free(rdata);
