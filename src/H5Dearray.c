@@ -584,16 +584,16 @@ H5D__earray_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
 
     /* Open the object header where the layout message resides */
     if (H5O_open(&obj_loc) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open object header");
     obj_opened = TRUE;
 
     /* Read the layout message */
     if (NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, &layout))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get layout info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get layout info");
 
     /* close the object header */
     if (H5O_close(&obj_loc, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header");
 
     /* Create user data */
     dbg_ctx->f          = f;
@@ -686,11 +686,11 @@ H5D__earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
 
     /* Get header */
     if (NULL == (oh = H5O_protect(&oloc, H5AC__READ_ONLY_FLAG, TRUE)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header");
 
     /* Retrieve the dataset's object header proxy */
     if (NULL == (oh_proxy = H5O_get_proxy(oh)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset object header proxy")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset object header proxy");
 
     /* Make the extensible array a child flush dependency of the dataset's object header */
     if (H5EA_depend(idx_info->storage->u.earray.ea, oh_proxy) < 0)
@@ -746,7 +746,7 @@ H5D__earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     /* Open the extensible array for the chunk index */
     if (NULL ==
         (idx_info->storage->u.earray.ea = H5EA_open(idx_info->f, idx_info->storage->idx_addr, &udata)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array");
 
     /* Check for SWMR writes to the file */
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
@@ -790,7 +790,7 @@ H5D__earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space, had
 
     /* Get the dim info for dataset */
     if ((sndims = H5S_get_simple_extent_dims(space, NULL, max_dims)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions");
     H5_CHECKED_ASSIGN(ndims, unsigned, sndims, int);
 
     /* Find the rank of the unlimited dimension */
@@ -800,7 +800,7 @@ H5D__earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space, had
         if (H5S_UNLIMITED == max_dims[u]) {
             /* Check if we've already found an unlimited dimension */
             if (unlim_dim >= 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_ALREADYINIT, FAIL, "already found unlimited dimension")
+                HGOTO_ERROR(H5E_DATASET, H5E_ALREADYINIT, FAIL, "already found unlimited dimension");
 
             /* Set the unlimited dimension */
             unlim_dim = (int)u;
@@ -809,7 +809,7 @@ H5D__earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space, had
 
     /* Check if we didn't find an unlimited dimension */
     if (unlim_dim < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_UNINITIALIZED, FAIL, "didn't find unlimited dimension")
+        HGOTO_ERROR(H5E_DATASET, H5E_UNINITIALIZED, FAIL, "didn't find unlimited dimension");
 
     /* Set the unlimited dimension for the layout's future use */
     idx_info->layout->u.earray.unlim_dim = (unsigned)unlim_dim;
@@ -889,11 +889,11 @@ H5D__earray_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Create the extensible array for the chunk index */
     if (NULL == (idx_info->storage->u.earray.ea = H5EA_create(idx_info->f, &cparam, &udata)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create extensible array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create extensible array");
 
     /* Get the address of the extensible array in file */
     if (H5EA_get_addr(idx_info->storage->u.earray.ea, &(idx_info->storage->idx_addr)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array address")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array address");
 
     /* Check for SWMR writes to the file */
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
@@ -956,7 +956,7 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     if (NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
     }
     else /* Patch the top level file pointer contained in ea if needed */
         H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f);
@@ -965,9 +965,9 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     ea = idx_info->storage->u.earray.ea;
 
     if (!H5_addr_defined(udata->chunk_block.offset))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "The chunk should have allocated already")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "The chunk should have allocated already");
     if (udata->chunk_idx != (udata->chunk_idx & 0xffffffff)) /* negative value */
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32");
 
     /* Check for filters on chunks */
     if (idx_info->pline->nused > 0) {
@@ -979,12 +979,12 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
 
         /* Set the info for the chunk */
         if (H5EA_set(ea, udata->chunk_idx, &elmt) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk info")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk info");
     } /* end if */
     else {
         /* Set the address for the chunk */
         if (H5EA_set(ea, udata->chunk_idx, &udata->chunk_block.offset) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk address")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk address");
     } /* end else */
 
 done:
@@ -1024,7 +1024,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     if (NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
     }
     else /* Patch the top level file pointer contained in ea if needed */
         H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f);
@@ -1062,7 +1062,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 
         /* Get the information for the chunk */
         if (H5EA_get(ea, idx, &elmt) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info");
 
         /* Set the info for the chunk */
         udata->chunk_block.offset = elmt.addr;
@@ -1072,7 +1072,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     else {
         /* Get the address for the chunk */
         if (H5EA_get(ea, idx, &udata->chunk_block.offset) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address");
 
         /* Update the other (constant) information for the chunk */
         udata->chunk_block.length = idx_info->layout->size;
@@ -1226,7 +1226,7 @@ H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
     if (NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
     }
     else /* Patch the top level file pointer contained in ea if needed */
         H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f);
@@ -1236,7 +1236,7 @@ H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
 
     /* Get the extensible array statistics */
     if (H5EA_get_stats(ea, &ea_stat) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics");
 
     if (ea_stat.stored.max_idx_set > 0) {
         H5D_earray_it_ud_t udata; /* User data for iteration callback */
@@ -1294,11 +1294,11 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     if (NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
     }
     else /* Patch the top level file pointer contained in ea if needed */
         if (H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch earray file pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch earray file pointer");
 
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->storage->u.earray.ea;
@@ -1331,14 +1331,14 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
 
         /* Get the info about the chunk for the index */
         if (H5EA_get(ea, idx, &elmt) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info");
 
         /* Remove raw data chunk from file if not doing SWMR writes */
         assert(H5_addr_defined(elmt.addr));
         if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
             H5_CHECK_OVERFLOW(elmt.nbytes, /*From: */ uint32_t, /*To: */ hsize_t);
             if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, elmt.addr, (hsize_t)elmt.nbytes) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
         } /* end if */
 
         /* Reset the info about the chunk for the index */
@@ -1346,27 +1346,27 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
         elmt.nbytes      = 0;
         elmt.filter_mask = 0;
         if (H5EA_set(ea, idx, &elmt) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to reset chunk info")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to reset chunk info");
     } /* end if */
     else {
         haddr_t addr = HADDR_UNDEF; /* Chunk address */
 
         /* Get the address of the chunk for the index */
         if (H5EA_get(ea, idx, &addr) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address");
 
         /* Remove raw data chunk from file if not doing SWMR writes */
         assert(H5_addr_defined(addr));
         if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
             H5_CHECK_OVERFLOW(idx_info->layout->size, /*From: */ uint32_t, /*To: */ hsize_t);
             if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, addr, (hsize_t)idx_info->layout->size) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
         } /* end if */
 
         /* Reset the address of the chunk for the index */
         addr = HADDR_UNDEF;
         if (H5EA_set(ea, idx, &addr) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to reset chunk address")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to reset chunk address");
     } /* end else */
 
 done:
@@ -1400,7 +1400,7 @@ H5D__earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Remove raw data chunk from file */
     H5_CHECK_OVERFLOW(chunk_rec->nbytes, /*From: */ uint32_t, /*To: */ hsize_t);
     if (H5MF_xfree(f, H5FD_MEM_DRAW, chunk_rec->chunk_addr, (hsize_t)chunk_rec->nbytes) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free chunk")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free chunk");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1441,11 +1441,11 @@ H5D__earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
         /* Iterate over the chunk addresses in the extensible array, deleting each chunk */
         if (H5D__earray_idx_iterate(idx_info, H5D__earray_idx_delete_cb, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk addresses")
+            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk addresses");
 
         /* Close extensible array */
         if (H5EA_close(idx_info->storage->u.earray.ea) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array");
         idx_info->storage->u.earray.ea = NULL;
 
         /* Set up the context user data */
@@ -1454,7 +1454,7 @@ H5D__earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
         /* Delete extensible array */
         if (H5EA_delete(idx_info->f, idx_info->storage->idx_addr, &ctx_udata) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk extensible array");
         idx_info->storage->idx_addr = HADDR_UNDEF;
     } /* end if */
     else
@@ -1497,14 +1497,14 @@ H5D__earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk
     if (NULL == idx_info_src->storage->u.earray.ea)
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info_src) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
 
     /* Set copied metadata tag */
     H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Create the extensible array that describes chunked storage in the dest. file */
     if (H5D__earray_idx_create(idx_info_dst) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
     assert(H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Reset metadata tag */
@@ -1538,10 +1538,10 @@ H5D__earray_idx_copy_shutdown(H5O_storage_chunk_t *storage_src, H5O_storage_chun
 
     /* Close extensible arrays */
     if (H5EA_close(storage_src->u.earray.ea) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array");
     storage_src->u.earray.ea = NULL;
     if (H5EA_close(storage_dst->u.earray.ea) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array");
     storage_dst->u.earray.ea = NULL;
 
 done:
@@ -1578,14 +1578,14 @@ H5D__earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 
     /* Open the extensible array in file */
     if (H5D__earray_idx_open(idx_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
 
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->storage->u.earray.ea;
 
     /* Get the extensible array statistics */
     if (H5EA_get_stats(ea, &ea_stat) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics");
 
     /* Set the size of the extensible array */
     *index_size = ea_stat.computed.hdr_size + ea_stat.computed.index_blk_size +
@@ -1594,7 +1594,7 @@ H5D__earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 done:
     if (idx_info->storage->u.earray.ea) {
         if (H5EA_close(idx_info->storage->u.earray.ea) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array");
         idx_info->storage->u.earray.ea = NULL;
     } /* end if */
 
@@ -1677,11 +1677,11 @@ H5D__earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
         /* Patch the top level file pointer contained in ea if needed */
         if (H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch earray file pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch earray file pointer");
 
         /* Close extensible array */
         if (H5EA_close(idx_info->storage->u.earray.ea) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array");
         idx_info->storage->u.earray.ea = NULL;
     } /* end if */
 

@@ -141,9 +141,9 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const 
     /* Check if destination name already exists */
     dst_exists = FALSE;
     if (H5L_exists_tolerant(dst_loc, dst_name, &dst_exists) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists");
     if (dst_exists)
-        HGOTO_ERROR(H5E_OHDR, H5E_EXISTS, FAIL, "destination object already exists")
+        HGOTO_ERROR(H5E_OHDR, H5E_EXISTS, FAIL, "destination object already exists");
 
     /* Set up opened group location to fill in */
     src_loc.oloc = &src_oloc;
@@ -152,17 +152,17 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const 
 
     /* Find the source object to copy */
     if (H5G_loc_find(loc, src_name, &src_loc /*out*/) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found");
     loc_found = TRUE;
 
     /* Open source object's object header */
     if (H5O_open(&src_oloc) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object");
     obj_open = TRUE;
 
     /* Do the actual copying of the object */
     if (H5O__copy_obj(&src_loc, dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object");
 
 done:
     if (loc_found && H5G_loc_free(&src_loc) < 0)
@@ -225,18 +225,18 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     /* Get pointer to object class for this object */
     if (NULL == (obj_class = H5O__obj_class(oloc_src)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type");
 
     /* Set the pointer to the shared struct for the object if opened in the file */
     cpy_info->shared_fo = H5FO_opened(oloc_src->file, oloc_src->addr);
 
     /* Get source object header */
     if (NULL == (oh_src = H5O_protect(oloc_src, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Retrieve user data for particular type of object to copy */
     if (obj_class->get_copy_file_udata && (NULL == (cpy_udata = (obj_class->get_copy_file_udata)())))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to retrieve copy user data")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to retrieve copy user data");
 
     /* If we are merging committed datatypes, check for a match in the destination
      * file now */
@@ -257,13 +257,13 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
             /* Search for a matching committed datatype, building the list if
              * necessary */
             if ((merge = H5O__copy_search_comm_dt(oloc_src->file, oh_src, oloc_dst, cpy_info)) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't search for matching committed datatype")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't search for matching committed datatype");
 
         if (merge) {
             /* Found a match, add to skip list and exit */
             /* Allocate space for the address mapping of the object copied */
             if (NULL == (addr_map = H5FL_MALLOC(H5O_addr_map_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             /* Insert the address mapping for the found object into the copied
              * list */
@@ -278,7 +278,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
             /* Insert into skip list */
             if (H5SL_insert(cpy_info->map_list, addr_map, &(addr_map->src_obj_pos)) < 0) {
                 addr_map = H5FL_FREE(H5O_addr_map_t, addr_map);
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
             } /* end if */
 
             HGOTO_DONE(SUCCEED);
@@ -287,18 +287,18 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     /* Flush any dirty messages in source object header to update the header chunks */
     if (H5O__flush_msgs(oloc_src->file, oh_src) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object header messages")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object header messages");
 
     /* Allocate the destination object header and fill in header fields */
     if (NULL == (oh_dst = H5FL_CALLOC(H5O_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize header information */
     oh_dst->version = oh_src->version;
 
     /* Version bounds check for destination object header */
     if (oh_dst->version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(oloc_dst->file)])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "destination object header version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "destination object header version out of bounds");
 
     oh_dst->flags          = oh_src->flags;
     oh_dst->link_msgs_seen = oh_src->link_msgs_seen;
@@ -321,7 +321,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     if (oh_dst->swmr_write) {
         /* Create virtual entry, for use as proxy */
         if (NULL == (oh_dst->proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy");
     } /* end if */
     else
         oh_dst->proxy = NULL;
@@ -334,7 +334,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     /* Allocate memory for the chunk array - always start with 1 chunk */
     if (NULL == (oh_dst->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, (size_t)1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Update number of allocated chunks.  There are still no chunks used. */
     oh_dst->alloc_nchunks = 1;
@@ -343,7 +343,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
      * the source that shouldn't be copied to the destination.
      */
     if (NULL == (deleted = (hbool_t *)H5MM_malloc(sizeof(hbool_t) * oh_src->nmesgs)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     memset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
     /* "pre copy" pass over messages, to gather information for actual message copy operation
@@ -384,7 +384,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
             /* Perform "pre copy" operation on message */
             if ((copy_type->pre_copy_file)(oloc_src->file, mesg_src->native, &(deleted[mesgno]), cpy_info,
                                            cpy_udata) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message");
 
             /* Check if the message should be deleted in the destination */
             if (deleted[mesgno])
@@ -404,7 +404,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     /* Allocate memory for destination message array */
     if (oh_dst->alloc_nmesgs > 0)
         if (NULL == (oh_dst->mesg = H5FL_SEQ_CALLOC(H5O_mesg_t, oh_dst->alloc_nmesgs)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* "copy" pass over messages, to perform main message copying */
     null_msgs = 0;
@@ -463,7 +463,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
             if (NULL == (mesg_dst->native =
                              H5O__msg_copy_file(copy_type, oloc_src->file, mesg_src->native, oloc_dst->file,
                                                 &recompute_size, &mesg_flags, cpy_info, cpy_udata)))
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message");
 
             /* Check if the sharing state changed, and recompute the size if so
              */
@@ -549,7 +549,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     /* Allocate space for chunk in destination file */
     if (HADDR_UNDEF ==
         (oh_dst->chunk[0].addr = H5MF_alloc(oloc_dst->file, H5FD_MEM_OHDR, (hsize_t)dst_oh_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header");
     addr_new = oh_dst->chunk[0].addr;
 
     /* Create memory image for the new chunk */
@@ -562,7 +562,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
      *  (QAK - 2010/08/17)
      */
     if (NULL == (oh_dst->chunk[0].image = H5FL_BLK_CALLOC(chunk_image, (size_t)dst_oh_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Set dest. chunk information */
     oh_dst->chunk[0].size = (size_t)dst_oh_size;
@@ -626,7 +626,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         /* Make sure we have enough space for new NULL message */
         if (oh_dst->nmesgs + 1 > oh_dst->alloc_nmesgs)
             if (H5O__alloc_msgs(oh_dst, (size_t)1) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages");
 
         /* Create null message for [rest of] space in new chunk */
         /* (account for chunk's magic # & checksum) */
@@ -652,11 +652,11 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
      */
     if (cpy_info->merge_comm_dt && obj_class->type == H5O_TYPE_NAMED_DATATYPE)
         if (H5O__copy_insert_comm_dt(oloc_src->file, oh_src, oloc_dst, cpy_info) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't insert committed datatype into destination list")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't insert committed datatype into destination list");
 
     /* Allocate space for the address mapping of the object copied */
     if (NULL == (addr_map = H5FL_MALLOC(H5O_addr_map_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Insert the address mapping for the new object into the copied list */
     /* (Do this here, because "post copy" possibly checks it) */
@@ -671,7 +671,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     /* Insert into skip list */
     if (H5SL_insert(cpy_info->map_list, addr_map, &(addr_map->src_obj_pos)) < 0) {
         addr_map = H5FL_FREE(H5O_addr_map_t, addr_map);
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
     } /* end if */
 
     /* "post copy" loop over messages, to fix up any messages which require a complete
@@ -736,7 +736,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     /* Retag all copied metadata to apply the destination object's tag */
     if (H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries");
 
     /* Set metadata tag for destination object's object header */
     H5_BEGIN_TAG(oloc_dst->addr)
@@ -830,7 +830,7 @@ H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5O_
 
         /* Copy object referred to */
         if (H5O__copy_header_real(oloc_src, oloc_dst, cpy_info, obj_type, udata) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object");
 
         /* Check for incrementing the depth of copy */
         if (inc_depth)
@@ -869,7 +869,7 @@ H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5O_
     /* Increment destination object's link count, if allowed */
     if (inc_link)
         if (H5O_link(oloc_dst, 1) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to increment object link count")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to increment object link count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -948,19 +948,19 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
 
     /* Get the copy property list */
     if (NULL == (ocpy_plist = (H5P_genplist_t *)H5I_object(ocpypl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Retrieve the copy parameters */
     if (H5P_get(ocpy_plist, H5O_CPY_OPTION_NAME, &cpy_option) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag");
 
     /* Retrieve the merge committed datatype list */
     if (H5P_peek(ocpy_plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge committed datatype list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge committed datatype list");
 
     /* Get callback info */
     if (H5P_get(ocpy_plist, H5O_CPY_MCDT_SEARCH_CB_NAME, &cb_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info");
 
     /* Convert copy flags into copy struct */
     if ((cpy_option & H5O_COPY_SHALLOW_HIERARCHY_FLAG) > 0) {
@@ -995,11 +995,11 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
 
     /* Create a skip list to keep track of which objects are copied */
     if (NULL == (cpy_info.map_list = H5SL_create(H5SL_TYPE_OBJ, NULL)))
-        HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, FAIL, "cannot make skip list")
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, FAIL, "cannot make skip list");
 
     /* copy the object from the source file to the destination file */
     if (H5O__copy_header_real(oloc_src, oloc_dst, &cpy_info, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object");
 
 done:
     if (cpy_info.map_list)
@@ -1050,7 +1050,7 @@ H5O__copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_
 
     /* Copy the object from the source file to the destination file */
     if (H5O__copy_header(src_loc->oloc, &new_oloc, ocpypl_id, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object");
 
     /* Patch dst_loc.  Again, this can be removed once oloc's point to shared
      * file structs. */
@@ -1058,7 +1058,7 @@ H5O__copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_
 
     /* Insert the new object in the destination file's group */
     if (H5L_link(dst_loc, dst_name, &new_loc, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link");
     entry_inserted = TRUE;
 
 done:
@@ -1166,17 +1166,17 @@ H5O__copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
 
     /* Get attribute datatype */
     if (NULL == (dt = H5A_type(attr)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get attribute datatype")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get attribute datatype");
 
     /* Check if the datatype is committed and search the skip list if so */
     if (H5T_is_named(dt)) {
         /* Allocate key */
         if (NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /* Copy datatype into key */
         if (NULL == (key->dt = (H5T_t *)H5O_msg_copy(H5O_DTYPE_ID, dt, NULL)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy datatype message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy datatype message");
 
         /* Get datatype object fileno */
         H5F_GET_FILENO(udata->obj_oloc.file, key->fileno);
@@ -1184,12 +1184,12 @@ H5O__copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
         if (!H5SL_search(udata->dst_dt_list, key)) {
             /* Allocate destination address */
             if (NULL == (addr = H5FL_MALLOC(haddr_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             /* Add the destination datatype to the skip list */
             *addr = ((H5O_shared_t *)(key->dt))->u.loc.oh_addr;
             if (H5SL_insert(udata->dst_dt_list, addr, key) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
             obj_inserted = TRUE;
         } /* end if */
     }     /* end if */
@@ -1243,18 +1243,18 @@ H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t
 
     /* Get pointer to object class for this object */
     if ((obj_class = H5O__obj_class(obj_oloc)) == NULL)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type");
 
     /* Check if the object is a datatype, a dataset using a committed
      * datatype, or contains an attribute using a committed datatype */
     if (obj_class->type == H5O_TYPE_NAMED_DATATYPE) {
         /* Allocate key */
         if (NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /* Read the destination datatype */
         if (NULL == (key->dt = (H5T_t *)H5O_msg_read(obj_oloc, H5O_DTYPE_ID, NULL)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message");
 
         /* Get destination object fileno */
         H5F_GET_FILENO(obj_oloc->file, key->fileno);
@@ -1263,23 +1263,23 @@ H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t
         if (!H5SL_search(udata->dst_dt_list, key)) {
             /* Allocate destination address */
             if (NULL == (addr = H5FL_MALLOC(haddr_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             /* Add the destination datatype to the skip list */
             *addr = obj_oloc->addr;
             if (H5SL_insert(udata->dst_dt_list, addr, key) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
             obj_inserted = TRUE;
         } /* end if */
     }     /* end if */
     else if (obj_class->type == H5O_TYPE_DATASET) {
         /* Allocate key */
         if (NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /* Read the destination datatype */
         if (NULL == (key->dt = (H5T_t *)H5O_msg_read(obj_oloc, H5O_DTYPE_ID, NULL)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message");
 
         /* Check if the datatype is committed and search the skip list if so */
         if (H5T_is_named(key->dt)) {
@@ -1289,12 +1289,12 @@ H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t
             if (!H5SL_search(udata->dst_dt_list, key)) {
                 /* Allocate destination address */
                 if (NULL == (addr = H5FL_MALLOC(haddr_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* Add the destination datatype to the skip list */
                 *addr = ((H5O_shared_t *)(key->dt))->u.loc.oh_addr;
                 if (H5SL_insert(udata->dst_dt_list, addr, key) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
                 obj_inserted = TRUE;
             } /* end if */
         }     /* end if */
@@ -1367,12 +1367,12 @@ H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const 
 
         /* Find the object */
         if (H5G_loc_find(udata->dst_root_loc, name, &obj_loc /*out*/) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, H5_ITER_ERROR, "object not found")
+            HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, H5_ITER_ERROR, "object not found");
         obj_found = TRUE;
 
         /* Check object and add to skip list if appropriate */
         if (H5O__copy_search_comm_dt_check(&obj_oloc, udata) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "can't check object")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "can't check object");
     } /* end if */
 
 done:
@@ -1418,11 +1418,11 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
 
     /* Allocate key */
     if (NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Read the source datatype */
     if (NULL == (key->dt = (H5T_t *)H5O_msg_read_oh(file_src, oh_src, H5O_DTYPE_ID, NULL)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message");
 
     /* Get destination object fileno */
     H5F_GET_FILENO(oloc_dst->file, key->fileno);
@@ -1431,7 +1431,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
     if (!cpy_info->dst_dt_list) {
         /* Create the skip list */
         if (NULL == (cpy_info->dst_dt_list = H5SL_create(H5SL_TYPE_GENERIC, H5O__copy_comm_dt_cmp)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create skip list for committed datatypes")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create skip list for committed datatypes");
 
         /* Add suggested types to list, if they are present */
         if (cpy_info->dst_dt_suggestion_list) {
@@ -1442,9 +1442,9 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
 
             /* Set up the root group in the destination file */
             if (NULL == (dst_root_loc.oloc = H5G_oloc(H5G_rootof(oloc_dst->file))))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group");
             if (NULL == (dst_root_loc.path = H5G_nameof(H5G_rootof(oloc_dst->file))))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group");
 
             /* Set up opened group location to fill in */
             obj_loc.oloc = &obj_oloc;
@@ -1469,7 +1469,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                     if (H5O__copy_search_comm_dt_check(&obj_oloc, &udata) < 0) {
                         if (H5G_loc_free(&obj_loc) < 0)
                             HERROR(H5E_OHDR, H5E_CANTRELEASE, "can't free location");
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't check object")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't check object");
                     } /* end if */
 
                 /* Free location */
@@ -1497,7 +1497,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
             /* Make callback to see if we should search destination file */
             if (cpy_info->mcdt_cb)
                 if ((search_cb_ret = cpy_info->mcdt_cb(cpy_info->mcdt_ud)) == H5O_MCDT_SEARCH_ERROR)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "callback returned error")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "callback returned error");
 
             if (search_cb_ret == H5O_MCDT_SEARCH_CONT) {
                 /* Build the complete dst dt list */
@@ -1508,7 +1508,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                     "unable to get object location for root group");
                     if (NULL == (dst_root_loc.path = H5G_nameof(H5G_rootof(oloc_dst->file))))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group");
                 } /* end if */
                 else
                     assert(dst_root_loc.path);
@@ -1525,11 +1525,11 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                  * list */
                 if (H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O__copy_search_comm_dt_cb,
                               &udata) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed");
                 cpy_info->dst_dt_list_complete = TRUE;
             } /* end if */
             else if (search_cb_ret != H5O_MCDT_SEARCH_STOP)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown return value for callback")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown return value for callback");
         } /* end if */
     }     /* end if */
 
@@ -1581,24 +1581,24 @@ H5O__copy_insert_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst, H5
 
     /* Allocate key */
     if (NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Read the datatype.  Read from the source file because the destination
      * object could be changed in the post-copy. */
     if (NULL == (key->dt = (H5T_t *)H5O_msg_read_oh(file_src, oh_src, H5O_DTYPE_ID, NULL)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message");
 
     /* Get destination object fileno */
     H5F_GET_FILENO(oloc_dst->file, key->fileno);
 
     /* Allocate destination address */
     if (NULL == (addr = H5FL_MALLOC(haddr_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Add the destination datatype to the skip list */
     *addr = oloc_dst->addr;
     if (H5SL_insert(cpy_info->dst_dt_list, addr, key) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
 
 done:
     if (ret_value < 0) {

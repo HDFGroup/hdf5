@@ -198,7 +198,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
         if (NULL ==
             (iblock = H5HF__man_iblock_protect(hdr, iblock_addr, iblock_nrows, iblock_parent,
                                                iblock_par_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block");
 
         /* Make indirect block the context for the current location */
         biter->curr->context = iblock;
@@ -210,7 +210,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
 
         /* Release the current indirect block */
         if (H5HF__man_iblock_unprotect(iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
         iblock = NULL;
 
         /* See if the location falls in a direct block row */
@@ -315,7 +315,7 @@ H5HF__man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, H5HF_indir
 
     /* Increment reference count on indirect block */
     if (H5HF__iblock_incr(new_loc->context) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block");
 
     /* Make new location the current location */
     biter->curr = new_loc;
@@ -446,7 +446,7 @@ H5HF__man_iter_up(H5HF_block_iter_t *biter)
 
     /* Release hold on current location's indirect block */
     if (H5HF__iblock_decr(biter->curr->context) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block");
 
     /* Get pointer to location context above this one */
     up_loc = biter->curr->up;
@@ -500,7 +500,7 @@ H5HF__man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
 
     /* Increment reference count on indirect block */
     if (H5HF__iblock_incr(down_loc->context) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block");
 
     /* Make down location the current location */
     biter->curr = down_loc;

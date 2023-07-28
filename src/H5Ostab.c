@@ -94,7 +94,7 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     assert(p);
 
     if (NULL == (stab = H5FL_CALLOC(H5O_stab_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -246,7 +246,7 @@ H5O__stab_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *mesg)
 
     /* Free the file space for the symbol table */
     if (H5G__stab_delete(f, (const H5O_stab_t *)mesg) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -282,11 +282,11 @@ H5O__stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
 
     /* Allocate space for the destination stab */
     if (NULL == (stab_dst = H5FL_MALLOC(H5O_stab_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Get the old local heap's size and use that as the hint for the new heap */
     if (H5HL_get_size(file_src, stab_src->heap_addr, &size_hint) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, NULL, "can't query local heap size")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, NULL, "can't query local heap size");
 
     /* Set copy metadata tag */
     H5_BEGIN_TAG(H5AC__COPIED_TAG)
@@ -354,7 +354,7 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
 
     /* Iterate over objects in group, copying them */
     if ((H5B_iterate(src_oloc->file, H5B_SNODE, stab_src->btree_addr, H5G__node_copy, &udata)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

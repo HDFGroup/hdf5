@@ -100,7 +100,7 @@ H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_MDCI_VERSION_0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message");
 
     /* Allocate space for message */
     if (NULL == (mesg = (H5O_mdci_t *)H5FL_MALLOC(H5O_mdci_t)))
@@ -177,7 +177,7 @@ H5O__mdci_copy(const void *_mesg, void *_dest)
     /* check args */
     assert(mesg);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_mdci_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *mesg;
@@ -272,15 +272,15 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
         if (f->shared->closing) {
             /* Get the eoa, and verify that it has the expected value */
             if (HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size");
 
             assert(H5_addr_eq(final_eoa, mesg->addr + mesg->size));
 
             if (H5FD_free(f->shared->lf, H5FD_MEM_SUPER, f, mesg->addr, mesg->size) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image");
         }
         else if (H5MF_xfree(f, H5FD_MEM_SUPER, mesg->addr, mesg->size) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block");
     } /* end if */
 
 done:

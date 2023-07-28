@@ -114,20 +114,20 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
 
     /* Check input buffer before decoding version and index flags */
     if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
     /* Version of message */
     if (*p++ != H5O_LINFO_VERSION)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message");
 
     /* Allocate space for message */
     if (NULL == (linfo = H5FL_MALLOC(H5O_linfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Get the index flags for the group */
     index_flags = *p++;
     if (index_flags & ~H5O_LINFO_ALL_FLAGS)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message");
     linfo->track_corder = (index_flags & H5O_LINFO_TRACK_CORDER) ? TRUE : FALSE;
     linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? TRUE : FALSE;
 
@@ -137,7 +137,7 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     /* Max. link creation order value for the group, if tracked */
     if (linfo->track_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         INT64DECODE(p, linfo->max_corder);
     }
     else
@@ -145,7 +145,7 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
 
     /* Check input buffer before decoding the next two addresses */
     if (H5_IS_BUFFER_OVERFLOW(p, addr_size + addr_size, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
     /* Address of fractal heap to store "dense" links */
     H5F_addr_decode(f, &p, &(linfo->fheap_addr));
@@ -156,7 +156,7 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     /* Address of v2 B-tree to index creation order of links, if there is one */
     if (linfo->index_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, addr_size, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_addr_decode(f, &p, &(linfo->corder_bt2_addr));
     }
     else
@@ -245,7 +245,7 @@ H5O__linfo_copy(const void *_mesg, void *_dest)
     /* check args */
     assert(linfo);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_linfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *linfo;
@@ -335,7 +335,7 @@ H5O__linfo_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     /* If the group is using "dense" link storage, delete it */
     if (H5_addr_defined(linfo->fheap_addr))
         if (H5G__dense_delete(f, linfo, TRUE) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -370,7 +370,7 @@ H5O__linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *fi
 
     /* Copy the source message */
     if (NULL == (linfo_dst = (H5O_linfo_t *)H5O__linfo_copy(linfo_src, NULL)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "memory allocation failed");
 
     /* If we are performing a 'shallow hierarchy' copy, and the links in this
      *  group won't be included in the destination, reset the link info for
@@ -391,7 +391,7 @@ H5O__linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *fi
         if (H5_addr_defined(linfo_src->fheap_addr)) {
             /* Create the dense link storage */
             if (H5G__dense_create(file_dst, linfo_dst, udata->common.src_pline) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create 'dense' form of new format group")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create 'dense' form of new format group");
         } /* end if */
     }     /* end else */
 
@@ -433,7 +433,7 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
 
     /* Copy the link (and the object it points to) */
     if (H5L__link_copy_file(udata->dst_oloc->file, src_lnk, udata->src_oloc, &dst_lnk, udata->cpy_info) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy link")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy link");
     dst_lnk_init = TRUE;
 
     /* Set metadata tag in API context */
@@ -499,7 +499,7 @@ H5O__linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
         /* Iterate over the links in the group, building a table of the link messages */
         if (H5G__dense_iterate(src_oloc->file, linfo_src, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL,
                                H5O__linfo_post_copy_file_cb, &udata) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links");
     } /* end if */
 
 done:

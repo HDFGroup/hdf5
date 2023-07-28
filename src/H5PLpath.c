@@ -114,22 +114,22 @@ H5PL__insert_at(const char *path, unsigned int idx)
     /* Expand the table if it is full */
     if (H5PL_num_paths_g == H5PL_path_capacity_g)
         if (H5PL__expand_path_table() < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't expand path table")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't expand path table");
 
     /* Copy the path for storage so the caller can dispose of theirs */
     if (NULL == (path_copy = H5MM_strdup(path)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't make internal copy of path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't make internal copy of path");
 
 #ifdef H5_HAVE_WIN32_API
     /* Clean up Microsoft Windows environment variables in the path string */
     if (H5_expand_windows_env_vars(&path_copy))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCONVERT, FAIL, "can't expand environment variable string")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCONVERT, FAIL, "can't expand environment variable string");
 #endif /* H5_HAVE_WIN32_API */
 
     /* If the table entry is in use, make some space */
     if (H5PL_paths_g[idx])
         if (H5PL__make_space_at(idx) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "unable to make space in the table for the new entry")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "unable to make space in the table for the new entry");
 
     /* Insert the copy of the search path into the table at the specified index */
     H5PL_paths_g[idx] = path_copy;
@@ -194,16 +194,16 @@ H5PL__replace_at(const char *path, unsigned int idx)
 
     /* Check that the table entry is in use */
     if (!H5PL_paths_g[idx])
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, FAIL, "path entry at index %u in the table is NULL", idx)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, FAIL, "path entry at index %u in the table is NULL", idx);
 
     /* Copy the path for storage so the caller can dispose of theirs */
     if (NULL == (path_copy = H5MM_strdup(path)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't make internal copy of path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't make internal copy of path");
 
 #ifdef H5_HAVE_WIN32_API
     /* Clean up Microsoft Windows environment variables in the path string */
     if (H5_expand_windows_env_vars(&path_copy))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCONVERT, FAIL, "can't expand environment variable string")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCONVERT, FAIL, "can't expand environment variable string");
 #endif /* H5_HAVE_WIN32_API */
 
     /* Free the existing path entry */
@@ -243,7 +243,7 @@ H5PL__create_path_table(void)
     H5PL_num_paths_g     = 0;
     H5PL_path_capacity_g = H5PL_INITIAL_PATH_CAPACITY;
     if (NULL == (H5PL_paths_g = (char **)H5MM_calloc((size_t)H5PL_path_capacity_g * sizeof(char *))))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path table")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path table");
 
     /* Retrieve paths from HDF5_PLUGIN_PATH if the user sets it
      * or from the default paths if it isn't set.
@@ -255,7 +255,7 @@ H5PL__create_path_table(void)
         paths = H5MM_strdup(env_var);
 
     if (NULL == paths)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path copy")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path copy");
 
     /* Separate the paths and store them */
     next_path = HDstrtok_r(paths, H5PL_PATH_SEPARATOR, &lasts);
@@ -263,7 +263,7 @@ H5PL__create_path_table(void)
 
         /* Insert the path into the table */
         if (H5PL__append_path(next_path) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't insert path: %s", next_path)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't insert path: %s", next_path);
 
         /* Get the next path from the environment string */
         next_path = HDstrtok_r(NULL, H5PL_PATH_SEPARATOR, &lasts);
@@ -356,7 +356,7 @@ H5PL__expand_path_table(void)
     /* Resize the array */
     if (NULL ==
         (H5PL_paths_g = (char **)H5MM_realloc(H5PL_paths_g, (size_t)H5PL_path_capacity_g * sizeof(char *))))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "allocating additional memory for path table failed")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "allocating additional memory for path table failed");
 
     /* Initialize the new memory */
     memset(H5PL_paths_g + H5PL_num_paths_g, 0, (size_t)H5PL_PATH_CAPACITY_ADD * sizeof(char *));
@@ -391,7 +391,7 @@ H5PL__append_path(const char *path)
 
     /* Insert the path at the end of the table */
     if (H5PL__insert_at(path, H5PL_num_paths_g) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to append search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to append search path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -419,7 +419,7 @@ H5PL__prepend_path(const char *path)
 
     /* Insert the path at the beginning of the table */
     if (H5PL__insert_at(path, 0) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to prepend search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to prepend search path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -448,7 +448,7 @@ H5PL__replace_path(const char *path, unsigned int idx)
 
     /* Insert the path at the requested index */
     if (H5PL__replace_at(path, idx) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to replace search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to replace search path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -478,7 +478,7 @@ H5PL__insert_path(const char *path, unsigned int idx)
 
     /* Insert the path at the requested index */
     if (H5PL__insert_at(path, idx) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to insert search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to insert search path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -507,7 +507,7 @@ H5PL__remove_path(unsigned int idx)
 
     /* Check if the path at that index is set */
     if (!H5PL_paths_g[idx])
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTDELETE, FAIL, "search path at index %u is NULL", idx)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTDELETE, FAIL, "search path at index %u is NULL", idx);
 
     /* Delete the path */
     H5PL_num_paths_g--;
@@ -543,7 +543,7 @@ H5PL__get_path(unsigned int idx)
 
     /* Get the path at the requested index */
     if (idx >= H5PL_num_paths_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "path index %u is out of range in table", idx)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "path index %u is out of range in table", idx);
 
     return H5PL_paths_g[idx];
 done:
@@ -640,7 +640,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
                   4; /* Extra "+4" to quiet GCC warning - 2019/07/05, QAK */
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path");
 
             HDsnprintf(path, len, "%s/%s", plugin_path, dp->d_name);
 
@@ -724,7 +724,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
             len = HDstrlen(plugin_path) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(fdFile.cFileName) + 1;
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path");
 
             HDsnprintf(path, len, "%s\\%s", plugin_path, fdFile.cFileName);
 
@@ -807,7 +807,7 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, hbool
         /* Break out if found */
         if (*found) {
             if (!plugin_info)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "plugin info should not be NULL")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "plugin info should not be NULL");
             break;
         }
     }
@@ -878,7 +878,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
                   4; /* Extra "+4" to quiet GCC warning - 2019/07/05, QAK */
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path");
 
             HDsnprintf(path, len, "%s/%s", dir, dp->d_name);
 
@@ -895,7 +895,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 
             /* attempt to open the dynamic library */
             if (H5PL__open(path, search_params->type, search_params->key, found, NULL, plugin_info) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed");
             if (*found)
                 HGOTO_DONE(SUCCEED);
 
@@ -937,7 +937,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     /* Specify a file mask. *.* = We want everything! */
     HDsnprintf(service, sizeof(service), "%s\\*.dll", dir);
     if ((hFind = FindFirstFileA(service, &fdFile)) == INVALID_HANDLE_VALUE)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory");
 
     /* Loop over all the files */
     do {
@@ -952,7 +952,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
             len = HDstrlen(dir) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(fdFile.cFileName) + 1;
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path");
 
             HDsnprintf(path, len, "%s\\%s", dir, fdFile.cFileName);
 
@@ -962,7 +962,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 
             /* attempt to open the dynamic library */
             if (H5PL__open(path, search_params->type, search_params->key, found, NULL, plugin_info) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed");
             if (*found)
                 HGOTO_DONE(SUCCEED);
 

@@ -98,7 +98,7 @@ H5FA__dblk_page_alloc(H5FA_hdr_t *hdr, size_t nelmts)
 
     /* Share common array information */
     if (H5FA__hdr_incr(hdr) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header");
     dblk_page->hdr = hdr;
 
     /* Set non-zero internal fields */
@@ -165,7 +165,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
 
     /* Cache the new fixed array data block page */
     if (H5AC_insert_entry(hdr->f, H5AC_FARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINSERT, FAIL, "can't add fixed array data block page to cache")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINSERT, FAIL, "can't add fixed array data block page to cache");
     inserted = TRUE;
 
     /* Add data block page as child of 'top' proxy */

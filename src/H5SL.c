@@ -631,7 +631,7 @@ H5SL__new_node(void *item, const void *key, uint32_t hashval)
 
     /* Allocate the node */
     if (NULL == (ret_value = (H5SL_node_t *)H5FL_MALLOC(H5SL_node_t)))
-        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Initialize node */
     ret_value->key     = key;
@@ -640,7 +640,7 @@ H5SL__new_node(void *item, const void *key, uint32_t hashval)
     ret_value->hashval = hashval;
     if (NULL == (ret_value->forward = (H5SL_node_t **)H5FL_FAC_MALLOC(H5SL_fac_g[0]))) {
         ret_value = H5FL_FREE(H5SL_node_t, ret_value);
-        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed");
     }
     ret_value->log_nalloc = 0;
 
@@ -740,7 +740,7 @@ H5SL__insert_common(H5SL_t *slist, void *item, const void *key)
 
     /* Create new node of level 0 */
     if (NULL == (x = H5SL__new_node(item, key, hashval)))
-        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "can't create new skip list node")
+        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "can't create new skip list node");
 
     /* Update the links */
     x->backward      = prev;
@@ -827,7 +827,7 @@ H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     slist->header->forward =
         (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[slist->header->log_nalloc], slist->header->forward);
     if (NULL == (slist->header->forward = (H5SL_node_t **)H5FL_FAC_MALLOC(H5SL_fac_g[0])))
-        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, FAIL, "memory allocation failed");
     slist->header->forward[0] = NULL;
     slist->header->log_nalloc = 0;
     slist->header->level      = 0;
@@ -881,7 +881,7 @@ H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 
     /* Free skip list nodes */
     if (H5SL__release_common(slist, op, op_data) < 0)
-        HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes")
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes");
 
     /* Release header node */
     slist->header->forward =
@@ -926,7 +926,7 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
 
     /* Allocate skip list structure */
     if (NULL == (new_slist = H5FL_MALLOC(H5SL_t)))
-        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Set the static internal fields */
     new_slist->type = type;
@@ -939,7 +939,7 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
 
     /* Allocate the header node */
     if (NULL == (header = H5SL__new_node(NULL, NULL, (uint32_t)ULONG_MAX)))
-        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "can't create new skip list node")
+        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "can't create new skip list node");
 
     /* Initialize header node's forward pointer */
     header->forward[0] = NULL;
@@ -1033,7 +1033,7 @@ H5SL_insert(H5SL_t *slist, void *item, const void *key)
 
     /* Insert item into skip list */
     if (NULL == H5SL__insert_common(slist, item, key))
-        HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't create new skip list node")
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't create new skip list node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1079,7 +1079,7 @@ H5SL_add(H5SL_t *slist, void *item, const void *key)
 
     /* Insert item into skip list */
     if (NULL == (ret_value = H5SL__insert_common(slist, item, key)))
-        HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, NULL, "can't create new skip list node")
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, NULL, "can't create new skip list node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2132,7 +2132,7 @@ H5SL_release(H5SL_t *slist)
 
     /* Free skip list nodes */
     if (H5SL__release_common(slist, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes")
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2181,7 +2181,7 @@ H5SL_free(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 
     /* Free skip list nodes */
     if (H5SL__release_common(slist, op, op_data) < 0)
-        HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes")
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2228,7 +2228,7 @@ H5SL_destroy(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 
     /* Close skip list */
     if (H5SL__close_common(slist, op, op_data) < 0)
-        HGOTO_ERROR(H5E_SLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list")
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2268,7 +2268,7 @@ H5SL_close(H5SL_t *slist)
 
     /* Close skip list */
     if (H5SL__close_common(slist, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list")
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close skip list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

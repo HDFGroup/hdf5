@@ -432,7 +432,7 @@ H5Z__get_token(H5Z_token *current)
                 /* Check that this is a properly formatted numerical value */
                 if (isalpha(current->tok_end[0]) || current->tok_end[0] == '.') {
                     current->tok_type = H5Z_XFORM_ERROR;
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current, "Invalidly formatted floating point number")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current, "Invalidly formatted floating point number");
                 }
             }
 
@@ -532,7 +532,7 @@ H5Z__xform_parse(const char *expression, H5Z_datval_ptrs *dat_val_pointers)
     FUNC_ENTER_PACKAGE
 
     if (!expression)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "No expression provided?")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "No expression provided?");
 
     /* Set up the initial H5Z_token for parsing */
     tok.tok_expr = tok.tok_begin = tok.tok_end = expression;
@@ -578,7 +578,7 @@ H5Z__parse_expression(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node) {
                     H5Z__xform_destroy_parse_tree(expr);
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
                 }
 
                 new_node->lchild = expr;
@@ -586,7 +586,7 @@ H5Z__parse_expression(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node->rchild) {
                     H5Z__xform_destroy_parse_tree(new_node);
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
                 }
 
                 expr = new_node;
@@ -597,7 +597,7 @@ H5Z__parse_expression(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node) {
                     H5Z__xform_destroy_parse_tree(expr);
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
                 }
 
                 new_node->lchild = expr;
@@ -605,7 +605,7 @@ H5Z__parse_expression(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node->rchild) {
                     H5Z__xform_destroy_parse_tree(new_node);
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
                 }
 
                 expr = new_node;
@@ -627,7 +627,7 @@ H5Z__parse_expression(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             case H5Z_XFORM_LPAREN:
             default:
                 H5Z__xform_destroy_parse_tree(expr);
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
         }
     }
 
@@ -667,7 +667,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node) {
                     H5Z__xform_destroy_parse_tree(term);
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
                 }
 
                 new_node->lchild = term;
@@ -675,7 +675,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node->rchild) {
                     H5Z__xform_destroy_parse_tree(new_node);
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
                 }
 
                 term = new_node;
@@ -686,7 +686,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node) {
                     H5Z__xform_destroy_parse_tree(term);
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
                 }
 
                 new_node->lchild = term;
@@ -695,7 +695,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node->rchild) {
                     H5Z__xform_destroy_parse_tree(new_node);
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
                 }
                 break;
 
@@ -758,7 +758,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             factor = H5Z__new_node(H5Z_XFORM_INTEGER);
 
             if (!factor)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
             HDsscanf(current->tok_begin, "%ld", &factor->value.int_val);
             break;
 
@@ -766,7 +766,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             factor = H5Z__new_node(H5Z_XFORM_FLOAT);
 
             if (!factor)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
             HDsscanf(current->tok_begin, "%lf", &factor->value.float_val);
             break;
 
@@ -774,7 +774,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             factor = H5Z__new_node(H5Z_XFORM_SYMBOL);
 
             if (!factor)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
 
             factor->value.dat_val = &(dat_val_pointers->ptr_dat_val[dat_val_pointers->num_ptrs]);
             dat_val_pointers->num_ptrs++;
@@ -784,20 +784,20 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             factor = H5Z__parse_expression(current, dat_val_pointers);
 
             if (!factor)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
 
             current = H5Z__get_token(current);
 
             if (current->tok_type != H5Z_XFORM_RPAREN) {
                 H5Z__xform_destroy_parse_tree(factor);
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Syntax error in data transform expression")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Syntax error in data transform expression");
             }
             break;
 
         case H5Z_XFORM_RPAREN:
             /* We shouldn't see a ) right now */
             H5Z__xform_destroy_parse_tree(factor);
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Syntax error: unexpected ')' ")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Syntax error: unexpected ')' ");
 
         case H5Z_XFORM_PLUS:
             /* unary + */
@@ -808,7 +808,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
                     new_node->type != H5Z_XFORM_SYMBOL) {
                     H5Z__xform_destroy_parse_tree(new_node);
                     H5Z__xform_destroy_parse_tree(factor);
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
                 }
 
                 factor   = new_node;
@@ -816,7 +816,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node) {
                     H5Z__xform_destroy_parse_tree(factor);
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
                 }
 
                 new_node->rchild = factor;
@@ -824,7 +824,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             }
             else {
                 H5Z__xform_destroy_parse_tree(factor);
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
             }
             break;
 
@@ -837,7 +837,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
                     new_node->type != H5Z_XFORM_SYMBOL) {
                     H5Z__xform_destroy_parse_tree(new_node);
                     H5Z__xform_destroy_parse_tree(factor);
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
                 }
 
                 factor   = new_node;
@@ -845,7 +845,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
                 if (!new_node) {
                     H5Z__xform_destroy_parse_tree(factor);
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
                 }
 
                 new_node->rchild = factor;
@@ -853,7 +853,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             }
             else {
                 H5Z__xform_destroy_parse_tree(factor);
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression");
             }
             break;
 
@@ -864,7 +864,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
         case H5Z_XFORM_DIVIDE:
         case H5Z_XFORM_ERROR:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Invalid token while parsing data transform expression")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Invalid token while parsing data transform expression");
     }
 
     /* Set return value */
@@ -926,7 +926,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void *array, size_t array_size
 
     /* Get the datatype ID for the buffer's type */
     if ((array_type = H5Z__xform_find_type(buf_type)) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot perform data transform on this type.")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot perform data transform on this type.");
 
     /* After this point, we're assured that the type of the array is handled by the eval code,
      *  so we no longer have to check for valid types
@@ -987,7 +987,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void *array, size_t array_size
         }     /* end else */
 
         if (H5Z__xform_eval_full(tree, array_size, array_type, &res) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform");
 
         if (data_xform_prop->dat_val_pointers->num_ptrs > 1)
             H5MM_memcpy(array, res.value.dat_val, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
@@ -1058,9 +1058,9 @@ H5Z__xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_
     } /* end if */
     else {
         if (tree->lchild && H5Z__xform_eval_full(tree->lchild, array_size, array_type, &resl) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform");
         if (H5Z__xform_eval_full(tree->rchild, array_size, array_type, &resr) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform");
 
         res->type = H5Z_XFORM_SYMBOL;
 
@@ -1093,7 +1093,7 @@ H5Z__xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_
             case H5Z_XFORM_RPAREN:
             case H5Z_XFORM_END:
             default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid expression tree")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid expression tree");
         } /* end switch */
 
         /* The result stores a pointer to the new data */
@@ -1104,7 +1104,7 @@ H5Z__xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_
         else if (resr.type == H5Z_XFORM_SYMBOL)
             res->value.dat_val = resr.value.dat_val;
         else
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error during transform evaluation")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error during transform evaluation");
     } /* end else */
 
 done:
@@ -1171,7 +1171,7 @@ H5Z__xform_find_type(const H5T_t *type)
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE)) && 0 == H5T_cmp(type, tmp, FALSE))
         HGOTO_DONE(H5T_NATIVE_LDOUBLE);
     else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1198,7 +1198,7 @@ H5Z__xform_copy_tree(H5Z_node *tree, H5Z_datval_ptrs *dat_val_pointers, H5Z_datv
 
     if (tree->type == H5Z_XFORM_INTEGER) {
         if ((ret_value = (H5Z_node *)H5MM_malloc(sizeof(H5Z_node))) == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree");
         else {
             ret_value->type          = H5Z_XFORM_INTEGER;
             ret_value->value.int_val = tree->value.int_val;
@@ -1208,7 +1208,7 @@ H5Z__xform_copy_tree(H5Z_node *tree, H5Z_datval_ptrs *dat_val_pointers, H5Z_datv
     }
     else if (tree->type == H5Z_XFORM_FLOAT) {
         if ((ret_value = (H5Z_node *)H5MM_malloc(sizeof(H5Z_node))) == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree");
         else {
             ret_value->type            = H5Z_XFORM_FLOAT;
             ret_value->value.float_val = tree->value.float_val;
@@ -1218,7 +1218,7 @@ H5Z__xform_copy_tree(H5Z_node *tree, H5Z_datval_ptrs *dat_val_pointers, H5Z_datv
     }
     else if (tree->type == H5Z_XFORM_SYMBOL) {
         if ((ret_value = (H5Z_node *)H5MM_malloc(sizeof(H5Z_node))) == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree");
         else {
             ret_value->type = H5Z_XFORM_SYMBOL;
 
@@ -1237,7 +1237,7 @@ H5Z__xform_copy_tree(H5Z_node *tree, H5Z_datval_ptrs *dat_val_pointers, H5Z_datv
     else if (tree->type == H5Z_XFORM_DIVIDE)
         H5Z_XFORM_DO_OP4(H5Z_XFORM_DIVIDE)
     else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error in parse tree while trying to copy")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error in parse tree while trying to copy");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1405,7 +1405,7 @@ H5Z_xform_create(const char *expr)
 
     /* Allocate space for the data transform information */
     if (NULL == (data_xform_prop = (H5Z_data_xform_t *)H5MM_calloc(sizeof(H5Z_data_xform_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform info");
 
     if (NULL == (data_xform_prop->dat_val_pointers = (H5Z_datval_ptrs *)H5MM_malloc(sizeof(H5Z_datval_ptrs))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -1448,7 +1448,7 @@ H5Z_xform_create(const char *expr)
     /* we generate the parse tree right here and store a pointer to its root in the property. */
     if ((data_xform_prop->parse_root =
              (H5Z_node *)H5Z__xform_parse(expr, data_xform_prop->dat_val_pointers)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to generate parse tree from expression")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to generate parse tree from expression");
 
     /* Sanity check
      * count should be the same num_ptrs */
@@ -1543,7 +1543,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
     if (*data_xform_prop) {
         /* Allocate new node */
         if (NULL == (new_data_xform_prop = (H5Z_data_xform_t *)H5MM_calloc(sizeof(H5Z_data_xform_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for data transform info")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for data transform info");
 
         /* Copy string */
         if (NULL == (new_data_xform_prop->xform_exp = (char *)H5MM_xstrdup((*data_xform_prop)->xform_exp)))
@@ -1575,7 +1575,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
         if ((new_data_xform_prop->parse_root = (H5Z_node *)H5Z__xform_copy_tree(
                  (*data_xform_prop)->parse_root, (*data_xform_prop)->dat_val_pointers,
                  new_data_xform_prop->dat_val_pointers)) == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "error copying the parse tree")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "error copying the parse tree");
 
         /* Sanity check
          * count should be the same num_ptrs */

@@ -90,7 +90,7 @@ H5S__get_rebuild_status_test(hid_t space_id, H5S_diminfo_valid_t *status1, H5S_d
 
     /* Get dataspace structures */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     *status1 = space->select.sel_info.hslab->diminfo_valid;
 
@@ -136,7 +136,7 @@ H5S__get_diminfo_status_test(hid_t space_id, H5S_diminfo_valid_t *status)
 
     /* Get dataspace structures */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     *status = space->select.sel_info.hslab->diminfo_valid;
 
@@ -279,7 +279,7 @@ H5S__check_internal_consistency(const H5S_t *space)
 
     /* Check the bound box */
     if (H5S_get_select_bounds(space, low_bounds, high_bounds) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_INCONSISTENTSTATE, FAIL, "the bound box could not be retrieved")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_INCONSISTENTSTATE, FAIL, "the bound box could not be retrieved");
 
     if (space->select.type->type == H5S_SEL_HYPERSLABS) {
         H5S_hyper_sel_t *hslab = space->select.sel_info.hslab;
@@ -357,7 +357,7 @@ H5S__internal_consistency_test(hid_t space_id)
 
     /* Get dataspace structures */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     /* Check if the dataspace selections are the same shape */
     if (FAIL == H5S__check_internal_consistency(space))

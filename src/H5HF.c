@@ -145,24 +145,24 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
 
     /* Create shared fractal heap header */
     if (HADDR_UNDEF == (fh_addr = H5HF__hdr_create(f, cparam)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header");
 
     /* Allocate fractal heap wrapper */
     if (NULL == (fh = H5FL_MALLOC(H5HF_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for fractal heap info")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for fractal heap info");
 
     /* Lock the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header");
 
     /* Point fractal heap wrapper at header and bump it's ref count */
     fh->hdr = hdr;
     if (H5HF__hdr_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header");
 
     /* Increment # of files using this heap header */
     if (H5HF__hdr_fuse_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header");
 
     /* Set file pointer for this heap open context */
     fh->f = f;
@@ -207,24 +207,24 @@ H5HF_open(H5F_t *f, haddr_t fh_addr)
 
     /* Load the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header");
 
     /* Check for pending heap deletion */
     if (hdr->pending_delete)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, NULL, "can't open fractal heap pending deletion")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, NULL, "can't open fractal heap pending deletion");
 
     /* Create fractal heap info */
     if (NULL == (fh = H5FL_MALLOC(H5HF_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for fractal heap info")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for fractal heap info");
 
     /* Point fractal heap wrapper at header */
     fh->hdr = hdr;
     if (H5HF__hdr_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header");
 
     /* Increment # of files using this heap header */
     if (H5HF__hdr_fuse_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header");
 
     /* Set file pointer for this heap open context */
     fh->f = f;
@@ -319,7 +319,7 @@ H5HF_insert(H5HF_t *fh, size_t size, const void *obj, void *id /*out*/)
 
     /* Check arguments */
     if (size == 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "can't insert 0-sized objects")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "can't insert 0-sized objects");
 
     /* Set the shared heap header's file context for this operation */
     fh->hdr->f = fh->f;
@@ -336,24 +336,24 @@ H5HF_insert(H5HF_t *fh, size_t size, const void *obj, void *id /*out*/)
          */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
         if (H5HF__huge_insert(hdr, size, (void *)obj, id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'huge' object in fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'huge' object in fractal heap");
         H5_GCC_CLANG_DIAG_ON("cast-qual")
     } /* end if */
     /* Check for 'tiny' object */
     else if (size <= hdr->tiny_max_len) {
         /* Store 'tiny' object in heap */
         if (H5HF__tiny_insert(hdr, size, obj, id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'tiny' object in fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'tiny' object in fractal heap");
     } /* end if */
     else {
         /* Check if we are in "append only" mode, or if there's enough room for the object */
         if (hdr->write_once) {
-            HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not supported yet")
+            HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not supported yet");
         } /* end if */
         else {
             /* Allocate space for object in 'managed' heap */
             if (H5HF__man_insert(hdr, size, obj, id) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'managed' object in fractal heap")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'managed' object in fractal heap");
         } /* end else */
     }     /* end else */
 
@@ -391,7 +391,7 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
 
     /* Check for correct heap ID version */
     if ((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version");
 
     /* Set the shared heap header's file context for this operation */
     fh->hdr->f = fh->f;
@@ -399,19 +399,19 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
     /* Check type of object in heap */
     if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         if (H5HF__man_get_obj_len(fh->hdr, id, obj_len_p) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'managed' object's length")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'managed' object's length");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
         if (H5HF__huge_get_obj_len(fh->hdr, id, obj_len_p) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's length")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's length");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         if (H5HF__tiny_get_obj_len(fh->hdr, id, obj_len_p) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'tiny' object's length")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'tiny' object's length");
     } /* end if */
     else {
         fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet");
     } /* end else */
 
 done:
@@ -448,7 +448,7 @@ H5HF_get_obj_off(H5HF_t *fh, const void *_id, hsize_t *obj_off_p)
 
     /* Check for correct heap ID version */
     if ((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version");
 
     /* Set the shared heap header's file context for this operation */
     fh->hdr->f = fh->f;
@@ -460,7 +460,7 @@ H5HF_get_obj_off(H5HF_t *fh, const void *_id, hsize_t *obj_off_p)
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
         /* Huge objects are located directly in the file */
         if (H5HF__huge_get_obj_off(fh->hdr, id, obj_off_p) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's offset")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's offset");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Tiny objects are not stored in the heap */
@@ -468,7 +468,7 @@ H5HF_get_obj_off(H5HF_t *fh, const void *_id, hsize_t *obj_off_p)
     } /* end if */
     else {
         fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet");
     } /* end else */
 
 done:
@@ -505,7 +505,7 @@ H5HF_read(H5HF_t *fh, const void *_id, void *obj /*out*/)
 
     /* Check for correct heap ID version */
     if ((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version");
 
     /* Set the shared heap header's file context for this operation */
     fh->hdr->f = fh->f;
@@ -514,21 +514,21 @@ H5HF_read(H5HF_t *fh, const void *_id, void *obj /*out*/)
     if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         /* Read object from managed heap blocks */
         if (H5HF__man_read(fh->hdr, id, obj) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read object from fractal heap");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
         /* Read 'huge' object from file */
         if (H5HF__huge_read(fh->hdr, id, obj) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'huge' object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'huge' object from fractal heap");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Read 'tiny' object from file */
         if (H5HF__tiny_read(fh->hdr, id, obj) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'tiny' object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'tiny' object from fractal heap");
     } /* end if */
     else {
         fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet");
     } /* end else */
 
 done:
@@ -577,7 +577,7 @@ H5HF_write(H5HF_t *fh, void *_id, hbool_t H5_ATTR_UNUSED *id_changed, const void
 
     /* Check for correct heap ID version */
     if ((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version");
 
     /* Set the shared heap header's file context for this operation */
     fh->hdr->f = fh->f;
@@ -587,21 +587,21 @@ H5HF_write(H5HF_t *fh, void *_id, hbool_t H5_ATTR_UNUSED *id_changed, const void
         /* Operate on object from managed heap blocks */
         /* (ID can't change and modifying object is "easy" to manage) */
         if (H5HF__man_write(fh->hdr, id, obj) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "can't write to 'managed' heap object")
+            HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "can't write to 'managed' heap object");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
         /* Operate on "huge" object */
         if (H5HF__huge_write(fh->hdr, id, obj) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "can't write to 'huge' heap object")
+            HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "can't write to 'huge' heap object");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Check for writing a 'tiny' object */
         /* (which isn't supported yet - ID will change) */
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "modifying 'tiny' object not supported yet")
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "modifying 'tiny' object not supported yet");
     } /* end if */
     else {
         fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet");
     } /* end else */
 
 done:
@@ -643,7 +643,7 @@ H5HF_op(H5HF_t *fh, const void *_id, H5HF_operator_t op, void *op_data)
 
     /* Check for correct heap ID version */
     if ((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version");
 
     /* Set the shared heap header's file context for this operation */
     fh->hdr->f = fh->f;
@@ -652,21 +652,21 @@ H5HF_op(H5HF_t *fh, const void *_id, H5HF_operator_t op, void *op_data)
     if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         /* Operate on object from managed heap blocks */
         if (H5HF__man_op(fh->hdr, id, op, op_data) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on object from fractal heap");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
         /* Operate on 'huge' object from file */
         if (H5HF__huge_op(fh->hdr, id, op, op_data) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on 'huge' object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on 'huge' object from fractal heap");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Operate on 'tiny' object from file */
         if (H5HF__tiny_op(fh->hdr, id, op, op_data) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on 'tiny' object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on 'tiny' object from fractal heap");
     } /* end if */
     else {
         fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet");
     } /* end else */
 
 done:
@@ -703,7 +703,7 @@ H5HF_remove(H5HF_t *fh, const void *_id)
 
     /* Check for correct heap ID version */
     if ((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version");
 
     /* Set the shared heap header's file context for this operation */
     fh->hdr->f = fh->f;
@@ -712,21 +712,21 @@ H5HF_remove(H5HF_t *fh, const void *_id)
     if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         /* Remove object from managed heap blocks */
         if (H5HF__man_remove(fh->hdr, id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from fractal heap");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
         /* Remove 'huge' object from file & v2 B-tree tracker */
         if (H5HF__huge_remove(fh->hdr, id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'huge' object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'huge' object from fractal heap");
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Remove 'tiny' object from heap statistics */
         if (H5HF__tiny_remove(fh->hdr, id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'tiny' object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'tiny' object from fractal heap");
     } /* end if */
     else {
         fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet");
     } /* end else */
 
 done:
@@ -768,7 +768,7 @@ H5HF_close(H5HF_t *fh)
          *      the metadata cache - QAK)
          */
         if (H5HF__space_close(fh->hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info");
 
         /* Reset the block iterator, if necessary */
         /* (Can't put this in header "destroy" routine, because it has
@@ -778,7 +778,7 @@ H5HF_close(H5HF_t *fh)
          */
         if (H5HF__man_iter_ready(&fh->hdr->next_block))
             if (H5HF__man_iter_reset(&fh->hdr->next_block) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator");
 
         /* Shut down the huge object information */
         /* (Can't put this in header "destroy" routine, because it has
@@ -786,7 +786,7 @@ H5HF_close(H5HF_t *fh)
          *      modified by the shutdown routine - QAK)
          */
         if (H5HF__huge_term(fh->hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release 'huge' object info")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release 'huge' object info");
 
         /* Check for pending heap deletion */
         if (fh->hdr->pending_delete) {
@@ -803,7 +803,7 @@ H5HF_close(H5HF_t *fh)
      *  immediately -QAK)
      */
     if (H5HF__hdr_decr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header");
 
     /* Check for pending heap deletion */
     if (pending_delete) {
@@ -811,11 +811,11 @@ H5HF_close(H5HF_t *fh)
 
         /* Lock the heap header into memory */
         if (NULL == (hdr = H5HF__hdr_protect(fh->f, heap_addr, H5AC__NO_FLAGS_SET)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header");
 
         /* Delete heap, starting with header (unprotects header) */
         if (H5HF__hdr_delete(hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "unable to delete fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "unable to delete fractal heap");
     } /* end if */
 
 done:
@@ -850,7 +850,7 @@ H5HF_delete(H5F_t *f, haddr_t fh_addr)
 
     /* Lock the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header");
 
     /* Check for files using shared heap header */
     if (hdr->file_rc)
@@ -858,7 +858,7 @@ H5HF_delete(H5F_t *f, haddr_t fh_addr)
     else {
         /* Delete heap now, starting with header (unprotects header) */
         if (H5HF__hdr_delete(hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "unable to delete fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "unable to delete fractal heap");
         hdr = NULL;
     } /* end if */
 

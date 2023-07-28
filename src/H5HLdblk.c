@@ -88,11 +88,11 @@ H5HL__dblk_new(H5HL_t *heap)
 
     /* Allocate new local heap data block */
     if (NULL == (dblk = H5FL_CALLOC(H5HL_dblk_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for local heap data block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for local heap data block");
 
     /* Increment ref. count on heap data structure */
     if (FAIL == H5HL__inc_rc(heap))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment heap ref. count")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment heap ref. count");
 
     /* Link the heap & the data block */
     dblk->heap = heap;
@@ -136,7 +136,7 @@ H5HL__dblk_dest(H5HL_dblk_t *dblk)
 
         /* Decrement ref. count on heap data structure */
         if (FAIL == H5HL__dec_rc(dblk->heap))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement heap ref. count")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement heap ref. count");
 
         /* Unlink heap from data block */
         dblk->heap = NULL;

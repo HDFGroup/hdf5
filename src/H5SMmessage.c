@@ -218,7 +218,7 @@ H5SM__message_compare(const void *rec1, const void *rec2, int *result)
         if (mesg->location == H5SM_IN_HEAP) {
             /* Call heap op routine with comparison callback */
             if (H5HF_op(key->fheap, &(mesg->u.heap_loc.fheap_id), H5SM__compare_cb, &udata) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
         } /* end if */
         else {
             H5O_loc_t           oloc; /* Object owning the message */
@@ -230,7 +230,7 @@ H5SM__message_compare(const void *rec1, const void *rec2, int *result)
 
             /* Reset the object location */
             if (H5O_loc_reset(&oloc) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize target location")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize target location");
 
             /* Set up object location */
             oloc.file = key->file;
@@ -243,7 +243,7 @@ H5SM__message_compare(const void *rec1, const void *rec2, int *result)
             op.op_type  = H5O_MESG_OP_LIB;
             op.u.lib_op = H5SM__compare_iter_op;
             if (H5O_msg_iterate(&oloc, mesg->msg_type_id, &op, &udata) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links")
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links");
         } /* end else */
 
         *result = udata.ret;

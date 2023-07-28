@@ -98,11 +98,11 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr)
 
     /* Allocate memory for the data block */
     if (NULL == (dblock = H5FL_CALLOC(H5FA_dblock_t)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for fixed array data block")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for fixed array data block");
 
     /* Share common array information */
     if (H5FA__hdr_incr(hdr) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header");
     dblock->hdr = hdr;
 
     /* Set non-zero internal fields */
@@ -125,7 +125,7 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr)
 
         /* Allocate space for 'page init' flags */
         if (NULL == (dblock->dblk_page_init = H5FL_BLK_CALLOC(fa_page_init, dblock->dblk_page_init_size)))
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for page init bitmask")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for page init bitmask");
 
         /* Compute data block page size */
         dblock->dblk_page_size = (dblock->dblk_page_nelmts * hdr->cparam.raw_elmt_size) + H5FA_SIZEOF_CHKSUM;
@@ -203,7 +203,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
 
     /* Cache the new fixed array data block */
     if (H5AC_insert_entry(hdr->f, H5AC_FARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINSERT, HADDR_UNDEF, "can't add fixed array data block to cache")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINSERT, HADDR_UNDEF, "can't add fixed array data block to cache");
     inserted = TRUE;
 
     /* Add data block as child of 'top' proxy */

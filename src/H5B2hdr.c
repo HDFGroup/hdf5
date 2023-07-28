@@ -128,12 +128,12 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
 
     /* Allocate "page" for node I/O */
     if (NULL == (hdr->page = H5FL_BLK_MALLOC(node_page, hdr->node_size)))
-        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed");
     memset(hdr->page, 0, hdr->node_size);
 
     /* Allocate array of node info structs */
     if (NULL == (hdr->node_info = H5FL_SEQ_MALLOC(H5B2_node_info_t, (size_t)(hdr->depth + 1))))
-        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize leaf node info */
     sz_max_nrec = H5B2_NUM_LEAF_REC(hdr->node_size, hdr->rrec_size);
@@ -144,13 +144,13 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     hdr->node_info[0].cum_max_nrec_size = 0;
     if (NULL ==
         (hdr->node_info[0].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[0].max_nrec)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory");
     hdr->node_info[0].node_ptr_fac = NULL;
 
     /* Allocate array of pointers to internal node native keys */
     /* (uses leaf # of records because its the largest) */
     if (NULL == (hdr->nat_off = H5FL_SEQ_MALLOC(size_t, (size_t)hdr->node_info[0].max_nrec)))
-        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize offsets in native key block */
     /* (uses leaf # of records because its the largest) */
@@ -181,7 +181,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
 
             if (NULL == (hdr->node_info[u].nat_rec_fac =
                              H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[u].max_nrec)))
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory");
             if (NULL == (hdr->node_info[u].node_ptr_fac =
                              H5FL_fac_init(sizeof(H5B2_node_ptr_t) * (hdr->node_info[u].max_nrec + 1))))
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
@@ -199,7 +199,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     /* Create the callback context, if the callback exists */
     if (hdr->cls->crt_context)
         if (NULL == (hdr->cb_ctx = (*hdr->cls->crt_context)(ctx_udata)))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "unable to create v2 B-tree client callback context")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "unable to create v2 B-tree client callback context");
 
 done:
     if (ret_value < 0)
@@ -233,7 +233,7 @@ H5B2__hdr_alloc(H5F_t *f)
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FL_CALLOC(H5B2_hdr_t)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree header");
 
     /* Assign non-zero information */
     hdr->f           = f;
@@ -276,24 +276,24 @@ H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
 
     /* Allocate v2 B-tree header */
     if (NULL == (hdr = H5B2__hdr_alloc(f)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header");
 
     /* Initialize shared B-tree info */
     if (H5B2__hdr_init(hdr, cparam, ctx_udata, (uint16_t)0) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info");
 
     /* Allocate space for the header on disk */
     if (HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_BTREE, (hsize_t)hdr->hdr_size)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for B-tree header");
 
     /* Create 'top' proxy for extensible array entries */
     if (hdr->swmr_write)
         if (NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree proxy");
 
     /* Cache the new B-tree node */
     if (H5AC_insert_entry(f, H5AC_BT2_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, HADDR_UNDEF, "can't add B-tree header to cache")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, HADDR_UNDEF, "can't add B-tree header to cache");
     inserted = TRUE;
 
     /* Add header as child of 'top' proxy */
@@ -349,7 +349,7 @@ H5B2__hdr_incr(H5B2_hdr_t *hdr)
     /* Mark header as un-evictable when a B-tree node is depending on it */
     if (hdr->rc == 0)
         if (H5AC_pin_protected_entry(hdr) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTPIN, FAIL, "unable to pin v2 B-tree header")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTPIN, FAIL, "unable to pin v2 B-tree header");
 
     /* Increment reference count on B-tree header */
     hdr->rc++;
@@ -384,7 +384,7 @@ H5B2__hdr_decr(H5B2_hdr_t *hdr)
     /* Mark header as evictable again when no nodes depend on it */
     if (hdr->rc == 0)
         if (H5AC_unpin_entry(hdr) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin v2 B-tree header")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin v2 B-tree header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -458,7 +458,7 @@ H5B2__hdr_dirty(H5B2_hdr_t *hdr)
 
     /* Mark B-tree header as dirty in cache */
     if (H5AC_mark_entry_dirty(hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark v2 B-tree header as dirty")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark v2 B-tree header as dirty");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -504,11 +504,11 @@ H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata, unsigned flags)
     if (hdr->swmr_write && NULL == hdr->top_proxy) {
         /* Create 'top' proxy for v2 B-tree entries */
         if (NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, NULL, "can't create v2 B-tree proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, NULL, "can't create v2 B-tree proxy");
 
         /* Add header as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree header as child of proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree header as child of proxy");
     } /* end if */
 
     /* Set return value */
@@ -576,7 +576,7 @@ H5B2__hdr_free(H5B2_hdr_t *hdr)
     /* Destroy the callback context */
     if (hdr->cb_ctx) {
         if ((*hdr->cls->dst_context)(hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "can't destroy v2 B-tree client callback context")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "can't destroy v2 B-tree client callback context");
         hdr->cb_ctx = NULL;
     } /* end if */
 
@@ -617,7 +617,7 @@ H5B2__hdr_free(H5B2_hdr_t *hdr)
     /* Destroy the 'top' proxy */
     if (hdr->top_proxy) {
         if (H5AC_proxy_entry_dest(hdr->top_proxy) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "unable to destroy v2 B-tree 'top' proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "unable to destroy v2 B-tree 'top' proxy");
         hdr->top_proxy = NULL;
     } /* end if */
 
@@ -666,7 +666,7 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr)
     /* Delete all nodes in B-tree */
     if (H5_addr_defined(hdr->root.addr))
         if (H5B2__delete_node(hdr, hdr->depth, &hdr->root, hdr, hdr->remove_op, hdr->remove_op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes");
 
     /* Indicate that the heap header should be deleted & file space freed */
     cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;

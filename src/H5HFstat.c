@@ -143,13 +143,13 @@ H5HF_size(const H5HF_t *fh, hsize_t *heap_size)
 
         /* Get the B-tree storage */
         if (H5B2_size(bt2, heap_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info");
     } /* end if */
 
     /* Get storage for free-space tracking info */
     if (H5_addr_defined(hdr->fs_addr)) {
         if (H5HF__space_size(hdr, &meta_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info");
         *heap_size += meta_size;
     } /* end if */
 

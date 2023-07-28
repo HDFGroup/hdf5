@@ -125,7 +125,7 @@ H5S__mpio_all_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
 
     /* Just treat the entire extent as a block of bytes */
     if ((snelmts = (hssize_t)H5S_GET_EXTENT_NPOINTS(space)) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection");
     H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
     total_bytes = (hsize_t)elmt_size * nelmts;
@@ -224,7 +224,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 #else
         /* Allocate block sizes for MPI datatype call */
         if (NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * num_points)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
 
         for (u = 0; u < num_points; u++)
             blocks[u] = 1;
@@ -259,18 +259,18 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 
         /* Allocate array if MPI derived types needed */
         if (NULL == (inner_types = (MPI_Datatype *)H5MM_malloc((sizeof(MPI_Datatype) * (size_t)total_types))))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
 
         if (NULL == (inner_blocks = (int *)H5MM_malloc(sizeof(int) * (size_t)total_types)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
 
         if (NULL == (inner_disps = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * (size_t)total_types)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
 
 #if MPI_VERSION < 3
         /* Allocate block sizes for MPI datatype call */
         if (NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * bigio_count)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
 
         for (u = 0; u < bigio_count; u++)
             blocks[u] = 1;
@@ -373,17 +373,17 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
 
     /* Get the total number of points selected */
     if ((snum_points = (hssize_t)H5S_GET_SELECT_NPOINTS(space)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
     num_points = (hsize_t)snum_points;
 
     /* Allocate array for element displacements */
     if (NULL == (disp = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * num_points)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements");
 
     /* Allocate array for element permutation - returned to caller */
     if (do_permute)
         if (NULL == (*permute = (hsize_t *)H5MM_malloc(sizeof(hsize_t) * num_points)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate permutation array")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate permutation array");
 
     /* Iterate through list of elements */
     curr = space->select.sel_info.pnt_lst->head;
@@ -391,7 +391,7 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
         /* Calculate the displacement of the current point */
         hsize_t disp_tmp = H5VM_array_offset(space->extent.rank, space->extent.size, curr->pnt);
         if (disp_tmp > LONG_MAX) /* Maximum value of type long */
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "disp overflow")
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "disp overflow");
         disp[u] = (MPI_Aint)disp_tmp;
         disp[u] *= (MPI_Aint)elmt_size;
 
@@ -449,7 +449,7 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
 
     /* Create the MPI datatype for the set of element displacements */
     if (H5S__mpio_create_point_datatype(elmt_size, num_points, disp, new_type) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create an MPI Datatype from point selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create an MPI Datatype from point selection");
 
     /* Set values about MPI datatype created */
     *count           = 1;
@@ -511,26 +511,26 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
 
     /* Get the total number of points selected */
     if ((snum_points = (hssize_t)H5S_GET_SELECT_NPOINTS(space)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
     num_points = (hsize_t)snum_points;
 
     /* Allocate array to store point displacements */
     if (NULL == (disp = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * num_points)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements");
 
     /* Allocate arrays to hold sequence offsets and lengths */
     if (NULL == (off = H5MM_malloc(H5D_IO_VECTOR_SIZE * sizeof(*off))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate sequence offsets array")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate sequence offsets array");
     if (NULL == (len = H5MM_malloc(H5D_IO_VECTOR_SIZE * sizeof(*len))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate sequence lengths array")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate sequence lengths array");
 
     /* Allocate a selection iterator for iterating over the dataspace */
     if (NULL == (sel_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "couldn't allocate dataspace selection iterator")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "couldn't allocate dataspace selection iterator");
 
     /* Initialize selection iterator */
     if (H5S_select_iter_init(sel_iter, space, elmt_size, 0) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     sel_iter_init = TRUE; /* Selection iteration info has been initialized */
 
     /* Set the number of elements to iterate over */
@@ -546,7 +546,7 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
         /* Get the sequences of bytes */
         if (H5S_SELECT_ITER_GET_SEQ_LIST(sel_iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off,
                                          len) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
         for (curr_seq = 0; curr_seq < nseq; curr_seq++) {
@@ -563,7 +563,7 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
             while (curr_len > 0) {
                 /* Set the displacement of the current point */
                 if (curr_off > LONG_MAX)
-                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "curr_off overflow")
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "curr_off overflow");
                 disp[u] = (MPI_Aint)curr_off;
 
                 /* This is a memory displacement, so for each point selected,
@@ -593,7 +593,7 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
 
     /* Create the MPI datatype for the set of element displacements */
     if (H5S__mpio_create_point_datatype(elmt_size, num_points, disp, new_type) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create an MPI Datatype from point selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create an MPI Datatype from point selection");
 
     /* Set values about MPI datatype created */
     *count           = 1;
@@ -673,11 +673,11 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
 
     /* Allocate a selection iterator for iterating over the dataspace */
     if (NULL == (sel_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "couldn't allocate dataspace selection iterator")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "couldn't allocate dataspace selection iterator");
 
     /* Initialize selection iterator */
     if (H5S_select_iter_init(sel_iter, space, elmt_size, 0) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     sel_iter_init = TRUE; /* Selection iteration info has been initialized */
 
     /* Abbreviate args */
@@ -910,11 +910,11 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
         /* Calculate start and extent values of this dimension */
         /* Check if value overflow to cast to type MPI_Aint */
         if (d[i].start > LONG_MAX || offset[i] > LONG_MAX || elmt_size > LONG_MAX)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "result overflow")
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "result overflow");
         start_disp = (MPI_Aint)d[i].start * (MPI_Aint)offset[i] * (MPI_Aint)elmt_size;
 
         if (max_xtent[i] > LONG_MAX)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "max_xtent overflow")
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "max_xtent overflow");
         new_extent = (MPI_Aint)elmt_size * (MPI_Aint)max_xtent[i];
         if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent(outer_type, &lb, &extent_len)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_get_extent failed", mpi_code)
@@ -1032,7 +1032,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
     type_list.head = type_list.tail = NULL;
     if (H5S__obtain_datatype(space->select.sel_info.hslab->span_lst, down, elmt_size, &elmt_type, &span_type,
                              &type_list, 0, op_gen) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type");
     if (MPI_SUCCESS != (mpi_code = MPI_Type_dup(span_type, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
     if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
@@ -1040,7 +1040,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
 
     /* Release MPI data types generated during span tree traversal */
     if (H5S__release_datatype(&type_list) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "couldn't release MPI derived data type")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "couldn't release MPI derived data type");
 
     /* fill in the remaining return values */
     *count           = 1;
@@ -1141,9 +1141,9 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
         /* Allocate the initial displacement & block length buffers */
         alloc_count = H5S_MPIO_INITIAL_ALLOC_COUNT;
         if (NULL == (disp = (MPI_Aint *)H5MM_malloc(alloc_count * sizeof(MPI_Aint))))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements");
         if (NULL == (blocklen = (int *)H5MM_malloc(alloc_count * sizeof(int))))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths");
 
         /* If this is the fastest changing dimension, it is the base case for derived datatype. */
         span = spans->head;
@@ -1236,7 +1236,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
             MPI_Aint stride; /* Distance between inner MPI datatypes */
 
             if (NULL == (inner_type = (MPI_Datatype *)H5MM_malloc(alloc_count * sizeof(MPI_Datatype))))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes");
 
             /* Calculate the total bytes of the lower dimension */
             stride = (MPI_Aint)(*down) * (MPI_Aint)elmt_size;
@@ -1281,7 +1281,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                 /* Generate MPI datatype for next dimension down */
                 if (H5S__obtain_datatype(span->down, down + 1, elmt_size, elmt_type, &down_type, type_list,
                                          op_info_i, op_gen) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type")
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type");
 
                 /* Compute the number of elements to attempt in this span */
                 nelmts = (span->high - span->low) + 1;
@@ -1311,7 +1311,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
 
         /* Allocate space for the MPI data type list node */
         if (NULL == (type_node = H5FL_MALLOC(H5S_mpio_mpitype_node_t)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate MPI data type list node")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate MPI data type list node");
 
         /* Set up MPI type node */
         type_node->type = spans->op_info[op_info_i].u.down_type;

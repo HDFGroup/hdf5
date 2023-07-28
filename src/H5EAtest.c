@@ -218,7 +218,7 @@ H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
     /* Check for callback action */
     if (ctx->cb) {
         if ((*ctx->cb->encode)(elmt, nelmts, ctx->cb->udata) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "extensible array testing callback action failed")
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "extensible array testing callback action failed");
     }
 
     /* Encode native elements into raw elements */

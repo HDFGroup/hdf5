@@ -69,7 +69,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object");
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
     assert(shared);
 
@@ -80,7 +80,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
     cache_udata.type      = type;
     cache_udata.rc_shared = rc_shared;
     if (NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree node");
 
     /*
      * Print the values.
@@ -169,7 +169,7 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object");
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
     assert(shared);
 

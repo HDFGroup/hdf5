@@ -108,16 +108,16 @@ H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t o
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY +
                                    (H5FD_ONION_ENCODED_SIZE_RECORD_POINTER * history->n_revisions))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, 0, "can't allocate buffer for updated history")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, 0, "can't allocate buffer for updated history");
 
     if (0 == (size = H5FD__onion_history_encode(history, buf, &_sum)))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, 0, "problem encoding updated history")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, 0, "problem encoding updated history");
 
     if ((size + off_start > filesize_curr) && (H5FD_set_eoa(file, H5FD_MEM_DRAW, off_start + size) < 0))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, 0, "can't modify EOA for updated history")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, 0, "can't modify EOA for updated history");
 
     if (H5FD_write(file, H5FD_MEM_DRAW, off_start, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, 0, "can't write history as intended")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, 0, "can't write history as intended");
 
     ret_value = size;
 
@@ -173,10 +173,10 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     assert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
 
     if (HDstrncmp((const char *)buf, H5FD_ONION_HISTORY_SIGNATURE, 4))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature");
 
     if (H5FD_ONION_HISTORY_VERSION_CURR != buf[4])
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid version")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid version");
 
     ptr = buf + 8;
 
@@ -194,7 +194,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0,
                         "history argument suggests different revision count than encoded buffer");
         if (NULL == history->record_locs)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "list is NULL -- cannot populate")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "list is NULL -- cannot populate");
 
         for (uint64_t i = 0; i < n_revisions; i++) {
             H5FD_onion_record_loc_t *rloc = &history->record_locs[i];
@@ -234,7 +234,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     ptr += 4;
 
     if (sum != history->checksum)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "checksum mismatch")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "checksum mismatch");
 
     ret_value = (size_t)(ptr - buf);
 

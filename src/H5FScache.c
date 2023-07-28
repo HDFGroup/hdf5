@@ -231,24 +231,24 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
 
     /* Allocate a new free space manager */
     if (NULL == (fspace = H5FS__new(udata->f, udata->nclasses, udata->classes, udata->cls_init_udata)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Set free space manager's internal information */
     fspace->addr = udata->addr;
 
     /* Magic number */
     if (memcmp(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5FS_HDR_VERSION)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header version")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header version");
 
     /* Client ID */
     fspace->client = (H5FS_client_t)*image++;
     if (fspace->client >= H5FS_NUM_CLIENT_ID)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown client ID in free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown client ID in free space header");
 
     /* Total space tracked */
     H5F_DECODE_LENGTH(udata->f, image, fspace->tot_space);
@@ -266,7 +266,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     /* (only check if we actually have some classes) */
     UINT16DECODE(image, nclasses);
     if (fspace->nclasses > 0 && nclasses > fspace->nclasses)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "section class count mismatch")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "section class count mismatch");
 
     /* Shrink percent */
     UINT16DECODE(image, fspace->shrink_percent);
@@ -498,7 +498,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                     new_sect_size = fspace->sect_size;
 
                     if (H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, sect_addr, saved_sect_size) < 0)
-                        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
+                        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections");
 
                     if (HADDR_UNDEF ==
                         (sect_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FSPACE_SINFO, new_sect_size)))
@@ -515,7 +515,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
 
                 /* Get the tag for this free space manager and use it to insert the entry */
                 if (H5AC_get_tag((const void *)fspace, &tag) < 0)
-                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTTAG, FAIL, "can't get tag for metadata cache object")
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTTAG, FAIL, "can't get tag for metadata cache object");
                 H5_BEGIN_TAG(tag)
                 if (H5AC_insert_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo,
                                       H5AC__NO_FLAGS_SET) < 0)
@@ -554,7 +554,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
 
                 /* Let the metadata cache know the section info moved */
                 if (H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move section info")
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move section info");
 
                 fspace->sect_addr = new_sect_addr;
             }      /* end else-if */
@@ -600,7 +600,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
              * unprotected and un-pinned.  Start by verifying this.
              */
             if (H5AC_get_entry_status(f, fspace->sect_addr, &sect_status) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info status")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info status");
 
             assert(sect_status & H5AC_ES__IN_CACHE);
             assert((sect_status & H5AC_ES__IS_PROTECTED) == 0);
@@ -609,7 +609,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
             /* Allocate space for the section info in file */
             if (HADDR_UNDEF ==
                 (new_sect_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
-                HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for free space sections")
+                HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for free space sections");
 
             fspace->alloc_sect_size = (size_t)fspace->sect_size;
 
@@ -618,7 +618,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
 
             /* Let the metadata cache know the section info moved */
             if (H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTMOVE, FAIL, "unable to move section info")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTMOVE, FAIL, "unable to move section info");
 
             /* Update the internal address for the section info */
             fspace->sect_addr = new_sect_addr;
@@ -779,7 +779,7 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
             if (H5AC_unsettle_entry_ring(fspace) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to mark FSM ring as unsettled")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to mark FSM ring as unsettled");
             break;
 
         case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
@@ -793,7 +793,7 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
 
         default:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+            HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
@@ -830,7 +830,7 @@ H5FS__cache_hdr_free_icr(void *_thing)
 
     /* Destroy free space header */
     if (H5FS__hdr_dest(fspace) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -940,24 +940,24 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
     /* Allocate a new free space section info */
     if (NULL == (sinfo = H5FS__sinfo_new(udata->f, fspace)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* initialize old_sect_size */
     H5_CHECKED_ASSIGN(old_sect_size, size_t, fspace->sect_size, hsize_t);
 
     /* Magic number */
     if (memcmp(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections signature")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5FS_SINFO_VERSION)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections version")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections version");
 
     /* Address of free space header for these sections */
     H5F_addr_decode(udata->f, &image, &fs_addr);
     if (H5_addr_ne(fs_addr, fspace->addr))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect header address for free space sections")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect header address for free space sections");
 
     /* Check for any serialized sections */
     if (fspace->serial_sect_count > 0) {
@@ -1013,7 +1013,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
                 assert(fspace->sect_cls[sect_type].deserialize);
                 if (NULL == (new_sect = (*fspace->sect_cls[sect_type].deserialize)(
                                  &fspace->sect_cls[sect_type], image, sect_addr, sect_size, &des_flags)))
-                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTDECODE, NULL, "can't deserialize section")
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTDECODE, NULL, "can't deserialize section");
 
                 /* Update offset in serialization image */
                 image += fspace->sect_cls[sect_type].serial_size;
@@ -1139,7 +1139,7 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
 
         /* Allocate space for the section info in file */
         if (HADDR_UNDEF == (sinfo_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
-            HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for free space sections")
+            HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for free space sections");
 
         fspace->alloc_sect_size = (size_t)fspace->sect_size;
 
@@ -1148,14 +1148,14 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
 
         /* Let the metadata cache know the section info moved */
         if (H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, sinfo->fspace->sect_addr, sinfo_addr) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMOVE, FAIL, "unable to move section info")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMOVE, FAIL, "unable to move section info");
 
         /* Update the internal address for the section info */
         sinfo->fspace->sect_addr = sinfo_addr;
 
         /* Mark free space header as dirty */
         if (H5AC_mark_entry_dirty(fspace) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty");
     } /* end if */
 
     if (!H5_addr_eq(addr, sinfo_addr)) {
@@ -1226,7 +1226,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
         if (sinfo->bins[bin].bin_list)
             /* Iterate over list of section size nodes for bin */
             if (H5SL_iterate(sinfo->bins[bin].bin_list, H5FS__sinfo_serialize_node_cb, &udata) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section size nodes")
+                HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section size nodes");
 
     /* Compute checksum */
 
@@ -1292,12 +1292,12 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* Destroy flush dependency on parent */
                 if (H5FS__destroy_flush_depend((H5AC_info_t *)sinfo->fspace, (H5AC_info_t *)sinfo) < 0)
-                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency");
                 break;
 
             default:
 #ifdef NDEBUG
-                HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+                HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else     /* NDEBUG */
                 assert(0 && "Unknown action?!?");
 #endif    /* NDEBUG */
@@ -1335,7 +1335,7 @@ H5FS__cache_sinfo_free_icr(void *_thing)
 
     /* Destroy free space info */
     if (H5FS__sinfo_dest(sinfo) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space info")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1380,7 +1380,7 @@ H5FS__sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
         /* Call 'serialize' callback for this section */
         if (sect_cls->serialize) {
             if ((*sect_cls->serialize)(sect_cls, sect, *udata->image) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTSERIALIZE, FAIL, "can't synchronize section")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTSERIALIZE, FAIL, "can't synchronize section");
 
             /* Update offset in serialization buffer */
             (*udata->image) += sect_cls->serial_size;
@@ -1428,7 +1428,7 @@ H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
         /* Iterate through all the sections of this size */
         assert(fspace_node->sect_list);
         if (H5SL_iterate(fspace_node->sect_list, H5FS__sinfo_serialize_sect_cb, udata) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section nodes")
+            HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section nodes");
     } /* end if */
 
 done:

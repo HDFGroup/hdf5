@@ -99,11 +99,11 @@ H5FA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context");
 
     /* Load the fixed array header */
     if (NULL == (hdr = H5FA__hdr_protect(f, addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL, "unable to load fixed array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL, "unable to load fixed array header");
 
     /* Print opening message */
     fprintf(stream, "%*sFixed Array Header...\n", indent, "");
@@ -170,11 +170,11 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context");
 
     /* Load the fixed array header */
     if (NULL == (hdr = H5FA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL, "unable to load fixed array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL, "unable to load fixed array header");
 
     /* Protect data block */
     if (NULL == (dblock = H5FA__dblock_protect(hdr, addr, H5AC__READ_ONLY_FLAG)))
@@ -232,7 +232,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                     if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
                                                  ((uint8_t *)dblk_page->elmts) +
                                                      (hdr->cparam.cls->nat_elmt_size * u)) < 0)
-                        HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "can't get element for debugging")
+                        HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
                 } /* end for */
                 if (H5FA__dblk_page_unprotect(dblk_page, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL,
@@ -251,7 +251,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
             if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
                                          ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) <
                 0)
-                HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "can't get element for debugging")
+                HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
         } /* end for */
     }     /* end else */
 

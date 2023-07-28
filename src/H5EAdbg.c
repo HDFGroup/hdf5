@@ -97,11 +97,11 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context");
 
     /* Load the extensible array header */
     if (NULL == (hdr = H5EA__hdr_protect(f, addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array Header...\n", indent, "");
@@ -179,11 +179,11 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
     if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
     /* Sanity check */
     assert(H5_addr_eq(hdr->idx_blk_addr, addr));
@@ -216,7 +216,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
             if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
                                          ((uint8_t *)iblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) <
                 0)
-                HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging")
+                HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
         } /* end for */
     }     /* end if */
 
@@ -297,11 +297,11 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
     if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
     /* Protect super block */
     /* (Note: setting parent of super block to 'hdr' for this operation should be OK -QAK) */
@@ -386,11 +386,11 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
     if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
     /* Protect data block */
     /* (Note: setting parent of data block to 'hdr' for this operation should be OK -QAK) */
@@ -411,7 +411,7 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
         /* Call the class's 'debug' callback */
         if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
                                      ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
     } /* end for */
 
 done:

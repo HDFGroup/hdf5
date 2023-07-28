@@ -111,20 +111,20 @@ H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
 
     /* Allocate fixed array wrapper */
     if (NULL == (fa = H5FL_CALLOC(H5FA_t)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for fixed array info")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for fixed array info");
 
     /* Lock the array header into memory */
     if (NULL == (hdr = H5FA__hdr_protect(f, fa_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, NULL, "unable to load fixed array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, NULL, "unable to load fixed array header");
 
     /* Check for pending array deletion */
     if (from_open && hdr->pending_delete)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTOPENOBJ, NULL, "can't open fixed array pending deletion")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTOPENOBJ, NULL, "can't open fixed array pending deletion");
 
     /* Point fixed array wrapper at header and bump it's ref count */
     fa->hdr = hdr;
     if (H5FA__hdr_incr(fa->hdr) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header");
 
     /* Increment # of files using this array header */
     if (H5FA__hdr_fuse_incr(fa->hdr) < 0)
@@ -175,7 +175,7 @@ H5FA_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
 
     /* Create fixed array header */
     if (HADDR_UNDEF == (fa_addr = H5FA__hdr_create(f, cparam, ctx_udata)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL, "can't create fixed array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL, "can't create fixed array header");
 
     /* Allocate and initialize new fixed array wrapper */
     if (NULL == (fa = H5FA__new(f, fa_addr, FALSE, ctx_udata)))
@@ -315,7 +315,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
         /* Create the data block */
         hdr->dblk_addr = H5FA__dblock_create(hdr, &hdr_dirty);
         if (!H5_addr_defined(hdr->dblk_addr))
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, FAIL, "unable to create fixed array data block")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, FAIL, "unable to create fixed array data block");
     }
 
     assert(idx < hdr->cparam.nelmts);
@@ -357,7 +357,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
         if (!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
             /* Create the data block page */
             if (H5FA__dblk_page_create(hdr, dblk_page_addr, dblk_page_nelmts) < 0)
-                HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, FAIL, "unable to create data block page")
+                HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, FAIL, "unable to create data block page");
 
             /* Mark data block page as initialized in data block */
             H5VM_bit_set(dblock->dblk_page_init, page_idx, TRUE);
@@ -422,7 +422,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
     if (!H5_addr_defined(hdr->dblk_addr)) {
         /* Call the class's 'fill' callback */
         if ((hdr->cparam.cls->fill)(elmt, (size_t)1) < 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "can't set element to class's fill value")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "can't set element to class's fill value");
     } /* end if */
     else {
         /* Get the data block */
@@ -447,7 +447,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
             if (!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
                 /* Call the class's 'fill' callback */
                 if ((hdr->cparam.cls->fill)(elmt, (size_t)1) < 0)
-                    HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "can't set element to class's fill value")
+                    HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "can't set element to class's fill value");
 
                 /* We've retrieved the value, leave now */
                 HGOTO_DONE(SUCCEED);
@@ -557,7 +557,7 @@ H5FA_close(H5FA_t *fa)
             /* Lock the array header into memory */
             /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
             if (NULL == (hdr = H5FA__hdr_protect(fa->f, fa_addr, NULL, H5AC__NO_FLAGS_SET)))
-                HGOTO_ERROR(H5E_FARRAY, H5E_CANTLOAD, FAIL, "unable to load fixed array header")
+                HGOTO_ERROR(H5E_FARRAY, H5E_CANTLOAD, FAIL, "unable to load fixed array header");
 
             /* Set the shared array header's file context for this operation */
             hdr->f = fa->f;
@@ -572,7 +572,7 @@ H5FA_close(H5FA_t *fa)
 
             /* Delete array, starting with header (unprotects header) */
             if (H5FA__hdr_delete(hdr) < 0)
-                HGOTO_ERROR(H5E_FARRAY, H5E_CANTDELETE, FAIL, "unable to delete fixed array")
+                HGOTO_ERROR(H5E_FARRAY, H5E_CANTDELETE, FAIL, "unable to delete fixed array");
         } /* end if */
         else {
             /* Decrement the reference count on the array header */
@@ -627,7 +627,7 @@ H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
 
         /* Delete array now, starting with header (unprotects header) */
         if (H5FA__hdr_delete(hdr) < 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTDELETE, FAIL, "unable to delete fixed array")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTDELETE, FAIL, "unable to delete fixed array");
         hdr = NULL;
     }
 
@@ -674,7 +674,7 @@ H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata)
     for (u = 0; u < fa->hdr->stats.nelmts && ret_value == H5_ITER_CONT; u++) {
         /* Get array element */
         if (H5FA_get(fa, u, elmt) < 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, H5_ITER_ERROR, "unable to delete fixed array")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, H5_ITER_ERROR, "unable to delete fixed array");
 
         /* Invoke callback */
         if ((ret_value = (*op)(u, elmt, udata)) < 0) {
@@ -727,7 +727,7 @@ H5FA_depend(H5FA_t *fa, H5AC_proxy_entry_t *parent)
 
         /* Add the fixed array as a child of the parent (proxy) */
         if (H5AC_proxy_entry_add_child(parent, hdr->f, hdr->top_proxy) < 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "unable to add fixed array as child of proxy")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "unable to add fixed array as child of proxy");
         hdr->parent = parent;
     }
 

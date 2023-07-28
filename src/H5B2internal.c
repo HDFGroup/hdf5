@@ -91,11 +91,11 @@ H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, 
 
     /* Allocate memory for internal node information */
     if (NULL == (internal = H5FL_CALLOC(H5B2_internal_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal info");
 
     /* Increment ref. count on B-tree header */
     if (H5B2__hdr_incr(hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, FAIL, "can't increment ref. count on B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, FAIL, "can't increment ref. count on B-tree header");
 
     /* Share B-tree header information */
     internal->hdr = hdr;
@@ -124,17 +124,17 @@ H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, 
 
     /* Allocate space on disk for the internal node */
     if (HADDR_UNDEF == (node_ptr->addr = H5MF_alloc(hdr->f, H5FD_MEM_BTREE, (hsize_t)hdr->node_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree internal node")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree internal node");
 
     /* Cache the new B-tree node */
     if (H5AC_insert_entry(hdr->f, H5AC_BT2_INT, node_ptr->addr, internal, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree internal node to cache")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree internal node to cache");
     inserted = TRUE;
 
     /* Add internal node as child of 'top' proxy */
     if (hdr->top_proxy) {
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, internal) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as child of proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as child of proxy");
         internal->top_proxy = hdr->top_proxy;
     } /* end if */
 
@@ -200,7 +200,7 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     /* Protect the internal node */
     if (NULL ==
         (internal = (H5B2_internal_t *)H5AC_protect(hdr->f, H5AC_BT2_INT, node_ptr->addr, &udata, flags)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect B-tree internal node");
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->top_proxy && NULL == internal->top_proxy) {
@@ -214,7 +214,7 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     /* Shadow the node, if requested */
     if (shadow)
         if (H5B2__shadow_internal(internal, node_ptr) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, NULL, "unable to shadow internal node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, NULL, "unable to shadow internal node");
 
     /* Set return value */
     ret_value = internal;
@@ -287,12 +287,12 @@ H5B2__neighbor_internal(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_n
     /* Lock current B-tree node */
     if (NULL ==
         (internal = H5B2__protect_internal(hdr, parent, curr_node_ptr, depth, FALSE, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
 
     /* Locate node pointer for child */
     if (H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx, &cmp) <
         0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
     if (cmp > 0)
         idx++;
 
@@ -318,7 +318,7 @@ H5B2__neighbor_internal(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_n
     else {
         if (H5B2__neighbor_leaf(hdr, &internal->node_ptrs[idx], neighbor_loc, comp, internal, udata, op,
                                 op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree leaf node")
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree leaf node");
     } /* end else */
 
 done:
@@ -360,7 +360,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
     /* Lock current B-tree node */
     if (NULL ==
         (internal = H5B2__protect_internal(hdr, parent, curr_node_ptr, depth, FALSE, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
 
     /* Sanity check number of records */
     assert(internal->nrec == curr_node_ptr->node_nrec);
@@ -374,9 +374,9 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
         /* Locate node pointer for child */
         if (H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx,
                                 &cmp) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
         if (cmp == 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree")
+            HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree");
         if (cmp > 0)
             idx++;
 
@@ -403,7 +403,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                 else {
                     if (H5B2__split1(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node");
                 }                             /* end else */
             }                                 /* end if */
             else if (idx == internal->nrec) { /* Right-most child */
@@ -415,7 +415,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                 else {
                     if (H5B2__split1(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node");
                 }  /* end else */
             }      /* end if */
             else { /* Middle child */
@@ -428,7 +428,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                 else {
                     if (H5B2__split1(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node");
                 } /* end else */
             }     /* end else */
 
@@ -437,9 +437,9 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
              */
             if (H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx,
                                     &cmp) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
             if (cmp == 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree")
+                HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree");
             if (cmp > 0)
                 idx++;
 
@@ -464,11 +464,11 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
     if (depth > 1) {
         if (H5B2__insert_internal(hdr, (uint16_t)(depth - 1), &internal_flags, &internal->node_ptrs[idx],
                                   next_pos, internal, udata) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node");
     } /* end if */
     else {
         if (H5B2__insert_leaf(hdr, &internal->node_ptrs[idx], next_pos, internal, udata) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree leaf node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree leaf node");
     } /* end else */
 
     /* Update record count for node pointer to current node */
@@ -528,7 +528,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
     /* Lock current B-tree node */
     if (NULL ==
         (internal = H5B2__protect_internal(hdr, parent, curr_node_ptr, depth, FALSE, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
 
     /* Sanity check number of records */
     assert(internal->nrec == curr_node_ptr->node_nrec);
@@ -536,7 +536,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
     /* Locate node pointer for child */
     if (H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx, &cmp) <
         0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
 
     /* Check for modifying existing record */
     if (0 == cmp) {
@@ -584,7 +584,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
         else {
             if (H5B2__update_leaf(hdr, &internal->node_ptrs[idx], status, next_pos, internal, udata, op,
                                   op_data) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update record in leaf B-tree node")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update record in leaf B-tree node");
         } /* end else */
 
         /* Take actions based on child's status report */
@@ -659,7 +659,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
 
                 /* Release the internal B-tree node */
                 if (H5AC_unprotect(hdr->f, H5AC_BT2_INT, curr_node_ptr->addr, internal, internal_flags) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node");
                 internal = NULL;
 
                 /* Indicate that the record was inserted */
@@ -675,7 +675,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
             case H5B2_UPDATE_UNKNOWN:
             default:
                 assert(0 && "Invalid update status");
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "invalid update status")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "invalid update status");
         } /* end switch */
     }     /* end else */
 
@@ -748,11 +748,11 @@ H5B2__shadow_internal(H5B2_internal_t *internal, H5B2_node_ptr_t *curr_node_ptr)
          */
         /* Allocate space for the cloned node */
         if (HADDR_UNDEF == (new_node_addr = H5MF_alloc(hdr->f, H5FD_MEM_BTREE, (hsize_t)hdr->node_size)))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "unable to allocate file space to move B-tree node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "unable to allocate file space to move B-tree node");
 
         /* Move the location of the node on the disk */
         if (H5AC_move_entry(hdr->f, H5AC_BT2_INT, curr_node_ptr->addr, new_node_addr) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTMOVE, FAIL, "unable to move B-tree node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTMOVE, FAIL, "unable to move B-tree node");
         curr_node_ptr->addr = new_node_addr;
 
         /* Should free the space in the file, but this is not supported by
@@ -805,7 +805,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
     /* Lock current B-tree node */
     if (NULL == (internal = H5B2__protect_internal(hdr, parent_cache_info, curr_node_ptr, depth, FALSE,
                                                    H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
     internal_addr = curr_node_ptr->addr;
 
     /* Determine the correct number of records to merge at */
@@ -819,7 +819,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
         /* Merge children of root node */
         if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal, &internal_flags,
                          0) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
 
         /* Let the cache know that the object is deleted */
         internal_flags |= H5AC__DELETED_FLAG;
@@ -833,7 +833,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
         /* Update flush dependency for child, if using SWMR */
         if (hdr->swmr_write)
             if (H5B2__update_flush_depend(hdr, depth, curr_node_ptr, internal, hdr) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update child node to new parent")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update child node to new parent");
 
         /* Indicate that the level of the B-tree decreased */
         *depth_decreased = TRUE;
@@ -858,7 +858,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
         /* Shadow the node if doing SWMR writes */
         if (hdr->swmr_write) {
             if (H5B2__shadow_internal(internal, curr_node_ptr) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node");
             internal_addr = curr_node_ptr->addr;
         } /* end if */
 
@@ -868,7 +868,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
         else {
             if (H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx,
                                     &cmp) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
             if (cmp >= 0)
                 idx++;
         } /* end else */
@@ -899,7 +899,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
                 else {
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
                 }                             /* end else */
             }                                 /* end if */
             else if (idx == internal->nrec) { /* Right-most child */
@@ -911,7 +911,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
                 else {
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, (idx - 1)) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
                 }  /* end else */
             }      /* end if */
             else { /* Middle child */
@@ -924,7 +924,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
                 else {
                     if (H5B2__merge3(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
                 } /* end else */
             }     /* end else */
 
@@ -936,7 +936,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
                  * re-searching */
                 if (H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata,
                                         &idx, &cmp) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
                 if (cmp >= 0)
                     idx++;
             } /* end else */
@@ -954,7 +954,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
         /* Swap record to delete with record from leaf, if we are the last internal node */
         if (swap_loc && depth == 1)
             if (H5B2__swap_leaf(hdr, depth, internal, &internal_flags, idx, swap_loc) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "Can't swap records in B-tree")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "Can't swap records in B-tree");
 
         /* Set pointers for advancing to child node */
         new_cache_info_flags_ptr = &internal_flags;
@@ -979,11 +979,11 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
         if (H5B2__remove_internal(hdr, depth_decreased, swap_loc, swap_parent, (uint16_t)(depth - 1),
                                   new_cache_info, new_cache_info_flags_ptr, next_pos, new_node_ptr, udata, op,
                                   op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node");
     } /* end if */
     else {
         if (H5B2__remove_leaf(hdr, new_node_ptr, next_pos, new_cache_info, udata, op, op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node");
     } /* end else */
 
     /* Update record count for node pointer to current node */
@@ -1046,7 +1046,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
     /* Lock current B-tree node */
     if (NULL == (internal = H5B2__protect_internal(hdr, parent_cache_info, curr_node_ptr, depth, FALSE,
                                                    H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
     internal_addr = curr_node_ptr->addr;
     assert(internal->nrec == curr_node_ptr->node_nrec);
     assert(depth == hdr->depth || internal->nrec > 1);
@@ -1063,7 +1063,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
         /* Merge children of root node */
         if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal, &internal_flags,
                          0) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
 
         /* Let the cache know that the object is deleted */
         internal_flags |= H5AC__DELETED_FLAG;
@@ -1077,7 +1077,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
         /* Update flush dependency for child, if using SWMR */
         if (hdr->swmr_write)
             if (H5B2__update_flush_depend(hdr, depth, curr_node_ptr, internal, hdr) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update child node to new parent")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update child node to new parent");
 
         /* Indicate that the level of the B-tree decreased */
         *depth_decreased = TRUE;
@@ -1103,7 +1103,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
         /* Shadow the node if doing SWMR writes */
         if (hdr->swmr_write) {
             if (H5B2__shadow_internal(internal, curr_node_ptr) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node");
             internal_addr = curr_node_ptr->addr;
         } /* end if */
 
@@ -1164,7 +1164,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
                 else {
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
                 }                             /* end else */
             }                                 /* end if */
             else if (idx == internal->nrec) { /* Right-most child */
@@ -1176,7 +1176,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
                 else {
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, (idx - 1)) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
                 }  /* end else */
             }      /* end if */
             else { /* Middle child */
@@ -1189,7 +1189,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
                 else {
                     if (H5B2__merge3(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
                 } /* end else */
             }     /* end else */
 
@@ -1245,7 +1245,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
         /* Swap record to delete with record from leaf, if we are the last internal node */
         if (swap_loc && depth == 1)
             if (H5B2__swap_leaf(hdr, depth, internal, &internal_flags, idx, swap_loc) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "can't swap records in B-tree")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "can't swap records in B-tree");
 
         /* Set pointers for advancing to child node */
         new_cache_info_flags_ptr = &internal_flags;
@@ -1270,12 +1270,12 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
         if (H5B2__remove_internal_by_idx(hdr, depth_decreased, swap_loc, swap_parent, (uint16_t)(depth - 1),
                                          new_cache_info, new_cache_info_flags_ptr, new_node_ptr, next_pos, n,
                                          op, op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node");
     } /* end if */
     else {
         if (H5B2__remove_leaf_by_idx(hdr, new_node_ptr, next_pos, new_cache_info, (unsigned)n, op, op_data) <
             0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node");
     } /* end else */
 
     /* Update record count for node pointer to child node */
@@ -1332,7 +1332,7 @@ H5B2__internal_free(H5B2_internal_t *internal)
 
     /* Decrement ref. count on B-tree header */
     if (H5B2__hdr_decr(internal->hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header");
 
     /* Sanity check */
     assert(NULL == internal->top_proxy);

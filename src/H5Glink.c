@@ -204,18 +204,18 @@ H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap, const H5G_entry_t *ent, co
     lnk->corder       = 0;
     lnk->corder_valid = FALSE; /* Creation order not valid for this link */
     if ((lnk->name = H5MM_xstrdup(name)) == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to duplicate link name")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to duplicate link name");
 
     /* Object is a symbolic or hard link */
     if (ent->type == H5G_CACHED_SLINK) {
         const char *s; /* Pointer to link value */
 
         if ((s = (const char *)H5HL_offset_into(heap, ent->cache.slink.lval_offset)) == NULL)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get symbolic link name")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get symbolic link name");
 
         /* Copy the link value */
         if ((lnk->u.soft.name = H5MM_xstrdup(s)) == NULL)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to duplicate symbolic link name")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to duplicate symbolic link name");
 
         dup_soft = TRUE;
 
@@ -286,7 +286,7 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
                 const H5L_class_t *link_class; /* User-defined link class */
 
                 if (lnk->type < H5L_TYPE_UD_MIN || lnk->type > H5L_TYPE_MAX)
-                    HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "unknown link class")
+                    HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "unknown link class");
 
                 /* User-defined link; call its query function to get the link udata size. */
                 /* Get the link class for this type of link.  It's okay if the class
@@ -345,11 +345,11 @@ H5G__link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj
 
     /* Check for unknown library-internal link */
     if (lnk->type > H5L_TYPE_BUILTIN_MAX && lnk->type < H5L_TYPE_UD_MIN)
-        HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "unknown link type")
+        HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "unknown link type");
 
     /* Build object's group hier. location */
     if (H5G_name_set(grp_loc->path, obj_loc->path, lnk->name) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot set name")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot set name");
 
     /* Set the object location, if it's a hard link set the address also */
     obj_loc->oloc->file         = grp_loc->oloc->file;
@@ -482,7 +482,7 @@ H5G__link_release_table(H5G_link_table_t *ltable)
         /* Free link message information */
         for (u = 0; u < ltable->nlinks; u++)
             if (H5O_msg_reset(H5O_LINK_ID, &(ltable->lnks[u])) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link message")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link message");
 
         /* Free table of links */
         H5MM_xfree(ltable->lnks);
@@ -519,7 +519,7 @@ H5G__link_name_replace(H5F_t *file, H5RS_str_t *grp_full_path_r, const H5O_link_
     if (grp_full_path_r) {
         obj_path_r = H5G_build_fullpath_refstr_str(grp_full_path_r, lnk->name);
         if (H5G_name_replace(lnk, H5G_NAME_DELETE, file, obj_path_r, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name");
     }
 
 done:

@@ -165,7 +165,7 @@ H5C__trace_write_log_message(H5C_log_trace_udata_t *trace_udata)
     /* Write the log message and flush */
     n_chars = HDstrlen(trace_udata->message);
     if ((int)n_chars != fprintf(trace_udata->outfile, "%s", trace_udata->message))
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message");
     memset((void *)(trace_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 
 done:
@@ -212,12 +212,12 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
 
     /* Allocate memory for the JSON-specific data */
     if (NULL == (log_info->udata = H5MM_calloc(sizeof(H5C_log_trace_udata_t))))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed");
     trace_udata = (H5C_log_trace_udata_t *)(log_info->udata);
 
     /* Allocate memory for the message buffer */
     if (NULL == (trace_udata->message = (char *)H5MM_calloc(H5C_MAX_TRACE_LOG_MSG_SIZE * sizeof(char))))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
     /* Possibly fix up the log file name.
      * The extra 39 characters are for adding the rank to the file name
@@ -239,7 +239,7 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
 
     /* Open log file and set it to be unbuffered */
     if (NULL == (trace_udata->outfile = fopen(file_name, "w")))
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file");
     HDsetbuf(trace_udata->outfile, NULL);
 
     /* Write the header */
@@ -293,7 +293,7 @@ H5C__trace_tear_down_logging(H5C_log_info_t *log_info)
 
     /* Close log file */
     if (EOF == fclose(trace_udata->outfile))
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file");
     trace_udata->outfile = NULL;
 
     /* Fre the udata */
@@ -334,7 +334,7 @@ H5C__trace_write_expunge_entry_log_msg(void *udata, haddr_t address, int type_id
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -366,7 +366,7 @@ H5C__trace_write_flush_cache_log_msg(void *udata, herr_t fxn_ret_value)
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -400,7 +400,7 @@ H5C__trace_write_insert_entry_log_msg(void *udata, haddr_t address, int type_id,
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -434,7 +434,7 @@ H5C__trace_write_mark_entry_dirty_log_msg(void *udata, const H5C_cache_entry_t *
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -468,7 +468,7 @@ H5C__trace_write_mark_entry_clean_log_msg(void *udata, const H5C_cache_entry_t *
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -503,7 +503,7 @@ H5C__trace_write_mark_unserialized_entry_log_msg(void *udata, const H5C_cache_en
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -538,7 +538,7 @@ H5C__trace_write_mark_serialized_entry_log_msg(void *udata, const H5C_cache_entr
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -572,7 +572,7 @@ H5C__trace_write_move_entry_log_msg(void *udata, haddr_t old_addr, haddr_t new_a
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -606,7 +606,7 @@ H5C__trace_write_pin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, 
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -644,7 +644,7 @@ H5C__trace_write_create_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -679,7 +679,7 @@ H5C__trace_write_protect_entry_log_msg(void *udata, const H5C_cache_entry_t *ent
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -714,7 +714,7 @@ H5C__trace_write_resize_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -748,7 +748,7 @@ H5C__trace_write_unpin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -786,7 +786,7 @@ H5C__trace_write_destroy_fd_log_msg(void *udata, const H5C_cache_entry_t *parent
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -820,7 +820,7 @@ H5C__trace_write_unprotect_entry_log_msg(void *udata, haddr_t address, int type_
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -867,7 +867,7 @@ H5C__trace_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -901,7 +901,7 @@ H5C__trace_write_remove_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
 
     /* Write the log message to the file */
     if (H5C__trace_write_log_message(trace_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

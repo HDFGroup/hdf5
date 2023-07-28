@@ -103,7 +103,7 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx)
 
     /* Share common array information */
     if (H5EA__hdr_incr(hdr) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header");
     sblock->hdr = hdr;
 
     /* Set non-zero internal fields */
@@ -377,7 +377,7 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, u
         if (H5_addr_defined(sblock->dblk_addrs[u])) {
             /* Delete data block */
             if (H5EA__dblock_delete(hdr, sblock, sblock->dblk_addrs[u], sblock->dblk_nelmts) < 0)
-                HGOTO_ERROR(H5E_EARRAY, H5E_CANTDELETE, FAIL, "unable to delete extensible array data block")
+                HGOTO_ERROR(H5E_EARRAY, H5E_CANTDELETE, FAIL, "unable to delete extensible array data block");
             sblock->dblk_addrs[u] = HADDR_UNDEF;
         } /* end if */
     }     /* end for */

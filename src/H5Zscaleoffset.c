@@ -763,27 +763,27 @@ H5Z__can_apply_scaleoffset(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     /* Get datatype's class, for checking the "datatype class" */
     if ((dtype_class = H5T_get_class(type, TRUE)) == H5T_NO_CLASS)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class");
 
     /* Get datatype's size, for checking the "datatype size" */
     if (H5T_get_size(type) == 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     if (dtype_class == H5T_INTEGER || dtype_class == H5T_FLOAT) {
         /* Get datatype's endianness order */
         if ((dtype_order = H5T_get_order(type)) == H5T_ORDER_ERROR)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "can't retrieve datatype endianness order")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "can't retrieve datatype endianness order");
 
         /* Range check datatype's endianness order */
         if (dtype_order != H5T_ORDER_LE && dtype_order != H5T_ORDER_BE)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FALSE, "bad datatype endianness order")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FALSE, "bad datatype endianness order");
     }
     else
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FALSE, "datatype class not supported by scaleoffset")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FALSE, "datatype class not supported by scaleoffset");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -823,7 +823,7 @@ H5Z__scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dt
                 type = t_ulong_long;
 #endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
             else
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype");
         }
 
         if (dtype_sign == H5Z_SCALEOFFSET_SGN_2) { /* signed integer */
@@ -840,7 +840,7 @@ H5Z__scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dt
                 type = t_long_long;
 #endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
             else
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype");
         }
     }
 
@@ -850,7 +850,7 @@ H5Z__scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dt
         else if (dtype_size == sizeof(double))
             type = t_double;
         else
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype");
     }
 
     /* Set return value */
@@ -940,11 +940,11 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     /* Initialize the parameters to a known state */
     memset(cd_values, 0, sizeof(cd_values));
@@ -952,22 +952,22 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     /* Get the filter's current parameters */
     if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SCALEOFFSET, &flags, &cd_nelmts, cd_values, (size_t)0,
                              NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get scaleoffset parameters")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get scaleoffset parameters");
 
     /* Get dataspace */
     if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     /* Get total number of elements in the chunk */
     if ((npoints = H5S_GET_EXTENT_NPOINTS(ds)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace");
 
     /* Set "local" parameter for this dataset's number of elements */
     H5_CHECKED_ASSIGN(cd_values[H5Z_SCALEOFFSET_PARM_NELMTS], unsigned, npoints, hssize_t);
 
     /* Get datatype's class */
     if ((dtype_class = H5T_get_class(type, TRUE)) == H5T_NO_CLASS)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class");
 
     /* Set "local" parameter for datatype's class */
     switch (dtype_class) {
@@ -991,12 +991,12 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_ARRAY:
         case H5T_NCLASSES:
         default:
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by scaleoffset")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by scaleoffset");
     } /* end switch */
 
     /* Get datatype's size */
     if ((dtype_size = H5T_get_size(type)) == 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     /* Set "local" parameter for datatype size */
     H5_CHECK_OVERFLOW(dtype_size, size_t, unsigned);
@@ -1005,7 +1005,7 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     if (dtype_class == H5T_INTEGER) {
         /* Get datatype's sign */
         if ((dtype_sign = H5T_get_sign(type)) == H5T_SGN_ERROR)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype sign")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype sign");
 
         /* Set "local" parameter for integer datatype sign */
         switch (dtype_sign) {
@@ -1020,13 +1020,13 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
             case H5T_SGN_ERROR:
             case H5T_NSGN:
             default:
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad integer sign")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad integer sign");
         } /* end switch */
     }     /* end if */
 
     /* Get datatype's endianness order */
     if ((dtype_order = H5T_get_order(type)) == H5T_ORDER_ERROR)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order");
 
     /* Set "local" parameter for datatype endianness */
     switch (dtype_order) {
@@ -1043,12 +1043,12 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_ORDER_MIXED:
         case H5T_ORDER_NONE:
         default:
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order");
     } /* end switch */
 
     /* Check whether fill value is defined for dataset */
     if (H5P_fill_value_defined(dcpl_plist, &status) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to determine if fill value is defined")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to determine if fill value is defined");
 
     /* Set local parameter for availability of fill value */
     if (status == H5D_FILL_VALUE_UNDEFINED)
@@ -1066,17 +1066,17 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         if ((scale_type = H5Z__scaleoffset_get_type(cd_values[H5Z_SCALEOFFSET_PARM_CLASS],
                                                     cd_values[H5Z_SCALEOFFSET_PARM_SIZE],
                                                     cd_values[H5Z_SCALEOFFSET_PARM_SIGN])) == 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot use C integer datatype for cast")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot use C integer datatype for cast");
 
         /* Get dataset fill value and store in cd_values[] */
         if (H5Z__scaleoffset_set_parms_fillval(dcpl_plist, type, scale_type, cd_values, need_convert) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "unable to set fill value")
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "unable to set fill value");
     } /* end else */
 
     /* Modify the filter's parameters for this dataset */
     if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SCALEOFFSET, flags, (size_t)H5Z_SCALEOFFSET_TOTAL_NPARMS,
                           cd_values) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local scaleoffset parameters")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local scaleoffset parameters");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1119,7 +1119,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
     /* check arguments */
     if (cd_nelmts != H5Z_SCALEOFFSET_TOTAL_NPARMS)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scaleoffset number of parameters")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scaleoffset number of parameters");
 
     /* Check if memory byte order matches dataset datatype byte order */
     switch (H5T_native_order_g) {
@@ -1138,7 +1138,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         case H5T_ORDER_MIXED:
         case H5T_ORDER_NONE:
         default:
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "bad H5T_NATIVE_INT endianness order")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "bad H5T_NATIVE_INT endianness order");
     } /* end switch */
 
     /* copy filter parameters to local variables */
@@ -1159,12 +1159,12 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
      */
     if (dtype_class == H5Z_SCALEOFFSET_CLS_FLOAT) { /* floating-point type */
         if (scale_type != H5Z_SO_FLOAT_DSCALE && scale_type != H5Z_SO_FLOAT_ESCALE)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scale type")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scale type");
     }
 
     if (dtype_class == H5Z_SCALEOFFSET_CLS_INTEGER) { /* integer type */
         if (scale_type != H5Z_SO_INT)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scale type")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scale type");
 
         /* if scale_factor is less than 0 for integer, library will reset it to 0
          * in this case, library will calculate the minimum-bits
@@ -1175,14 +1175,14 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
     /* fixed-minimum-bits method is not implemented and is forbidden */
     if (scale_type == H5Z_SO_FLOAT_ESCALE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "E-scaling method not supported")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "E-scaling method not supported");
 
     if (scale_type == H5Z_SO_FLOAT_DSCALE) { /* floating-point type, variable-minimum-bits */
         D_val = (double)scale_factor;
     }
     else { /* integer type, or floating-point type with fixed-minimum-bits method */
         if (scale_factor > (int)(cd_values[H5Z_SCALEOFFSET_PARM_SIZE] * 8))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "minimum number of bits exceeds maximum")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "minimum number of bits exceeds maximum");
 
         /* no need to process data */
         if (scale_factor == (int)(cd_values[H5Z_SCALEOFFSET_PARM_SIZE] * 8)) {
@@ -1264,7 +1264,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* before postprocess, get memory type */
         if ((type = H5Z__scaleoffset_get_type(dtype_class, p.size, dtype_sign)) == 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot use C integer datatype for cast")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot use C integer datatype for cast");
 
         /* postprocess after decompression */
         if (dtype_class == H5Z_SCALEOFFSET_CLS_INTEGER)
@@ -1274,7 +1274,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             if (scale_type == 0) { /* variable-minimum-bits method */
                 if (H5Z__scaleoffset_postdecompress_fd(outbuf, d_nelmts, type, filavail, cd_values, minbits,
                                                        minval, D_val) == FAIL)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "post-decompression failed")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "post-decompression failed");
             }
 
         /* after postprocess, convert to dataset datatype endianness order if needed */
@@ -1291,7 +1291,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* before preprocess, get memory type */
         if ((type = H5Z__scaleoffset_get_type(dtype_class, p.size, dtype_sign)) == 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot use C integer datatype for cast")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot use C integer datatype for cast");
 
         /* preprocess before compression */
         if (dtype_class == H5Z_SCALEOFFSET_CLS_INTEGER)
@@ -1301,7 +1301,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             if (scale_type == 0) { /* variable-minimum-bits method */
                 if (H5Z__scaleoffset_precompress_fd(*buf, d_nelmts, type, filavail, cd_values, &minbits,
                                                     &minval, D_val) == FAIL)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "pre-compression failed")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "pre-compression failed");
             }
 
         assert(minbits <= p.size * 8);
@@ -1314,7 +1314,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* allocate memory space for compressed buffer */
         if (NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for scaleoffset compression")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for scaleoffset compression");
 
         /* store minbits and minval in the front of output compressed buffer
          * store byte by byte from least significant byte to most significant byte

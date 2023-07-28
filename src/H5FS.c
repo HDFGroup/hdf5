@@ -102,7 +102,7 @@ H5FS_create(H5F_t *f, haddr_t *fs_addr, const H5FS_create_t *fs_create, uint16_t
      * Allocate free space structure
      */
     if (NULL == (fspace = H5FS__new(f, nclasses, classes, cls_init_udata)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list");
 
     /* Initialize creation information for free space manager */
     fspace->client         = fs_create->client;
@@ -119,11 +119,11 @@ H5FS_create(H5F_t *f, haddr_t *fs_addr, const H5FS_create_t *fs_create, uint16_t
     if (fs_addr) {
         /* Allocate space for the free space header */
         if (HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, (hsize_t)fspace->hdr_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for free space header")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for free space header");
 
         /* Cache the new free space header (pinned) */
         if (H5AC_insert_entry(f, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space header to cache")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space header to cache");
 
         /* Return free space header address to caller, if desired */
         *fs_addr = fspace->addr;
@@ -189,7 +189,7 @@ H5FS_open(H5F_t *f, haddr_t fs_addr, uint16_t nclasses, const H5FS_section_class
     /* Protect the free space header */
     if (NULL ==
         (fspace = (H5FS_t *)H5AC_protect(f, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header");
 #ifdef H5FS_DEBUG
     fprintf(stderr, "%s: fspace->sect_addr = %" PRIuHADDR "\n", __func__, fspace->sect_addr);
     fprintf(stderr, "%s: fspace->sect_size = %" PRIuHSIZE "\n", __func__, fspace->sect_size);
@@ -201,14 +201,14 @@ H5FS_open(H5F_t *f, haddr_t fs_addr, uint16_t nclasses, const H5FS_section_class
     /* Increment the reference count on the free space manager header */
     assert(fspace->rc <= 1);
     if (H5FS__incr(fspace) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTINC, NULL, "unable to increment ref. count on free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTINC, NULL, "unable to increment ref. count on free space header");
 
     fspace->alignment   = alignment;
     fspace->align_thres = threshold;
 
     /* Unlock free space header */
     if (H5AC_unprotect(f, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, NULL, "unable to release free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, NULL, "unable to release free space header");
 
     /* Set return value */
     ret_value = fspace;
@@ -298,7 +298,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
     /* Protect the free space header */
     if (NULL ==
         (fspace = (H5FS_t *)H5AC_protect(f, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to protect free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to protect free space header");
 
     /* Sanity check */
     assert(fspace->sinfo == NULL);
@@ -355,7 +355,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
             /* Release the space in the file */
             if (!H5F_IS_TMP_ADDR(f, fspace->sect_addr))
                 if (H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, fspace->sect_addr, fspace->alloc_sect_size) < 0)
-                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space sections")
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space sections");
         } /* end else */
     }     /* end if */
 
@@ -442,7 +442,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
             /* Cache the free space section info */
             if (H5AC_insert_entry(f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo,
                                   H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache");
         } /* end if */
         else {
 #ifdef H5FS_DEBUG
@@ -532,14 +532,14 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                     /* Free previous serialized sections disk space */
                     if (!H5F_IS_TMP_ADDR(f, old_sect_addr)) {
                         if (H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, old_sect_addr, old_alloc_sect_size) < 0)
-                            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
+                            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections");
                     } /* end if */
                 }     /* end else */
             }         /* end if */
 
             /* Destroy section info */
             if (H5FS__sinfo_dest(fspace->sinfo) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "unable to destroy free space section info")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "unable to destroy free space section info");
         } /* end else */
 
         /* Reset the header's pointer to the section info */
@@ -554,7 +554,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
 
     /* Decrement the reference count on the free space manager header */
     if (H5FS__decr(fspace) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTDEC, FAIL, "unable to decrement ref. count on free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTDEC, FAIL, "unable to decrement ref. count on free space header");
 
 done:
 #ifdef H5FS_DEBUG
@@ -589,7 +589,7 @@ H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes
      * Allocate free space structure
      */
     if (NULL == (fspace = H5FL_CALLOC(H5FS_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list");
 
     /* Set immutable free list parameters */
     H5_CHECKED_ASSIGN(fspace->nclasses, uint16_t, nclasses, size_t);
@@ -609,7 +609,7 @@ H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes
             /* Call the class initialization routine, if there is one */
             if (fspace->sect_cls[u].init_cls)
                 if ((fspace->sect_cls[u].init_cls)(&fspace->sect_cls[u], cls_init_udata) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "unable to initialize section class")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "unable to initialize section class");
 
             /* Determine maximum class-specific serialization size for each section */
             if (fspace->sect_cls[u].serial_size > fspace->max_cls_serial_size)
@@ -694,7 +694,7 @@ H5FS__incr(H5FS_t *fspace)
     /* Check if we should pin the header in the cache */
     if (fspace->rc == 0 && H5_addr_defined(fspace->addr))
         if (H5AC_pin_protected_entry(fspace) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, FAIL, "unable to pin free space header")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, FAIL, "unable to pin free space header");
 
     /* Increment reference count on header */
     fspace->rc++;
@@ -735,11 +735,11 @@ H5FS__decr(H5FS_t *fspace)
     if (fspace->rc == 0) {
         if (H5_addr_defined(fspace->addr)) {
             if (H5AC_unpin_entry(fspace) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header");
         } /* end if */
         else {
             if (H5FS__hdr_dest(fspace) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "unable to destroy free space header")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "unable to destroy free space header");
         } /* end else */
     }     /* end if */
 
@@ -770,7 +770,7 @@ H5FS__dirty(H5FS_t *fspace)
     if (H5_addr_defined(fspace->addr))
         /* Mark header as dirty in cache */
         if (H5AC_mark_entry_dirty(fspace) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -799,11 +799,11 @@ H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr)
     if (!H5_addr_defined(fspace->addr)) {
         /* Allocate space for the free space header */
         if (HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, (hsize_t)H5FS_HEADER_SIZE(f))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for free space header")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for free space header");
 
         /* Cache the new free space header (pinned) */
         if (H5AC_insert_entry(f, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space header to cache")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space header to cache");
     } /* end if */
 
     if (fs_addr)
@@ -835,16 +835,16 @@ H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace)
 
     if (!H5_addr_defined(fspace->sect_addr) && fspace->sinfo && fspace->serial_sect_count > 0) {
         if (HADDR_UNDEF == (fspace->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
-            HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for section info")
+            HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for section info");
         fspace->alloc_sect_size = fspace->sect_size;
 
         /* Mark free-space header as dirty */
         if (H5FS__dirty(fspace) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty");
 
         /* Cache the free-space section info */
         if (H5AC_insert_entry(f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache");
 
         /* Since space has been allocated for the section info and the sinfo
          * has been inserted into the cache, relinquish ownership (i.e. float)
@@ -900,11 +900,11 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
             cache_udata.fspace = fspace;
             if (NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, H5AC_FSPACE_SINFO, fspace->sect_addr,
                                                                       &cache_udata, H5AC__READ_ONLY_FLAG)))
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to protect free space section info")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to protect free space section info");
 
             /* Unload and release ownership of the free-space manager section info */
             if (H5AC_unprotect(f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, cache_flags) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info");
         } /* end if */
 
         saved_addr = fspace->sect_addr;
@@ -916,12 +916,12 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
         /* Free space for the free-space manager section info */
         if (!H5F_IS_TMP_ADDR(f, saved_addr)) {
             if (free_file_space && H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, saved_addr, saved_size) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space sections")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space sections");
         } /* end if */
 
         /* Mark free-space manager header as dirty */
         if (H5FS__dirty(fspace) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty");
     } /* end if */
 
     /* Free space for header */
@@ -944,15 +944,15 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
             cache_udata.cls_init_udata = NULL;
             if (NULL == (fspace = (H5FS_t *)H5AC_protect(f, H5AC_FSPACE_HDR, fspace->addr, &cache_udata,
                                                          H5AC__READ_ONLY_FLAG)))
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to protect free space section info")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to protect free space section info");
 
             /* Unpin the free-space manager header */
             if (H5AC_unpin_entry(fspace) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header");
 
             /* Unload and release ownership of the free-space header */
             if (H5AC_unprotect(f, H5AC_FSPACE_HDR, fspace->addr, fspace, cache_flags) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info");
         } /* end if */
 
         saved_addr   = fspace->addr;
@@ -961,7 +961,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
         /* Free space for the free-space manager header */
         if (free_file_space &&
             H5MF_xfree(f, H5FD_MEM_FSPACE_HDR, saved_addr, (hsize_t)H5FS_HEADER_SIZE(f)) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space header")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space header");
     } /* end if */
 
 done:
@@ -995,7 +995,7 @@ H5FS__hdr_dest(H5FS_t *fspace)
         /* Call the class termination routine, if there is one */
         if (fspace->sect_cls[u].term_cls)
             if ((fspace->sect_cls[u].term_cls)(&fspace->sect_cls[u]) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "unable to finalize section class")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "unable to finalize section class");
     } /* end for */
 
     /* Release the memory for the free space section classes */
@@ -1100,7 +1100,7 @@ H5FS__sinfo_dest(H5FS_sinfo_t *sinfo)
     /* Release skip list for merging sections */
     if (sinfo->merge_list)
         if (H5SL_close(sinfo->merge_list) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "can't destroy section merging skip list")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "can't destroy section merging skip list");
 
     /* Decrement the reference count on free space header */
     /* (make certain this is last action with section info, to allow for header
@@ -1108,7 +1108,7 @@ H5FS__sinfo_dest(H5FS_sinfo_t *sinfo)
      */
     sinfo->fspace->sinfo = NULL;
     if (H5FS__decr(sinfo->fspace) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTDEC, FAIL, "unable to decrement ref. count on free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTDEC, FAIL, "unable to decrement ref. count on free space header");
     sinfo->fspace = NULL;
 
     /* Release free space section info */

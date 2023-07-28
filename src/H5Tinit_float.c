@@ -259,7 +259,7 @@ H5T__bit_cmp(unsigned nbytes, int *perm, void *_a, void *_b, const unsigned char
 
     for (unsigned i = 0; i < nbytes; i++) {
         if (perm[i] >= (int)nbytes)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failure in bit comparison")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failure in bit comparison");
         if ((aa = (unsigned char)(a[perm[i]] & pad_mask[perm[i]])) !=
             (bb = (unsigned char)(b[perm[i]] & pad_mask[perm[i]]))) {
 
@@ -273,7 +273,7 @@ H5T__bit_cmp(unsigned nbytes, int *perm, void *_a, void *_b, const unsigned char
     }
 
     /* If we got here and didn't set a value, error out */
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "didn't find a value for `first`")
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "didn't find a value for `first`");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -301,7 +301,7 @@ H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
     FUNC_ENTER_PACKAGE
 
     if (last <= 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order");
 
     /* We have at least three points to consider */
     if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
@@ -322,7 +322,7 @@ H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
          * in rare cases)
          */
         if (0 != n % 2)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "n is not a power of 2")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "n is not a power of 2");
 
         *order = H5T_ORDER_VAX;
         for (int i = 0; i < n; i += 2) {
@@ -377,7 +377,7 @@ H5T__imp_bit(unsigned n, int *perm, void *_a, void *_b, const unsigned char *pad
      * A and B.  This is the least significant bit of the exponent.
      */
     if (H5T__bit_cmp(n, perm, a, b, pad_mask, &changed) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't find LSB")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't find LSB");
 
     /* The bit to the right (less significant) of the changed bit should
      * be the most significant bit of the mantissa.  If it is non-zero
@@ -470,7 +470,7 @@ H5T__init_native_float_types(void)
 
     /* Allocate and fill type structure */
     if (NULL == (dt = H5T__alloc()))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed");
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
     dt->shared->size               = det.size;
@@ -490,7 +490,7 @@ H5T__init_native_float_types(void)
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_FLOAT_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_FLOAT_ALIGN_g = det.comp_align;
 
     /* H5T_NATIVE_DOUBLE */
@@ -501,7 +501,7 @@ H5T__init_native_float_types(void)
 
     /* Allocate and fill type structure */
     if (NULL == (dt = H5T__alloc()))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed");
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
     dt->shared->size               = det.size;
@@ -521,7 +521,7 @@ H5T__init_native_float_types(void)
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_DOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_DOUBLE_ALIGN_g = det.comp_align;
 
     /* H5T_NATIVE_LDOUBLE */
@@ -532,7 +532,7 @@ H5T__init_native_float_types(void)
 
     /* Allocate and fill type structure */
     if (NULL == (dt = H5T__alloc()))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed");
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
     dt->shared->size               = det.size;
@@ -552,7 +552,7 @@ H5T__init_native_float_types(void)
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_LDOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_LDOUBLE_ALIGN_g = det.comp_align;
 
     /* Set the platform's alignment (assumes long double's order

@@ -75,7 +75,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
     r_out->archival_index.list = H5MM_xfree(r_out->archival_index.list);
 
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "at least one record extends beyond EOF")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "at least one record extends beyond EOF");
 
     /* recovery-open may have EOA below revision record */
     if ((H5FD_get_eoa(raw_file, H5FD_MEM_DRAW) < (addr + size)) &&
@@ -92,17 +92,17 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
         size = history->record_locs[n].record_size;
 
         if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
 
         if (H5FD_read(raw_file, H5FD_MEM_DRAW, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read revision record from file")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read revision record from file");
 
         if (H5FD__onion_revision_record_decode(buf, r_out) != size)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (initial)")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (initial)");
 
         sum = H5_checksum_fletcher32(buf, size - 4);
         if (r_out->checksum != sum)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored");
 
         if (revision_num == r_out->revision_num)
             break;
@@ -126,17 +126,17 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
         size = history->record_locs[n].record_size;
 
         if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
 
         if (H5FD_read(raw_file, H5FD_MEM_DRAW, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read revision record from file")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read revision record from file");
 
         if (H5FD__onion_revision_record_decode(buf, r_out) != size)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (initial)")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (initial)");
 
         sum = H5_checksum_fletcher32(buf, size - 4);
         if (r_out->checksum != sum)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored");
 
         if (revision_num != r_out->revision_num)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
@@ -145,15 +145,15 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
 
     if (r_out->comment_size > 0)
         if (NULL == (r_out->comment = H5MM_malloc(sizeof(char) * r_out->comment_size)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate comment space")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate comment space");
 
     if (r_out->archival_index.n_entries > 0)
         if (NULL == (r_out->archival_index.list =
                          H5MM_calloc(r_out->archival_index.n_entries * sizeof(H5FD_onion_index_entry_t))))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate index entry list")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate index entry list");
 
     if (H5FD__onion_revision_record_decode(buf, r_out) != size)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (final)")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (final)");
 
 done:
     H5MM_xfree(buf);
@@ -342,11 +342,11 @@ H5FD__onion_revision_index_init(uint32_t page_size)
     assert(POWER_OF_TWO(page_size));
 
     if (NULL == (rix = H5MM_calloc(sizeof(H5FD_onion_revision_index_t))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "cannot allocate index")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "cannot allocate index");
 
     if (NULL ==
         (rix->_hash_table = H5MM_calloc(table_size * sizeof(H5FD_onion_revision_index_hash_chain_node_t *))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "cannot allocate hash table")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "cannot allocate hash table");
 
     rix->version   = H5FD_ONION_REVISION_INDEX_VERSION_CURR;
     rix->n_entries = 0;
@@ -397,7 +397,7 @@ H5FD__onion_revision_index_resize(H5FD_onion_revision_index_t *rix)
     assert(rix->_hash_table);
 
     if (NULL == (new_table = H5MM_calloc(new_size * sizeof(H5FD_onion_revision_index_hash_chain_node_t *))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "cannot allocate new hash table")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "cannot allocate new hash table");
 
     for (uint64_t i = 0; i < rix->_hash_table_size; i++) {
         while (rix->_hash_table[i] != NULL) {
@@ -462,7 +462,7 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
     if (rix->n_entries >= (rix->_hash_table_size * 2) ||
         rix->_hash_table_n_keys_populated >= (rix->_hash_table_size / 2)) {
         if (H5FD__onion_revision_index_resize(rix) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_NONE_MINOR, FAIL, "unable to resize and hash table")
+            HGOTO_ERROR(H5E_VFL, H5E_NONE_MINOR, FAIL, "unable to resize and hash table");
     }
 
     key = entry->logical_page & (rix->_hash_table_size - 1);
@@ -493,7 +493,7 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
     /* Add new entry to bucket chain */
     if (append_dest != NULL) {
         if (NULL == (node = H5MM_malloc(sizeof(H5FD_onion_revision_index_hash_chain_node_t))))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "cannot allocate new ash chain node")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "cannot allocate new ash chain node");
         node->version = H5FD_ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR;
         node->next    = NULL;
         memcpy(&node->entry_data, entry, sizeof(H5FD_onion_index_entry_t));
@@ -605,10 +605,10 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
     if (HDstrncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature");
 
     if (H5FD_ONION_REVISION_RECORD_VERSION_CURR != buf[4])
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid record version")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid record version");
 
     ptr = buf + 8;
 
@@ -636,9 +636,9 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     ptr += 4;
 
     if (page_size == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "page size is zero")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "page size is zero");
     if (!POWER_OF_TWO(page_size))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "page size not power of two")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "page size not power of two");
 
     for (record->archival_index.page_size_log2 = 0;
          (((uint32_t)1 << record->archival_index.page_size_log2) & page_size) == 0;
@@ -660,13 +660,13 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
         ptr += H5FD_ONION_ENCODED_SIZE_INDEX_ENTRY * n_entries;
     }
     else if (n_entries != record->archival_index.n_entries) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "n_entries in archival index does not match decoded")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "n_entries in archival index does not match decoded");
     }
     else {
         H5FD_onion_index_entry_t *entry = NULL;
 
         if (record->archival_index.list == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "no archival index entry list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "no archival index entry list");
 
         for (size_t i = 0; i < n_entries; i++) {
             entry = &record->archival_index.list[i];
@@ -678,7 +678,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
 
             /* logical_page actually encoded as address; check and convert */
             if (entry->logical_page & (page_size - 1))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "logical address does not align with page size")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "logical address does not align with page size");
 
             entry->logical_page = entry->logical_page >> record->archival_index.page_size_log2;
 
@@ -694,18 +694,18 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
 
             ui32 = H5_checksum_fletcher32((ptr - 20), 16);
             if (ui32 != sum)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "index entry checksum mismatch")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "index entry checksum mismatch");
         }
     }
 
     if (record->comment_size == 0) {
         if (record->comment != NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "comment pointer prematurely allocated")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "comment pointer prematurely allocated");
         record->comment_size = comment_size;
     }
     else {
         if (record->comment == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "no comment pointer")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "no comment pointer");
         memcpy(record->comment, ptr, comment_size);
     }
     ptr += comment_size;
@@ -718,7 +718,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     ptr += 4;
 
     if (sum != record->checksum)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "checksum mismatch")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "checksum mismatch");
 
     ret_value = (size_t)(ptr - buf);
 
@@ -870,7 +870,7 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
     new_aix.page_size_log2 = aix->page_size_log2;
 
     if (NULL == (new_aix.list = H5MM_calloc(rix->n_entries * sizeof(H5FD_onion_index_entry_t))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate new archival index list")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate new archival index list");
 
     for (uint64_t i = 0; i < rix->_hash_table_size; i++) {
         const H5FD_onion_revision_index_hash_chain_node_t *node = NULL;
@@ -894,7 +894,7 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
      */
     if (aix->n_entries > 0)
         if (NULL == (kept_list = H5MM_calloc(aix->n_entries * sizeof(H5FD_onion_index_entry_t))))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list");
 
     for (uint64_t i = 0; i < aix->n_entries; i++) {
         const H5FD_onion_index_entry_t *entry = NULL;
@@ -911,7 +911,7 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
      */
     H5MM_xfree(aix->list);
     if (NULL == (aix->list = H5MM_calloc((new_aix.n_entries + n_kept) * sizeof(H5FD_onion_index_entry_t))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate exact-size archival index list")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate exact-size archival index list");
 
     /* Copy (new) revision list entries to replacement list */
     memcpy(aix->list, new_aix.list, sizeof(H5FD_onion_index_entry_t) * new_aix.n_entries);

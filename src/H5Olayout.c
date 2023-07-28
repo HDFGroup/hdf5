@@ -95,47 +95,47 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     assert(p);
 
     if (NULL == (mesg = H5FL_CALLOC(H5O_layout_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed");
     mesg->storage.type = H5D_LAYOUT_ERROR;
 
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     mesg->version = *p++;
 
     if (mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_4)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad version number for layout message")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad version number for layout message");
 
     if (mesg->version < H5O_LAYOUT_VERSION_3) {
         unsigned ndims; /* Num dimensions in chunk */
 
         /* Dimensionality */
         if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         ndims = *p++;
 
         if (!ndims || ndims > H5O_LAYOUT_NDIMS)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "dimensionality is out of range")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "dimensionality is out of range");
 
         /* Layout class */
         if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         mesg->type = (H5D_layout_t)*p++;
 
         if (H5D_CONTIGUOUS != mesg->type && H5D_CHUNKED != mesg->type && H5D_COMPACT != mesg->type)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad layout type for layout message")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad layout type for layout message");
 
         /* Set the storage type */
         mesg->storage.type = mesg->type;
 
         /* Reserved bytes */
         if (H5_IS_BUFFER_OVERFLOW(p, 5, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         p += 5;
 
         /* Address */
         if (mesg->type == H5D_CONTIGUOUS) {
             if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
-                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             H5F_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
 
             /* Set the layout operations */
@@ -143,7 +143,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         }
         else if (mesg->type == H5D_CHUNKED) {
             if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
-                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
 
             /* Set the layout operations */
@@ -160,7 +160,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             mesg->ops = H5D_LOPS_COMPACT;
         }
         else
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid layout type")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid layout type");
 
         /* Read the size */
         if (mesg->type != H5D_CHUNKED) {
@@ -171,16 +171,16 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
              * information available also.
              */
             if (H5_IS_BUFFER_OVERFLOW(p, (ndims * 4), p_end))
-                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             p += ndims * sizeof(uint32_t); /* Skip over dimension sizes */
         }
         else {
             if (ndims < 2)
-                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad dimensions for chunked storage")
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad dimensions for chunked storage");
             mesg->u.chunk.ndims = ndims;
 
             if (H5_IS_BUFFER_OVERFLOW(p, (ndims * 4), p_end))
-                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             for (unsigned u = 0; u < ndims; u++) {
 
                 UINT32DECODE(p, mesg->u.chunk.dim[u]);
@@ -201,13 +201,13 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
         if (mesg->type == H5D_COMPACT) {
             if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             UINT32DECODE(p, mesg->storage.u.compact.size);
 
             if (mesg->storage.u.compact.size > 0) {
                 /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
                 if (H5_IS_BUFFER_OVERFLOW(p, mesg->storage.u.compact.size, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
                 if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
@@ -220,7 +220,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     else {
         /* Layout & storage class */
         if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         mesg->type = mesg->storage.type = (H5D_layout_t)*p++;
 
         /* Interpret the rest of the message according to the layout class */
@@ -228,7 +228,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             case H5D_COMPACT:
                 /* Compact data size */
                 if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 UINT16DECODE(p, mesg->storage.u.compact.size);
 
                 if (mesg->storage.u.compact.size > 0) {
@@ -254,12 +254,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             case H5D_CONTIGUOUS:
                 /* Contiguous storage address */
                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
 
                 /* Contiguous storage size */
                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_DECODE_LENGTH(f, p, mesg->storage.u.contig.size);
 
                 /* Set the layout operations */
@@ -278,9 +278,9 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     mesg->u.chunk.ndims = *p++;
 
                     if (mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "dimensionality is too large")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "dimensionality is too large");
                     if (mesg->u.chunk.ndims < 2)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad dimensions for chunked storage")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad dimensions for chunked storage");
 
                     /* B-tree address */
                     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
@@ -328,7 +328,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                      *      until features are added for the flags)
                      */
                     if (mesg->u.chunk.flags & ~H5O_LAYOUT_ALL_CHUNK_FLAGS)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad flag value for message")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad flag value for message");
 
                     /* Dimensionality */
                     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -337,7 +337,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     mesg->u.chunk.ndims = *p++;
 
                     if (mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "dimensionality is too large")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "dimensionality is too large");
 
                     /* Encoded # of bytes for each chunk dimension */
                     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -346,7 +346,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     mesg->u.chunk.enc_bytes_per_dim = *p++;
 
                     if (mesg->u.chunk.enc_bytes_per_dim == 0 || mesg->u.chunk.enc_bytes_per_dim > 8)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "encoded chunk dimension size is too large")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "encoded chunk dimension size is too large");
 
                     if (H5_IS_BUFFER_OVERFLOW(p, (mesg->u.chunk.ndims * mesg->u.chunk.enc_bytes_per_dim),
                                               p_end))
@@ -377,7 +377,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     mesg->u.chunk.idx_type = (H5D_chunk_index_t)*p++;
 
                     if (mesg->u.chunk.idx_type >= H5D_CHUNK_IDX_NTYPES)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "unknown chunk index type")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "unknown chunk index type");
                     mesg->storage.u.chunk.idx_type = mesg->u.chunk.idx_type;
 
                     switch (mesg->u.chunk.idx_type) {
@@ -505,7 +505,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                         case H5D_CHUNK_IDX_NTYPES:
                         default:
-                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "Invalid chunk index type")
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "Invalid chunk index type");
                     }
 
                     /* Chunk index address */
@@ -522,16 +522,16 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             case H5D_VIRTUAL:
                 /* Check version */
                 if (mesg->version < H5O_LAYOUT_VERSION_4)
-                    HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "invalid layout version with virtual layout")
+                    HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "invalid layout version with virtual layout");
 
                 /* Heap information */
                 if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_addr_decode(f, &p, &(mesg->storage.u.virt.serial_list_hobjid.addr));
                 /* NOTE: virtual mapping global heap entry address could be undefined */
 
                 if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 UINT32DECODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);
 
                 /* Initialize other fields */
@@ -558,7 +558,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Read heap */
                     if (NULL == (heap_block = (uint8_t *)H5HG_read(
                                      f, &(mesg->storage.u.virt.serial_list_hobjid), NULL, &block_size)))
-                        HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "Unable to read global heap block")
+                        HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "Unable to read global heap block");
 
                     heap_block_p     = (const uint8_t *)heap_block;
                     heap_block_p_end = heap_block_p + block_size - 1;
@@ -583,7 +583,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Allocate entry list */
                     if (NULL == (mesg->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(
                                      (size_t)tmp_hsize * sizeof(H5O_storage_virtual_ent_t))))
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "unable to allocate heap block")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "unable to allocate heap block");
                     mesg->storage.u.virt.list_nalloc = (size_t)tmp_hsize;
                     mesg->storage.u.virt.list_nused  = (size_t)tmp_hsize;
 
@@ -642,7 +642,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                         if (H5S_SELECT_DESERIALIZE(&mesg->storage.u.virt.list[i].source_select, &heap_block_p,
                                                    (size_t)(avail_buffer_space)) < 0)
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode source space selection")
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode source space selection");
 
                         /* Virtual selection */
 
@@ -665,13 +665,13 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                 &mesg->storage.u.virt.list[i].parsed_source_file_name,
                                 &mesg->storage.u.virt.list[i].psfn_static_strlen,
                                 &mesg->storage.u.virt.list[i].psfn_nsubs) < 0)
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't parse source file name")
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't parse source file name");
                         if (H5D_virtual_parse_source_name(
                                 mesg->storage.u.virt.list[i].source_dset_name,
                                 &mesg->storage.u.virt.list[i].parsed_source_dset_name,
                                 &mesg->storage.u.virt.list[i].psdn_static_strlen,
                                 &mesg->storage.u.virt.list[i].psdn_nsubs) < 0)
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't parse source dataset name")
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't parse source dataset name");
 
                         /* Set source names in source_dset struct */
                         if ((mesg->storage.u.virt.list[i].psfn_nsubs == 0) &&
@@ -714,9 +714,9 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         if (H5D_virtual_check_mapping_pre(
                                 mesg->storage.u.virt.list[i].source_dset.virtual_select,
                                 mesg->storage.u.virt.list[i].source_select, H5O_VIRTUAL_STATUS_INVALID) < 0)
-                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid mapping selections")
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid mapping selections");
                         if (H5D_virtual_check_mapping_post(&mesg->storage.u.virt.list[i]) < 0)
-                            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid mapping entry")
+                            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid mapping entry");
 
                         /* Update min_dims */
                         if (H5D_virtual_update_min_dims(mesg, i) < 0)
@@ -740,7 +740,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                     /* Verify that the heap block size is correct */
                     if ((size_t)(heap_block_p - heap_block) != block_size)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "incorrect heap block size")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "incorrect heap block size");
                 } /* end if */
 
                 /* Set the layout operations */
@@ -751,7 +751,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
             default:
-                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "Invalid layout class")
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "Invalid layout class");
         }
     }
 
@@ -899,7 +899,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 
                     case H5D_CHUNK_IDX_NTYPES:
                     default:
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid chunk index type")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid chunk index type");
                 } /* end switch */
 
                 /*
@@ -920,7 +920,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid layout class")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid layout class");
     } /* end switch */
 
 done:
@@ -953,7 +953,7 @@ H5O__layout_copy(const void *_mesg, void *_dest)
 
     /* Allocate destination message, if necessary */
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_layout_t)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "layout message allocation failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "layout message allocation failed");
 
     /* copy */
     *dest = *mesg;
@@ -968,7 +968,7 @@ H5O__layout_copy(const void *_mesg, void *_dest)
 
                 /* Allocate memory for the raw data */
                 if (NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
+                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset");
 
                 /* Copy over the raw data */
                 H5MM_memcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf,
@@ -990,13 +990,13 @@ H5O__layout_copy(const void *_mesg, void *_dest)
 
         case H5D_VIRTUAL:
             if (H5D__virtual_copy_layout(dest) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual layout")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual layout");
             break;
 
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, NULL, "Invalid layout class")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, NULL, "Invalid layout class");
     } /* end switch */
 
     /* Set return value */
@@ -1067,7 +1067,7 @@ H5O__layout_reset(void *_mesg)
         else if (H5D_VIRTUAL == mesg->type)
             /* Free the virtual entry list */
             if (H5D__virtual_reset_layout(mesg) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to reset virtual layout")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to reset virtual layout");
 
         /* Reset the message */
         mesg->type    = H5D_CONTIGUOUS;
@@ -1135,25 +1135,25 @@ H5O__layout_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
         case H5D_CONTIGUOUS: /* Contiguous block on disk */
             /* Free the file space for the raw data */
             if (H5D__contig_delete(f, &mesg->storage) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data");
             break;
 
         case H5D_CHUNKED: /* Chunked blocks on disk */
             /* Free the file space for the index & chunk raw data */
             if (H5D__chunk_delete(f, open_oh, &mesg->storage) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data");
             break;
 
         case H5D_VIRTUAL: /* Virtual dataset */
             /* Free the file space virtual dataset */
             if (H5D__virtual_delete(f, &mesg->storage) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data");
             break;
 
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not valid storage type")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not valid storage type");
     } /* end switch */
 
 done:
@@ -1188,7 +1188,7 @@ H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     /* Check to ensure that the version of the message to be copied does not exceed
        the message version allowed by the destination file's high bound */
     if (layout_src->version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "layout message version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "layout message version out of bounds");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1225,7 +1225,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 
     /* Copy the layout information */
     if (NULL == (layout_dst = (H5O_layout_t *)H5O__layout_copy(layout_src, NULL)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy layout")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy layout");
 
     /* Copy the layout type specific information */
     switch (layout_src->type) {
@@ -1234,7 +1234,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 /* copy compact raw data */
                 if (H5D__compact_copy(file_src, &layout_src->storage.u.compact, file_dst,
                                       &layout_dst->storage.u.compact, udata->src_dtype, cpy_info) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage");
                 copied = TRUE;
             } /* end if */
             break;
@@ -1254,7 +1254,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 /* copy contiguous raw data */
                 if (H5D__contig_copy(file_src, &layout_src->storage.u.contig, file_dst,
                                      &layout_dst->storage.u.contig, udata->src_dtype, cpy_info) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy contiguous storage")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy contiguous storage");
                 copied = TRUE;
             } /* end if */
             break;
@@ -1267,7 +1267,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 if (H5D__chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst,
                                     &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype,
                                     udata->common.src_pline, cpy_info) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage");
                 copied = TRUE;
             } /* end if */
             break;
@@ -1276,13 +1276,13 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
             /* Copy virtual layout.  Always copy so the memory fields get copied
              * properly. */
             if (H5D__virtual_copy(file_dst, layout_dst) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual storage")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual storage");
             break;
 
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class");
     } /* end switch */
 
     /* Check if copy routine was invoked (which frees the source datatype) */

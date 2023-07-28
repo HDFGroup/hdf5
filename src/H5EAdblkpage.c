@@ -96,7 +96,7 @@ H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent)
 
     /* Share common array information */
     if (H5EA__hdr_incr(hdr) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header");
     dblk_page->hdr = hdr;
 
     /* Set non-zero internal fields */
@@ -155,7 +155,7 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
 
     /* Cache the new extensible array data block page */
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, FAIL, "can't add extensible array data block page to cache")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, FAIL, "can't add extensible array data block page to cache");
     inserted = TRUE;
 
     /* Add data block page as child of 'top' proxy */

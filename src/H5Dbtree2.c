@@ -225,7 +225,7 @@ H5D__bt2_crt_context(void *_udata)
 
     /* Allocate callback context */
     if (NULL == (ctx = H5FL_MALLOC(H5D_bt2_ctx_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate callback context")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate callback context");
 
     /* Determine the size of addresses and set the chunk size and # of dimensions for the dataset */
     ctx->sizeof_addr = H5F_SIZEOF_ADDR(udata->f);
@@ -234,7 +234,7 @@ H5D__bt2_crt_context(void *_udata)
 
     /* Set up the "local" information for this dataset's chunk dimension sizes */
     if (NULL == (my_dim = (uint32_t *)H5FL_ARR_MALLOC(uint32_t, H5O_LAYOUT_NDIMS)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate chunk dims")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate chunk dims");
     H5MM_memcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
     ctx->dim = my_dim;
 
@@ -609,11 +609,11 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
 
     /* Get header */
     if (NULL == (oh = H5O_protect(&oloc, H5AC__READ_ONLY_FLAG, TRUE)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header");
 
     /* Retrieve the dataset's object header proxy */
     if (NULL == (oh_proxy = H5O_get_proxy(oh)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset object header proxy")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset object header proxy");
 
     /* Make the v2 B-tree a child flush dependency of the dataset's object header proxy */
     if (H5B2_depend(idx_info->storage->u.btree2.bt2, oh_proxy) < 0)
@@ -670,7 +670,7 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     /* Open v2 B-tree for the chunk index */
     if (NULL ==
         (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->storage->idx_addr, &u_ctx)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset");
 
     /* Check for SWMR writes to the file */
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
@@ -740,7 +740,7 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Create the v2 B-tree for the chunked dataset */
     if (NULL == (idx_info->storage->u.btree2.bt2 = H5B2_create(idx_info->f, &bt2_cparam, &u_ctx)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking chunked dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking chunked dataset");
 
     /* Retrieve the v2 B-tree's address in the file */
     if (H5B2_get_addr(idx_info->storage->u.btree2.bt2, &(idx_info->storage->idx_addr)) < 0)
@@ -857,11 +857,11 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     if (NULL == idx_info->storage->u.btree2.bt2) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
     }    /* end if */
     else /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -882,7 +882,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
 
     /* Update record for v2 B-tree (could be insert or modify) */
     if (H5B2_update(bt2, &bt2_udata, H5D__bt2_mod_cb, &bt2_udata) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTUPDATE, FAIL, "unable to update record in v2 B-tree")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUPDATE, FAIL, "unable to update record in v2 B-tree");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -947,11 +947,11 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     if (NULL == idx_info->storage->u.btree2.bt2) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
     }    /* end if */
     else /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -972,7 +972,7 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     /* Go get chunk information from v2 B-tree */
     found = FALSE;
     if (H5B2_find(bt2, &bt2_udata, &found, H5D__bt2_found_cb, &found_rec) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "can't check for chunk in v2 B-tree")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "can't check for chunk in v2 B-tree");
 
     /* Check if chunk was found */
     if (found) {
@@ -1065,11 +1065,11 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chu
     if (NULL == idx_info->storage->u.btree2.bt2) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
     }    /* end if */
     else /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1114,7 +1114,7 @@ H5D__bt2_remove_cb(const void *_record, void *_udata)
     /* Free the space in the file for the object being removed */
     H5_CHECK_OVERFLOW(record->nbytes, uint32_t, hsize_t);
     if (H5MF_xfree(f, H5FD_MEM_DRAW, record->chunk_addr, (hsize_t)record->nbytes) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1152,11 +1152,11 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     if (NULL == idx_info->storage->u.btree2.bt2) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
     }    /* end if */
     else /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1173,7 +1173,7 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     if (H5B2_remove(bt2, &bt2_udata,
                     (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) ? NULL : H5D__bt2_remove_cb,
                     idx_info->f) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1223,7 +1223,7 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
         /* Delete the v2 B-tree */
         /*(space in the file for each object is freed in the 'remove' callback) */
         if (H5B2_delete(idx_info->f, idx_info->storage->idx_addr, &u_ctx, remove_op, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree");
 
         idx_info->storage->idx_addr = HADDR_UNDEF;
     } /* end if */
@@ -1266,14 +1266,14 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_id
     /* Check if the source v2 B-tree is open yet */
     if (NULL == idx_info_src->storage->u.btree2.bt2)
         if (H5D__bt2_idx_open(idx_info_src) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
 
     /* Set copied metadata tag */
     H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Create v2 B-tree that describes the chunked dataset in the destination file */
     if (H5D__bt2_idx_create(idx_info_dst) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
     assert(H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Reset metadata tag */
@@ -1307,12 +1307,12 @@ H5D__bt2_idx_copy_shutdown(H5O_storage_chunk_t *storage_src, H5O_storage_chunk_t
 
     /* Close v2 B-tree for source file */
     if (H5B2_close(storage_src->u.btree2.bt2) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close v2 B-tree")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close v2 B-tree");
     storage_src->u.btree2.bt2 = NULL;
 
     /* Close v2 B-tree for destination file */
     if (H5B2_close(storage_dst->u.btree2.bt2) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close v2 B-tree")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close v2 B-tree");
     storage_dst->u.btree2.bt2 = NULL;
 
 done:
@@ -1348,14 +1348,14 @@ H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 
     /* Open v2 B-tree */
     if (H5D__bt2_idx_open(idx_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2_cdset = idx_info->storage->u.btree2.bt2;
 
     /* Get v2 B-tree size for indexing chunked dataset */
     if (H5B2_size(bt2_cdset, index_size) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve v2 B-tree storage info for chunked dataset")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve v2 B-tree storage info for chunked dataset");
 
 done:
     /* Close v2 B-tree index */
@@ -1440,11 +1440,11 @@ H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
         /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
 
         /* Close v2 B-tree */
         if (H5B2_close(idx_info->storage->u.btree2.bt2) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree");
         idx_info->storage->u.btree2.bt2 = NULL;
     } /* end if */
 

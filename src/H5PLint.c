@@ -148,11 +148,11 @@ H5PL_init(void)
 
     /* Create the table of previously-loaded plugins */
     if (H5PL__create_plugin_cache() < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't create plugin cache")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't create plugin cache");
 
     /* Create the table of search paths for dynamic libraries */
     if (H5PL__create_path_table() < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't create plugin search path table")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't create plugin search path table");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -183,13 +183,13 @@ H5PL_term_package(void)
      * We need to bump the return value if we did any real work here.
      */
     if (H5PL__close_plugin_cache(&already_closed) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing plugin cache")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing plugin cache");
     if (!already_closed)
         ret_value++;
 
     /* Close the search path table and free the paths */
     if (H5PL__close_path_table() < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing search path table")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing search path table");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -223,7 +223,7 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
     switch (type) {
         case H5PL_TYPE_FILTER:
             if ((H5PL_plugin_control_mask_g & H5PL_FILTER_PLUGIN) == 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "filter plugins disabled")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "filter plugins disabled");
             break;
 
         case H5PL_TYPE_VOL:
@@ -234,13 +234,13 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 
         case H5PL_TYPE_VFD:
             if ((H5PL_plugin_control_mask_g & H5PL_VFD_PLUGIN) == 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Virtual File Driver (VFD) plugins disabled")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Virtual File Driver (VFD) plugins disabled");
             break;
 
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Invalid plugin type specified")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Invalid plugin type specified");
     }
 
     /* Set up the search parameters */
@@ -249,7 +249,7 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 
     /* Search in the table of already loaded plugin libraries */
     if (H5PL__find_plugin_in_cache(&search_params, &found, &plugin_info) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in plugin cache failed")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in plugin cache failed");
 
     /* If not found, try iterating through the path table to find an appropriate plugin */
     if (!found)
@@ -373,7 +373,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
 
             /* Get the plugin info */
             if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info)()))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin");
 
             /* Setup temporary plugin key if one wasn't supplied */
             if (!key) {
@@ -397,7 +397,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
 
             /* Get the plugin info */
             if (NULL == (cls = (const void *)(*get_plugin_info)()))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL connector info from plugin")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL connector info from plugin");
 
             /* Setup temporary plugin key if one wasn't supplied */
             if (!key) {
@@ -408,7 +408,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
 
             /* Ask VOL interface if this class is the one we are looking for and is compatible, etc */
             if (H5VL_check_plugin_load(cls, key, success) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "VOL connector compatibility check failed")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "VOL connector compatibility check failed");
 
             /* Check for finding the correct plugin */
             if (*success) {
@@ -425,7 +425,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
 
             /* Get the plugin info */
             if (NULL == (cls = (const void *)(*get_plugin_info)()))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VFD info from plugin")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VFD info from plugin");
 
             /* Setup temporary plugin key if one wasn't supplied */
             if (!key) {
@@ -436,7 +436,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
 
             /* Ask VFD interface if this class is the one we are looking for and is compatible, etc */
             if (H5FD_check_plugin_load(cls, key, success) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "VFD compatibility check failed")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "VFD compatibility check failed");
 
             /* Check for finding the correct plugin */
             if (*success) {
@@ -451,13 +451,13 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "Invalid plugin type specified")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "Invalid plugin type specified");
     } /* end switch */
 
     /* If we found the correct plugin, store it in the cache */
     if (*success)
         if (H5PL__add_plugin(loaded_plugin_type, key, handle))
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache");
 
 done:
     if (!(*success) && handle)
