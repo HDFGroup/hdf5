@@ -71,11 +71,11 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
     if (HDstrlen(TheDescr) >= MAXTESTDESC) {
         printf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n", TheDescr, MAXTESTDESC);
         exit(EXIT_FAILURE);
-    } /* end if */
+    }
     if (HDstrlen(TheName) >= MAXTESTNAME) {
         printf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
         exit(EXIT_FAILURE);
-    } /* end if */
+    }
 
     /* Check for increasing the Test array size */
     if (Index >= TestAlloc) {
@@ -87,12 +87,12 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
             printf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
                    newAlloc);
             exit(EXIT_FAILURE);
-        } /* end if */
+        }
 
         /* Update info */
         Test      = newTest;
         TestAlloc = newAlloc;
-    } /* end if */
+    }
 
     /* Set up test function */
     HDstrcpy(Test[Index].Description, TheDescr);
@@ -212,7 +212,7 @@ TestParseCmdLine(int argc, char *argv[])
     hbool_t skipped_all = FALSE;
     int     ret_code;
 
-    while (argv++, --argc > 0) {
+    while ((void)argv++, --argc > 0) {
         if ((HDstrcmp(*argv, "-verbose") == 0) || (HDstrcmp(*argv, "-v") == 0)) {
             if (argc > 0) {
                 --argc;
@@ -316,7 +316,7 @@ PerformTests(void)
         }
 
     Test_parameters = NULL; /* clear it. */
-    MESSAGE(2, ("\n\n"))
+    MESSAGE(2, ("\n\n"));
 
     if (num_errs)
         print_func("!!! %d Error(s) were detected !!!\n\n", (int)num_errs);
@@ -634,7 +634,7 @@ TestAlarmOn(void)
 
     /* Get the alarm value from the environment variable, if set */
     if (env_val != NULL)
-        alarm_sec = (unsigned)HDstrtoul(env_val, (char **)NULL, 10);
+        alarm_sec = (unsigned)strtoul(env_val, (char **)NULL, 10);
 
     /* Set the number of seconds before alarm goes off */
     alarm((unsigned)alarm_sec);

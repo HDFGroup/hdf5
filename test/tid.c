@@ -872,7 +872,7 @@ typedef struct {
 } future_obj_t;
 
 /* Global (static) future ID object type */
-H5I_type_t future_obj_type_g = H5I_BADID;
+static H5I_type_t future_obj_type_g = H5I_BADID;
 
 /* Callback to free the actual object for future object test */
 static herr_t
