@@ -465,9 +465,9 @@ H5I__destroy_type(H5I_type_t type)
     }
     H5E_END_TRY /* don't care about errors */
 
-        /* Check if we should release the ID class */
-        if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)
-            type_info->cls = H5MM_xfree_const(type_info->cls);
+    /* Check if we should release the ID class */
+    if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)
+        type_info->cls = H5MM_xfree_const(type_info->cls);
 
     HASH_CLEAR(hh, type_info->hash_table);
     type_info->hash_table = NULL;
