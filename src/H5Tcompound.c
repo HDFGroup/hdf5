@@ -439,10 +439,12 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Add member to end of member array */
     idx                                       = parent->shared->u.compnd.nmembs;
-    parent->shared->u.compnd.memb[idx].name   = H5MM_xstrdup(name);
     parent->shared->u.compnd.memb[idx].offset = offset;
     parent->shared->u.compnd.memb[idx].size   = total_size;
-    parent->shared->u.compnd.memb[idx].type   = H5T_copy(member, H5T_COPY_ALL);
+    if (NULL == (parent->shared->u.compnd.memb[idx].name = H5MM_xstrdup(name)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "couldn't duplicate name string")
+    if (NULL == (parent->shared->u.compnd.memb[idx].type = H5T_copy(member, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "couldn't copy datatype")
 
     parent->shared->u.compnd.sorted = H5T_SORT_NONE;
     parent->shared->u.compnd.nmembs++;

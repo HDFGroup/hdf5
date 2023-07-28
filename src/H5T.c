@@ -1417,7 +1417,7 @@ done:
                 (void)H5T_close_real(dt);
             else {
                 if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
-                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object");
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
                 dt         = H5FL_FREE(H5T_t, dt);
             } /* end else */
@@ -1867,7 +1867,7 @@ done:
     /* Close the new datatype on errors */
     if (H5I_INVALID_HID == ret_value)
         if (new_dt && H5T_close_real(new_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release datatype info")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release datatype info");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcopy() */
@@ -1959,7 +1959,7 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tclose_async() */
@@ -2713,8 +2713,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
             if (func && func != soft->conv.u.app_func)
                 continue;
 
-            HDmemmove(H5T_g.soft + i, H5T_g.soft + i + 1,
-                      (size_t)(H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
+            memmove(H5T_g.soft + i, H5T_g.soft + i + 1, (size_t)(H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
             --H5T_g.nsoft;
         } /* end for */
     }     /* end if */
@@ -2739,8 +2738,8 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
         } /* end if */
         else {
             /* Remove from table */
-            HDmemmove(H5T_g.path + i, H5T_g.path + i + 1,
-                      (size_t)(H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t *));
+            memmove(H5T_g.path + i, H5T_g.path + i + 1,
+                    (size_t)(H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t *));
             --H5T_g.npaths;
 
             /* Shut down path */
@@ -3122,7 +3121,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 done:
     /* Release fake file structure */
     if (f && H5F_fake_free(f) < 0)
-        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct")
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_encode() */
@@ -3172,7 +3171,7 @@ H5T_decode(size_t buf_size, const unsigned char *buf)
 done:
     /* Release fake file structure */
     if (f && H5F_fake_free(f) < 0)
-        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release fake file struct")
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release fake file struct");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_decode() */
@@ -3290,7 +3289,7 @@ done:
     if (NULL == ret_value) {
         if (dt) {
             if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
             dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
             dt         = H5FL_FREE(H5T_t, dt);
         }
@@ -3345,7 +3344,7 @@ done:
         if (new_dt) {
             if (new_dt->shared) {
                 if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
-                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
                 new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             } /* end if */
             new_dt = H5FL_FREE(H5T_t, new_dt);
@@ -3520,21 +3519,28 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                  * of each new member with copied values. That is, H5T_copy() is a
                  * deep copy.
                  */
-                if (NULL == (new_dt->shared->u.enumer.name =
-                                 H5MM_malloc(new_dt->shared->u.enumer.nalloc * sizeof(char *))))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "enam name array memory allocation failed")
-                if (NULL == (new_dt->shared->u.enumer.value =
-                                 H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                                "enam value array memory allocation failed")
-                H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
-                            new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
-                for (i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
-                    if (NULL == (s = H5MM_xstrdup(old_dt->shared->u.enumer.name[i])))
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
-                                    "can't copy string for enum value's name")
-                    new_dt->shared->u.enumer.name[i] = s;
-                } /* end for */
+                if (old_dt->shared->u.enumer.nalloc > 0) {
+                    if (NULL == (new_dt->shared->u.enumer.name =
+                                     H5MM_malloc(new_dt->shared->u.enumer.nalloc * sizeof(char *))))
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
+                                    "enam name array memory allocation failed")
+                    if (NULL == (new_dt->shared->u.enumer.value =
+                                     H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size)))
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
+                                    "enam value array memory allocation failed")
+                    H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
+                                new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
+                    for (i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
+                        if (NULL == (s = H5MM_xstrdup(old_dt->shared->u.enumer.name[i])))
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
+                                        "can't copy string for enum value's name")
+                        new_dt->shared->u.enumer.name[i] = s;
+                    }
+                }
+                else {
+                    /* Empty enum */
+                    memset(&new_dt->shared->u.enumer, 0, sizeof(H5T_enum_t));
+                }
                 break;
 
             case H5T_VLEN:
@@ -3665,7 +3671,7 @@ done:
         if (new_dt) {
             assert(new_dt->shared);
             if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
             new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             new_dt         = H5FL_FREE(H5T_t, new_dt);
         } /* end if */
@@ -3769,7 +3775,7 @@ done:
         if (new_dt) {
             assert(new_dt->shared);
             if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object");
             new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             new_dt         = H5FL_FREE(H5T_t, new_dt);
         } /* end if */
@@ -5117,7 +5123,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         } /* end if */
         if (cmp > 0)
             md++;
-        HDmemmove(H5T_g.path + md + 1, H5T_g.path + md, (size_t)(H5T_g.npaths - md) * sizeof(H5T_path_t *));
+        memmove(H5T_g.path + md + 1, H5T_g.path + md, (size_t)(H5T_g.npaths - md) * sizeof(H5T_path_t *));
         H5T_g.npaths++;
         H5T_g.path[md] = path;
         table          = path;
