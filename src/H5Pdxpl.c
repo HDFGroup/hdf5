@@ -28,14 +28,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Cache                                */
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FDprivate.h" /* File drivers				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Ppkg.h"      /* Property lists		  	*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Cache                                    */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FDprivate.h" /* File drivers                             */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5VMprivate.h" /* Vector Functions                         */
 
 /****************/
 /* Local Macros */
@@ -573,15 +574,15 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
         *(*pp)++ = (uint8_t)sizeof(double);
 
         /* Encode the left split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
         btree_split_ratio++;
 
         /* Encode the middle split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
         btree_split_ratio++;
 
         /* Encode the right split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
     } /* end if */
 
     /* Size of B-tree split ratio values */
@@ -623,9 +624,9 @@ H5P__dxfr_btree_split_ratio_dec(const void **_pp, void *_value)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "double value can't be decoded")
 
     /* Decode the left, middle & left B-tree split ratios */
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[0])
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[1])
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[2])
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[0]);
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[1]);
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[2]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -987,7 +988,7 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
 done:
     if (ret_value < 0)
         if (data_xform_prop && H5Z_xform_destroy(data_xform_prop) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
+            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_data_transform() */
@@ -2251,8 +2252,8 @@ herr_t
 H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op, const hsize_t start[],
                                       const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5P_genplist_t *plist = NULL;                  /* Property list pointer */
-    H5S_t          *space;                         /* Dataspace to hold selection */
+    H5P_genplist_t *plist               = NULL;    /* Property list pointer */
+    H5S_t          *space               = NULL;    /* Dataspace to hold selection */
     hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
     hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
     herr_t          ret_value           = SUCCEED; /* return value */
@@ -2342,9 +2343,9 @@ done:
     /* Cleanup on failure */
     if (ret_value < 0) {
         if (reset_prop_on_error && plist && H5P_poke(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection");
         if (space_created && H5S_close(space) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)

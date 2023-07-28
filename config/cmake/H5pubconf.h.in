@@ -216,9 +216,6 @@
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
 
-/* Define to 1 if you have the `lstat' function. */
-#cmakedefine H5_HAVE_LSTAT @H5_HAVE_LSTAT@
-
 /* Define if the map API (H5M) should be compiled */
 #cmakedefine H5_HAVE_MAP_API @H5_HAVE_MAP_API@
 
@@ -280,41 +277,17 @@
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
 
-/* Define to 1 if you have the `setsysinfo' function. */
-#cmakedefine H5_HAVE_SETSYSINFO @H5_HAVE_SETSYSINFO@
-
-/* Define to 1 if you have the `siglongjmp' function. */
-#cmakedefine H5_HAVE_SIGLONGJMP @H5_HAVE_SIGLONGJMP@
-
-/* Define to 1 if you have the `sigprocmask' function. */
-#cmakedefine H5_HAVE_SIGPROCMASK @H5_HAVE_SIGPROCMASK@
-
-/* Define to 1 if you have the `sigsetjmp' function. */
-#cmakedefine H5_HAVE_SIGSETJMP @H5_HAVE_SIGSETJMP@
-
-/* Define to 1 if you have the `srandom' function. */
-#cmakedefine H5_HAVE_SRANDOM @H5_HAVE_SRANDOM@
-
 /* Define to 1 if you have the `stat64' function. */
 #cmakedefine H5_HAVE_STAT64 @H5_HAVE_STAT64@
 
 /* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
 
-/* Define to 1 if you have the <stdlib.h> header file. */
-#cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
-
 /* Define to 1 if you have the `strcasestr' function. */
 #cmakedefine H5_HAVE_STRCASESTR @H5_HAVE_STRCASESTR@
 
 /* Define to 1 if you have the `strdup' function. */
 #cmakedefine H5_HAVE_STRDUP @H5_HAVE_STRDUP@
-
-/* Define to 1 if you have the <strings.h> header file. */
-#cmakedefine H5_HAVE_STRINGS_H @H5_HAVE_STRINGS_H@
-
-/* Define to 1 if you have the <string.h> header file. */
-#cmakedefine H5_HAVE_STRING_H @H5_HAVE_STRING_H@
 
 /* Define if struct text_info is defined */
 #cmakedefine H5_HAVE_STRUCT_TEXT_INFO @H5_HAVE_STRUCT_TEXT_INFO@

@@ -85,7 +85,6 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
     /* Check args */
     assert(f);
     assert(p);
-    assert(p_size > 0);
 
     if (NULL == (mesg = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -118,7 +117,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
     /* Heap address */
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5_addr_decode(f, &p, &(mesg->heap_addr));
+    H5F_addr_decode(f, &p, &(mesg->heap_addr));
     if (H5_addr_defined(mesg->heap_addr) == FALSE)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad local heap address when parsing efl msg")
 
@@ -182,7 +181,7 @@ done:
         }
         if (heap != NULL)
             if (H5HL_unprotect(heap) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect local heap")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect local heap");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -226,7 +225,7 @@ H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
 
     /* Heap address */
     assert(H5_addr_defined(mesg->heap_addr));
-    H5_addr_encode(f, &p, mesg->heap_addr);
+    H5F_addr_encode(f, &p, mesg->heap_addr);
 
     /* Encode file list */
     for (u = 0; u < mesg->nused; u++) {
@@ -490,7 +489,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
 done:
     /* Release resources */
     if (heap && H5HL_unprotect(heap) < 0)
-        HDONE_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to unprotect EFL file name heap")
+        HDONE_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to unprotect EFL file name heap");
     if (!ret_value)
         if (efl_dst)
             H5MM_xfree(efl_dst);

@@ -229,6 +229,11 @@ static herr_t  H5FD__ros3_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing
 
 static herr_t H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
+static herr_t H5FD__ros3_str_token_copy(const char *name, size_t size, void *_value);
+static int    H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t size);
+static herr_t H5FD__ros3_str_token_close(const char *name, size_t size, void *_value);
+static herr_t H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *_value);
+
 static const H5FD_class_t H5FD_ros3_g = {
     H5FD_CLASS_VERSION,       /* struct version       */
     H5FD_ROS3_VALUE,          /* value                */
@@ -1406,9 +1411,9 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(-1);
     }
     else if (purl1->port)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (purl2->port)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* URL: PATH */
     if (purl1->path && purl2->path) {
@@ -1416,9 +1421,9 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(-1);
     }
     else if (purl1->path && !purl2->path)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (purl2->path && !purl1->path)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* URL: QUERY */
     if (purl1->query && purl2->query) {
@@ -1426,9 +1431,9 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(-1);
     }
     else if (purl1->query && !purl2->query)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (purl2->query && !purl1->query)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* FAPL: AWS_REGION */
     if (f1->fa.aws_region[0] != '\0' && f2->fa.aws_region[0] != '\0') {
@@ -1436,9 +1441,9 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(-1);
     }
     else if (f1->fa.aws_region[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (f2->fa.aws_region[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* FAPL: SECRET_ID */
     if (f1->fa.secret_id[0] != '\0' && f2->fa.secret_id[0] != '\0') {
@@ -1446,9 +1451,9 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(-1);
     }
     else if (f1->fa.secret_id[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (f2->fa.secret_id[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* FAPL: SECRET_KEY */
     if (f1->fa.secret_key[0] != '\0' && f2->fa.secret_key[0] != '\0') {
@@ -1456,9 +1461,9 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(-1);
     }
     else if (f1->fa.secret_key[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (f2->fa.secret_key[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

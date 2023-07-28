@@ -207,7 +207,7 @@ H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set atomicity flag");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
@@ -228,7 +228,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", file_id, flag);
 
     /* Get the file object */
@@ -245,7 +245,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set MPI atomicity");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Fset_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
@@ -278,7 +278,7 @@ H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get atomicity flag");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__get_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
@@ -299,7 +299,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", file_id, flag);
 
     /* Get the file object */
@@ -316,7 +316,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get MPI atomicity");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------

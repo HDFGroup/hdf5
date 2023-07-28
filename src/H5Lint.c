@@ -261,7 +261,7 @@ H5L__find_class_idx(H5L_type_t id)
 
     for (i = 0; i < H5L_table_used_g; i++)
         if (H5L_table_g[i].id == id)
-            HGOTO_DONE((int)i)
+            HGOTO_DONE((int)i);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -379,7 +379,7 @@ H5L_unregister(H5L_type_t id)
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5L_table_g[i], &H5L_table_g[i + 1], sizeof(H5L_class_t) * ((H5L_table_used_g - 1) - i));
+    memmove(&H5L_table_g[i], &H5L_table_g[i + 1], sizeof(H5L_class_t) * ((H5L_table_used_g - 1) - i));
     H5L_table_used_g--;
 
 done:
@@ -630,17 +630,17 @@ done:
 
         /* Decrement refcount on new object's object header in memory */
         if (H5O_dec_rc_by_loc(&oloc) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
+            HDONE_ERROR(H5E_LINK, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object");
     } /* end if */
 
     /* Close the location given to the user callback if it was created */
     if (grp_id >= 0) {
         if (H5I_dec_app_ref(grp_id) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback");
     } /* end if */
     else if (grp != NULL) {
         if (H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback");
     } /* end if */
     else if (temp_loc_init)
         H5G_loc_free(&temp_loc);
@@ -796,7 +796,7 @@ done:
     /* Free the object header location */
     if (loc_valid)
         if (H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to free location")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to free location");
 
     /* Free the normalized path name */
     if (norm_cur_name)
@@ -1360,11 +1360,11 @@ done:
     /* Close the location given to the user callback if it was created */
     if (grp_id >= 0) {
         if (H5I_dec_app_ref(grp_id) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback");
     } /* end if */
     else if (grp != NULL) {
         if (H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback");
     } /* end if */
     else if (temp_loc_init)
         H5G_loc_free(&temp_loc);
@@ -2102,7 +2102,7 @@ done:
     /* Check if we need to free the temp source oloc */
     if (expanded_link_open)
         if (H5G_loc_free(&tmp_src_loc) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTFREE, FAIL, "unable to free object")
+            HDONE_ERROR(H5E_LINK, H5E_CANTFREE, FAIL, "unable to free object");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__link_copy_file() */

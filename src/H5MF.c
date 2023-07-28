@@ -967,7 +967,7 @@ done:
     /* Release section node, if allocated and not added to section list or merged */
     if (node)
         if (H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free section node")
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__alloc_pagefs() */
@@ -1057,7 +1057,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     /* check arguments */
     assert(f);
     if (!H5_addr_defined(addr) || 0 == size)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     assert(addr != 0); /* Can't deallocate the superblock :-) */
 
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
@@ -1113,13 +1113,13 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
             else if (status > 0)
                 /* Indicate success */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             else if (size < f->shared->fs_threshold) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
                 fprintf(stderr, "%s: dropping addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", on the floor!\n",
                         __func__, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             } /* end else-if */
         }     /* end if */
 
@@ -1137,7 +1137,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
             fprintf(stderr, "%s: dropping addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", on the floor!\n",
                     __func__, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
 
         /* There's either already a free space manager, or the freed
@@ -1197,7 +1197,7 @@ done:
     /* Release section node, if allocated and not added to section list or merged */
     if (node)
         if (H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node");
 
 #ifdef H5MF_ALLOC_DEBUG
     fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
@@ -1469,7 +1469,7 @@ done:
 
     /* Free section node allocated */
     if (node && H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-        HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
+        HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node");
 
 #ifdef H5MF_ALLOC_DEBUG
     fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);

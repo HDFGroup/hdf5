@@ -216,7 +216,7 @@ H5T__vlen_create(const H5T_t *base)
 done:
     if (!ret_value)
         if (dt && H5T_close_real(dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release datatype info")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release datatype info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_create() */

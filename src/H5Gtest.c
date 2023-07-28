@@ -112,7 +112,7 @@ H5G__is_empty_test(hid_t gid)
         if (msg_exists > 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
 
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     } /* end if */
 
     /* Check for a link info message */
@@ -133,15 +133,15 @@ H5G__is_empty_test(hid_t gid)
 
         /* Check for 'dense' link storage file addresses being defined */
         if (H5_addr_defined(linfo.fheap_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (H5_addr_defined(linfo.name_bt2_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (H5_addr_defined(linfo.corder_bt2_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
         /* Check for link count */
         if (linfo.nlinks > 0)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end if */
 
     /* "Old format" checks */
@@ -171,12 +171,12 @@ H5G__is_empty_test(hid_t gid)
 
         /* Check for link count */
         if (nlinks > 0)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end if */
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__is_empty_test() */
@@ -223,7 +223,7 @@ H5G__has_links_test(hid_t gid, unsigned *nmsgs)
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if (msg_exists == 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check if the group has a symbol table message */
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
@@ -243,7 +243,7 @@ H5G__has_links_test(hid_t gid, unsigned *nmsgs)
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__has_links_test() */
@@ -289,7 +289,7 @@ H5G__has_stab_test(hid_t gid)
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if (msg_exists == 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check if the group has any link messages */
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
@@ -299,7 +299,7 @@ H5G__has_stab_test(hid_t gid)
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__has_stab_test() */
@@ -347,13 +347,13 @@ H5G__is_new_dense_test(hid_t gid)
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if (msg_exists > 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check if the group has any link messages */
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if (msg_exists > 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check if the group has link info message */
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID)) < 0)
@@ -367,14 +367,14 @@ H5G__is_new_dense_test(hid_t gid)
 
         /* Check for 'dense' link storage file addresses being defined */
         if (!H5_addr_defined(linfo.fheap_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (!H5_addr_defined(linfo.name_bt2_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end if */
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__is_new_dense_test() */
@@ -422,37 +422,37 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     api_ctx_pushed = TRUE;
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(grp->oloc.addr);
+    H5_BEGIN_TAG(grp->oloc.addr)
 
     /* Get the link info */
     if (H5G__obj_get_linfo(&(grp->oloc), &linfo) < 0)
-        HGOTO_ERROR_TAG(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
+        HGOTO_ERROR_TAG(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info");
 
     /* Check for 'dense' link storage file addresses being defined */
     if (!H5_addr_defined(linfo.fheap_addr))
-        HGOTO_DONE_TAG(FAIL)
+        HGOTO_DONE_TAG(FAIL);
     if (!H5_addr_defined(linfo.name_bt2_addr))
-        HGOTO_DONE_TAG(FAIL)
+        HGOTO_DONE_TAG(FAIL);
 
     /* Open the name index v2 B-tree */
     if (NULL == (bt2_name = H5B2_open(grp->oloc.file, linfo.name_bt2_addr, NULL)))
-        HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+        HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
     /* Retrieve # of records in name index */
     if (H5B2_get_nrec(bt2_name, name_count) < 0)
-        HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
+        HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index");
 
     /* Check if there is a creation order index */
     if (H5_addr_defined(linfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
         if (NULL == (bt2_corder = H5B2_open(grp->oloc.file, linfo.corder_bt2_addr, NULL)))
             HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for creation order index")
+                            "unable to open v2 B-tree for creation order index");
 
         /* Retrieve # of records in creation order index */
         if (H5B2_get_nrec(bt2_corder, corder_count) < 0)
             HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTCOUNT, FAIL,
-                            "unable to retrieve # of records from creation order index")
+                            "unable to retrieve # of records from creation order index");
     } /* end if */
     else
         *corder_count = 0;
@@ -463,11 +463,11 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
 done:
     /* Release resources */
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index");
     if (bt2_corder && H5B2_close(bt2_corder) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index");
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__new_dense_info_test() */
@@ -520,7 +520,7 @@ H5G__lheap_size_test(hid_t gid, size_t *lheap_size)
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__lheap_size_test() */
@@ -632,7 +632,7 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__user_path_test() */
@@ -683,7 +683,7 @@ H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
 done:
     /* Release resources */
     if (heap && H5HL_unprotect(heap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5G__verify_cached_stab_test() */
@@ -766,7 +766,7 @@ H5G__verify_cached_stabs_test_cb(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, h
 
 done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header");
 
     if (targ_oh) {
         assert(ret_value == H5_ITER_ERROR);

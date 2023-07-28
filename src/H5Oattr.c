@@ -293,7 +293,7 @@ done:
         if (attr) {
             if (attr->shared)
                 if (H5A__shared_free(attr) < 0)
-                    HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release attribute info")
+                    HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release attribute info");
             attr = H5FL_FREE(H5A_t, attr);
         }
         if (extent)
@@ -408,7 +408,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         memset(p, 0, attr->shared->data_size);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_encode() */
 
 /*--------------------------------------------------------------------------

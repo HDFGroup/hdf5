@@ -164,10 +164,10 @@ H5B2_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header");
     if (!ret_value && bt2)
         if (H5B2_close(bt2) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_create() */
@@ -226,10 +226,10 @@ H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header");
     if (!ret_value && bt2)
         if (H5B2_close(bt2) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_open() */
@@ -455,7 +455,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
     /* Check for empty tree */
     if (curr_node_ptr.node_nrec == 0) {
         *found = FALSE;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 
     /* Check record against min & max records in tree, to attempt to quickly
@@ -466,14 +466,14 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         if (cmp < 0) {
             *found = FALSE; /* Less than the least record--not found */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
         else if (cmp == 0) { /* Record is found */
             if (op && (op)(hdr->min_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
                             "'found' callback failed for B-tree find operation")
             *found = TRUE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
     }     /* end if */
     if (hdr->max_native_rec != NULL) {
@@ -481,14 +481,14 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         if (cmp > 0) {
             *found = FALSE; /* Greater than the largest record--not found */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
         else if (cmp == 0) { /* Record is found */
             if (op && (op)(hdr->max_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
                             "'found' callback failed for B-tree find operation")
             *found = TRUE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
     }     /* end if */
 
@@ -580,7 +580,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
 
             /* Indicate record found */
             *found = TRUE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end else */
 
         /* Decrement depth we're at in B-tree */
@@ -616,7 +616,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
 
             /* Record not found */
             *found = FALSE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
         else {
             /* Make callback for current record */
@@ -665,7 +665,7 @@ done:
     if (parent) {
         assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -861,7 +861,7 @@ done:
     if (parent) {
         assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1276,16 +1276,12 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
             if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
-                /* Note: don't push error on stack, leave that to next higher level,
-                 *      since many times the B-tree is searched in order to determine
-                 *      if an object exists in the B-tree or not. -QAK
-                 */
-#ifdef OLD_WAY
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
-#else     /* OLD_WAY */
-            HGOTO_DONE(FAIL)
-#endif    /* OLD_WAY */
-        } /* end if */
+            /* Note: don't push error on stack, leave that to next higher level,
+             *       since many times the B-tree is searched in order to determine
+             *       if an object exists in the B-tree or not.
+             */
+            HGOTO_DONE(FAIL);
+        }
         else {
             /* Make callback for current record */
             if ((op)(H5B2_LEAF_NREC(leaf, hdr, idx), op_data, &changed) < 0) {
@@ -1336,7 +1332,7 @@ done:
     if (parent) {
         assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1495,7 +1491,7 @@ H5B2_delete(H5F_t *f, haddr_t addr, void *ctx_udata, H5B2_remove_t op, void *op_
 done:
     /* Unprotect the header, if an error occurred */
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_delete() */

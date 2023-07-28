@@ -234,7 +234,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
         asize[i] = -1;
 
     /* Parse the argument types */
-    for (argno = 0; *type; argno++, type += (HDisupper(*type) ? 2 : 1)) {
+    for (argno = 0; *type; argno++, type += (isupper(*type) ? 2 : 1)) {
         /* Count levels of indirection */
         for (ptr = 0; '*' == *type; type++)
             ptr++;
@@ -244,7 +244,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
             char *rest;
 
             if ('a' == type[1]) {
-                asize_idx = (int)HDstrtol(type + 2, &rest, 10);
+                asize_idx = (int)strtol(type + 2, &rest, 10);
                 assert(0 <= asize_idx && asize_idx < (int)NELMTS(asize));
                 assert(']' == *rest);
                 type = rest + 1;
@@ -267,8 +267,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
         argname = va_arg(ap, char *);
         if (argname)
             H5RS_asprintf_cat(rs, "%s%s=", argno ? ", " : "", argname);
-        else
-            argname = "";
 
         /* A pointer/array */
         if (ptr) {
@@ -3906,7 +3904,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     break;
 
                 default:
-                    if (HDisupper(type[0]))
+                    if (isupper(type[0]))
                         H5RS_asprintf_cat(rs, "BADTYPE(%c%c)", type[0], type[1]);
                     else
                         H5RS_asprintf_cat(rs, "BADTYPE(%c)", type[0]);
@@ -3960,8 +3958,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     hssize_t          i;
     FILE             *out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
-    H5_timer_t        function_timer;
-    H5_timevals_t     function_times = {0.0, 0.0, 0.0};
+    H5_timer_t        function_timer      = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, FALSE};
+    H5_timevals_t     function_times      = {0.0, 0.0, 0.0};
     static H5_timer_t running_timer;
     H5_timevals_t     running_times;
     static int        current_depth   = 0;

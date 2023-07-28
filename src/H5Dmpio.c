@@ -1318,8 +1318,8 @@ done:
     /* Close debugging log file */
     if (debug_log_file) {
         fprintf(debug_log_file, "##############\n\n");
-        if (EOF == HDfclose(debug_log_file))
-            HDONE_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "couldn't close debugging log file")
+        if (EOF == fclose(debug_log_file))
+            HDONE_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "couldn't close debugging log file");
         debug_stream = H5DEBUG(D);
     }
 #endif
@@ -1476,8 +1476,8 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
 
             /* Sort sel_pieces if necessary */
             if (need_sort)
-                HDqsort(io_info->sel_pieces, io_info->pieces_added, sizeof(io_info->sel_pieces[0]),
-                        H5D__cmp_piece_addr);
+                qsort(io_info->sel_pieces, io_info->pieces_added, sizeof(io_info->sel_pieces[0]),
+                      H5D__cmp_piece_addr);
 
             /* Allocate chunking information */
             if (NULL == (chunk_mtype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
@@ -2127,7 +2127,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
 done:
     /* Reset collective opt mode */
     if (H5CX_set_mpio_coll_opt(orig_coll_opt_mode) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't reset MPI-I/O collective_op property")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't reset MPI-I/O collective_op property");
 
     /* Free memory */
     if (chunk_io_option)
@@ -2855,7 +2855,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
         for (ic = 0; ic < total_chunks; ic++)
             assign_io_mode[ic] = H5D_CHUNK_IO_MODE_COL;
 
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     threshold_nproc_per_chunk = (unsigned)mpi_size * percent_nproc_per_chunk / 100;
@@ -2880,7 +2880,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
     } /* end while */
 
     /* Gather all the information */
-    H5_CHECK_OVERFLOW(total_chunks, size_t, int)
+    H5_CHECK_OVERFLOW(total_chunks, size_t, int);
     if (MPI_SUCCESS != (mpi_code = MPI_Gather(io_mode_info, (int)total_chunks, MPI_BYTE, recv_io_mode_info,
                                               (int)total_chunks, MPI_BYTE, root, comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
@@ -3159,8 +3159,8 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
 
         /* Ensure the chunk list is sorted in ascending order of offset in the file */
         if (need_sort)
-            HDqsort(local_info_array, num_chunks_selected, sizeof(H5D_filtered_collective_io_info_t),
-                    H5D__cmp_filtered_collective_io_info_entry);
+            qsort(local_info_array, num_chunks_selected, sizeof(H5D_filtered_collective_io_info_t),
+                  H5D__cmp_filtered_collective_io_info_entry);
 
 #ifdef H5Dmpio_DEBUG
         H5D__mpio_dump_collective_filtered_chunk_list(local_info_array, num_chunks_selected, mpi_rank);
@@ -3409,7 +3409,7 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
         if (NULL == (counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*counts_disps_array)))) {
             /* Push an error, but still participate in collective gather operation */
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate receive counts and displacements array")
+                        "couldn't allocate receive counts and displacements array");
         }
         else {
             /* Set the receive counts from the assigned chunks map */
@@ -3467,8 +3467,8 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
         memset(num_chunks_assigned_map, 0, (size_t)mpi_size * sizeof(*num_chunks_assigned_map));
 
         /* Sort collective chunk list according to chunk index */
-        HDqsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
-                H5D__cmp_chunk_redistribute_info);
+        qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
+              H5D__cmp_chunk_redistribute_info);
 
         /*
          * Process all chunks in the collective chunk list.
@@ -3549,8 +3549,8 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
          *       algorithm may be devised that doesn't rely on frail sorting,
          *       but the current implementation is a quick and naive approach.
          */
-        HDqsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
-                H5D__cmp_chunk_redistribute_info_orig_owner);
+        qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
+              H5D__cmp_chunk_redistribute_info_orig_owner);
     }
 
     if (all_ranks_involved) {
@@ -3842,7 +3842,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
              * future, this may become a problem and derived datatypes
              * will need to be used.
              */
-            H5_CHECK_OVERFLOW(mod_data_size, size_t, int)
+            H5_CHECK_OVERFLOW(mod_data_size, size_t, int);
 
             /* Send modification data to new owner */
             if (MPI_SUCCESS !=
@@ -3882,8 +3882,8 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                     "too many shared chunks in parallel filtered write operation")
 
-    H5_CHECK_OVERFLOW(num_send_requests, size_t, int)
-    H5_CHECK_OVERFLOW(num_msgs_incoming, size_t, int)
+    H5_CHECK_OVERFLOW(num_send_requests, size_t, int);
+    H5_CHECK_OVERFLOW(num_msgs_incoming, size_t, int);
 
     /*
      * Allocate receive buffer and MPI_Request arrays for non-blocking
@@ -3919,7 +3919,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&status, MPI_BYTE, &msg_size)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements_x failed", mpi_code)
 
-            H5_CHECK_OVERFLOW(msg_size, MPI_Count, int)
+            H5_CHECK_OVERFLOW(msg_size, MPI_Count, int);
 #else
             int msg_size = 0;
 
@@ -4067,7 +4067,7 @@ done:
 
     if (mem_iter) {
         if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release dataspace selection iterator")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release dataspace selection iterator");
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
     }
 
@@ -4162,7 +4162,7 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
      */
     if (num_chunks == 0) {
         if (mpi_size == 1)
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         else {
             if (io_info->op_type == H5D_IO_OP_WRITE)
                 coll_io_info.base_maddr.cvp = &fake_buf;
@@ -4288,7 +4288,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
 
         if (NULL == (chunk_list[i].buf = H5MM_malloc(chunk_list[i].chunk_buf_size))) {
             /* Push an error, but participate in collective read */
-            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer");
             break;
         }
 
@@ -4407,9 +4407,9 @@ done:
 
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info");
     if (fill_space && (H5S_close(fill_space) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space")
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);
@@ -4526,7 +4526,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
         if (NULL == chunk_list[i].buf) {
             /* Push an error, but participate in collective read */
-            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer");
             break;
         }
 
@@ -4738,17 +4738,17 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 done:
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator");
         sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
     if (dataspace && (H5S_close(dataspace) < 0))
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace");
     if (fill_space && (H5S_close(fill_space) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space")
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
 
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info");
 
     /* On failure, try to free all resources used by entries in the chunk list */
     if (ret_value < 0) {
@@ -4841,7 +4841,7 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
         if (NULL == (counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*counts_disps_array)))) {
             /* Push an error, but still participate in collective gather operation */
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate receive counts and displacements array")
+                        "couldn't allocate receive counts and displacements array");
         }
         else {
             /* Set the receive counts from the assigned chunks map */
@@ -4935,8 +4935,8 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
      * ascending order of offset in the file
      */
     if (need_sort)
-        HDqsort(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
-                H5D__cmp_filtered_collective_io_info_entry);
+        qsort(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
+              H5D__cmp_filtered_collective_io_info_entry);
 
 done:
     H5MM_free(gathered_array);
@@ -5035,7 +5035,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         if (NULL == (counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*counts_disps_array)))) {
             /* Push an error, but still participate in collective gather operation */
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate receive counts and displacements array")
+                        "couldn't allocate receive counts and displacements array");
         }
         else {
             /* Set the receive counts from the assigned chunks map */

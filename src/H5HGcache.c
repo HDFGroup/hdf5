@@ -190,6 +190,7 @@ H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len, void *
     assert(image_len == H5HG_MINSIZE);
 
     /* Deserialize the heap's header */
+    heap.size = 0;
     if (H5HG__hdr_deserialize(&heap, (const uint8_t *)image, image_len, (const H5F_t *)udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode global heap prefix")
 
@@ -389,7 +390,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
 done:
     if (!ret_value && heap)
         if (H5HG__free(heap) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG__cache_heap_deserialize() */
@@ -411,7 +412,6 @@ H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(heap);
-    assert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(heap->cache_info.type == H5AC_GHEAP);
     assert(heap->size >= H5HG_MINSIZE);
     assert(image_len);
@@ -442,7 +442,6 @@ H5HG__cache_heap_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, si
     assert(f);
     assert(image);
     assert(heap);
-    assert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(heap->cache_info.type == H5AC_GHEAP);
     assert(heap->size == len);
     assert(heap->chunk);
@@ -458,10 +457,6 @@ H5HG__cache_heap_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, si
  *
  * Purpose:     Free the in memory representation of the supplied global heap.
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -474,7 +469,6 @@ H5HG__cache_heap_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     assert(heap);
-    assert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(heap->cache_info.type == H5AC_GHEAP);
 
     /* Destroy global heap collection */

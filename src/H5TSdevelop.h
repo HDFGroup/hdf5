@@ -39,7 +39,7 @@ extern "C" {
 #endif
 
 /* HDF5 global library lock routines */
-H5_DLL herr_t H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired);
+H5_DLL herr_t H5TSmutex_acquire(unsigned int lock_count, bool *acquired);
 H5_DLL herr_t H5TSmutex_release(unsigned int *lock_count);
 H5_DLL herr_t H5TSmutex_get_attempt_count(unsigned int *count);
 

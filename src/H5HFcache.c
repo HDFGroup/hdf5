@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFcache.c
- *			Feb 24 2006
- *			Quincey Koziol
  *
- * Purpose:		Implement fractal heap metadata cache methods.
+ * Purpose:		Implement fractal heap metadata cache methods
  *
  *-------------------------------------------------------------------------
  */
@@ -261,7 +259,7 @@ H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
     UINT16DECODE(*pp, dtable->cparam.start_root_rows);
 
     /* Address of table */
-    H5_addr_decode(f, pp, &(dtable->table_addr));
+    H5F_addr_decode(f, pp, &(dtable->table_addr));
 
     /* Current # of rows in root indirect block */
     UINT16DECODE(*pp, dtable->curr_root_rows);
@@ -306,7 +304,7 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
     UINT16ENCODE(*pp, dtable->cparam.start_root_rows);
 
     /* Address of root direct/indirect block */
-    H5_addr_encode(f, pp, dtable->table_addr);
+    H5F_addr_encode(f, pp, dtable->table_addr);
 
     /* Current # of rows in root indirect block */
     UINT16ENCODE(*pp, dtable->curr_root_rows);
@@ -476,14 +474,14 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     hdr->checksum_dblocks = heap_flags & H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS;
 
     /* "Huge" object information */
-    UINT32DECODE(image, hdr->max_man_size);                /* Max. size of "managed" objects */
-    H5F_DECODE_LENGTH(udata->f, image, hdr->huge_next_id); /* Next ID to use for "huge" object */
-    H5_addr_decode(udata->f, &image, &hdr->huge_bt2_addr); /* Address of "huge" object tracker B-tree */
+    UINT32DECODE(image, hdr->max_man_size);                 /* Max. size of "managed" objects */
+    H5F_DECODE_LENGTH(udata->f, image, hdr->huge_next_id);  /* Next ID to use for "huge" object */
+    H5F_addr_decode(udata->f, &image, &hdr->huge_bt2_addr); /* Address of "huge" object tracker B-tree */
 
     /* "Managed" object free space information */
     H5F_DECODE_LENGTH(udata->f, image,
-                      hdr->total_man_free);          /* Internal free space in managed direct blocks */
-    H5_addr_decode(udata->f, &image, &hdr->fs_addr); /* Address of free section header */
+                      hdr->total_man_free);           /* Internal free space in managed direct blocks */
+    H5F_addr_decode(udata->f, &image, &hdr->fs_addr); /* Address of free section header */
 
     /* Heap statistics */
     H5F_DECODE_LENGTH(udata->f, image, hdr->man_size);
@@ -555,7 +553,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
 done:
     if (!ret_value && hdr)
         if (H5HF__hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_hdr_deserialize() */
@@ -583,7 +581,6 @@ H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len)
 
     /* Sanity checks */
     assert(hdr);
-    assert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     assert(image_len);
 
@@ -622,7 +619,6 @@ H5HF__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t len,
     /* Sanity checks */
     assert(f);
     assert(hdr);
-    assert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     assert(H5_addr_defined(addr));
     assert(addr == hdr->heap_addr);
@@ -707,7 +703,6 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     assert(f);
     assert(image);
     assert(hdr);
-    assert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     assert(len == hdr->heap_size);
 
@@ -740,11 +735,11 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     /* "Huge" object information */
     UINT32ENCODE(image, hdr->max_man_size);         /* Max. size of "managed" objects */
     H5F_ENCODE_LENGTH(f, image, hdr->huge_next_id); /* Next ID to use for "huge" object */
-    H5_addr_encode(f, &image, hdr->huge_bt2_addr);  /* Address of "huge" object tracker B-tree */
+    H5F_addr_encode(f, &image, hdr->huge_bt2_addr); /* Address of "huge" object tracker B-tree */
 
     /* "Managed" object free space information */
     H5F_ENCODE_LENGTH(f, image, hdr->total_man_free); /* Internal free space in managed direct blocks */
-    H5_addr_encode(f, &image, hdr->fs_addr);          /* Address of free section header */
+    H5F_addr_encode(f, &image, hdr->fs_addr);         /* Address of free section header */
 
     /* Heap statistics */
     H5F_ENCODE_LENGTH(f, image, hdr->man_size);
@@ -799,10 +794,6 @@ done:
  *		This routine also does not free the file space that may
  *		be allocated to the header.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
@@ -818,7 +809,6 @@ H5HF__cache_hdr_free_icr(void *_thing)
 
     /* Sanity checks */
     assert(hdr);
-    assert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     assert(hdr->rc == 0);
 
@@ -964,7 +954,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, NULL, "wrong fractal heap direct block version")
 
     /* Address of heap that owns this block */
-    H5_addr_decode(udata->f, &image, &heap_addr);
+    H5F_addr_decode(udata->f, &image, &heap_addr);
     if (H5_addr_ne(heap_addr, hdr->heap_addr))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect heap header address for direct block")
 
@@ -1017,7 +1007,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
     for (u = 0; u < (iblock->nrows * hdr->man_dtable.cparam.width); u++) {
         /* Decode child block address */
-        H5_addr_decode(udata->f, &image, &(iblock->ents[u].addr));
+        H5F_addr_decode(udata->f, &image, &(iblock->ents[u].addr));
 
         /* Check for heap with I/O filters */
         if (hdr->filter_len > 0) {
@@ -1080,7 +1070,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 done:
     if (!ret_value && iblock)
         if (H5HF__man_iblock_dest(iblock) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap indirect block")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap indirect block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_iblock_deserialize() */
@@ -1104,7 +1094,6 @@ H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len)
 
     /* Sanity checks */
     assert(iblock);
-    assert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     assert(image_len);
 
@@ -1143,7 +1132,6 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
     /* Sanity checks */
     assert(f);
     assert(iblock);
-    assert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     assert(iblock->cache_info.size == iblock->size);
     assert(H5_addr_defined(addr));
@@ -1153,7 +1141,6 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
     assert(flags);
     hdr = iblock->hdr;
     assert(hdr);
-    assert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(hdr->cache_info.type == H5AC_FHEAP_HDR);
 
 #ifndef NDEBUG
@@ -1269,7 +1256,6 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     assert(f);
     assert(image);
     assert(iblock);
-    assert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     assert(iblock->cache_info.size == iblock->size);
     assert(len == iblock->size);
@@ -1296,7 +1282,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     *image++ = H5HF_IBLOCK_VERSION;
 
     /* Address of heap header for heap which owns this block */
-    H5_addr_encode(f, &image, hdr->heap_addr);
+    H5F_addr_encode(f, &image, hdr->heap_addr);
 
     /* Offset of block in heap */
     UINT64ENCODE_VAR(image, iblock->block_off, hdr->heap_off_size);
@@ -1304,7 +1290,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     /* Encode indirect block-specific fields */
     for (u = 0; u < (iblock->nrows * hdr->man_dtable.cparam.width); u++) {
         /* Encode child block address */
-        H5_addr_encode(f, &image, iblock->ents[u].addr);
+        H5F_addr_encode(f, &image, iblock->ents[u].addr);
 
         /* Check for heap with I/O filters */
         if (hdr->filter_len > 0) {
@@ -1379,7 +1365,6 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
 
     /* Sanity checks */
     assert(iblock);
-    assert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     assert(iblock->hdr);
 
@@ -1456,10 +1441,6 @@ done:
  * Purpose:	Unlink the supplied instance of H5HF_indirect_t from the
  *		fractal heap and free its memory.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
@@ -1475,7 +1456,6 @@ H5HF__cache_iblock_free_icr(void *thing)
 
     /* Sanity checks */
     assert(iblock);
-    assert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     assert(iblock->rc == 0);
     assert(iblock->hdr);
@@ -1628,7 +1608,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     computed_chksum = H5_checksum_metadata(read_buf, len, 0);
 
     /* Restore the checksum */
-    UINT32ENCODE(chk_p, stored_chksum)
+    UINT32ENCODE(chk_p, stored_chksum);
 
     /* Verify checksum */
     if (stored_chksum != computed_chksum)
@@ -1694,7 +1674,6 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     assert(par_info);
     hdr = par_info->hdr;
     assert(hdr);
-    assert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     assert(dirty);
 
@@ -1789,7 +1768,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, NULL, "wrong fractal heap direct block version")
 
     /* Address of heap that owns this block (just for file integrity checks) */
-    H5_addr_decode(udata->f, &image, &heap_addr);
+    H5F_addr_decode(udata->f, &image, &heap_addr);
     if (H5_addr_ne(heap_addr, hdr->heap_addr))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect heap header address for direct block")
 
@@ -1834,7 +1813,7 @@ done:
     /* Cleanup on error */
     if (!ret_value && dblock)
         if (H5HF__man_dblock_dest(dblock) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap direct block")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap direct block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_dblock_deserialize() */
@@ -1862,7 +1841,6 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len)
 
     /* Sanity checks */
     assert(dblock);
-    assert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     assert(image_len);
 
@@ -2002,7 +1980,6 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     /* Sanity checks */
     assert(f);
     assert(dblock);
-    assert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     assert(dblock->write_buf == NULL);
     assert(dblock->write_size == 0);
@@ -2020,7 +1997,6 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     hdr->f = (H5F_t *)f;
 
     assert(hdr);
-    assert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(hdr->cache_info.type == H5AC_FHEAP_HDR);
 
     if (dblock->parent) {
@@ -2033,7 +2009,6 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
         par_iblock = dblock->parent;
         par_entry  = dblock->par_entry;
 
-        assert(par_iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         assert(par_iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
         assert(H5_addr_eq(par_iblock->ents[par_entry].addr, addr));
     } /* end if */
@@ -2063,7 +2038,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     *image++ = H5HF_DBLOCK_VERSION;
 
     /* Address of heap header for heap which owns this block */
-    H5_addr_encode(f, &image, hdr->heap_addr);
+    H5F_addr_encode(f, &image, hdr->heap_addr);
 
     /* Offset of block in heap */
     UINT64ENCODE_VAR(image, dblock->block_off, hdr->heap_off_size);
@@ -2365,7 +2340,6 @@ H5HF__cache_dblock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image,
     assert(image);
     assert(len > 0);
     assert(dblock);
-    assert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     assert((dblock->blk != dblock->write_buf) || (dblock->cache_info.size == dblock->size));
     assert(dblock->write_buf);
@@ -2410,7 +2384,6 @@ H5HF__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
 
     /* Sanity checks */
     assert(dblock);
-    assert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     assert(dblock->hdr);
 
@@ -2457,10 +2430,6 @@ done:
  * Purpose:	Free the in core memory allocated to the supplied direct
  *		block.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
@@ -2476,7 +2445,6 @@ H5HF__cache_dblock_free_icr(void *_thing)
 
     /* Sanity checks */
     assert(dblock);
-    assert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
 
     /* Destroy fractal heap direct block */
@@ -2508,7 +2476,6 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
 
     /* Sanity checks */
     assert(dblock);
-    assert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     assert(dblock->file_size > 0);
     assert(fsf_size);
@@ -2593,7 +2560,6 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, hbool_t *fd_
     /* Sanity checks */
     assert(f);
     assert(hdr);
-    assert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     assert(fd_clean);
     assert(clean);
@@ -2712,7 +2678,7 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, hbool_t *fd_
 
                     if (NULL == (root_iblock = (H5HF_indirect_t *)H5AC_protect(
                                      f, H5AC_FHEAP_IBLOCK, root_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
-                        HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.")
+                        HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.");
 
                     H5_END_TAG
 
@@ -2787,7 +2753,7 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, hbool_t *fd_
 
                     if (NULL == (iblock = (H5HF_indirect_t *)H5AC_protect(
                                      f, H5AC_FHEAP_IBLOCK, root_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
-                        HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.")
+                        HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.");
 
                     H5_END_TAG
 
@@ -2800,7 +2766,6 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, hbool_t *fd_
              * in memory for the duration of the call.  Do some sanity checks,
              * and then call H5HF__cache_verify_iblock_descendants_clean().
              */
-            assert(root_iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             assert(root_iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
 
             if (H5HF__cache_verify_iblock_descendants_clean(f, hdr->heap_addr, root_iblock,
@@ -2955,7 +2920,6 @@ H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, haddr_t fd_parent_addr, H5
     assert(f);
     assert(H5_addr_defined(fd_parent_addr));
     assert(iblock);
-    assert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     assert(iblock_status);
     assert(fd_clean);
@@ -3071,7 +3035,6 @@ H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5HF_
     assert(f);
     assert(H5_addr_defined(fd_parent_addr));
     assert(iblock);
-    assert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     assert(fd_clean);
     assert(*fd_clean);
@@ -3233,7 +3196,6 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
     assert(f);
     assert(H5_addr_defined(fd_parent_addr));
     assert(iblock);
-    assert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     assert(fd_clean);
     assert(*fd_clean);
@@ -3356,7 +3318,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
                             if (NULL ==
                                 (child_iblock = (H5HF_indirect_t *)H5AC_protect(
                                      f, H5AC_FHEAP_IBLOCK, child_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
-                                HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.")
+                                HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.");
 
                             H5_END_TAG
 
@@ -3386,7 +3348,6 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
                      * that we have the correct one.
                      */
                     assert(child_iblock);
-                    assert(child_iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     assert(child_iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
                     assert(child_iblock->addr == child_iblock_addr);
 

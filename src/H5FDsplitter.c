@@ -267,7 +267,7 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
         HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, -1, "unable to copy file access property list");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__copy_plist() */
 
 /*-------------------------------------------------------------------------
@@ -880,7 +880,7 @@ done:
             if (file_ptr->wo_file)
                 H5FD_close(file_ptr->wo_file);
             if (file_ptr->logfp)
-                HDfclose(file_ptr->logfp);
+                fclose(file_ptr->logfp);
             H5FL_FREE(H5FD_splitter_t, file_ptr);
         }
     } /* end if error */
@@ -924,7 +924,7 @@ H5FD__splitter_close(H5FD_t *_file)
                                    "unable to close W/O file")
 
     if (file->logfp) {
-        HDfclose(file->logfp);
+        fclose(file->logfp);
         file->logfp = NULL;
     }
 
@@ -1580,7 +1580,7 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
             ret_value = FAIL;
         else if (size < (size_t)HDsnprintf(s, size + 1, "%s: %s\n", atfunc, msg))
             ret_value = FAIL;
-        else if (size != HDfwrite(s, 1, size, file->logfp))
+        else if (size != fwrite(s, 1, size, file->logfp))
             ret_value = FAIL;
         H5MM_free(s);
     }

@@ -70,8 +70,8 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*****************************/
 
 /* Library incompatible release versions, develop releases are incompatible by design */
-const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
-const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 0;
+static const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
+static const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 0;
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
@@ -145,7 +145,7 @@ H5_init_library(void)
 
     /* Run the library initialization routine, if it hasn't already run */
     if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
@@ -218,11 +218,11 @@ H5_init_library(void)
          * This must be entered before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
-        (void)HDatexit(H5TS_win32_process_exit);
+        (void)atexit(H5TS_win32_process_exit);
 #endif /* H5_HAVE_THREADSAFE && H5_HAVE_WIN_THREADS */
 
         /* Normal library termination code */
-        (void)HDatexit(H5_term_library);
+        (void)atexit(H5_term_library);
 
         H5_dont_atexit_g = TRUE;
     } /* end if */
@@ -492,7 +492,7 @@ H5_term_library(void)
         H5_debug_open_stream_t *tmp_open_stream;
 
         tmp_open_stream = H5_debug_g.open_stream;
-        (void)HDfclose(H5_debug_g.open_stream->stream);
+        (void)fclose(H5_debug_g.open_stream->stream);
         H5_debug_g.open_stream = H5_debug_g.open_stream->next;
         (void)H5MM_free(tmp_open_stream);
     } /* end while */
@@ -697,7 +697,7 @@ H5__debug_mask(const char *s)
 
     while (s && *s) {
 
-        if (HDisalpha(*s) || '-' == *s || '+' == *s) {
+        if (isalpha(*s) || '-' == *s || '+' == *s) {
 
             /* Enable or Disable debugging? */
             if ('-' == *s) {
@@ -713,7 +713,7 @@ H5__debug_mask(const char *s)
             } /* end if */
 
             /* Get the name */
-            for (i = 0; HDisalpha(*s); i++, s++)
+            for (i = 0; isalpha(*s); i++, s++)
                 if (i < sizeof pkg_name)
                     pkg_name[i] = *s;
             pkg_name[MIN(sizeof(pkg_name) - 1, i)] = '\0';
@@ -745,8 +745,8 @@ H5__debug_mask(const char *s)
                     fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
             } /* end if-else */
         }
-        else if (HDisdigit(*s)) {
-            int                     fd = (int)HDstrtol(s, &rest, 0);
+        else if (isdigit(*s)) {
+            int                     fd = (int)strtol(s, &rest, 0);
             H5_debug_open_stream_t *open_stream;
 
             if ((stream = HDfdopen(fd, "w")) != NULL) {
@@ -754,7 +754,7 @@ H5__debug_mask(const char *s)
 
                 if (NULL ==
                     (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {
-                    (void)HDfclose(stream);
+                    (void)fclose(stream);
                     return;
                 } /* end if */
 
@@ -881,7 +881,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
     /* Don't check again, if we already have */
     if (checked)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     {
         const char *s; /* Environment string for disabling version check */
@@ -889,8 +889,8 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         /* Allow different versions of the header files and library? */
         s = HDgetenv("HDF5_DISABLE_VERSION_CHECK");
 
-        if (s && HDisdigit(*s))
-            disable_version_check = (unsigned int)HDstrtol(s, NULL, 0);
+        if (s && isdigit(*s))
+            disable_version_check = (unsigned int)strtol(s, NULL, 0);
     }
 
     /* H5_VERS_MAJOR and H5_VERS_MINOR must match */

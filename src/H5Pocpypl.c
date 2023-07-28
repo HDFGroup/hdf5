@@ -203,7 +203,7 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
         dt_list = tmp_node;
     } /* end while */
 
-    FUNC_LEAVE_NOAPI(NULL);
+    FUNC_LEAVE_NOAPI(NULL)
 } /* H5P__free_merge_comm_dtype_list */
 
 /*--------------------------------------------------------------------------
@@ -545,7 +545,7 @@ H5P__ocpy_merge_comm_dt_list_cmp(const void *_dt_list1, const void *_dt_list2, s
         /* Compare paths */
         ret_value = HDstrcmp(dt_list1->path, dt_list2->path);
         if (ret_value != 0)
-            HGOTO_DONE(ret_value)
+            HGOTO_DONE(ret_value);
 
         /* Advance to next node */
         dt_list1 = dt_list1->next;
@@ -554,9 +554,9 @@ H5P__ocpy_merge_comm_dt_list_cmp(const void *_dt_list1, const void *_dt_list2, s
 
     /* Check if one list is longer than the other */
     if (dt_list1)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (dt_list2)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -668,7 +668,7 @@ done:
  *              target file when merging committed datatypes during H5Ocopy
  *              (i.e. when using the H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG flag
  *              as set by H5Pset_copy_object).  If the source named
- *              dataype is not found in the list of paths created by this
+ *              datatype is not found in the list of paths created by this
  *              function, the entire file will be searched.
  *
  * Usage:       H5Padd_merge_committed_dtype_path(plist_id, path)

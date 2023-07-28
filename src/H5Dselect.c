@@ -23,11 +23,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Dpkg.h"      /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free Lists                           */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Dpkg.h"      /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5VMprivate.h" /* Vector Functions                         */
 
 /****************/
 /* Local Macros */
@@ -234,11 +235,11 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
 done:
     /* Release selection iterators */
     if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     if (file_iter)
         file_iter = H5FL_FREE(H5S_sel_iter_t, file_iter);
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     if (mem_iter)
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
 
@@ -413,13 +414,13 @@ done:
     /* Release selection iterators */
     if (src_sel_iter) {
         if (src_sel_iter_init && H5S_SELECT_ITER_RELEASE(src_sel_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
 
         src_sel_iter = H5FL_FREE(H5S_sel_iter_t, src_sel_iter);
     }
     if (dst_sel_iter) {
         if (dst_sel_iter_init && H5S_SELECT_ITER_RELEASE(dst_sel_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
 
         dst_sel_iter = H5FL_FREE(H5S_sel_iter_t, dst_sel_iter);
     }

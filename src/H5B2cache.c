@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5B2cache.c
- *              Jan 31 2005
- *              Quincey Koziol
  *
- * Purpose:     Implement v2 B-tree metadata cache methods.
+ * Purpose:     Implement v2 B-tree metadata cache methods
  *
  *-------------------------------------------------------------------------
  */
@@ -30,10 +28,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5B2pkg.h"     /* v2 B-trees				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5WBprivate.h" /* Wrapped Buffers                      */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5B2pkg.h"     /* B-Trees (Version 2)                      */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MMprivate.h" /* Memory Management                        */
 
 /****************/
 /* Local Macros */
@@ -268,7 +269,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     cparam.merge_percent = *image++;
 
     /* Root node pointer */
-    H5_addr_decode(udata->f, (const uint8_t **)&image, &(hdr->root.addr));
+    H5F_addr_decode(udata->f, (const uint8_t **)&image, &(hdr->root.addr));
     UINT16DECODE(image, hdr->root.node_nrec);
     H5F_DECODE_LENGTH(udata->f, image, hdr->root.all_nrec);
 
@@ -297,7 +298,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
 done:
     if (!ret_value && hdr)
         if (H5B2__hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, NULL, "can't release v2 B-tree header")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, NULL, "can't release v2 B-tree header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__cache_hdr_deserialize() */
@@ -378,7 +379,7 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = (uint8_t)hdr->merge_percent;
 
     /* Root node pointer */
-    H5_addr_encode(f, &image, hdr->root.addr);
+    H5F_addr_encode(f, &image, hdr->root.addr);
     UINT16ENCODE(image, hdr->root.node_nrec);
     H5F_ENCODE_LENGTH(f, image, hdr->root.all_nrec);
 
@@ -663,12 +664,12 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     int_node_ptr = internal->node_ptrs;
     for (u = 0; u < (unsigned)(internal->nrec + 1); u++) {
         /* Decode node pointer */
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &(int_node_ptr->addr));
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &(int_node_ptr->addr));
         UINT64DECODE_VAR(image, node_nrec, udata->hdr->max_nrec_size);
         H5_CHECKED_ASSIGN(int_node_ptr->node_nrec, uint16_t, node_nrec, int);
         if (udata->depth > 1)
             UINT64DECODE_VAR(image, int_node_ptr->all_nrec,
-                             udata->hdr->node_info[udata->depth - 1].cum_max_nrec_size)
+                             udata->hdr->node_info[udata->depth - 1].cum_max_nrec_size);
         else
             int_node_ptr->all_nrec = int_node_ptr->node_nrec;
 
@@ -690,7 +691,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
 done:
     if (!ret_value && internal)
         if (H5B2__internal_free(internal) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree internal node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree internal node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__cache_int_deserialize() */
@@ -779,7 +780,7 @@ H5B2__cache_int_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     int_node_ptr = internal->node_ptrs;
     for (u = 0; u < (unsigned)(internal->nrec + 1); u++) {
         /* Encode node pointer */
-        H5_addr_encode(f, &image, int_node_ptr->addr);
+        H5F_addr_encode(f, &image, int_node_ptr->addr);
         UINT64ENCODE_VAR(image, int_node_ptr->node_nrec, internal->hdr->max_nrec_size);
         if (internal->depth > 1)
             UINT64ENCODE_VAR(image, int_node_ptr->all_nrec,
@@ -1063,7 +1064,7 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void
 done:
     if (!ret_value && leaf)
         if (H5B2__leaf_free(leaf) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree leaf node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree leaf node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__cache_leaf_deserialize() */

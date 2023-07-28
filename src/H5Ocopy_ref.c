@@ -14,7 +14,7 @@
  *
  * Created:     H5Ocopy_ref.c
  *
- * Purpose:     Object with references copying routines.
+ * Purpose:     Object with references copying routines
  *
  *-------------------------------------------------------------------------
  */
@@ -30,6 +30,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* File                                     */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
@@ -242,7 +243,7 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
 
             /* Get object address */
             p = (const uint8_t *)data;
-            H5_addr_decode(src_oloc->file, &p, &src_oloc->addr);
+            H5F_addr_decode(src_oloc->file, &p, &src_oloc->addr);
             if (!H5_addr_defined(src_oloc->addr) || src_oloc->addr == 0) {
                 H5MM_free(data);
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
@@ -257,7 +258,7 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
 
             /* Serialize object addr */
             q = (uint8_t *)data;
-            H5_addr_encode(dst_oloc->file, &q, dst_oloc->addr);
+            H5F_addr_encode(dst_oloc->file, &q, dst_oloc->addr);
 
             /* Write to heap */
             if (H5R__encode_heap(dst_oloc->file, dst_buf, &buf_size, data, (size_t)data_size) < 0) {
@@ -401,20 +402,20 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
 
 done:
     if (buf_space && (H5S_close(buf_space) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't close dataspace")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't close dataspace");
     /* Don't decrement ID, we want to keep underlying datatype */
     if (reg_tid_src && (tid_src > 0) && (NULL == H5I_remove(tid_src)))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if ((tid_mem > 0) && H5I_dec_ref(tid_mem) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if ((tid_dst > 0) && H5I_dec_ref(tid_dst) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (reclaim_buf)
         reclaim_buf = H5FL_BLK_FREE(type_conv, reclaim_buf);
     if (conv_buf)
         conv_buf = H5FL_BLK_FREE(type_conv, conv_buf);
     if ((dst_loc_id != H5I_INVALID_HID) && (H5I_dec_ref(dst_loc_id) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement refcount on location id")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement refcount on location id");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy_expand_ref_object2() */

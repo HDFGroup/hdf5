@@ -288,7 +288,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* If no datasets have I/O, we're done */
     if (io_op_init == 0)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
@@ -395,7 +395,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             }
             else {
                 /* Call selection I/O directly */
-                H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t)
+                H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t);
                 if (H5F_shared_select_read(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                            io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
                                            io_info.element_sizes, io_info.rbufs) < 0)
@@ -424,11 +424,11 @@ done:
     for (i = 0; i < io_op_init; i++)
         if (!dset_info[i].skip_io && dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
 
     /* Shut down datatype info for operation */
     if (H5D__typeinfo_term(&io_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info");
 
     /* Discard projected mem spaces and restore originals */
     if (orig_mem_space) {
@@ -436,7 +436,7 @@ done:
             if (orig_mem_space[i]) {
                 if (H5S_close(dset_info[i].mem_space) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL,
-                                "unable to shut down projected memory dataspace")
+                                "unable to shut down projected memory dataspace");
                 dset_info[i].mem_space = orig_mem_space[i];
             }
 
@@ -797,7 +797,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             }
             else {
                 /* Call selection I/O directly */
-                H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t)
+                H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t);
                 if (H5F_shared_select_write(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                             io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
                                             io_info.element_sizes, io_info.wbufs) < 0)
@@ -827,36 +827,18 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 #endif /* H5_HAVE_PARALLEL */
     }
 
-#ifdef OLD_WAY
-    /*
-     * This was taken out because it can be called in a parallel program with
-     * independent access, causing the metadata cache to get corrupted. Its been
-     * disabled for all types of access (serial as well as parallel) to make the
-     * modification time consistent for all programs. -QAK
-     *
-     * We should set a value in the dataset's shared information instead and flush
-     * it to the file when the dataset is being closed. -QAK
-     */
-    /*
-     * Update modification time.  We have to do this explicitly because
-     * writing to a dataset doesn't necessarily change the object header.
-     */
-    if (H5O_touch(&(dataset->oloc), FALSE) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time")
-#endif /* OLD_WAY */
-
 done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++) {
         assert(!dset_info[i].skip_io);
         if (dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
     }
 
     /* Shut down datatype info for operation */
     if (H5D__typeinfo_term(&io_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info");
 
     /* Discard projected mem spaces and restore originals */
     if (orig_mem_space) {
@@ -864,7 +846,7 @@ done:
             if (orig_mem_space[i]) {
                 if (H5S_close(dset_info[i].mem_space) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL,
-                                "unable to shut down projected memory dataspace")
+                                "unable to shut down projected memory dataspace");
                 dset_info[i].mem_space = orig_mem_space[i];
             }
 

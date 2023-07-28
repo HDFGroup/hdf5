@@ -173,7 +173,7 @@ done:
 } /* H5C__trace_write_log_message() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_log_trace_set_up
+ * Function:    H5C__log_trace_set_up
  *
  * Purpose:     Setup for metadata cache logging.
  *
@@ -194,14 +194,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank)
+H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank)
 {
     H5C_log_trace_udata_t *trace_udata = NULL;
     char                  *file_name   = NULL;
     size_t                 n_chars;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(log_info);
@@ -263,7 +263,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_log_trace_set_up() */
+} /* H5C__log_trace_set_up() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5C__trace_tear_down_logging
@@ -292,7 +292,7 @@ H5C__trace_tear_down_logging(H5C_log_info_t *log_info)
     H5MM_xfree(trace_udata->message);
 
     /* Close log file */
-    if (EOF == HDfclose(trace_udata->outfile))
+    if (EOF == fclose(trace_udata->outfile))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file")
     trace_udata->outfile = NULL;
 

@@ -11,14 +11,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:    This file contains the framework for ensuring that the global
- *        library lock is held when an API routine is called.  This
- *              framework works in concert with the FUNC_ENTER_API / FUNC_LEAVE_API
- *        macros defined in H5private.h.
+ * Purpose: This file contains the framework for ensuring that the global
+ *          library lock is held when an API routine is called.  This
+ *          framework works in concert with the FUNC_ENTER_API / FUNC_LEAVE_API
+ *          macros defined in H5private.h.
  *
  * Note:    Because this threadsafety framework operates outside the library,
- *        it does not use the error stack and only uses the "namecheck only"
- *              FUNC_ENTER_* / FUNC_LEAVE_* macros.
+ *          it does not use the error stack and only uses the "namecheck only"
+ *          FUNC_ENTER_* / FUNC_LEAVE_* macros.
  */
 
 /****************/
@@ -55,7 +55,7 @@ typedef void *(*H5TS_thread_cb_t)(void *);
 /* Local Prototypes */
 /********************/
 static void   H5TS__key_destructor(void *key_val);
-static herr_t H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acquired);
+static herr_t H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, bool *acquired);
 static herr_t H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count);
 
 /*********************/
@@ -148,10 +148,6 @@ static H5TS_key_t H5TS_tid_key;
  *   Frees the memory for a key.  Called by each thread as it exits.
  *   Currently all the thread-specific information for all keys are simple
  *   structures allocated with malloc, so we can free them all uniformly.
- *
- * PROGRAMMER: Quincey Koziol
- *             February 7, 2003
- *
  *--------------------------------------------------------------------------
  */
 static void
@@ -159,7 +155,7 @@ H5TS__key_destructor(void *key_val)
 {
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
-    /* Use free here instead of H5MM_xfree(), to avoid calling the H5CS routines */
+    /* Use free() here instead of H5MM_xfree(), to avoid calling the H5CS routines */
     if (key_val != NULL)
         free(key_val);
 
@@ -310,8 +306,8 @@ H5TS_thread_id(void)
 void
 H5TS_pthread_first_thread_init(void)
 {
-    H5_g.H5_libinit_g = FALSE; /* Library hasn't been initialized */
-    H5_g.H5_libterm_g = FALSE; /* Library isn't being shutdown */
+    H5_g.H5_libinit_g = false; /* Library hasn't been initialized */
+    H5_g.H5_libterm_g = false; /* Library isn't being shutdown */
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -361,14 +357,10 @@ H5TS_pthread_first_thread_init(void)
  * Note:        The Windows threads code is very likely bogus.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 27, 2019
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acquired)
+H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, bool *acquired)
 {
     herr_t ret_value = SUCCEED;
 
@@ -376,7 +368,7 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acqui
 
 #ifdef H5_HAVE_WIN_THREADS
     EnterCriticalSection(&mutex->CriticalSection);
-    *acquired = TRUE;
+    *acquired = true;
 #else  /* H5_HAVE_WIN_THREADS */
     /* Attempt to acquire the mutex lock */
     if (0 == pthread_mutex_lock(&mutex->atomic_lock)) {
@@ -388,21 +380,21 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acqui
             if (pthread_equal(my_thread_id, mutex->owner_thread)) {
                 /* Already owned by self - increment count */
                 mutex->lock_count += lock_count;
-                *acquired = TRUE;
-            } /* end if */
+                *acquired = true;
+            }
             else
-                *acquired = FALSE;
-        } /* end if */
+                *acquired = false;
+        }
         else {
             /* Take ownership of the mutex */
             mutex->owner_thread = my_thread_id;
             mutex->lock_count   = lock_count;
-            *acquired           = TRUE;
-        } /* end else */
+            *acquired           = true;
+        }
 
         if (0 != pthread_mutex_unlock(&mutex->atomic_lock))
             ret_value = -1;
-    } /* end if */
+    }
     else
         ret_value = -1;
 #endif /* H5_HAVE_WIN_THREADS */
@@ -419,14 +411,10 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acqui
  *              global lock was acquired.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 27, 2019
- *
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_acquire(unsigned int lock_count, hbool_t *acquired){
+H5TSmutex_acquire(unsigned int lock_count, bool *acquired){
     FUNC_ENTER_API_NAMECHECK_ONLY
 
         FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(&H5_g.init_lock, lock_count, acquired))}
@@ -487,7 +475,7 @@ herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex)
         /* After we've received the signal, take ownership of the mutex */
         mutex->owner_thread = pthread_self();
         mutex->lock_count   = 1;
-    } /* end else */
+    }
 
     /* Release the library lock */
     ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
@@ -545,7 +533,7 @@ H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
         err = pthread_cond_signal(&mutex->cond_var);
         if (err != 0)
             ret_value = err;
-    } /* end if */
+    }
 
 done:
 #endif /* H5_HAVE_WIN_THREADS */
@@ -600,7 +588,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
         err = pthread_cond_signal(&mutex->cond_var);
         if (err != 0)
             ret_value = err;
-    } /* end if */
+    }
 
 done:
 #endif /* H5_HAVE_WIN_THREADS */
@@ -613,10 +601,6 @@ done:
  * Purpose:     Get the current count of the global lock attempt
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Houjun Tang
- *              June 24, 2019
- *
  *--------------------------------------------------------------------------
  */
 herr_t
@@ -650,10 +634,6 @@ done:
  * Purpose:     Releases the HDF5 library global lock
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Februrary 27, 2019
- *
  *--------------------------------------------------------------------------
  */
 herr_t
@@ -728,8 +708,8 @@ H5TS_cancel_count_inc(void)
         if (ret_value) {
             free(cancel_counter);
             HGOTO_DONE(FAIL);
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     /* Check if thread entering library */
     if (cancel_counter->cancel_count == 0)

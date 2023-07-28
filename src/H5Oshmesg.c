@@ -87,7 +87,7 @@ H5O__shmesg_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5_addr_decode(f, &p, &(mesg->addr));
+    H5F_addr_decode(f, &p, &(mesg->addr));
 
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -126,7 +126,7 @@ H5O__shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 
     /* Store version, table address, and number of indexes */
     *p++ = (uint8_t)mesg->version;
-    H5_addr_encode(f, &p, mesg->addr);
+    H5F_addr_encode(f, &p, mesg->addr);
     *p++ = (uint8_t)mesg->nindexes;
 
     FUNC_LEAVE_NOAPI(SUCCEED)

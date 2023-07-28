@@ -320,7 +320,7 @@ H5G__obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo)
 done:
     /* Release resources */
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5G__obj_get_linfo() */
@@ -531,7 +531,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert link into group")
 
             /* Done with insertion now */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
         else
             use_old_format = TRUE;
@@ -580,7 +580,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
 done:
     /* Free any space used by the pipeline message */
     if (pline && H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't release pipeline")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "can't release pipeline");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5G_obj_insert() */
@@ -722,7 +722,7 @@ H5G__obj_info(const H5O_loc_t *oloc, H5G_info_t *grp_info)
 done:
     /* Clean up resources */
     if (grp && H5G_close(grp) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "unable to close queried group")
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "unable to close queried group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__obj_info() */
@@ -866,7 +866,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
                             /* Release object header */
                             if (H5O_unpin(oh) < 0)
                                 HDONE_ERROR(H5E_SYM, H5E_CANTUNPIN, FAIL,
-                                            "unable to unpin group object header")
+                                            "unable to unpin group object header");
 
                             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
                         } /* end if */

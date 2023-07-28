@@ -510,12 +510,12 @@ done:
             if (*lib_class->class_id >= 0) {
                 /* Close the class ID */
                 if (H5I_dec_ref(*lib_class->class_id) < 0)
-                    HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to close property list class ID")
+                    HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to close property list class ID");
             }
             else if (lib_class->pclass && *lib_class->pclass) {
                 /* Close a half-initialized pclass */
                 if (H5P__close_class(*lib_class->pclass) < 0)
-                    HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to close property list class")
+                    HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to close property list class");
             }
         }
     }
@@ -2233,7 +2233,7 @@ H5P__register_real(H5P_genclass_t *pclass, const char *name, size_t size, const 
 done:
     if (ret_value < 0)
         if (new_prop && H5P__free_prop(new_prop) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close property")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close property");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P__register_real() */
@@ -2489,7 +2489,7 @@ H5P__register(H5P_genclass_t **ppclass, const char *name, size_t size, const voi
 done:
     if (ret_value < 0)
         if (new_class && H5P__close_class(new_class) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close new property class")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close new property class");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P__register() */
@@ -2728,7 +2728,7 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size, void *value, H5
 done:
     if (ret_value < 0)
         if (new_prop && H5P__free_prop(new_prop) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close property")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close property");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P_insert() */
@@ -3332,7 +3332,7 @@ H5P_exist_plist(const H5P_genplist_t *plist, const char *name)
             tclass = plist->pclass;
             while (tclass != NULL) {
                 if (H5SL_search(tclass->props, name) != NULL)
-                    HGOTO_DONE(TRUE)
+                    HGOTO_DONE(TRUE);
 
                 /* Go up to parent class */
                 tclass = tclass->parent;
@@ -3387,7 +3387,7 @@ H5P__exist_pclass(H5P_genclass_t *pclass, const char *name)
         tclass = pclass->parent;
         while (tclass != NULL) {
             if (H5SL_search(tclass->props, name) != NULL)
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
 
             /* Go up to parent class */
             tclass = tclass->parent;

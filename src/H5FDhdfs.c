@@ -449,12 +449,12 @@ done:
         handle->magic++;
         if (handle->file != NULL)
             if (FAIL == (hdfsCloseFile(handle->filesystem, handle->file)))
-                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close hdfs file handle")
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close hdfs file handle");
         if (handle->fileinfo != NULL)
             hdfsFreeFileInfo(handle->fileinfo, 1);
         if (handle->filesystem != NULL)
             if (FAIL == (hdfsDisconnect(handle->filesystem)))
-                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to disconnect from hdfs")
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to disconnect from hdfs");
         H5MM_xfree(handle);
     }
 
@@ -491,12 +491,12 @@ H5FD__hdfs_handle_close(hdfs_t *handle)
     handle->magic++;
     if (handle->file != NULL)
         if (FAIL == (hdfsCloseFile(handle->filesystem, handle->file)))
-            HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close hdfs file handle")
+            HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close hdfs file handle");
     if (handle->fileinfo != NULL)
         hdfsFreeFileInfo(handle->fileinfo, 1);
     if (handle->filesystem != NULL)
         if (FAIL == (hdfsDisconnect(handle->filesystem)))
-            HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to disconnect hdfs file system")
+            HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to disconnect hdfs file system");
 
     H5MM_xfree(handle);
 
@@ -767,7 +767,7 @@ hdfs__reset_stats(H5FD_hdfs_t *file)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 
 } /* hdfs__reset_stats */
 #endif /* HDFS_STATS */
@@ -848,7 +848,7 @@ done:
     if (ret_value == NULL) {
         if (handle != NULL)
             if (FAIL == H5FD__hdfs_handle_close(handle))
-                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close HDFS file handle")
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close HDFS file handle");
         if (file != NULL)
             file = H5FL_FREE(H5FD_hdfs_t, file);
     } /* end if null return value (error) */
@@ -1109,7 +1109,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* hdfs__fprint_stats */
 #endif /* HDFS_STATS */
 

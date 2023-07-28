@@ -285,7 +285,7 @@ H5FD__mirror_xmit_decode_uint16(uint16_t *out, const unsigned char *_buf)
     assert(_buf && out);
 
     H5MM_memcpy(&n, _buf, sizeof(n));
-    *out = (uint16_t)HDntohs(n);
+    *out = (uint16_t)ntohs(n);
 
     return 2; /* number of bytes eaten */
 } /* end H5FD__mirror_xmit_decode_uint16() */
@@ -313,7 +313,7 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
     assert(_buf && out);
 
     H5MM_memcpy(&n, _buf, sizeof(n));
-    *out = (uint32_t)HDntohl(n);
+    *out = (uint32_t)ntohl(n);
 
     return 4; /* number of bytes eaten */
 } /* end H5FD__mirror_xmit_decode_uint32() */
@@ -422,7 +422,7 @@ H5FD__mirror_xmit_encode_uint16(unsigned char *_dest, uint16_t v)
 
     assert(_dest);
 
-    n = (uint16_t)HDhtons(v);
+    n = (uint16_t)htons(v);
     H5MM_memcpy(_dest, &n, sizeof(n));
 
     return 2;
@@ -449,7 +449,7 @@ H5FD__mirror_xmit_encode_uint32(unsigned char *_dest, uint32_t v)
 
     assert(_dest);
 
-    n = (uint32_t)HDhtonl(v);
+    n = (uint32_t)htonl(v);
     H5MM_memcpy(_dest, &n, sizeof(n));
 
     return 4;
@@ -1144,7 +1144,7 @@ done:
     if (xmit_buf)
         xmit_buf = H5FL_BLK_FREE(xmit, xmit_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mirror_verify_reply() */
 
 /* -------------------------------------------------------------------------
@@ -1285,7 +1285,7 @@ H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_dst /*out*/)
     H5MM_memcpy(fa_dst, fa_src, sizeof(H5FD_mirror_fapl_t));
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fapl_mirror() */
 
 /*-------------------------------------------------------------------------
@@ -1378,17 +1378,17 @@ H5FD__mirror_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     /* Handshake with remote */
     /* --------------------- */
 
-    live_socket = HDsocket(AF_INET, SOCK_STREAM, 0);
+    live_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (live_socket < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "can't create socket");
 
     target_addr.sin_family      = AF_INET;
-    target_addr.sin_port        = HDhtons((uint16_t)fa.handshake_port);
-    target_addr.sin_addr.s_addr = HDinet_addr(fa.remote_ip);
+    target_addr.sin_port        = htons((uint16_t)fa.handshake_port);
+    target_addr.sin_addr.s_addr = inet_addr(fa.remote_ip);
     memset(target_addr.sin_zero, '\0', sizeof target_addr.sin_zero);
 
     addr_size = sizeof(target_addr);
-    if (HDconnect(live_socket, (struct sockaddr *)&target_addr, addr_size) < 0)
+    if (connect(live_socket, (struct sockaddr *)&target_addr, addr_size) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "can't connect to remote server");
 
     /* ------------- */
@@ -1547,7 +1547,7 @@ done:
 static herr_t
 H5FD__mirror_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     LOG_OP_CALL(__func__);
 
@@ -1564,7 +1564,7 @@ H5FD__mirror_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
                  H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE | H5FD_FEAT_SUPPORTS_SWMR_IO |
                  H5FD_FEAT_DEFAULT_VFD_COMPATIBLE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__mirror_query() */
 
 /*-------------------------------------------------------------------------
@@ -1860,7 +1860,7 @@ done:
     if (xmit_buf)
         xmit_buf = H5FL_BLK_FREE(xmit, xmit_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mirror_lock */
 
 /*-------------------------------------------------------------------------
@@ -1904,7 +1904,7 @@ done:
     if (xmit_buf)
         xmit_buf = H5FL_BLK_FREE(xmit, xmit_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mirror_unlock */
 
 #endif /* H5_HAVE_MIRROR_VFD */

@@ -103,7 +103,7 @@ H5F__get_sohm_mesg_count_test(hid_t file_id, unsigned type_id, size_t *mesg_coun
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__get_sohm_mesg_count_test() */
@@ -144,7 +144,7 @@ H5F__check_cached_stab_test(hid_t file_id)
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__check_cached_stab_test() */

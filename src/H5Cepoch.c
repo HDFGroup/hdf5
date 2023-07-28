@@ -13,19 +13,26 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cepoch.c
- *              June 5 2004
- *              Quincey Koziol
  *
- * Purpose:     Metadata cache epoch callbacks.
+ * Purpose:     Metadata cache epoch callbacks
  *
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
+#include "H5Cmodule.h" /* This source code file is part of the H5C module */
+
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Cpkg.h"      /* Cache                                    */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
 
 /****************/
 /* Local Macros */

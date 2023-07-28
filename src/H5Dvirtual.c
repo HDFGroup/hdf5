@@ -277,7 +277,7 @@ done:
     /* Free temporary space */
     if (tmp_space)
         if (H5S_close(tmp_space) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "can't close dataspace")
+            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "can't close dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_check_mapping_post() */
@@ -318,7 +318,7 @@ H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx)
 
     /* Do not update min_dims for "all" or "none" selections */
     if ((sel_type == H5S_SEL_ALL) || (sel_type == H5S_SEL_NONE))
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Get rank of vspace */
     if ((rank = H5S_GET_EXTENT_NDIMS(ent->source_dset.virtual_select)) < 0)
@@ -478,7 +478,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Number of entries */
         tmp_nentries = (hsize_t)virt->list_nused;
-        H5F_ENCODE_LENGTH(f, heap_block_p, tmp_nentries)
+        H5F_ENCODE_LENGTH(f, heap_block_p, tmp_nentries);
 
         /* Encode each entry */
         for (i = 0; i < virt->list_nused; i++) {
@@ -502,7 +502,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Checksum */
         chksum = H5_checksum_metadata(heap_block, block_size - (size_t)4, 0);
-        UINT32ENCODE(heap_block_p, chksum)
+        UINT32ENCODE(heap_block_p, chksum);
 
         /* Insert block into global heap */
         if (H5HG_insert(f, block_size, heap_block, &(virt->serial_list_hobjid)) < 0)
@@ -670,7 +670,7 @@ done:
     /* Release allocated resources on failure */
     if (ret_value < 0)
         if (H5D__virtual_reset_layout(layout) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset virtual layout")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset virtual layout");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy_layout() */
@@ -707,7 +707,7 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
         H5O_storage_virtual_ent_t *ent = &virt->list[i];
         /* Free source_dset */
         if (H5D__virtual_reset_source_dset(ent, &ent->source_dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset source dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset source dataset");
 
         /* Free original source names */
         (void)H5MM_xfree(ent->source_file_name);
@@ -716,13 +716,13 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
         /* Free sub_dset */
         for (j = 0; j < ent->sub_dset_nalloc; j++)
             if (H5D__virtual_reset_source_dset(ent, &ent->sub_dset[j]) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset source dataset")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset source dataset");
         ent->sub_dset = H5MM_xfree(ent->sub_dset);
 
         /* Free source_select */
         if (ent->source_select)
             if (H5S_close(ent->source_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection");
 
         /* Free parsed_source_file_name */
         H5D_virtual_free_parsed_name(ent->parsed_source_file_name);
@@ -740,12 +740,12 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
     /* Close access property lists */
     if (virt->source_fapl >= 0) {
         if (H5I_dec_ref(virt->source_fapl) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source fapl")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source fapl");
         virt->source_fapl = -1;
     }
     if (virt->source_dapl >= 0) {
         if (H5I_dec_ref(virt->source_dapl) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source dapl")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source dapl");
         virt->source_dapl = -1;
     }
 
@@ -927,7 +927,7 @@ done:
     /* Release resources */
     if (src_file_open)
         if (H5F_efc_close(vdset->oloc.file, src_file) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_open_source_dset() */
@@ -955,7 +955,7 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
     /* Free dataset */
     if (source_dset->dset) {
         if (H5D_close(source_dset->dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset");
         source_dset->dset = NULL;
     } /* end if */
 
@@ -983,14 +983,14 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
     if (source_dset->clipped_virtual_select) {
         if (source_dset->clipped_virtual_select != source_dset->virtual_select)
             if (H5S_close(source_dset->clipped_virtual_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release clipped virtual selection")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release clipped virtual selection");
         source_dset->clipped_virtual_select = NULL;
     } /* end if */
 
     /* Free virtual selection */
     if (source_dset->virtual_select) {
         if (H5S_close(source_dset->virtual_select) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection");
         source_dset->virtual_select = NULL;
     } /* end if */
 
@@ -998,7 +998,7 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
     if (source_dset->clipped_source_select) {
         if (source_dset->clipped_source_select != virtual_ent->source_select)
             if (H5S_close(source_dset->clipped_source_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release clipped source selection")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release clipped source selection");
         source_dset->clipped_source_select = NULL;
     } /* end if */
 
@@ -1078,7 +1078,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf, s
     **p = '\0';
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_str_append() */
 
 /*-------------------------------------------------------------------------
@@ -1610,7 +1610,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                              * numbers of datasets open */
                             if (H5D_close(storage->list[i].sub_dset[j].dset) < 0)
                                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                            "unable to close source dataset")
+                                            "unable to close source dataset");
                             storage->list[i].sub_dset[j].dset = NULL;
                         } /* end if */
                     }     /* end else */
@@ -2613,7 +2613,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
                 /* Close projected memory space */
                 if (storage->list[i].sub_dset[j].projected_mem_space) {
                     if (H5S_close(storage->list[i].sub_dset[j].projected_mem_space) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
                     storage->list[i].sub_dset[j].projected_mem_space = NULL;
                 } /* end if */
         }         /* end if */
@@ -2621,7 +2621,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
             /* Close projected memory space */
             if (storage->list[i].source_dset.projected_mem_space) {
                 if (H5S_close(storage->list[i].source_dset.projected_mem_space) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space")
+                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space");
                 storage->list[i].source_dset.projected_mem_space = NULL;
             } /* end if */
 
@@ -2689,7 +2689,7 @@ done:
     if (projected_src_space) {
         assert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2815,12 +2815,12 @@ H5D__virtual_read(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_info
 done:
     /* Cleanup I/O operation */
     if (H5D__virtual_post_io(storage) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation")
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation");
 
     /* Close fill space */
     if (fill_space)
         if (H5S_close(fill_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_read() */
@@ -2886,7 +2886,7 @@ done:
     if (projected_src_space) {
         assert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2962,7 +2962,7 @@ H5D__virtual_write(H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, H5D_dset_io_inf
 done:
     /* Cleanup I/O operation */
     if (H5D__virtual_post_io(storage) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation")
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't cleanup I/O operation");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_write() */
@@ -3076,7 +3076,7 @@ done:
     if (ret_value < 0)
         /* Release hold on files and delete list on error */
         if (*head && H5D__virtual_release_source_dset_files(*head) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release source datasets' files held open")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release source datasets' files held open");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_hold_source_dset_files() */
@@ -3119,7 +3119,7 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
 
 done:
     if (vol_obj && H5VL_free_object(vol_obj) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_refresh_source_dset() */

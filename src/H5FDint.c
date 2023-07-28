@@ -35,6 +35,7 @@
 #include "H5FDpkg.h"     /* File Drivers                             */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5PLprivate.h" /* Plugins                                  */
 
 /****************/
@@ -229,7 +230,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
      * collective transfer.
      */
     if (0 == size)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     /* If the file is open for SWMR read access, allow access to data past
@@ -291,7 +292,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
      * collective transfer.
      */
     if (0 == size)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
@@ -354,8 +355,8 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
     hbool_t    extend_sizes = FALSE;
     hbool_t    extend_types = FALSE;
     uint32_t   i;
-    size_t     size;
-    H5FD_mem_t type;
+    size_t     size      = 0;
+    H5FD_mem_t type      = H5FD_MEM_DEFAULT;
     hid_t      dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
     herr_t     ret_value = SUCCEED;         /* Return value */
 
@@ -385,7 +386,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -568,8 +569,8 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
     hbool_t    extend_sizes = FALSE;
     hbool_t    extend_types = FALSE;
     uint32_t   i;
-    size_t     size;
-    H5FD_mem_t type;
+    size_t     size = 0;
+    H5FD_mem_t type = H5FD_MEM_DEFAULT;
     hid_t      dxpl_id;                 /* DXPL for operation */
     haddr_t    eoa       = HADDR_UNDEF; /* EOA for file */
     herr_t     ret_value = SUCCEED;     /* Return value */
@@ -600,7 +601,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
      * collective transfer.
      */
     if (0 == count)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     if (file->base_addr > 0) {
@@ -754,9 +755,9 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     hbool_t         extend_sizes = FALSE;
     hbool_t         extend_bufs  = FALSE;
     uint32_t        i;
-    size_t          element_size;
-    void           *buf;
-    hbool_t         use_vector = FALSE;
+    size_t          element_size = 0;
+    void           *buf          = NULL;
+    hbool_t         use_vector   = FALSE;
     haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
     haddr_t        *addrs = addrs_local;
     size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
@@ -992,7 +993,7 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
 
     /* Issue vector read call if appropriate */
     if (use_vector) {
-        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
         if ((file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed")
@@ -1114,7 +1115,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1174,7 +1175,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
             if ((file_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, file_spaces[num_spaces], TRUE)) <
                 0) {
                 if (NULL == H5I_remove(mem_space_ids[num_spaces]))
-                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
                 HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
             }
         }
@@ -1208,9 +1209,9 @@ done:
      */
     for (i = 0; i < num_spaces; i++) {
         if (NULL == H5I_remove(mem_space_ids[i]))
-            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
         if (NULL == H5I_remove(file_space_ids[i]))
-            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
     }
     if (mem_space_ids != mem_space_ids_local)
         mem_space_ids = H5MM_xfree(mem_space_ids);
@@ -1276,7 +1277,7 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1395,9 +1396,9 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     hbool_t         extend_sizes = FALSE;
     hbool_t         extend_bufs  = FALSE;
     uint32_t        i;
-    size_t          element_size;
-    const void     *buf;
-    hbool_t         use_vector = FALSE;
+    size_t          element_size = 0;
+    const void     *buf          = NULL;
+    hbool_t         use_vector   = FALSE;
     haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
     haddr_t        *addrs = addrs_local;
     size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
@@ -1633,7 +1634,7 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
 
     /* Issue vector write call if appropriate */
     if (use_vector) {
-        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
         if ((file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed")
@@ -1753,7 +1754,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1807,7 +1808,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
             if ((file_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, file_spaces[num_spaces], TRUE)) <
                 0) {
                 if (NULL == H5I_remove(mem_space_ids[num_spaces]))
-                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
                 HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
             }
         }
@@ -1841,9 +1842,9 @@ done:
      */
     for (i = 0; i < num_spaces; i++) {
         if (NULL == H5I_remove(mem_space_ids[i]))
-            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
         if (NULL == H5I_remove(file_space_ids[i]))
-            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
     }
     if (mem_space_ids != mem_space_ids_local)
         mem_space_ids = H5MM_xfree(mem_space_ids);
@@ -1906,7 +1907,7 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2276,7 +2277,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
         }
 
         /* sort the srt_tmp array */
-        HDqsort(srt_tmp, count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
+        qsort(srt_tmp, count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
 
         /* verify no duplicate entries */
         i = 1;

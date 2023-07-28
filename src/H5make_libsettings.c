@@ -60,7 +60,7 @@ insert_libhdf5_settings(FILE *flibinfo)
     int   bol = 0; /* indicates the beginning of a new line */
 
     if (NULL == (fsettings = fopen(LIBSETTINGSFNAME, "r"))) {
-        HDperror(LIBSETTINGSFNAME);
+        perror(LIBSETTINGSFNAME);
         exit(EXIT_FAILURE);
     }
 
@@ -74,9 +74,9 @@ insert_libhdf5_settings(FILE *flibinfo)
     /* Print variable definition and the string. Do not use const or some
      * platforms (AIX?) will have issues.
      */
-    fprintf(flibinfo, "char H5libhdf5_settings[]=\n");
+    fprintf(flibinfo, "const char H5libhdf5_settings[]=\n");
     bol++;
-    while (EOF != (inchar = HDgetc(fsettings))) {
+    while (EOF != (inchar = getc(fsettings))) {
         if (bol) {
             /* Start a new line */
             fprintf(flibinfo, "\t\"");
@@ -88,10 +88,10 @@ insert_libhdf5_settings(FILE *flibinfo)
             bol++;
         }
         else
-            HDputc(inchar, flibinfo);
+            putc(inchar, flibinfo);
     }
 
-    if (HDfeof(fsettings)) {
+    if (feof(fsettings)) {
         /* wrap up */
         if (!bol)
             /* EOF found without a new line */
@@ -102,8 +102,8 @@ insert_libhdf5_settings(FILE *flibinfo)
         fprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
         exit(EXIT_FAILURE);
     }
-    if (0 != HDfclose(fsettings)) {
-        HDperror(LIBSETTINGSFNAME);
+    if (0 != fclose(fsettings)) {
+        perror(LIBSETTINGSFNAME);
         exit(EXIT_FAILURE);
     }
 
@@ -114,7 +114,7 @@ insert_libhdf5_settings(FILE *flibinfo)
     /* Print variable definition and an empty string. Do not use const or some
      * platforms (AIX?) will have issues.
      */
-    fprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
+    fprintf(flibinfo, "const char H5libhdf5_settings[]=\"\";\n");
 #endif
 } /* insert_libhdf5_settings() */
 
@@ -171,14 +171,14 @@ information about the library build configuration\n";
         size_t n;
         char  *comma;
 
-        if ((pwd = HDgetpwuid(HDgetuid()))) {
-            if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
+        if ((pwd = getpwuid(getuid()))) {
+            if ((comma = strchr(pwd->pw_gecos, ','))) {
                 n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));
-                HDstrncpy(real_name, pwd->pw_gecos, n);
+                strncpy(real_name, pwd->pw_gecos, n);
                 real_name[n] = '\0';
             }
             else {
-                HDstrncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+                strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
                 real_name[sizeof(real_name) - 1] = '\0';
             }
         }
@@ -193,7 +193,7 @@ information about the library build configuration\n";
      * The FQDM of this host or the empty string.
      */
 #ifdef H5_HAVE_GETHOSTNAME
-    if (HDgethostname(host_name, sizeof(host_name)) < 0)
+    if (gethostname(host_name, sizeof(host_name)) < 0)
         host_name[0] = '\0';
 #else
     host_name[0] = '\0';
@@ -203,7 +203,7 @@ information about the library build configuration\n";
      * The file header: warning, copyright notice, build information.
      */
     fprintf(rawoutstream, "/* Generated automatically by H5make_libsettings -- do not edit */\n\n\n");
-    HDfputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
+    fputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
 
     fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
             1900 + tm->tm_year);
@@ -213,19 +213,19 @@ information about the library build configuration\n";
             fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
         if (pwd)
-            HDfputs(pwd->pw_name, rawoutstream);
+            fputs(pwd->pw_name, rawoutstream);
 #endif
         if (host_name[0])
             fprintf(rawoutstream, "@%s", host_name);
         if (real_name[0])
             fprintf(rawoutstream, ">");
-        HDfputc('\n', rawoutstream);
+        fputc('\n', rawoutstream);
     }
 
     fprintf(rawoutstream, " *\n * Purpose:\t\t");
 
     for (s = purpose; *s; s++) {
-        HDfputc(*s, rawoutstream);
+        fputc(*s, rawoutstream);
         if ('\n' == *s && s[1])
             fprintf(rawoutstream, " *\t\t\t");
     }
@@ -236,7 +236,7 @@ information about the library build configuration\n";
 
     fprintf(rawoutstream, " *\n *");
     for (i = 0; i < 73; i++)
-        HDfputc('-', rawoutstream);
+        fputc('-', rawoutstream);
     fprintf(rawoutstream, "\n */\n\n");
 }
 
@@ -290,7 +290,7 @@ main(int argc, char *argv[])
     print_footer();
 
     if (rawoutstream && rawoutstream != stdout) {
-        if (HDfclose(rawoutstream))
+        if (fclose(rawoutstream))
             fprintf(stderr, "closing rawoutstream");
         else
             rawoutstream = NULL;

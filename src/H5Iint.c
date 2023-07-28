@@ -92,7 +92,7 @@ int              H5I_next_type_g = (int)H5I_NTYPES;
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
 /* Whether deletes are actually marks (for mark-and-sweep) */
-hbool_t H5I_marking_g = FALSE;
+static hbool_t H5I_marking_s = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -314,7 +314,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
      */
 
     /* Set marking flag */
-    H5I_marking_g = TRUE;
+    H5I_marking_s = TRUE;
 
     /* Mark nodes for deletion */
     HASH_ITER(hh, udata.type_info->hash_table, item, tmp)
@@ -325,7 +325,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
     }
 
     /* Unset marking flag */
-    H5I_marking_g = FALSE;
+    H5I_marking_s = FALSE;
 
     /* Perform sweep */
     HASH_ITER(hh, udata.type_info->hash_table, item, tmp)
@@ -803,7 +803,7 @@ H5I_is_file_object(hid_t id)
     H5I_type_t type      = H5I_get_type(id);
     htri_t     ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Fail if the ID type is out of range */
     if (type < 1 || type >= H5I_NTYPES)
@@ -827,7 +827,7 @@ H5I_is_file_object(hid_t id)
         ret_value = FALSE;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5I_is_file_object() */
 
 /*-------------------------------------------------------------------------
@@ -886,7 +886,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     HASH_FIND(hh, type_info->hash_table, &id, sizeof(hid_t), info);
     if (info) {
         assert(!info->marked);
-        if (!H5I_marking_g)
+        if (!H5I_marking_s)
             HASH_DELETE(hh, type_info->hash_table, info);
         else
             info->marked = TRUE;
@@ -902,7 +902,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     ret_value = (void *)info->object;
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
-    if (!H5I_marking_g)
+    if (!H5I_marking_s)
         info = H5FL_FREE(H5I_id_info_t, info);
 
     /* Decrement the number of IDs in the type */
@@ -1591,10 +1591,10 @@ H5I__find_id(hid_t id)
     /* Check arguments */
     type = H5I_TYPE(id);
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_DONE(NULL)
+        HGOTO_DONE(NULL);
     type_info = H5I_type_info_array_g[type];
     if (!type_info || type_info->init_count <= 0)
-        HGOTO_DONE(NULL)
+        HGOTO_DONE(NULL);
 
     /* Check for same ID as we have looked up last time */
     if (type_info->last_id_info && type_info->last_id_info->id == id)
@@ -1615,13 +1615,13 @@ H5I__find_id(hid_t id)
 
         /* Invoke the realize callback, to get the actual object */
         if ((id_info->realize_cb)((void *)id_info->object, &actual_id) < 0)
-            HGOTO_DONE(NULL)
+            HGOTO_DONE(NULL);
 
         /* Verify that we received a valid ID, of the same type */
         if (H5I_INVALID_HID == actual_id)
-            HGOTO_DONE(NULL)
+            HGOTO_DONE(NULL);
         if (H5I_TYPE(id) != H5I_TYPE(actual_id))
-            HGOTO_DONE(NULL)
+            HGOTO_DONE(NULL);
 
         /* Swap the actual object in for the future object */
         future_object = (void *)id_info->object;
@@ -1631,7 +1631,7 @@ H5I__find_id(hid_t id)
 
         /* Discard the future object */
         if ((id_info->discard_cb)(future_object) < 0)
-            HGOTO_DONE(NULL)
+            HGOTO_DONE(NULL);
         future_object = NULL;
 
         /* Change the ID from 'future' to 'actual' */

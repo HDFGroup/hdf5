@@ -283,7 +283,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     H5F_DECODE_LENGTH(udata->f, image, fspace->max_sect_size);
 
     /* Address of serialized free space sections */
-    H5_addr_decode(udata->f, &image, &fspace->sect_addr);
+    H5F_addr_decode(udata->f, &image, &fspace->sect_addr);
 
     /* Size of serialized free space sections */
     H5F_DECODE_LENGTH(udata->f, image, fspace->sect_size);
@@ -306,7 +306,7 @@ done:
     /* Release resources */
     if (!ret_value && fspace)
         if (H5FS__hdr_dest(fspace) < 0)
-            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_hdr_deserialize() */
@@ -330,7 +330,6 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
 
     /* Check arguments */
     assert(fspace);
-    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     assert(image_len);
 
@@ -378,7 +377,6 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
     /* Sanity check */
     assert(f);
     assert(fspace);
-    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     assert(H5_addr_defined(addr));
     assert(new_addr);
@@ -521,7 +519,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                 H5_BEGIN_TAG(tag)
                 if (H5AC_insert_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo,
                                       H5AC__NO_FLAGS_SET) < 0)
-                    HGOTO_ERROR_TAG(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
+                    HGOTO_ERROR_TAG(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache");
                 H5_END_TAG
 
                 assert(fspace->sinfo->cache_info.size == fspace->alloc_sect_size);
@@ -674,7 +672,6 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     assert(f);
     assert(image);
     assert(fspace);
-    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     assert(fspace->hdr_size == len);
 
@@ -732,7 +729,7 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     H5F_ENCODE_LENGTH(f, image, fspace->max_sect_size);
 
     /* Address of serialized free space sections */
-    H5_addr_encode(f, &image, fspace->sect_addr);
+    H5F_addr_encode(f, &image, fspace->sect_addr);
 
     /* Size of serialized free space sections */
     H5F_ENCODE_LENGTH(f, image, fspace->sect_size);
@@ -811,10 +808,6 @@ done:
  *
  * Purpose:	Destroys a free space header in memory.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -830,7 +823,6 @@ H5FS__cache_hdr_free_icr(void *_thing)
 
     /* Sanity checks */
     assert(fspace);
-    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
 
     /* We should not still be holding on to the free space section info */
@@ -963,7 +955,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections version")
 
     /* Address of free space header for these sections */
-    H5_addr_decode(udata->f, &image, &fs_addr);
+    H5F_addr_decode(udata->f, &image, &fs_addr);
     if (H5_addr_ne(fs_addr, fspace->addr))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect header address for free space sections")
 
@@ -1064,7 +1056,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 done:
     if (!ret_value && sinfo)
         if (H5FS__sinfo_dest(sinfo) < 0)
-            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info")
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_sinfo_deserialize() */
@@ -1088,10 +1080,8 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
 
     /* Sanity checks */
     assert(sinfo);
-    assert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
     assert(sinfo->fspace);
-    assert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
     assert(image_len);
 
@@ -1128,10 +1118,8 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
     /* Sanity checks */
     assert(f);
     assert(sinfo);
-    assert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
     fspace = sinfo->fspace;
-    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     assert(fspace->cache_info.is_pinned);
     assert(H5_addr_defined(addr));
@@ -1211,9 +1199,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
     assert(f);
     assert(image);
     assert(sinfo);
-    assert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    assert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
     assert(sinfo->fspace->cache_info.is_pinned);
     assert(sinfo->fspace->sect_size == len);
@@ -1227,7 +1213,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
     *image++ = H5FS_SINFO_VERSION;
 
     /* Address of free space header for these sections */
-    H5_addr_encode(f, &image, sinfo->fspace->addr);
+    H5F_addr_encode(f, &image, sinfo->fspace->addr);
 
     /* Set up user data for iterator */
     udata.sinfo         = sinfo;
@@ -1328,10 +1314,6 @@ done:
  * Purpose:	Free the memory used for the in core representation of the
  *		free space manager section info.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
@@ -1347,9 +1329,7 @@ H5FS__cache_sinfo_free_icr(void *_thing)
 
     /* Sanity checks */
     assert(sinfo);
-    assert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    assert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
     assert(sinfo->fspace->cache_info.is_pinned);
 

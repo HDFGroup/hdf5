@@ -200,7 +200,7 @@ H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
                         H5ARG_TRACE7(__func__, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID");
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         }
 
@@ -330,7 +330,7 @@ H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
                         H5ARG_TRACE10(__func__, "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, lapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID");
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         }
 
@@ -2002,7 +2002,7 @@ H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oclose_async() */
@@ -2027,7 +2027,7 @@ H5O__disable_mdc_flushes(H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork object");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__disable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
@@ -2049,7 +2049,7 @@ H5Odisable_mdc_flushes(hid_t object_id)
     H5VL_loc_params_t    loc_params;          /* Location parameters */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Make sure the ID is a file object */
@@ -2074,7 +2074,7 @@ H5Odisable_mdc_flushes(hid_t object_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork object");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* H5Odisable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
@@ -2097,7 +2097,7 @@ H5O__enable_mdc_flushes(H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork object");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__enable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
@@ -2119,7 +2119,7 @@ H5Oenable_mdc_flushes(hid_t object_id)
     H5VL_loc_params_t    loc_params;          /* Location parameters */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Make sure the ID is a file object */
@@ -2144,7 +2144,7 @@ H5Oenable_mdc_flushes(hid_t object_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork object");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* H5Oenable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
@@ -2195,7 +2195,7 @@ H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
     H5VL_loc_params_t                  loc_params;          /* Location parameters */
     herr_t                             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", object_id, are_disabled);
 
     /* Sanity check */

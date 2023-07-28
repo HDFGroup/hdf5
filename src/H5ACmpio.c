@@ -141,7 +141,6 @@ H5AC__set_sync_point_done_callback(H5C_t *cache_ptr, H5AC_sync_point_done_cb_t s
     assert(cache_ptr);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     aux_ptr->sync_point_done = sync_point_done;
 
@@ -170,7 +169,6 @@ H5AC__set_write_done_callback(H5C_t *cache_ptr, H5AC_write_done_cb_t write_done)
     assert(cache_ptr);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     aux_ptr->write_done = write_done;
 
@@ -205,7 +203,6 @@ H5AC_add_candidate(H5AC_t *cache_ptr, haddr_t addr)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
     assert(aux_ptr->candidate_slist_ptr != NULL);
 
@@ -265,7 +262,6 @@ H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, unsigned *num_entries_ptr, had
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->mpi_rank == 0);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
     assert(aux_ptr->candidate_slist_ptr != NULL);
@@ -292,7 +288,7 @@ H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, unsigned *num_entries_ptr, had
          */
         if (H5AC__copy_candidate_list_to_buffer(cache_ptr, &chk_num_entries, &haddr_buf_ptr) < 0) {
             /* Push an error, but still participate in following MPI_Bcast */
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate buffer.")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate buffer.");
         }
         assert(chk_num_entries == num_entries);
         assert(haddr_buf_ptr != NULL);
@@ -394,7 +390,6 @@ H5AC__broadcast_clean_list(H5AC_t *cache_ptr)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->mpi_rank == 0);
     assert(aux_ptr->c_slist_ptr != NULL);
 
@@ -414,7 +409,7 @@ H5AC__broadcast_clean_list(H5AC_t *cache_ptr)
         buf_size = sizeof(haddr_t) * num_entries;
         if (NULL == (addr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size))) {
             /* Push an error, but still participate in following MPI_Bcast */
-            HDONE_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for addr buffer")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for addr buffer");
         }
         else {
             /* Set up user data for callback */
@@ -426,7 +421,7 @@ H5AC__broadcast_clean_list(H5AC_t *cache_ptr)
             /* (Callback also removes the matching entries from the dirtied list) */
             if (H5SL_free(aux_ptr->c_slist_ptr, H5AC__broadcast_clean_list_cb, &udata) < 0) {
                 /* Push an error, but still participate in following MPI_Bcast */
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "Can't build address list for clean entries")
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "Can't build address list for clean entries");
             }
         }
 
@@ -477,7 +472,6 @@ H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t H5_ATTR_NDEBUG_UNUS
     /* Sanity checks */
     assert(cache_ptr != NULL);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
     assert((sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_CACHE) || (aux_ptr->mpi_rank == 0));
     assert(aux_ptr->d_slist_ptr != NULL);
@@ -588,7 +582,6 @@ H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr, unsigned *num_entri
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
     assert(aux_ptr->candidate_slist_ptr != NULL);
     assert(H5SL_count(aux_ptr->candidate_slist_ptr) > 0);
@@ -661,7 +654,6 @@ H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->mpi_rank == 0);
     assert(aux_ptr->d_slist_ptr != NULL);
     assert(aux_ptr->c_slist_ptr != NULL);
@@ -712,7 +704,6 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     if (aux_ptr->mpi_rank == 0) {
         H5AC_slist_entry_t *slist_entry_ptr;
@@ -786,7 +777,6 @@ H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     if (aux_ptr->mpi_rank == 0) {
         H5AC_slist_entry_t *slist_entry_ptr;
@@ -845,7 +835,6 @@ H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty, unsig
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->mpi_rank == 0);
     assert(aux_ptr->c_slist_ptr != NULL);
 
@@ -912,7 +901,6 @@ H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     if (aux_ptr->mpi_rank == 0) {
         H5AC_slist_entry_t *slist_entry_ptr;
@@ -1012,7 +1000,6 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
     assert(cache_ptr);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     /* get entry status, size, etc here */
     if (H5C_get_entry_status(f, old_addr, &entry_size, &entry_in_cache, &entry_dirty, NULL, NULL, NULL, NULL,
@@ -1188,7 +1175,6 @@ H5AC__propagate_and_apply_candidate_list(H5F_t *f)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 
     /* to prevent "messages from the future" we must synchronize all
@@ -1348,7 +1334,6 @@ H5AC__propagate_flushed_and_still_clean_entries_list(H5F_t *f)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
 
     if (aux_ptr->mpi_rank == 0) {
@@ -1411,7 +1396,7 @@ H5AC__receive_haddr_list(MPI_Comm mpi_comm, unsigned *num_entries_ptr, haddr_t *
         buf_size = sizeof(haddr_t) * num_entries;
         if (NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size))) {
             /* Push an error, but still participate in following MPI_Bcast */
-            HDONE_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for haddr buffer")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for haddr buffer");
         }
 
         /* Now receive the list of candidate entries */
@@ -1467,7 +1452,6 @@ H5AC__receive_and_apply_clean_list(H5F_t *f)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->mpi_rank != 0);
 
     /* Retrieve the clean list from process 0 */
@@ -1523,7 +1507,6 @@ H5AC__receive_candidate_list(const H5AC_t *cache_ptr, unsigned *num_entries_ptr,
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->mpi_rank != 0);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
     assert(num_entries_ptr != NULL);
@@ -1603,7 +1586,6 @@ H5AC__rsp__dist_md_write__flush(H5F_t *f)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 
     /* first construct the candidate list -- initially, this will be in the
@@ -1744,7 +1726,6 @@ H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 
     /* Query if evictions are allowed */
@@ -1759,7 +1740,7 @@ H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f)
              */
             if (H5AC__construct_candidate_list(cache_ptr, aux_ptr, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) <
                 0)
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.")
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.");
         }
 
         /* propagate and apply candidate list -- all processes */
@@ -1820,7 +1801,6 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
 
     /* To prevent "messages from the future" we must
@@ -1853,7 +1833,7 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
              * in collective operations during following cache entry
              * propagation
              */
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.");
         }
         else {
             /* this code exists primarily for the test bed -- it allows us to
@@ -1928,7 +1908,6 @@ H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
 
     /* Query if evictions are allowed */
@@ -1976,7 +1955,7 @@ H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f)
                  * in collective operations during following cache entry
                  * propagation
                  */
-                HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_flush_to_min_clean() failed.")
+                HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_flush_to_min_clean() failed.");
             }
             else {
                 /* this call exists primarily for the test code -- it is used
@@ -2039,13 +2018,12 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert((sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) ||
            (sync_point_op == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED));
 
 #ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
-    fprintf(stdout, "%d:%s...:%u: (u/uu/i/iu/m/mu) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank, __func__,
-            aux_ptr->dirty_bytes_propagations, aux_ptr->unprotect_dirty_bytes,
+    fprintf(stdout, "%d:%s...:%u: (u/uu/i/iu/m/mu) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank,
+            __func__ aux_ptr->dirty_bytes_propagations, aux_ptr->unprotect_dirty_bytes,
             aux_ptr->unprotect_dirty_bytes_updates, aux_ptr->insert_dirty_bytes,
             aux_ptr->insert_dirty_bytes_updates, aux_ptr->move_dirty_bytes,
             aux_ptr->move_dirty_bytes_updates);
@@ -2165,7 +2143,6 @@ H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, unsigned num_candidates, haddr_t *ca
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     assert(aux_ptr != NULL);
-    assert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     assert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
     assert(aux_ptr->mpi_rank == 0);
     assert(num_candidates > 0);

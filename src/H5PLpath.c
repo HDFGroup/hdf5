@@ -579,7 +579,7 @@ H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, 
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__path_table_iterate() */
 
 /*-------------------------------------------------------------------------
@@ -617,7 +617,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
 
     /* Open the directory - skip the path if the directory can't be opened */
     if (!(dirp = HDopendir(plugin_path)))
-        HGOTO_DONE(H5_ITER_CONT)
+        HGOTO_DONE(H5_ITER_CONT);
 
     /* Iterate through all entries in the directory */
     while (NULL != (dp = HDreaddir(dirp))) {
@@ -681,7 +681,7 @@ done:
     if (dirp)
         if (HDclosedir(dirp) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, H5_ITER_ERROR, "can't close directory: %s",
-                        HDstrerror(errno))
+                        HDstrerror(errno));
 
     path = (char *)H5MM_xfree(path);
 
@@ -711,7 +711,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
      * skip the path if the directory can't be opened */
     HDsnprintf(service, sizeof(service), "%s\\*.dll", plugin_path);
     if ((hFind = FindFirstFileA(service, &fdFile)) == INVALID_HANDLE_VALUE)
-        HGOTO_DONE(H5_ITER_CONT)
+        HGOTO_DONE(H5_ITER_CONT);
 
     /* Loop over all the files */
     do {
@@ -897,7 +897,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
             if (H5PL__open(path, search_params->type, search_params->key, found, NULL, plugin_info) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
             if (*found)
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
 
             path = (char *)H5MM_xfree(path);
         } /* end if */
@@ -906,7 +906,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 done:
     if (dirp)
         if (HDclosedir(dirp) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", HDstrerror(errno))
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", HDstrerror(errno));
 
     path = (char *)H5MM_xfree(path);
 
@@ -964,7 +964,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
             if (H5PL__open(path, search_params->type, search_params->key, found, NULL, plugin_info) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
             if (*found)
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
 
             path = (char *)H5MM_xfree(path);
         }

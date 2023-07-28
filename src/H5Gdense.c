@@ -322,11 +322,11 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
 done:
     /* Close the open objects */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap");
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index");
     if (bt2_corder && H5B2_close(bt2_corder) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for creation order index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for creation order index");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_create() */
@@ -419,13 +419,13 @@ H5G__dense_insert(H5F_t *f, const H5O_linfo_t *linfo, const H5O_link_t *lnk)
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap");
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index");
     if (bt2_corder && H5B2_close(bt2_corder) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for creation order index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for creation order index");
     if (wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_insert() */
@@ -513,9 +513,9 @@ H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, hbool_t 
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap");
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_lookup() */
@@ -683,11 +683,11 @@ H5G__dense_lookup_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap");
     if (bt2 && H5B2_close(bt2) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for index");
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_lookup_by_idx() */
@@ -970,11 +970,11 @@ H5G__dense_iterate(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_i
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap");
     if (bt2 && H5B2_close(bt2) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for index");
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_iterate() */
@@ -1159,11 +1159,11 @@ H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap");
     if (bt2 && H5B2_close(bt2) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for index");
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_get_name_by_idx() */
@@ -1223,7 +1223,7 @@ H5G__dense_remove_fh_cb(const void *obj, size_t obj_len, void *_udata)
 done:
     /* Release resources */
     if (bt2 && H5B2_close(bt2) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for creation order index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for creation order index");
     if (lnk)
         H5O_msg_free(H5O_LINK_ID, lnk);
 
@@ -1321,9 +1321,9 @@ H5G__dense_remove(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap");
     if (bt2 && H5B2_close(bt2) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_remove() */
@@ -1454,7 +1454,7 @@ H5G__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
 done:
     /* Release resources */
     if (bt2 && H5B2_close(bt2) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for 'other' index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for 'other' index");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_remove_by_idx_bt2_cb() */
@@ -1555,11 +1555,11 @@ H5G__dense_remove_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_ful
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap");
     if (bt2 && H5B2_close(bt2) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for index")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for index");
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_remove_by_idx() */

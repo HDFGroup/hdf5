@@ -107,7 +107,7 @@ done:
         /* H5FL_FREE always returns NULL so we can't check for errors */
         dblk = H5FL_FREE(H5HL_dblk_t, dblk);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__dblk_new() */
 
 /*-------------------------------------------------------------------------

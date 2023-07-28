@@ -717,10 +717,10 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
      */
     if (pass) {
 
-        if (H5C_get_cache_image_config(cache_ptr, &image_ctl) < 0) {
+        if (H5C__get_cache_image_config(cache_ptr, &image_ctl) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "error returned by H5C_get_cache_image_config().";
+            failure_mssg = "error returned by H5C__get_cache_image_config().";
         }
     }
 
@@ -921,7 +921,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
             {
                 file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
         else {
 
@@ -929,7 +929,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
             {
                 file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
 
         if (file_id >= 0) {

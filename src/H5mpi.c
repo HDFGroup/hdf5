@@ -662,11 +662,11 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
 
         /* If our buffer size is 0, there's nothing to do */
         if (buf_size == 0)
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
 
         if (NULL == (recv_buf = H5MM_malloc(buf_size)))
             /* Push an error, but still participate in collective gather operation */
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate receive buffer")
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate receive buffer");
     }
 
     /* Perform gather operation */
@@ -735,7 +735,7 @@ H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_t
             (recv_counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*recv_counts_disps_array))))
             /* Push an error, but still participate in collective gather operation */
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "couldn't allocate receive counts and displacements array")
+                        "couldn't allocate receive counts and displacements array");
     }
 
     /* Collect each rank's send count to interested ranks */

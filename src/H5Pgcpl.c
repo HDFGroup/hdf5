@@ -511,11 +511,11 @@ H5P__gcrt_group_info_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     if (NULL != *pp) {
-        UINT32ENCODE(*pp, ginfo->lheap_size_hint)
-        UINT16ENCODE(*pp, ginfo->max_compact)
-        UINT16ENCODE(*pp, ginfo->min_dense)
-        UINT16ENCODE(*pp, ginfo->est_num_entries)
-        UINT16ENCODE(*pp, ginfo->est_name_len)
+        UINT32ENCODE(*pp, ginfo->lheap_size_hint);
+        UINT16ENCODE(*pp, ginfo->max_compact);
+        UINT16ENCODE(*pp, ginfo->min_dense);
+        UINT16ENCODE(*pp, ginfo->est_num_entries);
+        UINT16ENCODE(*pp, ginfo->est_name_len);
     } /* end if */
 
     *size += sizeof(uint16_t) * 4 + sizeof(uint32_t);
@@ -548,11 +548,11 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
     memset(ginfo, 0, sizeof(H5O_ginfo_t));
     *ginfo = H5G_def_ginfo_g;
 
-    UINT32DECODE(*pp, ginfo->lheap_size_hint)
-    UINT16DECODE(*pp, ginfo->max_compact)
-    UINT16DECODE(*pp, ginfo->min_dense)
-    UINT16DECODE(*pp, ginfo->est_num_entries)
-    UINT16DECODE(*pp, ginfo->est_name_len)
+    UINT32DECODE(*pp, ginfo->lheap_size_hint);
+    UINT16DECODE(*pp, ginfo->max_compact);
+    UINT16DECODE(*pp, ginfo->min_dense);
+    UINT16DECODE(*pp, ginfo->est_num_entries);
+    UINT16DECODE(*pp, ginfo->est_name_len);
 
     /* Update fields */
     if (ginfo->max_compact != H5G_CRT_GINFO_MAX_COMPACT || ginfo->min_dense != H5G_CRT_GINFO_MIN_DENSE)
@@ -599,7 +599,7 @@ H5P__gcrt_link_info_enc(const void *value, void **_pp, size_t *size)
         *(*pp)++ = (uint8_t)sizeof(unsigned);
 
         /* Encode the value */
-        H5_ENCODE_UNSIGNED(*pp, crt_order_flags)
+        H5_ENCODE_UNSIGNED(*pp, crt_order_flags);
     } /* end if */
 
     *size += (1 + sizeof(unsigned));
@@ -638,7 +638,7 @@ H5P__gcrt_link_info_dec(const void **_pp, void *_value)
     memset(linfo, 0, sizeof(H5O_linfo_t));
     *linfo = H5G_def_linfo_g;
 
-    H5_DECODE_UNSIGNED(*pp, crt_order_flags)
+    H5_DECODE_UNSIGNED(*pp, crt_order_flags);
 
     /* Update fields */
     linfo->track_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);

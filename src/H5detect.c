@@ -174,7 +174,7 @@ precision(detected_t *d)
         }                                                                                                    \
         fix_order(sizeof(TYPE), _last, INFO.perm, (const char **)&_mesg);                                    \
                                                                                                              \
-        if (!HDstrcmp(_mesg, "VAX"))                                                                         \
+        if (!strcmp(_mesg, "VAX"))                                                                           \
             INFO.is_vax = TRUE;                                                                              \
                                                                                                              \
         /* Implicit mantissa bit */                                                                          \
@@ -203,8 +203,8 @@ precision(detected_t *d)
         _v1       = (TYPE)1.0L;                                                                              \
         INFO.bias = find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                       \
         precision(&(INFO));                                                                                  \
-        if (!HDstrcmp(INFO.varname, "FLOAT") || !HDstrcmp(INFO.varname, "DOUBLE") ||                         \
-            !HDstrcmp(INFO.varname, "LDOUBLE")) {                                                            \
+        if (!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||                             \
+            !strcmp(INFO.varname, "LDOUBLE")) {                                                              \
             COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
         }                                                                                                    \
     }
@@ -395,10 +395,10 @@ dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
                 d[i].varname);
 
         /* Variables for alignment of compound datatype */
-        if (!HDstrcmp(d[i].varname, "SCHAR") || !HDstrcmp(d[i].varname, "SHORT") ||
-            !HDstrcmp(d[i].varname, "INT") || !HDstrcmp(d[i].varname, "LONG") ||
-            !HDstrcmp(d[i].varname, "LLONG") || !HDstrcmp(d[i].varname, "FLOAT") ||
-            !HDstrcmp(d[i].varname, "DOUBLE") || !HDstrcmp(d[i].varname, "LDOUBLE")) {
+        if (!strcmp(d[i].varname, "SCHAR") || !strcmp(d[i].varname, "SHORT") ||
+            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") ||
+            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") ||
+            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) {
             fprintf(rawoutstream, "    H5T_NATIVE_%s_ALIGN_g = %lu;\n", d[i].varname,
                     (unsigned long)(d[i].comp_align));
         }
@@ -455,7 +455,7 @@ iprint(detected_t *d)
         for (i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
             fprintf(rawoutstream, "%4d", d->perm[i]);
             if (i > pass * 4)
-                HDfputs("     ", rawoutstream);
+                fputs("     ", rawoutstream);
             if (!i)
                 break;
         }
@@ -470,25 +470,25 @@ iprint(detected_t *d)
 
             for (j = 8; j > 0; --j) {
                 if (k == d->sign) {
-                    HDfputc('S', rawoutstream);
+                    fputc('S', rawoutstream);
                 }
                 else if (k >= d->epos && k < d->epos + d->esize) {
-                    HDfputc('E', rawoutstream);
+                    fputc('E', rawoutstream);
                 }
                 else if (k >= d->mpos && k < d->mpos + d->msize) {
-                    HDfputc('M', rawoutstream);
+                    fputc('M', rawoutstream);
                 }
                 else {
-                    HDfputc('?', rawoutstream); /*unknown floating point bit */
+                    fputc('?', rawoutstream); /*unknown floating point bit */
                 }
                 --k;
             }
             if (i > pass * 4)
-                HDfputc(' ', rawoutstream);
+                fputc(' ', rawoutstream);
             if (!i)
                 break;
         }
-        HDfputc('\n', rawoutstream);
+        fputc('\n', rawoutstream);
         if (!pass)
             break;
     }
@@ -557,11 +557,11 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned char 
                     return i * 8 + j;
             }
             fprintf(stderr, "INTERNAL ERROR");
-            HDabort();
+            abort();
         }
     }
     fprintf(stderr, "INTERNAL ERROR");
-    HDabort();
+    abort();
     return 0;
 }
 
@@ -781,14 +781,14 @@ bit.\n";
     {
         size_t n;
         char  *comma;
-        if ((pwd = HDgetpwuid(HDgetuid()))) {
-            if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
+        if ((pwd = getpwuid(getuid()))) {
+            if ((comma = strchr(pwd->pw_gecos, ','))) {
                 n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));
-                HDstrncpy(real_name, pwd->pw_gecos, n);
+                strncpy(real_name, pwd->pw_gecos, n);
                 real_name[n] = '\0';
             }
             else {
-                HDstrncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+                strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
                 real_name[sizeof(real_name) - 1] = '\0';
             }
         }
@@ -803,7 +803,7 @@ bit.\n";
      * The FQDM of this host or the empty string.
      */
 #ifdef H5_HAVE_GETHOSTNAME
-    if (HDgethostname(host_name, sizeof(host_name)) < 0) {
+    if (gethostname(host_name, sizeof(host_name)) < 0) {
         host_name[0] = '\0';
     }
 #else
@@ -814,7 +814,7 @@ bit.\n";
      * The file header: warning, copyright notice, build information.
      */
     fprintf(rawoutstream, "/* Generated automatically by H5detect -- do not edit */\n\n\n");
-    HDfputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
+    fputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
 
     fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
             1900 + tm->tm_year);
@@ -824,17 +824,17 @@ bit.\n";
             fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
         if (pwd)
-            HDfputs(pwd->pw_name, rawoutstream);
+            fputs(pwd->pw_name, rawoutstream);
 #endif
         if (host_name[0])
             fprintf(rawoutstream, "@%s", host_name);
         if (real_name[0])
             fprintf(rawoutstream, ">");
-        HDfputc('\n', rawoutstream);
+        fputc('\n', rawoutstream);
     }
     fprintf(rawoutstream, " *\n * Purpose:\t\t");
     for (s = purpose; *s; s++) {
-        HDfputc(*s, rawoutstream);
+        fputc(*s, rawoutstream);
         if ('\n' == *s && s[1])
             fprintf(rawoutstream, " *\t\t\t");
     }
@@ -845,7 +845,7 @@ bit.\n";
 
     fprintf(rawoutstream, " *\n *");
     for (i = 0; i < 73; i++)
-        HDfputc('-', rawoutstream);
+        fputc('-', rawoutstream);
     fprintf(rawoutstream, "\n */\n\n");
 }
 
@@ -931,7 +931,7 @@ main(int argc, char *argv[])
     print_results(nd_g, d_g);
 
     if (rawoutstream && rawoutstream != stdout) {
-        if (HDfclose(rawoutstream))
+        if (fclose(rawoutstream))
             fprintf(stderr, "closing rawoutstream");
         else
             rawoutstream = NULL;

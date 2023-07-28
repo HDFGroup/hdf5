@@ -929,26 +929,26 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR; /* return value is arbitrary */
+    FUNC_ENTER_NOAPI_NOERR /* return value is arbitrary */
 
     if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     if (!f1 || !f1->cls)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (!f2 || !f2->cls)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (f1->cls < f2->cls)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (f1->cls > f2->cls)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     /* Files are same driver; no cmp callback */
     if (!f1->cls->cmp) {
         if (f1 < f2)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (f1 > f2)
-            HGOTO_DONE(1)
-        HGOTO_DONE(0)
+            HGOTO_DONE(1);
+        HGOTO_DONE(0);
     }
 
     /* Dispatch to driver */

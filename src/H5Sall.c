@@ -672,7 +672,7 @@ done:
     /* Free temporary space if not passed to caller (only happens on error) */
     if (!*space && tmp_space)
         if (H5S_close(tmp_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__all_deserialize() */
@@ -918,7 +918,7 @@ H5S__all_shape_same(H5S_t *space1, H5S_t *space2)
      */
     while (space2_dim >= 0) {
         if (space1->extent.size[space1_dim] != space2->extent.size[space2_dim])
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
         space1_dim--;
         space2_dim--;
@@ -929,7 +929,7 @@ H5S__all_shape_same(H5S_t *space1, H5S_t *space2)
      */
     while (space1_dim >= 0) {
         if (space1->extent.size[space1_dim] != 1)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
         space1_dim--;
     } /* end while */

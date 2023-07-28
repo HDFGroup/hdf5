@@ -298,7 +298,7 @@ H5S_create(H5S_class_t type)
 done:
     if (ret_value == NULL)
         if (new_ds && H5S_close(new_ds) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_create() */
@@ -344,7 +344,7 @@ H5Screate(H5S_class_t type)
 done:
     if (ret_value < 0)
         if (new_ds && H5S_close(new_ds) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Screate() */
@@ -481,7 +481,7 @@ H5Scopy(hid_t space_id)
 done:
     if (ret_value < 0)
         if (dst && H5S_close(dst) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Scopy() */
@@ -1330,7 +1330,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/], const hsize_t maxdims[/
 done:
     if (ret_value < 0)
         if (space && H5S_close(space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Screate_simple() */
@@ -1470,7 +1470,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 done:
     /* Release fake file structure */
     if (f && H5F_fake_free(f) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_encode() */
@@ -1585,7 +1585,7 @@ H5S_decode(const unsigned char **p)
 done:
     /* Release fake file structure */
     if (f && H5F_fake_free(f) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release fake file struct")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release fake file struct");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_decode() */
@@ -1861,11 +1861,11 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
 
     /* Make certain the dataspaces are the same type */
     if (ds1->extent.type != ds2->extent.type)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Make certain the dataspaces are the same rank */
     if (ds1->extent.rank != ds2->extent.rank)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Make certain the dataspaces' current dimensions are the same size */
     if (ds1->extent.rank > 0) {
@@ -1873,7 +1873,7 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
         assert(ds2->extent.size);
         for (u = 0; u < ds1->extent.rank; u++)
             if (ds1->extent.size[u] != ds2->extent.size[u])
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
     } /* end if */
 
     /* Make certain the dataspaces' maximum dimensions are the same size */
@@ -1882,11 +1882,11 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
         if (ds1->extent.max != NULL && ds2->extent.max != NULL) {
             for (u = 0; u < ds1->extent.rank; u++)
                 if (ds1->extent.max[u] != ds2->extent.max[u])
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
         } /* end if */
         else if ((ds1->extent.max == NULL && ds2->extent.max != NULL) ||
                  (ds1->extent.max != NULL && ds2->extent.max == NULL))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end if */
 
 done:

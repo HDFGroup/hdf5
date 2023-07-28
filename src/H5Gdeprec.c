@@ -222,11 +222,11 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 done:
     if (H5I_INVALID_HID != tmp_gcpl && tmp_gcpl != H5P_GROUP_CREATE_DEFAULT)
         if (H5I_dec_ref(tmp_gcpl) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release property list")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release property list");
 
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate1() */
@@ -280,7 +280,7 @@ H5Gopen1(hid_t loc_id, const char *name)
 done:
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */
@@ -932,7 +932,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *
     H5VL_native_group_optional_args_t grp_opt_args;        /* Arguments for optional operation */
     herr_t                            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sbx", loc_id, name, follow_link, statbuf);
 
     /* Check arguments */
@@ -962,7 +962,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_objinfo() */
 
 /*-------------------------------------------------------------------------
@@ -1045,7 +1045,7 @@ done:
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1067,7 +1067,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
     H5G_trav_goi_t udata;               /* User data for callback */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(loc);
@@ -1099,7 +1099,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
         {
             ret = H5L_get_info(loc, name, &linfo);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (ret >= 0 && linfo.type != H5L_TYPE_HARD) {
             statbuf->linklen = linfo.u.val_size;
@@ -1115,7 +1115,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo() */
 
 /*-------------------------------------------------------------------------

@@ -524,10 +524,10 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
         /* Remainder of "variable-sized" portion of superblock */
         if (H5_IS_BUFFER_OVERFLOW(image, H5F_sizeof_addr(udata->f) * 4, end))
             HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &sblock->base_addr /*out*/);
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &sblock->ext_addr /*out*/);
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &udata->stored_eof /*out*/);
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &sblock->driver_addr /*out*/);
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->base_addr /*out*/);
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->ext_addr /*out*/);
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &udata->stored_eof /*out*/);
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->driver_addr /*out*/);
 
         /* Allocate space for the root group symbol table entry */
         if (sblock->root_ent)
@@ -580,10 +580,10 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
             HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
         /* Base, superblock extension, end of file & root group object header addresses */
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &sblock->base_addr /*out*/);
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &sblock->ext_addr /*out*/);
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &udata->stored_eof /*out*/);
-        H5_addr_decode(udata->f, (const uint8_t **)&image, &sblock->root_addr /*out*/);
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->base_addr /*out*/);
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->ext_addr /*out*/);
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &udata->stored_eof /*out*/);
+        H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->root_addr /*out*/);
 
         /* checksum verification already done in verify_chksum cb */
 
@@ -604,7 +604,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
 
     /* Size check */
     if ((size_t)(image - (const uint8_t *)_image) > len)
-        HDONE_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad decoded superblock size")
+        HDONE_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad decoded superblock size");
 
     ret_value = sblock;
 
@@ -612,7 +612,7 @@ done:
     /* Release the [possibly partially initialized] superblock on error */
     if (!ret_value && sblock)
         if (H5F__super_free(sblock) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTFREE, NULL, "unable to destroy superblock data")
+            HDONE_ERROR(H5E_FILE, H5E_CANTFREE, NULL, "unable to destroy superblock data");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__cache_superblock_deserialize() */
@@ -633,7 +633,6 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(sblock);
-    assert(sblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(sblock->cache_info.type == H5AC_SUPERBLOCK);
     assert(image_len);
 
@@ -702,10 +701,10 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
         }                 /* end if */
 
         /* Encode the base address */
-        H5_addr_encode(f, &image, sblock->base_addr);
+        H5F_addr_encode(f, &image, sblock->base_addr);
 
         /* Encode the address of global free-space index */
-        H5_addr_encode(f, &image, sblock->ext_addr);
+        H5F_addr_encode(f, &image, sblock->ext_addr);
 
         /* Encode the end-of-file address. Note that at this point in time,
          * the EOF value itself may not be reflective of the file's size, as
@@ -714,10 +713,10 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
          * value will ultimately match it. */
         if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-        H5_addr_encode(f, &image, (rel_eof + sblock->base_addr));
+        H5F_addr_encode(f, &image, (rel_eof + sblock->base_addr));
 
         /* Encode the driver information block address */
-        H5_addr_encode(f, &image, sblock->driver_addr);
+        H5F_addr_encode(f, &image, sblock->driver_addr);
 
         /* Encode the root group object entry, including the cached stab info */
         if (H5G_ent_encode(f, &image, sblock->root_ent) < 0)
@@ -736,10 +735,10 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
         *image++ = sblock->status_flags;
 
         /* Encode the base address */
-        H5_addr_encode(f, &image, sblock->base_addr);
+        H5F_addr_encode(f, &image, sblock->base_addr);
 
         /* Encode the address of the superblock extension */
-        H5_addr_encode(f, &image, sblock->ext_addr);
+        H5F_addr_encode(f, &image, sblock->ext_addr);
 
         /* At this point in time, the EOF value itself may
          * not be reflective of the file's size, since we'll eventually
@@ -748,14 +747,14 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
          * ultimately match it. */
         if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-        H5_addr_encode(f, &image, (rel_eof + sblock->base_addr));
+        H5F_addr_encode(f, &image, (rel_eof + sblock->base_addr));
 
         /* Retrieve information for root group */
         if (NULL == (root_oloc = H5G_oloc(f->shared->root_grp)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to retrieve root group information")
 
         /* Encode address of root group's object header */
-        H5_addr_encode(f, &image, root_oloc->addr);
+        H5F_addr_encode(f, &image, root_oloc->addr);
 
         /* Compute superblock checksum */
         chksum = H5_checksum_metadata(_image, ((size_t)H5F_SUPERBLOCK_SIZE(sblock) - H5F_SIZEOF_CHKSUM), 0);
@@ -780,10 +779,6 @@ done:
  * Purpose:     Destroy/release an "in core representation" of a data
  *              structure
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -796,7 +791,6 @@ H5F__cache_superblock_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     assert(sblock);
-    assert(sblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(sblock->cache_info.type == H5AC_SUPERBLOCK);
 
     /* Destroy superblock */
@@ -933,7 +927,6 @@ H5F__cache_drvrinfo_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(drvinfo);
-    assert(drvinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(drvinfo->cache_info.type == H5AC_DRVRINFO);
     assert(image_len);
 
@@ -965,7 +958,6 @@ H5F__cache_drvrinfo_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBU
     assert(f);
     assert(image);
     assert(drvinfo);
-    assert(drvinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(drvinfo->cache_info.type == H5AC_DRVRINFO);
     assert(len == (size_t)(H5F_DRVINFOBLOCK_HDR_SIZE + drvinfo->len));
 
@@ -1001,10 +993,6 @@ done:
  * Purpose:     Destroy/release an "in core representation" of a data
  *              structure
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -1016,7 +1004,6 @@ H5F__cache_drvrinfo_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(drvinfo);
-    assert(drvinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(drvinfo->cache_info.type == H5AC_DRVRINFO);
 
     /* Destroy driver info message */

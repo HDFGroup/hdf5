@@ -327,7 +327,7 @@ H5FD_subfiling_init(void)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
                                         "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
 
-            if (HDatexit(H5FD__subfiling_mpi_finalize) < 0)
+            if (atexit(H5FD__subfiling_mpi_finalize) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
                                         "can't register atexit handler for MPI_Finalize");
         }

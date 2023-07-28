@@ -179,9 +179,9 @@ H5O__shared_read(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const H5O_shared_t
 done:
     /* Release resources */
     if (fheap && H5HF_close(fheap) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "can't close fractal heap")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "can't close fractal heap");
     if (wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
+        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, NULL, "can't close wrapped buffer");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__shared_read() */
@@ -327,7 +327,7 @@ H5O__shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *b
 
         /* Decode stored "symbol table entry" into message location */
         buf += H5F_SIZEOF_SIZE(f); /* Skip over local heap address */
-        H5_addr_decode(f, &buf, &(sh_mesg.u.loc.oh_addr));
+        H5F_addr_decode(f, &buf, &(sh_mesg.u.loc.oh_addr));
     } /* end if */
     else if (version >= H5O_SHARED_VERSION_2) {
         /* If this message is in the heap, copy a heap ID.
@@ -345,7 +345,7 @@ H5O__shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *b
                 sh_mesg.type = H5O_SHARE_TYPE_COMMITTED;
 
             sh_mesg.u.loc.index = 0;
-            H5_addr_decode(f, &buf, &sh_mesg.u.loc.oh_addr);
+            H5F_addr_decode(f, &buf, &sh_mesg.u.loc.oh_addr);
         } /* end else */
     }     /* end else if */
 
@@ -401,7 +401,7 @@ H5O__shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_
     if (sh_mesg->type == H5O_SHARE_TYPE_SOHM)
         H5MM_memcpy(buf, &(sh_mesg->u.heap_id), sizeof(sh_mesg->u.heap_id));
     else
-        H5_addr_encode(f, &buf, sh_mesg->u.loc.oh_addr);
+        H5F_addr_encode(f, &buf, sh_mesg->u.loc.oh_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__shared_encode() */
@@ -572,10 +572,11 @@ H5O__shared_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, H5F_t *file_dst,
     if (shared_src->type != H5O_SHARE_TYPE_COMMITTED) {
         /* Simulate trying to share new message in the destination file. */
         /* Set copied metadata tag */
-        H5_BEGIN_TAG(H5AC__COPIED_TAG);
+        H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
         if (H5SM_try_share(file_dst, NULL, H5SM_DEFER, mesg_type->id, _native_dst, mesg_flags) < 0)
-            HGOTO_ERROR_TAG(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to determine if message should be shared")
+            HGOTO_ERROR_TAG(H5E_OHDR, H5E_WRITEERROR, FAIL,
+                            "unable to determine if message should be shared");
 
         /* Reset metadata tag */
         H5_END_TAG

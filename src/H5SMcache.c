@@ -261,10 +261,10 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
         UINT16DECODE(image, table->indexes[u].num_messages);
 
         /* Address of the actual index */
-        H5_addr_decode(f, &image, &(table->indexes[u].index_addr));
+        H5F_addr_decode(f, &image, &(table->indexes[u].index_addr));
 
         /* Address of the index's heap */
-        H5_addr_decode(f, &image, &(table->indexes[u].heap_addr));
+        H5F_addr_decode(f, &image, &(table->indexes[u].heap_addr));
 
         /* Compute the size of a list index for this SOHM index */
         table->indexes[u].list_size = H5SM_LIST_SIZE(f, table->indexes[u].list_max);
@@ -284,7 +284,7 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 done:
     if (!ret_value && table)
         if (H5SM__table_free(table) < 0)
-            HDONE_ERROR(H5E_SOHM, H5E_CANTFREE, NULL, "unable to destroy sohm table")
+            HDONE_ERROR(H5E_SOHM, H5E_CANTFREE, NULL, "unable to destroy sohm table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__cache_table_deserialize() */
@@ -311,7 +311,6 @@ H5SM__cache_table_image_len(const void *_thing, size_t *image_len)
 
     /* Check arguments */
     assert(table);
-    assert(table->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(table->cache_info.type == H5AC_SOHM_TABLE);
     assert(image_len);
 
@@ -345,7 +344,6 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
     assert(f);
     assert(image);
     assert(table);
-    assert(table->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(table->cache_info.type == H5AC_SOHM_TABLE);
     assert(table->table_size == len);
 
@@ -382,10 +380,10 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
         UINT16ENCODE(image, table->indexes[u].num_messages);
 
         /* Address of the actual index */
-        H5_addr_encode(f, &image, table->indexes[u].index_addr);
+        H5F_addr_encode(f, &image, table->indexes[u].index_addr);
 
         /* Address of the index's heap */
-        H5_addr_encode(f, &image, table->indexes[u].heap_addr);
+        H5F_addr_encode(f, &image, table->indexes[u].heap_addr);
     } /* end for */
 
     /* Compute checksum on buffer */
@@ -407,10 +405,6 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
  *
  * Purpose:	Free memory used by the SOHM table.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -426,7 +420,6 @@ H5SM__cache_table_free_icr(void *_thing)
 
     /* Check arguments */
     assert(table);
-    assert(table->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(table->cache_info.type == H5AC_SOHM_TABLE);
 
     /* Destroy Shared Object Header Message table */
@@ -609,7 +602,6 @@ H5SM__cache_list_image_len(const void *_thing, size_t *image_len)
 
     /* Check arguments */
     assert(list);
-    assert(list->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(list->cache_info.type == H5AC_SOHM_LIST);
     assert(list->header);
     assert(image_len);
@@ -647,7 +639,6 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_U
     assert(f);
     assert(image);
     assert(list);
-    assert(list->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(list->cache_info.type == H5AC_SOHM_LIST);
     assert(list->header);
     assert(list->header->list_size == len);
@@ -694,10 +685,6 @@ done:
  *
  * Purpose:	Free all memory used by the list.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -713,7 +700,6 @@ H5SM__cache_list_free_icr(void *_thing)
 
     /* Check arguments */
     assert(list);
-    assert(list->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(list->cache_info.type == H5AC_SOHM_LIST);
 
     /* Destroy Shared Object Header Message list */

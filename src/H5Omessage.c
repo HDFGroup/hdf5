@@ -116,7 +116,7 @@ H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags, unsi
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_create() */
@@ -249,7 +249,7 @@ H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags, unsig
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_write() */
@@ -433,7 +433,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_msg_read() */
@@ -722,7 +722,7 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_count() */
@@ -796,7 +796,7 @@ H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_msg_exists() */
@@ -833,7 +833,7 @@ H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id)
     /* Scan through the messages looking for the right one */
     for (u = 0; u < oh->nmesgs; u++)
         if (type == oh->mesg[u].type)
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -883,7 +883,7 @@ H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_remove() */
@@ -930,7 +930,7 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence, H5O_oper
 
 done:
     if (oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_remove_op() */
@@ -988,7 +988,7 @@ H5O__msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence, un
 
         /* Break out now, if we've found the correct message */
         if (udata->sequence == H5O_FIRST || udata->sequence != H5O_ALL)
-            HGOTO_DONE(H5_ITER_STOP)
+            HGOTO_DONE(H5_ITER_STOP);
     } /* end if */
 
 done:
@@ -1104,7 +1104,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, const H5O_mesg_operator_
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_iterate() */
@@ -1190,11 +1190,11 @@ done:
          */
         if (oh_modified & H5O_MODIFY_CONDENSE)
             if (H5O__condense_header(f, oh) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header")
+                HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header");
 
         /* Mark object header as changed */
         if (H5O_touch_oh(f, oh, FALSE) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update time on object");
 
         /* Mark object header as dirty in cache */
         if (H5AC_mark_entry_dirty(oh) < 0)
@@ -1805,7 +1805,7 @@ H5O__copy_mesg(H5F_t *f, H5O_t *oh, size_t idx, const H5O_msg_class_t *type, con
 done:
     /* Release chunk, if not already released */
     if (chk_proxy && H5O__chunk_unprotect(f, chk_proxy, chk_dirtied) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy_mesg() */
@@ -1922,7 +1922,7 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
 
     /* Encode the message prefix */
     if (oh->version == H5O_VERSION_1)
-        UINT16ENCODE(p, msg_id)
+        UINT16ENCODE(p, msg_id);
     else
         *p++ = (uint8_t)msg_id;
     assert(mesg->raw_size < H5O_MESG_MAX_SIZE);
@@ -2072,7 +2072,7 @@ H5O_msg_get_flags(const H5O_loc_t *loc, unsigned type_id, uint8_t *flags)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_get_flags() */

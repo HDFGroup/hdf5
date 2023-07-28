@@ -160,7 +160,7 @@ H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag)
 done:
     /* Unprotect object header on failure */
     if (oh && H5O_unprotect(oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__oh_tag() */
@@ -256,7 +256,7 @@ done:
     if (objs_incr && file)
         H5F_decr_nopen_objs(file);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_refresh_metadata() */
 
 /*-------------------------------------------------------------------------
@@ -319,7 +319,7 @@ H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Evict the object's tagged metadata */
-    if (H5F_evict_tagged_metadata(file, tag) < 0)
+    if (H5AC_evict_tagged_metadata(file, tag, TRUE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to evict metadata")
 
     /* Re-cork object with tag */
@@ -328,7 +328,7 @@ H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid)
             HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to cork the object")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__refresh_metadata_close() */
 
 /*-------------------------------------------------------------------------
@@ -415,5 +415,5 @@ H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_refresh_metadata_reopen() */

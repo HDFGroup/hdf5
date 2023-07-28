@@ -216,7 +216,7 @@ H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
 done:
     /* Release resources */
     if (wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
+        HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__bit_shift() */

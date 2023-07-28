@@ -288,7 +288,7 @@ H5D__contig_fill(H5D_t *dset)
                      * still participate in following MPI_Barrier.
                      */
                     blocks_written = TRUE;
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                     break;
                 }
             }
@@ -325,7 +325,7 @@ H5D__contig_fill(H5D_t *dset)
 done:
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_fill() */
@@ -667,13 +667,13 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 done:
     if (ret_value < 0) {
         if (H5D__contig_io_term(io_info, dinfo) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataset I/O info")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataset I/O info");
     } /* end if */
 
     if (file_space_normalized) {
         /* (Casting away const OK -QAK) */
         if (H5S_hyper_denormalize_offset(dinfo->file_space, old_offset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+            HDONE_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1352,8 +1352,8 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                     /* Prepend to existing sieve buffer */
                     if ((addr + len) == sieve_start) {
                         /* Move existing sieve information to correct location */
-                        HDmemmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
-                                  dset_contig->sieve_size);
+                        memmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
+                                dset_contig->sieve_size);
 
                         /* Copy in new information (must be first in sieve buffer) */
                         H5MM_memcpy(dset_contig->sieve_buf, buf, len);
@@ -1835,13 +1835,13 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
 
 done:
     if (buf_sid > 0 && H5I_dec_ref(buf_sid) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID");
     if (tid_src > 0 && H5I_dec_ref(tid_src) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (tid_dst > 0 && H5I_dec_ref(tid_dst) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (tid_mem > 0 && H5I_dec_ref(tid_mem) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (buf)
         buf = H5FL_BLK_FREE(type_conv, buf);
     if (reclaim_buf)

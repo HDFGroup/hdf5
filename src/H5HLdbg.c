@@ -106,10 +106,10 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
 done:
     if (h && FAIL == H5HL_unprotect(h))
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release/unprotect local heap")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release/unprotect local heap");
 
     if (marker && NULL != (marker = (uint8_t *)H5MM_xfree(marker)))
-        HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "can't free marker buffer")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "can't free marker buffer");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_debug() */

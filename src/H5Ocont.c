@@ -95,7 +95,7 @@ H5O__cont_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     /* Decode */
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5_addr_decode(f, &p, &(cont->addr));
+    H5F_addr_decode(f, &p, &(cont->addr));
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -136,7 +136,7 @@ H5O__cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     assert(cont->size > 0);
 
     /* encode */
-    H5_addr_encode(f, &p, cont->addr);
+    H5F_addr_encode(f, &p, cont->addr);
     H5F_ENCODE_LENGTH(f, p, cont->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

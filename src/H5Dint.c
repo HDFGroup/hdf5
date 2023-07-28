@@ -30,6 +30,7 @@
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
+#include "H5VMprivate.h" /* Vector Functions                         */
 
 /****************/
 /* Local Macros */
@@ -467,9 +468,9 @@ done:
     if (ret_value == NULL)
         if (new_dset != NULL) {
             if (new_dset->dcpl_id != 0 && H5I_dec_ref(new_dset->dcpl_id) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't decrement temporary datatype ID")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't decrement temporary datatype ID");
             if (new_dset->dapl_id != 0 && H5I_dec_ref(new_dset->dapl_id) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't decrement temporary datatype ID")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't decrement temporary datatype ID");
             new_dset = H5FL_FREE(H5D_shared_t, new_dset);
         } /* end if */
 
@@ -665,7 +666,7 @@ H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize)
 done:
     if (FAIL == ret_value)
         *minimize = FALSE;
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__use_minimized_dset_headers */
 
 /*-------------------------------------------------------------------------
@@ -783,7 +784,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__calculate_minimum_header_size */
 
 /*-------------------------------------------------------------------------
@@ -823,7 +824,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__prepare_minimized_oh */
 
 /*-------------------------------------------------------------------------
@@ -1021,14 +1022,14 @@ done:
     /* Release pointer to object header itself */
     if (oh != NULL)
         if (H5O_unpin(oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header");
 
     /* Error cleanup */
     if (ret_value < 0)
         if (layout_init)
             /* Destroy the layout information for the dataset */
             if (dset->shared->layout.ops->dest && (dset->shared->layout.ops->dest)(dset) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__update_oh_info() */
@@ -1328,48 +1329,48 @@ done:
         if (new_dset->shared) {
             if (layout_init)
                 if (new_dset->shared->layout.ops->dest && (new_dset->shared->layout.ops->dest)(new_dset) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to destroy layout info")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to destroy layout info");
             if (pline_copied)
                 if (H5O_msg_reset(H5O_PLINE_ID, &new_dset->shared->dcpl_cache.pline) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset I/O pipeline info")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset I/O pipeline info");
             if (layout_copied)
                 if (H5O_msg_reset(H5O_LAYOUT_ID, &new_dset->shared->layout) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset layout info")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset layout info");
             if (fill_copied)
                 if (H5O_msg_reset(H5O_FILL_ID, &new_dset->shared->dcpl_cache.fill) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset fill-value info")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset fill-value info");
             if (efl_copied)
                 if (H5O_msg_reset(H5O_EFL_ID, &new_dset->shared->dcpl_cache.efl) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset external file list info")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset external file list info");
             if (new_dset->shared->space && H5S_close(new_dset->shared->space) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace");
 
             if (new_dset->shared->type) {
                 if (new_dset->shared->type_id > 0) {
                     if (H5I_dec_ref(new_dset->shared->type_id) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype");
                 } /* end if */
                 else {
                     if (H5T_close_real(new_dset->shared->type) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype");
                 } /* end else */
             }     /* end if */
 
             if (H5_addr_defined(new_dset->oloc.addr)) {
                 if (H5O_dec_rc_by_loc(&(new_dset->oloc)) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL,
-                                "unable to decrement refcount on newly created object")
+                                "unable to decrement refcount on newly created object");
                 if (H5O_close(&(new_dset->oloc), NULL) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header")
+                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header");
                 if (file) {
                     if (H5O_delete(file, new_dset->oloc.addr) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CANTDELETE, NULL, "unable to delete object header")
+                        HDONE_ERROR(H5E_DATASET, H5E_CANTDELETE, NULL, "unable to delete object header");
                 } /* end if */
             }     /* end if */
             if (new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list");
             if (new_dset->shared->dapl_id != 0 && H5I_dec_ref(new_dset->shared->dapl_id) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list");
             new_dset->shared->extfile_prefix = (char *)H5MM_xfree(new_dset->shared->extfile_prefix);
             new_dset->shared->vds_prefix     = (char *)H5MM_xfree(new_dset->shared->vds_prefix);
             new_dset->shared                 = H5FL_FREE(H5D_shared_t, new_dset->shared);
@@ -1433,7 +1434,7 @@ H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id)
 done:
     if (!ret_value)
         if (loc_found && H5G_loc_free(&dset_loc) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "can't free location")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__open_name() */
@@ -1820,21 +1821,21 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
 done:
     if (ret_value < 0) {
         if (H5_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc), NULL) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header");
         if (dataset->shared) {
             if (layout_init)
                 if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info");
             if (dataset->shared->space && H5S_close(dataset->shared->space) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
             if (dataset->shared->type) {
                 if (dataset->shared->type_id > 0) {
                     if (H5I_dec_ref(dataset->shared->type_id) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype");
                 } /* end if */
                 else {
                     if (H5T_close_real(dataset->shared->type) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype");
                 } /* end else */
             }     /* end if */
         }         /* end if */
@@ -1877,7 +1878,7 @@ H5D_close(H5D_t *dataset)
 
         /* Flush the dataset's information.  Continue to close even if it fails. */
         if (H5D__flush_real(dataset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
+            HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info");
 
         /* Set a flag to indicate the dataset is closing, before we start freeing things */
         /* (Avoids problems with flushing datasets twice, when one is holding
@@ -1932,7 +1933,7 @@ H5D_close(H5D_t *dataset)
                     if (dataset->shared->layout.storage.u.virt.list[i].source_dset.dset) {
                         assert(dataset->shared->layout.storage.u.virt.list[i].source_dset.dset != dataset);
                         if (H5D_close(dataset->shared->layout.storage.u.virt.list[i].source_dset.dset) < 0)
-                            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
+                            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset");
                         dataset->shared->layout.storage.u.virt.list[i].source_dset.dset = NULL;
                     } /* end if */
 
@@ -1944,7 +1945,7 @@ H5D_close(H5D_t *dataset)
                             if (H5D_close(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset) <
                                 0)
                                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
-                                            "unable to close source dataset")
+                                            "unable to close source dataset");
                             dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset = NULL;
                         } /* end if */
                 }         /* end for */
@@ -1962,7 +1963,7 @@ H5D_close(H5D_t *dataset)
 
         /* Destroy any cached layout information for the dataset */
         if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info");
 
         /* Free the external file prefix */
         dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
@@ -1979,10 +1980,10 @@ H5D_close(H5D_t *dataset)
 
         /* Uncork cache entries with object address tag */
         if (H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status");
         if (corked)
             if (H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__UNCORK, NULL) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTUNCORK, FAIL, "unable to uncork an object");
 
         /* Release datatype, dataspace, and creation and access property lists -- there isn't
          * much we can do if one of these fails, so we just continue.
@@ -1993,21 +1994,21 @@ H5D_close(H5D_t *dataset)
 
         /* Remove the dataset from the list of opened objects in the file */
         if (H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object");
         if (H5FO_delete(dataset->oloc.file, dataset->oloc.addr) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects");
 
         /* Close the dataset object */
         /* (This closes the file, if this is the last object open) */
         if (H5O_close(&(dataset->oloc), &file_closed) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header");
 
         /* Evict dataset metadata if evicting on close */
         if (!file_closed && H5F_SHARED(dataset->oloc.file) && H5F_EVICT_ON_CLOSE(dataset->oloc.file)) {
             if (H5AC_flush_tagged_metadata(dataset->oloc.file, dataset->oloc.addr) < 0)
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata");
             if (H5AC_evict_tagged_metadata(dataset->oloc.file, dataset->oloc.addr, FALSE) < 0)
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata");
         } /* end if */
 
         /*
@@ -2725,9 +2726,9 @@ H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size
 
 done:
     if (fspace && H5S_close(fspace) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
     if (mspace && H5S_close(mspace) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
     if (vlen_bufsize.common.fl_tbuf != NULL)
         vlen_bufsize.common.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.common.fl_tbuf);
     if (vlen_bufsize.common.vl_tbuf != NULL)
@@ -2882,29 +2883,29 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
 done:
     if (vlen_bufsize.fspace_id >= 0) {
         if (H5I_dec_app_ref(vlen_bufsize.fspace_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "problem freeing id")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "problem freeing id");
         vlen_bufsize.fspace = NULL;
     } /* end if */
     if (vlen_bufsize.fspace && H5S_close(vlen_bufsize.fspace) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
     if (vlen_bufsize.mspace_id >= 0) {
         if (H5I_dec_app_ref(vlen_bufsize.mspace_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "problem freeing id")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "problem freeing id");
         mspace = NULL;
     } /* end if */
     if (mspace && H5S_close(mspace) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
     if (vlen_bufsize.common.fl_tbuf != NULL)
         vlen_bufsize.common.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.common.fl_tbuf);
     if (vlen_bufsize.common.vl_tbuf != NULL)
         vlen_bufsize.common.vl_tbuf = H5FL_BLK_FREE(vlen_vl_buf, vlen_bufsize.common.vl_tbuf);
     if (vlen_bufsize.dxpl_id != H5I_INVALID_HID) {
         if (H5I_dec_app_ref(vlen_bufsize.dxpl_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close property list")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close property list");
         dxpl = NULL;
     } /* end if */
     if (dxpl && H5P_close(dxpl) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release DXPL")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release DXPL");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_gen() */
@@ -3373,30 +3374,30 @@ done:
         /* Remove new layout message */
         if (add_new_layout)
             if (H5O_msg_remove(&dataset->oloc, H5O_LAYOUT_ID, H5O_ALL, FALSE) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete layout message")
+                HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete layout message");
 
         /* Add back old layout message */
         if (delete_old_layout)
             if (H5O_msg_create(&dataset->oloc, H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &dataset->shared->layout) <
                 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to add layout header message")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to add layout header message");
 
         /* Clean up v1 b-tree chunk index */
         if (init_new_index) {
             if (H5_addr_defined(new_idx_info.storage->idx_addr)) {
                 /* Check for valid address i.e. tag */
                 if (!H5_addr_defined(dataset->oloc.addr))
-                    HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "address undefined")
+                    HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "address undefined");
 
                 /* Expunge from cache all v1 B-tree type entries associated with tag */
                 if (H5AC_expunge_tag_type_metadata(dataset->oloc.file, dataset->oloc.addr, H5AC_BT_ID,
                                                    H5AC__NO_FLAGS_SET))
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTEXPUNGE, FAIL, "unable to expunge index metadata")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTEXPUNGE, FAIL, "unable to expunge index metadata");
             } /* end if */
 
             /* Delete v1 B-tree chunk index */
             if (new_idx_info.storage->ops->dest && (new_idx_info.storage->ops->dest)(&new_idx_info) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info");
         } /* end if */
     }     /* end if */
 
@@ -3461,7 +3462,7 @@ done:
     /* Release pointer to object header */
     if (oh != NULL)
         if (H5O_unpin(oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mark() */
@@ -3699,7 +3700,7 @@ done:
     if (ret_value < 0)
         if (new_dcpl_id > 0)
             if (H5I_dec_app_ref(new_dcpl_id) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_create_plist() */
@@ -3820,7 +3821,7 @@ done:
     if (ret_value < 0)
         if (new_dapl_id > 0)
             if (H5I_dec_app_ref(new_dapl_id) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_access_plist() */
@@ -3859,7 +3860,7 @@ done:
     if (ret_value < 0)
         if (space != NULL)
             if (H5S_close(space) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_space() */
@@ -3913,7 +3914,7 @@ H5D__get_type(const H5D_t *dset)
 done:
     if (ret_value < 0)
         if (dt && H5T_close(dt) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_type() */
@@ -3959,7 +3960,7 @@ done:
     /* Release hold on (source) virtual datasets' files */
     if (virt_dsets_held)
         if (H5D__virtual_release_source_dset_files(head) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't release VDS source files held open")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't release VDS source files held open");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__refresh() */
