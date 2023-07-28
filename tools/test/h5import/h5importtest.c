@@ -167,7 +167,7 @@ main(void)
             (void)fprintf(sp, "\n");
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     /*-------------------------------------------------------------------------
      * TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
@@ -182,7 +182,7 @@ main(void)
             (void)fprintf(sp, "\n");
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     /*-------------------------------------------------------------------------
      * TOOLTEST txtin32.txt -c $srcdir/testfiles/textin32.conf -o textin32.h5
@@ -197,7 +197,7 @@ main(void)
             (void)fprintf(sp, "\n");
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 #endif
 
     /*-------------------------------------------------------------------------
@@ -209,11 +209,11 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++) {
-                (void)HDfwrite((char *)&b32i3[k][i][j], sizeof(int), 1, sp);
+                (void)fwrite((char *)&b32i3[k][i][j], sizeof(int), 1, sp);
             }
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     sp = fopen("binin32.conf", "w");
     (void)fprintf(sp, "PATH /int/bin/32-bit\n");
@@ -226,7 +226,7 @@ main(void)
     (void)fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
     (void)fprintf(sp, "CHUNKED-DIMENSION-SIZES 1 2 1\n");
     (void)fprintf(sp, "\n");
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     /*-------------------------------------------------------------------------
      * TOOLTEST binuin32.bin -c binuin32.conf -o binuin32.h5
@@ -237,11 +237,11 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++) {
-                (void)HDfwrite((char *)&b32i3[k][i][j], sizeof(unsigned int), 1, sp);
+                (void)fwrite((char *)&b32i3[k][i][j], sizeof(unsigned int), 1, sp);
             }
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     sp = fopen("binuin32.conf", "w");
     (void)fprintf(sp, "PATH /int/buin/32-bit\n");
@@ -253,7 +253,7 @@ main(void)
     (void)fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
     (void)fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
     (void)fprintf(sp, "\n");
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     /*-------------------------------------------------------------------------
      * TOOLTEST binin16.bin -c binin16.conf -o binin16.h5
@@ -264,11 +264,11 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++) {
-                (void)HDfwrite((char *)&b16i3[k][i][j], sizeof(short), 1, sp);
+                (void)fwrite((char *)&b16i3[k][i][j], sizeof(short), 1, sp);
             }
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     sp = fopen("binin16.conf", "w");
     (void)fprintf(sp, "PATH /int/bin/16-bit\n");
@@ -282,7 +282,7 @@ main(void)
     (void)fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
     (void)fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 8\n");
     (void)fprintf(sp, "\n");
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     /*-------------------------------------------------------------------------
      * TOOLTEST binuin16.bin -c binuin16.conf -o binuin16.h5
@@ -292,11 +292,11 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++) {
-                (void)HDfwrite((char *)&b16i3[k][i][j], sizeof(unsigned short), 1, sp);
+                (void)fwrite((char *)&b16i3[k][i][j], sizeof(unsigned short), 1, sp);
             }
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     sp = fopen("binuin16.conf", "w");
     (void)fprintf(sp, "PATH /int/buin/16-bit\n");
@@ -310,7 +310,7 @@ main(void)
     (void)fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
     (void)fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 8\n");
     (void)fprintf(sp, "\n");
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     /*-------------------------------------------------------------------------
      * TOOLTEST binin8.bin -c binin8.conf  -o binin8.h5
@@ -321,11 +321,11 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++) {
-                (void)HDfwrite((char *)&b8i3[k][i][j], sizeof(char), 1, sp);
+                (void)fwrite((char *)&b8i3[k][i][j], sizeof(char), 1, sp);
             }
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     sp = fopen("binin8.conf", "w");
     (void)fprintf(sp, "PATH /int/bin/8-bit\n");
@@ -342,7 +342,7 @@ main(void)
     (void)fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 -1\n");
     (void)fprintf(sp, "COMPRESSION-PARAM 3\n");
     (void)fprintf(sp, "\n");
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
 #endif /* UNICOS */
 
@@ -359,11 +359,11 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++) {
-                (void)HDfwrite((char *)&b64r3[k][i][j], sizeof(double), 1, sp);
+                (void)fwrite((char *)&b64r3[k][i][j], sizeof(double), 1, sp);
             }
         }
     }
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     sp = fopen("binfp64.conf", "w");
     (void)fprintf(sp, "PATH /fp/bin/64-bit\n");
@@ -378,7 +378,7 @@ main(void)
     (void)fprintf(sp, "MAXIMUM-DIMENSIONS -1 6 7\n");
     (void)fprintf(sp, "COMPRESSION-PARAM 8\n");
     (void)fprintf(sp, "\n");
-    (void)HDfclose(sp);
+    (void)fclose(sp);
 
     /*-------------------------------------------------------------------------
      * TOOLTEST binin8w.bin -c binin8w.conf -o binin8w.h5
@@ -392,10 +392,10 @@ main(void)
         sp = fopen("binin8w.bin", OPEN_FLAGS);
         for (i = 0; i < 4; i++) {
             char c = bin8w[i];
-            if (HDfwrite(&c, sizeof(char), 1, sp) != 1)
+            if (fwrite(&c, sizeof(char), 1, sp) != 1)
                 printf("error writing file\n");
         }
-        HDfclose(sp);
+        fclose(sp);
 
         sp = fopen("binin8w.conf", "w");
         (void)fprintf(sp, "INPUT-CLASS IN\n");
@@ -408,7 +408,7 @@ main(void)
         (void)fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
         (void)fprintf(sp, "DIMENSION-SIZES 4\n");
         (void)fprintf(sp, "\n");
-        (void)HDfclose(sp);
+        (void)fclose(sp);
     }
     return (EXIT_SUCCESS);
 }

@@ -132,7 +132,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             u++;             /* skip ',' */
                         }
                         c = str[u];
-                        if (!HDisdigit(c) && l == -1) {
+                        if (!isdigit(c) && l == -1) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("compression parameter not digit in <%s>\n", str);
@@ -182,7 +182,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             u++;             /* skip ',' */
                         }
                         c = str[u];
-                        if (!HDisdigit(c) && l == -1) {
+                        if (!isdigit(c) && l == -1) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("compression parameter is not a digit in <%s>\n", str);
@@ -228,27 +228,27 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                 l           = 0;
                             }
                             else if (f == -1) {
-                                filt->filt_flag = (unsigned)HDstrtoul(stype, NULL, 0);
+                                filt->filt_flag = (unsigned)strtoul(stype, NULL, 0);
                                 f               = 0;
                             }
                             else if (p == -1) {
-                                filt->cd_nelmts = HDstrtoull(stype, NULL, 0);
+                                filt->cd_nelmts = strtoull(stype, NULL, 0);
                                 p               = 0;
                             }
                             else {
-                                filt->cd_values[j++] = (unsigned)HDstrtoul(stype, NULL, 0);
+                                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
                             }
                             q = 0;
                             u++; /* skip ',' */
                         }
                         c = str[u];
-                        if (!HDisdigit(c) && l == -1) {
+                        if (!isdigit(c) && l == -1) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("filter number parameter is not a digit in <%s>\n", str);
                             exit(EXIT_FAILURE);
                         }
-                        else if (!HDisdigit(c) && f == -1) {
+                        else if (!isdigit(c) && f == -1) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("filter flag parameter is not a digit in <%s>\n", str);
@@ -267,7 +267,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     /* here we could have 1 or 2 digits  */
                     for (m = 0, u = i + 1; u < len; u++, m++) {
                         c = str[u];
-                        if (!HDisdigit(c)) {
+                        if (!isdigit(c)) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("compression parameter is not a digit in <%s>\n", str);
@@ -279,7 +279,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     stype[m] = '\0';
                 } /*if */
 
-                filt->cd_values[j++] = (unsigned)HDstrtoul(stype, NULL, 0);
+                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
                 if (filt->cd_nelmts == 0)
                     j = 0;
                 i += m; /* jump */
@@ -457,7 +457,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
             break;
         default:
             break;
-    };
+    }
 
     return obj_list;
 }
@@ -581,7 +581,7 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
             sdim[k] = c;
             k++; /*increment sdim index */
 
-            if (!HDisdigit(c) && c != 'x' && c != 'N' && c != 'O' && c != 'N' && c != 'E') {
+            if (!isdigit(c) && c != 'x' && c != 'N' && c != 'O' && c != 'N' && c != 'E') {
                 if (obj_list)
                     free(obj_list);
                 error_msg("in parse layout, <%s> Not a valid character in <%s>\n", sdim, str);
@@ -592,7 +592,7 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
                 if (c == 'x') {
                     sdim[k - 1]                        = '\0';
                     k                                  = 0;
-                    pack->chunk.chunk_lengths[c_index] = HDstrtoull(sdim, NULL, 0);
+                    pack->chunk.chunk_lengths[c_index] = strtoull(sdim, NULL, 0);
                     if (pack->chunk.chunk_lengths[c_index] == 0) {
                         if (obj_list)
                             free(obj_list);
@@ -608,7 +608,7 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
                         pack->chunk.rank = -2;
                     }
                     else {
-                        pack->chunk.chunk_lengths[c_index] = HDstrtoull(sdim, NULL, 0);
+                        pack->chunk.chunk_lengths[c_index] = strtoull(sdim, NULL, 0);
                         if (pack->chunk.chunk_lengths[c_index] == 0) {
                             if (obj_list)
                                 free(obj_list);

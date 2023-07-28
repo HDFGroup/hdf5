@@ -143,7 +143,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* gen_newgrat_file() */
@@ -348,7 +348,7 @@ error:
         H5Sclose(sid4);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -453,7 +453,7 @@ error:
         H5Dclose(did2);
 #endif
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -575,7 +575,7 @@ error:
         H5Aclose(aid2);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (fd >= 0)
         HDclose(fd);

@@ -447,7 +447,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
     {
         snblocks = H5Sget_select_hyper_nblocks(rspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Print block information */
     if (snblocks > 0) {
@@ -508,7 +508,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
     {
         snpoints = H5Sget_select_elem_npoints(rspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Print point information */
     if (snpoints > 0) {
@@ -1548,10 +1548,10 @@ h5tools_escape(char *s /*in,out*/, size_t size)
                 /*would overflow*/
                 return NULL;
 
-            HDmemmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
-            memcpy(s + i, escape, esc_size);               /*insert*/
-            n += esc_size - 1;                             /* adjust total string size */
-            i += esc_size;                                 /* adjust string position */
+            memmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
+            memcpy(s + i, escape, esc_size);             /*insert*/
+            n += esc_size - 1;                           /* adjust total string size */
+            i += esc_size;                               /* adjust string position */
         }
     }
 

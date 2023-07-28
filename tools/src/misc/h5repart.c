@@ -89,14 +89,14 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
     char *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
-        retval = HDstrtol(argv[*argno] + 2, &suffix, 10);
+        retval = strtol(argv[*argno] + 2, &suffix, 10);
         (*argno)++;
     }
     else if (argv[*argno][2] || *argno + 1 >= argc) {
         usage(progname);
     }
     else {
-        retval = HDstrtol(argv[*argno + 1], &suffix, 0);
+        retval = strtol(argv[*argno + 1], &suffix, 0);
         if (suffix == argv[*argno + 1])
             usage(progname);
         *argno += 2;
@@ -472,7 +472,7 @@ main(int argc, char *argv[])
     {
         file = H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (file >= 0) {
         if (H5Fclose(file) < 0) {

@@ -390,7 +390,7 @@ done:
             H5Fclose(fidout);
             H5Fclose(fidin);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (travt)
         trav_table_free(travt);
@@ -1455,7 +1455,7 @@ done:
         {
             named_datatype_free(&named_dt_head, 1);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /* free link info path */
@@ -1480,7 +1480,7 @@ done:
         H5Tclose(type_in);
         H5Tclose(type_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* free */
     if (buf != NULL)

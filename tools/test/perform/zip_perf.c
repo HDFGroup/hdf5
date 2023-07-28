@@ -274,7 +274,7 @@ parse_size_directive(const char *size)
     unsigned long s;
     char         *endptr;
 
-    s = HDstrtoul(size, &endptr, 10);
+    s = strtoul(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -488,7 +488,7 @@ main(int argc, char *argv[])
                 min_buf_size = parse_size_directive(H5_optarg);
                 break;
             case 'c':
-                compress_percent = (int)HDstrtol(H5_optarg, NULL, 10);
+                compress_percent = (int)strtol(H5_optarg, NULL, 10);
 
                 if (compress_percent < 0)
                     compress_percent = 0;

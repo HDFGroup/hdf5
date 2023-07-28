@@ -441,7 +441,7 @@ done:
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, region_elmt_counter, elmt_counter);
     /* Render the region } element end */
 
-    H5_LEAVE(dimension_break)
+    H5_LEAVE(dimension_break);
 
     CATCH
 
@@ -843,7 +843,7 @@ done:
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, region_elmt_counter, elmt_counter);
     /* Render the region } element end */
 
-    H5_LEAVE(dimension_break)
+    H5_LEAVE(dimension_break);
 
     CATCH
 
@@ -1198,7 +1198,7 @@ done:
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, region_elmt_counter, elmt_counter);
     /* Render the region } element end */
 
-    H5_LEAVE(dimension_break)
+    H5_LEAVE(dimension_break);
     CATCH
 
     H5TOOLS_ENDDEBUG(" ");
@@ -3485,8 +3485,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                (hsize_t)0, (hsize_t)0);
                         break;
                     case H5Z_FILTER_SZIP:
-                        szip_options_mask = cd_values[0];
-                        ;
+                        szip_options_mask     = cd_values[0];
                         szip_pixels_per_block = cd_values[1];
 
                         h5tools_str_append(&buffer, "%s %s", SZIP, BEGIN);
@@ -3939,7 +3938,7 @@ h5tools_print_packed_bits(h5tools_str_t *buffer, hid_t type)
         error_msg("Packed Bit offset+length value(%u) too large. Max is %d\n",
                   packed_data_offset + packed_data_length, packed_bits_size);
         packed_data_mask = 0;
-    };
+    }
     h5tools_str_append(buffer, "%s %s=%u %s=%u", PACKED_BITS, PACKED_OFFSET, packed_data_offset,
                        PACKED_LENGTH, packed_data_length);
 }

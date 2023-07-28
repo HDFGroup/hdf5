@@ -575,7 +575,7 @@ done:
         H5Tclose(ftype_id);
         H5Aclose(attr_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 } /* end copy_attr() */
@@ -884,7 +884,7 @@ done:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (travt)
         trav_table_free(travt);
     return ret_value;

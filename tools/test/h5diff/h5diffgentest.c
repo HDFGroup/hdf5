@@ -538,7 +538,7 @@ error:
         H5Sclose(space);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_onion_1d_dset */
@@ -972,7 +972,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_onion_dset_extension */
@@ -5656,7 +5656,7 @@ error:
         H5Tclose(tid1);
         H5Tclose(tid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }
 
 static hid_t
@@ -8649,7 +8649,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -8703,7 +8703,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }
 
 /*-------------------------------------------------------------------------
@@ -8787,7 +8787,7 @@ error:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end write_dset() */

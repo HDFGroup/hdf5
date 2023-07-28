@@ -1176,7 +1176,7 @@ set_vfd(parameters *param)
 
         /* Family of files, each 1MB and using the default driver */
         /* if ((val=HDstrtok(NULL, " \t\n\r")))
-            fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024); */
+            fam_size = (hsize_t)(strtod(val, NULL) * 1024*1024); */
         if (H5Pset_fapl_family(my_fapl, fam_size, H5P_DEFAULT) < 0)
             return -1;
     }

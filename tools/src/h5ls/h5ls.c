@@ -141,11 +141,11 @@ static struct dispatch_t {
 } dispatch_g[H5O_TYPE_NTYPES];
 
 #define DISPATCH(TYPE, NAME, LIST1, LIST2)                                                                   \
-    {                                                                                                        \
+    do {                                                                                                     \
         dispatch_g[TYPE].name  = (NAME);                                                                     \
         dispatch_g[TYPE].list1 = (LIST1);                                                                    \
         dispatch_g[TYPE].list2 = (LIST2);                                                                    \
-    }
+    } while (0)
 
 static void    print_type(h5tools_str_t *buffer, hid_t type, int ind);
 static hbool_t print_int_type(h5tools_str_t *buffer, hid_t type, int ind);
@@ -234,6 +234,11 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info      VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                   If none of the above options are used to specify a VOL, then\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                   the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream, "                   if that environment variable is unset) will be used\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd-value     Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd-name      Name of the VFL driver to use for opening the\n");
@@ -2525,7 +2530,7 @@ get_width(void)
     /* Try to get it from the COLUMNS environment variable first since it's
      * value is sometimes wrong. */
     if ((s = HDgetenv("COLUMNS")) && *s && isdigit((int)*s))
-        width = (int)HDstrtol(s, NULL, 0);
+        width = (int)strtol(s, NULL, 0);
 
 #if defined(H5_HAVE_STRUCT_VIDEOCONFIG) && defined(H5_HAVE__GETVIDEOCONFIG)
     {
@@ -2651,12 +2656,15 @@ main(int argc, char *argv[])
 
 #ifdef H5_HAVE_ROS3_VFD
     /* Default "anonymous" S3 configuration */
-    H5FD_ros3_fapl_t ros3_fa = {
-        1,     /* Structure Version */
-        FALSE, /* Authenticate?     */
-        "",    /* AWS Region        */
-        "",    /* Access Key ID     */
-        "",    /* Secret Access Key */
+    H5FD_ros3_fapl_ext_t ros3_fa = {
+        {
+            1,     /* Structure Version */
+            FALSE, /* Authenticate?     */
+            "",    /* AWS Region        */
+            "",    /* Access Key ID     */
+            "",    /* Secret Access Key */
+        },
+        "", /* Session/security token */
     };
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -2774,7 +2782,7 @@ main(int argc, char *argv[])
             vfd_info.info = (const void *)(argv[argno] + 11);
         }
         else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
-            width_g = (int)HDstrtol(argv[argno] + 8, &rest, 0);
+            width_g = (int)strtol(argv[argno] + 8, &rest, 0);
 
             if (0 == width_g)
                 no_line_wrap_g = TRUE;
@@ -2791,7 +2799,7 @@ main(int argc, char *argv[])
             else {
                 s = argv[++argno];
             }
-            width_g = (int)HDstrtol(s, &rest, 0);
+            width_g = (int)strtol(s, &rest, 0);
             if (width_g <= 0 || *rest) {
                 usage();
                 leave(EXIT_FAILURE);
@@ -2818,7 +2826,7 @@ main(int argc, char *argv[])
             else {
                 s = argv[++argno];
             }
-            width_g = (int)HDstrtol(s, &rest, 0);
+            width_g = (int)strtol(s, &rest, 0);
 
             if (0 == width_g) {
                 no_line_wrap_g = TRUE;

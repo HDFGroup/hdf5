@@ -242,7 +242,7 @@ ref_path_table_put(const char *path, const H5O_token_t *token)
 /*
  *  counter used to disambiguate multiple instances of same object.
  */
-int xid = 1;
+static int xid = 1;
 
 int
 get_next_xid(void)
@@ -256,7 +256,7 @@ get_next_xid(void)
  *  minimizes the chance of collision with a real object id.
  *
  */
-haddr_t fake_xid = HADDR_MAX;
+static haddr_t fake_xid = HADDR_MAX;
 
 void
 get_fake_token(H5O_token_t *token)

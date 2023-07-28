@@ -32,12 +32,15 @@ static hbool_t get_onion_revision_count = FALSE;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
-static H5FD_ros3_fapl_t ros3_fa_g = {
-    1,     /* Structure Version */
-    FALSE, /* Authenticate?     */
-    "",    /* AWS Region        */
-    "",    /* Access Key ID     */
-    "",    /* Secret Access Key */
+static H5FD_ros3_fapl_ext_t ros3_fa_g = {
+    {
+        1,     /* Structure Version */
+        FALSE, /* Authenticate?     */
+        "",    /* AWS Region        */
+        "",    /* Access Key ID     */
+        "",    /* Secret Access Key */
+    },
+    "", /* Session/security token */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -219,6 +222,14 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "     --vol-info           VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                          opening the HDF5 file specified\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                          If none of the above options are used to specify a VOL, then\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                          the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          if that environment variable is unset) will be used\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --vfd-value          Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                          HDF5 file specified\n");
@@ -594,7 +605,7 @@ parse_mask_list(const char *h_list)
         ptr = h_list;
         while (*ptr) {
             /* scan for an offset which is an unsigned int */
-            if (!HDisdigit(*ptr)) {
+            if (!isdigit(*ptr)) {
                 error_msg("Bad mask list(%s)\n", h_list);
                 return FAIL;
             }
@@ -607,7 +618,7 @@ parse_mask_list(const char *h_list)
             }
 
             /* skip to end of integer */
-            while (HDisdigit(*++ptr))
+            while (isdigit(*++ptr))
                 ;
             /* Look for the common separator */
             if (*ptr++ != ',') {
@@ -616,7 +627,7 @@ parse_mask_list(const char *h_list)
             }
 
             /* scan for a length which is a positive int */
-            if (!HDisdigit(*ptr)) {
+            if (!isdigit(*ptr)) {
                 error_msg("Bad mask list(%s)\n", h_list);
                 return FAIL;
             }
@@ -633,7 +644,7 @@ parse_mask_list(const char *h_list)
             }
 
             /* skip to end of int */
-            while (HDisdigit(*++ptr))
+            while (isdigit(*++ptr))
                 ;
 
             /* store the offset,length pair */
@@ -1230,7 +1241,7 @@ end_collect:
                 get_onion_revision_count = TRUE;
             else {
                 errno                   = 0;
-                onion_fa_g.revision_num = HDstrtoull(vfd_info_g.info, NULL, 10);
+                onion_fa_g.revision_num = strtoull(vfd_info_g.info, NULL, 10);
                 if (errno == ERANGE) {
                     printf("Invalid onion revision specified\n");
                     goto error;

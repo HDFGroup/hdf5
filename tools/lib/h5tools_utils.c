@@ -187,7 +187,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     H5TOOLS_START_DEBUG(" - h_list:%s", h_list);
     /* count how many integers do we have */
     for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit(*ptr)) {
             if (!last_digit)
                 /* the last read character wasn't a digit */
                 size_count++;
@@ -209,11 +209,11 @@ parse_hsize_list(const char *h_list, subset_d *d)
         H5TOOLS_INFO("Unable to allocate space for subset data");
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
+            p_list[i++] = (hsize_t)strtoull(ptr, NULL, 0);
 
-            while (HDisdigit(*ptr))
+            while (isdigit(*ptr))
                 /* scroll to end of integer */
                 ptr++;
         }
@@ -996,7 +996,7 @@ h5tools_getenv_update_hyperslab_bufsize(void)
     /* check if environment variable is set for the hyperslab buffer size */
     if (NULL != (env_str = HDgetenv("H5TOOLS_BUFSIZE"))) {
         errno                = 0;
-        hyperslab_bufsize_mb = HDstrtol(env_str, (char **)NULL, 10);
+        hyperslab_bufsize_mb = strtol(env_str, (char **)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
             H5TOOLS_GOTO_ERROR(FAIL, "hyperslab buffer size failed");
 
@@ -1025,9 +1025,9 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t *fapl_config_out)
+h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_ext_t *fapl_config_out)
 {
-    const char *ccred[3];
+    const char *ccred[4];
     unsigned    nelems     = 0;
     char       *s3cred_src = NULL;
     char      **s3cred     = NULL;
@@ -1038,12 +1038,18 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t
         H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
 
     /* Sanity-check tuple count */
-    if (nelems != 3)
+    if (nelems != 3 && nelems != 4)
         H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
 
     ccred[0] = (const char *)s3cred[0];
     ccred[1] = (const char *)s3cred[1];
     ccred[2] = (const char *)s3cred[2];
+    if (nelems == 3) {
+        ccred[3] = "";
+    }
+    else {
+        ccred[3] = (const char *)s3cred[3];
+    }
 
     if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
@@ -1090,34 +1096,35 @@ done:
  *         * NULL fapl pointer: (NULL, {...} )
  *         * Warning: In all cases below, fapl will be set as "default"
  *                    before error occurs.
- *         * NULL value strings: (&fa, {NULL?, NULL? NULL?, ...})
+ *         * NULL value strings: (&fa, {NULL?, NULL? NULL?, NULL?, ...})
  *         * Incomplete fapl info:
- *             * empty region, non-empty id, key either way
- *                 * (&fa, {"", "...", "?"})
- *             * empty id, non-empty region, key either way
- *                 * (&fa, {"...", "", "?"})
- *             * "non-empty key and either id or region empty
- *                 * (&fa, {"",    "",    "...")
- *                 * (&fa, {"",    "...", "...")
- *                 * (&fa, {"...", "",    "...")
+ *             * empty region, non-empty id, key either way, token either way
+ *                 * (&fa, token, {"", "...", "?", "?"})
+ *             * empty id, non-empty region, key either way, token either way
+ *                 * (&fa, token,  {"...", "", "?", "?"})
+ *             * "non-empty key, token either way and either id or region empty
+ *                 * (&fa, token, {"",    "",    "...", "?")
+ *                 * (&fa, token, {"",    "...", "...", "?")
+ *                 * (&fa, token, {"...", "",    "...", "?")
  *             * Any string would overflow allowed space in fapl definition.
  *     or
  *     1 (success)
  *         * Sets components in fapl_t pointer, copying strings as appropriate.
  *         * "Default" fapl (valid version, authenticate->False, empty strings)
  *             * `values` pointer is NULL
- *                 * (&fa, NULL)
- *             * first three strings in `values` are empty ("")
- *                 * (&fa, {"", "", "", ...}
+ *                 * (&fa, token, NULL)
+ *             * first four strings in `values` are empty ("")
+ *                 * (&fa, token,  {"", "", "", "", ...})
  *         * Authenticating fapl
- *             * region, id, and optional key provided
- *                 * (&fa, {"...", "...", ""})
- *                 * (&fa, {"...", "...", "..."})
+ *             * region, id, optional key and option session token provided
+ *                 * (&fa, token, {"...", "...", "", ""})
+ *                 * (&fa, token, {"...", "...", "...", ""})
+ *                 * (&fa, token, {"...", "...", "...", "..."})
  *
  *----------------------------------------------------------------------------
  */
 int
-h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
+h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 {
     int show_progress = 0; /* set to 1 for debugging */
     int ret_value     = 1; /* 1 for success, 0 for failure           */
@@ -1138,11 +1145,12 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
     if (show_progress) {
         printf("  preset fapl with default values\n");
     }
-    fa->version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
-    fa->authenticate  = FALSE;
-    *(fa->aws_region) = '\0';
-    *(fa->secret_id)  = '\0';
-    *(fa->secret_key) = '\0';
+    fa->fa.version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    fa->fa.authenticate  = FALSE;
+    *(fa->fa.aws_region) = '\0';
+    *(fa->fa.secret_id)  = '\0';
+    *(fa->fa.secret_key) = '\0';
+    *(fa->token)         = '\0';
 
     /* sanity-check supplied values
      */
@@ -1168,6 +1176,13 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
             ret_value = 0;
             goto done;
         }
+        if (values[3] == NULL) {
+            if (show_progress) {
+                printf("  ERROR: token value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
 
         /* if region and ID are supplied (key optional), write to fapl...
          * fail if value would overflow
@@ -1180,7 +1195,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
+            memcpy(fa->fa.aws_region, values[0], (HDstrlen(values[0]) + 1));
             if (show_progress) {
                 printf("  aws_region set\n");
             }
@@ -1192,7 +1207,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
+            memcpy(fa->fa.secret_id, values[1], (HDstrlen(values[1]) + 1));
             if (show_progress) {
                 printf("  secret_id set\n");
             }
@@ -1204,17 +1219,29 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
+            memcpy(fa->fa.secret_key, values[2], (HDstrlen(values[2]) + 1));
             if (show_progress) {
                 printf("  secret_key set\n");
             }
 
-            fa->authenticate = TRUE;
+            if (HDstrlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
+                if (show_progress) {
+                    printf("  ERROR: token value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            memcpy(fa->token, values[3], (HDstrlen(values[3]) + 1));
+            if (show_progress) {
+                printf("  token set\n");
+            }
+
+            fa->fa.authenticate = TRUE;
             if (show_progress) {
                 printf("  set to authenticate\n");
             }
         }
-        else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0') {
+        else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0' || *values[3] != '\0') {
             if (show_progress) {
                 printf("  ERROR: invalid assortment of empty/non-empty values\n");
             }
@@ -1277,7 +1304,7 @@ h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t
         HDstrncpy(fapl_config_out->user_name, (const char *)props[3], HDstrlen(props[3]));
     }
     if (HDstrncmp(props[4], "", 1)) {
-        k = HDstrtoul((const char *)props[4], NULL, 0);
+        k = strtoul((const char *)props[4], NULL, 0);
         if (errno == ERANGE)
             H5TOOLS_GOTO_ERROR(FAIL, "supposed buffersize number wasn't");
         fapl_config_out->stream_buffer_size = (int32_t)k;

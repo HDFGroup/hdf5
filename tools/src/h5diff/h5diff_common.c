@@ -280,7 +280,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->delta = HDatof(H5_optarg);
+                opts->delta = atof(H5_optarg);
                 /* do not check against default, the DBL_EPSILON is being replaced by user */
                 break;
 
@@ -291,7 +291,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->percent = HDatof(H5_optarg);
+                opts->percent = atof(H5_optarg);
 
                 /* -p 0 is the same as default */
                 if (H5_DBL_ABS_EQUAL(opts->percent, 0.0))
@@ -305,7 +305,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->count = HDstrtoull(H5_optarg, NULL, 0);
+                opts->count = strtoull(H5_optarg, NULL, 0);
                 break;
 
             case 'N':
@@ -390,7 +390,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->vfd_info[0].u.name && !HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
         if (opts->vfd_info[0].info) {
             errno                     = 0;
-            onion_fa_g_1.revision_num = HDstrtoull(opts->vfd_info[0].info, NULL, 10);
+            onion_fa_g_1.revision_num = strtoull(opts->vfd_info[0].info, NULL, 10);
             if (errno == ERANGE) {
                 printf("Invalid onion revision specified for file 1\n");
                 usage();
@@ -407,7 +407,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->vfd_info[1].u.name && !HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
         if (opts->vfd_info[1].info) {
             errno                     = 0;
-            onion_fa_g_2.revision_num = HDstrtoull(opts->vfd_info[1].info, NULL, 10);
+            onion_fa_g_2.revision_num = strtoull(opts->vfd_info[1].info, NULL, 10);
             if (errno == ERANGE) {
                 printf("Invalid onion revision specified for file 2\n");
                 usage();
@@ -544,7 +544,7 @@ check_p_input(const char *str)
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = HDatof(str);
+    x = atof(str);
     if (x < 0)
         return -1;
 
@@ -571,7 +571,7 @@ check_d_input(const char *str)
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = HDatof(str);
+    x = atof(str);
     if (x < 0)
         return -1;
 
@@ -640,6 +640,13 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "                           If none of the above options are used to "
+                                 "specify a VOL for a file, then\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                           the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           if that environment variable is unset) will be used\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --vfd-value-1           Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");
