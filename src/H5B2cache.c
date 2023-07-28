@@ -461,7 +461,7 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
                         HGOTO_ERROR(
                             H5E_BTREE, H5E_CANTUNDEPEND, FAIL,
-                            "unable to destroy flush dependency between header and v2 B-tree 'top' proxy")
+                            "unable to destroy flush dependency between header and v2 B-tree 'top' proxy");
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
                 break;
@@ -1218,7 +1218,7 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(leaf->top_proxy, leaf) < 0)
                         HGOTO_ERROR(
                             H5E_BTREE, H5E_CANTUNDEPEND, FAIL,
-                            "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
+                            "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy");
                     leaf->top_proxy = NULL;
                 } /* end if */
                 break;

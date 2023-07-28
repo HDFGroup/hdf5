@@ -1267,7 +1267,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
                 if (mpi_file_sync_required)
                     HGOTO_ERROR(
                         H5E_DATASET, H5E_NO_INDEPENDENT, FAIL,
-                        "Can't perform independent write when MPI_File_sync is required by ROMIO driver.")
+                        "Can't perform independent write when MPI_File_sync is required by ROMIO driver.");
             }
 
             /* Check if there are any filters in the pipeline. If there are,

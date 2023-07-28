@@ -263,7 +263,7 @@ H5D_virtual_check_mapping_post(const H5O_storage_virtual_ent_t *ent)
             if (nelmts_vs != nelmts_ss)
                 HGOTO_ERROR(
                     H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "virtual (single block) and source space selections have different numbers of elements")
+                    "virtual (single block) and source space selections have different numbers of elements");
         } /* end if */
     }     /* end if */
     else
@@ -2137,7 +2137,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
     if (H5D_virtual_check_min_dims(dset) < 0)
         HGOTO_ERROR(
             H5E_ARGS, H5E_BADVALUE, FAIL,
-            "virtual dataset dimensions not large enough to contain all limited dimensions in all selections")
+            "virtual dataset dimensions not large enough to contain all limited dimensions in all selections");
 
     /* Patch the virtual selection dataspaces.  Note we always patch the space
      * status because this layout could be from an old version held in the

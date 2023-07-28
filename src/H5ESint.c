@@ -988,7 +988,7 @@ H5ES__close(H5ES_t *es)
     if (H5ES__list_count(&es->active) > 0)
         HGOTO_ERROR(
             H5E_EVENTSET, H5E_CANTCLOSEOBJ, FAIL,
-            "can't close event set while unfinished operations are present (i.e. wait on event set first)")
+            "can't close event set while unfinished operations are present (i.e. wait on event set first)");
 
     /* Iterate over the failed events in the set, releasing them */
     if (H5ES__list_iterate(&es->failed, H5_ITER_NATIVE, H5ES__close_failed_cb, (void *)es) < 0)

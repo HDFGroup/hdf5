@@ -463,7 +463,7 @@ H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
                         HGOTO_ERROR(
                             H5E_FARRAY, H5E_CANTUNDEPEND, FAIL,
-                            "unable to destroy flush dependency between header and fixed array 'top' proxy")
+                            "unable to destroy flush dependency between header and fixed array 'top' proxy");
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
                 break;

@@ -222,7 +222,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                     if (H5_addr_gt((aggr->addr + aggr->size + ext_size), f->shared->tmp_addr))
                         HGOTO_ERROR(
                             H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF,
-                            "'normal' file space allocation request will overlap into 'temporary' file space")
+                            "'normal' file space allocation request will overlap into 'temporary' file space");
 
                     if ((aggr->addr > 0) &&
                         (extended = H5F__try_extend(f, alloc_type, (aggr->addr + aggr->size), ext_size)) < 0)
@@ -268,7 +268,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                     if (H5_addr_gt((aggr->addr + aggr->size + ext_size), f->shared->tmp_addr))
                         HGOTO_ERROR(
                             H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF,
-                            "'normal' file space allocation request will overlap into 'temporary' file space")
+                            "'normal' file space allocation request will overlap into 'temporary' file space");
 
                     if ((aggr->addr > 0) &&
                         (extended = H5F__try_extend(f, alloc_type, (aggr->addr + aggr->size), ext_size)) < 0)

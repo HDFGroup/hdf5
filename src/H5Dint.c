@@ -1529,13 +1529,13 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
             if (HDstrcmp(extfile_prefix, dataset->shared->extfile_prefix) != 0)
                 HGOTO_ERROR(
                     H5E_DATASET, H5E_CANTOPENOBJ, NULL,
-                    "new external file prefix does not match external file prefix of already open dataset")
+                    "new external file prefix does not match external file prefix of already open dataset");
         }
         else {
             if (extfile_prefix || dataset->shared->extfile_prefix)
                 HGOTO_ERROR(
                     H5E_DATASET, H5E_CANTOPENOBJ, NULL,
-                    "new external file prefix does not match external file prefix of already open dataset")
+                    "new external file prefix does not match external file prefix of already open dataset");
         }
 
         /* Check if the object has been opened through the top file yet */

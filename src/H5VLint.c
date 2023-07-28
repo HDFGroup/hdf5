@@ -1240,7 +1240,7 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_
     if (cls->info_cls.copy && !cls->info_cls.free)
         HGOTO_ERROR(
             H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-            "VOL connector must provide free callback for VOL info objects when a copy callback is provided")
+            "VOL connector must provide free callback for VOL info objects when a copy callback is provided");
     if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
                     "VOL connector must provide free callback for object wrapping contexts when a get "

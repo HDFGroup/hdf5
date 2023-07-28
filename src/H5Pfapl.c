@@ -3182,7 +3182,7 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     if (info.buffer != NULL || info.size > 0)
         HGOTO_ERROR(
             H5E_PLIST, H5E_SETDISALLOWED, FAIL,
-            "setting callbacks when an image is already set is forbidden. It could cause memory leaks.")
+            "setting callbacks when an image is already set is forbidden. It could cause memory leaks.");
 
     /* verify that callbacks_ptr is not NULL */
     if (NULL == callbacks_ptr)
