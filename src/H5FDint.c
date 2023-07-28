@@ -450,7 +450,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                             "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)i,
                             (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
-                            (unsigned long long)eoa)
+                            (unsigned long long)eoa);
         }
     }
 
@@ -656,7 +656,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
             HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, \
                         eoa = %llu",
                         (int)i, (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
-                        (unsigned long long)eoa)
+                        (unsigned long long)eoa);
     }
 
     /* if the underlying VFD supports vector write, make the call */

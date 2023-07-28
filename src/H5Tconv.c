@@ -730,7 +730,7 @@
                     if (NULL == (st = (H5T_t *)H5I_object(src_id)) ||                                        \
                         NULL == (dt = (H5T_t *)H5I_object(dst_id)))                                          \
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,                                        \
-                                    "unable to dereference datatype object ID")                              \
+                                    "unable to dereference datatype object ID");                             \
                     if (st->shared->size != sizeof(ST) || dt->shared->size != sizeof(DT))                    \
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "disagreement about datatype size");   \
                     CI_ALLOC_PRIV                                                                            \
@@ -769,13 +769,13 @@
                     /* Get conversion exception callback property */                                         \
                     if (H5CX_get_dt_conv_cb(&cb_struct) < 0)                                                 \
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL,                                         \
-                                    "unable to get conversion exception callback")                           \
+                                    "unable to get conversion exception callback");                          \
                                                                                                              \
                     /* Get source and destination datatypes */                                               \
                     if (NULL == (st = (H5T_t *)H5I_object(src_id)) ||                                        \
                         NULL == (dt = (H5T_t *)H5I_object(dst_id)))                                          \
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,                                        \
-                                    "unable to dereference datatype object ID")                              \
+                                    "unable to dereference datatype object ID");                             \
                                                                                                              \
                     H5T_CONV_SET_PREC(PREC) /*init precision variables, or not */                            \
                                                                                                              \

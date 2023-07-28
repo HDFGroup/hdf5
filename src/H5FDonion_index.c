@@ -140,7 +140,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
 
         if (revision_num != r_out->revision_num)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                        "could not find target revision!") /* TODO: corrupted? */
+                        "could not find target revision!"); /* TODO: corrupted? */
     }                                                      /* end if revision ID at 'leaf' in binary search */
 
     if (r_out->comment_size > 0)

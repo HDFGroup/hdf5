@@ -190,7 +190,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
                                 "bad chunk dimension value when parsing layout message - chunk dimension "
                                 "must be positive: mesg->u.chunk.dim[%u] = %u",
-                                u, mesg->u.chunk.dim[u])
+                                u, mesg->u.chunk.dim[u]);
             }
 
             /* Compute chunk size */
@@ -302,7 +302,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
                                         "bad chunk dimension value when parsing layout message - chunk "
                                         "dimension must be positive: mesg->u.chunk.dim[%u] = %u",
-                                        u, mesg->u.chunk.dim[u])
+                                        u, mesg->u.chunk.dim[u]);
                     }
 
                     /* Compute chunk size */
@@ -362,7 +362,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
                                         "bad chunk dimension value when parsing layout message - chunk "
                                         "dimension must be positive: mesg->u.chunk.dim[%u] = %u",
-                                        u, mesg->u.chunk.dim[u])
+                                        u, mesg->u.chunk.dim[u]);
                     }
 
                     /* Compute chunk size */
@@ -485,7 +485,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
                                             "bad value for v2 B-tree split percent value - must be > 0 and "
                                             "<= 100: split percent = %" PRIu8,
-                                            mesg->u.chunk.u.btree2.cparam.split_percent)
+                                            mesg->u.chunk.u.btree2.cparam.split_percent);
 
                             if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
@@ -497,7 +497,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
                                             "bad value for v2 B-tree merge percent value - must be > 0 and "
                                             "<= 100: merge percent = %" PRIu8,
-                                            mesg->u.chunk.u.btree2.cparam.merge_percent)
+                                            mesg->u.chunk.u.btree2.cparam.merge_percent);
 
                             /* Set the chunk operations */
                             mesg->storage.u.chunk.ops = H5D_COPS_BT2;

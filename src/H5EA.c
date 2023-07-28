@@ -500,7 +500,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                                 H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                                 "unable to create flush dependency between super block and header, address "
                                 "= %llu",
-                                (unsigned long long)sblock->addr)
+                                (unsigned long long)sblock->addr);
                         sblock->has_hdr_depend = TRUE;
                     } /* end if */
                 }     /* end if */
@@ -558,7 +558,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                                     "unable to create flush dependency between data block page and header, "
                                     "index = %llu",
-                                    (unsigned long long)idx)
+                                    (unsigned long long)idx);
                     dblk_page->has_hdr_depend = TRUE;
                 } /* end if */
 

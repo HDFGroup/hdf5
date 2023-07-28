@@ -601,7 +601,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL,
                         "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu",
                         (unsigned long long)eof, (unsigned long long)sblock->base_addr,
-                        (unsigned long long)udata.stored_eof)
+                        (unsigned long long)udata.stored_eof);
     }
 
     /*

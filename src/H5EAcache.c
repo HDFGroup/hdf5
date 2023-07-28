@@ -2068,7 +2068,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block page and header, "
                                 "address = %llu",
-                                (unsigned long long)dblk_page->addr)
+                                (unsigned long long)dblk_page->addr);
                 dblk_page->has_hdr_depend = FALSE;
             } /* end if */
             break;
@@ -2087,7 +2087,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block page and header, "
                                 "address = %llu",
-                                (unsigned long long)dblk_page->addr)
+                                (unsigned long long)dblk_page->addr);
                 dblk_page->has_hdr_depend = FALSE;
             } /* end if */
 
