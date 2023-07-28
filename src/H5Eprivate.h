@@ -68,10 +68,10 @@ typedef struct H5E_t H5E_t;
  * control branches to the `done' label.
  */
 #define HGOTO_ERROR(maj, min, ret_val, ...)                                                                  \
-    {                                                                                                        \
+    do {                                                                                                     \
         HCOMMON_ERROR(maj, min, __VA_ARGS__);                                                                \
         HGOTO_DONE(ret_val);                                                                                 \
-    }
+    } while(0)
 
 /*
  * HGOTO_ERROR_TAG macro, used like HGOTO_ERROR between H5_BEGIN_TAG and
