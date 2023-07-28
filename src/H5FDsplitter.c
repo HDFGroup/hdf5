@@ -81,7 +81,7 @@ typedef struct H5FD_splitter_t {
     {                                                                                                        \
         H5FD__splitter_log_error((file), (funcname), (mesg));                                                \
         if (FALSE == (file)->fa.ignore_wo_errs)                                                              \
-            HGOTO_ERROR((errmajor), (errminor), (ret), (mesg))                                               \
+            HGOTO_ERROR((errmajor), (errminor), (ret), (mesg));                                              \
     }
 
 #define H5FD_SPLITTER_DEBUG_OP_CALLS 0 /* debugging print toggle; 0 disables */

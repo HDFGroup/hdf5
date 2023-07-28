@@ -78,7 +78,7 @@
                                                                                                              \
         /* Get the property */                                                                               \
         if (H5P_get((*head)->ctx.PL, (PROP_NAME), &(*head)->ctx.PROP_FIELD) < 0)                             \
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't retrieve value from API context")             \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't retrieve value from API context");            \
     } /* end else */                                                                                         \
                                                                                                              \
     /* Mark the field as valid */                                                                            \
@@ -110,7 +110,7 @@
             H5CX_RETRIEVE_PLIST(dxpl, FAIL)                                                                  \
                                                                                                              \
             if ((check_prop = H5P_exist_plist((*head)->ctx.dxpl, PROP_NAME)) < 0)                            \
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property")                   \
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property");                  \
         } /* end if */                                                                                       \
                                                                                                              \
         /* If property was already set or exists (for first set), update it */                               \
@@ -130,7 +130,7 @@
                                                                                                              \
         /* Set the property */                                                                               \
         if (H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0)                             \
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting data xfer property")                  \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting data xfer property");                 \
     } /* end if */
 
 /******************/

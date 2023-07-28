@@ -146,7 +146,7 @@ static void       H5Z__xform_reduce_tree(H5Z_node *tree);
             }                                                                                                \
         }                                                                                                    \
         else                                                                                                 \
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation")                \
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation");               \
     }
 
 #if CHAR_MIN >= 0
@@ -239,7 +239,7 @@ static void       H5Z__xform_reduce_tree(H5Z_node *tree);
 #define H5Z_XFORM_DO_OP4(TYPE)                                                                               \
     {                                                                                                        \
         if ((ret_value = (H5Z_node *)H5MM_malloc(sizeof(H5Z_node))) == NULL)                                 \
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")      \
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree");     \
         else {                                                                                               \
             ret_value->type = (TYPE);                                                                        \
             if (tree->lchild)                                                                                \

@@ -173,7 +173,7 @@
                     H5SL_fac_nalloc_g *= 2;                                                                  \
                     if (NULL == (H5SL_fac_g = (H5FL_fac_head_t **)H5MM_realloc(                              \
                                      (void *)H5SL_fac_g, H5SL_fac_nalloc_g * sizeof(H5FL_fac_head_t *))))    \
-                        HGOTO_ERROR(H5E_SLIST, H5E_CANTALLOC, ERR, "memory allocation failed")               \
+                        HGOTO_ERROR(H5E_SLIST, H5E_CANTALLOC, ERR, "memory allocation failed");              \
                 }                                                                                            \
                                                                                                              \
                 /* Create the new factory */                                                                 \
@@ -184,7 +184,7 @@
                                                                                                              \
             /* Allocate space for new forward pointers */                                                    \
             if (NULL == (_tmp = (H5SL_node_t **)H5FL_FAC_MALLOC(H5SL_fac_g[X->log_nalloc])))                 \
-                HGOTO_ERROR(H5E_SLIST, H5E_CANTALLOC, ERR, "memory allocation failed")                       \
+                HGOTO_ERROR(H5E_SLIST, H5E_CANTALLOC, ERR, "memory allocation failed");                      \
             H5MM_memcpy((void *)_tmp, (const void *)X->forward, (LVL + 1) * sizeof(H5SL_node_t *));          \
             X->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[X->log_nalloc - 1], (void *)X->forward);   \
             X->forward = _tmp;                                                                               \
@@ -205,7 +205,7 @@
                                                                                                              \
             /* Allocate space for new forward pointers */                                                    \
             if (NULL == (_tmp = (H5SL_node_t **)H5FL_FAC_MALLOC(H5SL_fac_g[X->log_nalloc])))                 \
-                HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed")                        \
+                HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed");                       \
             H5MM_memcpy((void *)_tmp, (const void *)X->forward, (LVL) * sizeof(H5SL_node_t *));              \
             X->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[X->log_nalloc + 1], (void *)X->forward);   \
             X->forward = _tmp;                                                                               \
@@ -302,7 +302,7 @@
         }                                                                                                    \
                                                                                                              \
         if (_next && H5_GLUE3(H5SL_LOCATE_, CMP, _EQ)(SLIST, TYPE, _next, KEY, HASHVAL))                     \
-            HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, NULL, "can't insert duplicate key")                       \
+            HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, NULL, "can't insert duplicate key");                      \
     }
 
 /* Macro used to remove node */

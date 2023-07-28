@@ -49,7 +49,7 @@
         /* Check if the span should be recovered */                                                          \
         if (recover) {                                                                                       \
             if (H5S__hyper_free_span(curr_span) < 0)                                                         \
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, ERR, "unable to free span")                         \
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, ERR, "unable to free span");                        \
             (recover) = FALSE;                                                                               \
         }                                                                                                    \
                                                                                                              \
@@ -65,7 +65,7 @@
          * to the projection first before adding skip */                                                     \
         if ((UDATA)->nelem > 0)                                                                              \
             if (H5S__hyper_proj_int_build_proj(UDATA) < 0)                                                   \
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, ERR, "can't add elements to projected selection") \
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, ERR, "can't add elements to projected selection"); \
         (UDATA)->skip += (ADD);                                                                              \
     } while (0) /* end H5S_HYPER_PROJ_INT_ADD_SKIP() */
 

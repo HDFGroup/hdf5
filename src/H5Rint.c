@@ -46,7 +46,7 @@
     do {                                                                                                     \
         size_t __nalloc = buf_size;                                                                          \
         if (func(val, buf, &__nalloc) < 0)                                                                   \
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, m)                                              \
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, m);                                             \
         if (buf && buf_size >= __nalloc) {                                                                   \
             buf += __nalloc;                                                                                 \
             buf_size -= __nalloc;                                                                            \
@@ -58,7 +58,7 @@
     do {                                                                                                     \
         size_t __nalloc = buf_size;                                                                          \
         if (func(var, size, buf, &__nalloc) < 0)                                                             \
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, m)                                              \
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, m);                                             \
         if (buf && buf_size >= __nalloc) {                                                                   \
             p += __nalloc;                                                                                   \
             buf_size -= __nalloc;                                                                            \
@@ -71,7 +71,7 @@
     do {                                                                                                     \
         size_t __nbytes = buf_size;                                                                          \
         if (func(buf, &__nbytes, val) < 0)                                                                   \
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, m)                                              \
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, m);                                             \
         buf += __nbytes;                                                                                     \
         buf_size -= __nbytes;                                                                                \
         actual += __nbytes;                                                                                  \
@@ -81,7 +81,7 @@
     do {                                                                                                     \
         size_t __nbytes = buf_size;                                                                          \
         if (func(buf, &__nbytes, var, size) < 0)                                                             \
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, m)                                              \
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, m);                                             \
         p += __nbytes;                                                                                       \
         buf_size -= __nbytes;                                                                                \
         actual += __nbytes;                                                                                  \

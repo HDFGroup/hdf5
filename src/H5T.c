@@ -301,14 +301,14 @@
     {                                                                                                        \
         /* Base off of existing datatype */                                                                  \
         if (NULL == (dt = H5T_copy(BASE, H5T_COPY_TRANSIENT)))                                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "duplicating base type failed")                    \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "duplicating base type failed");                   \
     }
 
 #define H5T_INIT_TYPE_ALLOC_CREATE(BASE)                                                                     \
     {                                                                                                        \
         /* Allocate new datatype info */                                                                     \
         if (NULL == (dt = H5T__alloc()))                                                                     \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")                       \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed");                      \
     }
 
 #define H5T_INIT_TYPE(GUTS, GLOBAL, CRT_TMPL, BASE, SIZE_TMPL, SIZE)                                         \
@@ -327,7 +327,7 @@
                                                                                                              \
             /* Register result */                                                                            \
             if (((GLOBAL) = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                      \
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")        \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");       \
     }
 
 /******************/
