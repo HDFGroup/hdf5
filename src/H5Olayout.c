@@ -601,7 +601,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         if (tmp_size == (size_t)avail_buffer_space)
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding - unterminated source "
-                                        "file name string")
+                                        "file name string");
                         else
                             tmp_size += 1; /* Add space for NUL terminator */
 
@@ -622,7 +622,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         if (tmp_size == (size_t)avail_buffer_space)
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding - unterminated source "
-                                        "dataset name string")
+                                        "dataset name string");
                         else
                             tmp_size += 1; /* Add space for NUL terminator */
 

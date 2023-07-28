@@ -2143,7 +2143,7 @@ H5VL_dataset_read(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_i
         if (vol_obj[i]->connector->cls->value != vol_obj[0]->connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                         "datasets are accessed through different VOL connectors and can't be used in the "
-                        "same I/O call")
+                        "same I/O call");
     }
 
     /* Call the corresponding internal VOL routine */
@@ -2333,7 +2333,7 @@ H5VL_dataset_write(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_
         if (vol_obj[i]->connector->cls->value != vol_obj[0]->connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                         "datasets are accessed through different VOL connectors and can't be used in the "
-                        "same I/O call")
+                        "same I/O call");
     }
 
     /* Call the corresponding internal VOL routine */

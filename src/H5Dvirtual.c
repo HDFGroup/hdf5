@@ -197,7 +197,7 @@ H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,
             if (nenu_vs != nenu_ss)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "numbers of elements in the non-unlimited dimensions is different for source and "
-                            "virtual spaces")
+                            "virtual spaces");
         } /* end if */
         /* We will handle the printf case after parsing the source names */
     } /* end if */
@@ -242,7 +242,7 @@ H5D_virtual_check_mapping_post(const H5O_storage_virtual_ent_t *ent)
         if ((ent->psfn_nsubs == 0) && (ent->psdn_nsubs == 0))
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
                         "unlimited virtual selection, limited source selection, and no printf specifiers in "
-                        "source names")
+                        "source names");
 
         /* Make sure virtual space uses hyperslab selection */
         if (H5S_GET_SELECT_TYPE(ent->source_dset.virtual_select) != H5S_SEL_HYPERSLABS)
@@ -271,7 +271,7 @@ H5D_virtual_check_mapping_post(const H5O_storage_virtual_ent_t *ent)
         if ((ent->psfn_nsubs > 0) || (ent->psdn_nsubs > 0))
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
                         "printf specifier(s) in source name(s) without an unlimited virtual selection and "
-                        "limited source selection")
+                        "limited source selection");
 
 done:
     /* Free temporary space */
@@ -375,7 +375,7 @@ H5D_virtual_check_min_dims(const H5D_t *dset)
         if (dims[i] < dset->shared->layout.storage.u.virt.min_dims[i])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                         "virtual dataset dimensions not large enough to contain all limited dimensions in "
-                        "all selections")
+                        "all selections");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -993,7 +993,7 @@ H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t m
         if (tmp_vol_obj->connector->cls->value != connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                         "datasets are accessed through different VOL connectors and can't be used in the "
-                        "same I/O call")
+                        "same I/O call");
     }
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -1302,7 +1302,7 @@ H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t 
         if (tmp_vol_obj->connector->cls->value != connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                         "datasets are accessed through different VOL connectors and can't be used in the "
-                        "same I/O call")
+                        "same I/O call");
     }
 
     /* Get the default dataset transfer property list if the user didn't provide one */

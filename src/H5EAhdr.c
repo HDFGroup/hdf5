@@ -376,7 +376,7 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
         if (dblk_page_nelmts < dblk_nelmts)
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
                         "max. # of elements per data block page bits must be > # of elements in "
-                        "first data block from super block")
+                        "first data block from super block");
 
         if (cparam->max_dblk_page_nelmts_bits > cparam->max_nelmts_bits)
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,

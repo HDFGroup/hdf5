@@ -845,7 +845,7 @@ H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
                         HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL,
                                     "unable to destroy flush dependency between data block "
-                                    "and fixed array 'top' proxy")
+                                    "and fixed array 'top' proxy");
                     dblock->top_proxy = NULL;
                 }
                 break;
@@ -1177,7 +1177,7 @@ H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block page "
-                                "and fixed array 'top' proxy")
+                                "and fixed array 'top' proxy");
                 dblk_page->top_proxy = NULL;
             } /* end if */
             break;

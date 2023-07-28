@@ -859,7 +859,7 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(internal->top_proxy, internal) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL,
                                     "unable to destroy flush dependency between internal node and v2 B-tree "
-                                    "'top' proxy")
+                                    "'top' proxy");
                     internal->top_proxy = NULL;
                 } /* end if */
                 break;

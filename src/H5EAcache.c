@@ -541,7 +541,7 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                     "unable to destroy flush dependency between header and "
-                                    "extensible array 'top' proxy")
+                                    "extensible array 'top' proxy");
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
                 break;
@@ -925,7 +925,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(iblock->top_proxy, iblock) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between index block and "
-                                "extensible array 'top' proxy")
+                                "extensible array 'top' proxy");
                 iblock->top_proxy = NULL;
             } /* end if */
             break;
@@ -1321,7 +1321,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(sblock->top_proxy, sblock) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between super block and "
-                                "extensible array 'top' proxy")
+                                "extensible array 'top' proxy");
                 sblock->top_proxy = NULL;
             } /* end if */
             break;
@@ -1726,7 +1726,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block and "
-                                "extensible array 'top' proxy")
+                                "extensible array 'top' proxy");
                 dblock->top_proxy = NULL;
             } /* end if */
             break;
@@ -2096,7 +2096,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block page and "
-                                "extensible array 'top' proxy")
+                                "extensible array 'top' proxy");
                 dblk_page->top_proxy = NULL;
             } /* end if */
             break;

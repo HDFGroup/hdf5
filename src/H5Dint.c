@@ -3088,7 +3088,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
             if (H5D_virtual_check_min_dims(dset) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "virtual dataset dimensions not large enough to contain all limited dimensions "
-                            "in all selections")
+                            "in all selections");
 
             /* Patch the virtual selection dataspaces */
             for (u = 0; u < dset->shared->layout.storage.u.virt.list_nused; u++) {
