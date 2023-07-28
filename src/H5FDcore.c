@@ -1389,7 +1389,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
             HGOTO_ERROR(
                 H5E_VFL, H5E_CANTINSERT, FAIL,
                 "unable to add core VFD dirty region during write call - addresses: start=%llu end=%llu",
-                (unsigned long long)start, (unsigned long long)end)
+                (unsigned long long)start, (unsigned long long)end);
     }
 
     /* Write from BUF to memory */

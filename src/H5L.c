@@ -1406,7 +1406,7 @@ H5Lregister(const H5L_class_t *cls)
         HGOTO_ERROR(
             H5E_ARGS, H5E_BADVALUE, FAIL,
             "deprecated H5L_class_t version number (%d) and library built without deprecated symbol support",
-            cls->version)
+            cls->version);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     if (cls->id < H5L_TYPE_UD_MIN || cls->id > H5L_TYPE_MAX)

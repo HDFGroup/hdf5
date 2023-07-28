@@ -823,7 +823,7 @@ H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_FARRAY, H5E_CANTDEPEND, FAIL,
                         "unable to create flush dependency between data block and header, address = %llu",
-                        (unsigned long long)dblock->addr)
+                        (unsigned long long)dblock->addr);
                 break;
 
             case H5AC_NOTIFY_ACTION_AFTER_FLUSH:

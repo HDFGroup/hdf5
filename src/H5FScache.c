@@ -1276,7 +1276,7 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_FSPACE, H5E_CANTDEPEND, FAIL,
                         "unable to create flush dependency between data block and header, address = %llu",
-                        (unsigned long long)sinfo->fspace->sect_addr)
+                        (unsigned long long)sinfo->fspace->sect_addr);
                 break;
 
             case H5AC_NOTIFY_ACTION_AFTER_FLUSH:

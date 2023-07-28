@@ -899,7 +899,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                     "unable to create flush dependency between index block and header, address = %llu",
-                    (unsigned long long)iblock->addr)
+                    (unsigned long long)iblock->addr);
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -918,7 +918,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                     "unable to destroy flush dependency between index block and header, address = %llu",
-                    (unsigned long long)iblock->addr)
+                    (unsigned long long)iblock->addr);
 
             /* Detach from 'top' proxy for extensible array */
             if (iblock->top_proxy) {
@@ -1283,7 +1283,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                     "unable to create flush dependency between super block and index block, address = %llu",
-                    (unsigned long long)sblock->addr)
+                    (unsigned long long)sblock->addr);
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -1293,7 +1293,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between super block and header, address = %llu",
-                        (unsigned long long)sblock->addr)
+                        (unsigned long long)sblock->addr);
                 sblock->has_hdr_depend = FALSE;
             } /* end if */
             break;
@@ -1304,7 +1304,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                     "unable to destroy flush dependency between super block and index block, address = %llu",
-                    (unsigned long long)sblock->addr)
+                    (unsigned long long)sblock->addr);
 
             /* Destroy flush dependency on extensible array header, if set */
             if (sblock->has_hdr_depend) {
@@ -1312,7 +1312,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between super block and header, address = %llu",
-                        (unsigned long long)sblock->addr)
+                        (unsigned long long)sblock->addr);
                 sblock->has_hdr_depend = FALSE;
             } /* end if */
 
@@ -1698,7 +1698,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between direct block and header, address = %llu",
-                        (unsigned long long)dblock->addr)
+                        (unsigned long long)dblock->addr);
                 dblock->has_hdr_depend = FALSE;
             } /* end if */
             break;
@@ -1709,7 +1709,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                     "unable to destroy flush dependency between data block and parent, address = %llu",
-                    (unsigned long long)dblock->addr)
+                    (unsigned long long)dblock->addr);
 
             /* Destroy flush dependency on extensible array header, if set */
             if (dblock->has_hdr_depend) {
@@ -1717,7 +1717,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between data block and header, address = %llu",
-                        (unsigned long long)dblock->addr)
+                        (unsigned long long)dblock->addr);
                 dblock->has_hdr_depend = FALSE;
             } /* end if */
 
@@ -2058,7 +2058,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                     "unable to create flush dependency between data block page and parent, address = %llu",
-                    (unsigned long long)dblk_page->addr)
+                    (unsigned long long)dblk_page->addr);
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -2079,7 +2079,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                     "unable to destroy flush dependency between data block page and parent, address = %llu",
-                    (unsigned long long)dblk_page->addr)
+                    (unsigned long long)dblk_page->addr);
 
             /* Destroy flush dependency on extensible array header, if set */
             if (dblk_page->has_hdr_depend) {

@@ -1514,7 +1514,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
             HGOTO_ERROR(
                 H5E_CACHE, H5E_CANTFLUSH, FAIL,
                 "Pinned entry count not decreasing, cur_ring_pel_len = %d, old_ring_pel_len = %d, ring = %d",
-                (int)cur_ring_pel_len, (int)old_ring_pel_len, (int)ring)
+                (int)cur_ring_pel_len, (int)old_ring_pel_len, (int)ring);
         } /* end if */
 
         assert(protected_entries == cache_ptr->pl_len);
