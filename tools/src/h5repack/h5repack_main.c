@@ -21,10 +21,10 @@ static int  parse_command_line(int argc, const char *const *argv, pack_opt_t *op
 static void leave(int ret) H5_ATTR_NORETURN;
 
 /* module-scoped variables */
-static int  has_i   = 0;
-static int  has_o   = 0;
-const char *infile  = NULL;
-const char *outfile = NULL;
+static int         has_i   = 0;
+static int         has_o   = 0;
+static const char *infile  = NULL;
+static const char *outfile = NULL;
 
 /*
  * Command-line options: The user can specify short or long-named
@@ -415,26 +415,26 @@ read_info(const char *filename, pack_opt_t *options)
         i = 0;
         c = '0';
         while (c != ' ') {
-            if (HDfscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+            if (HDfscanf(fp, "%c", &c) < 0 && ferror(fp)) {
                 error_msg("fscanf error\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
                 goto done;
             }
-            if (HDfeof(fp))
+            if (feof(fp))
                 break;
         }
         c = '0';
         /* go until end */
         while (c != ' ') {
-            if (HDfscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+            if (HDfscanf(fp, "%c", &c) < 0 && ferror(fp)) {
                 error_msg("fscanf error\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
                 goto done;
             }
             comp_info[i++] = c;
-            if (HDfeof(fp))
+            if (feof(fp))
                 break;
             if (c == 10 /*eol*/)
                 break;
@@ -461,7 +461,7 @@ read_info(const char *filename, pack_opt_t *options)
 
 done:
     if (fp)
-        HDfclose(fp);
+        fclose(fp);
 
     return ret_value;
 }
@@ -597,7 +597,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'm':
-                options->min_comp = HDstrtoull(H5_optarg, NULL, 0);
+                options->min_comp = strtoull(H5_optarg, NULL, 0);
                 if ((int)options->min_comp <= 0) {
                     error_msg("invalid minimum compress size <%s>\n", H5_optarg);
                     h5tools_setstatus(EXIT_FAILURE);
@@ -699,19 +699,19 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'b':
-                options->ublock_size = (hsize_t)HDatol(H5_optarg);
+                options->ublock_size = (hsize_t)atol(H5_optarg);
                 break;
 
             case 'M':
-                options->meta_block_size = (hsize_t)HDatol(H5_optarg);
+                options->meta_block_size = (hsize_t)atol(H5_optarg);
                 break;
 
             case 't':
-                options->threshold = (hsize_t)HDatol(H5_optarg);
+                options->threshold = (hsize_t)atol(H5_optarg);
                 break;
 
             case 'a':
-                options->alignment = HDstrtoull(H5_optarg, NULL, 0);
+                options->alignment = strtoull(H5_optarg, NULL, 0);
                 if (options->alignment < 1) {
                     error_msg("invalid alignment size `%s`\n", H5_optarg);
                     h5tools_setstatus(EXIT_FAILURE);
@@ -751,14 +751,14 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'T':
-                options->fs_threshold = HDatol(H5_optarg);
+                options->fs_threshold = atol(H5_optarg);
                 if (options->fs_threshold == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_threshold = -1;
                 break;
 
             case 'G':
-                options->fs_pagesize = HDstrtoll(H5_optarg, NULL, 0);
+                options->fs_pagesize = strtoll(H5_optarg, NULL, 0);
                 if (options->fs_pagesize == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_pagesize = -1;
@@ -889,7 +889,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     if (in_vfd_info.u.name && !HDstrcmp(in_vfd_info.u.name, "onion")) {
         if (in_vfd_info.info) {
             errno                      = 0;
-            onion_fa_in_g.revision_num = HDstrtoull(in_vfd_info.info, NULL, 10);
+            onion_fa_in_g.revision_num = strtoull(in_vfd_info.info, NULL, 10);
             if (errno == ERANGE) {
                 printf("Invalid onion revision specified for the input file\n");
                 usage(h5tools_getprogname());

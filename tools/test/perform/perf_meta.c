@@ -25,25 +25,25 @@
 #define FACC_MPIO    0x1 /* MPIO */
 
 /* Which test to run */
-int RUN_TEST = 0x0; /* all tests as default */
-int TEST_1   = 0x1; /* Test 1 */
-int TEST_2   = 0x2; /* Test 2 */
-int TEST_3   = 0x4; /* Test 3 */
+static int RUN_TEST = 0x0; /* all tests as default */
+static int TEST_1   = 0x1; /* Test 1 */
+static int TEST_2   = 0x2; /* Test 2 */
+static int TEST_3   = 0x4; /* Test 3 */
 
-const char *FILENAME[] = {"meta_perf_1", "meta_perf_2", "meta_perf_3", NULL};
+static const char *FILENAME[] = {"meta_perf_1", "meta_perf_2", "meta_perf_3", NULL};
 
 /* Default values for performance. Can be changed through command line options */
-int     NUM_DSETS   = 16;
-int     NUM_ATTRS   = 8;
-int     BATCH_ATTRS = 2;
-hbool_t flush_dset  = FALSE;
-hbool_t flush_attr  = FALSE;
-int     nerrors     = 0; /* errors count */
-hid_t   fapl;
+static int     NUM_DSETS   = 16;
+static int     NUM_ATTRS   = 8;
+static int     BATCH_ATTRS = 2;
+static hbool_t flush_dset  = FALSE;
+static hbool_t flush_attr  = FALSE;
+static int     nerrors     = 0; /* errors count */
+static hid_t   fapl;
 
 /* Data space IDs */
-hid_t space;
-hid_t small_space;
+static hid_t space;
+static hid_t small_space;
 
 /* Performance data */
 typedef struct p_time {
@@ -56,7 +56,7 @@ typedef struct p_time {
 } p_time;
 
 /*Test file access type for parallel.  MPIO as default */
-int facc_type = FACC_DEFAULT;
+static int facc_type = FACC_DEFAULT;
 
 double retrieve_time(void);
 void   perf(p_time *perf_t, double start_t, double end_t);

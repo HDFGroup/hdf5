@@ -66,7 +66,7 @@ main(void)
     {
         (void)H5Ldelete(fil, setname, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     cs6 = H5Tcopy(H5T_C_S1);
     H5Tset_size(cs6, sizeof(string5));

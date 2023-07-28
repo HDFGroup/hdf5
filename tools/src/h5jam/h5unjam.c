@@ -108,7 +108,6 @@ parse_command_line(int argc, const char *const *argv)
                 if (input_file)
                     h5tools_set_input_file(input_file, 1);
                 break;
-                ;
 
             case 'u':
                 ub_file = HDstrdup(H5_optarg);
@@ -335,12 +334,12 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
         HDfseek(infid, from, SEEK_SET);
 
         /* Read data to buffer */
-        bytes_read = HDfread(buf, (size_t)1, bytes_in, infid);
-        if (0 == bytes_read && HDferror(infid)) {
+        bytes_read = fread(buf, (size_t)1, bytes_in, infid);
+        if (0 == bytes_read && ferror(infid)) {
             ret_value = -1;
             goto done;
         } /* end if */
-        if (0 == bytes_read && HDfeof(infid)) {
+        if (0 == bytes_read && feof(infid)) {
             goto done;
         } /* end if */
 
@@ -353,8 +352,8 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
         to += (off_t)bytes_read;
 
         /* Write nchars bytes to output file */
-        bytes_wrote = HDfwrite(buf, (size_t)1, bytes_read, ofid);
-        if (bytes_wrote != bytes_read || (0 == bytes_wrote && HDferror(ofid))) { /* error */
+        bytes_wrote = fwrite(buf, (size_t)1, bytes_read, ofid);
+        if (bytes_wrote != bytes_read || (0 == bytes_wrote && ferror(ofid))) { /* error */
             ret_value = -1;
             goto done;
         } /* end if */

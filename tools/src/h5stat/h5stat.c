@@ -35,12 +35,12 @@
          to accommodate datasets without any filters */
 
 /* File space management strategies: see H5Fpublic.h for declarations */
-const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
-                                  "H5F_FSPACE_STRATEGY_PAGE",
-                                  "H5F_FSPACE_STRATEGY_AGGR",
-                                  "H5F_FSPACE_STRATEGY_NONE",
-                                  "unknown",
-                                  NULL};
+static const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
+                                         "H5F_FSPACE_STRATEGY_PAGE",
+                                         "H5F_FSPACE_STRATEGY_AGGR",
+                                         "H5F_FSPACE_STRATEGY_NONE",
+                                         "unknown",
+                                         NULL};
 
 /* Datatype statistics for datasets */
 typedef struct dtype_info_t {
@@ -119,12 +119,15 @@ static const char *drivername = NULL;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
-static H5FD_ros3_fapl_t ros3_fa = {
-    1,     /* Structure Version */
-    FALSE, /* Authenticate?     */
-    "",    /* AWS Region        */
-    "",    /* Access Key ID     */
-    "",    /* Secret Access Key */
+static H5FD_ros3_fapl_ext_t ros3_fa = {
+    {
+        1,     /* Structure Version */
+        FALSE, /* Authenticate?     */
+        "",    /* AWS Region        */
+        "",    /* Access Key ID     */
+        "",    /* Secret Access Key */
+    },
+    "", /* Session/security token */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 

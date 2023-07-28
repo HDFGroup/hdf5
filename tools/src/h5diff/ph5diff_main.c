@@ -143,7 +143,7 @@ ph5diff_worker(int nID)
                 }
                 /* enable error reporting */
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
         /* Check for work */
         else if (Status.MPI_TAG == MPI_TAG_ARGS) {

@@ -30,11 +30,11 @@ static struct h5_long_options l_opts[]  = {{"destination", require_arg, 'd'},
                                           {"version", no_arg, 'V'},
                                           {"enable-error-stack", optional_arg, 'E'},
                                           {NULL, 0, '\0'}};
-char                         *fname_src = NULL;
-char                         *fname_dst = NULL;
-char                         *oname_src = NULL;
-char                         *oname_dst = NULL;
-char                         *str_flag  = NULL;
+static char                  *fname_src = NULL;
+static char                  *fname_dst = NULL;
+static char                  *oname_src = NULL;
+static char                  *oname_dst = NULL;
+static char                  *str_flag  = NULL;
 
 /*-------------------------------------------------------------------------
  * Function:    leave
@@ -479,7 +479,7 @@ done:
         H5Fclose(fid_src);
         H5Fclose(fid_dst);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     leave(ret_value);
 }

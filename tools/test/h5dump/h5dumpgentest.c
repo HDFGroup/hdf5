@@ -2675,7 +2675,7 @@ error:
         H5Sclose(space);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }
 
 static void
@@ -5374,7 +5374,7 @@ out:
     {
         H5Dclose(dsid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6545,7 +6545,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }
 
 /*-------------------------------------------------------------------------
@@ -6730,7 +6730,7 @@ out:
         H5Pclose(fcpl_id);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }
 
 /*-------------------------------------------------------------------------
@@ -6989,7 +6989,7 @@ out:
         H5Pclose(tcpl_id);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }
 
 /*-------------------------------------------------------------------------
@@ -11325,7 +11325,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 } /* gen_err_attr_dspace() */
 
 /* Structure to collect the onion filepaths in one place. */
@@ -11551,7 +11551,7 @@ error:
         H5Sclose(space);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* gent_onion_1d_dset */
@@ -11988,7 +11988,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* gent_onion_dset_extension */

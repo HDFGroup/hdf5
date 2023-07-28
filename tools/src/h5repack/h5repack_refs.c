@@ -156,7 +156,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             if (buf == NULL) {
                                 printf("cannot read into memory\n");
                                 H5TOOLS_GOTO_ERROR((-1), "malloc failed");
-                            } /* end if */
+                            }
                             if (H5Dread(dset_in, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
 
@@ -164,7 +164,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             if (refbuf == NULL) {
                                 printf("cannot allocate memory\n");
                                 H5TOOLS_GOTO_ERROR((-1), "calloc failed");
-                            } /* end if */
+                            }
                             for (u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY
                                 {
@@ -172,7 +172,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                              H5Rdereference2(dset_in, H5P_DEFAULT, H5R_OBJECT, &buf[u])) < 0)
                                         continue;
                                 }
-                                H5E_END_TRY;
+                                H5E_END_TRY
 
                                 /* get the name. a valid name could only occur
                                  * in the second traversal of the file
@@ -238,7 +238,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             if (buf == NULL) {
                                 printf("cannot read into memory\n");
                                 H5TOOLS_GOTO_ERROR((-1), "malloc failed");
-                            } /* end if */
+                            }
                             if (H5Dread(dset_in, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
 
@@ -251,7 +251,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             if (refbuf == NULL) {
                                 printf("cannot allocate memory\n");
                                 H5TOOLS_GOTO_ERROR((-1), "calloc failed");
-                            } /* end if */
+                            }
 
                             for (u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY
@@ -260,7 +260,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                                                      &buf[u])) < 0)
                                         continue;
                                 }
-                                H5E_END_TRY;
+                                H5E_END_TRY
 
                                 /* get the name. a valid name could only occur
                                  * in the second traversal of the file
@@ -408,7 +408,7 @@ done:
         H5Tclose(type_in);
         named_datatype_free(&named_dt_head, 1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }
@@ -602,7 +602,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                 if (buf == NULL) {
                     printf("cannot read into memory\n");
                     H5TOOLS_GOTO_ERROR((-1), "malloc failed");
-                } /* end if */
+                }
                 if (H5Aread(attr_id, mtype_id, buf) < 0)
                     H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
 
@@ -610,7 +610,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                 if (refbuf == NULL) {
                     printf("cannot allocate memory\n");
                     H5TOOLS_GOTO_ERROR((-1), "calloc failed");
-                } /* end if */
+                }
 
                 for (i = 0; i < (unsigned)nelmts; i++)
                     if (update_ref_value(attr_id, H5R_OBJECT, &((hobj_ref_t *)buf)[i], fidout,
@@ -624,7 +624,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                 if (buf == NULL) {
                     printf("cannot read into memory\n");
                     H5TOOLS_GOTO_ERROR((-1), "malloc failed");
-                } /* end if */
+                }
                 if (H5Aread(attr_id, mtype_id, buf) < 0)
                     H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
 
@@ -636,7 +636,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                 if (refbuf == NULL) {
                     printf("cannot allocate memory\n");
                     H5TOOLS_GOTO_ERROR((-1), "calloc failed");
-                } /* end if */
+                }
 
                 for (i = 0; i < (unsigned)nelmts; i++)
                     if (update_ref_value(attr_id, H5R_DATASET_REGION, &((hdset_reg_ref_t *)buf)[i], fidout,
@@ -652,7 +652,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                 if (buf == NULL) {
                     printf("cannot read into memory\n");
                     H5TOOLS_GOTO_ERROR((-1), "malloc failed");
-                } /* end if */
+                }
 
                 if (H5Aread(attr_id, mtype_id, buf) < 0)
                     H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
@@ -694,7 +694,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                 if (buf == NULL) {
                     printf("cannot read into memory\n");
                     H5TOOLS_GOTO_ERROR((-1), "malloc failed");
-                } /* end if */
+                }
 
                 if (H5Aread(attr_id, mtype_id, buf) < 0)
                     H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
@@ -794,7 +794,7 @@ done:
         H5Aclose(attr_id);
         H5Aclose(attr_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }
@@ -875,7 +875,7 @@ done:
         H5Sclose(space_id);
         H5Oclose(ref_obj_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }

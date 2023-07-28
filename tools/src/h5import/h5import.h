@@ -110,21 +110,21 @@ struct Options {
     int                  fcount;       /* number of input files */
 };
 
-char keytable[NUM_KEYS][30] = {"PATH",
-                               "INPUT-CLASS",
-                               "INPUT-SIZE",
-                               "RANK",
-                               "DIMENSION-SIZES",
-                               "OUTPUT-CLASS",
-                               "OUTPUT-SIZE",
-                               "OUTPUT-ARCHITECTURE",
-                               "OUTPUT-BYTE-ORDER",
-                               "CHUNKED-DIMENSION-SIZES",
-                               "COMPRESSION-TYPE",
-                               "COMPRESSION-PARAM",
-                               "EXTERNAL-STORAGE",
-                               "MAXIMUM-DIMENSIONS",
-                               "INPUT-BYTE-ORDER"};
+static char keytable[NUM_KEYS][30] = {"PATH",
+                                      "INPUT-CLASS",
+                                      "INPUT-SIZE",
+                                      "RANK",
+                                      "DIMENSION-SIZES",
+                                      "OUTPUT-CLASS",
+                                      "OUTPUT-SIZE",
+                                      "OUTPUT-ARCHITECTURE",
+                                      "OUTPUT-BYTE-ORDER",
+                                      "CHUNKED-DIMENSION-SIZES",
+                                      "COMPRESSION-TYPE",
+                                      "COMPRESSION-PARAM",
+                                      "EXTERNAL-STORAGE",
+                                      "MAXIMUM-DIMENSIONS",
+                                      "INPUT-BYTE-ORDER"};
 
 static int state_table[15][8] = {
     /* token ordering: FILNAME      OPT_o   OPT_c  OPT_h  OPT_d  OPT_p  OPT_t  OPT_s   */

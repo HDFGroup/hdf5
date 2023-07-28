@@ -3069,7 +3069,7 @@ error:
         H5Tclose(type);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -3238,7 +3238,7 @@ error:
         H5Tclose(type);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
