@@ -972,7 +972,7 @@ done:
         if (*api_state) {
             /* Release the (possibly partially allocated) API state struct */
             if (H5CX_free_state(*api_state) < 0)
-                HDONE_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release API state")
+                HDONE_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release API state");
             *api_state = NULL;
         } /* end if */
     }     /* end if */
@@ -1095,7 +1095,7 @@ H5CX_free_state(H5CX_state_t *api_state)
                 HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
         /* Decrement connector ID */
         if (H5I_dec_ref(api_state->vol_connector_prop.connector_id) < 0)
-            HDONE_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't close VOL connector ID")
+            HDONE_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't close VOL connector ID");
     } /* end if */
 
     /* Free the state */

@@ -35,21 +35,21 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
 
 /* Other functions */
 #define H5VM_vector_cpy(N, DST, SRC)                                                                         \
-    {                                                                                                        \
+    do {                                                                                                     \
         assert(sizeof(*(DST)) == sizeof(*(SRC)));                                                            \
         if (SRC)                                                                                             \
             H5MM_memcpy(DST, SRC, (N) * sizeof(*(DST)));                                                     \
         else                                                                                                 \
-            HDmemset(DST, 0, (N) * sizeof(*(DST)));                                                          \
-    }
+            memset(DST, 0, (N) * sizeof(*(DST)));                                                            \
+    } while (0)
 
-#define H5VM_vector_zero(N, DST) HDmemset(DST, 0, (N) * sizeof(*(DST)))
+#define H5VM_vector_zero(N, DST) memset(DST, 0, (N) * sizeof(*(DST)))
 
 /* Given a coordinate offset array (COORDS) of type TYPE, move the unlimited
  * dimension (UNLIM_DIM) value to offset 0, sliding any intermediate values down
  * one position. */
 #define H5VM_swizzle_coords(TYPE, COORDS, UNLIM_DIM)                                                         \
-    {                                                                                                        \
+    do {                                                                                                     \
         /* COORDS must be an array of type TYPE */                                                           \
         assert(sizeof(COORDS[0]) == sizeof(TYPE));                                                           \
                                                                                                              \
@@ -57,17 +57,17 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
         if (0 != (UNLIM_DIM)) {                                                                              \
             TYPE _tmp = (COORDS)[UNLIM_DIM];                                                                 \
                                                                                                              \
-            HDmemmove(&(COORDS)[1], &(COORDS)[0], sizeof(TYPE) * (UNLIM_DIM));                               \
+            memmove(&(COORDS)[1], &(COORDS)[0], sizeof(TYPE) * (UNLIM_DIM));                                 \
             (COORDS)[0] = _tmp;                                                                              \
         } /* end if */                                                                                       \
-    }
+    } while (0)
 
 /* Given a coordinate offset array (COORDS) of type TYPE, move the value at
  * offset 0 to offset of the unlimied dimension (UNLIM_DIM), sliding any
  * intermediate values up one position.  Undoes the "swizzle_coords" operation.
  */
 #define H5VM_unswizzle_coords(TYPE, COORDS, UNLIM_DIM)                                                       \
-    {                                                                                                        \
+    do {                                                                                                     \
         /* COORDS must be an array of type TYPE */                                                           \
         assert(sizeof(COORDS[0]) == sizeof(TYPE));                                                           \
                                                                                                              \
@@ -75,10 +75,10 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
         if (0 != (UNLIM_DIM)) {                                                                              \
             TYPE _tmp = (COORDS)[0];                                                                         \
                                                                                                              \
-            HDmemmove(&(COORDS)[0], &(COORDS)[1], sizeof(TYPE) * (UNLIM_DIM));                               \
+            memmove(&(COORDS)[0], &(COORDS)[1], sizeof(TYPE) * (UNLIM_DIM));                                 \
             (COORDS)[UNLIM_DIM] = _tmp;                                                                      \
         } /* end if */                                                                                       \
-    }
+    } while (0)
 
 /* A null pointer is equivalent to a zero vector */
 #define H5VM_ZERO NULL
@@ -142,7 +142,7 @@ H5VM_vector_reduce_product(unsigned n, const hsize_t *v)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (n && !v)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     while (n--)
         ret_value *= *v++;
 
@@ -172,10 +172,10 @@ H5VM_vector_zerop_u(int n, const hsize_t *v)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     while (n--)
         if (*v++)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -204,10 +204,10 @@ H5VM_vector_zerop_s(int n, const hssize_t *v)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     while (n--)
         if (*v++)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -239,16 +239,16 @@ H5VM_vector_cmp_u(unsigned n, const hsize_t *v1, const hsize_t *v2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (v1 == v2)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     if (v1 == NULL)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (v2 == NULL)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     while (n--) {
         if (*v1 < *v2)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (*v1 > *v2)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
         v1++;
         v2++;
     }
@@ -283,16 +283,16 @@ H5VM_vector_cmp_s(unsigned n, const hssize_t *v1, const hssize_t *v2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (v1 == v2)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     if (v1 == NULL)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (v2 == NULL)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     while (n--) {
         if (*v1 < *v2)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (*v1 > *v2)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
         v1++;
         v2++;
     }

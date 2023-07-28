@@ -261,7 +261,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_INDIRECT[1] = {{
 }};
 
 /* Declare a free list to manage the H5HF_free_section_t struct */
-H5FL_DEFINE(H5HF_free_section_t);
+H5FL_DEFINE_STATIC(H5HF_free_section_t);
 
 /*****************************/
 /* Library Private Variables */
@@ -840,7 +840,7 @@ H5HF__sect_single_can_merge(const H5FS_section_info_t *_sect1, const H5FS_sectio
      *  are actually within the same direct block)
      */
     if (H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr))
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -939,14 +939,14 @@ H5HF__sect_single_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
         dblock_size     = hdr->man_dtable.cparam.start_block_size;
         dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
         if ((dblock_size - dblock_overhead) == sect->sect_info.size)
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
     } /* end if */
     else {
         /* We shouldn't have a situation where the 'next block' iterator
          *      is moved before a direct block that still has objects within it.
          */
         assert(hdr->man_iter_off > sect->sect_info.addr);
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     } /* end else */
 
 done:
@@ -1645,7 +1645,7 @@ H5HF__sect_row_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_i
             /* Check if second section adjoins first section */
             if (H5_addr_eq((top_indir_sect1->sect_info.addr + top_indir_sect1->u.indirect.span_size),
                            top_indir_sect2->sect_info.addr))
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1732,7 +1732,7 @@ H5HF__sect_row_can_shrink(const H5FS_section_info_t *_sect, void H5_ATTR_UNUSED 
 
     /* Check if section is past end of "next block" iterator */
     if (sect->sect_info.addr >= hdr->man_iter_off)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2172,7 +2172,7 @@ H5HF__sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, H5HF_free_
 done:
     if (!ret_value && sect)
         if (H5HF__sect_indirect_free(sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_for_row() */
@@ -2496,7 +2496,7 @@ H5HF__sect_indirect_add(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, unsigned start
 done:
     if (ret_value < 0 && sect)
         if (H5HF__sect_indirect_free(sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_add() */
@@ -2585,7 +2585,7 @@ H5HF__sect_indirect_revive_row(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 done:
     /* Unlock indirect block */
     if (sec_iblock && H5HF__man_iblock_unprotect(sec_iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_revive_row() */
@@ -2747,8 +2747,8 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
                 /* Adjust direct row sections for indirect section */
                 if (sect->u.indirect.dir_nrows > 0) {
                     assert(sect->u.indirect.dir_rows);
-                    HDmemmove(&sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[1],
-                              sect->u.indirect.dir_nrows * sizeof(H5HF_free_section_t *));
+                    memmove(&sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[1],
+                            sect->u.indirect.dir_nrows * sizeof(H5HF_free_section_t *));
                     assert(sect->u.indirect.dir_rows[0]);
 
                     /* Make new "first row" in indirect section */
@@ -2841,8 +2841,8 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
             /* Transfer row sections between current & peer sections */
             H5MM_memcpy(&peer_sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[0],
                         (sizeof(H5HF_free_section_t *) * peer_dir_nrows));
-            HDmemmove(&sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[peer_dir_nrows],
-                      (sizeof(H5HF_free_section_t *) * (sect->u.indirect.dir_nrows - peer_dir_nrows)));
+            memmove(&sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[peer_dir_nrows],
+                    (sizeof(H5HF_free_section_t *) * (sect->u.indirect.dir_nrows - peer_dir_nrows)));
             sect->u.indirect.dir_nrows -= peer_dir_nrows;
             assert(row_sect == sect->u.indirect.dir_rows[0]);
 
@@ -2902,7 +2902,7 @@ done:
         assert(ret_value < 0);
 
         if (H5HF__sect_indirect_free(peer_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2991,8 +2991,8 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
 
             /* Adjust indirect entry information */
             sect->u.indirect.indir_nents--;
-            HDmemmove(&sect->u.indirect.indir_ents[0], &sect->u.indirect.indir_ents[1],
-                      sect->u.indirect.indir_nents * sizeof(H5HF_free_section_t *));
+            memmove(&sect->u.indirect.indir_ents[0], &sect->u.indirect.indir_ents[1],
+                    sect->u.indirect.indir_nents * sizeof(H5HF_free_section_t *));
             assert(sect->u.indirect.indir_ents[0]);
 
             /* Make new "first row" in new first indirect child section */
@@ -3136,7 +3136,7 @@ done:
         assert(ret_value < 0);
 
         if (H5HF__sect_indirect_free(peer_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3562,7 +3562,7 @@ H5HF__sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 done:
     if (ret_value < 0)
         if (par_sect && H5HF__sect_indirect_free(par_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_build_parent() */

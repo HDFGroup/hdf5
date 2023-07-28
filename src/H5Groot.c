@@ -140,7 +140,7 @@ H5G_mkroot(H5F_t *f, hbool_t create_root)
 
     /* Check if the root group is already initialized */
     if (f->shared->root_grp)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Create information needed for group nodes */
     if (H5G__node_init(f) < 0)
@@ -300,7 +300,7 @@ done:
     /* Mark superblock dirty in cache, if necessary */
     if (sblock_dirty)
         if (H5AC_mark_entry_dirty(f->shared->sblock) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+            HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_mkroot() */

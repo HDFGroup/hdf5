@@ -429,7 +429,7 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
                     MPI_Aint temp;
 
                     temp = disp[u];
-                    HDmemmove(disp + m + 1, disp + m, (u - m) * sizeof(MPI_Aint));
+                    memmove(disp + m + 1, disp + m, (u - m) * sizeof(MPI_Aint));
                     disp[m] = temp;
                 } /* end if */
                 (*permute)[u] = m;
@@ -571,8 +571,8 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
                 if ((*permute)[u] != num_points) {
                     MPI_Aint temp = disp[u];
 
-                    HDmemmove(disp + (*permute)[u] + 1, disp + (*permute)[u],
-                              (u - (*permute)[u]) * sizeof(MPI_Aint));
+                    memmove(disp + (*permute)[u] + 1, disp + (*permute)[u],
+                            (u - (*permute)[u]) * sizeof(MPI_Aint));
                     disp[(*permute)[u]] = temp;
                 } /* end if */
 
@@ -603,7 +603,7 @@ done:
     /* Release selection iterator */
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
         sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
 
@@ -695,7 +695,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
             fprintf(H5DEBUG(S), "%s: Flattened selection\n", __func__);
 #endif
         for (u = 0; u < rank; ++u) {
-            H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t)
+            H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t);
             d[u].start = (hssize_t)diminfo[u].start + sel_iter->u.hyp.sel_off[u];
             d[u].strid = diminfo[u].stride;
             d[u].block = diminfo[u].block;
@@ -729,7 +729,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
             fprintf(H5DEBUG(S), "%s: Non-flattened selection\n", __func__);
 #endif
         for (u = 0; u < rank; ++u) {
-            H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t)
+            H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t);
             d[u].start = (hssize_t)diminfo[u].start + space->select.offset[u];
             d[u].strid = diminfo[u].stride;
             d[u].block = diminfo[u].block;
@@ -960,7 +960,7 @@ done:
     /* Release selection iterator */
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
         sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
 
@@ -1178,7 +1178,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
 
                 /* Store displacement & block length */
                 disp[outercount] = (MPI_Aint)elmt_size * (MPI_Aint)span->low;
-                H5_CHECK_OVERFLOW(nelmts, hsize_t, int)
+                H5_CHECK_OVERFLOW(nelmts, hsize_t, int);
                 blocklen[outercount] = (int)nelmts;
 
                 if (bigio_count < (hsize_t)blocklen[outercount])
@@ -1287,7 +1287,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                 nelmts = (span->high - span->low) + 1;
 
                 /* Build the MPI datatype for this node */
-                H5_CHECK_OVERFLOW(nelmts, hsize_t, int)
+                H5_CHECK_OVERFLOW(nelmts, hsize_t, int);
                 if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)nelmts, 1, stride, down_type,
                                                                        &inner_type[outercount])))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
@@ -1297,7 +1297,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
             } /* end while */
 
             /* Building the whole vector datatype */
-            H5_CHECK_OVERFLOW(outercount, size_t, int)
+            H5_CHECK_OVERFLOW(outercount, size_t, int);
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)outercount, blocklen, disp, inner_type,
                                                                   &spans->op_info[op_info_i].u.down_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)

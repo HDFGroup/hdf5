@@ -97,11 +97,11 @@ H5C_log_set_up(H5C_t *cache, const char log_location[], H5C_log_style_t style, h
 
     /* Set up logging */
     if (H5C_LOG_STYLE_JSON == style) {
-        if (H5C_log_json_set_up(cache->log_info, log_location, mpi_rank) < 0)
+        if (H5C__log_json_set_up(cache->log_info, log_location, mpi_rank) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to set up json logging")
     }
     else if (H5C_LOG_STYLE_TRACE == style) {
-        if (H5C_log_trace_set_up(cache->log_info, log_location, mpi_rank) < 0)
+        if (H5C__log_trace_set_up(cache->log_info, log_location, mpi_rank) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to set up trace logging")
     }
     else

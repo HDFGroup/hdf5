@@ -124,9 +124,9 @@ H5O__is_attr_dense_test(hid_t oid)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__is_attr_dense_test() */
@@ -195,12 +195,12 @@ H5O__is_attr_empty_test(hid_t oid)
                 assert(nattrs == 0);
 
                 /* Set metadata tag in API context */
-                H5_BEGIN_TAG(loc->addr);
+                H5_BEGIN_TAG(loc->addr)
 
                 /* Open the name index v2 B-tree */
                 if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, NULL)))
                     HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL,
-                                    "unable to open v2 B-tree for name index")
+                                    "unable to open v2 B-tree for name index");
 
                 /* Reset metadata tag in API context */
                 H5_END_TAG
@@ -224,11 +224,11 @@ H5O__is_attr_empty_test(hid_t oid)
 done:
     /* Release resources */
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index");
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__is_attr_empty_test() */
@@ -297,11 +297,11 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
             assert(obj_nattrs == 0);
 
             /* Set metadata tag in API context */
-            H5_BEGIN_TAG(loc->addr);
+            H5_BEGIN_TAG(loc->addr)
 
             /* Open the name index v2 B-tree */
             if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, NULL)))
-                HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+                HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
             /* Reset metadata tag in API context */
             H5_END_TAG
@@ -321,11 +321,11 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
 done:
     /* Release resources */
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index");
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__num_attrs_test() */
@@ -374,45 +374,45 @@ H5O__attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     api_ctx_pushed = TRUE;
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(loc->addr);
+    H5_BEGIN_TAG(loc->addr)
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
     if (oh->version > H5O_VERSION_1) {
         /* Check for (& retrieve if available) attribute info */
         if (H5A__get_ainfo(loc->file, oh, &ainfo) < 0)
-            HGOTO_ERROR_TAG(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+            HGOTO_ERROR_TAG(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message");
     } /* end if */
 
     /* Check for 'dense' attribute storage file addresses being defined */
     if (!H5_addr_defined(ainfo.fheap_addr))
-        HGOTO_DONE_TAG(FAIL)
+        HGOTO_DONE_TAG(FAIL);
     if (!H5_addr_defined(ainfo.name_bt2_addr))
-        HGOTO_DONE_TAG(FAIL)
+        HGOTO_DONE_TAG(FAIL);
 
     /* Open the name index v2 B-tree */
     if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, NULL)))
-        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
     /* Retrieve # of records in name index */
     if (H5B2_get_nrec(bt2_name, name_count) < 0)
-        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index");
 
     /* Check if there is a creation order index */
     if (H5_addr_defined(ainfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
         if (NULL == (bt2_corder = H5B2_open(loc->file, ainfo.corder_bt2_addr, NULL)))
             HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL,
-                            "unable to open v2 B-tree for creation order index")
+                            "unable to open v2 B-tree for creation order index");
 
         /* Retrieve # of records in creation order index */
         if (H5B2_get_nrec(bt2_corder, corder_count) < 0)
             HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTCOUNT, FAIL,
-                            "unable to retrieve # of records from creation order index")
+                            "unable to retrieve # of records from creation order index");
     } /* end if */
     else
         *corder_count = 0;
@@ -423,13 +423,13 @@ H5O__attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
 done:
     /* Release resources */
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index");
     if (bt2_corder && H5B2_close(bt2_corder) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index");
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__attr_dense_info_test() */
@@ -492,7 +492,7 @@ H5O__check_msg_marked_test(hid_t oid, hbool_t flag_val)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__check_msg_marked_test() */
@@ -596,7 +596,7 @@ H5O__get_rc_test(const H5O_loc_t *loc, unsigned *rc)
 done:
     /* Release the object header */
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__get_rc_test() */
@@ -663,9 +663,9 @@ H5O__msg_get_chunkno_test(hid_t oid, unsigned msg_type, unsigned *chunk_num)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__msg_get_chunkno_test() */
@@ -774,9 +774,9 @@ H5O__msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type)
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__msg_move_to_new_chunk_test() */

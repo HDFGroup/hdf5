@@ -1000,7 +1000,7 @@ done:                                                                           
 
 /* Print alignment statistics */
 #define CI_PRINT_STATS(STYPE, DTYPE)                                                                         \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->s_aligned) {                                       \
             fprintf(H5DEBUG(T), "      %zu src elements aligned on %zu-byte boundaries\n",                   \
                     ((H5T_conv_hw_t *)cdata->priv)->s_aligned, H5T_NATIVE_##STYPE##_ALIGN_g);                \
@@ -1009,7 +1009,7 @@ done:                                                                           
             fprintf(H5DEBUG(T), "      %zu dst elements aligned on %zu-byte boundaries\n",                   \
                     ((H5T_conv_hw_t *)cdata->priv)->d_aligned, H5T_NATIVE_##DTYPE##_ALIGN_g);                \
         }                                                                                                    \
-    }
+    } while (0)
 
 /* Allocate private alignment structure for atomic types */
 #define CI_ALLOC_PRIV                                                                                        \
@@ -1041,12 +1041,12 @@ done:                                                                           
 
 /* Swap two elements (I & J) of an array using a temporary variable */
 #define H5_SWAP_BYTES(ARRAY, I, J)                                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         uint8_t _tmp;                                                                                        \
         _tmp     = ARRAY[I];                                                                                 \
         ARRAY[I] = ARRAY[J];                                                                                 \
         ARRAY[J] = _tmp;                                                                                     \
-    }
+    } while (0)
 
 /* Minimum size of variable-length conversion buffer */
 #define H5T_VLEN_MIN_CONF_BUF_SIZE 4096
@@ -2124,7 +2124,6 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     else /* If the numbers of source and dest members are equal and no conversion is needed,
           * the case should have been handled as noop earlier in H5Dio.c. */
     {
-        ;
     }
 
     cdata->recalc = FALSE;
@@ -2307,11 +2306,11 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                                         xbuf + src_memb->offset, xbkg + dst_memb->offset) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
-                        HDmemmove(xbuf + offset, xbuf + src_memb->offset, dst_memb->size);
+                        memmove(xbuf + offset, xbuf + src_memb->offset, dst_memb->size);
                         offset += dst_memb->size;
                     } /* end if */
                     else {
-                        HDmemmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
+                        memmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
                         offset += src_memb->size;
                     } /* end else */
                 }     /* end for */
@@ -2341,7 +2340,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                     } /* end if */
                     else
                         offset -= dst_memb->size;
-                    HDmemmove(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
+                    memmove(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
                 } /* end for */
                 assert(0 == offset);
 
@@ -2361,7 +2360,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
              * buffer.
              */
             for (xbuf = buf, xbkg = bkg, elmtno = 0; elmtno < nelmts; elmtno++) {
-                HDmemmove(xbuf, xbkg, dst->shared->size);
+                memmove(xbuf, xbkg, dst->shared->size);
                 xbuf += buf_stride ? buf_stride : dst->shared->size;
                 xbkg += bkg_delta;
             } /* end for */
@@ -2552,7 +2551,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                 copy_size = priv->subset_info.copy_size;
 
                 for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                    HDmemmove(xbkg, xbuf, copy_size);
+                    memmove(xbkg, xbuf, copy_size);
 
                     /* Update pointers */
                     xbuf += buf_stride;
@@ -2582,14 +2581,14 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbkg, xbuf, dst_memb->size);
+                            memmove(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
                             xbkg += bkg_stride;
                         } /* end for */
                     }     /* end if */
                     else {
                         for (xbuf = buf, elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
+                            memmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
                             xbuf += buf_stride;
                         } /* end for */
                         offset += src_memb->size;
@@ -2619,7 +2618,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbkg, xbuf, dst_memb->size);
+                            memmove(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
                             xbkg += bkg_stride;
                         } /* end for */
@@ -2632,7 +2631,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
 
             /* Move background buffer into result buffer */
             for (xbuf = buf, xbkg = bkg, elmtno = 0; elmtno < nelmts; elmtno++) {
-                HDmemmove(xbuf, xbkg, dst->shared->size);
+                memmove(xbuf, xbkg, dst->shared->size);
                 xbuf += buf_stride;
                 xbkg += bkg_stride;
             } /* end for */
@@ -3562,7 +3561,7 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
             /* Perform the actual conversion */
             for (elmtno = 0; elmtno < nelmts; elmtno++) {
                 /* Copy the source array into the correct location for the destination */
-                HDmemmove(dp, sp, src->shared->size);
+                memmove(dp, sp, src->shared->size);
 
                 /* Convert array */
                 if (H5T_convert(tpath, tsrc_id, tdst_id, src->shared->u.array.nelem, (size_t)0, bkg_stride,

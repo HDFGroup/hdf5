@@ -137,7 +137,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
 
     /* Initialize leaf node info */
     sz_max_nrec = H5B2_NUM_LEAF_REC(hdr->node_size, hdr->rrec_size);
-    H5_CHECKED_ASSIGN(hdr->node_info[0].max_nrec, unsigned, sz_max_nrec, size_t)
+    H5_CHECKED_ASSIGN(hdr->node_info[0].max_nrec, unsigned, sz_max_nrec, size_t);
     hdr->node_info[0].split_nrec        = (hdr->node_info[0].max_nrec * hdr->split_percent) / 100;
     hdr->node_info[0].merge_nrec        = (hdr->node_info[0].max_nrec * hdr->merge_percent) / 100;
     hdr->node_info[0].cum_max_nrec      = hdr->node_info[0].max_nrec;
@@ -160,14 +160,14 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     /* Compute size to store # of records in each node */
     /* (uses leaf # of records because its the largest) */
     u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[0].max_nrec);
-    H5_CHECKED_ASSIGN(hdr->max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
+    H5_CHECKED_ASSIGN(hdr->max_nrec_size, uint8_t, u_max_nrec_size, unsigned);
     assert(hdr->max_nrec_size <= H5B2_SIZEOF_RECORDS_PER_NODE);
 
     /* Initialize internal node info */
     if (depth > 0) {
         for (u = 1; u < (unsigned)(depth + 1); u++) {
             sz_max_nrec = H5B2_NUM_INT_REC(hdr, u);
-            H5_CHECKED_ASSIGN(hdr->node_info[u].max_nrec, unsigned, sz_max_nrec, size_t)
+            H5_CHECKED_ASSIGN(hdr->node_info[u].max_nrec, unsigned, sz_max_nrec, size_t);
             assert(hdr->node_info[u].max_nrec <= hdr->node_info[u - 1].max_nrec);
 
             hdr->node_info[u].split_nrec = (hdr->node_info[u].max_nrec * hdr->split_percent) / 100;
@@ -177,7 +177,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
                 ((hdr->node_info[u].max_nrec + 1) * hdr->node_info[u - 1].cum_max_nrec) +
                 hdr->node_info[u].max_nrec;
             u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[u].cum_max_nrec);
-            H5_CHECKED_ASSIGN(hdr->node_info[u].cum_max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
+            H5_CHECKED_ASSIGN(hdr->node_info[u].cum_max_nrec_size, uint8_t, u_max_nrec_size, unsigned);
 
             if (NULL == (hdr->node_info[u].nat_rec_fac =
                              H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[u].max_nrec)))
@@ -204,7 +204,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
 done:
     if (ret_value < 0)
         if (H5B2__hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free shared v2 B-tree info")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free shared v2 B-tree info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__hdr_init() */
@@ -312,16 +312,16 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(hdr) < 0)
                     HDONE_ERROR(H5E_BTREE, H5E_CANTREMOVE, HADDR_UNDEF,
-                                "unable to remove v2 B-tree header from cache")
+                                "unable to remove v2 B-tree header from cache");
 
             /* Release header's disk space */
             if (H5_addr_defined(hdr->addr) &&
                 H5MF_xfree(f, H5FD_MEM_BTREE, hdr->addr, (hsize_t)hdr->hdr_size) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free v2 B-tree header")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free v2 B-tree header");
 
             /* Destroy header */
             if (H5B2__hdr_free(hdr) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release v2 B-tree header")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release v2 B-tree header");
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -520,7 +520,7 @@ done:
         /* Release the header, if it was protected */
         if (hdr && H5AC_unprotect(hdr->f, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL,
-                        "unable to unprotect v2 B-tree header, address = %llu", (unsigned long long)hdr_addr)
+                        "unable to unprotect v2 B-tree header, address = %llu", (unsigned long long)hdr_addr);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -674,7 +674,7 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr)
 done:
     /* Unprotect the header with appropriate flags */
     if (H5B2__hdr_unprotect(hdr, cache_flags) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header")
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__hdr_delete() */

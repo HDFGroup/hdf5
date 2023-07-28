@@ -445,7 +445,7 @@ H5VL_native_addr_to_token(void *obj, H5I_type_t obj_type, haddr_t addr, H5O_toke
 
     /* Encode token */
     p = (uint8_t *)token;
-    H5_addr_encode_len(addr_len, &p, addr);
+    H5F_addr_encode_len(addr_len, &p, addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -536,7 +536,7 @@ H5VL_native_token_to_addr(void *obj, H5I_type_t obj_type, H5O_token_t token, had
 
     /* Decode token */
     p = (const uint8_t *)&token;
-    H5_addr_decode_len(addr_len, &p, addr);
+    H5F_addr_decode_len(addr_len, &p, addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -557,7 +557,7 @@ H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file)
     H5O_loc_t *oloc      = NULL;    /* Object location for ID   */
     herr_t     ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     *file = NULL;
 

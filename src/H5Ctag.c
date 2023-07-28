@@ -13,11 +13,9 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Ctag.c
- *              June 5 2016
- *              Quincey Koziol
  *
  * Purpose:     Functions in this file operate on tags for metadata
- *              cache entries.
+ *              cache entries
  *
  *-------------------------------------------------------------------------
  */
@@ -32,14 +30,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5Cpkg.h"      /* Cache				*/
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* Files				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5Pprivate.h"  /* Property lists                       */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Cpkg.h"      /* Cache                                    */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fpkg.h"      /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MMprivate.h" /* Memory management                        */
 
 /****************/
 /* Local Macros */
@@ -81,7 +79,9 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, void *cb_ctx);
 static herr_t H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag);
+static herr_t H5C__flush_marked_entries(H5F_t *f);
 
 /*********************/
 /* Package Variables */
@@ -99,7 +99,6 @@ H5FL_EXTERN(H5C_tag_info_t);
 /*******************/
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_ignore_tags
  *
  * Purpose:     Override all assertion frameworks associated with making
@@ -115,9 +114,6 @@ H5FL_EXTERN(H5C_tag_info_t);
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  Mike McGreevy
- *              December 1, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -127,7 +123,6 @@ H5C_ignore_tags(H5C_t *cache)
 
     /* Assertions */
     assert(cache != NULL);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Set variable to ignore tag values upon assignment */
     cache->ignore_tags = TRUE;
@@ -136,58 +131,48 @@ H5C_ignore_tags(H5C_t *cache)
 } /* H5C_ignore_tags */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_ignore_tags
  *
  * Purpose:     Retrieve the 'ignore_tags' field for the cache
  *
  * Return:      'ignore_tags' value (can't fail)
  *
- * Programmer:  Quincey Koziol
- *              April 30, 2016
- *
  *-------------------------------------------------------------------------
  */
-hbool_t
+H5_ATTR_PURE hbool_t
 H5C_get_ignore_tags(const H5C_t *cache)
 {
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     assert(cache);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Return ignore tag value */
     FUNC_LEAVE_NOAPI(cache->ignore_tags)
 } /* H5C_get_ignore_tags */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_num_objs_corked
  *
  * Purpose:     Retrieve the 'num_objs_corked' field for the cache
  *
  * Return:      'num_objs_corked' value (can't fail)
  *
- * Programmer:  Vailin Choi; Feb 2019
- *
  *-------------------------------------------------------------------------
  */
-uint32_t
+H5_ATTR_PURE uint32_t
 H5C_get_num_objs_corked(const H5C_t *cache)
 {
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     assert(cache);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Return value for num_objs_corked */
     FUNC_LEAVE_NOAPI(cache->num_objs_corked)
 } /* H5C_get_num_objs_corked */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__tag_entry
  *
  * Purpose:     Tags an entry with the provided tag (contained in the API context).
@@ -196,9 +181,6 @@ H5C_get_num_objs_corked(const H5C_t *cache)
  *              data access property list id before application.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              January 14, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -214,7 +196,6 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     /* Assertions */
     assert(cache != NULL);
     assert(entry != NULL);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Get the tag */
     tag = H5CX_get_tag();
@@ -274,16 +255,12 @@ done:
 } /* H5C__tag_entry */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__untag_entry
  *
  * Purpose:     Removes an entry from a tag list, possibly removing the tag
  *		info from the list of tagged objects with entries.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Quincey Koziol
- *              July 8, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -298,7 +275,6 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     /* Assertions */
     assert(cache != NULL);
     assert(entry != NULL);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Get the entry's tag info struct */
     if (NULL != (tag_info = entry->tag_info)) {
@@ -333,15 +309,11 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
 } /* H5C__untag_entry */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__iter_tagged_entries_real
  *
  * Purpose:     Iterate over tagged entries, making a callback for matches
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Quincey Koziol
- *              June 7, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -356,7 +328,6 @@ H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, v
 
     /* Sanity checks */
     assert(cache != NULL);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Search the list of tagged object addresses in the cache */
     HASH_FIND(hh, cache->tag_list, &tag, sizeof(haddr_t), tag_info);
@@ -390,15 +361,11 @@ done:
 } /* H5C__iter_tagged_entries_real() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__iter_tagged_entries
  *
  * Purpose:     Iterate over tagged entries, making a callback for matches
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Quincey Koziol
- *              June 7, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -412,7 +379,6 @@ H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global, H5C_ta
 
     /* Sanity checks */
     assert(cache != NULL);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Iterate over the entries for this tag */
     if (H5C__iter_tagged_entries_real(cache, tag, cb, cb_ctx) < 0)
@@ -434,15 +400,11 @@ done:
 } /* H5C__iter_tagged_entries() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__evict_tagged_entries_cb
  *
  * Purpose:     Callback for evicting tagged entries
  *
  * Return:      H5_ITER_ERROR if error is detected, H5_ITER_CONT otherwise.
- *
- * Programmer:  Mike McGreevy
- *              August 19, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -485,15 +447,11 @@ done:
 } /* H5C__evict_tagged_entries_cb() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_evict_tagged_entries
  *
  * Purpose:     Evicts all entries with the specified tag from cache
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              August 19, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -512,7 +470,6 @@ H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
     assert(f->shared);
     cache = f->shared->cache; /* Get cache pointer */
     assert(cache != NULL);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Construct context for iterator callbacks */
     ctx.f = f;
@@ -564,15 +521,11 @@ done:
 } /* H5C_evict_tagged_entries() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__mark_tagged_entries_cb
  *
  * Purpose:     Callback to set the flush marker on dirty entries in the cache
  *
  * Return:      H5_ITER_CONT (can't fail)
- *
- * Programmer:  Mike McGreevy
- *              September 9, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -594,16 +547,12 @@ H5C__mark_tagged_entries_cb(H5C_cache_entry_t *entry, void H5_ATTR_UNUSED *_ctx)
 } /* H5C__mark_tagged_entries_cb() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__mark_tagged_entries
  *
  * Purpose:     Set the flush marker on dirty entries in the cache that have
  *              the specified tag, as well as all globally tagged entries.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              September 9, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -617,7 +566,6 @@ H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag)
 
     /* Sanity check */
     assert(cache);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Iterate through hash table entries, marking those with specified tag, as
      * well as any major global entries which should always be flushed
@@ -629,18 +577,52 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__mark_tagged_entries() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5C__flush_marked_entries
+ *
+ * Purpose:     Flushes all marked entries in the cache.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C__flush_marked_entries(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Assertions */
+    assert(f != NULL);
+
+    /* Enable the slist, as it is needed in the flush */
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
+    /* Flush all marked entries */
+    if (H5C_flush_cache(f, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache")
+
+    /* Disable the slist.  Set the clear_slist parameter to TRUE
+     * since we called H5C_flush_cache() with the
+     * H5C__FLUSH_MARKED_ENTRIES_FLAG.
+     */
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__flush_marked_entries */
+
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_verify_tag
  *
  * Purpose:     Performs sanity checking on an entrytype/tag pair.
  *
  * Return:      SUCCEED or FAIL.
- *
- * Programmer:  Mike McGreevy
- *              January 14, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -703,15 +685,11 @@ done:
 #endif
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_flush_tagged_entries
  *
  * Purpose:     Flushes all entries with the specified tag to disk.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              August 19, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -744,7 +722,6 @@ done:
 } /* H5C_flush_tagged_entries */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_retag_entries
  *
  * Purpose:     Searches through cache index for all entries with the
@@ -752,9 +729,6 @@ done:
  *              specified by dest_tag.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Mike McGreevy
- *              March 17, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -786,16 +760,12 @@ H5C_retag_entries(H5C_t *cache, haddr_t src_tag, haddr_t dest_tag)
 } /* H5C_retag_entries() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__expunge_tag_type_metadata_cb
  *
  * Purpose:     Expunge from the cache entries associated
  *              with 'tag' and type id.
  *
  * Return:      H5_ITER_ERROR if error is detected, H5_ITER_CONT otherwise.
- *
- * Programmer:  Vailin Choi
- *		May 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -822,16 +792,12 @@ done:
 } /* H5C__expunge_tag_type_metadata_cb() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_expunge_tag_type_metadata
  *
  * Purpose:     Search and expunge from the cache entries associated
  *              with 'tag' and type id.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Vailin Choi
- *		May 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -850,7 +816,6 @@ H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags
     assert(f->shared);
     cache = f->shared->cache; /* Get cache pointer */
     assert(cache != NULL);
-    assert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Construct context for iterator callbacks */
     ctx.f       = f;
@@ -866,15 +831,11 @@ done:
 } /* H5C_expunge_tag_type_metadata() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_tag()
  *
  * Purpose:     Get the tag for a metadata cache entry.
  *
  * Return:      SUCCEED (can't fail)
- *
- * Programmer:  Dana Robinson
- *              Fall 2016
  *
  *-------------------------------------------------------------------------
  */

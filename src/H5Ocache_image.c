@@ -71,7 +71,7 @@ const H5O_msg_class_t H5O_MSG_MDCI[1] = {{
 #define H5O_MDCI_VERSION_0 0
 
 /* Declare the free list for H5O_mdci_t's */
-H5FL_DEFINE(H5O_mdci_t);
+H5FL_DEFINE_STATIC(H5O_mdci_t);
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__mdci_decode
@@ -109,7 +109,7 @@ H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5_addr_decode(f, &p, &(mesg->addr));
+    H5F_addr_decode(f, &p, &(mesg->addr));
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -148,7 +148,7 @@ H5O__mdci_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
 
     /* encode */
     *p++ = H5O_MDCI_VERSION_0;
-    H5_addr_encode(f, &p, mesg->addr);
+    H5F_addr_encode(f, &p, mesg->addr);
     H5F_ENCODE_LENGTH(f, p, mesg->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

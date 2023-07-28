@@ -139,10 +139,10 @@ H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
 
 done:
     if (hdr && H5FA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, NULL, "unable to release fixed array header")
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, NULL, "unable to release fixed array header");
     if (!ret_value)
         if (fa && H5FA_close(fa) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CLOSEERROR, NULL, "unable to close fixed array")
+            HDONE_ERROR(H5E_FARRAY, H5E_CLOSEERROR, NULL, "unable to close fixed array");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__new() */
@@ -188,7 +188,7 @@ H5FA_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
 done:
     if (!ret_value)
         if (fa && H5FA_close(fa) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CLOSEERROR, NULL, "unable to close fixed array")
+            HDONE_ERROR(H5E_FARRAY, H5E_CLOSEERROR, NULL, "unable to close fixed array");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA_create() */
@@ -226,7 +226,7 @@ H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
 done:
     if (!ret_value)
         if (fa && H5FA_close(fa) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CLOSEERROR, NULL, "unable to close fixed array")
+            HDONE_ERROR(H5E_FARRAY, H5E_CLOSEERROR, NULL, "unable to close fixed array");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA_open() */
@@ -381,13 +381,13 @@ done:
     /* Check for header modified */
     if (hdr_dirty)
         if (H5FA__hdr_modified(hdr) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTMARKDIRTY, FAIL, "unable to mark fixed array header as modified")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTMARKDIRTY, FAIL, "unable to mark fixed array header as modified");
 
     /* Release resources */
     if (dblock && H5FA__dblock_unprotect(dblock, dblock_cache_flags) < 0)
-        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block")
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block");
     if (dblk_page && H5FA__dblk_page_unprotect(dblk_page, dblk_page_cache_flags) < 0)
-        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block page")
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block page");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA_set() */
@@ -450,7 +450,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "can't set element to class's fill value")
 
                 /* We've retrieved the value, leave now */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             }                             /* end if */
             else {                        /* get the page */
                 size_t  dblk_page_nelmts; /* # of elements in a data block page */
@@ -486,9 +486,9 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
 
 done:
     if (dblock && H5FA__dblock_unprotect(dblock, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block")
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block");
     if (dblk_page && H5FA__dblk_page_unprotect(dblk_page, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block page")
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array data block page");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA_get() */
@@ -634,7 +634,7 @@ H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
 done:
     /* Unprotect the header if an error occurred */
     if (hdr && H5FA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array header")
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA_delete() */

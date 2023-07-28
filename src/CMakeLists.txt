@@ -17,6 +17,7 @@ set (H5_SOURCES
 set (H5_HDRS
     ${HDF5_SRC_DIR}/hdf5.h
     ${HDF5_SRC_DIR}/H5api_adpt.h
+    ${HDF5_SRC_DIR}/H5encode.h
     ${HDF5_SRC_DIR}/H5public.h
     #${HDF5_SRC_DIR}/H5version.h
     #${HDF5_SRC_DIR}/H5overflow.h
@@ -78,8 +79,10 @@ IDE_GENERATED_PROPERTIES ("H5B2" "${H5B2_HDRS}" "${H5B2_SOURCES}" )
 set (H5C_SOURCES
     ${HDF5_SRC_DIR}/H5C.c
     ${HDF5_SRC_DIR}/H5Cdbg.c
+    ${HDF5_SRC_DIR}/H5Centry.c
     ${HDF5_SRC_DIR}/H5Cepoch.c
     ${HDF5_SRC_DIR}/H5Cimage.c
+    ${HDF5_SRC_DIR}/H5Cint.c
     ${HDF5_SRC_DIR}/H5Clog.c
     ${HDF5_SRC_DIR}/H5Clog_json.c
     ${HDF5_SRC_DIR}/H5Clog_trace.c
@@ -1409,17 +1412,7 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-# This cmake function requires that the non-default doxyfile settings are provided with set (DOXYGEN_xxx) commands
-# In addition the doxyfile aliases @INCLUDE option is not supported and would need to be provided in a set (DOXYGEN_ALIASES) command.
-#  doxygen_add_docs (hdf5lib_doc
-##      ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS} ${HDF5_DOXYGEN_DIR}/dox
-#      ${DOXYGEN_INPUT_DIRECTORY}
-#      ALL
-#      WORKING_DIRECTORY ${HDF5_SRC_DIR}
-#      COMMENT "Generating HDF5 library Source Documentation"
-#  )
-
-# This custom target and doxygen/configure work together
+  # This custom target and doxygen/configure work together
   # Replace variables inside @@ with the current values
   add_custom_target (hdf5lib_doc ALL
         COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile

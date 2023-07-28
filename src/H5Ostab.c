@@ -98,11 +98,11 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5_addr_decode(f, &p, &(stab->btree_addr));
+    H5F_addr_decode(f, &p, &(stab->btree_addr));
 
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    H5_addr_decode(f, &p, &(stab->heap_addr));
+    H5F_addr_decode(f, &p, &(stab->heap_addr));
 
     ret_value = stab;
 
@@ -135,8 +135,8 @@ H5O__stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     assert(stab);
 
     /* encode */
-    H5_addr_encode(f, &p, stab->btree_addr);
-    H5_addr_encode(f, &p, stab->heap_addr);
+    H5F_addr_encode(f, &p, stab->btree_addr);
+    H5F_addr_encode(f, &p, stab->heap_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__stab_encode() */
@@ -289,11 +289,11 @@ H5O__stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
         HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, NULL, "can't query local heap size")
 
     /* Set copy metadata tag */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Create components of symbol table message */
     if (H5G__stab_create_components(file_dst, stab_dst, size_hint) < 0)
-        HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTINIT, NULL, "can't create symbol table components")
+        HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTINIT, NULL, "can't create symbol table components");
 
     /* Reset metadata tag */
     H5_END_TAG
@@ -343,7 +343,7 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
 
     /* If we are performing a 'shallow hierarchy' copy, get out now */
     if (cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Set up B-tree iteration user data */
     udata.src_oloc      = src_oloc;

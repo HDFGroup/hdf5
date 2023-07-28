@@ -337,7 +337,7 @@ H5HF_hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
 done:
     if (hdr && H5AC_unprotect(f, H5AC_FHEAP_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_debug() */
@@ -389,11 +389,11 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
         if (sect_start < dblock_start)
             start = 0;
         else
-            H5_CHECKED_ASSIGN(start, size_t, (sect_start - dblock_start), hsize_t)
+            H5_CHECKED_ASSIGN(start, size_t, (sect_start - dblock_start), hsize_t);
         if (sect_end > dblock_end)
-            H5_CHECKED_ASSIGN(end, size_t, udata->dblock_size, hsize_t)
+            H5_CHECKED_ASSIGN(end, size_t, udata->dblock_size, hsize_t);
         else
-            H5_CHECKED_ASSIGN(end, size_t, ((sect_end - dblock_start) + 1), hsize_t)
+            H5_CHECKED_ASSIGN(end, size_t, ((sect_end - dblock_start) + 1), hsize_t);
 
         /* Calculate the length */
         len = end - start;
@@ -531,9 +531,9 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
 
 done:
     if (dblock && H5AC_unprotect(f, H5AC_FHEAP_DBLOCK, addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block");
     if (hdr && H5AC_unprotect(f, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header");
     H5MM_xfree(marker);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -695,9 +695,9 @@ H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
 
 done:
     if (iblock && H5HF__man_iblock_unprotect(iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block");
     if (hdr && H5AC_unprotect(f, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_iblock_debug() */
@@ -802,7 +802,7 @@ H5HF_sects_debug(H5F_t *f, haddr_t fh_addr, FILE *stream, int indent, int fwidth
 
 done:
     if (hdr && H5AC_unprotect(f, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_sects_debug() */

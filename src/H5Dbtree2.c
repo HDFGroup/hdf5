@@ -361,7 +361,7 @@ H5D__bt2_unfilt_encode(uint8_t *raw, const void *_record, void *_ctx)
     assert(ctx);
 
     /* Encode the record's fields */
-    H5_addr_encode_len(ctx->sizeof_addr, &raw, record->chunk_addr);
+    H5F_addr_encode_len(ctx->sizeof_addr, &raw, record->chunk_addr);
     /* (Don't encode the chunk size & filter mask for non-filtered B-tree records) */
     for (u = 0; u < ctx->ndims; u++)
         UINT64ENCODE(raw, record->scaled[u]);
@@ -393,7 +393,7 @@ H5D__bt2_unfilt_decode(const uint8_t *raw, void *_record, void *_ctx)
     assert(ctx);
 
     /* Decode the record's fields */
-    H5_addr_decode_len(ctx->sizeof_addr, &raw, &record->chunk_addr);
+    H5F_addr_decode_len(ctx->sizeof_addr, &raw, &record->chunk_addr);
     record->nbytes      = ctx->chunk_size;
     record->filter_mask = 0;
     for (u = 0; u < ctx->ndims; u++)
@@ -463,7 +463,7 @@ H5D__bt2_filt_encode(uint8_t *raw, const void *_record, void *_ctx)
     assert(0 != record->nbytes);
 
     /* Encode the record's fields */
-    H5_addr_encode_len(ctx->sizeof_addr, &raw, record->chunk_addr);
+    H5F_addr_encode_len(ctx->sizeof_addr, &raw, record->chunk_addr);
     UINT64ENCODE_VAR(raw, record->nbytes, ctx->chunk_size_len);
     UINT32ENCODE(raw, record->filter_mask);
     for (u = 0; u < ctx->ndims; u++)
@@ -497,7 +497,7 @@ H5D__bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
     assert(record);
 
     /* Decode the record's fields */
-    H5_addr_decode_len(ctx->sizeof_addr, &raw, &record->chunk_addr);
+    H5F_addr_decode_len(ctx->sizeof_addr, &raw, &record->chunk_addr);
     UINT64DECODE_VAR(raw, record->nbytes, ctx->chunk_size_len);
     UINT32DECODE(raw, record->filter_mask);
     for (u = 0; u < ctx->ndims; u++)
@@ -623,7 +623,7 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
 done:
     /* Release the object header from the cache */
     if (oh && H5O_unprotect(&oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree2_idx_depend() */
@@ -1269,7 +1269,7 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_id
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
 
     /* Set copied metadata tag */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Create v2 B-tree that describes the chunked dataset in the destination file */
     if (H5D__bt2_idx_create(idx_info_dst) < 0)
@@ -1360,7 +1360,7 @@ H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 done:
     /* Close v2 B-tree index */
     if (bt2_cdset && H5B2_close(bt2_cdset) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for tracking chunked dataset")
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for tracking chunked dataset");
     idx_info->storage->u.btree2.bt2 = NULL;
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -522,7 +522,7 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
 done:
     if (oh && H5O_unprotect(&loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_debug() */

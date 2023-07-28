@@ -413,7 +413,7 @@ H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t blk_end, hsize_
             HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, FAIL, "unable to mark EOA info as dirty")
 
         /* Indicate success */
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(TRUE);
     } /* end if */
 
 done:

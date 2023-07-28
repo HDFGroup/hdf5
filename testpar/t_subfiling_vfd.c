@@ -212,7 +212,7 @@ test_create_and_close(void)
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
@@ -343,7 +343,7 @@ test_config_file(void)
         config_buf = malloc((size_t)config_file_len + 1);
         VRFY(config_buf, "malloc succeeded");
 
-        VRFY((HDfread(config_buf, (size_t)config_file_len, 1, config_file) == 1), "HDfread succeeded");
+        VRFY((fread(config_buf, (size_t)config_file_len, 1, config_file) == 1), "fread succeeded");
         config_buf[config_file_len] = '\0';
 
         /* Check the stripe_size field in the configuration file */
@@ -421,7 +421,7 @@ test_config_file(void)
         free(subfile_name);
         free(config_buf);
 
-        VRFY((HDfclose(config_file) >= 0), "HDfclose on configuration file succeeded");
+        VRFY((fclose(config_file) >= 0), "fclose on configuration file succeeded");
     }
 
     mpi_code_g = MPI_Barrier(comm_g);
@@ -431,7 +431,7 @@ test_config_file(void)
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
@@ -572,7 +572,7 @@ test_stripe_sizes(void)
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
                 VRFY(subfile_ptr, "fopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
                 /* Check file size */
                 VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -618,7 +618,7 @@ test_stripe_sizes(void)
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
                 VRFY(subfile_ptr, "fopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
                 /* Check file size */
                 VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -644,7 +644,7 @@ test_stripe_sizes(void)
             {
                 H5Fdelete(SUBF_FILENAME, fapl_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
         }
@@ -738,7 +738,7 @@ test_stripe_sizes(void)
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
                 VRFY(subfile_ptr, "fopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
                 /* Check file size */
                 VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -795,7 +795,7 @@ test_stripe_sizes(void)
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
                 VRFY(subfile_ptr, "fopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
                 /* Check file size */
                 VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -822,7 +822,7 @@ test_stripe_sizes(void)
         {
             H5Fdelete(SUBF_FILENAME, fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         free(write_buf);
 
@@ -987,7 +987,7 @@ test_selection_strategies(void)
                         /* Ensure file exists */
                         subfile_ptr = fopen(tmp_filename, "r");
                         VRFY(subfile_ptr, "fopen on subfile succeeded");
-                        VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                        VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
                     }
 
                     /* Ensure no extra subfiles are present */
@@ -1146,7 +1146,7 @@ test_read_different_stripe_size(void)
             /* Ensure file exists */
             subfile_ptr = fopen(tmp_filename, "r");
             VRFY(subfile_ptr, "fopen on subfile succeeded");
-            VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
             /* Check file size */
             VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -1217,7 +1217,7 @@ test_read_different_stripe_size(void)
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
                 VRFY(subfile_ptr, "fopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
             }
             else {
                 /* Ensure file doesn't exist */
@@ -1234,7 +1234,7 @@ test_read_different_stripe_size(void)
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
@@ -1369,7 +1369,7 @@ test_subfiling_precreate_rank_0(void)
             /* Ensure file exists */
             subfile_ptr = fopen(tmp_filename, "r");
             VRFY(subfile_ptr, "fopen on subfile succeeded");
-            VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
             /* Check file size */
             VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -1436,7 +1436,7 @@ test_subfiling_precreate_rank_0(void)
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
@@ -1574,7 +1574,7 @@ test_subfiling_write_many_read_one(void)
         {
             H5Fdelete(SUBF_FILENAME, fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
     }
@@ -1760,7 +1760,7 @@ test_subfiling_write_many_read_few(void)
         {
             H5Fdelete(SUBF_FILENAME, fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
     }
@@ -1831,7 +1831,7 @@ test_subfiling_h5fuse(void)
 
         h5fuse_script = fopen("h5fuse.sh", "r");
         if (h5fuse_script)
-            HDfclose(h5fuse_script);
+            fclose(h5fuse_script);
         else
             skip_test = 1;
     }
@@ -1924,8 +1924,8 @@ test_subfiling_h5fuse(void)
         pid_t tmppid;
         int   status;
 
-        pid = HDfork();
-        VRFY(pid >= 0, "HDfork succeeded");
+        pid = fork();
+        VRFY(pid >= 0, "fork succeeded");
 
         if (pid == 0) {
             char *tmp_filename;
@@ -1947,11 +1947,11 @@ test_subfiling_h5fuse(void)
             args[6] = NULL;
 
             /* Call h5fuse script from MPI rank 0 */
-            HDexecvp("env", args);
+            execvp("env", args);
         }
         else {
-            tmppid = HDwaitpid(pid, &status, 0);
-            VRFY(tmppid >= 0, "HDwaitpid succeeded");
+            tmppid = waitpid(pid, &status, 0);
+            VRFY(tmppid >= 0, "waitpid succeeded");
 
             if (WIFEXITED(status)) {
                 int ret;
@@ -2073,13 +2073,13 @@ parse_subfiling_env_vars(void)
     char *env_value;
 
     if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
-        stripe_size_g = HDstrtoll(env_value, NULL, 0);
+        stripe_size_g = strtoll(env_value, NULL, 0);
         if ((ERANGE == errno) || (stripe_size_g <= 0))
             stripe_size_g = -1;
     }
 
     if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
-        ioc_per_node_g = HDstrtol(env_value, NULL, 0);
+        ioc_per_node_g = strtol(env_value, NULL, 0);
         if ((ERANGE == errno) || (ioc_per_node_g <= 0))
             ioc_per_node_g = -1;
         else if (ioc_per_node_g * num_nodes_g > mpi_size)

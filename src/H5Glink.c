@@ -390,18 +390,18 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type, H5_iter_orde
     /* Pick appropriate sorting routine */
     if (idx_type == H5_INDEX_NAME) {
         if (order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
         else
             assert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
         assert(idx_type == H5_INDEX_CRT_ORDER);
         if (order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
         else
             assert(order == H5_ITER_NATIVE);
     } /* end else */
@@ -439,7 +439,7 @@ H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip, hsize_t *l
         *last_lnk += skip;
 
     /* Iterate over link messages */
-    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t)
+    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t);
     for (; u < ltable->nlinks && !ret_value; u++) {
         /* Make the callback */
         ret_value = (op)(&(ltable->lnks[u]), op_data);

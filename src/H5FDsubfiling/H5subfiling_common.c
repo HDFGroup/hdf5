@@ -856,7 +856,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
 
             errno = 0;
 
-            stripe_size = HDstrtoll(env_value, NULL, 0);
+            stripe_size = strtoll(env_value, NULL, 0);
             if (ERANGE == errno)
                 H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
                                             "invalid stripe size setting for " H5FD_SUBFILING_STRIPE_SIZE);
@@ -899,7 +899,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
     *context_id_out = context_id;
 
 done:
-    if (config_file && (EOF == HDfclose(config_file)))
+    if (config_file && (EOF == fclose(config_file)))
         H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
                                 "couldn't close subfiling configuration file");
 
@@ -983,7 +983,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                 /* Check for an IOC-per-node value set in the environment */
                 if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
                     errno          = 0;
-                    ioc_select_val = HDstrtol(env_value, NULL, 0);
+                    ioc_select_val = strtol(env_value, NULL, 0);
                     if ((ERANGE == errno)) {
                         printf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
                         ioc_select_val = 1;
@@ -1010,7 +1010,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
             ioc_select_val = 1;
             if (ioc_sel_str) {
                 errno          = 0;
-                ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
+                ioc_select_val = strtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
                     printf("invalid IOC selection strategy string '%s' for strategy "
                            "SELECT_IOC_EVERY_NTH_RANK; defaulting to SELECT_IOC_ONE_PER_NODE\n",
@@ -1046,7 +1046,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
             ioc_select_val = 1;
             if (ioc_sel_str) {
                 errno          = 0;
-                ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
+                ioc_select_val = strtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
                     printf("invalid IOC selection strategy string '%s' for strategy SELECT_IOC_TOTAL; "
                            "defaulting to SELECT_IOC_ONE_PER_NODE\n",
@@ -1209,7 +1209,7 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
             *opt_value++ = '\0';
 
             errno       = 0;
-            check_value = HDstrtol(env_value, NULL, 0);
+            check_value = strtol(env_value, NULL, 0);
 
             if (errno == ERANGE)
                 H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
@@ -1354,7 +1354,7 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't gather application topology info");
 
     /* Sort the list according to the node local lead rank values */
-    HDqsort(app_layout->layout, (size_t)app_layout->world_size, sizeof(layout_t), compare_layout_nodelocal);
+    qsort(app_layout->layout, (size_t)app_layout->world_size, sizeof(layout_t), compare_layout_nodelocal);
 
     /*
      * Count the number of nodes by checking how many
@@ -2297,31 +2297,31 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
 
         /* Write the subfiling stripe size to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "stripe_size=%" PRId64 "\n", sf_context->sf_stripe_size);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write the number of I/O concentrators to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "aggregator_count=%d\n", sf_context->topology->n_io_concentrators);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write the number of subfiles to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "subfile_count=%d\n", n_subfiles);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write the base HDF5 filename to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "hdf5_file=%s\n", sf_context->h5_filename);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write the optional subfile directory prefix to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "subfile_dir=%s\n", subfile_dir);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
@@ -2331,7 +2331,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
             HDsnprintf(line_buf, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
                        sf_context->h5_file_id, num_digits, k + 1, n_subfiles);
 
-            if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+            if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
                 H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                             "failed to write to subfiling configuration file");
         }
@@ -2339,7 +2339,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
 
 done:
     if (config_file) {
-        if (EOF == HDfclose(config_file))
+        if (EOF == fclose(config_file))
             H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
                                     "couldn't close subfiling configuration file");
     }
@@ -2416,7 +2416,7 @@ open_config_file(const char *base_filename, const char *config_dir, uint64_t fil
 
 done:
     if (ret_value < 0) {
-        if (config_file && (EOF == HDfclose(config_file)))
+        if (config_file && (EOF == fclose(config_file)))
             H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
                                     "couldn't close subfiling configuration file");
     }
@@ -2464,7 +2464,7 @@ H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size, int64
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for reading from subfiling configuration file");
 
-    if (HDfread(config_buf, (size_t)config_file_len, 1, config_file) != 1)
+    if (fread(config_buf, (size_t)config_file_len, 1, config_file) != 1)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL,
                                     "couldn't read from subfiling configuration file");
 
@@ -2773,7 +2773,7 @@ H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm)
 
         H5_subfiling_log(sf_context->sf_context_id, "\n-- LOGGING FINISH - %s", asctime(tm));
 
-        HDfclose(sf_context->sf_logfile);
+        fclose(sf_context->sf_logfile);
         sf_context->sf_logfile = NULL;
     }
 #endif

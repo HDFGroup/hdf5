@@ -207,7 +207,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
 done:
     if (ret_value < 0)
         if (memb_dt && H5T_close(memb_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close datatype")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close datatype");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_member_type() */
@@ -496,7 +496,7 @@ H5T__pack(const H5T_t *dt)
     if (H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
         /* If datatype has been packed, skip packing it and indicate success */
         if (TRUE == H5T__is_packed(dt))
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
 
         /* Check for packing unmodifiable datatype */
         if (H5T_STATE_TRANSIENT != dt->shared->state)

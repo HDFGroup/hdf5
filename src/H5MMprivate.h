@@ -26,7 +26,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-#define H5MM_free(Z) HDfree(Z)
+#define H5MM_free(Z) free(Z)
 
 /*
  * Library prototypes...

@@ -77,7 +77,7 @@ H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr, H5C_auto_size_ctl_t *co
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
     if (config_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad config_ptr on entry.")
@@ -112,7 +112,7 @@ H5C_get_cache_size(const H5C_t *cache_ptr, size_t *max_size_ptr, size_t *min_cle
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
 
     if (max_size_ptr != NULL)
@@ -148,7 +148,7 @@ H5C_get_cache_flush_in_progress(const H5C_t *cache_ptr, hbool_t *flush_in_progre
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
 
     if (flush_in_progress_ptr != NULL)
@@ -178,7 +178,7 @@ H5C_get_cache_hit_rate(const H5C_t *cache_ptr, double *hit_rate_ptr)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
     if (hit_rate_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad hit_rate_ptr on entry.")
@@ -196,7 +196,6 @@ done:
 } /* H5C_get_cache_hit_rate() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_entry_status
  *
  * Purpose:     This function is used to determine whether the cache
@@ -229,21 +228,15 @@ H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in
     /* Sanity checks */
     assert(f);
     assert(f->shared);
-
     cache_ptr = f->shared->cache;
-
     assert(cache_ptr != NULL);
-    assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     assert(H5_addr_defined(addr));
     assert(in_cache_ptr != NULL);
 
-    /* this test duplicates two of the above asserts, but we need an
-     * invocation of HGOTO_ERROR to keep the compiler happy.
-     */
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
 
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
 
     if (entry_ptr == NULL) {
         /* the entry doesn't exist in the cache -- report this
@@ -292,7 +285,7 @@ H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
 
     if (evictions_enabled_ptr == NULL)
@@ -323,7 +316,6 @@ H5C_get_aux_ptr(const H5C_t *cache_ptr)
 
     /* Check arguments */
     assert(cache_ptr);
-    assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     FUNC_LEAVE_NOAPI(cache_ptr->aux_ptr)
 } /* H5C_get_aux_ptr() */
@@ -354,11 +346,10 @@ H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring)
     assert(f->shared);
     cache_ptr = f->shared->cache;
     assert(cache_ptr);
-    assert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     assert(H5_addr_defined(addr));
 
     /* Locate the entry at the address */
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
     if (entry_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't find entry in index")
 
@@ -385,7 +376,7 @@ H5C_get_mdc_image_info(const H5C_t *cache_ptr, haddr_t *image_addr, hsize_t *ima
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry")
 
     if (image_addr)

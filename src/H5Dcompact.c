@@ -141,7 +141,7 @@ H5D__compact_fill(const H5D_t *dset)
 done:
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__compact_fill() */
@@ -628,13 +628,13 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
 
 done:
     if (buf_sid > 0 && H5I_dec_ref(buf_sid) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID");
     if (tid_src > 0 && H5I_dec_ref(tid_src) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (tid_dst > 0 && H5I_dec_ref(tid_dst) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (tid_mem > 0 && H5I_dec_ref(tid_mem) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID");
     if (buf)
         buf = H5FL_BLK_FREE(type_conv, buf);
     if (reclaim_buf)

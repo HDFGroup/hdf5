@@ -1518,7 +1518,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         n_subfiles = (int32_t)read_n_subfiles;
 
         /* Delete the Subfiling configuration file */
-        if (EOF == HDfclose(config_file)) {
+        if (EOF == fclose(config_file)) {
             config_file = NULL;
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
                                         "can't close subfiling config file");
@@ -1555,7 +1555,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
 done:
     if (config_file)
-        if (EOF == HDfclose(config_file))
+        if (EOF == fclose(config_file))
             H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close subfiling config file");
 
     /* Set up a barrier (don't want processes to run ahead of the delete) */

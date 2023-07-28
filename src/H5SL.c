@@ -218,7 +218,7 @@
  * head node if necessary.  PREV is the previous node of the height that X is to
  * grow to. */
 #define H5SL_PROMOTE(SLIST, X, PREV, ERR)                                                                    \
-    {                                                                                                        \
+    do {                                                                                                     \
         size_t _lvl = X->level;                                                                              \
                                                                                                              \
         H5SL_GROW(X, _lvl, ERR);                                                                             \
@@ -235,7 +235,7 @@
             X->forward[_lvl + 1] = PREV->forward[_lvl + 1];                                                  \
         }                                                                                                    \
         PREV->forward[_lvl + 1] = X;                                                                         \
-    }
+    } while (0)
 
 /* Macro used to reduce the level of a node by 1.  Does not update the head node
  * "current level".  PREV is the previous node of the current height of X. */
@@ -293,7 +293,7 @@
             /* Promote the middle node if necessary */                                                       \
             if (_count == 3) {                                                                               \
                 assert(X == _last->forward[_i]->forward[_i]);                                                \
-                H5SL_PROMOTE(SLIST, X, _last, NULL)                                                          \
+                H5SL_PROMOTE(SLIST, X, _last, NULL);                                                         \
             }                                                                                                \
                                                                                                              \
             /* Prepare to drop down */                                                                       \
@@ -398,7 +398,7 @@
                     /* If there are 2 or more nodes, promote the first */                                    \
                     if (_next->forward[_i]->forward[_i] != _llast) {                                         \
                         X = _next->forward[_i];                                                              \
-                        H5SL_PROMOTE(SLIST, X, _last, NULL)                                                  \
+                        H5SL_PROMOTE(SLIST, X, _last, NULL);                                                 \
                     }                                                                                        \
                     else if (!_head->forward[_i + 1]) {                                                      \
                         /* shrink the header */                                                              \
@@ -424,7 +424,7 @@
                                                                                                              \
                     /* If there are 2 or more nodes, promote the last */                                     \
                     if (_count >= 2)                                                                         \
-                        H5SL_PROMOTE(SLIST, X, _llast, NULL)                                                 \
+                        H5SL_PROMOTE(SLIST, X, _llast, NULL);                                                \
                     else if (!_head->forward[_i + 1]) {                                                      \
                         /* shrink the header */                                                              \
                         assert(_i == SLIST->curr_level - 1);                                                 \

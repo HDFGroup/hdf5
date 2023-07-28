@@ -108,7 +108,7 @@ H5FA__hdr_alloc(H5F_t *f)
 done:
     if (!ret_value)
         if (hdr && H5FA__hdr_dest(hdr) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array header")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array header");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__hdr_alloc() */
 
@@ -227,16 +227,16 @@ done:
             if (inserted)
                 if (H5AC_remove_entry(hdr) < 0)
                     HDONE_ERROR(H5E_FARRAY, H5E_CANTREMOVE, HADDR_UNDEF,
-                                "unable to remove fixed array header from cache")
+                                "unable to remove fixed array header from cache");
 
             /* Release header's disk space */
             if (H5_addr_defined(hdr->addr) &&
                 H5MF_xfree(f, H5FD_MEM_FARRAY_HDR, hdr->addr, (hsize_t)hdr->size) < 0)
-                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to free Fixed Array header")
+                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to free Fixed Array header");
 
             /* Destroy header */
             if (H5FA__hdr_dest(hdr) < 0)
-                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy Fixed Array header")
+                HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy Fixed Array header");
         }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -518,7 +518,7 @@ H5FA__hdr_delete(H5FA_hdr_t *hdr)
 done:
     /* Unprotect the header, deleting it if an error hasn't occurred */
     if (H5AC_unprotect(hdr->f, H5AC_FARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
-        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array header")
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release fixed array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__hdr_delete() */

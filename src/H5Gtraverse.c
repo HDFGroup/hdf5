@@ -238,10 +238,10 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
 done:
     /* Close location given to callback. */
     if (cur_grp > 0 && H5I_dec_ref(cur_grp) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID for current location")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID for current location");
 
     if (ret_value < 0 && cb_return > 0 && H5I_dec_ref(cb_return) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__traverse_ud() */
@@ -595,7 +595,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
             if ((op)(&grp_loc, comp, cb_lnk, cb_loc, op_data, &own_loc) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CALLBACK, FAIL, "traversal operator failed")
 
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
 
         /* Handle lookup failures now */
@@ -757,11 +757,11 @@ done:
     /* If there's valid information in the link, reset it */
     if (link_valid)
         if (H5O_msg_reset(H5O_LINK_ID, &lnk) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link message")
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link message");
 
     /* Release temporary component buffer */
     if (wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__traverse_real() */
@@ -809,11 +809,11 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
      * shouldn't be during the traversal. Note that for best tagging assertion
      * coverage, setting H5C_DO_TAGGING_SANITY_CHECKS is advised.
      */
-    H5_BEGIN_TAG(H5AC__INVALID_TAG);
+    H5_BEGIN_TAG(H5AC__INVALID_TAG)
 
     /* Go perform "real" traversal */
     if (H5G__traverse_real(loc, name, target, op, op_data) < 0)
-        HGOTO_ERROR_TAG(H5E_SYM, H5E_NOTFOUND, FAIL, "internal path traversal failed")
+        HGOTO_ERROR_TAG(H5E_SYM, H5E_NOTFOUND, FAIL, "internal path traversal failed");
 
     /* Reset tag after traversal */
     H5_END_TAG

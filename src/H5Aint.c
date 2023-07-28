@@ -381,7 +381,7 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type, cons
 done:
     /* Cleanup on failure */
     if (NULL == ret_value && attr && H5A__close(attr))
-        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5A__create() */
@@ -433,12 +433,12 @@ H5A__create_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr
 done:
     /* Release resources */
     if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location");
 
     /* Cleanup on failure */
     if (ret_value == NULL)
         if (attr && H5A__close(attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__create_by_name() */
@@ -532,7 +532,7 @@ done:
     /* Cleanup on failure */
     if (ret_value == NULL)
         if (attr && H5A__close(attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__open() */
@@ -587,12 +587,12 @@ H5A__open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type
 done:
     /* Release resources */
     if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location");
 
     /* Cleanup on failure */
     if (ret_value == NULL)
         if (attr && H5A__close(attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__open_by_idx() */
@@ -647,12 +647,12 @@ H5A__open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_n
 done:
     /* Release resources */
     if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't free location");
 
     /* Cleanup on failure */
     if (ret_value == NULL)
         if (attr && H5A__close(attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__open_by_name() */
@@ -769,9 +769,9 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
 done:
     /* Release resources */
     if (src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
     if (dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
     if (tconv_buf)
         tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if (bkg_buf)
@@ -907,9 +907,9 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
 done:
     /* Release resources */
     if (src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
     if (dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
     if (tconv_buf)
         tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if (bkg_buf)
@@ -996,7 +996,7 @@ H5A_get_space(H5A_t *attr)
 
 done:
     if (H5I_INVALID_HID == ret_value && ds && H5S_close(ds) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataspace")
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_space() */
@@ -1057,7 +1057,7 @@ H5A__get_type(H5A_t *attr)
 done:
     if (H5I_INVALID_HID == ret_value)
         if (dt && H5T_close(dt) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_type() */
@@ -1193,7 +1193,7 @@ H5A__copy(H5A_t *_new_attr, const H5A_t *old_attr)
 done:
     if (ret_value == NULL)
         if (allocated_attr && new_attr && H5A__close(new_attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__copy() */
@@ -1229,12 +1229,12 @@ H5A__shared_free(H5A_t *attr)
     }
     if (attr->shared->dt) {
         if (H5T_close_real(attr->shared->dt) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info");
         attr->shared->dt = NULL;
     }
     if (attr->shared->ds) {
         if (H5S_close(attr->shared->ds) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info");
         attr->shared->ds = NULL;
     }
     if (attr->shared->data)
@@ -1445,7 +1445,7 @@ H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name, 
 done:
     /* Release resources */
     if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__exists_by_name() */
@@ -1675,7 +1675,7 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
 done:
     /* Release resources */
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__dense_build_table() */
@@ -1808,18 +1808,18 @@ H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type, H5_iter_orde
     /* Pick appropriate comparison routine */
     if (idx_type == H5_INDEX_NAME) {
         if (order == H5_ITER_INC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_inc);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_dec);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_dec);
         else
             assert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
         assert(idx_type == H5_INDEX_CRT_ORDER);
         if (order == H5_ITER_INC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_inc);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_dec);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_dec);
         else
             assert(order == H5_ITER_NATIVE);
     } /* end else */
@@ -1855,7 +1855,7 @@ H5A__attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip, hsize_t *l
         *last_attr = skip;
 
     /* Iterate over attribute messages */
-    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t)
+    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t);
     for (; u < atable->nattrs && !ret_value; u++) {
         /* Check which type of callback to make */
         switch (attr_op->op_type) {
@@ -1993,7 +1993,7 @@ H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo)
 done:
     /* Release resources */
     if (bt2_name && H5B2_close(bt2_name) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5A__get_ainfo() */
@@ -2313,19 +2313,19 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
 
 done:
     if (buf_sid > 0 && H5I_dec_ref(buf_sid) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID");
     if (tid_src > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
         if (NULL == H5I_remove(tid_src))
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID");
     if (tid_dst > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
         if (NULL == H5I_remove(tid_dst))
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID");
     if (tid_mem > 0)
         /* Decrement the memory datatype ID, it's transient */
         if (H5I_dec_ref(tid_mem) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID");
     if (buf)
         buf = H5FL_BLK_FREE(attr_buf, buf);
     if (reclaim_buf)
@@ -2335,7 +2335,7 @@ done:
 
     /* Release destination attribute information on failure */
     if (!ret_value && attr_dst && H5A__close(attr_dst) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__attr_copy_file() */
@@ -2468,18 +2468,18 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset attribute sharing")
 
     /* Set COPIED tag for destination object's metadata */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Insert attribute into dense storage */
     if (H5A__dense_insert(udata->file, udata->ainfo, attr_dst) < 0)
-        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage");
 
     /* Reset metadata tag */
     H5_END_TAG
 
 done:
     if (attr_dst && H5A__close(attr_dst) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close destination attribute")
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close destination attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__dense_post_copy_file_cb() */
@@ -2566,7 +2566,7 @@ H5A__rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_na
 done:
     /* Release resources */
     if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__rename_by_name() */
@@ -2742,7 +2742,7 @@ H5A__delete_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr
 done:
     /* Release resources */
     if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__delete_by_name() */
@@ -2785,7 +2785,7 @@ H5A__delete_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_ty
 done:
     /* Release resources */
     if (loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__delete_by_idx() */

@@ -379,10 +379,10 @@ H5Z__get_token(H5Z_token *current)
     current->tok_begin = current->tok_end;
 
     while (current->tok_begin[0] != '\0') {
-        if (HDisspace(current->tok_begin[0])) {
+        if (isspace(current->tok_begin[0])) {
             /* ignore whitespace */
         }
-        else if (HDisdigit(current->tok_begin[0]) || current->tok_begin[0] == '.') {
+        else if (isdigit(current->tok_begin[0]) || current->tok_begin[0] == '.') {
             current->tok_end = current->tok_begin;
 
             /*
@@ -394,7 +394,7 @@ H5Z__get_token(H5Z_token *current)
                 /* is number */
                 current->tok_type = H5Z_XFORM_INTEGER;
 
-                while (HDisdigit(current->tok_end[0]))
+                while (isdigit(current->tok_end[0]))
                     ++current->tok_end;
             }
 
@@ -411,7 +411,7 @@ H5Z__get_token(H5Z_token *current)
                 if (current->tok_end[0] == '.')
                     do {
                         ++current->tok_end;
-                    } while (HDisdigit(current->tok_end[0]));
+                    } while (isdigit(current->tok_end[0]));
 
                 if (current->tok_end[0] == 'e' || current->tok_end[0] == 'E') {
                     ++current->tok_end;
@@ -419,18 +419,18 @@ H5Z__get_token(H5Z_token *current)
                     if (current->tok_end[0] == '-' || current->tok_end[0] == '+')
                         ++current->tok_end;
 
-                    if (!HDisdigit(current->tok_end[0])) {
+                    if (!isdigit(current->tok_end[0])) {
                         current->tok_type = H5Z_XFORM_ERROR;
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current,
                                     "Invalidly formatted floating point number")
                     }
 
-                    while (HDisdigit(current->tok_end[0]))
+                    while (isdigit(current->tok_end[0]))
                         ++current->tok_end;
                 }
 
                 /* Check that this is a properly formatted numerical value */
-                if (HDisalpha(current->tok_end[0]) || current->tok_end[0] == '.') {
+                if (isalpha(current->tok_end[0]) || current->tok_end[0] == '.') {
                     current->tok_type = H5Z_XFORM_ERROR;
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current, "Invalidly formatted floating point number")
                 }
@@ -438,12 +438,12 @@ H5Z__get_token(H5Z_token *current)
 
             break;
         }
-        else if (HDisalpha(current->tok_begin[0])) {
+        else if (isalpha(current->tok_begin[0])) {
             /* is symbol */
             current->tok_type = H5Z_XFORM_SYMBOL;
             current->tok_end  = current->tok_begin;
 
-            while (HDisalnum(current->tok_end[0]))
+            while (isalnum(current->tok_end[0]))
                 ++current->tok_end;
 
             break;
@@ -613,10 +613,10 @@ H5Z__parse_expression(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
             case H5Z_XFORM_RPAREN:
                 H5Z__unget_token(current);
-                HGOTO_DONE(expr)
+                HGOTO_DONE(expr);
 
             case H5Z_XFORM_END:
-                HGOTO_DONE(expr)
+                HGOTO_DONE(expr);
 
             case H5Z_XFORM_ERROR:
             case H5Z_XFORM_INTEGER:
@@ -701,10 +701,10 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
             case H5Z_XFORM_RPAREN:
                 H5Z__unget_token(current);
-                HGOTO_DONE(term)
+                HGOTO_DONE(term);
 
             case H5Z_XFORM_END:
-                HGOTO_DONE(term)
+                HGOTO_DONE(term);
 
             case H5Z_XFORM_INTEGER:
             case H5Z_XFORM_FLOAT:
@@ -713,7 +713,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
             case H5Z_XFORM_MINUS:
             case H5Z_XFORM_LPAREN:
                 H5Z__unget_token(current);
-                HGOTO_DONE(term)
+                HGOTO_DONE(term);
 
             case H5Z_XFORM_ERROR:
             default:
@@ -871,7 +871,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
     ret_value = factor;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -1130,46 +1130,46 @@ H5Z__xform_find_type(const H5T_t *type)
 
     /* Check for SHORT type */
     if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SHORT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_SHORT)
+        HGOTO_DONE(H5T_NATIVE_SHORT);
     /* Check for INT type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_INT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_INT)
+        HGOTO_DONE(H5T_NATIVE_INT);
     /* Check for LONG type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LONG)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_LONG)
+        HGOTO_DONE(H5T_NATIVE_LONG);
     /* Check for LONGLONG type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LLONG)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_LLONG)
+        HGOTO_DONE(H5T_NATIVE_LLONG);
     /* Check for UCHAR type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_UCHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_UCHAR)
+        HGOTO_DONE(H5T_NATIVE_UCHAR);
     /* Check for CHAR type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_CHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_CHAR)
+        HGOTO_DONE(H5T_NATIVE_CHAR);
     /* Check for SCHAR type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_SCHAR)
+        HGOTO_DONE(H5T_NATIVE_SCHAR);
     /* Check for USHORT type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_USHORT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_USHORT)
+        HGOTO_DONE(H5T_NATIVE_USHORT);
     /* Check for UINT type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_UINT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_UINT)
+        HGOTO_DONE(H5T_NATIVE_UINT);
     /* Check for ULONG type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_ULONG)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_ULONG)
+        HGOTO_DONE(H5T_NATIVE_ULONG);
     /* Check for ULONGLONG type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_ULLONG)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_ULLONG)
+        HGOTO_DONE(H5T_NATIVE_ULLONG);
     /* Check for FLOAT type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_FLOAT)
+        HGOTO_DONE(H5T_NATIVE_FLOAT);
     /* Check for DOUBLE type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_DOUBLE)
+        HGOTO_DONE(H5T_NATIVE_DOUBLE);
     /* Check for LONGDOUBLE type */
     else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE)) && 0 == H5T_cmp(type, tmp, FALSE))
-        HGOTO_DONE(H5T_NATIVE_LDOUBLE)
+        HGOTO_DONE(H5T_NATIVE_LDOUBLE);
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type")
 
@@ -1347,7 +1347,7 @@ H5Z__xform_reduce_tree(H5Z_node *tree)
         }
     }
 
-    FUNC_LEAVE_NOAPI_VOID;
+    FUNC_LEAVE_NOAPI_VOID
 }
 
 /*-------------------------------------------------------------------------
@@ -1377,7 +1377,7 @@ H5Z__do_op(H5Z_node *tree)
     else if (tree->type == H5Z_XFORM_MINUS)
         H5Z_XFORM_DO_OP6(-)
 
-    FUNC_LEAVE_NOAPI_VOID;
+    FUNC_LEAVE_NOAPI_VOID
 }
 
 /*-------------------------------------------------------------------------
@@ -1420,11 +1420,11 @@ H5Z_xform_create(const char *expr)
      * A more sophisticated check is needed to support scientific notation.
      */
     for (i = 0; i < HDstrlen(expr); i++) {
-        if (HDisalpha(expr[i])) {
+        if (isalpha(expr[i])) {
             if ((i > 0) && (i < (HDstrlen(expr) - 1))) {
                 if (((expr[i] == 'E') || (expr[i] == 'e')) &&
-                    (HDisdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
-                    (HDisdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
+                    (isdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
+                    (isdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
                     continue;
             } /* end if */
 
@@ -1558,7 +1558,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
         /* Find the number of times "x" is used in this equation, and allocate room for storing that many
          * points */
         for (i = 0; i < HDstrlen(new_data_xform_prop->xform_exp); i++)
-            if (HDisalpha(new_data_xform_prop->xform_exp[i]))
+            if (isalpha(new_data_xform_prop->xform_exp[i]))
                 count++;
 
         if (count > 0)

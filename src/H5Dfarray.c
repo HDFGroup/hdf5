@@ -319,7 +319,7 @@ H5D__farray_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
     while (nelmts) {
         /* Encode element */
         /* (advances 'raw' pointer) */
-        H5_addr_encode_len(ctx->file_addr_len, (uint8_t **)&raw, *elmt);
+        H5F_addr_encode_len(ctx->file_addr_len, (uint8_t **)&raw, *elmt);
 
         /* Advance native element pointer */
         elmt++;
@@ -359,7 +359,7 @@ H5D__farray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
     while (nelmts) {
         /* Decode element */
         /* (advances 'raw' pointer) */
-        H5_addr_decode_len(ctx->file_addr_len, &raw, elmt);
+        H5F_addr_decode_len(ctx->file_addr_len, &raw, elmt);
 
         /* Advance native element pointer */
         elmt++;
@@ -464,7 +464,7 @@ done:
         /* Close object header */
         if (obj_opened)
             if (H5O_close(&obj_loc, NULL) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -554,7 +554,7 @@ H5D__farray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx
     while (nelmts) {
         /* Encode element */
         /* (advances 'raw' pointer) */
-        H5_addr_encode_len(ctx->file_addr_len, &raw, elmt->addr);
+        H5F_addr_encode_len(ctx->file_addr_len, &raw, elmt->addr);
         UINT64ENCODE_VAR(raw, elmt->nbytes, ctx->chunk_size_len);
         UINT32ENCODE(raw, elmt->filter_mask);
 
@@ -597,7 +597,7 @@ H5D__farray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx
     while (nelmts) {
         /* Decode element */
         /* (advances 'raw' pointer) */
-        H5_addr_decode_len(ctx->file_addr_len, &raw, &elmt->addr);
+        H5F_addr_decode_len(ctx->file_addr_len, &raw, &elmt->addr);
         UINT64DECODE_VAR(raw, elmt->nbytes, ctx->chunk_size_len);
         UINT32DECODE(raw, elmt->filter_mask);
 
@@ -696,7 +696,7 @@ H5D__farray_idx_depend(const H5D_chk_idx_info_t *idx_info)
 done:
     /* Release the object header from the cache */
     if (oh && H5O_unprotect(&oloc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__farray_idx_depend() */
@@ -1358,7 +1358,7 @@ H5D__farray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array")
 
     /* Set copied metadata tag */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Create the fixed array that describes chunked storage in the dest. file */
     if (H5D__farray_idx_create(idx_info_dst) < 0)

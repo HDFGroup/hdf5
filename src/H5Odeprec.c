@@ -33,6 +33,7 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5Opkg.h"      /* Object headers                           */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
@@ -90,14 +91,14 @@ static herr_t H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_p
 static herr_t
 H5O__reset_info1(H5O_info1_t *oinfo)
 {
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset the passed-in info struct */
     memset(oinfo, 0, sizeof(H5O_info1_t));
     oinfo->type = H5O_TYPE_UNKNOWN;
     oinfo->addr = HADDR_UNDEF;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__reset_info1() */
 
 /*-------------------------------------------------------------------------
@@ -197,7 +198,7 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     ret_value = (shim_data->real_op)(obj_id, name, &oinfo, shim_data->real_op_data);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__iterate1_adapter() */
 
 /*-------------------------------------------------------------------------

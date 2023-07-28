@@ -1087,7 +1087,8 @@ test_H5FDread_without_eoa_set_fails(void)
      * TEARDOWN *
      ************/
 
-    FAIL_IF(FAIL == H5FDclose(file_shakespeare)) file_shakespeare = NULL;
+    FAIL_IF(FAIL == H5FDclose(file_shakespeare))
+    file_shakespeare = NULL;
 
     FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;
@@ -1396,7 +1397,8 @@ test_noops_and_autofails(void)
      * TEARDOWN *
      ************/
 
-    FAIL_IF(FAIL == H5FDclose(file)) file = NULL;
+    FAIL_IF(FAIL == H5FDclose(file))
+    file = NULL;
 
     FAIL_IF(FAIL == H5Pclose(fapl_id))
     fapl_id = -1;

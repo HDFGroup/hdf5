@@ -43,7 +43,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5B.c H5Bcache.c H5Bdbg.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2hdr.c H5B2int.c H5B2internal.c \
         H5B2leaf.c H5B2stat.c H5B2test.c \
-        H5C.c H5Cdbg.c H5Cepoch.c H5Cimage.c H5Clog.c H5Clog_json.c H5Clog_trace.c \
+        H5C.c H5Cdbg.c H5Centry.c H5Cepoch.c H5Cimage.c H5Cint.c \
+        H5Clog.c H5Clog_json.c H5Clog_trace.c \
         H5Cprefetched.c H5Cquery.c H5Ctag.c H5Ctest.c \
         H5CS.c \
         H5CX.c \

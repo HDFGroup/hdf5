@@ -449,7 +449,7 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             /* Encode chunk dims */
             HDcompile_assert(sizeof(uint32_t) == sizeof(layout->u.chunk.dim[0]));
             for (u = 0; u < (size_t)layout->u.chunk.ndims; u++) {
-                UINT32ENCODE(*pp, layout->u.chunk.dim[u])
+                UINT32ENCODE(*pp, layout->u.chunk.dim[u]);
                 *size += sizeof(uint32_t);
             } /* end for */
         }     /* end if */
@@ -457,7 +457,7 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             uint64_t nentries = (uint64_t)layout->storage.u.virt.list_nused;
 
             /* Encode number of entries */
-            UINT64ENCODE(*pp, nentries)
+            UINT64ENCODE(*pp, nentries);
             *size += (size_t)8;
 
             /* Iterate over entries */
@@ -599,7 +599,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                 /* Set rank & dimensions */
                 tmp_layout.u.chunk.ndims = (unsigned)ndims;
                 for (u = 0; u < ndims; u++)
-                    UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u])
+                    UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u]);
 
                 /* Point at the newly set up struct */
                 layout = &tmp_layout;
@@ -610,7 +610,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
             uint64_t nentries; /* Number of VDS mappings */
 
             /* Decode number of entries */
-            UINT64DECODE(*pp, nentries)
+            UINT64DECODE(*pp, nentries);
 
             if (nentries == (uint64_t)0)
                 /* Just use the default struct */
@@ -825,9 +825,9 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
 
     /* Check for different layout type */
     if (layout1->type < layout2->type)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (layout1->type > layout2->type)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     /* Compare non-dataset-specific fields in layout info */
     switch (layout1->type) {
@@ -840,16 +840,16 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
 
             /* Check the number of dimensions */
             if (layout1->u.chunk.ndims < layout2->u.chunk.ndims)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             if (layout1->u.chunk.ndims > layout2->u.chunk.ndims)
-                HGOTO_DONE(1)
+                HGOTO_DONE(1);
 
             /* Compare the chunk dims */
             for (u = 0; u < layout1->u.chunk.ndims - 1; u++) {
                 if (layout1->u.chunk.dim[u] < layout2->u.chunk.dim[u])
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (layout1->u.chunk.dim[u] > layout2->u.chunk.dim[u])
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
             } /* end for */
         }     /* end case */
         break;
@@ -861,9 +861,9 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
 
             /* Compare number of mappings */
             if (layout1->storage.u.virt.list_nused < layout2->storage.u.virt.list_nused)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             if (layout1->storage.u.virt.list_nused > layout2->storage.u.virt.list_nused)
-                HGOTO_DONE(1)
+                HGOTO_DONE(1);
 
             /* Iterate over mappings */
             for (u = 0; u < layout1->storage.u.virt.list_nused; u++) {
@@ -873,45 +873,45 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
                 if ((equal = H5S_extent_equal(layout1->storage.u.virt.list[u].source_dset.virtual_select,
                                               layout2->storage.u.virt.list[u].source_dset.virtual_select)) <
                     0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (!equal)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
                 if ((equal = H5S_SELECT_SHAPE_SAME(
                          layout1->storage.u.virt.list[u].source_dset.virtual_select,
                          layout2->storage.u.virt.list[u].source_dset.virtual_select)) < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (!equal)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
 
                 /* Compare source file names */
                 strcmp_ret = HDstrcmp(layout1->storage.u.virt.list[u].source_file_name,
                                       layout2->storage.u.virt.list[u].source_file_name);
                 if (strcmp_ret < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (strcmp_ret > 0)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
 
                 /* Compare source dataset names */
                 strcmp_ret = HDstrcmp(layout1->storage.u.virt.list[u].source_dset_name,
                                       layout2->storage.u.virt.list[u].source_dset_name);
                 if (strcmp_ret < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (strcmp_ret > 0)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
 
                 /* Compare source spaces.  Note we cannot tell which is
                  * "greater", so just return 1 if different, -1 on failure.
                  */
                 if ((equal = H5S_extent_equal(layout1->storage.u.virt.list[u].source_select,
                                               layout2->storage.u.virt.list[u].source_select)) < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (!equal)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
                 if ((equal = H5S_SELECT_SHAPE_SAME(layout1->storage.u.virt.list[u].source_select,
                                                    layout2->storage.u.virt.list[u].source_select)) < 0)
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 if (!equal)
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
             } /* end for */
         }     /* end block */
         break;
@@ -1058,7 +1058,7 @@ H5P__dcrt_fill_value_enc(const void *value, void **_pp, size_t *size)
         *(*pp)++ = (uint8_t)fill->fill_time;
 
         /* Encode size of fill value */
-        INT64ENCODE(*pp, fill->size)
+        INT64ENCODE(*pp, fill->size);
 
         /* Encode the fill value & datatype */
         if (fill->size > 0) {
@@ -1145,7 +1145,7 @@ H5P__dcrt_fill_value_dec(const void **_pp, void *_value)
     fill->fill_time  = (H5D_fill_time_t) * (*pp)++;
 
     /* Decode fill size */
-    INT64DECODE(*pp, fill->size)
+    INT64DECODE(*pp, fill->size);
 
     /* Check if there's a fill value */
     if (fill->size > 0) {
@@ -2150,7 +2150,7 @@ done:
     /* (Even on failure, so there's not a mangled layout struct in the list) */
     if (retrieved_layout) {
         if (H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0) {
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout");
             if (old_list != virtual_layout.storage.u.virt.list)
                 free_list = TRUE;
         } /* end if */
@@ -2164,10 +2164,10 @@ done:
             ent->source_file_name = (char *)H5MM_xfree(ent->source_file_name);
             ent->source_dset_name = (char *)H5MM_xfree(ent->source_dset_name);
             if (ent->source_dset.virtual_select && H5S_close(ent->source_dset.virtual_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection");
             ent->source_dset.virtual_select = NULL;
             if (ent->source_select && H5S_close(ent->source_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection");
             ent->source_select = NULL;
             H5D_virtual_free_parsed_name(ent->parsed_source_file_name);
             ent->parsed_source_file_name = NULL;
@@ -2273,7 +2273,7 @@ done:
     /* Free space on failure */
     if ((ret_value < 0) && space)
         if (H5S_close(space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_vspace() */
@@ -2361,7 +2361,7 @@ done:
     /* Free space on failure */
     if ((ret_value < 0) && space)
         if (H5S_close(space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_srcspace() */
@@ -3148,9 +3148,9 @@ done:
     if (bkg != value)
         H5MM_xfree(bkg);
     if (src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID")
+        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID");
     if (dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID")
+        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_get_fill_value() */

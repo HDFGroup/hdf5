@@ -118,8 +118,8 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     if (ginfo->store_link_phase_change) {
         if (H5_IS_BUFFER_OVERFLOW(p, 2 * 2, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-        UINT16DECODE(p, ginfo->max_compact)
-        UINT16DECODE(p, ginfo->min_dense)
+        UINT16DECODE(p, ginfo->max_compact);
+        UINT16DECODE(p, ginfo->min_dense);
     }
     else {
         ginfo->max_compact = H5G_CRT_GINFO_MAX_COMPACT;
@@ -130,8 +130,8 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     if (ginfo->store_est_entry_info) {
         if (H5_IS_BUFFER_OVERFLOW(p, 2 * 2, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-        UINT16DECODE(p, ginfo->est_num_entries)
-        UINT16DECODE(p, ginfo->est_name_len)
+        UINT16DECODE(p, ginfo->est_num_entries);
+        UINT16DECODE(p, ginfo->est_name_len);
     }
     else {
         ginfo->est_num_entries = H5G_CRT_GINFO_EST_NUM_ENTRIES;
@@ -180,14 +180,14 @@ H5O__ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
 
     /* Store the max. # of links to store compactly & the min. # of links to store densely */
     if (ginfo->store_link_phase_change) {
-        UINT16ENCODE(p, ginfo->max_compact)
-        UINT16ENCODE(p, ginfo->min_dense)
+        UINT16ENCODE(p, ginfo->max_compact);
+        UINT16ENCODE(p, ginfo->min_dense);
     } /* end if */
 
     /* Estimated # of entries & name lengths */
     if (ginfo->store_est_entry_info) {
-        UINT16ENCODE(p, ginfo->est_num_entries)
-        UINT16ENCODE(p, ginfo->est_name_len)
+        UINT16ENCODE(p, ginfo->est_num_entries);
+        UINT16ENCODE(p, ginfo->est_name_len);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

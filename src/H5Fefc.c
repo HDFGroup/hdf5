@@ -171,7 +171,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
          * H5F_decr_nopen_objs() in H5L_extern_traverse(). */
         ret_value->nopen_objs++;
 
-        HGOTO_DONE(ret_value)
+        HGOTO_DONE(ret_value);
     } /* end if */
 
     /* Search the skip list for name if the skip list exists, create the skip
@@ -247,7 +247,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
                  * file id */
                 ret_value->nopen_objs++;
 
-                HGOTO_DONE(ret_value)
+                HGOTO_DONE(ret_value);
             } /* end else */
         }     /* end if */
         else
@@ -311,7 +311,7 @@ done:
             if (open_file) {
                 ent->file->nopen_objs--;
                 if (H5F_try_close(ent->file, NULL) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file");
             } /* end if */
             ent->name = (char *)H5MM_xfree(ent->name);
             ent       = H5FL_FREE(H5F_efc_ent_t, ent);
@@ -358,7 +358,7 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
         if (H5F_try_close(file, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
 
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Scan the parent's LRU list from the head to file file.  We do this
@@ -456,7 +456,7 @@ H5F__efc_release_real(H5F_efc_t *efc)
     efc->tag = H5F_EFC_TAG_DEFAULT;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__efc_release_real() */
 
 /*-------------------------------------------------------------------------
@@ -534,7 +534,7 @@ H5F__efc_destroy(H5F_efc_t *efc)
     (void)H5FL_FREE(H5F_efc_t, efc);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__efc_destroy() */
 
 /*-------------------------------------------------------------------------
@@ -819,7 +819,7 @@ H5F__efc_try_close(H5F_t *f)
          * EFC (i.e. none were open). */
         assert(f->shared->efc->nfiles == 0);
 
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Conditions where we should not do anything and just return immediately */
@@ -838,7 +838,7 @@ H5F__efc_try_close(H5F_t *f)
         (f->shared->efc->nfiles == 0))
         /* We must have reentered this function, and we should not close this
          * file.  Just return. */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* If the file EFC were locked, that should always mean that there exists
      * a reference to this file that is not in an EFC (it may have just been
@@ -871,7 +871,7 @@ H5F__efc_try_close(H5F_t *f)
             sf->efc->tmp_next = NULL;
             sf                = next;
         } /* end while */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Run through the linked list , separating into two lists, one with tag ==

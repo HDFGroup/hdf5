@@ -2068,9 +2068,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
 AC_CHECK_FUNCS([alarm asprintf clock_gettime fcntl flock fork])
 AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
-AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
-AC_CHECK_FUNCS([siglongjmp sigsetjmp sigprocmask])
-AC_CHECK_FUNCS([srandom strcasestr strdup symlink])
+AC_CHECK_FUNCS([rand_r random])
+AC_CHECK_FUNCS([strcasestr strdup symlink])
 AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
 
 ## ----------------------------------------------------------------------
@@ -4045,10 +4044,10 @@ fi
 ##
 AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
-AC_CONFIG_FILES([src/libhdf5.settings
-                 Makefile
+AC_CONFIG_FILES([Makefile
                  doxygen/Doxyfile
                  src/Makefile
+                 src/libhdf5.settings
                  test/Makefile
                  test/H5srcdir_str.h
                  test/test_abort_fail.sh

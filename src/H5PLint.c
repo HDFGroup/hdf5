@@ -346,25 +346,25 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
      */
     if (NULL == (handle = H5PL_OPEN_DLIB(path))) {
         H5PL_CLR_ERROR; /* clear error */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 
     /* Return a handle for the function H5PLget_plugin_type in the dynamic library.
      * The plugin library is supposed to define this function.
      */
     if (NULL == (get_plugin_type = (H5PL_get_plugin_type_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_type")))
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Return a handle for the function H5PLget_plugin_info in the dynamic library.
      * The plugin library is supposed to define this function.
      */
     if (NULL == (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_info")))
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Check the plugin type and return if it doesn't match the one passed in */
     loaded_plugin_type = (H5PL_type_t)(*get_plugin_type)();
     if ((type != H5PL_TYPE_NONE) && (type != loaded_plugin_type))
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Get the plugin information */
     switch (loaded_plugin_type) {
@@ -462,7 +462,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
 done:
     if (!(*success) && handle)
         if (H5PL__close(handle) < 0)
-            HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+            HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */

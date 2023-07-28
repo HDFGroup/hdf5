@@ -157,7 +157,7 @@ const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
 /*****************************/
 
 /* inherits B-tree like properties from H5B */
-H5B_class_t H5B_BTREE[1] = {{
+static H5B_class_t H5B_BTREE[1] = {{
     H5B_CHUNK_ID,            /*id			*/
     sizeof(H5D_btree_key_t), /*sizeof_nkey		*/
     H5D__btree_get_shared,   /*get_shared		*/
@@ -417,7 +417,7 @@ H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, haddr_t addr, const void *_lt_key, hbo
     for (u = 0; u < udata->common.layout->ndims; u++)
         if (udata->common.scaled[u] >= (lt_key->scaled[u] + 1)) {
             *found = FALSE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
 
     /* Initialize return values */
@@ -459,7 +459,7 @@ H5D__chunk_disjoint(unsigned n, const hsize_t *scaled1, const hsize_t *scaled2)
     /* Loop over two chunks, detecting disjointness and getting out quickly */
     for (u = 0; u < n; u++)
         if ((scaled1[u] + 1) <= scaled2[u] || (scaled2[u] + 1) <= scaled1[u])
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1377,9 +1377,9 @@ done:
     if (shared_init) {
         /* Free the raw B-tree node buffer */
         if (NULL == storage.u.btree.shared)
-            HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted shared info nil")
+            HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted shared info nil");
         else if (H5UC_DEC(storage.u.btree.shared) < 0)
-            HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted shared info")
+            HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted shared info");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

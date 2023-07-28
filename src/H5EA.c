@@ -95,7 +95,7 @@ const H5EA_class_t *const H5EA_client_class_g[] = {
 H5FL_DEFINE_STATIC(H5EA_t);
 
 /* Declare a PQ free list to manage the element */
-H5FL_BLK_DEFINE(ea_native_elmt);
+H5FL_BLK_DEFINE_STATIC(ea_native_elmt);
 
 /*-------------------------------------------------------------------------
  * Function:	H5EA__new
@@ -151,10 +151,10 @@ H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open, void *ctx_udata)
 done:
 
     if (hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, NULL, "unable to release extensible array header")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, NULL, "unable to release extensible array header");
     if (!ret_value)
         if (ea && H5EA_close(ea) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CLOSEERROR, NULL, "unable to close extensible array")
+            HDONE_ERROR(H5E_EARRAY, H5E_CLOSEERROR, NULL, "unable to close extensible array");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__new() */
@@ -200,7 +200,7 @@ H5EA_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
 done:
     if (!ret_value)
         if (ea && H5EA_close(ea) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CLOSEERROR, NULL, "unable to close extensible array")
+            HDONE_ERROR(H5E_EARRAY, H5E_CLOSEERROR, NULL, "unable to close extensible array");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA_create() */
@@ -238,7 +238,7 @@ H5EA_open(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
 done:
     if (!ret_value)
         if (ea && H5EA_close(ea) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CLOSEERROR, NULL, "unable to close extensible array")
+            HDONE_ERROR(H5E_EARRAY, H5E_CLOSEERROR, NULL, "unable to close extensible array");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA_open() */
@@ -350,7 +350,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
             hdr_dirty = TRUE;
         } /* end if */
         else
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Protect index block */
@@ -406,7 +406,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                     iblock_cache_flags |= H5AC__DIRTIED_FLAG;
                 } /* end if */
                 else
-                    HGOTO_DONE(SUCCEED)
+                    HGOTO_DONE(SUCCEED);
             } /* end if */
 
             /* Protect data block */
@@ -458,7 +458,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                     iblock_cache_flags |= H5AC__DIRTIED_FLAG;
                 } /* end if */
                 else
-                    HGOTO_DONE(SUCCEED)
+                    HGOTO_DONE(SUCCEED);
             } /* end if */
 
             /* Protect super block */
@@ -505,7 +505,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                     } /* end if */
                 }     /* end if */
                 else
-                    HGOTO_DONE(SUCCEED)
+                    HGOTO_DONE(SUCCEED);
             } /* end if */
 
             /* Adjust index to offset in data block */
@@ -543,7 +543,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                         sblock_cache_flags |= H5AC__DIRTIED_FLAG;
                     } /* end if */
                     else
-                        HGOTO_DONE(SUCCEED)
+                        HGOTO_DONE(SUCCEED);
                 } /* end if */
 
                 /* Protect data block page */
@@ -616,18 +616,19 @@ done:
     if (hdr_dirty)
         if (H5EA__hdr_modified(hdr) < 0)
             HDONE_ERROR(H5E_EARRAY, H5E_CANTMARKDIRTY, FAIL,
-                        "unable to mark extensible array header as modified")
+                        "unable to mark extensible array header as modified");
 
     /* Release resources */
     if (iblock && *thing != iblock && H5EA__iblock_unprotect(iblock, iblock_cache_flags) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array index block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array index block");
     /* (Note: super blocks don't contain elements, so don't have a '*thing != sblock' check) */
     if (sblock && H5EA__sblock_unprotect(sblock, sblock_cache_flags) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array super block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array super block");
     if (dblock && *thing != dblock && H5EA__dblock_unprotect(dblock, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block");
     if (dblk_page && *thing != dblk_page && H5EA__dblk_page_unprotect(dblk_page, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block page")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
+                    "unable to release extensible array data block page");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__lookup_elmt() */
@@ -690,7 +691,7 @@ H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt)
 done:
     /* Release resources */
     if (thing && (thing_unprot_func)(thing, thing_cache_flags) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array metadata")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array metadata");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA_set() */
@@ -752,7 +753,7 @@ H5EA_get(const H5EA_t *ea, hsize_t idx, void *elmt)
 done:
     /* Release thing */
     if (thing && (thing_unprot_func)(thing, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array metadata")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array metadata");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA_get() */
@@ -943,7 +944,7 @@ H5EA_delete(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
 done:
     /* Unprotect the header if an error occurred */
     if (hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA_delete() */

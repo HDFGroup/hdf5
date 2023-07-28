@@ -1496,7 +1496,7 @@ done:
 
     /* Release selection iterator */
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     if (iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
 
@@ -1613,7 +1613,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
     /* Check for different number of elements selected */
     if (H5S_GET_SELECT_NPOINTS(space1) != H5S_GET_SELECT_NPOINTS(space2))
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check special cases if both dataspaces aren't scalar */
     /* (If only one is, the number of selected points check is sufficient) */
@@ -1683,7 +1683,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
                 /* Verify that the ranges are the same */
                 if ((high_a[space_a_dim] - low_a[space_a_dim]) != (high_b[space_b_dim] - low_b[space_b_dim]))
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
 
                 /* Go to next dimension */
                 space_a_dim--;
@@ -1697,7 +1697,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
                 /* This range should be flat to be the same in a lower dimension */
                 if (low_a[space_a_dim] != high_a[space_a_dim])
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
 
                 space_a_dim--;
             } /* end while */
@@ -1708,7 +1708,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                  * the same, then the selections are the same, even if the
                  * selection types are different.
                  */
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
             } /* end if */
         }     /* end if */
 
@@ -1767,7 +1767,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                     while (space_b_dim >= 0) {
                         if ((end_a[space_a_dim] - start_a[space_a_dim]) !=
                             (end_b[space_b_dim] - start_b[space_b_dim]))
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         /* Set the relative locations of the selections */
                         offset[space_a_dim] = (hssize_t)start_b[space_b_dim] - (hssize_t)start_a[space_a_dim];
@@ -1781,7 +1781,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                      */
                     while (space_a_dim >= 0) {
                         if (start_a[space_a_dim] != end_a[space_a_dim])
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         space_a_dim--;
                     } /* end while */
@@ -1796,12 +1796,12 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                         /* Check if the blocks are in the same relative location */
                         if ((hsize_t)((hssize_t)start_a[space_a_dim] + offset[space_a_dim]) !=
                             start_b[space_b_dim])
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         /* If the block sizes from each selection doesn't match, get out */
                         if ((end_a[space_a_dim] - start_a[space_a_dim]) !=
                             (end_b[space_b_dim] - start_b[space_b_dim]))
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         space_a_dim--;
                         space_b_dim--;
@@ -1811,7 +1811,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                     while (space_a_dim >= 0) {
                         /* If the block size isn't 1, get out */
                         if (start_a[space_a_dim] != end_a[space_a_dim])
-                            HGOTO_DONE(FALSE)
+                            HGOTO_DONE(FALSE);
 
                         space_a_dim--;
                     } /* end while */
@@ -1828,7 +1828,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                 if ((status_a == FALSE) && (status_b == FALSE))
                     break;
                 else if (status_a != status_b)
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
                 else {
                     /* Advance to next block in selection iterators */
                     if (H5S_SELECT_ITER_NEXT_BLOCK(iter_a) < 0)
@@ -1845,11 +1845,11 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
 done:
     if (iter_a_init && H5S_SELECT_ITER_RELEASE(iter_a) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator a")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator a");
     if (iter_a)
         iter_a = H5FL_FREE(H5S_sel_iter_t, iter_a);
     if (iter_b_init && H5S_SELECT_ITER_RELEASE(iter_b) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator b")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator b");
     if (iter_b)
         iter_b = H5FL_FREE(H5S_sel_iter_t, iter_b);
 
@@ -1946,7 +1946,7 @@ H5S_select_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
         for (u = 0; u < space->extent.rank; u++)
             /* If selection bounds & block don't overlap, can leave now */
             if (!H5S_RANGE_OVERLAP(low[u], high[u], start[u], end[u]))
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
     } /* end if */
 
     /* Call selection type's intersect routine */
@@ -2262,7 +2262,7 @@ done:
     /* Cleanup on error */
     if (ret_value < 0)
         if (new_space && H5S_close(new_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_construct_projection() */
@@ -2368,7 +2368,7 @@ done:
 
     /* Release selection iterator */
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     if (iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
 
@@ -2609,15 +2609,15 @@ done:
     /* Cleanup on error */
     if (ret_value < 0)
         if (new_space && H5S_close(new_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
     /* General cleanup */
     if (tmp_src_intersect_space && H5S_close(tmp_src_intersect_space) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release temporary dataspace")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release temporary dataspace");
     if (ss_iter_init && H5S_SELECT_ITER_RELEASE(ss_iter) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release source selection iterator")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release source selection iterator");
     if (ds_iter_init && H5S_SELECT_ITER_RELEASE(ds_iter) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release destination selection iterator")
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release destination selection iterator");
 
     ss_iter = H5FL_FREE(H5S_sel_iter_t, ss_iter);
     ds_iter = H5FL_FREE(H5S_sel_iter_t, ds_iter);
@@ -2697,7 +2697,7 @@ H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id, hid_t src
 done:
     if (ret_value < 0)
         if (proj_space && H5S_close(proj_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sselect_project_intersection() */
@@ -2996,7 +2996,7 @@ H5S_select_contig_block(H5S_t *space, hbool_t *is_contig, hsize_t *off, size_t *
 
 done:
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
     if (iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
 

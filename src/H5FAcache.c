@@ -272,7 +272,7 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     H5F_DECODE_LENGTH(udata->f, image, hdr->cparam.nelmts); /* Number of elements */
 
     /* Internal information */
-    H5_addr_decode(udata->f, &image, &hdr->dblk_addr); /* Address of index block */
+    H5F_addr_decode(udata->f, &image, &hdr->dblk_addr); /* Address of index block */
 
     /* Check for data block */
     if (H5_addr_defined(hdr->dblk_addr)) {
@@ -317,7 +317,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (hdr && H5FA__hdr_dest(hdr) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array header")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_hdr_deserialize() */
@@ -392,7 +392,7 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     H5F_ENCODE_LENGTH(f, image, hdr->stats.nelmts); /* Number of elements for the fixed array */
 
     /* Internal information */
-    H5_addr_encode(f, &image, hdr->dblk_addr); /* Address of fixed array data block */
+    H5F_addr_encode(f, &image, hdr->dblk_addr); /* Address of fixed array data block */
 
     /* Compute metadata checksum */
     metadata_chksum = H5_checksum_metadata(_image, (size_t)(image - (uint8_t *)_image), 0);
@@ -645,7 +645,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
         HGOTO_ERROR(H5E_FARRAY, H5E_BADTYPE, NULL, "incorrect fixed array class")
 
     /* Address of header for array that owns this block (just for file integrity checks) */
-    H5_addr_decode(udata->hdr->f, &image, &arr_addr);
+    H5F_addr_decode(udata->hdr->f, &image, &arr_addr);
     if (H5_addr_ne(arr_addr, udata->hdr->addr))
         HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array header address")
 
@@ -687,7 +687,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (dblock && H5FA__dblock_dest(dblock) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_dblock_deserialize() */
@@ -758,7 +758,7 @@ H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     *image++ = (uint8_t)dblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
-    H5_addr_encode(f, &image, dblock->hdr->addr);
+    H5F_addr_encode(f, &image, dblock->hdr->addr);
 
     /* Page init flags */
     if (dblock->npages > 0) {
@@ -927,7 +927,6 @@ H5FA__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
 
     /* Check arguments */
     assert(dblock);
-    assert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(dblock->cache_info.type == H5AC_FARRAY_DBLOCK);
     assert(fsf_size);
 
@@ -1064,7 +1063,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (dblk_page && H5FA__dblk_page_dest(dblk_page) < 0)
-            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block page")
+            HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, NULL, "unable to destroy fixed array data block page");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_dblk_page_deserialize() */

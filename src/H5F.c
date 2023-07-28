@@ -713,7 +713,7 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, c
                         H5ARG_TRACE8(__func__, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref(ret_value) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID")
+                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID");
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -890,7 +890,7 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, con
                         H5ARG_TRACE7(__func__, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref(ret_value) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID")
+                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID");
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
@@ -1119,7 +1119,7 @@ H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclose_async() */
@@ -1294,9 +1294,9 @@ done:
     if (grp) {
         assert(loc_vol_obj);
         if (H5VL_group_close(loc_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to release group")
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to release group");
         if (H5VL_free_object(loc_vol_obj) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -1390,9 +1390,9 @@ done:
     if (grp) {
         assert(loc_vol_obj);
         if (H5VL_group_close(loc_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to release group")
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to release group");
         if (H5VL_free_object(loc_vol_obj) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -1526,7 +1526,7 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, h
                         H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref(ret_value) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID")
+                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID");
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 

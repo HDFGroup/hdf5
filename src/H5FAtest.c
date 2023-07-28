@@ -320,7 +320,7 @@ H5FA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_a
     ret_value = ctx;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__test_crt_dbg_context() */
 
 /*-------------------------------------------------------------------------
@@ -345,7 +345,7 @@ H5FA__get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam)
     cparam->raw_elmt_size = fa->hdr->cparam.raw_elmt_size;
     cparam->nelmts        = fa->hdr->cparam.nelmts;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FA__get_cparam_test() */
 
 /*-------------------------------------------------------------------------

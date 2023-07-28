@@ -138,7 +138,7 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     if (linfo->track_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-        INT64DECODE(p, linfo->max_corder)
+        INT64DECODE(p, linfo->max_corder);
     }
     else
         linfo->max_corder = 0;
@@ -148,16 +148,16 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
 
     /* Address of fractal heap to store "dense" links */
-    H5_addr_decode(f, &p, &(linfo->fheap_addr));
+    H5F_addr_decode(f, &p, &(linfo->fheap_addr));
 
     /* Address of v2 B-tree to index names of links (names are always indexed) */
-    H5_addr_decode(f, &p, &(linfo->name_bt2_addr));
+    H5F_addr_decode(f, &p, &(linfo->name_bt2_addr));
 
     /* Address of v2 B-tree to index creation order of links, if there is one */
     if (linfo->index_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, addr_size, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-        H5_addr_decode(f, &p, &(linfo->corder_bt2_addr));
+        H5F_addr_decode(f, &p, &(linfo->corder_bt2_addr));
     }
     else
         linfo->corder_bt2_addr = HADDR_UNDEF;
@@ -205,17 +205,17 @@ H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
 
     /* Max. link creation order value for the group, if tracked */
     if (linfo->track_corder)
-        INT64ENCODE(p, linfo->max_corder)
+        INT64ENCODE(p, linfo->max_corder);
 
     /* Address of fractal heap to store "dense" links */
-    H5_addr_encode(f, &p, linfo->fheap_addr);
+    H5F_addr_encode(f, &p, linfo->fheap_addr);
 
     /* Address of v2 B-tree to index names of links */
-    H5_addr_encode(f, &p, linfo->name_bt2_addr);
+    H5F_addr_encode(f, &p, linfo->name_bt2_addr);
 
     /* Address of v2 B-tree to index creation order of links, if they are indexed */
     if (linfo->index_corder)
-        H5_addr_encode(f, &p, linfo->corder_bt2_addr);
+        H5F_addr_encode(f, &p, linfo->corder_bt2_addr);
     else
         assert(!H5_addr_defined(linfo->corder_bt2_addr));
 
@@ -437,12 +437,12 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     dst_lnk_init = TRUE;
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Insert the new object in the destination file's group */
     /* (Doesn't increment the link count - that's already been taken care of for hard links) */
     if (H5G__dense_insert(udata->dst_oloc->file, udata->dst_linfo, &dst_lnk) < 0)
-        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link");
 
     /* Reset metadata tag in API context */
     H5_END_TAG
@@ -484,7 +484,7 @@ H5O__linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
 
     /* If we are performing a 'shallow hierarchy' copy, get out now */
     if (cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Check for copying dense link storage */
     if (H5_addr_defined(linfo_src->fheap_addr)) {

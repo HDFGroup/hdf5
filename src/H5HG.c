@@ -163,10 +163,6 @@ H5HG__create(H5F_t *f, size_t size)
      * align the pointer, but this might not be the case.
      */
     n = (size_t)H5HG_ALIGN(p - heap->chunk) - (size_t)(p - heap->chunk);
-#ifdef OLD_WAY
-    /* Don't bother zeroing out the rest of the info in the heap -QAK */
-    memset(p, 0, n);
-#endif /* OLD_WAY */
     p += n;
 
     /* The freespace object */
@@ -178,10 +174,6 @@ H5HG__create(H5F_t *f, size_t size)
     UINT16ENCODE(p, 0); /*reference count*/
     UINT32ENCODE(p, 0); /*reserved*/
     H5F_ENCODE_LENGTH(f, p, heap->obj[0].size);
-#ifdef OLD_WAY
-    /* Don't bother zeroing out the rest of the info in the heap -QAK */
-    memset(p, 0, (size_t)((heap->chunk + heap->size) - p));
-#endif /* OLD_WAY */
 
     /* Add this heap to the beginning of the CWFS list */
     if (H5F_cwfs_add(f, heap) < 0)
@@ -200,14 +192,14 @@ done:
         if (H5_addr_defined(addr)) {
             /* Release the space on disk */
             if (H5MF_xfree(f, H5FD_MEM_GHEAP, addr, (hsize_t)size) < 0)
-                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free global heap")
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free global heap");
 
             /* Check if the heap object was allocated */
             if (heap)
                 /* Destroy the heap object */
                 if (H5HG__free(heap) < 0)
                     HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF,
-                                "unable to destroy global heap collection")
+                                "unable to destroy global heap collection");
         } /* end if */
     }     /* end if */
 
@@ -368,7 +360,7 @@ H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
     ret_value = idx;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG__alloc() */
 
 /*-------------------------------------------------------------------------
@@ -447,7 +439,7 @@ H5HG_extend(H5F_t *f, haddr_t addr, size_t need)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG_extend() */
@@ -519,13 +511,8 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "unable to allocate global heap object")
 
     /* Copy data into the heap */
-    if (size > 0) {
+    if (size > 0)
         H5MM_memcpy(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f), obj, size);
-#ifdef OLD_WAY
-        /* Don't bother zeroing out the rest of the info in the heap -QAK */
-        memset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0, need - (H5HG_SIZEOF_OBJHDR(f) + size));
-#endif /* OLD_WAY */
-    }  /* end if */
     heap_flags |= H5AC__DIRTIED_FLAG;
 
     /* Return value */
@@ -534,7 +521,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap.")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap.");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5HG_insert() */
@@ -600,7 +587,7 @@ H5HG_read(H5F_t *f, H5HG_t *hobj, void *object /*out*/, size_t *buf_size)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release object header");
 
     if (NULL == ret_value && NULL == orig_object && object)
         H5MM_free(object);
@@ -658,7 +645,7 @@ H5HG_link(H5F_t *f, const H5HG_t *hobj, int adjust)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, heap_flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5HG_link() */
@@ -698,7 +685,7 @@ H5HG_get_obj_size(H5F_t *f, H5HG_t *hobj, size_t *obj_size)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5HG_get_obj_size() */
@@ -741,7 +728,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
      * the entry and let the second rewrite happen (see HDFFV-10635).  In the future, it'd be nice to handle
      * this situation in H5T_conv_vlen in H5Tconv.c instead of this level (HDFFV-10648). */
     if (heap->obj[hobj->idx].nrefs == 0 && heap->obj[hobj->idx].size == 0 && !heap->obj[hobj->idx].begin)
-        HGOTO_DONE(ret_value)
+        HGOTO_DONE(ret_value);
 
     obj_start = heap->obj[hobj->idx].begin;
     /* Include object header size */
@@ -758,7 +745,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
     } /* end if */
     else
         heap->obj[0].size += need;
-    HDmemmove(obj_start, obj_start + need, heap->size - (size_t)((obj_start + need) - heap->chunk));
+    memmove(obj_start, obj_start + need, heap->size - (size_t)((obj_start + need) - heap->chunk));
     if (heap->obj[0].size >= H5HG_SIZEOF_OBJHDR(f)) {
         p = heap->obj[0].begin;
         UINT16ENCODE(p, 0); /*id*/
@@ -790,9 +777,9 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
 
 done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, flags) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header");
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value);
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5HG_remove() */
 
 /*-------------------------------------------------------------------------

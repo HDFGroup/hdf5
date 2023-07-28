@@ -144,7 +144,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
 done:
     if (H5I_INVALID_HID == ret_value)
         if (dset && H5VL_dataset_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate1() */
@@ -200,7 +200,7 @@ H5Dopen1(hid_t loc_id, const char *name)
 done:
     if (H5I_INVALID_HID == ret_value)
         if (dset && H5VL_dataset_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen1() */
@@ -286,7 +286,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
 done:
     /* Close the dataspace */
     if (sid != H5I_INVALID_HID && H5I_dec_app_ref(sid) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close dataspace")
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dextend() */

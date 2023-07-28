@@ -321,7 +321,7 @@ done:
     /* Release the [possibly partially initialized] object header on errors */
     if (!ret_value && oh)
         if (H5O__free(oh, FALSE) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_deserialize() */
@@ -344,7 +344,6 @@ H5O__cache_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(oh);
-    assert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(oh->cache_info.type == H5AC_OHDR);
     assert(image_len);
 
@@ -375,7 +374,6 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     assert(f);
     assert(image);
     assert(oh);
-    assert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(oh->cache_info.type == H5AC_OHDR);
     assert(oh->chunk[0].size == len);
 #ifdef H5O_DEBUG
@@ -458,7 +456,7 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
         /* Number of messages */
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
         if (oh->store_bad_mesg_count)
-            UINT16ENCODE(chunk_image, (oh->nmesgs - 1))
+            UINT16ENCODE(chunk_image, (oh->nmesgs - 1));
         else
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
             UINT16ENCODE(chunk_image, oh->nmesgs);
@@ -568,10 +566,6 @@ done:
  *
  * Purpose:     Free the in core representation of the supplied object header.
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -584,7 +578,6 @@ H5O__cache_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     assert(oh);
-    assert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(oh->cache_info.type == H5AC_OHDR);
 
     /* Destroy object header */
@@ -727,7 +720,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
 done:
     if (NULL == ret_value)
         if (chk_proxy && H5O__chunk_dest(chk_proxy) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header chunk")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header chunk");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_chk_deserialize() */
@@ -749,7 +742,6 @@ H5O__cache_chk_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(chk_proxy);
-    assert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
     assert(chk_proxy->oh);
     assert(image_len);
@@ -781,7 +773,6 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     assert(f);
     assert(image);
     assert(chk_proxy);
-    assert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
     assert(chk_proxy->oh);
     assert(chk_proxy->oh->chunk[chk_proxy->chunkno].size == len);
@@ -825,8 +816,6 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 /* Add flush dependency on chunk with continuation, if one exists */
                 if (chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
-                           H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
                     assert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
                            (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
@@ -883,8 +872,6 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 /* Remove flush dependency on parent object header chunk, if one is set */
                 if (chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
-                           H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
                     assert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
                            (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
@@ -919,10 +906,6 @@ done:
  * Purpose:     Free the in core memory associated with the supplied object
  *              header continuation chunk.
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -935,7 +918,6 @@ H5O__cache_chk_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     assert(chk_proxy);
-    assert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
 
     /* Destroy object header chunk proxy */
@@ -1183,7 +1165,7 @@ done:
     /* Release the [possibly partially initialized] object header on errors */
     if (ret_value < 0 && oh)
         if (H5O__free(oh, FALSE) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header data")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header data");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__prefix_deserialize() */
@@ -1287,7 +1269,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
         if (oh->version == H5O_VERSION_1) {
             if (H5_IS_BUFFER_OVERFLOW(chunk_image, 2, p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
-            UINT16DECODE(chunk_image, id)
+            UINT16DECODE(chunk_image, id);
         }
         else {
             if (H5_IS_BUFFER_OVERFLOW(chunk_image, 1, p_end))

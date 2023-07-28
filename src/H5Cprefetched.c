@@ -13,21 +13,28 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cprefetched.c
- *              December 28 2016
- *              Quincey Koziol
  *
- * Purpose:     Metadata cache prefetched entry callbacks.
+ * Purpose:     Metadata cache prefetched entry callbacks
  *
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
+#include "H5Cmodule.h" /* This source code file is part of the H5C module */
+
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5FLprivate.h" /* Free Lists                           */
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Cpkg.h"      /* Cache                                    */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MMprivate.h" /* Memory Management                        */
 
 /****************/
 /* Local Macros */
@@ -208,7 +215,6 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
 
     /* Sanity checks */
     assert(entry_ptr);
-    assert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     assert(entry_ptr->prefetched);
 
     switch (action) {
@@ -232,7 +238,6 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                 assert(entry_ptr->flush_dep_parent);
                 parent_ptr = entry_ptr->flush_dep_parent[u];
                 assert(parent_ptr);
-                assert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 assert(parent_ptr->flush_dep_nchildren > 0);
 
                 /* Destroy flush dependency with flush dependency parent */
@@ -283,7 +288,6 @@ H5C__prefetched_entry_free_icr(void *_thing)
 
     /* Sanity checks */
     assert(entry_ptr);
-    assert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     assert(entry_ptr->prefetched);
 
     /* Release array for flush dependency parent addresses */

@@ -29,14 +29,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions */
-#include "H5Eprivate.h"  /* Error handling    */
-#include "H5Iprivate.h"  /* IDs               */
-#include "H5MMprivate.h" /* Memory management */
-#include "H5Opkg.h"      /* Object headers    */
-#include "H5Ppkg.h"      /* Property lists    */
-#include "H5PLprivate.h" /* Dynamic plugin    */
-#include "H5Zprivate.h"  /* Filter pipeline   */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Opkg.h"      /* Object headers                           */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5PLprivate.h" /* Dynamic plugin                           */
+#include "H5VMprivate.h" /* Vector Functions                         */
+#include "H5Zprivate.h"  /* Filter pipeline                          */
 
 /****************/
 /* Local Macros */
@@ -1311,10 +1312,10 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             unsigned v; /* Local index variable */
 
             /* encode filter ID */
-            INT32ENCODE(*pp, pline->filter[u].id)
+            INT32ENCODE(*pp, pline->filter[u].id);
 
             /* encode filter flags */
-            H5_ENCODE_UNSIGNED(*pp, pline->filter[u].flags)
+            H5_ENCODE_UNSIGNED(*pp, pline->filter[u].flags);
 
             /* encode filter name if it exists */
             if (NULL != pline->filter[u].name) {
@@ -1338,7 +1339,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
             /* encode all values */
             for (v = 0; v < pline->filter[u].cd_nelmts; v++)
-                H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v])
+                H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v]);
         } /* end for */
     }     /* end if */
 
@@ -1404,10 +1405,10 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         unsigned          v;        /* Local index variable */
 
         /* decode filter id */
-        INT32DECODE(*pp, filter.id)
+        INT32DECODE(*pp, filter.id);
 
         /* decode filter flags */
-        H5_DECODE_UNSIGNED(*pp, filter.flags)
+        H5_DECODE_UNSIGNED(*pp, filter.flags);
 
         /* decode value indicating if the name is encoded */
         has_name = *(*pp)++;
@@ -1434,7 +1435,7 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
 
         /* decode values */
         for (v = 0; v < filter.cd_nelmts; v++)
-            H5_DECODE_UNSIGNED(*pp, filter.cd_values[v])
+            H5_DECODE_UNSIGNED(*pp, filter.cd_values[v]);
 
         /* Add the filter to the I/O pipeline */
         if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0)

@@ -213,7 +213,7 @@ H5CS_pop(void)
     /* Pop the function. */
     fstack->nused--;
 
-    FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
+    FUNC_LEAVE_NOAPI_NOFS(SUCCEED)
 } /* end H5CS_pop() */
 
 /*-------------------------------------------------------------------------

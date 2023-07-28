@@ -180,7 +180,7 @@ H5_now_usec(void)
     {
         struct timespec ts;
 
-        HDclock_gettime(CLOCK_MONOTONIC, &ts);
+        clock_gettime(CLOCK_MONOTONIC, &ts);
 
         /* Cast all values in this expression to uint64_t to ensure that all intermediate
          * calculations are done in 64 bit, to prevent overflow */
@@ -227,7 +227,7 @@ H5_get_time(void)
     {
         struct timespec ts;
 
-        HDclock_gettime(CLOCK_MONOTONIC, &ts);
+        clock_gettime(CLOCK_MONOTONIC, &ts);
         ret_value = (double)ts.tv_sec + ((double)ts.tv_nsec / 1000000000.0);
     }
 #elif defined(H5_HAVE_GETTIMEOFDAY)
@@ -279,7 +279,7 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
     {
         struct rusage res;
 
-        if (HDgetrusage(RUSAGE_SELF, &res) < 0)
+        if (getrusage(RUSAGE_SELF, &res) < 0)
             return -1;
         times->system = (double)res.ru_stime.tv_sec + ((double)res.ru_stime.tv_usec / 1.0E6);
         times->user   = (double)res.ru_utime.tv_sec + ((double)res.ru_utime.tv_usec / 1.0E6);
