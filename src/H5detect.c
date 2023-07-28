@@ -396,9 +396,9 @@ dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
 
         /* Variables for alignment of compound datatype */
         if (!strcmp(d[i].varname, "SCHAR") || !strcmp(d[i].varname, "SHORT") ||
-            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") ||
-            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") ||
-            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) {
+            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") || !strcmp(d[i].varname, "LLONG") ||
+            !strcmp(d[i].varname, "FLOAT") || !strcmp(d[i].varname, "DOUBLE") ||
+            !strcmp(d[i].varname, "LDOUBLE")) {
             fprintf(rawoutstream, "    H5T_NATIVE_%s_ALIGN_g = %lu;\n", d[i].varname,
                     (unsigned long)(d[i].comp_align));
         }
