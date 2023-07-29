@@ -162,7 +162,8 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
 
     /* Increment # of files using this heap header */
     if (H5HF__hdr_fuse_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header");
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL,
+                    "can't increment file reference count on shared heap header");
 
     /* Set file pointer for this heap open context */
     fh->f = f;
@@ -224,7 +225,8 @@ H5HF_open(H5F_t *f, haddr_t fh_addr)
 
     /* Increment # of files using this heap header */
     if (H5HF__hdr_fuse_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header");
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL,
+                    "can't increment file reference count on shared heap header");
 
     /* Set file pointer for this heap open context */
     fh->f = f;

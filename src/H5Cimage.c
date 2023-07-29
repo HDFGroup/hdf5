@@ -1446,7 +1446,8 @@ H5C__decode_cache_image_entry(const H5F_t *f, const H5C_t *cache_ptr, const uint
         int i; /* Local index variable */
 
         if (NULL == (fd_parent_addrs = (haddr_t *)H5MM_malloc((size_t)(fd_parent_count)*H5F_SIZEOF_ADDR(f))))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for fd parent addrs buffer");
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
+                        "memory allocation failed for fd parent addrs buffer");
 
         for (i = 0; i < fd_parent_count; i++) {
             H5F_addr_decode(f, &p, &(fd_parent_addrs[i]));
@@ -2667,7 +2668,8 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
 
         if (NULL == (pf_entry_ptr->fd_parent_addrs = (haddr_t *)H5MM_malloc(
                          (size_t)(pf_entry_ptr->fd_parent_count) * H5F_SIZEOF_ADDR(f))))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for fd parent addrs buffer");
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL,
+                        "memory allocation failed for fd parent addrs buffer");
 
         for (u = 0; u < pf_entry_ptr->fd_parent_count; u++) {
             H5F_addr_decode(f, &p, &(pf_entry_ptr->fd_parent_addrs[u]));

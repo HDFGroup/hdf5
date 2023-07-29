@@ -1800,7 +1800,8 @@ H5A__dense_delete(H5F_t *f, H5O_ainfo_t *ainfo)
     if (H5_addr_defined(ainfo->corder_bt2_addr)) {
         /* Delete the creation order index, without adjusting the ref. count on the attributes  */
         if (H5B2_delete(f, ainfo->corder_bt2_addr, NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for creation order index");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL,
+                        "unable to delete v2 B-tree for creation order index");
         ainfo->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */
 

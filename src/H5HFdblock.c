@@ -96,7 +96,8 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
      * Allocate file and memory data structures.
      */
     if (NULL == (dblock = H5FL_MALLOC(H5HF_direct_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fractal heap direct block");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                    "memory allocation failed for fractal heap direct block");
 
     /* Reset the metadata cache info for the heap header */
     memset(&dblock->cache_info, 0, sizeof(H5AC_info_t));

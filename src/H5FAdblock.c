@@ -278,7 +278,8 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, haddr_t dblk_addr, unsigned flags)
     if (NULL ==
         (dblock = (H5FA_dblock_t *)H5AC_protect(hdr->f, H5AC_FARRAY_DBLOCK, dblk_addr, &udata, flags)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, NULL,
-                    "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr);
+                    "unable to protect fixed array data block, address = %llu",
+                    (unsigned long long)dblk_addr);
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->top_proxy && NULL == dblock->top_proxy) {
@@ -358,7 +359,8 @@ H5FA__dblock_delete(H5FA_hdr_t *hdr, haddr_t dblk_addr)
     /* Protect data block */
     if (NULL == (dblock = H5FA__dblock_protect(hdr, dblk_addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
-                    "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr);
+                    "unable to protect fixed array data block, address = %llu",
+                    (unsigned long long)dblk_addr);
 
     /* Check if data block is paged */
     if (dblock->npages) {

@@ -91,7 +91,8 @@ H5FA__hdr_alloc(H5F_t *f)
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FL_CALLOC(H5FA_hdr_t)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for Fixed Array shared header");
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL,
+                    "memory allocation failed for Fixed Array shared header");
 
     /* Set non-zero internal fields */
     hdr->addr = HADDR_UNDEF;

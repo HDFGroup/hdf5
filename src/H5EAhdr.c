@@ -266,7 +266,8 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts)
     /* Check for un-initialized factory at index */
     if (NULL == hdr->elmt_fac.fac[idx]) {
         if (NULL == (hdr->elmt_fac.fac[idx] = H5FL_fac_init(nelmts * (size_t)hdr->cparam.cls->nat_elmt_size)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL, "can't create data block data element buffer factory");
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL,
+                        "can't create data block data element buffer factory");
     } /* end if */
 
     /* Allocate buffer for elements in index block */
@@ -367,8 +368,9 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
                         "min # of elements per data block must be power of two");
         dblk_page_nelmts = (size_t)1 << cparam->max_dblk_page_nelmts_bits;
         if (dblk_page_nelmts < cparam->idx_blk_elmts)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "# of elements per data block page must be greater than # of elements in index block");
+            HGOTO_ERROR(
+                H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
+                "# of elements per data block page must be greater than # of elements in index block");
 
         /* Compute the number of elements in data blocks for first actual super block */
         sblk_idx    = H5EA_SBLK_FIRST_IDX(cparam->sup_blk_min_data_ptrs);
@@ -670,7 +672,8 @@ H5EA__hdr_unprotect(H5EA_hdr_t *hdr, unsigned cache_flags)
     /* Unprotect the header */
     if (H5AC_unprotect(hdr->f, H5AC_EARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
-                    "unable to unprotect extensible array hdr, address = %llu", (unsigned long long)hdr->addr);
+                    "unable to unprotect extensible array hdr, address = %llu",
+                    (unsigned long long)hdr->addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

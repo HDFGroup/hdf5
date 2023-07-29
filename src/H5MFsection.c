@@ -464,7 +464,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
             /* See if section can absorb the aggregator & vice versa */
             if ((status = H5MF__aggr_can_absorb(udata->f, &(udata->f->shared->meta_aggr), sect,
                                                 &(udata->shrink))) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "error merging section with aggregation block");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL,
+                            "error merging section with aggregation block");
             else if (status > 0) {
                 /* Set the aggregator to operate on */
                 udata->aggr = &(udata->f->shared->meta_aggr);
@@ -485,7 +486,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
             /* See if section can absorb the aggregator & vice versa */
             if ((status = H5MF__aggr_can_absorb(udata->f, &(udata->f->shared->sdata_aggr), sect,
                                                 &(udata->shrink))) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "error merging section with aggregation block");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL,
+                            "error merging section with aggregation block");
             else if (status > 0) {
                 /* Set the aggregator to operate on */
                 udata->aggr = &(udata->f->shared->sdata_aggr);

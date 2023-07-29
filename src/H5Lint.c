@@ -1107,7 +1107,8 @@ H5L__get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
 
     /* Traverse the group hierarchy to locate the object to get info about */
     if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_val_by_idx_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info for index: %llu", (unsigned long long)n);
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info for index: %llu",
+                    (unsigned long long)n);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

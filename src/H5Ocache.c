@@ -779,7 +779,8 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
 
     /* Serialize messages for this chunk */
     if (H5O__chunk_serialize(f, chk_proxy->oh, chk_proxy->chunkno) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "unable to serialize object header continuation chunk");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL,
+                    "unable to serialize object header continuation chunk");
 
     /* copy the chunk into the image -- this is potentially expensive.
      * Can we rework things so that the chunk and the cache share a buffer?

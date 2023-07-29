@@ -277,7 +277,8 @@ H5HF__space_revert_root(const H5HF_hdr_t *hdr)
     if (hdr->fspace)
         /* Iterate over all sections, resetting the parent pointers in 'single' sections */
         if (H5FS_sect_iterate(hdr->f, hdr->fspace, H5HF__space_revert_root_cb, NULL) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over sections to reset parent pointers");
+            HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL,
+                        "can't iterate over sections to reset parent pointers");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -220,9 +220,9 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
 
                     /* Check for overlapping into file's temporary allocation space */
                     if (H5_addr_gt((aggr->addr + aggr->size + ext_size), f->shared->tmp_addr))
-                        HGOTO_ERROR(
-                            H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF,
-                            "'normal' file space allocation request will overlap into 'temporary' file space");
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF,
+                                    "'normal' file space allocation request will overlap into 'temporary' "
+                                    "file space");
 
                     if ((aggr->addr > 0) &&
                         (extended = H5F__try_extend(f, alloc_type, (aggr->addr + aggr->size), ext_size)) < 0)
@@ -250,7 +250,8 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                         /* Allocate space from the VFD (i.e. at the end of the file) */
                         if (HADDR_UNDEF ==
                             (ret_value = H5F__alloc(f, alloc_type, size, &eoa_frag_addr, &eoa_frag_size)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF,
+                                        "can't allocate file space");
                     } /* end else */
                 }     /* end if */
                 else {
@@ -266,9 +267,9 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
 
                     /* Check for overlapping into file's temporary allocation space */
                     if (H5_addr_gt((aggr->addr + aggr->size + ext_size), f->shared->tmp_addr))
-                        HGOTO_ERROR(
-                            H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF,
-                            "'normal' file space allocation request will overlap into 'temporary' file space");
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF,
+                                    "'normal' file space allocation request will overlap into 'temporary' "
+                                    "file space");
 
                     if ((aggr->addr > 0) &&
                         (extended = H5F__try_extend(f, alloc_type, (aggr->addr + aggr->size), ext_size)) < 0)
@@ -297,7 +298,8 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                         /* Allocate space from the VFD (i.e. at the end of the file) */
                         if (HADDR_UNDEF == (new_space = H5F__alloc(f, alloc_type, aggr->alloc_size,
                                                                    &eoa_frag_addr, &eoa_frag_size)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF,
+                                        "can't allocate file space");
 
                         /* Return the unused portion of the block to a free list */
                         if (aggr->size > 0)

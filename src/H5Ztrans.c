@@ -864,7 +864,8 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
         case H5Z_XFORM_DIVIDE:
         case H5Z_XFORM_ERROR:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Invalid token while parsing data transform expression");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+                        "Invalid token while parsing data transform expression");
     }
 
     /* Set return value */

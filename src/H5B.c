@@ -795,7 +795,8 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, H5B_INS_ERROR, "can't retrieve B-tree's shared ref. count object");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, H5B_INS_ERROR,
+                    "can't retrieve B-tree's shared ref. count object");
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
     assert(shared);
 
@@ -886,7 +887,8 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
         /* Since we are to the left of the leftmost key there must not be a left
          * sibling */
         if (H5_addr_defined(bt->left))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "internal error: likely corrupt key values");
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
+                        "internal error: likely corrupt key values");
 #endif /* H5_STRICT_FORMAT_CHECKS */
     }
     else if (cmp > 0 && idx + 1 >= bt->nchildren) {
@@ -937,7 +939,8 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
         /* Since we are to the right of the rightmost key there must not be a
          * right sibling */
         if (H5_addr_defined(bt->right))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "internal error: likely corrupt key values");
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
+                        "internal error: likely corrupt key values");
 #endif /* H5_STRICT_FORMAT_CHECKS */
     }
     else if (cmp) {
@@ -1218,7 +1221,8 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, H5B_INS_ERROR, "can't retrieve B-tree's shared ref. count object");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, H5B_INS_ERROR,
+                    "can't retrieve B-tree's shared ref. count object");
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
     assert(shared);
 

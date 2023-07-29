@@ -214,7 +214,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             if (H5S_select_construct_projection(orig_mem_space[i], &dset_info[i].mem_space,
                                                 (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
                                                 (hsize_t)dset_info[i].type_info.dst_type_size, &buf_adj) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                            "unable to construct projected memory dataspace");
             assert(dset_info[i].mem_space);
 
             /* Adjust the buffer by the given amount */
@@ -350,7 +351,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for memory space list");
             if (NULL == (io_info.file_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for file space list");
             if (NULL == (io_info.addrs = H5MM_malloc(io_info.piece_count * sizeof(haddr_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for piece address list");
@@ -562,7 +564,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Collective access is not permissible without a MPI based VFD */
             if (io_xfer_mode == H5FD_MPIO_COLLECTIVE)
-                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based driver only");
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                            "collective access for MPI-based driver only");
         } /* end else */
 #endif    /*H5_HAVE_PARALLEL*/
 
@@ -631,7 +634,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             if (H5S_select_construct_projection(orig_mem_space[i], &dset_info[i].mem_space,
                                                 (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
                                                 dset_info[i].type_info.src_type_size, &buf_adj) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                            "unable to construct projected memory dataspace");
             assert(dset_info[i].mem_space);
 
             /* Adjust the buffer by the given amount */
@@ -754,7 +758,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for memory space list");
             if (NULL == (io_info.file_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for file space list");
             if (NULL == (io_info.addrs = H5MM_malloc(io_info.piece_count * sizeof(haddr_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for piece address list");
@@ -1357,7 +1362,8 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
         if (H5CX_get_tconv_buf(&tconv_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer");
         if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background conversion buffer pointer");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                        "can't retrieve background conversion buffer pointer");
 
         /* Check if we're doing selection I/O */
         if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {

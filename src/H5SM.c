@@ -540,7 +540,8 @@ H5SM__delete_index(H5F_t *f, H5SM_index_header_t *header, hbool_t delete_heap)
 
         /* Check the index list's status in the metadata cache */
         if (H5AC_get_entry_status(f, header->index_addr, &index_status) < 0)
-            HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "unable to check metadata cache status for direct block");
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL,
+                        "unable to check metadata cache status for direct block");
 
         /* If the index list is in the cache, expunge it now */
         if (index_status & H5AC_ES__IN_CACHE) {
@@ -2231,7 +2232,8 @@ H5SM__read_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
         /* Check if the message is dirty & flush it to the object header if so */
         if (mesg->dirty)
             if (H5O_msg_flush(udata->file, oh, mesg) < 0)
-                HGOTO_ERROR(H5E_SOHM, H5E_CANTENCODE, H5_ITER_ERROR, "unable to encode object header message");
+                HGOTO_ERROR(H5E_SOHM, H5E_CANTENCODE, H5_ITER_ERROR,
+                            "unable to encode object header message");
 
         /* Get the message's encoded size */
         udata->buf_size = mesg->raw_size;

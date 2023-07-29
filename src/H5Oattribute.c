@@ -259,7 +259,8 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
 
                 /* Create dense storage for attributes */
                 if (H5A__dense_create(loc->file, &ainfo) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create dense storage for attributes");
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+                                "unable to create dense storage for attributes");
 
                 /* Set up user data for callback */
                 udata.f     = loc->file;
@@ -809,7 +810,8 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
 
         /* Release chunk */
         if (H5O__chunk_unprotect(udata->f, chk_proxy, chk_dirtied) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR,
+                        "unable to unprotect object header chunk");
         chk_proxy = NULL;
 
         /* Update the shared attribute in the SOHM storage */
@@ -997,7 +999,8 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
 
         /* Release chunk */
         if (H5O__chunk_unprotect(udata->f, chk_proxy, chk_dirtied) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR,
+                        "unable to unprotect object header chunk");
         chk_proxy = NULL;
 
         /* Check for shared message */

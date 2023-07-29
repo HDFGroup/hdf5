@@ -515,7 +515,8 @@ H5HF__man_iblock_root_double(H5HF_hdr_t *hdr, size_t min_dblock_size)
     if (!H5F_IS_TMP_ADDR(hdr->f, iblock->addr))
         /* Free previous indirect block disk space */
         if (H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_IBLOCK, iblock->addr, (hsize_t)iblock->size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block file space");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
+                        "unable to free fractal heap indirect block file space");
 
     /* Compute size of buffer needed for new indirect block */
     iblock->nrows   = new_nrows;
@@ -525,11 +526,13 @@ H5HF__man_iblock_root_double(H5HF_hdr_t *hdr, size_t min_dblock_size)
     /* Allocate [temporary] space for the new indirect block on disk */
     if (H5F_USE_TMP_SPACE(hdr->f)) {
         if (HADDR_UNDEF == (new_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block");
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
+                        "file allocation failed for fractal heap indirect block");
     } /* end if */
     else {
         if (HADDR_UNDEF == (new_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, (hsize_t)iblock->size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block");
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
+                        "file allocation failed for fractal heap indirect block");
     } /* end else */
 
     /* Resize pinned indirect block in the cache, if its changed size */
@@ -670,7 +673,8 @@ H5HF__man_iblock_root_halve(H5HF_indirect_t *iblock)
     if (!H5F_IS_TMP_ADDR(hdr->f, iblock->addr))
         /* Free previous indirect block disk space */
         if (H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_IBLOCK, iblock->addr, (hsize_t)iblock->size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block file space");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
+                        "unable to free fractal heap indirect block file space");
 
     /* Compute free space in rows to delete */
     acc_dblock_free = 0;
@@ -686,11 +690,13 @@ H5HF__man_iblock_root_halve(H5HF_indirect_t *iblock)
     /* Allocate [temporary] space for the new indirect block on disk */
     if (H5F_USE_TMP_SPACE(hdr->f)) {
         if (HADDR_UNDEF == (new_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block");
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
+                        "file allocation failed for fractal heap indirect block");
     } /* end if */
     else {
         if (HADDR_UNDEF == (new_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, (hsize_t)iblock->size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block");
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
+                        "file allocation failed for fractal heap indirect block");
     } /* end else */
 
     /* Resize pinned indirect block in the cache, if it has changed size */

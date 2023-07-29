@@ -2068,7 +2068,8 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
 
                 case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
                     if (H5AC__rsp__dist_md_write__flush(f) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC__rsp__dist_md_write__flush() failed.");
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL,
+                                    "H5AC__rsp__dist_md_write__flush() failed.");
                     break;
 
                 default:

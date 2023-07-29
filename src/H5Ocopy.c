@@ -384,7 +384,8 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
             /* Perform "pre copy" operation on message */
             if ((copy_type->pre_copy_file)(oloc_src->file, mesg_src->native, &(deleted[mesgno]), cpy_info,
                                            cpy_udata) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message");
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+                            "unable to perform 'pre copy' operation on message");
 
             /* Check if the message should be deleted in the destination */
             if (deleted[mesgno])

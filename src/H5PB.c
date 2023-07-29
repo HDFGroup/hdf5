@@ -283,7 +283,8 @@ H5PB_create(H5F_shared_t *f_sh, size_t size, unsigned page_buf_min_meta_perc, un
 
     /* Check args */
     if (f_sh->fs_strategy != H5F_FSPACE_STRATEGY_PAGE)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "Enabling Page Buffering requires PAGE file space strategy");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                    "Enabling Page Buffering requires PAGE file space strategy");
     /* round down the size if it is larger than the page size */
     else if (size > f_sh->fs_page_size) {
         hsize_t temp_size;

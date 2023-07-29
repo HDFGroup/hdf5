@@ -1236,7 +1236,8 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
             MPI_Aint stride; /* Distance between inner MPI datatypes */
 
             if (NULL == (inner_type = (MPI_Datatype *)H5MM_malloc(alloc_count * sizeof(MPI_Datatype))))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes");
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL,
+                            "can't allocate array of inner MPI datatypes");
 
             /* Calculate the total bytes of the lower dimension */
             stride = (MPI_Aint)(*down) * (MPI_Aint)elmt_size;

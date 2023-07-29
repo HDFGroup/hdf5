@@ -381,7 +381,8 @@ H5VL__set_def_conn(void)
 
         /* Duplicate the string to parse, as it is modified as we go */
         if (NULL == (buf = H5MM_strdup(env_var)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate memory for environment variable string");
+            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL,
+                        "can't allocate memory for environment variable string");
 
         /* Get the first 'word' of the environment variable.
          * If it's nothing (environment variable was whitespace) return error.
@@ -598,7 +599,8 @@ H5VL_conn_copy(H5VL_connector_prop_t *connector_prop)
         if (connector_prop->connector_id > 0) {
             /* Increment the reference count on connector ID and copy connector info */
             if (H5I_inc_ref(connector_prop->connector_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID");
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL,
+                            "unable to increment ref count on VOL connector ID");
 
             /* Copy connector info, if it exists */
             if (connector_prop->connector_info) {
@@ -648,7 +650,8 @@ H5VL_conn_free(const H5VL_connector_prop_t *connector_prop)
                 /* Free the connector info */
                 if (H5VL_free_connector_info(connector_prop->connector_id, connector_prop->connector_info) <
                     0)
-                    HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object");
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL,
+                                "unable to release VOL connector info object");
 
             /* Decrement reference count for connector ID */
             if (H5I_dec_ref(connector_prop->connector_id) < 0)

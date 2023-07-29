@@ -1672,9 +1672,11 @@ H5O__move_msgs_forward(H5F_t *f, H5O_t *oh)
 
                         /* Protect chunks */
                         if (NULL == (null_chk_proxy = H5O__chunk_protect(f, oh, null_msg->chunkno)))
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk");
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL,
+                                        "unable to load object header chunk");
                         if (NULL == (curr_chk_proxy = H5O__chunk_protect(f, oh, curr_msg->chunkno)))
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk");
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL,
+                                        "unable to load object header chunk");
 
                         /* If the message being moved is a continuation
                          * message and we are doing SWMR writes, we must

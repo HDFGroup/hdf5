@@ -166,7 +166,8 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
 
         /* Set up type conversion function */
         if (NULL == (tpath = H5T_path_find(fill_type, buf_type)))
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype");
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                        "unable to convert between src and dest datatype");
 
         /* Construct source & destination datatype IDs, if we will need them */
         if (!H5T_path_noop(tpath)) {

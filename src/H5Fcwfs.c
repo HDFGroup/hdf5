@@ -198,7 +198,8 @@ H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "error trying to extend heap");
                 else if (was_extended == TRUE) {
                     if (H5HG_extend(f, H5HG_ADDR(f->shared->cwfs[cwfsno]), new_need) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to extend global heap collection");
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL,
+                                    "unable to extend global heap collection");
                     *addr = H5HG_ADDR(f->shared->cwfs[cwfsno]);
                     found = TRUE;
                     break;

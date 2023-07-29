@@ -1177,7 +1177,8 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
         /* Allocate 'normal' space for the new indirect block on disk */
         if (HADDR_UNDEF ==
             (iblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_IBLOCK, (hsize_t)iblock->size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block");
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL,
+                        "file allocation failed for fractal heap indirect block");
 
         /* Sanity check */
         assert(!H5_addr_eq(iblock->addr, iblock_addr));

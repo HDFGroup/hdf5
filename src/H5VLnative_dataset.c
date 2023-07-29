@@ -155,7 +155,8 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
             if (nelmts > 0) {
                 /* Create a 1-D dataspace of the same # of elements */
                 if (NULL == (dinfo[i].mem_space = H5S_create_simple(1, &nelmts, NULL)))
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace");
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL,
+                                "unable to create simple memory dataspace");
             } /* end if */
             else {
                 /* Create a NULL dataspace of the same # of elements */
@@ -696,7 +697,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             /* Call private function */
             if (H5D__get_chunk_info_by_coord(dset, gcibc_args->offset, gcibc_args->filter_mask,
                                              gcibc_args->addr, gcibc_args->size) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by its logical coordinates");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                            "can't get chunk info by its logical coordinates");
 
             break;
         }

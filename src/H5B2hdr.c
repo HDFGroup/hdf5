@@ -199,7 +199,8 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     /* Create the callback context, if the callback exists */
     if (hdr->cls->crt_context)
         if (NULL == (hdr->cb_ctx = (*hdr->cls->crt_context)(ctx_udata)))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "unable to create v2 B-tree client callback context");
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL,
+                        "unable to create v2 B-tree client callback context");
 
 done:
     if (ret_value < 0)

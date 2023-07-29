@@ -539,7 +539,8 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve local cause for breaking collective I/O");
     if (H5P_get(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME,
                 &H5CX_def_dxpl_cache.mpio_global_no_coll_cause) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve global cause for breaking collective I/O");
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
+                    "Can't retrieve global cause for breaking collective I/O");
 #endif /* H5_HAVE_PARALLEL */
 
     /* Get error detection properties */
@@ -1092,7 +1093,8 @@ H5CX_free_state(H5CX_state_t *api_state)
         if (api_state->vol_connector_prop.connector_info)
             if (H5VL_free_connector_info(api_state->vol_connector_prop.connector_id,
                                          api_state->vol_connector_prop.connector_info) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object");
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL,
+                            "unable to release VOL connector info object");
         /* Decrement connector ID */
         if (H5I_dec_ref(api_state->vol_connector_prop.connector_id) < 0)
             HDONE_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't close VOL connector ID");

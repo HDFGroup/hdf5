@@ -844,7 +844,8 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 if (H5B2__update_child_flush_depends(hdr, depth, left_node_ptrs, (unsigned)(*left_nrec + 1),
                                                      (unsigned)(*left_nrec + moved_middle_nrec + 1),
                                                      middle_child, left_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update child nodes to new parent");
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL,
+                                "unable to update child nodes to new parent");
 
             /* Update the current number of records in middle node */
             curr_middle_nrec = (uint16_t)(curr_middle_nrec - moved_middle_nrec);
@@ -904,7 +905,8 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 if (H5B2__update_child_flush_depends(hdr, depth, right_node_ptrs, 0,
                                                      (unsigned)right_nrec_move, middle_child,
                                                      right_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update child nodes to new parent");
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL,
+                                "unable to update child nodes to new parent");
 
             /* Update the current number of records in middle node */
             curr_middle_nrec = (uint16_t)(curr_middle_nrec - right_nrec_move);
@@ -961,7 +963,8 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
             if (hdr->swmr_write && depth > 1)
                 if (H5B2__update_child_flush_depends(hdr, depth, middle_node_ptrs, 0,
                                                      (unsigned)left_nrec_move, left_child, middle_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update child nodes to new parent");
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL,
+                                "unable to update child nodes to new parent");
 
             /* Update the current number of records in middle node */
             curr_middle_nrec = (uint16_t)(curr_middle_nrec + left_nrec_move);
@@ -1017,7 +1020,8 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 if (H5B2__update_child_flush_depends(
                         hdr, depth, middle_node_ptrs, (unsigned)(curr_middle_nrec + 1),
                         (unsigned)(curr_middle_nrec + right_nrec_move + 1), right_child, middle_child) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update child nodes to new parent");
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL,
+                                "unable to update child nodes to new parent");
 
             /* Mark nodes as dirty */
             middle_child_flags |= H5AC__DIRTIED_FLAG;

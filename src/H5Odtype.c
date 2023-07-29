@@ -75,7 +75,7 @@ static herr_t H5O__dtype_debug(H5F_t *f, const void *_mesg, FILE *stream, int in
 /* If the version is too low and we are allowed to change the message, upgrade
  * it and mark the object header as dirty */
 #define H5O_DTYPE_CHECK_VERSION(DT, VERS, MIN_VERS, IOF, CLASS, ERR)                                         \
-    if (((VERS) < (MIN_VERS)) && !(*(IOF) & H5O_DECODEIO_NOCHANGE)) {                                        \
+    if (((VERS) < (MIN_VERS)) && !(*(IOF)&H5O_DECODEIO_NOCHANGE)) {                                          \
         (VERS) = (MIN_VERS);                                                                                 \
         if (H5T__upgrade_version((DT), (VERS)) < 0)                                                          \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade " CLASS " encoding version");        \
@@ -407,7 +407,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                     if (ndims > 4) {
                         dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
                             H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid number of dimensions for array");
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL,
+                                    "invalid number of dimensions for array");
                     }
 
                     /* Skip reserved bytes */

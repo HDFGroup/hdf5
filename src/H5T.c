@@ -4888,7 +4888,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                         "memory allocation failed for type conversion path table");
         H5T_g.apaths = 128;
         if (NULL == (H5T_g.path[0] = H5FL_CALLOC(H5T_path_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for no-op conversion path");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                        "memory allocation failed for no-op conversion path");
         HDsnprintf(H5T_g.path[0]->name, sizeof(H5T_g.path[0]->name), "no-op");
         H5T_g.path[0]->conv.is_app     = FALSE;
         H5T_g.path[0]->conv.u.lib_func = H5T__conv_noop;

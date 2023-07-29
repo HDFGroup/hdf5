@@ -1024,7 +1024,8 @@ H5T_open(const H5G_loc_t *loc)
 
         /* Add the datatype to the list of opened objects in the file */
         if (H5FO_insert(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr, dt->shared, FALSE) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL,
+                        "can't insert datatype into list of open objects");
 
         /* Increment object count for the object in the top file */
         if (H5FO_top_incr(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)

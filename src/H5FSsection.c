@@ -593,7 +593,8 @@ H5FS__sect_increase(H5FS_t *fspace, const H5FS_section_class_t *cls, unsigned fl
         /* (if we're not deserializing the sections from disk) */
         if (!(flags & H5FS_ADD_DESERIALIZING)) {
             if (H5FS__sect_serialize_size(fspace) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTCOMPUTE, FAIL, "can't adjust free space section size on disk");
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTCOMPUTE, FAIL,
+                            "can't adjust free space section size on disk");
         } /* end if */
     }     /* end else */
 
@@ -851,7 +852,8 @@ H5FS__sect_remove_real(H5FS_t *fspace, H5FS_section_info_t *sect)
 
     /* Remove node from size tracked data structures */
     if (H5FS__sect_unlink_size(fspace->sinfo, cls, sect) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "can't remove section from size tracking data structures");
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL,
+                    "can't remove section from size tracking data structures");
 
     /* Update rest of free space manager data structures for node removal */
     if (H5FS__sect_unlink_rest(fspace, cls, sect) < 0)

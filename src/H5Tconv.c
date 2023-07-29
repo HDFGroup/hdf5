@@ -3729,7 +3729,8 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     /* Check for "nil" source reference */
                     if ((*(src->shared->u.atomic.u.r.cls->isnull))(src->shared->u.atomic.u.r.file, s,
                                                                    &is_nil) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check if reference data is 'nil'");
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL,
+                                    "can't check if reference data is 'nil'");
 
                     if (is_nil) {
                         /* Write "nil" reference to destination location */
@@ -4924,7 +4925,8 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
 
             /* Allocate the overlap buffer */
             if (NULL == (dbuf = (uint8_t *)H5MM_calloc(dst->shared->size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for string conversion");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                            "memory allocation failed for string conversion");
 
             /* The conversion loop. */
             for (elmtno = 0; elmtno < nelmts; elmtno++) {

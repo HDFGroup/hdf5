@@ -212,7 +212,8 @@ H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     /* Remove flush dependency between the proxy entry and a parent */
     if (pentry->nchildren > 0)
         if (H5AC_destroy_flush_dependency(parent, pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on proxy entry");
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
+                        "unable to remove flush dependency on proxy entry");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

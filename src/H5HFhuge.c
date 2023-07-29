@@ -142,7 +142,8 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
 
     /* Create v2 B-tree for tracking 'huge' objects */
     if (NULL == (hdr->huge_bt2 = H5B2_create(hdr->f, &bt2_cparam, hdr->f)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking 'huge' heap objects");
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL,
+                    "can't create v2 B-tree for tracking 'huge' heap objects");
 
     /* Retrieve the v2 B-tree's address in the file */
     if (H5B2_get_addr(hdr->huge_bt2, &hdr->huge_bt2_addr) < 0)
@@ -426,7 +427,8 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
         /* Insert record for tracking object in v2 B-tree */
         if (H5B2_insert(hdr->huge_bt2, ins_rec) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "couldn't insert object tracking record in v2 B-tree");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL,
+                        "couldn't insert object tracking record in v2 B-tree");
 
         /* Encode ID for user */
         *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_HUGE;
@@ -806,7 +808,8 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
 
     /* Check for filters on the heap */
     if (hdr->filter_len > 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "modifying 'huge' object with filters not supported yet");
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL,
+                    "modifying 'huge' object with filters not supported yet");
 
     /* Skip over the flag byte */
     id++;

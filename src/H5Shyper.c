@@ -65,7 +65,8 @@
          * to the projection first before adding skip */                                                     \
         if ((UDATA)->nelem > 0)                                                                              \
             if (H5S__hyper_proj_int_build_proj(UDATA) < 0)                                                   \
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, ERR, "can't add elements to projected selection"); \
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, ERR,                                              \
+                            "can't add elements to projected selection");                                    \
         (UDATA)->skip += (ADD);                                                                              \
     } while (0) /* end H5S_HYPER_PROJ_INT_ADD_SKIP() */
 
@@ -7530,7 +7531,8 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                          *  after each append call in the following codes */
                         if (H5S__hyper_clip_spans(span_a->down, span_b->down, selector, ndims - 1,
                                                   &down_a_not_b, &down_a_and_b, &down_b_not_a) < 0)
-                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL,
+                                        "can't clip hyperslab information");
 
                         /* Check for additions to the a_not_b list */
                         if (down_a_not_b) {
@@ -7640,7 +7642,8 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Check for overlaps in the 'down spans' of span 'a' & 'b' */
                         if (H5S__hyper_clip_spans(span_a->down, span_b->down, selector, ndims - 1,
                                                   &down_a_not_b, &down_a_and_b, &down_b_not_a) < 0)
-                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL,
+                                        "can't clip hyperslab information");
 
                         /* Check for additions to the a_not_b list */
                         if (down_a_not_b) {
@@ -7747,7 +7750,8 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Check for overlaps in the 'down spans' of span 'a' & 'b' */
                         if (H5S__hyper_clip_spans(span_a->down, span_b->down, selector, ndims - 1,
                                                   &down_a_not_b, &down_a_and_b, &down_b_not_a) < 0)
-                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL,
+                                        "can't clip hyperslab information");
 
                         /* Check for additions to the a_not_b list */
                         if (down_a_not_b) {
@@ -7864,7 +7868,8 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Check for overlaps in the 'down spans' of span 'a' & 'b' */
                         if (H5S__hyper_clip_spans(span_a->down, span_b->down, selector, ndims - 1,
                                                   &down_a_not_b, &down_a_and_b, &down_b_not_a) < 0)
-                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL,
+                                        "can't clip hyperslab information");
 
                         /* Check for additions to the a_not_b list */
                         if (down_a_not_b) {
@@ -10464,7 +10469,8 @@ H5S_combine_hyperslab(const H5S_t *old_space, H5S_seloper_t op, const hsize_t st
                     /* Add the new space to the space */
                     if (NULL == (new_spans = H5S__hyper_make_spans(old_space->extent.rank, start, stride,
                                                                    count, block)))
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't create hyperslab information");
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL,
+                                    "can't create hyperslab information");
                     if (NULL != old_space->select.sel_info.hslab->span_lst)
                         (*new_space)->select.sel_info.hslab->span_lst = H5S__hyper_copy_span(
                             old_space->select.sel_info.hslab->span_lst, old_space->extent.rank);
@@ -11115,7 +11121,8 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                             if (NULL == (copied_span_info = H5S__hyper_copy_span_helper(
                                              udata->ds_span[udata->depth]->down,
                                              udata->ds_rank - udata->depth, 1, udata->op_gen)))
-                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination spans");
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL,
+                                            "can't copy destination spans");
                             if (H5S__hyper_append_span(
                                     &udata->ps_span_info[udata->depth], udata->ds_rank - udata->depth,
                                     udata->ds_low[udata->depth],
@@ -11256,7 +11263,8 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                             if (NULL == (copied_span_info = H5S__hyper_copy_span_helper(
                                              udata->ds_span[udata->depth]->down,
                                              udata->ds_rank - udata->depth, 1, udata->op_gen)))
-                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination spans");
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL,
+                                            "can't copy destination spans");
                             if (H5S__hyper_append_span(
                                     &udata->ps_span_info[udata->depth], udata->ds_rank - udata->depth,
                                     udata->ds_low[udata->depth],
@@ -11715,7 +11723,8 @@ H5S__hyper_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
         if (NULL == (ds_span_info_buf =
                          H5S__hyper_make_spans(H5S_GET_EXTENT_NDIMS(dst_space), H5S_hyper_zeros_g,
                                                H5S_hyper_zeros_g, H5S_hyper_ones_g, dst_space->extent.size)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't create span tree for ALL destination space");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
+                        "can't create span tree for ALL destination space");
         ds_span_info = ds_span_info_buf;
     } /* end else */
 

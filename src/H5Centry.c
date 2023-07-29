@@ -390,7 +390,8 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 
     if (entry_ptr->flush_dep_nparents > 0)
         if (H5C__mark_flush_dep_serialized(entry_ptr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents");
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
+                        "Can't propagate serialization status to fd parents");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1186,7 +1187,8 @@ H5C__load_entry(H5F_t *f,
 
         /* Check for too many tries */
         if (tries == 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "incorrect metadata checksum after all read attempts");
+            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL,
+                        "incorrect metadata checksum after all read attempts");
 
         /* Calculate and track the # of retries */
         retries = max_tries - tries;
@@ -2435,7 +2437,8 @@ H5C_mark_entry_dirty(void *thing)
              */
             if (entry_ptr->type->notify &&
                 (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_DIRTIED, entry_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry dirty flag set");
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
+                            "can't notify client about entry dirty flag set");
 
             /* Propagate the dirty flag up the flush dependency chain if appropriate */
             if (entry_ptr->flush_dep_nparents > 0)
@@ -2872,7 +2875,8 @@ H5C_resize_entry(void *thing, size_t new_size)
              */
             if (entry_ptr->type->notify &&
                 (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_DIRTIED, entry_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry dirty flag set");
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
+                            "can't notify client about entry dirty flag set");
 
             /* Propagate the dirty flag up the flush dependency chain if appropriate */
             if (entry_ptr->flush_dep_nparents > 0)
@@ -3569,7 +3573,8 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
              */
             if (entry_ptr->type->notify &&
                 (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_DIRTIED, entry_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry dirty flag set");
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
+                            "can't notify client about entry dirty flag set");
 
             /* Propagate the flush dep dirty flag up the flush dependency chain
              * if appropriate

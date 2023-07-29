@@ -348,7 +348,8 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 
     /* Copy properties of the file access property list */
     if (H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &(f->shared->mdc_initCacheCfg)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set initial metadata cache resize config.");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
+                    "can't set initial metadata cache resize config.");
     if (H5P_set(new_plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, &(f->shared->rdcc_nslots)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set data cache number of slots");
     if (H5P_set(new_plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(f->shared->rdcc_nbytes)) < 0)
@@ -418,7 +419,8 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 #endif /* H5_HAVE_PARALLEL */
     if (H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) <
         0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set initial metadata cache resize config.");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
+                    "can't set initial metadata cache resize config.");
 
     /* Prepare the driver property */
     driver_prop.driver_id         = f->shared->lf->driver_id;
@@ -1223,7 +1225,8 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         /* Require the SWMR feature flag if SWMR I/O is desired */
         if (!H5F_HAS_FEATURE(f, H5FD_FEAT_SUPPORTS_SWMR_IO) &&
             (H5F_INTENT(f) & (H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ)))
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "must use a SWMR-compatible VFD when SWMR is specified");
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL,
+                        "must use a SWMR-compatible VFD when SWMR is specified");
 
         if (H5FD_get_fs_type_map(lf, f->shared->fs_type_map) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get free space type mapping from VFD");
@@ -2749,7 +2752,8 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
              */
             want_posix_fd = TRUE;
             if (H5P_set(new_fapl, H5F_ACS_WANT_POSIX_FD_NAME, &want_posix_fd) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property for retrieving file descriptor");
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                            "can't set property for retrieving file descriptor");
 
             /* Retrieve the file handle */
             if (H5F_get_vfd_handle(f, new_fapl_id, (void **)&fd) < 0)

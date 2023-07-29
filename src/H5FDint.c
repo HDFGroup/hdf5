@@ -980,7 +980,8 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
 
         /* Make sure both memory and file sequences terminated at the same time */
         if (mem_seq_i < mem_nseq)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                        "file selection terminated before memory selection");
 
         /* Terminate iterators */
         if (H5S_SELECT_ITER_RELEASE(file_iter) < 0)
@@ -1621,7 +1622,8 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
 
         /* Make sure both memory and file sequences terminated at the same time */
         if (mem_seq_i < mem_nseq)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                        "file selection terminated before memory selection");
 
         /* Terminate iterators */
         if (H5S_SELECT_ITER_RELEASE(file_iter) < 0)

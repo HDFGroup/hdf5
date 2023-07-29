@@ -346,7 +346,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     mesg->u.chunk.enc_bytes_per_dim = *p++;
 
                     if (mesg->u.chunk.enc_bytes_per_dim == 0 || mesg->u.chunk.enc_bytes_per_dim > 8)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "encoded chunk dimension size is too large");
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                    "encoded chunk dimension size is too large");
 
                     if (H5_IS_BUFFER_OVERFLOW(p, (mesg->u.chunk.ndims * mesg->u.chunk.enc_bytes_per_dim),
                                               p_end))
@@ -642,7 +643,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                         if (H5S_SELECT_DESERIALIZE(&mesg->storage.u.virt.list[i].source_select, &heap_block_p,
                                                    (size_t)(avail_buffer_space)) < 0)
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode source space selection");
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL,
+                                        "can't decode source space selection");
 
                         /* Virtual selection */
 

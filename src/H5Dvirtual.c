@@ -1754,7 +1754,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                         /* Clip source selection */
                         if (H5S_hyper_clip_unlim(storage->list[i].source_dset.clipped_source_select,
                                                  clip_size))
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
+                                        "failed to clip unlimited selection");
 
                         /* Update cached value clip_size_source */
                         storage->list[i].clip_size_source = clip_size;
@@ -1839,7 +1840,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                          storage->list[i].sub_dset[j].virtual_select) &&
                         storage->list[i].sub_dset[j].clipped_virtual_select)
                         if (H5S_set_extent(storage->list[i].sub_dset[j].clipped_virtual_select, new_dims) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                                        "unable to modify size of dataspace");
                 } /* end if */
                 else
                     assert(!storage->list[i].sub_dset[j].clipped_virtual_select);
@@ -1952,12 +1954,14 @@ H5D__virtual_init_all(const H5D_t *dset)
                         /* Clip virtual selection to extent */
                         if (H5S_hyper_clip_unlim(storage->list[i].source_dset.clipped_virtual_select,
                                                  virtual_dims[storage->list[i].unlim_dim_virtual]))
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
+                                        "failed to clip unlimited selection");
 
                         /* Clip source selection to clip_size */
                         if (H5S_hyper_clip_unlim(storage->list[i].source_dset.clipped_source_select,
                                                  clip_size))
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
+                                        "failed to clip unlimited selection");
                     } /* end if */
                     else {
                         /* Get size that virtual selection will be clipped to to
@@ -1970,12 +1974,14 @@ H5D__virtual_init_all(const H5D_t *dset)
                         /* Clip virtual selection to clip_size */
                         if (H5S_hyper_clip_unlim(storage->list[i].source_dset.clipped_virtual_select,
                                                  clip_size))
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
+                                        "failed to clip unlimited selection");
 
                         /* Clip source selection to extent */
                         if (H5S_hyper_clip_unlim(storage->list[i].source_dset.clipped_source_select,
                                                  source_dims[storage->list[i].unlim_dim_source]))
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL,
+                                        "failed to clip unlimited selection");
                     } /* end else */
                 }     /* end if */
                 else {
@@ -2000,7 +2006,8 @@ H5D__virtual_init_all(const H5D_t *dset)
                     /* Allocate sub_dset array */
                     if (NULL == (storage->list[i].sub_dset = (H5O_storage_virtual_srcdset_t *)H5MM_calloc(
                                      sub_dset_max * sizeof(H5O_storage_virtual_srcdset_t))))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate sub dataset array");
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "unable to allocate sub dataset array");
 
                     /* Update sub_dset_nalloc */
                     storage->list[i].sub_dset_nalloc = sub_dset_max;
@@ -2040,7 +2047,8 @@ H5D__virtual_init_all(const H5D_t *dset)
                                 storage->list[i].source_dset_name, storage->list[i].parsed_source_dset_name,
                                 storage->list[i].psdn_static_strlen, storage->list[i].psdn_nsubs, j,
                                 &storage->list[i].sub_dset[j].dset_name) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to build source dataset name");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                        "unable to build source dataset name");
 
                     /* Resolve virtual selection for block */
                     if (!storage->list[i].sub_dset[j].virtual_select)
@@ -2135,9 +2143,9 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
 
     /* Check that the dimensions of the VDS are large enough */
     if (H5D_virtual_check_min_dims(dset) < 0)
-        HGOTO_ERROR(
-            H5E_ARGS, H5E_BADVALUE, FAIL,
-            "virtual dataset dimensions not large enough to contain all limited dimensions in all selections");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "virtual dataset dimensions not large enough to contain all limited dimensions in all "
+                    "selections");
 
     /* Patch the virtual selection dataspaces.  Note we always patch the space
      * status because this layout could be from an old version held in the
@@ -2445,7 +2453,8 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
 
                         /* Temporarily set extent of virtual selection to bounds */
                         if (H5S_set_extent(storage->list[i].sub_dset[j].virtual_select, vbounds_end) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                                        "unable to modify size of dataspace");
 
                         /* Get current VDS dimensions */
                         if (H5S_get_simple_extent_dims(dset->shared->space, tmp_dims, NULL) < 0)
@@ -2475,9 +2484,11 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                         /* Set extents of virtual_select and
                          * clipped_virtual_select to virtual extent */
                         if (H5S_set_extent(storage->list[i].sub_dset[j].virtual_select, tmp_dims) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                                        "unable to modify size of dataspace");
                         if (H5S_set_extent(storage->list[i].sub_dset[j].clipped_virtual_select, tmp_dims) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                                        "unable to modify size of dataspace");
                     } /* end if */
                 }     /* end if */
 

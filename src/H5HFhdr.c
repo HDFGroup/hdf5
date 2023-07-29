@@ -940,7 +940,8 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
 
             /* Get information about new iterator location */
             if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location");
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
+                            "unable to retrieve current block iterator location");
         } /* end if */
 
         do {

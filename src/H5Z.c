@@ -1091,7 +1091,8 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
         if (cd_nelmts > H5Z_COMMON_CD_VALUES) {
             pline->filter[idx].cd_values = (unsigned *)H5MM_malloc(cd_nelmts * sizeof(unsigned));
             if (NULL == pline->filter[idx].cd_values)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter parameters");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                            "memory allocation failed for filter parameters");
         } /* end if */
         else
             pline->filter[idx].cd_values = pline->filter[idx]._cd_values;

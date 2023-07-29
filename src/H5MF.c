@@ -1503,11 +1503,13 @@ H5MF_close(H5F_t *f)
 
     if (H5F_PAGED_AGGR(f)) {
         if ((ret_value = H5MF__close_pagefs(f)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'page' file space");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL,
+                        "can't close free-space managers for 'page' file space");
     }
     else {
         if ((ret_value = H5MF__close_aggrfs(f)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'aggr' file space");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL,
+                        "can't close free-space managers for 'aggr' file space");
     }
 
 done:
@@ -3185,7 +3187,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
             if (sm_hdr_fspace)
                 if (H5FS_vfd_alloc_hdr_and_section_info_if_needed(
                         f, sm_hdr_fspace, &(f->shared->fs_addr[sm_fshdr_fs_type])) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't vfd allocate sm hdr FSM file space");
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "can't vfd allocate sm hdr FSM file space");
 
             if (sm_sinfo_fspace && (sm_sinfo_fspace != sm_hdr_fspace))
                 if (H5FS_vfd_alloc_hdr_and_section_info_if_needed(

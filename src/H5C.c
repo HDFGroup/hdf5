@@ -1242,7 +1242,8 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                         "initial_size must be in the interval [min_size, max_size]");
         if ((config_ptr->min_clean_fraction < 0.0) || (config_ptr->min_clean_fraction > 1.0))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_clean_fraction must be in the interval [0.0, 1.0]");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                        "min_clean_fraction must be in the interval [0.0, 1.0]");
         if (config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too small");
         if (config_ptr->epoch_length > H5C__MAX_AR_EPOCH_LENGTH)

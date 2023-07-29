@@ -763,7 +763,8 @@ H5S_get_select_num_elem_non_unlim(const H5S_t *space, hsize_t *num_elem_non_unli
 
     /* Check for selection callback */
     if (!space->select.type->num_elem_non_unlim)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type has no num_elem_non_unlim callback");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+                    "selection type has no num_elem_non_unlim callback");
 
     /* Make selection callback */
     if ((*space->select.type->num_elem_non_unlim)(space, num_elem_non_unlim) < 0)

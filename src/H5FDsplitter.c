@@ -1530,7 +1530,8 @@ H5FD__splitter_delete(const char *filename, hid_t fapl_id)
             if (*default_fapl->wo_path == '\0')
                 if (H5FD__splitter_get_default_wo_path(default_fapl->wo_path, H5FD_SPLITTER_PATH_MAX + 1,
                                                        filename) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't generate default filename for W/O channel");
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL,
+                                "can't generate default filename for W/O channel");
 
             fapl_ptr = default_fapl;
         }

@@ -2327,7 +2327,8 @@ H5D__piece_mem_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, u
          */
         /* Get the chunk node from the skip list */
         if (NULL == (piece_info = (H5D_piece_info_t *)H5SL_search(fm->dset_sel_pieces, &chunk_index)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, H5_ITER_ERROR, "can't locate piece in dataset skip list");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, H5_ITER_ERROR,
+                        "can't locate piece in dataset skip list");
 
         /* Check if the chunk already has a memory space */
         if (NULL == piece_info->mspace)
@@ -3373,7 +3374,8 @@ H5D__chunk_io_term(H5D_io_info_t H5_ATTR_UNUSED *io_info, H5D_dset_io_info_t *di
     /* Free the memory piece dataspace template */
     if (fm->mchunk_tmpl)
         if (H5S_close(fm->mchunk_tmpl) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL,
+                        "can't release memory chunk dataspace template");
 
     /* Free chunk map */
     di->layout_io_info.chunk_map = H5FL_FREE(H5D_chunk_map_t, di->layout_io_info.chunk_map);
@@ -3934,7 +3936,8 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
              */
             if (H5D__chunk_file_alloc(&idx_info, &(ent->chunk_block), &udata.chunk_block, &need_insert,
                                       ent->scaled) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert/resize chunk on chunk level");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL,
+                            "unable to insert/resize chunk on chunk level");
 
             /* Update the chunk entry's info, in case it was allocated or relocated */
             ent->chunk_block.offset = udata.chunk_block.offset;
@@ -5113,7 +5116,8 @@ H5D__chunk_allocate(const H5D_t *dset, hbool_t full_overwrite, const hsize_t old
 
             /* Allocate the chunk (with all processes) */
             if (H5D__chunk_file_alloc(&idx_info, NULL, &udata.chunk_block, &need_insert, scaled) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert/resize chunk on chunk level");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL,
+                            "unable to insert/resize chunk on chunk level");
             assert(H5_addr_defined(udata.chunk_block.offset));
 
             /* Check if fill values should be written to chunks */
@@ -6315,7 +6319,8 @@ H5D__chunk_addrmap(const H5D_t *dset, haddr_t chunk_addr[])
 
     /* Iterate over chunks to build mapping of chunk addresses */
     if ((sc->ops->iterate)(&idx_info, H5D__chunk_addrmap_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to iterate over chunk index to build address map");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                    "unable to iterate over chunk index to build address map");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

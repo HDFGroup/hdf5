@@ -1730,7 +1730,8 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
         assert(H5D_COMPACT == dataset->shared->layout.storage.type);
 
         if ((dset_nelemts = H5S_GET_EXTENT_NPOINTS(dataset->shared->space)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of elements in dataset's dataspace");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                        "can't get number of elements in dataset's dataspace");
 
         dset_data_size = (size_t)dset_nelemts * dset_type_size;
 
@@ -2255,7 +2256,8 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, hbool_t full_overwr
                     if (layout->storage.u.contig.size > 0) {
                         /* Reserve space in the file for the entire array */
                         if (H5D__contig_alloc(f, &layout->storage.u.contig /*out*/) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage");
+                            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
+                                        "unable to initialize contiguous storage");
 
                         /* Indicate that we should initialize storage space */
                         must_init_space = TRUE;
@@ -3026,7 +3028,8 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
 
                 /* Compute the scaled dimension size value */
                 if (dset->shared->layout.u.chunk.dim[dim_idx] == 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", dim_idx);
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ",
+                                dim_idx);
 
                 scaled = size[dim_idx] / dset->shared->layout.u.chunk.dim[dim_idx];
 

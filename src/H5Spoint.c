@@ -1389,7 +1389,8 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
     else {
         /* Skip over the remainder of the header */
         if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 8, p_end))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection headers");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
+                        "buffer overflow while decoding selection headers");
         pp += 8;
         enc_size = H5S_SELECT_INFO_ENC_SIZE_4;
     }
@@ -1468,7 +1469,8 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
     coordinate_buffer_requirement = num_elem * rank * enc_type_size;
 
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, coordinate_buffer_requirement, p_end))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection coordinates");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
+                    "buffer overflow while decoding selection coordinates");
 
     /* Retrieve the coordinates from the buffer */
     for (tcoord = coord, i = 0; i < num_elem; i++)

@@ -1416,7 +1416,8 @@ H5F__super_init(H5F_t *f)
 
             /* Allocate space for the driver info */
             if (NULL == (drvinfo = (H5O_drvinfo_t *)H5MM_calloc(sizeof(H5O_drvinfo_t))))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed for driver info message");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for driver info message");
 
             /* Set up driver info message */
             /* (NOTE: All the actual information (name & driver information) is

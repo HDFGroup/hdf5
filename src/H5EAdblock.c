@@ -180,7 +180,8 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, void *parent, hbool_t *stats_changed, hsize
 
     /* Cache the new extensible array data block */
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF, "can't add extensible array data block to cache");
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF,
+                    "can't add extensible array data block to cache");
     inserted = TRUE;
 
     /* Add data block as child of 'top' proxy */
