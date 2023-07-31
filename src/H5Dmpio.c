@@ -236,8 +236,18 @@ typedef struct H5D_filtered_collective_chunk_info_t {
  * chunk info structures for collective filtered I/O, as well as other useful information.
  * The struct's fields are as follows:
  *
- * chunk_infos - An array of H5D_filtered_collective_chunk_info_t structures that contain
- *               information about a single chunk when performing collective filtered I/O.
+ * chunk_infos - An array of H5D_filtered_collective_chunk_info_t structures that each
+ *               contain information about a single chunk when performing collective filtered
+ *               I/O.
+ *
+ * chunk_hash_table - A hash table storing H5D_filtered_collective_chunk_info_t structures
+ *                    that is populated when chunk modification data has to be shared between
+ *                    MPI processes during collective filtered I/O. This hash table facilitates
+ *                    quicker and easier lookup of a particular chunk by its "chunk index"
+ *                    value when applying chunk data modification messages from another MPI
+ *                    process. Each modification message received from another MPI process
+ *                    will contain the chunk's "chunk index" value that can be used for chunk
+ *                    lookup operations.
  *
  * num_chunks_infos - The number of entries in the `chunk_infos` array.
  *
@@ -3211,20 +3221,6 @@ H5D__mpio_redistribute_shared_chunks(H5D_filtered_collective_io_info_t *chunk_li
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREDISTRIBUTE, FAIL, "can't redistribute shared chunks")
 
     /*
-     * Now that chunks have been redistributed, each rank must update
-     * their chunk list struct's `num_chunks_to_read` field since it
-     * may now be out of date.
-     */
-    for (i = 0; i < chunk_list->num_chunk_infos; i++) {
-        if ((chunk_list->chunk_infos[i].new_owner != mpi_rank) && chunk_list->chunk_infos[i].need_read) {
-            chunk_list->chunk_infos[i].need_read = FALSE;
-
-            assert(chunk_list->num_chunks_to_read > 0);
-            chunk_list->num_chunks_to_read--;
-        }
-    }
-
-    /*
      * If the caller provided a pointer for the mapping from
      * rank value -> number of chunks assigned, return that
      * mapping here.
@@ -5512,8 +5508,10 @@ H5D__mpio_collective_filtered_vec_io(const H5D_filtered_collective_io_info_t *ch
              * not equal to it; file addresses should only appear in the
              * chunk list once.
              */
+#ifndef NDEBUG
             if (vec_idx > 0)
                 assert(io_addrs[vec_idx] > io_addrs[vec_idx - 1]);
+#endif
 
             io_sizes[vec_idx] = (size_t)chunk_block->length;
 
