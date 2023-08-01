@@ -21,9 +21,9 @@ Project starts 2022-01-01
 [1.10.11] displays on same row as [1.10.9]
 [1.10] is colored in #F6DD60
 
-[1.12] starts 2022-01-01 and lasts 96 weeks
+[1.12] starts 2022-01-01 and lasts 100 weeks
 [1.12.2] happens 2022-04-30
-[1.12.3] happens 2023-10-31
+[1.12.3] happens 2023-11-30
 [1.12.3] displays on same row as [1.12.2]
 [1.12] is colored in #88CCEE
 
@@ -31,8 +31,10 @@ Project starts 2022-01-01
 [1.14.0] happens at 2022-12-31
 [1.14.1] happens at 2023-04-30
 [1.14.2] happens at 2023-08-31
+[1.14.3] happens at 2023-10-31
 [1.14.1] displays on same row as [1.14.0]
 [1.14.2] displays on same row as [1.14.0]
+[1.14.3] displays on same row as [1.14.0]
 [1.14] is colored in #B187CF
 
 @endgantt
