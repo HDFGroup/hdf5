@@ -179,16 +179,16 @@ const char *FILESPACE_NAME[] = {"tfilespace", NULL};
 #define DSET_DS1 "DS1"
 
 /* Declarations for test_get_datatype_count() */
-#define DATATYPE_OBJ_COUNT_FILENAME_1 "datatype_obj_count_file1"
-#define DATATYPE_OBJ_COUNT_FILENAME_2 "datatype_obj_count_file2"
-#define DATATYPE_OBJ_COUNT_DATASET_NAME_1 "datatype_obj_count_dset1"
-#define DATATYPE_OBJ_COUNT_DATASET_NAME_2 "datatype_obj_count_dset2"
-#define DATATYPE_OBJ_COUNT_DATASET_NAME_3 "datatype_obj_count_dset3"
-#define DATATYPE_OBJ_COUNT_DATASET_NAME_4 "datatype_obj_count_dset4"
+#define DATATYPE_OBJ_COUNT_FILENAME_1         "datatype_obj_count_file1"
+#define DATATYPE_OBJ_COUNT_FILENAME_2         "datatype_obj_count_file2"
+#define DATATYPE_OBJ_COUNT_DATASET_NAME_1     "datatype_obj_count_dset1"
+#define DATATYPE_OBJ_COUNT_DATASET_NAME_2     "datatype_obj_count_dset2"
+#define DATATYPE_OBJ_COUNT_DATASET_NAME_3     "datatype_obj_count_dset3"
+#define DATATYPE_OBJ_COUNT_DATASET_NAME_4     "datatype_obj_count_dset4"
 #define DATATYPE_OBJ_COUNT_TRANSIENT_DATATYPE H5T_NATIVE_INT
-#define DATATYPE_OBJ_COUNT_DATATYPE_NAME_1 "datatype_obj_count_type1"
-#define DATATYPE_OBJ_COUNT_DATATYPE_NAME_2 "datatype_obj_count_type2"
-#define DATATYPE_OBJ_COUNT_DSPACE_EXTENT 100
+#define DATATYPE_OBJ_COUNT_DATATYPE_NAME_1    "datatype_obj_count_type1"
+#define DATATYPE_OBJ_COUNT_DATATYPE_NAME_2    "datatype_obj_count_type2"
+#define DATATYPE_OBJ_COUNT_DSPACE_EXTENT      100
 
 /* Local test function declarations for version bounds */
 static void test_libver_bounds_low_high(const char *env_h5_drvr);
@@ -1306,10 +1306,11 @@ test_get_obj_ids(void)
 **
 ****************************************************************/
 static void
-test_get_datatype_count(void) {
+test_get_datatype_count(void)
+{
     hid_t file_id1 = H5I_INVALID_HID;
     hid_t file_id2 = H5I_INVALID_HID;
-    
+
     hid_t dset_id1 = H5I_INVALID_HID;
     hid_t dset_id2 = H5I_INVALID_HID;
     hid_t dset_id3 = H5I_INVALID_HID;
@@ -1319,11 +1320,11 @@ test_get_datatype_count(void) {
     hid_t type_id2 = H5I_INVALID_HID;
     hid_t type_id3 = H5I_INVALID_HID;
 
-    hid_t dspace_id = H5I_INVALID_HID;
-    hsize_t dims[1] = {DATATYPE_OBJ_COUNT_DSPACE_EXTENT};
+    hid_t   dspace_id = H5I_INVALID_HID;
+    hsize_t dims[1]   = {DATATYPE_OBJ_COUNT_DSPACE_EXTENT};
 
     ssize_t obj_count = 0;
-    herr_t ret = FAIL;
+    herr_t  ret       = FAIL;
 
     /* Check that no other files are open at the start of the test */
     obj_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL);
@@ -1336,7 +1337,8 @@ test_get_datatype_count(void) {
     dspace_id = H5Screate_simple(1, dims, NULL);
     CHECK(dspace_id, H5I_INVALID_HID, "H5Screate_simple");
 
-    dset_id1 = H5Dcreate2(file_id1, DATATYPE_OBJ_COUNT_DATASET_NAME_1, DATATYPE_OBJ_COUNT_TRANSIENT_DATATYPE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id1 = H5Dcreate2(file_id1, DATATYPE_OBJ_COUNT_DATASET_NAME_1, DATATYPE_OBJ_COUNT_TRANSIENT_DATATYPE,
+                          dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset_id1, H5I_INVALID_HID, "H5Dcreate2");
 
     /* H5Fget_obj_count should not count transient datatype as open object */
@@ -1346,7 +1348,8 @@ test_get_datatype_count(void) {
     type_id1 = H5Tcopy(DATATYPE_OBJ_COUNT_TRANSIENT_DATATYPE);
     CHECK(type_id1, H5I_INVALID_HID, "H5Tcopy");
 
-    ret = H5Tcommit2(file_id1, DATATYPE_OBJ_COUNT_DATATYPE_NAME_1, type_id1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    ret = H5Tcommit2(file_id1, DATATYPE_OBJ_COUNT_DATATYPE_NAME_1, type_id1, H5P_DEFAULT, H5P_DEFAULT,
+                     H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
 
     /* H5Fget_obj_count should count the committed datatype */
@@ -1373,13 +1376,15 @@ test_get_datatype_count(void) {
     file_id2 = H5Fcreate(DATATYPE_OBJ_COUNT_FILENAME_2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file_id2, H5I_INVALID_HID, "H5Fcreate");
 
-    dset_id2 = H5Dcreate2(file_id2, DATATYPE_OBJ_COUNT_DATASET_NAME_2, DATATYPE_OBJ_COUNT_TRANSIENT_DATATYPE, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id2 = H5Dcreate2(file_id2, DATATYPE_OBJ_COUNT_DATASET_NAME_2, DATATYPE_OBJ_COUNT_TRANSIENT_DATATYPE,
+                          dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset_id2, H5I_INVALID_HID, "H5Dcreate2");
-    
+
     type_id2 = H5Tcopy(DATATYPE_OBJ_COUNT_TRANSIENT_DATATYPE);
     CHECK(type_id2, H5I_INVALID_HID, "H5Tcopy");
 
-    ret = H5Tcommit2(file_id2, DATATYPE_OBJ_COUNT_DATATYPE_NAME_2, type_id2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    ret = H5Tcommit2(file_id2, DATATYPE_OBJ_COUNT_DATATYPE_NAME_2, type_id2, H5P_DEFAULT, H5P_DEFAULT,
+                     H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
 
     obj_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL);
@@ -1392,7 +1397,8 @@ test_get_datatype_count(void) {
     VERIFY(obj_count, 2, "H5Fget_obj_count");
 
     /* Create a dataset which shares a pre-existing committed datatype */
-    dset_id3 = H5Dcreate2(file_id1, DATATYPE_OBJ_COUNT_DATASET_NAME_3, type_id1, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id3 = H5Dcreate2(file_id1, DATATYPE_OBJ_COUNT_DATASET_NAME_3, type_id1, dspace_id, H5P_DEFAULT,
+                          H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset_id3, H5I_INVALID_HID, "H5Dcreate2");
 
     obj_count = H5Fget_obj_count(file_id1, H5F_OBJ_DATATYPE);
@@ -1412,7 +1418,8 @@ test_get_datatype_count(void) {
     VERIFY(obj_count, 2, "H5Fget_obj_count");
 
     /* Create dataset with copy of transient datatype */
-    dset_id4 = H5Dcreate2(file_id1, DATATYPE_OBJ_COUNT_DATASET_NAME_4, type_id3, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id4 = H5Dcreate2(file_id1, DATATYPE_OBJ_COUNT_DATASET_NAME_4, type_id3, dspace_id, H5P_DEFAULT,
+                          H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset_id4, H5I_INVALID_HID, "H5Dcreate2");
 
     obj_count = H5Fget_obj_count(file_id1, H5F_OBJ_DATATYPE);
@@ -1433,7 +1440,6 @@ test_get_datatype_count(void) {
     ret = H5Tclose(type_id3);
     CHECK(ret, FAIL, "H5Tclose");
 
-
     ret = H5Dclose(dset_id1);
     CHECK(ret, FAIL, "H5Dclose");
 
@@ -1442,10 +1448,9 @@ test_get_datatype_count(void) {
 
     ret = H5Dclose(dset_id3);
     CHECK(ret, FAIL, "H5Dclose");
-    
+
     ret = H5Dclose(dset_id4);
     CHECK(ret, FAIL, "H5Dclose");
-
 
     ret = H5Fclose(file_id1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -8320,15 +8325,15 @@ test_file(void)
     ret = h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_compatible);
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
-    test_file_create();                   /* Test file creation(also creation templates)*/
-    test_file_open(env_h5_drvr);          /* Test file opening */
-    test_file_reopen();                   /* Test file reopening */
-    test_file_close();                    /* Test file close behavior */
-    test_get_file_id();                   /* Test H5Iget_file_id */
-    test_get_obj_ids();                   /* Test H5Fget_obj_ids for Jira Issue 8528 */
-    test_get_datatype_count();            /* Test for H5Fget_obj_count for committed vs. transient datatypes */
-    test_file_perm();                     /* Test file access permissions */
-    test_file_perm2();                    /* Test file access permission again */
+    test_file_create();          /* Test file creation(also creation templates)*/
+    test_file_open(env_h5_drvr); /* Test file opening */
+    test_file_reopen();          /* Test file reopening */
+    test_file_close();           /* Test file close behavior */
+    test_get_file_id();          /* Test H5Iget_file_id */
+    test_get_obj_ids();          /* Test H5Fget_obj_ids for Jira Issue 8528 */
+    test_get_datatype_count();   /* Test for H5Fget_obj_count for committed vs. transient datatypes */
+    test_file_perm();            /* Test file access permissions */
+    test_file_perm2();           /* Test file access permission again */
     test_file_is_accessible(env_h5_drvr); /* Test detecting HDF5 files correctly */
     test_file_delete(fapl_id);            /* Test H5Fdelete */
     test_file_open_dot();                 /* Test opening objects with "." for a name */
