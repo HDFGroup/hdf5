@@ -445,7 +445,7 @@ herr_t
 H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
     void           *buf;                    /* Local pointer to application buffer */
-    void           *tmp_buf;                /* Buffer to use for type covnersion */
+    void           *tmp_buf;                /* Buffer to use for type conversion */
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info*/
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
@@ -613,7 +613,7 @@ herr_t
 H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
     const void     *buf;                    /* Local pointer to application buffer */
-    void           *tmp_buf;                /* Buffer to use for type covnersion */
+    void           *tmp_buf;                /* Buffer to use for type conversion */
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info*/
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
