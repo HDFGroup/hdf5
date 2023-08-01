@@ -89,7 +89,8 @@ layer.
 | ------- | ------------ |
 | 1.10.11 | CVE fixes, Last HDF5 1.10 release |
 | 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
-| 1.14.2 | CVE fixes, VFD SWMR (tentative) |
+| 1.14.2 | CVE fixes |
+| 1.14.2 | VFD SWMR (tentative) |
 | 2.0.0 | TBD |
 
 This list of feature release versions is also tentative, and the specific release
