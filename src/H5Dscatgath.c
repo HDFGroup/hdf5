@@ -37,9 +37,10 @@
      !(IN_PLACE_TCONV))
 
 /* Macro to determine if we're using H5D__compound_opt_write() */
-#define H5D__SCATGATH_USE_CMPD_OPT_WRITE(DSET_INFO, IN_PLACE_TCONV)                                        \
-    ((DSET_INFO)->type_info.cmpd_subset && H5T_SUBSET_DST == (DSET_INFO)->type_info.cmpd_subset->subset && \
-    (DSET_INFO)->type_info.dst_type_size == (DSET_INFO)->type_info.cmpd_subset->copy_size && !(IN_PLACE_TCONV))
+#define H5D__SCATGATH_USE_CMPD_OPT_WRITE(DSET_INFO, IN_PLACE_TCONV)                                          \
+    ((DSET_INFO)->type_info.cmpd_subset && H5T_SUBSET_DST == (DSET_INFO)->type_info.cmpd_subset->subset &&   \
+     (DSET_INFO)->type_info.dst_type_size == (DSET_INFO)->type_info.cmpd_subset->copy_size &&                \
+     !(IN_PLACE_TCONV))
 
 /******************/
 /* Local Typedefs */
@@ -474,7 +475,8 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
         HGOTO_DONE(SUCCEED);
 
     /* Check for in-place type conversion */
-    in_place_tconv = dset_info->layout_io_info.contig_piece_info && dset_info->layout_io_info.contig_piece_info->in_place_tconv;
+    in_place_tconv = dset_info->layout_io_info.contig_piece_info &&
+                     dset_info->layout_io_info.contig_piece_info->in_place_tconv;
 
     /* Allocate the iterators */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -504,23 +506,30 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
 
         /* Determine strip mine size. First check if we're doing in-place type conversion */
         if (in_place_tconv) {
-            /* If this is not a selection I/O operation and there is a background buffer, we cannot exceed request_nelmts.  It could be part of a selection I/O operation if this read is used to fill in a nonexistent chunk */
-            if (dset_info->type_info.need_bkg && !H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, in_place_tconv) && (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON))
-                smine_nelmts = (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
+            /* If this is not a selection I/O operation and there is a background buffer, we cannot exceed
+             * request_nelmts.  It could be part of a selection I/O operation if this read is used to fill in
+             * a nonexistent chunk */
+            if (dset_info->type_info.need_bkg &&
+                !H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, in_place_tconv) &&
+                (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON))
+                smine_nelmts =
+                    (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
             else {
                 assert(smine_start == 0);
                 smine_nelmts = dset_info->nelmts;
             }
 
             /* Calculate buffer position in user buffer */
-            tmp_buf = (uint8_t *)buf + dset_info->layout_io_info.contig_piece_info->buf_off + (smine_start * dset_info->type_info.dst_type_size);
+            tmp_buf = (uint8_t *)buf + dset_info->layout_io_info.contig_piece_info->buf_off +
+                      (smine_start * dset_info->type_info.dst_type_size);
         }
         else {
             /* Do type conversion using intermediate buffer */
             tmp_buf = io_info->tconv_buf;
 
             /* Go figure out how many elements to read from the file */
-            smine_nelmts = (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
+            smine_nelmts =
+                (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
         }
 
         /*
@@ -531,7 +540,8 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
 
         /* Fill background buffer here unless we will use H5D__compound_opt_read().  Must do this before
          * the read so the read buffer doesn't get wiped out if we're using in-place type conversion */
-        if ((H5T_BKG_YES == dset_info->type_info.need_bkg) && !H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, in_place_tconv)) {
+        if ((H5T_BKG_YES == dset_info->type_info.need_bkg) &&
+            !H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, in_place_tconv)) {
             n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, io_info->bkg_buf /*out*/);
             if (n != smine_nelmts)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
@@ -549,8 +559,8 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
          * bypass the rest of steps.
          */
         if (H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, in_place_tconv)) {
-            if (H5D__compound_opt_read(smine_nelmts, mem_iter, &dset_info->type_info, tmp_buf,
-                                       buf /*out*/) < 0)
+            if (H5D__compound_opt_read(smine_nelmts, mem_iter, &dset_info->type_info, tmp_buf, buf /*out*/) <
+                0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
@@ -558,8 +568,8 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
              * Perform datatype conversion.
              */
             if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
-                            dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
-                            tmp_buf, io_info->bkg_buf) < 0)
+                            dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0, tmp_buf,
+                            io_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
             /* Do the data transform after the conversion (since we're using type mem_type) */
@@ -570,8 +580,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
                 if (H5CX_get_data_transform(&data_transform) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
 
-                if (H5Z_xform_eval(data_transform, tmp_buf, smine_nelmts,
-                                   dset_info->type_info.mem_type) < 0)
+                if (H5Z_xform_eval(data_transform, tmp_buf, smine_nelmts, dset_info->type_info.mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
             }
 
@@ -642,7 +651,8 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
         HGOTO_DONE(SUCCEED);
 
     /* Check for in-place type conversion */
-    in_place_tconv = dset_info->layout_io_info.contig_piece_info && dset_info->layout_io_info.contig_piece_info->in_place_tconv;
+    in_place_tconv = dset_info->layout_io_info.contig_piece_info &&
+                     dset_info->layout_io_info.contig_piece_info->in_place_tconv;
 
     /* Allocate the iterators */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -673,25 +683,32 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
 
         /* Determine strip mine size. First check if we're doing in-place type conversion */
         if (in_place_tconv) {
-            /* If this is not a selection I/O operation and there is a background buffer, we cannot exceed request_nelmts.  It could be part of a selection I/O operation if this is used to write the fill value to a cached chunk that will immediately be evicted. */
-            if (dset_info->type_info.need_bkg && !H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, in_place_tconv) && (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON))
-                smine_nelmts = (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
+            /* If this is not a selection I/O operation and there is a background buffer, we cannot exceed
+             * request_nelmts.  It could be part of a selection I/O operation if this is used to write the
+             * fill value to a cached chunk that will immediately be evicted. */
+            if (dset_info->type_info.need_bkg &&
+                !H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, in_place_tconv) &&
+                (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON))
+                smine_nelmts =
+                    (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
             else {
                 assert(smine_start == 0);
                 smine_nelmts = dset_info->nelmts;
             }
 
             /* Calculate buffer position in user buffer */
-            /* Use "vp" field of union to twiddle away const.  OK because if we're doing this it means the user
-             * explicitly allowed us to modify this buffer via H5Pset_modify_write_buf(). */
-            tmp_buf = (uint8_t *)dset_info->buf.vp + dset_info->layout_io_info.contig_piece_info->buf_off + (smine_start * dset_info->type_info.dst_type_size);
+            /* Use "vp" field of union to twiddle away const.  OK because if we're doing this it means the
+             * user explicitly allowed us to modify this buffer via H5Pset_modify_write_buf(). */
+            tmp_buf = (uint8_t *)dset_info->buf.vp + dset_info->layout_io_info.contig_piece_info->buf_off +
+                      (smine_start * dset_info->type_info.dst_type_size);
         }
         else {
             /* Do type conversion using intermediate buffer */
             tmp_buf = io_info->tconv_buf;
 
             /* Go figure out how many elements to read from the file */
-            smine_nelmts = (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
+            smine_nelmts =
+                (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
 
             /*
              * Gather data from application buffer into the datatype conversion
@@ -729,8 +746,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
                 if (H5CX_get_data_transform(&data_transform) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
 
-                if (H5Z_xform_eval(data_transform, tmp_buf, smine_nelmts,
-                                   dset_info->type_info.mem_type) < 0)
+                if (H5Z_xform_eval(data_transform, tmp_buf, smine_nelmts, dset_info->type_info.mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
             }
 
@@ -738,8 +754,8 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
              * Perform datatype conversion.
              */
             if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
-                            dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
-                            tmp_buf, io_info->bkg_buf) < 0)
+                            dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0, tmp_buf,
+                            io_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
         } /* end else */
 
@@ -1228,7 +1244,8 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
         for (i = 0; i < io_info->pieces_added; i++) {
             H5D_dset_io_info_t *dset_info = io_info->sel_pieces[i]->dset_info;
 
-            if ((H5T_BKG_YES == dset_info->type_info.need_bkg) && !H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, io_info->sel_pieces[i]->in_place_tconv)) {
+            if ((H5T_BKG_YES == dset_info->type_info.need_bkg) &&
+                !H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, io_info->sel_pieces[i]->in_place_tconv)) {
                 /* Non-const write_buf[i].  Use pointer math here to avoid const warnings.  When
                  * there's a background buffer write_buf[i] always points inside the non-const tconv
                  * buf so this is OK. */

@@ -87,10 +87,10 @@ static int test_rank2(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fill_value,
                       hbool_t set_istore_k);
 static int test_rank3(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fill_value, hbool_t disable_edge_filters,
                       hbool_t set_istore_k);
-static int test_random_rank4(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fillvalue, hbool_t disable_edge_filters,
-                             hbool_t do_sparse, rank4_index_t index_type);
-static int test_random_rank4_vl(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fillvalue, hbool_t disable_edge_filters,
-                                hbool_t do_sparse, rank4_index_t index_type);
+static int test_random_rank4(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fillvalue,
+                             hbool_t disable_edge_filters, hbool_t do_sparse, rank4_index_t index_type);
+static int test_random_rank4_vl(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fillvalue,
+                                hbool_t disable_edge_filters, hbool_t do_sparse, rank4_index_t index_type);
 
 static int  test_external(hid_t fapl, hbool_t use_select_io);
 static int  test_layouts(H5D_layout_t layout, hid_t fapl, hid_t dxpl);
@@ -178,7 +178,7 @@ main(void)
 
             /* Tests which use chunked datasets */
             if (!new_format || (new_format && contig_addr_vfd)) {
-                 /* Run do_ranks() with H5D_SELECTION_IO_MODE_DEFAULT/H5D_SELECTION_IO_MODE_ON */
+                /* Run do_ranks() with H5D_SELECTION_IO_MODE_DEFAULT/H5D_SELECTION_IO_MODE_ON */
                 nerrors += do_ranks(my_fapl, new_format, FALSE) < 0 ? 1 : 0;
                 nerrors += do_ranks(my_fapl, new_format, TRUE) < 0 ? 1 : 0;
             }
@@ -186,7 +186,7 @@ main(void)
 
         /* Tests which do not use chunked datasets */
         if (!new_format || (new_format && contig_addr_vfd)) {
-             /* Run test_external() with H5D_SELECTION_IO_MODE_DEFAULT/H5D_SELECTION_IO_MODE_ON */
+            /* Run test_external() with H5D_SELECTION_IO_MODE_DEFAULT/H5D_SELECTION_IO_MODE_ON */
             nerrors += test_external(fapl, FALSE) < 0 ? 1 : 0;
             nerrors += test_external(fapl, TRUE) < 0 ? 1 : 0;
             /* Run do_layouts() with H5D_SELECTION_IO_MODE_DEFAULT/H5D_SELECTION_IO_MODE_ON */
@@ -245,12 +245,11 @@ do_ranks(hid_t fapl, hbool_t new_format, hbool_t use_select_io)
 
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
             TEST_ERROR;
-
-    } else {
+    }
+    else {
         TESTING_2("datasets with ranks 1 to 4 (all configurations)");
         printf("\n    With H5D_SELECTION_IO_MODE_DEFAULT  ");
     }
-
 
     if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
         TEST_ERROR;
@@ -357,7 +356,8 @@ do_ranks(hid_t fapl, hbool_t new_format, hbool_t use_select_io)
          */
         for (index_type = RANK4_INDEX_BTREE; index_type < RANK4_NINDICES; index_type++) {
             /* Standard test */
-            if (test_random_rank4(fapl, dcpl, dxpl, do_fillvalue, disable_edge_filters, FALSE, index_type) < 0) {
+            if (test_random_rank4(fapl, dcpl, dxpl, do_fillvalue, disable_edge_filters, FALSE, index_type) <
+                0) {
                 DO_RANKS_PRINT_CONFIG("Randomized rank 4")
                 printf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
                                              ? "btree"
@@ -367,8 +367,8 @@ do_ranks(hid_t fapl, hbool_t new_format, hbool_t use_select_io)
 
             if (!driver_is_parallel) {
                 /* VL test */
-                if (test_random_rank4_vl(fapl, dcpl, dxpl, do_fillvalue, disable_edge_filters, FALSE, index_type) <
-                    0) {
+                if (test_random_rank4_vl(fapl, dcpl, dxpl, do_fillvalue, disable_edge_filters, FALSE,
+                                         index_type) < 0) {
                     DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length")
                     printf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
                                                  ? "btree"
@@ -379,7 +379,8 @@ do_ranks(hid_t fapl, hbool_t new_format, hbool_t use_select_io)
 
             /* Sparse allocation test (regular and VL) */
             if (!(config & CONFIG_EARLY_ALLOC)) {
-                if (test_random_rank4(fapl, dcpl, dxpl, do_fillvalue, disable_edge_filters, TRUE, index_type) < 0) {
+                if (test_random_rank4(fapl, dcpl, dxpl, do_fillvalue, disable_edge_filters, TRUE,
+                                      index_type) < 0) {
                     DO_RANKS_PRINT_CONFIG("Randomized rank 4 with sparse allocation")
                     printf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
                                                  ? "btree"
@@ -437,7 +438,7 @@ static int
 do_layouts(hid_t fapl, hbool_t use_select_io)
 {
     hid_t        new_fapl = -1;
-    hid_t        dxpl = -1;
+    hid_t        dxpl     = -1;
     H5F_libver_t low, high; /* Low and high bounds */
     herr_t       ret;       /* Generic return value */
 
@@ -450,9 +451,9 @@ do_layouts(hid_t fapl, hbool_t use_select_io)
         printf("\n  With H5D_SELECTION_IO_MODE_ON         ");
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
             TEST_ERROR;
-    } else
+    }
+    else
         printf("\n  With H5D_SELECTION_IO_MODE_DEFAULT    ");
-
 
     /* Loop through all the combinations of low/high library format bounds */
     for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
@@ -489,7 +490,6 @@ do_layouts(hid_t fapl, hbool_t use_select_io)
     if (H5Pclose(dxpl) < 0)
         goto error;
 
-
     PASSED();
 
     return 0;
@@ -510,7 +510,8 @@ error:
  */
 
 static int
-test_rank1(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fill_value, hbool_t disable_edge_filters, hbool_t set_istore_k)
+test_rank1(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fill_value, hbool_t disable_edge_filters,
+           hbool_t set_istore_k)
 {
 
     hid_t   fid     = -1;
@@ -843,7 +844,8 @@ error:
  */
 
 static int
-test_rank2(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fill_value, hbool_t disable_edge_filters, hbool_t set_istore_k)
+test_rank2(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fill_value, hbool_t disable_edge_filters,
+           hbool_t set_istore_k)
 {
 
     hid_t   fid     = -1;
@@ -1337,7 +1339,8 @@ error:
  */
 
 static int
-test_rank3(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fill_value, hbool_t disable_edge_filters, hbool_t set_istore_k)
+test_rank3(hid_t fapl, hid_t dcpl, hid_t dxpl, hbool_t do_fill_value, hbool_t disable_edge_filters,
+           hbool_t set_istore_k)
 {
 
     hid_t   fid     = -1;
@@ -1814,10 +1817,10 @@ test_external(hid_t fapl, hbool_t use_select_io)
         printf("\n  With H5D_SELECTION_IO_MODE_ON         ");
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
             TEST_ERROR;
-    } else {
+    }
+    else {
         printf("\n  With H5D_SELECTION_IO_MODE_DEFAULT    ");
     }
-
 
     /* create a new file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
