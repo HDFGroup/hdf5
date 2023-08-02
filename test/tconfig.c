@@ -30,10 +30,13 @@
         vrfy_macrosize(ctype, ctype_macro, #ctype_macro);                                                    \
         /* check unsigned type size */                                                                       \
         vrfy_macrosize(uctype, ctype_macro, #ctype_macro);                                                   \
-    } while(0)
+    } while (0)
 
 /* verify C type sizes: verify the sizeof type with the macro size. */
-#define vrfy_ctype(type, macro) do {vrfy_macrosize(type, macro, #macro);} while(0)
+#define vrfy_ctype(type, macro)                                                                              \
+    do {                                                                                                     \
+        vrfy_macrosize(type, macro, #macro);                                                                 \
+    } while (0)
 
 /* verify if the sizeof(type) matches size defined in macro. */
 /* Needs this extra step so that we can print the macro name. */

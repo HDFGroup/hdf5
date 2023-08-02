@@ -37,11 +37,11 @@
     do {                                                                                                     \
         ret_code = errcode;                                                                                  \
         goto done;                                                                                           \
-    } while(0)
+    } while (0)
 #define ERRMSG(mesg)                                                                                         \
     do {                                                                                                     \
         fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);     \
-    } while(0)
+    } while (0)
 
 /* verify: if val is false (0), print mesg. */
 #define VRFY(val, mesg)                                                                                      \

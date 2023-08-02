@@ -1144,9 +1144,9 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         if (H5Pclose(close_fapl) < 0)
             H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", error);
 
-                /* Compute derived properties and open member files */
-                if (compute_next(file) < 0)
-                    H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "compute_next() failed", error);
+    /* Compute derived properties and open member files */
+    if (compute_next(file) < 0)
+        H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "compute_next() failed", error);
     if (open_members(file) < 0)
         H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "open_members() failed", error);
 

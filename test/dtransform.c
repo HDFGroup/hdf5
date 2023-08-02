@@ -85,7 +85,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                 }                                                                                            \
             }                                                                                                \
         PASSED();                                                                                            \
-    } while(0)
+    } while (0)
 
 #define COMPARE(TYPE, VAR1, VAR2, TOL)                                                                       \
     do {                                                                                                     \
@@ -101,7 +101,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                 }                                                                                            \
             }                                                                                                \
         PASSED();                                                                                            \
-    } while(0)
+    } while (0)
 
 #define COMPARE_INT(VAR1, VAR2)                                                                              \
     do {                                                                                                     \
@@ -115,7 +115,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                     goto error;                                                                              \
                 }                                                                                            \
             }                                                                                                \
-    } while(0)
+    } while (0)
 
 #define TEST_TYPE_CONTIG(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)                              \
     do {                                                                                                     \
@@ -211,7 +211,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             TEST_ERROR;                                                                                      \
                                                                                                              \
         free(array);                                                                                         \
-    } while(0)
+    } while (0)
 
 #define TEST_TYPE_CHUNK(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)                               \
     do {                                                                                                     \

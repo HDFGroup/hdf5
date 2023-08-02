@@ -38,7 +38,7 @@ static const char *progname_g = "use_disable_mdc_flushes"; /* program name */
     do {                                                                                                     \
         ret_value = val;                                                                                     \
         goto done;                                                                                           \
-    } while(0)
+    } while (0)
 
 static char   *filename_g;
 static hsize_t nplanes_g;

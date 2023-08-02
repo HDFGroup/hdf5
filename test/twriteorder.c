@@ -74,7 +74,7 @@
     do {                                                                                                     \
         ret_value = val;                                                                                     \
         goto done;                                                                                           \
-    } while(0)
+    } while (0)
 
 /* type declarations */
 typedef enum part_t {
