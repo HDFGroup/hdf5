@@ -229,7 +229,7 @@ H5_make_time(struct tm *tm)
 
     /* Perform base conversion */
     if ((time_t)-1 == (the_time = HDmktime(tm)))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message");
 
         /* Adjust for timezones */
 #if defined(H5_HAVE_TM_GMTOFF)
@@ -253,7 +253,7 @@ H5_make_time(struct tm *tm)
      * only way a user can get the modification time is from our internal
      * query routines, which can gracefully recover.
      */
-    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "unable to obtain local timezone information")
+    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "unable to obtain local timezone information");
 #endif
 
     /* Set return value */
@@ -633,7 +633,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
      */
     if (H5_CHECK_ABSOLUTE(name)) {
         if (NULL == (full_path = (char *)H5MM_strdup(name)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
     }      /* end if */
     else { /* relative pathname */
         char  *retcwd;
@@ -641,10 +641,10 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         int    drive;
 
         if (NULL == (cwdpath = (char *)H5MM_malloc(MAX_PATH_LEN)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
         name_len = HDstrlen(name) + 1;
         if (NULL == (new_name = (char *)H5MM_malloc(name_len)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /*
          * Windows: name[0-1] is "<drive-letter>:"
@@ -682,7 +682,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             assert(new_name);
             path_len = cwdlen + HDstrlen(new_name) + 2;
             if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
-                HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             HDstrncpy(full_path, cwdpath, cwdlen + 1);
             if (!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
@@ -741,7 +741,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 
         /* If path1 is empty or path2 is absolute, simply use path2 */
         if (NULL == (*full_name = (char *)H5MM_strdup(path2)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     } /* end if */
     else if (H5_CHECK_ABS_PATH(path2)) {
@@ -752,7 +752,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
              * Use the drive letter of path1 + path2
              */
             if (NULL == (*full_name = (char *)H5MM_malloc(path2_len + 3)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate path2 buffer")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate path2 buffer");
             HDsnprintf(*full_name, (path2_len + 3), "%c:%s", path1[0], path2);
         } /* end if */
         else {
@@ -761,7 +761,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
              * Use path2.
              */
             if (NULL == (*full_name = (char *)H5MM_strdup(path2)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         } /* end else */
 
     } /* end else if */
@@ -774,7 +774,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
         if (NULL ==
             (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2 +
                                               2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer");
 
         /* Compose the full file name */
         HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s",
@@ -868,15 +868,15 @@ H5_expand_windows_env_vars(char **env_var)
 
     /* Allocate buffer for expanded environment variable string */
     if (NULL == (temp_buf = (char *)H5MM_calloc((size_t)H5_WIN32_ENV_VAR_BUFFER_SIZE)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path");
 
     /* Expand the environment variable string */
     if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) >
         H5_WIN32_ENV_VAR_BUFFER_SIZE)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long");
 
     if (0 == n_chars)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path");
 
     *env_var = (char *)H5MM_xfree(*env_var);
     *env_var = temp_buf;
@@ -916,13 +916,13 @@ H5_strndup(const char *s, size_t n)
     FUNC_ENTER_NOAPI_NOINIT
 
     if (!s)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "string cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "string cannot be NULL");
 
     for (len = 0; len < n && s[len] != '\0'; len++)
         ;
 
     if (NULL == (ret_value = H5MM_malloc(len + 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for string")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for string");
 
     H5MM_memcpy(ret_value, s, len);
     ret_value[len] = '\0';
@@ -996,9 +996,9 @@ H5_dirname(const char *path, char **dirname)
     FUNC_ENTER_NOAPI_NOINIT
 
     if (!path)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL");
     if (!dirname)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL");
 
     if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
         /* Pathname with no file separator characters */
@@ -1105,9 +1105,9 @@ H5_basename(const char *path, char **basename)
     FUNC_ENTER_NOAPI_NOINIT
 
     if (!path)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL");
     if (!basename)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "basename can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "basename can't be NULL");
 
     if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
         if (*path == '\0')

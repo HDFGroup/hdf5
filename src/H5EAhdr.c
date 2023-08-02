@@ -110,7 +110,7 @@ H5EA__hdr_alloc(H5F_t *f)
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FL_CALLOC(H5EA_hdr_t)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array shared header")
+                    "memory allocation failed for extensible array shared header");
 
     /* Set non-zero internal fields */
     hdr->addr = HADDR_UNDEF;
@@ -187,7 +187,7 @@ H5EA__hdr_init(H5EA_hdr_t *hdr, void *ctx_udata)
 
     /* Allocate information for each super block */
     if (NULL == (hdr->sblk_info = H5FL_SEQ_MALLOC(H5EA_sblk_info_t, hdr->nsblks)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, FAIL, "memory allocation failed for super block info array")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, FAIL, "memory allocation failed for super block info array");
 
     /* Compute information about each super block */
     start_idx  = 0;
@@ -210,7 +210,7 @@ H5EA__hdr_init(H5EA_hdr_t *hdr, void *ctx_udata)
     if (hdr->cparam.cls->crt_context) {
         if (NULL == (hdr->cb_ctx = (*hdr->cparam.cls->crt_context)(ctx_udata)))
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, FAIL,
-                        "unable to create extensible array client callback context")
+                        "unable to create extensible array client callback context");
     }
 
 done:
@@ -252,7 +252,7 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts)
         /* Re-allocate array of element factories */
         if (NULL == (new_fac = H5FL_SEQ_REALLOC(H5FL_fac_head_ptr_t, hdr->elmt_fac.fac, new_nalloc)))
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                        "memory allocation failed for data block data element buffer factory array")
+                        "memory allocation failed for data block data element buffer factory array");
 
         /* Zero out new elements allocated */
         memset(new_fac + hdr->elmt_fac.nalloc, 0,
@@ -266,13 +266,14 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts)
     /* Check for un-initialized factory at index */
     if (NULL == hdr->elmt_fac.fac[idx]) {
         if (NULL == (hdr->elmt_fac.fac[idx] = H5FL_fac_init(nelmts * (size_t)hdr->cparam.cls->nat_elmt_size)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL, "can't create data block data element buffer factory")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL,
+                        "can't create data block data element buffer factory");
     } /* end if */
 
     /* Allocate buffer for elements in index block */
     if (NULL == (elmts = H5FL_FAC_MALLOC(hdr->elmt_fac.fac[idx])))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for data block data element buffer")
+                    "memory allocation failed for data block data element buffer");
 
     /* Set the return value */
     ret_value = elmts;
@@ -349,26 +350,27 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
 
         /* Check for valid parameters */
         if (cparam->raw_elmt_size == 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF, "element size must be greater than zero")
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF, "element size must be greater than zero");
         if (cparam->max_nelmts_bits == 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "max. # of elements bits must be greater than zero")
+                        "max. # of elements bits must be greater than zero");
         if (cparam->max_nelmts_bits > H5EA_MAX_NELMTS_IDX_MAX)
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF, "max. # of elements bits must be <= %u",
-                        (unsigned)H5EA_MAX_NELMTS_IDX_MAX)
+                        (unsigned)H5EA_MAX_NELMTS_IDX_MAX);
         if (cparam->sup_blk_min_data_ptrs < 2)
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "min # of data block pointers in super block must be >= two")
+                        "min # of data block pointers in super block must be >= two");
         if (!POWER_OF_TWO(cparam->sup_blk_min_data_ptrs))
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "min # of data block pointers in super block must be power of two")
+                        "min # of data block pointers in super block must be power of two");
         if (!POWER_OF_TWO(cparam->data_blk_min_elmts))
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "min # of elements per data block must be power of two")
+                        "min # of elements per data block must be power of two");
         dblk_page_nelmts = (size_t)1 << cparam->max_dblk_page_nelmts_bits;
         if (dblk_page_nelmts < cparam->idx_blk_elmts)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "# of elements per data block page must be greater than # of elements in index block")
+            HGOTO_ERROR(
+                H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
+                "# of elements per data block page must be greater than # of elements in index block");
 
         /* Compute the number of elements in data blocks for first actual super block */
         sblk_idx    = H5EA_SBLK_FIRST_IDX(cparam->sup_blk_min_data_ptrs);
@@ -376,18 +378,18 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
         if (dblk_page_nelmts < dblk_nelmts)
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
                         "max. # of elements per data block page bits must be > # of elements in "
-                        "first data block from super block")
+                        "first data block from super block");
 
         if (cparam->max_dblk_page_nelmts_bits > cparam->max_nelmts_bits)
             HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "max. # of elements per data block page bits must be <= max. # of elements bits")
+                        "max. # of elements per data block page bits must be <= max. # of elements bits");
     }
 #endif /* NDEBUG */
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5EA__hdr_alloc(f)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, HADDR_UNDEF,
-                    "memory allocation failed for extensible array shared header")
+                    "memory allocation failed for extensible array shared header");
 
     /* Set the internal parameters for the array */
     hdr->idx_blk_addr = HADDR_UNDEF;
@@ -398,28 +400,28 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
     /* Finish initializing extensible array header */
     if (H5EA__hdr_init(hdr, ctx_udata) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, HADDR_UNDEF,
-                    "initialization failed for extensible array header")
+                    "initialization failed for extensible array header");
 
     /* Allocate space for the header on disk */
     if (HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_EARRAY_HDR, (hsize_t)hdr->size)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, HADDR_UNDEF,
-                    "file allocation failed for extensible array header")
+                    "file allocation failed for extensible array header");
 
     /* Create 'top' proxy for extensible array entries */
     if (hdr->swmr_write)
         if (NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, HADDR_UNDEF, "can't create extensible array entry proxy")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, HADDR_UNDEF, "can't create extensible array entry proxy");
 
     /* Cache the new extensible array header */
     if (H5AC_insert_entry(f, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF, "can't add extensible array header to cache")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF, "can't add extensible array header to cache");
     inserted = TRUE;
 
     /* Add header as child of 'top' proxy */
     if (hdr->top_proxy)
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, HADDR_UNDEF,
-                        "unable to add extensible array entry as child of array proxy")
+                        "unable to add extensible array entry as child of array proxy");
 
     /* Set address of array header to return */
     ret_value = hdr->addr;
@@ -469,7 +471,7 @@ H5EA__hdr_incr(H5EA_hdr_t *hdr)
     /* Mark header as un-evictable when something is depending on it */
     if (hdr->rc == 0)
         if (H5AC_pin_protected_entry(hdr) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTPIN, FAIL, "unable to pin extensible array header")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTPIN, FAIL, "unable to pin extensible array header");
 
     /* Increment reference count on shared header */
     hdr->rc++;
@@ -505,7 +507,7 @@ H5EA__hdr_decr(H5EA_hdr_t *hdr)
     if (hdr->rc == 0) {
         assert(hdr->file_rc == 0);
         if (H5AC_unpin_entry(hdr) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPIN, FAIL, "unable to unpin extensible array header")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPIN, FAIL, "unable to unpin extensible array header");
     }
 
 done:
@@ -587,7 +589,7 @@ H5EA__hdr_modified(H5EA_hdr_t *hdr)
 
     /* Mark header as dirty in cache */
     if (H5AC_mark_entry_dirty(hdr) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTMARKDIRTY, FAIL, "unable to mark extensible array header as dirty")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTMARKDIRTY, FAIL, "unable to mark extensible array header as dirty");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -626,19 +628,19 @@ H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, void *ctx_udata, unsigned flags)
     /* Protect the header */
     if (NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, H5AC_EARRAY_HDR, ea_addr, &udata, flags)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, NULL,
-                    "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
+                    "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr);
     hdr->f = f; /* (Must be set again here, in case the header was already in the cache -QAK) */
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->swmr_write && NULL == hdr->top_proxy) {
         /* Create 'top' proxy for extensible array entries */
         if (NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, NULL, "can't create extensible array entry proxy")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTCREATE, NULL, "can't create extensible array entry proxy");
 
         /* Add header as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, NULL,
-                        "unable to add extensible array entry as child of array proxy")
+                        "unable to add extensible array entry as child of array proxy");
     } /* end if */
 
     /* Set return value */
@@ -670,7 +672,8 @@ H5EA__hdr_unprotect(H5EA_hdr_t *hdr, unsigned cache_flags)
     /* Unprotect the header */
     if (H5AC_unprotect(hdr->f, H5AC_EARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
-                    "unable to unprotect extensible array hdr, address = %llu", (unsigned long long)hdr->addr)
+                    "unable to unprotect extensible array hdr, address = %llu",
+                    (unsigned long long)hdr->addr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -702,7 +705,7 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr)
 
     /* Check the array header's status in the metadata cache */
     if (H5AC_get_entry_status(hdr->f, hdr->addr, &hdr_status) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to check metadata cache status for array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to check metadata cache status for array header");
 
     /* Sanity checks on array header */
     assert(hdr_status & H5AC_ES__IN_CACHE);
@@ -713,7 +716,7 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr)
     if (H5_addr_defined(hdr->idx_blk_addr)) {
         /* Delete index block */
         if (H5EA__iblock_delete(hdr) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTDELETE, FAIL, "unable to delete extensible array index block")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTDELETE, FAIL, "unable to delete extensible array index block");
     } /* end if */
 
     /* Set flags to finish deleting header on unprotect */
@@ -723,7 +726,7 @@ done:
 
     /* Unprotect the header, deleting it if an error hasn't occurred */
     if (H5EA__hdr_unprotect(hdr, cache_flags) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__hdr_delete() */
@@ -752,7 +755,7 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr)
     if (hdr->cb_ctx) {
         if ((*hdr->cparam.cls->dst_context)(hdr->cb_ctx) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL,
-                        "unable to destroy extensible array client callback context")
+                        "unable to destroy extensible array client callback context");
     } /* end if */
     hdr->cb_ctx = NULL;
 
@@ -769,7 +772,7 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr)
             if (hdr->elmt_fac.fac[u]) {
                 if (H5FL_fac_term(hdr->elmt_fac.fac[u]) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL,
-                                "unable to destroy extensible array header factory")
+                                "unable to destroy extensible array header factory");
                 hdr->elmt_fac.fac[u] = NULL;
             } /* end if */
         }     /* end for */
@@ -785,7 +788,7 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr)
     /* Destroy the 'top' proxy */
     if (hdr->top_proxy) {
         if (H5AC_proxy_entry_dest(hdr->top_proxy) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL, "unable to destroy extensible array 'top' proxy")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL, "unable to destroy extensible array 'top' proxy");
         hdr->top_proxy = NULL;
     } /* end if */
 

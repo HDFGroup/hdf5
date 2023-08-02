@@ -882,7 +882,7 @@ H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
 
     /* Retrieve the file's serial number */
     if (H5FD_get_fileno(f->shared->lf, filenum) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "can't retrieve fileno")
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "can't retrieve fileno");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -907,7 +907,7 @@ H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type)
 
     /* Dispatch to driver */
     if (HADDR_UNDEF == (ret_value = H5FD_get_eoa(f_sh->lf, type)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -933,7 +933,7 @@ H5F_get_eoa(const H5F_t *f, H5FD_mem_t type)
 
     /* Dispatch to driver */
     if (HADDR_UNDEF == (ret_value = H5FD_get_eoa(f->shared->lf, type)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -985,7 +985,7 @@ H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle)
 
     /* Get the VFD handle */
     if (H5FD_get_vfd_handle(file->shared->lf, fapl, file_handle) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1081,7 +1081,7 @@ H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag /*
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_file_sync_required(f_sh->lf, flag)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver get_file_sync_required request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver get_file_sync_required request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1324,7 +1324,7 @@ H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info)
 
     /* Verify structure version */
     if (info->version != H5VL_CONTAINER_INFO_VERSION)
-        HGOTO_ERROR(H5E_FILE, H5E_VERSION, FAIL, "wrong container info version #")
+        HGOTO_ERROR(H5E_FILE, H5E_VERSION, FAIL, "wrong container info version #");
 
     /* Set the container info fields */
     info->feature_flags = 0; /* None currently defined */

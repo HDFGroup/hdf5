@@ -71,7 +71,7 @@ H5Ddebug(hid_t dset_id)
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     /* Print B-tree information */
     if (H5D_CHUNKED == dset->shared->layout.type)

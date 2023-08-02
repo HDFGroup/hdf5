@@ -96,7 +96,8 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
      * Allocate file and memory data structures.
      */
     if (NULL == (dblock = H5FL_MALLOC(H5HF_direct_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fractal heap direct block")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                    "memory allocation failed for fractal heap direct block");
 
     /* Reset the metadata cache info for the heap header */
     memset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
@@ -104,7 +105,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     /* Share common heap information */
     dblock->hdr = hdr;
     if (H5HF__hdr_incr(hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared heap header");
 
     /* Set info for direct block */
     if (par_iblock) {
@@ -128,7 +129,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     /* Allocate buffer for block */
     /* XXX: Change to using free-list factories */
     if ((dblock->blk = H5FL_BLK_MALLOC(direct_block, dblock->size)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     memset(dblock->blk, 0, dblock->size);
 
     dblock->write_buf  = NULL;
@@ -138,19 +139,19 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     if (H5F_USE_TMP_SPACE(hdr->f)) {
         if (HADDR_UNDEF == (dblock_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)dblock->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "file allocation failed for fractal heap direct block")
+                        "file allocation failed for fractal heap direct block");
     } /* end if */
     else {
         if (HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_DBLOCK, (hsize_t)dblock->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "file allocation failed for fractal heap direct block")
+                        "file allocation failed for fractal heap direct block");
     } /* end else */
 
     /* Attach to parent indirect block, if there is one */
     dblock->parent = par_iblock;
     if (dblock->parent) {
         if (H5HF__man_iblock_attach(dblock->parent, par_entry, dblock_addr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't attach direct block to parent indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't attach direct block to parent indirect block");
         dblock->fd_parent = par_iblock;
     } /* end if */
     else
@@ -160,7 +161,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     /* Create a new 'single' section for the free space in the block */
     if (NULL == (sec_node = H5HF__sect_single_new((dblock->block_off + H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr)),
                                                   free_space, dblock->parent, dblock->par_entry)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for new direct block's free space")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for new direct block's free space");
 
     /* Check what to do with section node */
     if (ret_sec_node)
@@ -169,16 +170,16 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     else {
         /* Add new free space to the heap's list of space */
         if (H5HF__space_add(hdr, sec_node, 0) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list");
     } /* end else */
 
     /* Cache the new fractal heap direct block */
     if (H5AC_insert_entry(hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap direct block to cache")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap direct block to cache");
 
     /* Increase the allocated heap size */
     if (H5HF__hdr_inc_alloc(hdr, dblock->size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size");
 
     /* Set the address of of direct block, if requested */
     if (addr_p)
@@ -257,7 +258,7 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
 
         /* Reset header information back to "empty heap" state */
         if (H5HF__hdr_empty(hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't make heap empty")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't make heap empty");
     } /* end if */
     else {
         /* Adjust heap statistics */
@@ -267,13 +268,13 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
         if ((dblock->block_off + dblock->size) == hdr->man_iter_off)
             /* Move 'next block' iterator backwards (may shrink heap) */
             if (H5HF__hdr_reverse_iter(hdr, dblock_addr) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reverse 'next block' iterator")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reverse 'next block' iterator");
 
         /* Detach from parent indirect block */
         if (dblock->parent) {
             /* Destroy flush dependency between direct block and parent */
             if (H5AC_destroy_flush_dependency(dblock->fd_parent, dblock) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency");
             dblock->fd_parent = NULL;
 
             /* If this is the last direct block for the indirect block, the
@@ -347,7 +348,7 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
         min_dblock_size == hdr->man_dtable.cparam.start_block_size) {
         /* Create new direct block at starting offset */
         if (H5HF__man_dblock_create(hdr, NULL, 0, &dblock_addr, ret_sec_node) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap direct block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap direct block");
 
         /* Point root at new direct block */
         hdr->man_dtable.curr_root_rows = 0;
@@ -360,7 +361,7 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
         /* Extend heap to cover new direct block */
         if (H5HF__hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size,
                                   (hssize_t)hdr->man_dtable.row_tot_dblock_free[0]) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block");
     } /* end if */
     /* Root entry already exists, allocate direct block from root indirect block */
     else {
@@ -372,11 +373,11 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
         /* Update iterator to reflect any previous increments as well as allow for requested direct block size
          */
         if (H5HF__hdr_update_iter(hdr, min_dblock_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "unable to update block iterator")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "unable to update block iterator");
 
         /* Retrieve information about current iterator position */
         if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location");
         assert(next_row < iblock->nrows);
         H5_CHECKED_ASSIGN(next_size, size_t, hdr->man_dtable.row_block_size[next_row], hsize_t);
 
@@ -385,16 +386,16 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
             fprintf(stderr,
                     "%s: Skipping direct block sizes not supported, min_dblock_size = %zu, next_size = %zu\n",
                     __func__, min_dblock_size, next_size);
-            HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "skipping direct block sizes not supported yet")
+            HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "skipping direct block sizes not supported yet");
         } /* end if */
 
         /* Advance "next block" iterator to next direct block entry */
         if (H5HF__hdr_inc_iter(hdr, (hsize_t)next_size, 1) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment 'next block' iterator")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment 'next block' iterator");
 
         /* Create new direct block at current location*/
         if (H5HF__man_dblock_create(hdr, iblock, next_entry, &dblock_addr, ret_sec_node) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap direct block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap direct block");
     } /* end else */
 
 done:
@@ -471,7 +472,7 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
     /* Protect the direct block */
     if (NULL ==
         (dblock = (H5HF_direct_t *)H5AC_protect(hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, &udata, flags)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap direct block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap direct block");
 
     /* Set the return value */
     ret_value = dblock;
@@ -515,7 +516,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
 
     /* Look up row & column for object */
     if (H5HF__dtable_lookup(&hdr->man_dtable, obj_off, &row, &col) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object");
 
     /* Set initial indirect block info */
     iblock_addr = hdr->man_dtable.table_addr;
@@ -523,7 +524,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
     /* Lock root indirect block */
     if (NULL == (iblock = H5HF__man_iblock_protect(hdr, iblock_addr, hdr->man_dtable.curr_root_rows, NULL, 0,
                                                    FALSE, flags, &did_protect)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block");
 
     /* Check for indirect block row */
     while (row >= hdr->man_dtable.max_direct_rows) {
@@ -545,7 +546,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
         /* Check if we need to (re-)create the child indirect block */
         if (!H5_addr_defined(iblock_addr)) {
             if (H5HF__man_iblock_create(hdr, iblock, entry, nrows, nrows, &iblock_addr) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block");
 
             /* Indicate that the parent indirect block was modified */
             cache_flags |= H5AC__DIRTIED_FLAG;
@@ -554,11 +555,11 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
         /* Lock child indirect block */
         if (NULL == (new_iblock = H5HF__man_iblock_protect(hdr, iblock_addr, nrows, iblock, entry, FALSE,
                                                            flags, &new_did_protect)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block");
 
         /* Release the current indirect block */
         if (H5HF__man_iblock_unprotect(iblock, cache_flags, did_protect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
 
         /* Switch variables to use new indirect block */
         iblock      = new_iblock;
@@ -566,7 +567,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
 
         /* Look up row & column in new indirect block for object */
         if (H5HF__dtable_lookup(&hdr->man_dtable, (obj_off - iblock->block_off), &row, &col) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object");
         assert(row < iblock->nrows); /* child must be smaller than parent */
     }                                /* end while */
 
@@ -611,7 +612,7 @@ H5HF__man_dblock_delete(H5F_t *f, haddr_t dblock_addr, hsize_t dblock_size)
 
     /* Check the direct block's status in the metadata cache */
     if (H5AC_get_entry_status(f, dblock_addr, &dblock_status) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to check metadata cache status for direct block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to check metadata cache status for direct block");
 
     /* If the direct block is in the cache, expunge it now */
     if (dblock_status & H5AC_ES__IN_CACHE) {
@@ -621,7 +622,7 @@ H5HF__man_dblock_delete(H5F_t *f, haddr_t dblock_addr, hsize_t dblock_size)
 
         /* Evict the direct block from the metadata cache */
         if (H5AC_expunge_entry(f, H5AC_FHEAP_DBLOCK, dblock_addr, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove direct block from cache")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove direct block from cache");
     } /* end if */
 
     /* Check if the direct block is NOT currently allocated in temp. file space */
@@ -639,7 +640,7 @@ H5HF__man_dblock_delete(H5F_t *f, haddr_t dblock_addr, hsize_t dblock_size)
          *          so we just release the file space here, directly.  -QAK)
          */
         if (H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dblock_addr, dblock_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block file space")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block file space");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -669,11 +670,11 @@ H5HF__man_dblock_dest(H5HF_direct_t *dblock)
     /* Decrement reference count on shared fractal heap info */
     assert(dblock->hdr != NULL);
     if (H5HF__hdr_decr(dblock->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header");
     if (dblock->parent)
         if (H5HF__iblock_decr(dblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared indirect block")
+                        "can't decrement reference count on shared indirect block");
 
     /* Free block's buffer */
     dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);

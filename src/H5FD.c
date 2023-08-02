@@ -107,7 +107,7 @@ H5FD_init(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     if (H5I_register_type(H5I_VFL_CLS) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /* Reset the file serial numbers */
     H5FD_file_serial_no_g = 0;
@@ -177,7 +177,7 @@ H5FD__free_cls(H5FD_class_t *cls, void H5_ATTR_UNUSED **request)
      */
     if (cls->terminate && cls->terminate() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEOBJ, FAIL, "virtual file driver '%s' did not terminate cleanly",
-                    cls->name)
+                    cls->name);
 
     H5MM_xfree(cls);
 
@@ -212,27 +212,27 @@ H5FDregister(const H5FD_class_t *cls)
 
     /* Check arguments */
     if (!cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null class pointer is disallowed")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null class pointer is disallowed");
     if (cls->version != H5FD_CLASS_VERSION)
-        HGOTO_ERROR(H5E_ARGS, H5E_VERSION, H5I_INVALID_HID, "wrong file driver version #")
+        HGOTO_ERROR(H5E_ARGS, H5E_VERSION, H5I_INVALID_HID, "wrong file driver version #");
     if (!cls->open || !cls->close)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "'open' and/or 'close' methods are not defined")
+                    "'open' and/or 'close' methods are not defined");
     if (!cls->get_eoa || !cls->set_eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "'get_eoa' and/or 'set_eoa' methods are not defined")
+                    "'get_eoa' and/or 'set_eoa' methods are not defined");
     if (!cls->get_eof)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "'get_eof' method is not defined")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "'get_eof' method is not defined");
     if (!cls->read || !cls->write)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "'read' and/or 'write' method is not defined")
+                    "'read' and/or 'write' method is not defined");
     for (type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++)
         if (cls->fl_map[type] < H5FD_MEM_NOLIST || cls->fl_map[type] >= H5FD_MEM_NTYPES)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid free-list mapping")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid free-list mapping");
 
     /* Create the new class ID */
     if ((ret_value = H5FD_register(cls, sizeof(H5FD_class_t), TRUE)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file driver ID")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file driver ID");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -277,12 +277,12 @@ H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
     /* Copy the class structure so the caller can reuse or free it */
     if (NULL == (saved = (H5FD_class_t *)H5MM_malloc(size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_INVALID_HID,
-                    "memory allocation failed for file driver class struct")
+                    "memory allocation failed for file driver class struct");
     H5MM_memcpy(saved, cls, size);
 
     /* Create the new class ID */
     if ((ret_value = H5I_register(H5I_VFL, saved, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file driver ID")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file driver ID");
 
 done:
     if (H5I_INVALID_HID == ret_value)
@@ -314,7 +314,7 @@ H5FDis_driver_registered_by_name(const char *driver_name)
 
     /* Check if driver with this name is registered */
     if ((ret_value = H5FD_is_driver_registered_by_name(driver_name, NULL)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -342,7 +342,7 @@ H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
 
     /* Check if driver with this value is registered */
     if ((ret_value = H5FD_is_driver_registered_by_value(driver_value, NULL)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -370,11 +370,11 @@ H5FDunregister(hid_t driver_id)
 
     /* Check arguments */
     if (NULL == H5I_object_verify(driver_id, H5I_VFL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver");
 
     /* The H5FD_class_t struct will be freed by this function */
     if (H5I_dec_app_ref(driver_id) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "unable to unregister file driver")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "unable to unregister file driver");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -411,17 +411,17 @@ H5FD_get_class(hid_t id)
 
         /* Get the plist structure */
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, NULL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, NULL, "can't find object for ID");
 
         if (TRUE == H5P_isa_class(id, H5P_FILE_ACCESS)) {
             H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
 
             if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info")
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info");
             ret_value = H5FD_get_class(driver_prop.driver_id);
         } /* end if */
         else
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver id or file access property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver id or file access property list");
     } /* end if */
 
 done:
@@ -486,7 +486,7 @@ H5FD_sb_encode(H5FD_t *file, char *name /*out*/, uint8_t *buf)
 
     /* Dispatch to driver */
     if (file->cls->sb_encode && (file->cls->sb_encode)(file, name /*out*/, buf /*out*/) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_encode request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_encode request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -514,7 +514,7 @@ H5FD__sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
 
     /* Dispatch to driver */
     if (file->cls->sb_decode && (file->cls->sb_decode)(file, name, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_decode request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_decode request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -544,13 +544,13 @@ H5FD_sb_load(H5FD_t *file, const char *name, const uint8_t *buf)
      * function to each specific driver because we're checking if the driver is correct.
      */
     if (!HDstrncmp(name, "NCSAfami", (size_t)8) && HDstrcmp(file->cls->name, "family") != 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "family driver should be used")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "family driver should be used");
     if (!HDstrncmp(name, "NCSAmult", (size_t)8) && HDstrcmp(file->cls->name, "multi") != 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "multi driver should be used")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "multi driver should be used");
 
     /* Decode driver information */
     if (H5FD__sb_decode(file, name, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode driver information")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode driver information");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -617,14 +617,14 @@ H5FD_free_driver_info(hid_t driver_id, const void *driver_info)
 
         /* Retrieve the driver for the ID */
         if (NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
 
         /* Allow driver to free info or do it ourselves */
         if (driver->fapl_free) {
             /* Free the const pointer */
             /* Cast through uintptr_t to de-const memory */
             if ((driver->fapl_free)((void *)(uintptr_t)driver_info) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed");
         }
         else
             driver_info = H5MM_xfree_const(driver_info);
@@ -696,11 +696,11 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
     else if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
     /* Call private function */
     if (NULL == (ret_value = H5FD_open(name, flags, fapl_id, maxaddr)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to open file")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to open file");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -732,41 +732,41 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Sanity checks */
     if (0 == maxaddr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "zero format address range")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "zero format address range");
 
     /* Get file access property list */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
     /* Get the VFD to open the file with */
     if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info");
 
     /* Get driver info */
     if (NULL == (driver = (H5FD_class_t *)H5I_object(driver_prop.driver_id)))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list");
     if (NULL == driver->open)
-        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method")
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method");
 
     /* Query driver flag */
     if (H5FD_driver_query(driver, &driver_flags) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't query VFD flags")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't query VFD flags");
 
     /* Get initial file image info */
     if (H5P_peek(plist, H5F_ACS_FILE_IMAGE_INFO_NAME, &file_image_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file image info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file image info");
 
     /* If an image is provided, make sure the driver supports this feature */
     assert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
            ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
     if ((file_image_info.buffer != NULL) && !(driver_flags & H5FD_FEAT_ALLOW_FILE_IMAGE))
-        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file image set, but not supported.")
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file image set, but not supported.");
 
     /* Dispatch to file driver */
     if (HADDR_UNDEF == maxaddr)
         maxaddr = driver->maxaddr;
     if (NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed");
 
     /* Set the file access flags */
     file->access_flags = flags;
@@ -776,22 +776,22 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
      */
     file->driver_id = driver_prop.driver_id;
     if (H5I_inc_ref(file->driver_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver");
     file->cls     = driver;
     file->maxaddr = maxaddr;
     if (H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(file->threshold)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold");
     if (H5P_get(plist, H5F_ACS_ALIGN_NAME, &(file->alignment)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");
 
     /* Retrieve the VFL driver feature flags */
     if (H5FD__query(file, &(file->feature_flags)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");
 
     /* Increment the global serial number & assign it to this H5FD_t object */
     if (++H5FD_file_serial_no_g == 0) {
         /* (Just error out if we wrap around for now...) */
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number");
     } /* end if */
     file->fileno = H5FD_file_serial_no_g;
 
@@ -830,13 +830,13 @@ H5FDclose(H5FD_t *file)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     /* Call private function */
     if (H5FD_close(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -866,14 +866,14 @@ H5FD_close(H5FD_t *file)
     /* Prepare to close file by clearing all public fields */
     driver = file->cls;
     if (H5I_dec_ref(file->driver_id) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID");
 
     /* Dispatch to the driver for actual close. If the driver fails to
      * close the file then the file will be in an unusable state.
      */
     assert(driver->close);
     if ((driver->close)(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "close failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "close failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -978,15 +978,15 @@ H5FDquery(const H5FD_t *file, unsigned long *flags /*out*/)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "file class pointer cannot be NULL");
     if (!flags)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "flags parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "flags parameter cannot be NULL");
 
     /* Call private function */
     if (H5FD__query(file, flags) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "unable to query feature flags")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "unable to query feature flags");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1016,7 +1016,7 @@ H5FD__query(const H5FD_t *file, unsigned long *flags /*out*/)
     /* Dispatch to driver (if available) */
     if (file->cls->query) {
         if ((file->cls->query)(file, flags) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to query feature flags")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to query feature flags");
     }
     else
         *flags = 0;
@@ -1071,24 +1071,24 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file class pointer cannot be NULL");
     if (type < H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid request type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid request type");
     if (size == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "zero-size request")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "zero-size request");
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a data transfer property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a data transfer property list");
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
     /* Call private function */
     if (HADDR_UNDEF == (ret_value = H5FD__alloc_real(file, type, size, NULL, NULL)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file memory")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file memory");
 
     /* (Note compensating for base address subtraction in internal routine) */
     ret_value += file->base_addr;
@@ -1121,15 +1121,15 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
     if (type < H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request type");
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
@@ -1137,7 +1137,7 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD__free_real(file, type, addr - file->base_addr, size) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "file deallocation request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "file deallocation request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1164,15 +1164,15 @@ H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file class pointer cannot be NULL");
     if (type < H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file type");
 
     /* Call private function */
     if (HADDR_UNDEF == (ret_value = H5FD_get_eoa(file, type)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eoa request failed");
 
     /* (Note compensating for base address subtraction in internal routine) */
     ret_value += file->base_addr;
@@ -1212,18 +1212,18 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
     if (type < H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file type");
     if (!H5_addr_defined(addr) || addr > file->maxaddr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid end-of-address value")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid end-of-address value");
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_set_eoa(file, type, addr - file->base_addr) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file set eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file set eoa request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1260,13 +1260,13 @@ H5FDget_eof(H5FD_t *file, H5FD_mem_t type)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "file class pointer cannot be NULL");
 
     /* Call private function */
     if (HADDR_UNDEF == (ret_value = H5FD_get_eof(file, type)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eof request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eof request failed");
 
     /* (Note compensating for base address subtraction in internal routine) */
     ret_value += file->base_addr;
@@ -1373,7 +1373,7 @@ H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map)
     if (file->cls->get_type_map) {
         /* Retrieve type mapping for this file */
         if ((file->cls->get_type_map)(file, type_map) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get type map failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get type map failed");
     } /* end if */
     else
         /* Copy class's default free space type mapping */
@@ -1410,17 +1410,17 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
     if (!buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "result buffer parameter can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "result buffer parameter can't be NULL");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
@@ -1428,7 +1428,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_read(file, type, addr - file->base_addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1456,17 +1456,17 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
     if (!buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "result buffer parameter can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "result buffer parameter can't be NULL");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
@@ -1474,7 +1474,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_write(file, type, addr - file->base_addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1512,28 +1512,28 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     if ((!types) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive");
 
     if ((!addrs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive");
 
     if ((!sizes) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive");
 
     if ((count > 0) && (sizes[0] == 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0");
 
     if ((count > 0) && (types[0] == H5FD_MEM_NOLIST))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count[0] can't be H5FD_MEM_NOLIST")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count[0] can't be H5FD_MEM_NOLIST");
 
     /* Get the default dataset transfer property list if the user
      * didn't provide one
@@ -1543,7 +1543,7 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
     }
     else {
         if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
     /* Set DXPL for operation */
@@ -1552,7 +1552,7 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
     /* Call private function */
     /* (Note compensating for base addresses addition in internal routine) */
     if (H5FD_read_vector(file, count, types, addrs, sizes, bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file vector read request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file vector read request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1588,28 +1588,28 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[]
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     if ((!types) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive");
 
     if ((!addrs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive");
 
     if ((!sizes) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive");
 
     if ((count > 0) && (sizes[0] == 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0");
 
     if ((count > 0) && (types[0] == H5FD_MEM_NOLIST))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count[0] can't be H5FD_MEM_NOLIST")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count[0] can't be H5FD_MEM_NOLIST");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id) {
@@ -1617,7 +1617,7 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[]
     }
     else {
         if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
     /* Set DXPL for operation */
@@ -1626,7 +1626,7 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[]
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_write_vector(file, count, types, addrs, sizes, bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1682,32 +1682,32 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     if ((!mem_space_ids) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive");
 
     if ((!file_space_ids) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive");
 
     if ((!offsets) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive");
 
     if ((!element_sizes) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "element_sizes parameter can't be NULL if count is positive")
+                    "element_sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive");
 
     if ((count > 0) && (element_sizes[0] == 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0");
 
     if ((count > 0) && (bufs[0] == NULL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id) {
@@ -1715,7 +1715,7 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
     }
     else {
         if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
     /* Set DXPL for operation */
@@ -1725,7 +1725,7 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_read_selection_id(file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
                                bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1779,32 +1779,32 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     if ((!mem_space_ids) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive");
 
     if ((!file_space_ids) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive");
 
     if ((!offsets) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive");
 
     if ((!element_sizes) && (count > 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "element_sizes parameter can't be NULL if count is positive")
+                    "element_sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive");
 
     if ((count > 0) && (element_sizes[0] == 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0");
 
     if ((count > 0) && (bufs[0] == NULL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id) {
@@ -1812,7 +1812,7 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
     }
     else {
         if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
     /* Set DXPL for operation */
@@ -1822,7 +1822,7 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_write_selection_id(file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
                                 bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1848,21 +1848,21 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
     /* Call private function */
     if (H5FD_flush(file, closing) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file flush request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file flush request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1890,7 +1890,7 @@ H5FD_flush(H5FD_t *file, hbool_t closing)
 
     /* Dispatch to driver */
     if (file->cls->flush && (file->cls->flush)(file, H5CX_get_dxpl(), closing) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1915,20 +1915,20 @@ H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
     /* Call private function */
     if (H5FD_truncate(file, closing) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "file flush request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "file flush request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1956,7 +1956,7 @@ H5FD_truncate(H5FD_t *file, hbool_t closing)
 
     /* Dispatch to driver */
     if (file->cls->truncate && (file->cls->truncate)(file, H5CX_get_dxpl(), closing) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver truncate request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver truncate request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1981,13 +1981,13 @@ H5FDlock(H5FD_t *file, hbool_t rw)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     /* Call private function */
     if (H5FD_lock(file, rw) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "file lock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "file lock request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2015,7 +2015,7 @@ H5FD_lock(H5FD_t *file, hbool_t rw)
 
     /* Dispatch to driver */
     if (file->cls->lock && (file->cls->lock)(file, rw) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "driver lock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "driver lock request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2040,13 +2040,13 @@ H5FDunlock(H5FD_t *file)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     /* Call private function */
     if (H5FD_unlock(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "file unlock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "file unlock request failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2074,7 +2074,7 @@ H5FD_unlock(H5FD_t *file)
 
     /* Dispatch to driver */
     if (file->cls->unlock && (file->cls->unlock)(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "driver unlock request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "driver unlock request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2108,10 +2108,10 @@ H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void 
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
 
     /* Don't attempt to validate the op code.  If appropriate, that will
      * be done by the underlying VFD callback, along with the input and
@@ -2120,7 +2120,7 @@ H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void 
 
     /* Call private function */
     if (H5FD_ctl(file, op_code, flags, input, output) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed");
 
 done:
 
@@ -2167,12 +2167,12 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
 
         if ((file->cls->ctl)(file, op_code, flags, input, output) < 0)
 
-            HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed");
     }
     else if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
 
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
-                    "VFD ctl request failed (no ctl callback and fail if unknown flag is set)")
+                    "VFD ctl request failed (no ctl callback and fail if unknown flag is set)");
     }
 
 done:
@@ -2227,17 +2227,17 @@ H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle /*out*/)
 
     /* Check arguments */
     if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
     if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL");
     if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fapl_id parameter is not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fapl_id parameter is not a file access property list");
     if (!file_handle)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle parameter cannot be NULL");
 
     /* Call private function */
     if (H5FD_get_vfd_handle(file, fapl_id, file_handle) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");
 
 done:
     if (FAIL == ret_value) {
@@ -2271,9 +2271,9 @@ H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle)
 
     /* Dispatch to driver */
     if (NULL == file->cls->get_handle)
-        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "file driver has no `get_vfd_handle' method")
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "file driver has no `get_vfd_handle' method");
     if ((file->cls->get_handle)(file, fapl_id, file_handle) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2371,13 +2371,13 @@ H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/)
 
     /* Check arguments */
     if (NULL == flags)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "flags parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "flags parameter cannot be NULL");
 
     /* Check for the driver to query and then query it */
     if (NULL == (driver = (H5FD_class_t *)H5I_object_verify(driver_id, H5I_VFL)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "not a VFL ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "not a VFL ID");
     if (H5FD_driver_query(driver, flags) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "driver flag query failed")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "driver flag query failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2402,16 +2402,16 @@ H5FDdelete(const char *filename, hid_t fapl_id)
 
     /* Check arguments */
     if (!filename || !*filename)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no file name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no file name specified");
 
     if (H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
     else if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     /* Call private function */
     if (H5FD_delete(filename, fapl_id) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file");
 
 done:
     FUNC_LEAVE_API(ret_value)

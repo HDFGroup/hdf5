@@ -100,7 +100,7 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
 
             /* Verify computed checksum matches stored checksum */
             if (stored_fletcher != fletcher && stored_fletcher != reversed_fletcher)
-                HGOTO_ERROR(H5E_STORAGE, H5E_READERROR, 0, "data error detected by Fletcher32 checksum")
+                HGOTO_ERROR(H5E_STORAGE, H5E_READERROR, 0, "data error detected by Fletcher32 checksum");
         }
 
         /* Set return values */
@@ -115,7 +115,7 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
 
         if (NULL == (outbuf = H5MM_malloc(nbytes + FLETCHER_LEN)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
-                        "unable to allocate Fletcher32 checksum destination buffer")
+                        "unable to allocate Fletcher32 checksum destination buffer");
 
         dst = (unsigned char *)outbuf;
 

@@ -93,23 +93,23 @@ H5O__is_attr_dense_test(hid_t oid)
 
     /* Get object location for object */
     if (NULL == (loc = H5O_get_loc(oid)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Set API context */
     if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context");
     api_ctx_pushed = TRUE;
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
     if (oh->version > H5O_VERSION_1) {
         /* Check for (& retrieve if available) attribute info */
         if (H5A__get_ainfo(loc->file, oh, &ainfo) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message");
     } /* end if */
 
     /* Check if dense storage is being used */
@@ -165,22 +165,22 @@ H5O__is_attr_empty_test(hid_t oid)
 
     /* Get object location for object */
     if (NULL == (loc = H5O_get_loc(oid)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Set API context */
     if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context");
     api_ctx_pushed = TRUE;
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Check for attribute info stored */
     if (oh->version > H5O_VERSION_1) {
         /* Check for (& retrieve if available) attribute info */
         if ((ainfo_exists = H5A__get_ainfo(loc->file, oh, &ainfo)) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message");
     } /* end if */
 
     /* Retrieve the number of attribute messages in header */
@@ -208,7 +208,7 @@ H5O__is_attr_empty_test(hid_t oid)
                 /* Retrieve # of records in name index */
                 if (H5B2_get_nrec(bt2_name, &nattrs) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL,
-                                "unable to retrieve # of records from name index")
+                                "unable to retrieve # of records from name index");
             } /* end if */
 
             /* Verify that attribute count in object header is correct */
@@ -267,23 +267,23 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
 
     /* Get object location for object */
     if (NULL == (loc = H5O_get_loc(oid)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Set API context */
     if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context");
     api_ctx_pushed = TRUE;
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
     if (oh->version > H5O_VERSION_1) {
         /* Check for (& retrieve if available) attribute info */
         if (H5A__get_ainfo(loc->file, oh, &ainfo) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message");
     } /* end if */
 
     /* Retrieve the number of attribute messages in header */
@@ -308,7 +308,7 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
 
             /* Retrieve # of records in name index */
             if (H5B2_get_nrec(bt2_name, &obj_nattrs) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index");
         } /* end if */
 
         /* Verify that attribute count in object header is correct */
@@ -366,11 +366,11 @@ H5O__attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
 
     /* Get object location for object */
     if (NULL == (loc = H5O_get_loc(oid)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Set API context */
     if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context");
     api_ctx_pushed = TRUE;
 
     /* Set metadata tag in API context */
@@ -468,11 +468,11 @@ H5O__check_msg_marked_test(hid_t oid, hbool_t flag_val)
 
     /* Get object location for object */
     if (NULL == (loc = H5O_get_loc(oid)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Locate "unknown" message  */
     for (idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++)
@@ -480,7 +480,7 @@ H5O__check_msg_marked_test(hid_t oid, hbool_t flag_val)
             /* Check for "unknown" message having the correct flags */
             if (((idx_msg->flags & H5O_MSG_FLAG_WAS_UNKNOWN) > 0) != flag_val)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
-                            "'unknown' message has incorrect 'was unknown' flag value")
+                            "'unknown' message has incorrect 'was unknown' flag value");
 
             /* Break out of loop, to indicate that the "unknown" message was found */
             break;
@@ -488,7 +488,7 @@ H5O__check_msg_marked_test(hid_t oid, hbool_t flag_val)
 
     /* Check for not finding an "unknown" message */
     if (idx == oh->nmesgs)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "'unknown' message type not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "'unknown' message type not found");
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
@@ -529,7 +529,7 @@ H5O__expunge_chunks_test(const H5O_loc_t *loc)
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__NO_FLAGS_SET, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header");
 
     /* Safety check */
     nchunks = oh->nchunks;
@@ -541,14 +541,14 @@ H5O__expunge_chunks_test(const H5O_loc_t *loc)
 
     /* Release the object header */
     if (H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header");
 
     /* Iterate over all the saved chunk addresses, evicting them from the cache */
     /* (in reverse order, so that chunk #0 is unpinned) */
     for (u = nchunks - 1; u < nchunks; u--)
         if (H5AC_expunge_entry(loc->file, (u == 0 ? H5AC_OHDR : H5AC_OHDR_CHK), chk_addr[u],
                                H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTEXPUNGE, FAIL, "unable to expunge object header chunk")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTEXPUNGE, FAIL, "unable to expunge object header chunk");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -588,7 +588,7 @@ H5O__get_rc_test(const H5O_loc_t *loc, unsigned *rc)
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header");
 
     /* Save the refcount for the object header */
     *rc = oh->nlink;
@@ -636,16 +636,16 @@ H5O__msg_get_chunkno_test(hid_t oid, unsigned msg_type, unsigned *chunk_num)
 
     /* Get object location for object */
     if (NULL == (loc = H5O_get_loc(oid)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Set API context */
     if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context");
     api_ctx_pushed = TRUE;
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Locate first message of given type */
     for (idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++)
@@ -659,7 +659,7 @@ H5O__msg_get_chunkno_test(hid_t oid, unsigned msg_type, unsigned *chunk_num)
 
     /* Check for not finding a message of the given type*/
     if (idx == oh->nmesgs)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message of type not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message of type not found");
 
 done:
     if (oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
@@ -703,16 +703,16 @@ H5O__msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type)
 
     /* Get object location for object */
     if (NULL == (loc = H5O_get_loc(oid)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Set API context */
     if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context");
     api_ctx_pushed = TRUE;
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__NO_FLAGS_SET, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* Locate first message of given type */
     for (idx = 0, curr_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, curr_msg++)
@@ -766,7 +766,7 @@ H5O__msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type)
             /* (*new_idx returned from this routine is unused here) */
             if (H5O__alloc_chunk(loc->file, oh, (curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh)),
                                  oh->nmesgs, &found_msg, &new_idx) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate new object header chunk")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate new object header chunk");
 
             /* Break out of loop, the message was found */
             break;

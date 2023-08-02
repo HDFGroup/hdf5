@@ -52,11 +52,11 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
 
     /* Get property list */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Retrieve file creation properties */
     if (H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get userblock size")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get userblock size");
 
     /* debug */
     fprintf(stream, "%*sFile Super Block...\n", indent, "");

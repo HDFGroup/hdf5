@@ -89,7 +89,7 @@ H5HL__new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size)
 
     /* Allocate new local heap structure */
     if (NULL == (heap = H5FL_CALLOC(H5HL_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed");
 
     /* Initialize non-zero fields */
     heap->sizeof_size = sizeof_size;

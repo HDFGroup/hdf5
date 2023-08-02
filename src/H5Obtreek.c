@@ -84,11 +84,11 @@ H5O__btreek_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_BTREEK_VERSION)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message");
 
     /* Allocate space for message */
     if (NULL == (mesg = (H5O_btreek_t *)H5MM_calloc(sizeof(H5O_btreek_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for v1 B-tree 'K' message")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for v1 B-tree 'K' message");
 
     /* Retrieve non-default B-tree 'K' values */
     if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
@@ -166,7 +166,7 @@ H5O__btreek_copy(const void *_mesg, void *_dest)
 
     if (!dest && NULL == (dest = (H5O_btreek_t *)H5MM_malloc(sizeof(H5O_btreek_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for shared message table message")
+                    "memory allocation failed for shared message table message");
 
     /* All this message requires is a shallow copy */
     *dest = *mesg;
