@@ -583,8 +583,7 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, hbool
 
         /* Search for the plugin in this path */
         if (H5PL__find_plugin_in_path(search_params, found, H5PL_paths_g[u], plugin_info) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in path %s encountered an error",
-                        H5PL_paths_g[u])
+            HERROR(H5E_PLUGIN, H5E_CANTGET, "search in path %s encountered an error", H5PL_paths_g[u]);
 
         /* Break out if found */
         if (*found) {
@@ -636,7 +635,8 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 
     /* Open the directory */
     if (!(dirp = HDopendir(dir)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory: %s", dir)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory (%s). Please verify its existence",
+                    dir)
 
     /* Iterate through all entries in the directory */
     while (NULL != (dp = HDreaddir(dirp))) {
@@ -714,7 +714,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     *found = FALSE;
 
     /* Specify a file mask. *.* = We want everything! */
-    HDsprintf(service, "%s\\*.dll", dir);
+    HDsnprintf(service, sizeof(service), "%s\\*.dll", dir);
     if ((hFind = FindFirstFileA(service, &fdFile)) == INVALID_HANDLE_VALUE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
 
