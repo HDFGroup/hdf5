@@ -109,7 +109,7 @@ H5AC_proxy_entry_create(void)
 
     /* Allocate new proxy entry */
     if (NULL == (pentry = H5FL_CALLOC(H5AC_proxy_entry_t)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "can't allocate proxy entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "can't allocate proxy entry");
 
     /* Set non-zero fields */
     pentry->addr = HADDR_UNDEF;
@@ -151,11 +151,11 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     if (NULL == pentry->parents)
         if (NULL == (pentry->parents = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL,
-                        "unable to create skip list for parents of proxy entry")
+                        "unable to create skip list for parents of proxy entry");
 
     /* Insert parent address into skip list */
     if (H5SL_insert(pentry->parents, parent, &parent->addr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to insert parent into proxy's skip list")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to insert parent into proxy's skip list");
 
     /* Add flush dependency on parent */
     if (pentry->nchildren > 0) {
@@ -163,7 +163,7 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
         assert(H5_addr_defined(pentry->addr));
 
         if (H5AC_create_flush_dependency(parent, pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency on proxy entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency on proxy entry");
     } /* end if */
 
 done:
@@ -195,9 +195,9 @@ H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
 
     /* Remove parent from skip list */
     if (NULL == (rem_parent = (H5AC_info_t *)H5SL_remove(pentry->parents, &parent->addr)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry parent from skip list")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry parent from skip list");
     if (!H5_addr_eq(rem_parent->addr, parent->addr))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "removed proxy entry parent not the same as real parent")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "removed proxy entry parent not the same as real parent");
 
     /* Shut down the skip list, if this is the last parent */
     if (0 == H5SL_count(pentry->parents)) {
@@ -205,14 +205,15 @@ H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
         assert(0 == pentry->nchildren);
 
         if (H5SL_close(pentry->parents) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CLOSEERROR, FAIL, "can't close proxy parent skip list")
+            HGOTO_ERROR(H5E_CACHE, H5E_CLOSEERROR, FAIL, "can't close proxy parent skip list");
         pentry->parents = NULL;
     } /* end if */
 
     /* Remove flush dependency between the proxy entry and a parent */
     if (pentry->nchildren > 0)
         if (H5AC_destroy_flush_dependency(parent, pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on proxy entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
+                        "unable to remove flush dependency on proxy entry");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -241,7 +242,7 @@ H5AC__proxy_entry_add_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_ud
     /* Add flush dependency on parent for proxy entry */
     if (H5AC_create_flush_dependency(parent, pentry) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, H5_ITER_ERROR,
-                    "unable to set flush dependency for virtual entry")
+                    "unable to set flush dependency for virtual entry");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -273,30 +274,30 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, void *child)
         if (!H5_addr_defined(pentry->addr))
             if (HADDR_UNDEF == (pentry->addr = H5MF_alloc_tmp(f, 1)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
-                            "temporary file space allocation failed for proxy entry")
+                            "temporary file space allocation failed for proxy entry");
 
         /* Insert the proxy entry into the cache */
         if (H5AC_insert_entry(f, H5AC_PROXY_ENTRY, pentry->addr, pentry, H5AC__PIN_ENTRY_FLAG) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to cache proxy entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to cache proxy entry");
 
         /* Proxies start out clean (insertions are automatically marked dirty) */
         if (H5AC_mark_entry_clean(pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean");
 
         /* Proxies start out serialized (insertions are automatically marked unserialized) */
         if (H5AC_mark_entry_serialized(pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry clean")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry clean");
 
         /* If there are currently parents, iterate over the list of parents, creating flush dependency on them
          */
         if (pentry->parents)
             if (H5SL_iterate(pentry->parents, H5AC__proxy_entry_add_child_cb, pentry) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "can't visit parents")
+                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "can't visit parents");
     } /* end if */
 
     /* Add flush dependency on proxy entry */
     if (H5AC_create_flush_dependency(pentry, child) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency on proxy entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency on proxy entry");
 
     /* Increment count of children */
     pentry->nchildren++;
@@ -328,7 +329,7 @@ H5AC__proxy_entry_remove_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *
     /* Remove flush dependency on parent for proxy entry */
     if (H5AC_destroy_flush_dependency(parent, pentry) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, H5_ITER_ERROR,
-                    "unable to remove flush dependency for proxy entry")
+                    "unable to remove flush dependency for proxy entry");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -356,7 +357,7 @@ H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
 
     /* Remove flush dependency on proxy entry */
     if (H5AC_destroy_flush_dependency(pentry, child) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on proxy entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on proxy entry");
 
     /* Decrement count of children */
     pentry->nchildren--;
@@ -367,15 +368,15 @@ H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
         if (pentry->parents)
             /* Iterate over the list of parents, removing flush dependency on them */
             if (H5SL_iterate(pentry->parents, H5AC__proxy_entry_remove_child_cb, pentry) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "can't visit parents")
+                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "can't visit parents");
 
         /* Unpin proxy */
         if (H5AC_unpin_entry(pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin proxy entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin proxy entry");
 
         /* Remove proxy entry from cache */
         if (H5AC_remove_entry(pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry");
     } /* end if */
 
 done:
@@ -485,7 +486,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Invalid action?!?");
 #endif /* NDEBUG */
@@ -493,7 +494,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Invalid action?!?");
 #endif /* NDEBUG */
@@ -528,7 +529,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
             /* Check for first dirty child */
             if (1 == pentry->ndirty_children)
                 if (H5AC_mark_entry_dirty(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTDIRTY, FAIL, "can't mark proxy entry dirty")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTDIRTY, FAIL, "can't mark proxy entry dirty");
             break;
 
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
@@ -541,7 +542,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
             /* Check for last dirty child */
             if (0 == pentry->ndirty_children)
                 if (H5AC_mark_entry_clean(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean");
             break;
 
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
@@ -551,7 +552,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
             /* Check for first unserialized child */
             if (1 == pentry->nunser_children)
                 if (H5AC_mark_entry_unserialized(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNSERIALIZE, FAIL, "can't mark proxy entry unserialized")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNSERIALIZE, FAIL, "can't mark proxy entry unserialized");
             break;
 
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
@@ -564,12 +565,12 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
             /* Check for last unserialized child */
             if (0 == pentry->nunser_children)
                 if (H5AC_mark_entry_serialized(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry serialized")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry serialized");
             break;
 
         default:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "unknown notify action from metadata cache")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "unknown notify action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
@@ -599,7 +600,7 @@ H5AC__proxy_entry_free_icr(void *_thing)
 
     /* Destroy the proxy entry */
     if (H5AC_proxy_entry_dest(pentry) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to destroy proxy entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to destroy proxy entry");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -242,24 +242,25 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
 
     /* Allocate space for the fixed array data structure */
     if (NULL == (hdr = H5FA__hdr_alloc(udata->f)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for fixed array shared header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL,
+                    "memory allocation failed for fixed array shared header");
 
     /* Set the fixed array header's address */
     hdr->addr = udata->addr;
 
     /* Magic number */
     if (memcmp(image, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array header signature")
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array header signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5FA_HDR_VERSION)
-        HGOTO_ERROR(H5E_FARRAY, H5E_VERSION, NULL, "wrong fixed array header version")
+        HGOTO_ERROR(H5E_FARRAY, H5E_VERSION, NULL, "wrong fixed array header version");
 
     /* Fixed array class */
     id = (H5FA_cls_id_t)*image++;
     if (id >= H5FA_NUM_CLS_ID)
-        HGOTO_ERROR(H5E_FARRAY, H5E_BADTYPE, NULL, "incorrect fixed array class")
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADTYPE, NULL, "incorrect fixed array class");
     hdr->cparam.cls = H5FA_client_class_g[id];
 
     /* General array creation/configuration information */
@@ -307,7 +308,7 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
 
     /* Finish initializing fixed array header */
     if (H5FA__hdr_init(hdr, udata->ctx_udata) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL, "initialization failed for fixed array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL, "initialization failed for fixed array header");
     assert(hdr->size == len);
 
     /* Set return value */
@@ -454,7 +455,7 @@ H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent,
                                                       (void *)hdr->top_proxy) < 0)
                         HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL,
-                                    "unable to destroy flush dependency between fixed array and proxy")
+                                    "unable to destroy flush dependency between fixed array and proxy");
                     hdr->parent = NULL;
                 } /* end if */
 
@@ -463,14 +464,14 @@ H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
                         HGOTO_ERROR(
                             H5E_FARRAY, H5E_CANTUNDEPEND, FAIL,
-                            "unable to destroy flush dependency between header and fixed array 'top' proxy")
+                            "unable to destroy flush dependency between header and fixed array 'top' proxy");
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
                 break;
 
             default:
 #ifdef NDEBUG
-                HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+                HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else     /* NDEBUG */
                 assert(0 && "Unknown action?!?");
 #endif    /* NDEBUG */
@@ -506,7 +507,7 @@ H5FA__cache_hdr_free_icr(void *thing)
 
     /* Release the extensible array header */
     if (H5FA__hdr_dest((H5FA_hdr_t *)thing) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "can't free fixed array header")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "can't free fixed array header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -623,7 +624,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
     /* Allocate the fixed array data block */
     if (NULL == (dblock = H5FA__dblock_alloc(udata->hdr)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for fixed array data block")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for fixed array data block");
 
     assert(((!dblock->npages) && (len == (size_t)H5FA_DBLOCK_SIZE(dblock))) ||
            (len == (size_t)H5FA_DBLOCK_PREFIX_SIZE(dblock)));
@@ -633,21 +634,21 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
     /* Magic number */
     if (memcmp(image, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array data block signature")
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array data block signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5FA_DBLOCK_VERSION)
-        HGOTO_ERROR(H5E_FARRAY, H5E_VERSION, NULL, "wrong fixed array data block version")
+        HGOTO_ERROR(H5E_FARRAY, H5E_VERSION, NULL, "wrong fixed array data block version");
 
     /* Fixed array type */
     if (*image++ != (uint8_t)udata->hdr->cparam.cls->id)
-        HGOTO_ERROR(H5E_FARRAY, H5E_BADTYPE, NULL, "incorrect fixed array class")
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADTYPE, NULL, "incorrect fixed array class");
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(udata->hdr->f, &image, &arr_addr);
     if (H5_addr_ne(arr_addr, udata->hdr->addr))
-        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array header address")
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array header address");
 
     /* Page initialization flags */
     if (dblock->npages > 0) {
@@ -661,7 +662,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
         /* Convert from raw elements on disk into native elements in memory */
         if ((udata->hdr->cparam.cls->decode)(image, dblock->elmts, (size_t)udata->hdr->cparam.nelmts,
                                              udata->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTDECODE, NULL, "can't decode fixed array data elements")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTDECODE, NULL, "can't decode fixed array data elements");
         image += (udata->hdr->cparam.nelmts * udata->hdr->cparam.raw_elmt_size);
     }
 
@@ -775,7 +776,7 @@ H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
         H5_CHECK_OVERFLOW(dblock->hdr->cparam.nelmts, /* From: */ hsize_t, /* To: */ size_t);
         if ((dblock->hdr->cparam.cls->encode)(image, dblock->elmts, (size_t)dblock->hdr->cparam.nelmts,
                                               dblock->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_CANTENCODE, FAIL, "can't encode fixed array data elements")
+            HGOTO_ERROR(H5E_FARRAY, H5E_CANTENCODE, FAIL, "can't encode fixed array data elements");
         image += (dblock->hdr->cparam.nelmts * dblock->hdr->cparam.raw_elmt_size);
     }
 
@@ -823,7 +824,7 @@ H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_FARRAY, H5E_CANTDEPEND, FAIL,
                         "unable to create flush dependency between data block and header, address = %llu",
-                        (unsigned long long)dblock->addr)
+                        (unsigned long long)dblock->addr);
                 break;
 
             case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -838,21 +839,21 @@ H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* Destroy flush dependency on parent */
                 if (H5FA__destroy_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
-                    HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                    HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency");
 
                 /* Detach from 'top' proxy for fixed array */
                 if (dblock->top_proxy) {
                     if (H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
                         HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL,
                                     "unable to destroy flush dependency between data block "
-                                    "and fixed array 'top' proxy")
+                                    "and fixed array 'top' proxy");
                     dblock->top_proxy = NULL;
                 }
                 break;
 
             default:
 #ifdef NDEBUG
-                HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+                HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else
                 assert(0 && "Unknown action?!?");
 #endif
@@ -886,7 +887,7 @@ H5FA__cache_dblock_free_icr(void *_thing)
 
     /* Release the fixed array data block */
     if (H5FA__dblock_dest(dblock) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "can't free fixed array data block")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "can't free fixed array data block");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1027,7 +1028,7 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     /* Allocate the fixed array data block page */
     if (NULL == (dblk_page = H5FA__dblk_page_alloc(udata->hdr, udata->nelmts)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for fixed array data block page")
+                    "memory allocation failed for fixed array data block page");
 
     /* Set the fixed array data block's information */
     dblk_page->addr = udata->dblk_page_addr;
@@ -1037,7 +1038,7 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     /* Decode elements in data block page */
     /* Convert from raw elements on disk into native elements in memory */
     if ((udata->hdr->cparam.cls->decode)(image, dblk_page->elmts, udata->nelmts, udata->hdr->cb_ctx) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTDECODE, NULL, "can't decode fixed array data elements")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTDECODE, NULL, "can't decode fixed array data elements");
     image += (udata->nelmts * udata->hdr->cparam.raw_elmt_size);
 
     /* Sanity check */
@@ -1127,7 +1128,7 @@ H5FA__cache_dblk_page_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *_ima
     /* Convert from native elements in memory into raw elements on disk */
     if ((dblk_page->hdr->cparam.cls->encode)(image, dblk_page->elmts, dblk_page->nelmts,
                                              dblk_page->hdr->cb_ctx) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTENCODE, FAIL, "can't encode fixed array data elements")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTENCODE, FAIL, "can't encode fixed array data elements");
     image += (dblk_page->nelmts * dblk_page->hdr->cparam.raw_elmt_size);
 
     /* Compute metadata checksum */
@@ -1177,7 +1178,7 @@ H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block page "
-                                "and fixed array 'top' proxy")
+                                "and fixed array 'top' proxy");
                 dblk_page->top_proxy = NULL;
             } /* end if */
             break;
@@ -1193,7 +1194,7 @@ H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
 
         default:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+            HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
@@ -1225,7 +1226,7 @@ H5FA__cache_dblk_page_free_icr(void *thing)
 
     /* Release the fixed array data block page */
     if (H5FA__dblk_page_dest((H5FA_dblk_page_t *)thing) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "can't free fixed array data block page")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "can't free fixed array data block page");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -51,11 +51,11 @@ H5Tget_precision(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
 
     /* Get precision */
     if ((ret_value = H5T_get_precision(dt)) == 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, 0, "can't get precision for specified datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, 0, "can't get precision for specified datatype");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -86,7 +86,7 @@ H5T_get_precision(const H5T_t *dt)
     while (dt->shared->parent)
         dt = dt->shared->parent;
     if (!H5T_IS_ATOMIC(dt->shared))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified datatype");
 
     /* Precision */
     ret_value = dt->shared->u.atomic.prec;
@@ -128,23 +128,23 @@ H5Tset_precision(hid_t type_id, size_t prec)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (H5T_STATE_TRANSIENT != dt->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only");
     if (NULL != dt->vol_obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is committed")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is committed");
     if (prec == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive");
     if (H5T_ENUM == dt->shared->type && dt->shared->u.enumer.nmembs > 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after members are defined")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after members are defined");
     if (H5T_STRING == dt->shared->type)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only");
     if (H5T_COMPOUND == dt->shared->type || H5T_OPAQUE == dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified datatype");
 
     /* Do the work */
     if (H5T__set_precision(dt, prec) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -190,7 +190,7 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
 
     if (dt->shared->parent) {
         if (H5T__set_precision(dt->shared->parent, prec) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type");
 
         /* Adjust size of datatype appropriately */
         if (dt->shared->type == H5T_ARRAY)
@@ -228,7 +228,7 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
                         dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize > prec + offset ||
                         dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize > prec + offset)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                    "adjust sign, mantissa, and exponent fields first")
+                                    "adjust sign, mantissa, and exponent fields first");
                     break;
 
                 case H5T_NO_CLASS:
@@ -241,7 +241,7 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
                 case H5T_ARRAY:
                 case H5T_NCLASSES:
                 default:
-                    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
+                    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class");
             } /* end switch */
 
             /* Commit */
@@ -250,7 +250,7 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
             dt->shared->u.atomic.prec   = prec;
         } /* end if */
         else
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype");
     } /* end else */
 
 done:

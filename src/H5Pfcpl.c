@@ -213,88 +213,88 @@ H5P__fcrt_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE,
                            &H5F_def_userblock_size_g, NULL, NULL, NULL, H5F_CRT_USER_BLOCK_ENC,
                            H5F_CRT_USER_BLOCK_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the 1/2 rank for symbol table leaf nodes */
     if (H5P__register_real(pclass, H5F_CRT_SYM_LEAF_NAME, H5F_CRT_SYM_LEAF_SIZE, &H5F_def_sym_leaf_k_g, NULL,
                            NULL, NULL, H5F_CRT_SYM_LEAF_ENC, H5F_CRT_SYM_LEAF_DEC, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the 1/2 rank for btree internal nodes */
     if (H5P__register_real(pclass, H5F_CRT_BTREE_RANK_NAME, H5F_CRT_BTREE_RANK_SIZE, H5F_def_btree_k_g, NULL,
                            NULL, NULL, H5F_CRT_BTREE_RANK_ENC, H5F_CRT_BTREE_RANK_DEC, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the byte number for an address */
     if (H5P__register_real(pclass, H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE,
                            &H5F_def_sizeof_addr_g, NULL, NULL, NULL, H5F_CRT_ADDR_BYTE_NUM_ENC,
                            H5F_CRT_ADDR_BYTE_NUM_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the byte number for object size */
     if (H5P__register_real(pclass, H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE,
                            &H5F_def_sizeof_size_g, NULL, NULL, NULL, H5F_CRT_OBJ_BYTE_NUM_ENC,
                            H5F_CRT_OBJ_BYTE_NUM_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the superblock version number */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5F_CRT_SUPER_VERS_NAME, H5F_CRT_SUPER_VERS_SIZE,
                            &H5F_def_superblock_ver_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the shared OH message information */
     if (H5P__register_real(pclass, H5F_CRT_SHMSG_NINDEXES_NAME, H5F_CRT_SHMSG_NINDEXES_SIZE,
                            &H5F_def_num_sohm_indexes_g, NULL, NULL, NULL, H5F_CRT_SHMSG_NINDEXES_ENC,
                            H5F_CRT_SHMSG_NINDEXES_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     if (H5P__register_real(pclass, H5F_CRT_SHMSG_INDEX_TYPES_NAME, H5F_CRT_SHMSG_INDEX_TYPES_SIZE,
                            &H5F_def_sohm_index_flags_g, NULL, NULL, NULL, H5F_CRT_SHMSG_INDEX_TYPES_ENC,
                            H5F_CRT_SHMSG_INDEX_TYPES_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     if (H5P__register_real(pclass, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE,
                            &H5F_def_sohm_index_minsizes_g, NULL, NULL, NULL, H5F_CRT_SHMSG_INDEX_MINSIZE_ENC,
                            H5F_CRT_SHMSG_INDEX_MINSIZE_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the shared OH cutoff size information */
     if (H5P__register_real(pclass, H5F_CRT_SHMSG_LIST_MAX_NAME, H5F_CRT_SHMSG_LIST_MAX_SIZE,
                            &H5F_def_sohm_list_max_g, NULL, NULL, NULL, H5F_CRT_SHMSG_LIST_MAX_ENC,
                            H5F_CRT_SHMSG_LIST_MAX_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     if (H5P__register_real(pclass, H5F_CRT_SHMSG_BTREE_MIN_NAME, H5F_CRT_SHMSG_BTREE_MIN_SIZE,
                            &H5F_def_sohm_btree_min_g, NULL, NULL, NULL, H5F_CRT_SHMSG_BTREE_MIN_ENC,
                            H5F_CRT_SHMSG_BTREE_MIN_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the file space handling strategy */
     if (H5P__register_real(pclass, H5F_CRT_FILE_SPACE_STRATEGY_NAME, H5F_CRT_FILE_SPACE_STRATEGY_SIZE,
                            &H5F_def_file_space_strategy_g, NULL, NULL, NULL, H5F_CRT_FILE_SPACE_STRATEGY_ENC,
                            H5F_CRT_FILE_SPACE_STRATEGY_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the free-space persist flag */
     if (H5P__register_real(pclass, H5F_CRT_FREE_SPACE_PERSIST_NAME, H5F_CRT_FREE_SPACE_PERSIST_SIZE,
                            &H5F_def_free_space_persist_g, NULL, NULL, NULL, H5F_CRT_FREE_SPACE_PERSIST_ENC,
                            H5F_CRT_FREE_SPACE_PERSIST_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the free space section threshold */
     if (H5P__register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE,
                            &H5F_def_free_space_threshold_g, NULL, NULL, NULL,
                            H5F_CRT_FREE_SPACE_THRESHOLD_ENC, H5F_CRT_FREE_SPACE_THRESHOLD_DEC, NULL, NULL,
                            NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the file space page size */
     if (H5P__register_real(pclass, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, H5F_CRT_FILE_SPACE_PAGE_SIZE_SIZE,
                            &H5F_def_file_space_page_size_g, NULL, NULL, NULL,
                            H5F_CRT_FILE_SPACE_PAGE_SIZE_ENC, H5F_CRT_FILE_SPACE_PAGE_SIZE_DEC, NULL, NULL,
                            NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -323,20 +323,20 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
     if (size > 0) {
         /* Check that the userblock size is >=512 */
         if (size < 512)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is non-zero and less than 512")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is non-zero and less than 512");
 
         /* Check that the userblock size is a power of two */
         if (!POWER_OF_TWO(size))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is non-zero and not a power of two")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is non-zero and not a power of two");
     } /* end if */
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set value */
     if (H5P_set(plist, H5F_CRT_USER_BLOCK_NAME, &size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set user block")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set user block");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -399,29 +399,29 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
     /* Check arguments */
     if (sizeof_addr) {
         if (sizeof_addr != 2 && sizeof_addr != 4 && sizeof_addr != 8 && sizeof_addr != 16)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file haddr_t size is not valid")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file haddr_t size is not valid");
     } /* end if */
     if (sizeof_size) {
         if (sizeof_size != 2 && sizeof_size != 4 && sizeof_size != 8 && sizeof_size != 16)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file size_t size is not valid")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file size_t size is not valid");
     } /* end if */
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set value */
     if (sizeof_addr) {
         uint8_t tmp_sizeof_addr = (uint8_t)sizeof_addr;
 
         if (H5P_set(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &tmp_sizeof_addr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for an address")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for an address");
     } /* end if */
     if (sizeof_size) {
         uint8_t tmp_sizeof_size = (uint8_t)sizeof_size;
 
         if (H5P_set(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &tmp_sizeof_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for object ")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for object ");
     } /* end if */
 
 done:
@@ -451,21 +451,21 @@ H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr /*out*/, size_t *sizeof_size /*
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
     if (sizeof_addr) {
         uint8_t tmp_sizeof_addr;
 
         if (H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &tmp_sizeof_addr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address");
         *sizeof_addr = tmp_sizeof_addr;
     } /* end if */
     if (sizeof_size) {
         uint8_t tmp_sizeof_size;
 
         if (H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &tmp_sizeof_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object ")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object ");
         *sizeof_size = tmp_sizeof_size;
     } /* end if */
 
@@ -722,7 +722,7 @@ H5P__fcrt_btree_rank_dec(const void **_pp, void *_value)
     /* Decode the size */
     enc_size = *(*pp)++;
     if (enc_size != sizeof(unsigned))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded");
 
     /* Decode all the type flags */
     for (u = 0; u < H5B_NUM_BTREE_ID; u++)
@@ -831,15 +831,15 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
 
     /* Check arguments */
     if (mesg_type_flags > H5O_SHMESG_ALL_FLAG)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "unrecognized flags in mesg_type_flags")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "unrecognized flags in mesg_type_flags");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Read the current number of indexes */
     if (H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes");
 
     /* Range check */
     if (index_num >= nindexes)
@@ -847,9 +847,9 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
 
     /* Get arrays of type flags and message sizes */
     if (H5P_get(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current index type flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current index type flags");
     if (H5P_get(plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current min sizes")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current min sizes");
 
     /* Set values in arrays */
     type_flags[index_num] = mesg_type_flags;
@@ -857,9 +857,9 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
 
     /* Write arrays back to plist */
     if (H5P_set(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set index type flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set index type flags");
     if (H5P_set(plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min mesg sizes")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min mesg sizes");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -891,21 +891,21 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Read the current number of indexes */
     if (H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes");
 
     if (index_num >= nindexes)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index_num is greater than number of indexes in property list")
+                    "index_num is greater than number of indexes in property list");
 
     /* Get arrays of type flags and message sizes */
     if (H5P_get(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current index type flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current index type flags");
     if (H5P_get(plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current min sizes")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current min sizes");
 
     /* Get values from arrays */
     if (mesg_type_flags)
@@ -992,7 +992,7 @@ H5P__fcrt_shmsg_index_types_dec(const void **_pp, void *_value)
     /* Decode the size */
     enc_size = *(*pp)++;
     if (enc_size != sizeof(unsigned))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded");
 
     /* Decode all the type flags */
     for (u = 0; u < H5O_SHMESG_MAX_NINDEXES; u++)
@@ -1077,7 +1077,7 @@ H5P__fcrt_shmsg_index_minsize_dec(const void **_pp, void *_value)
     /* Decode the size */
     enc_size = *(*pp)++;
     if (enc_size != sizeof(unsigned))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded");
 
     /* Decode all the minsize values */
     for (u = 0; u < H5O_SHMESG_MAX_NINDEXES; u++)
@@ -1118,11 +1118,11 @@ H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_
      * Range check to make certain they will fit into encoded form.
      */
     if (max_list + 1 < min_btree)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "minimum B-tree value is greater than maximum list value")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "minimum B-tree value is greater than maximum list value");
     if (max_list > H5O_SHMESG_MAX_LIST_SIZE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max list value is larger than H5O_SHMESG_MAX_LIST_SIZE")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max list value is larger than H5O_SHMESG_MAX_LIST_SIZE");
     if (min_btree > H5O_SHMESG_MAX_LIST_SIZE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min btree value is larger than H5O_SHMESG_MAX_LIST_SIZE")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min btree value is larger than H5O_SHMESG_MAX_LIST_SIZE");
 
     /* Avoid the strange case where max_list == 0 and min_btree == 1, so deleting the
      * last message in a B-tree makes it become an empty list.
@@ -1201,23 +1201,23 @@ H5Pset_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t strategy, hbool
 
     /* Check arguments */
     if (strategy >= H5F_FSPACE_STRATEGY_NTYPES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid strategy")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid strategy");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set value(s), if non-zero */
     if (H5P_set(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &strategy) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file space strategy")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file space strategy");
 
     /* Ignore persist and threshold settings for strategies that do not use FSM */
     if (strategy == H5F_FSPACE_STRATEGY_FSM_AGGR || strategy == H5F_FSPACE_STRATEGY_PAGE) {
         if (H5P_set(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, &persist) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space persisting status")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space persisting status");
 
         if (H5P_set(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &threshold) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space threshold")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space threshold");
     } /* end if */
 
 done:
@@ -1246,18 +1246,18 @@ H5Pget_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t *strategy /*out
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value(s) */
     if (strategy)
         if (H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, strategy) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space strategy")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space strategy");
     if (persist)
         if (H5P_get(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, persist) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space persisting status")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space persisting status");
     if (threshold)
         if (H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, threshold) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space threshold")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space threshold");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1349,17 +1349,17 @@ H5Pset_file_space_page_size(hid_t plist_id, hsize_t fsp_size)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     if (fsp_size < H5F_FILE_SPACE_PAGE_SIZE_MIN)
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "cannot set file space page size to less than 512")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "cannot set file space page size to less than 512");
 
     if (fsp_size > H5F_FILE_SPACE_PAGE_SIZE_MAX)
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "cannot set file space page size to more than 1GB")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "cannot set file space page size to more than 1GB");
 
     /* Set the value*/
     if (H5P_set(plist, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, &fsp_size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set file space page size")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set file space page size");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1386,12 +1386,12 @@ H5Pget_file_space_page_size(hid_t plist_id, hsize_t *fsp_size /*out*/)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */
     if (fsp_size)
         if (H5P_get(plist, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, fsp_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space page size")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space page size");
 
 done:
     FUNC_LEAVE_API(ret_value)

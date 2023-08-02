@@ -148,7 +148,7 @@ H5G__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
     /* Decode link information */
     if (NULL == (lnk = (H5O_link_t *)H5O_msg_decode(udata->f, NULL, H5O_LINK_ID, obj_len,
                                                     (const unsigned char *)obj)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link");
 
     /* Compare the string values */
     udata->cmp = HDstrcmp(udata->name, lnk->name);
@@ -156,7 +156,7 @@ H5G__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
     /* Check for correct link & callback to make */
     if (udata->cmp == 0 && udata->found_op) {
         if ((udata->found_op)(lnk, udata->found_op_data) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, FAIL, "link found callback failed")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, FAIL, "link found callback failed");
     } /* end if */
 
     /* Release the space allocated for the link */
@@ -238,7 +238,7 @@ H5G__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
 
         /* Check if the user's link and the B-tree's link have the same name */
         if (H5HF_op(bt2_udata->fheap, bt2_rec->id, H5G__dense_fh_name_cmp, &fh_udata) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
 
         /* Callback will set comparison value */
         *result = fh_udata.cmp;

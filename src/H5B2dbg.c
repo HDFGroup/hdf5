@@ -94,7 +94,7 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 
     /* Load the B-tree header  */
     if (NULL == (hdr = H5B2__hdr_protect(f, addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header");
 
     /* Set file pointer for this B-tree operation */
     hdr->f = f;
@@ -173,7 +173,7 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
 
     /* Load the B-tree header */
     if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load v2 B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load v2 B-tree header");
 
     /* Set file pointer for this B-tree operation */
     hdr->f = f;
@@ -186,7 +186,7 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     H5_CHECKED_ASSIGN(node_ptr.node_nrec, uint16_t, nrec, unsigned);
     if (NULL == (internal = H5B2__protect_internal(hdr, NULL, &node_ptr, (uint16_t)depth, FALSE,
                                                    H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node");
 
     /* Print opening message */
     fprintf(stream, "%*sv2 B-tree Internal Node...\n", indent, "");
@@ -271,7 +271,7 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
 
     /* Load the B-tree header */
     if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, f, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header");
 
     /* Set file pointer for this B-tree operation */
     hdr->f = f;
@@ -283,7 +283,7 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
     node_ptr.addr = addr;
     H5_CHECKED_ASSIGN(node_ptr.node_nrec, uint16_t, nrec, unsigned);
     if (NULL == (leaf = H5B2__protect_leaf(hdr, NULL, &node_ptr, FALSE, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
     /* Print opening message */
     fprintf(stream, "%*sv2 B-tree Leaf Node...\n", indent, "");

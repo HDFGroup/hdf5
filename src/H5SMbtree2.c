@@ -93,7 +93,7 @@ H5SM__bt2_crt_context(void *_f)
 
     /* Allocate callback context */
     if (NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context");
 
     /* Determine the size of addresses & lengths in the file */
     ctx->sizeof_addr = H5F_SIZEOF_ADDR(f);

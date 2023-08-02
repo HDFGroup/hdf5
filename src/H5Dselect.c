@@ -101,7 +101,7 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
     assert(dset_info->buf.vp);
 
     if (elmt_size == 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0");
 
     /* Initialize nelmts */
     nelmts = dset_info->nelmts;
@@ -115,9 +115,9 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
 
         /* Get offset of first element in selections */
         if (H5S_SELECT_OFFSET(dset_info->file_space, &single_file_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve file selection offset")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve file selection offset");
         if (H5S_SELECT_OFFSET(dset_info->mem_space, &single_mem_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve memory selection offset")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve memory selection offset");
 
         /* Set up necessary information for I/O operation */
         file_nseq = mem_nseq = 1;
@@ -131,14 +131,14 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
             if ((tmp_file_len = (*dset_info->layout_ops.readvv)(
                      io_info, dset_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off,
                      mem_nseq, &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
         } /* end if */
         else {
             assert(io_info->op_type == H5D_IO_OP_WRITE);
             if ((tmp_file_len = (*dset_info->layout_ops.writevv)(
                      io_info, dset_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off,
                      mem_nseq, &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
         } /* end else */
 
         /* Decrement number of elements left to process */
@@ -150,7 +150,7 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
 
         /* Get info from API context */
         if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size");
 
         /* Allocate the vector I/O arrays */
         if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
@@ -158,29 +158,29 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
         else
             vec_size = H5D_IO_VECTOR_SIZE;
         if (NULL == (mem_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
         if (NULL == (mem_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array");
         if (NULL == (file_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
         if (NULL == (file_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array");
 
         /* Allocate the iterators */
         if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator");
         if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator");
 
         /* Initialize file iterator */
         if (H5S_select_iter_init(file_iter, dset_info->file_space, elmt_size,
                                  H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
         file_iter_init = 1; /* File selection iteration info has been initialized */
 
         /* Initialize memory iterator */
         if (H5S_select_iter_init(mem_iter, dset_info->mem_space, elmt_size, 0) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
         mem_iter_init = 1; /* Memory selection iteration info has been initialized */
 
         /* Initialize sequence counts */
@@ -194,7 +194,7 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
                 /* Get sequences for file selection */
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(file_iter, vec_size, nelmts, &file_nseq, &file_nelem,
                                                  file_off, file_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
                 /* Start at the beginning of the sequences again */
                 curr_file_seq = 0;
@@ -205,7 +205,7 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
                 /* Get sequences for memory selection */
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, vec_size, nelmts, &mem_nseq, &mem_nelem, mem_off,
                                                  mem_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
                 /* Start at the beginning of the sequences again */
                 curr_mem_seq = 0;
@@ -216,14 +216,14 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
                 if ((tmp_file_len = (*dset_info->layout_ops.readvv)(
                          io_info, dset_info, file_nseq, &curr_file_seq, file_len, file_off, mem_nseq,
                          &curr_mem_seq, mem_len, mem_off)) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
             } /* end if */
             else {
                 assert(io_info->op_type == H5D_IO_OP_WRITE);
                 if ((tmp_file_len = (*dset_info->layout_ops.writevv)(
                          io_info, dset_info, file_nseq, &curr_file_seq, file_len, file_off, mem_nseq,
                          &curr_mem_seq, mem_len, mem_off)) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
             } /* end else */
 
             /* Decrement number of elements left to process */
@@ -301,7 +301,7 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
     assert(src_space);
 
     if (elmt_size == 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0");
 
     /* Check for only one element in selection */
     if (nelmts == 1) {
@@ -312,9 +312,9 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
 
         /* Get offset of first element in selections */
         if (H5S_SELECT_OFFSET(dst_space, &single_dst_off) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve destination selection offset")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve destination selection offset");
         if (H5S_SELECT_OFFSET(src_space, &single_src_off) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve source selection offset")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve source selection offset");
 
         /* Set up necessary information for I/O operation */
         dst_nseq = src_nseq = 1;
@@ -327,7 +327,7 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
         if ((bytes_copied =
                  H5VM_memcpyvv(dst_buf, dst_nseq, &curr_dst_seq, &single_dst_len, &single_dst_off, src_buf,
                                src_nseq, &curr_src_seq, &single_src_len, &single_src_off)) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
         assert(((size_t)bytes_copied % elmt_size) == 0);
     }
@@ -338,7 +338,7 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
 
         /* Get info from API context */
         if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+            HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't retrieve I/O vector size");
 
         /* Allocate the vector I/O arrays */
         if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
@@ -347,28 +347,28 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
             vec_size = H5D_IO_VECTOR_SIZE;
 
         if (NULL == (dst_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-            HGOTO_ERROR(H5E_IO, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+            HGOTO_ERROR(H5E_IO, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
         if (NULL == (dst_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-            HGOTO_ERROR(H5E_IO, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
+            HGOTO_ERROR(H5E_IO, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array");
         if (NULL == (src_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-            HGOTO_ERROR(H5E_IO, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+            HGOTO_ERROR(H5E_IO, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
         if (NULL == (src_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-            HGOTO_ERROR(H5E_IO, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
+            HGOTO_ERROR(H5E_IO, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array");
 
         /* Allocate the dataspace selection iterators */
         if (NULL == (dst_sel_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate destination selection iterator")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate destination selection iterator");
         if (NULL == (src_sel_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate source selection iterator")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate source selection iterator");
 
         /* Initialize destination selection iterator */
         if (H5S_select_iter_init(dst_sel_iter, dst_space, elmt_size, sel_iter_flags) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
         dst_sel_iter_init = TRUE; /* Destination selection iteration info has been initialized */
 
         /* Initialize source selection iterator */
         if (H5S_select_iter_init(src_sel_iter, src_space, elmt_size, H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
         src_sel_iter_init = TRUE; /* Source selection iteration info has been initialized */
 
         /* Initialize sequence counts */
@@ -382,7 +382,7 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
                 /* Get sequences for destination selection */
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(dst_sel_iter, vec_size, nelmts, &dst_nseq, &dst_nelem,
                                                  dst_off, dst_len) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed");
 
                 /* Start at the beginning of the sequences again */
                 curr_dst_seq = 0;
@@ -393,7 +393,7 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
                 /* Get sequences for source selection */
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(src_sel_iter, vec_size, nelmts, &src_nseq, &src_nelem,
                                                  src_off, src_len) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed");
 
                 /* Start at the beginning of the sequences again */
                 curr_src_seq = 0;
@@ -402,7 +402,7 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
             /* Perform vectorized memcpy from src_buf to dst_buf */
             if ((bytes_copied = H5VM_memcpyvv(dst_buf, dst_nseq, &curr_dst_seq, dst_len, dst_off, src_buf,
                                               src_nseq, &curr_src_seq, src_len, src_off)) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
             /* Decrement number of elements left to process */
             assert(((size_t)bytes_copied % elmt_size) == 0);
@@ -456,7 +456,7 @@ H5D__select_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_in
 
     /* Call generic selection operation */
     if (H5D__select_io(io_info, dset_info, dset_info->type_info.src_type_size) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -480,7 +480,7 @@ H5D__select_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_i
 
     /* Call generic selection operation */
     if (H5D__select_io(io_info, dset_info, dset_info->type_info.dst_type_size) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

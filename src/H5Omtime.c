@@ -185,7 +185,7 @@ H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     for (int i = 0; i < 14; i++)
         if (!isdigit(p[i]))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message");
 
     /* Convert YYYYMMDDhhmmss UTC to a time_t. */
     memset(&tm, 0, sizeof tm);
@@ -197,11 +197,11 @@ H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     tm.tm_sec   = (p[12] - '0') * 10 + (p[13] - '0');
     tm.tm_isdst = -1; /* (figure it out) */
     if ((time_t)-1 == (the_time = H5_make_time(&tm)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't construct time info")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't construct time info");
 
     /* The return value */
     if (NULL == (mesg = H5FL_MALLOC(time_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     *mesg = the_time;
 
     /* Set return value */

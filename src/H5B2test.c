@@ -138,7 +138,7 @@ H5B2__test_crt_context(void *_f)
 
     /* Allocate callback context */
     if (NULL == (ctx = H5FL_MALLOC(H5B2_test_ctx_t)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate callback context")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate callback context");
 
     /* Determine the size of lengths in the file */
     ctx->sizeof_size = H5F_SIZEOF_SIZE(f);
@@ -472,7 +472,7 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
 
     /* Check for empty tree */
     if (0 == curr_node_ptr.node_nrec)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records");
 
     /* Walk down B-tree to find record or leaf node where record is located */
     cmp = -1;
@@ -483,19 +483,19 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
         /* Lock B-tree current node */
         if (NULL == (internal = H5B2__protect_internal(hdr, parent, &curr_node_ptr, depth, FALSE,
                                                        H5AC__READ_ONLY_FLAG)))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node");
 
         /* Unpin parent if necessary */
         if (parent) {
             if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
             parent = NULL;
         } /* end if */
 
         /* Locate node pointer for child */
         if (H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx,
                                 &cmp) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
 
         if (cmp > 0)
             idx++;
@@ -507,7 +507,7 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
             /* Unlock current node */
             if (H5AC_unprotect(hdr->f, H5AC_BT2_INT, curr_node_ptr.addr, internal,
                                (unsigned)(hdr->swmr_write ? H5AC__PIN_ENTRY_FLAG : H5AC__NO_FLAGS_SET)) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node");
 
             /* Keep track of parent if necessary */
             if (hdr->swmr_write)
@@ -519,7 +519,7 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
         else {
             /* Unlock current node */
             if (H5AC_unprotect(hdr->f, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node");
 
             /* Fill in information about the node */
             ninfo->depth = depth;
@@ -538,26 +538,26 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
 
         /* Lock B-tree leaf node */
         if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, &curr_node_ptr, FALSE, H5AC__READ_ONLY_FLAG)))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
         /* Unpin parent if necessary */
         if (parent) {
             if (parent != hdr && H5AC_unpin_entry(parent) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry");
             parent = NULL;
         } /* end if */
 
         /* Locate record */
         if (H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx, &cmp) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
 
         /* Unlock current node */
         if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node");
 
         /* Indicate the depth that the record was found */
         if (cmp != 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record not in B-tree")
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record not in B-tree");
     } /* end block */
 
     /* Fill in information about the leaf node */
@@ -601,7 +601,7 @@ H5B2__get_node_depth_test(H5B2_t *bt2, void *udata)
 
     /* Get information abou the node */
     if (H5B2__get_node_info_test(bt2, udata, &ninfo) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, (-1), "error looking up node info")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, (-1), "error looking up node info");
 
     /* Set return value */
     ret_value = (int)ninfo.depth;

@@ -131,7 +131,7 @@ H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Allocate space for max dataset chunks */
     addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, nbytes);
     if (!H5_addr_defined(addr))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed");
 
     /* This is the address of the dataset chunks */
     idx_info->storage->idx_addr = addr;
@@ -251,7 +251,7 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t ch
         /* Make "generic chunk" callback */
         if ((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, H5_ITER_ERROR,
-                        "failure in generic chunk iterator callback")
+                        "failure in generic chunk iterator callback");
 
         /* Update coordinates of chunk in dataset */
         curr_dim = (int)(ndims - 1);
@@ -328,7 +328,7 @@ H5D__none_idx_delete(const H5D_chk_idx_info_t *idx_info)
     /* chunk size * max # of chunks */
     nbytes = idx_info->layout->max_nchunks * idx_info->layout->size;
     if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->storage->idx_addr, nbytes) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free dataset chunks")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free dataset chunks");
 
     idx_info->storage->idx_addr = HADDR_UNDEF;
 
@@ -374,7 +374,7 @@ H5D__none_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_inf
 
     /* Allocate dataset chunks in the dest. file */
     if (H5D__none_idx_create(idx_info_dst) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
 
     /* Reset metadata tag */
     H5_END_TAG

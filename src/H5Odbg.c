@@ -246,7 +246,7 @@ H5O_debug_id(unsigned type_id, H5F_t *f, const void *mesg, FILE *stream, int ind
 
     /* Call the debug method in the class */
     if ((ret_value = (type->debug)(f, mesg, stream, indent, fwidth)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "unable to debug message")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "unable to debug message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -365,7 +365,7 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
 
     /* debug each message */
     if (NULL == (sequence = (unsigned *)H5MM_calloc(NELMTS(H5O_msg_class_g) * sizeof(unsigned))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     for (i = 0, mesg_total = 0; i < oh->nmesgs; i++) {
         const H5O_msg_class_t *debug_type; /* Type of message to use for callbacks */
         unsigned               chunkno;    /* Chunk for message */
@@ -514,11 +514,11 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     loc.holding_file = FALSE;
 
     if (NULL == (oh = H5O_protect(&loc, H5AC__READ_ONLY_FLAG, FALSE)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* debug */
     if (H5O__debug_real(f, oh, addr, stream, indent, fwidth) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "debug dump call failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "debug dump call failed");
 
 done:
     if (oh && H5O_unprotect(&loc, oh, H5AC__NO_FLAGS_SET) < 0)

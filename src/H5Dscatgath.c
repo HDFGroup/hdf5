@@ -125,7 +125,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size");
 
     /* Allocate the vector I/O arrays */
     if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
@@ -133,15 +133,15 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if (NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
     if (NULL == (off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array");
 
     /* Loop until all elements are written */
     while (nelmts > 0) {
         /* Get list of sequences for selection to write */
         if (H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Reset the current sequence information */
         mem_curr_seq = dset_curr_seq = 0;
@@ -151,7 +151,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
         /* Write sequence list out */
         if ((*tmp_dset_info.layout_ops.writevv)(&tmp_io_info, &tmp_dset_info, nseq, &dset_curr_seq, len, off,
                                                 (size_t)1, &mem_curr_seq, &mem_len, &mem_off) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Update buffer */
         tmp_dset_info.buf.cvp = (const uint8_t *)tmp_dset_info.buf.cvp + orig_mem_len;
@@ -226,7 +226,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't retrieve I/O vector size")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't retrieve I/O vector size");
 
     /* Allocate the vector I/O arrays */
     if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
@@ -234,15 +234,15 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if (NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "can't allocate I/O length vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "can't allocate I/O length vector array");
     if (NULL == (off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "can't allocate I/O offset vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "can't allocate I/O offset vector array");
 
     /* Loop until all elements are read */
     while (nelmts > 0) {
         /* Get list of sequences for selection to read */
         if (H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Reset the current sequence information */
         mem_curr_seq = dset_curr_seq = 0;
@@ -252,7 +252,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
         /* Read sequence list in */
         if ((*tmp_dset_info.layout_ops.readvv)(&tmp_io_info, &tmp_dset_info, nseq, &dset_curr_seq, len, off,
                                                (size_t)1, &mem_curr_seq, &mem_len, &mem_off) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
 
         /* Update buffer */
         tmp_dset_info.buf.vp = (uint8_t *)tmp_dset_info.buf.vp + orig_mem_len;
@@ -308,7 +308,7 @@ H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, vo
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size");
 
     /* Allocate the vector I/O arrays */
     if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
@@ -316,15 +316,15 @@ H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, vo
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if (NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
     if (NULL == (off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array");
 
     /* Loop until all elements are written */
     while (nelmts > 0) {
         /* Get list of sequences for selection to write */
         if (H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
         for (curr_seq = 0; curr_seq < nseq; curr_seq++) {
@@ -390,7 +390,7 @@ H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_tg
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't retrieve I/O vector size")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't retrieve I/O vector size");
 
     /* Allocate the vector I/O arrays */
     if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
@@ -398,15 +398,15 @@ H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_tg
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if (NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "can't allocate I/O length vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "can't allocate I/O length vector array");
     if (NULL == (off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "can't allocate I/O offset vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "can't allocate I/O offset vector array");
 
     /* Loop until all elements are written */
     while (nelmts > 0) {
         /* Get list of sequences for selection to write */
         if (H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &nelem, off, len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
         for (curr_seq = 0; curr_seq < nseq; curr_seq++) {
@@ -480,22 +480,22 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
 
     /* Allocate the iterators */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator");
     if (NULL == (bkg_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate background iterator")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate background iterator");
     if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator");
 
     /* Figure out the strip mine size. */
     if (H5S_select_iter_init(file_iter, dset_info->file_space, dset_info->type_info.src_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
     file_iter_init = TRUE; /*file selection iteration info has been initialized */
     if (H5S_select_iter_init(mem_iter, dset_info->mem_space, dset_info->type_info.dst_type_size, 0) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
     mem_iter_init = TRUE; /*file selection iteration info has been initialized */
     if (H5S_select_iter_init(bkg_iter, dset_info->mem_space, dset_info->type_info.dst_type_size, 0) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
     bkg_iter_init = TRUE; /*file selection iteration info has been initialized */
 
     /* Start strip mining... */
@@ -552,7 +552,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
          */
         n = H5D__gather_file(io_info, dset_info, file_iter, smine_nelmts, tmp_buf /*out*/);
         if (n != smine_nelmts)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
 
         /* If the source and destination are compound types and subset of each other
          * and no conversion is needed, copy the data directly into user's buffer and
@@ -578,7 +578,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
 
                 /* Retrieve info from API context */
                 if (H5CX_get_data_transform(&data_transform) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info");
 
                 if (H5Z_xform_eval(data_transform, tmp_buf, smine_nelmts, dset_info->type_info.mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
@@ -656,23 +656,23 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
 
     /* Allocate the iterators */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator");
     if (NULL == (bkg_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate background iterator")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate background iterator");
     if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator");
 
     /* Figure out the strip mine size. */
     if (H5S_select_iter_init(file_iter, dset_info->file_space, dset_info->type_info.dst_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
     file_iter_init = TRUE; /*file selection iteration info has been initialized */
     if (H5S_select_iter_init(mem_iter, dset_info->mem_space, dset_info->type_info.src_type_size, 0) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
     mem_iter_init = TRUE; /*file selection iteration info has been initialized */
     if (H5S_select_iter_init(bkg_iter, dset_info->file_space, dset_info->type_info.dst_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
     bkg_iter_init = TRUE; /*file selection iteration info has been initialized */
 
     /* Start strip mining... */
@@ -729,12 +729,13 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
         if (H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, in_place_tconv)) {
             if (H5D__compound_opt_write(smine_nelmts, &dset_info->type_info, tmp_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
         } /* end if */
         else {
             if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
                 n = H5D__gather_file(io_info, dset_info, bkg_iter, smine_nelmts, io_info->bkg_buf /*out*/);
                 if (n != smine_nelmts)
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
+                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
             } /* end if */
 
             /* Do the data transform before the type conversion (since
@@ -744,7 +745,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
 
                 /* Retrieve info from API context */
                 if (H5CX_get_data_transform(&data_transform) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info");
 
                 if (H5Z_xform_eval(data_transform, tmp_buf, smine_nelmts, dset_info->type_info.mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
@@ -819,18 +820,18 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
 
     /* Allocate list of buffers (within the tconv buf) */
     if (NULL == (tmp_bufs = H5MM_malloc(io_info->pieces_added * sizeof(void *))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary buffer list")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary buffer list");
 
     /* Allocate the iterator */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator");
 
     /* Allocate list of block memory spaces */
     /*!FIXME delay doing this until we find the first mem space that is non-contiguous or doesn't start at 0
      */
     if (NULL == (tmp_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                    "memory allocation failed for temporary memory space list")
+                    "memory allocation failed for temporary memory space list");
 
     /* Build read operation to tconv buffer */
     for (i = 0; i < io_info->pieces_added; i++) {
@@ -849,7 +850,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             if (NULL ==
                 (tmp_mem_spaces[i] = H5S_create_simple(1, &io_info->sel_pieces[i]->piece_points, NULL))) {
                 memset(&tmp_mem_spaces[i], 0, (io_info->pieces_added - i) * sizeof(tmp_mem_spaces[0]));
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace");
             }
 
             /* Check for in-place type conversion */
@@ -885,19 +886,19 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                         if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i],
                                                  dset_info->type_info.dst_type_size, 0) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                                        "unable to initialize memory selection information")
+                                        "unable to initialize memory selection information");
                         mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
 
                         if ((size_t)io_info->sel_pieces[i]->piece_points !=
                             H5D__gather_mem(io_info->rbufs[i], mem_iter,
                                             (size_t)io_info->sel_pieces[i]->piece_points,
                                             tmp_bkg_buf /*out*/))
-                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
+                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
 
                         /* Reset selection iterator */
                         assert(mem_iter_init);
                         if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
                         mem_iter_init = FALSE;
                     }
                 }
@@ -909,7 +910,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
     H5_CHECK_OVERFLOW(io_info->pieces_added, size_t, uint32_t);
     if (H5F_shared_select_read(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)io_info->pieces_added, tmp_mem_spaces,
                                io_info->file_spaces, io_info->addrs, io_info->element_sizes, tmp_bufs) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed");
 
     /* Reset bkg_bytes_used */
     bkg_bytes_used = 0;
@@ -929,7 +930,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.dst_type_size,
                                      0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize memory selection information")
+                            "unable to initialize memory selection information");
             mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
 
             /* If the source and destination are compound types and subset of each other
@@ -939,7 +940,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             if (H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, io_info->sel_pieces[i]->in_place_tconv)) {
                 if (H5D__compound_opt_read((size_t)io_info->sel_pieces[i]->piece_points, mem_iter,
                                            &dset_info->type_info, tmp_bufs[i], io_info->rbufs[i] /*out*/) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed");
             }
             else {
                 /* Check for background buffer */
@@ -960,7 +961,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                                 dset_info->type_info.dst_type_id,
                                 (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
                                 tmp_bufs[i], tmp_bkg_buf) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
                 /* Do the data transform after the conversion (since we're using type mem_type) */
                 if (!dset_info->type_info.is_xform_noop) {
@@ -968,25 +969,25 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
 
                     /* Retrieve info from API context */
                     if (H5CX_get_data_transform(&data_transform) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info");
 
                     if (H5Z_xform_eval(data_transform, tmp_bufs[i],
                                        (size_t)io_info->sel_pieces[i]->piece_points,
                                        dset_info->type_info.mem_type) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+                        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform");
                 }
 
                 /* Scatter the data into memory if this was not an in-place conversion */
                 if (!io_info->sel_pieces[i]->in_place_tconv)
                     if (H5D__scatter_mem(tmp_bufs[i], mem_iter, (size_t)io_info->sel_pieces[i]->piece_points,
                                          io_info->rbufs[i] /*out*/) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed");
             }
 
             /* Release selection iterator */
             assert(mem_iter_init);
             if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
             mem_iter_init = FALSE;
         }
     }
@@ -1056,18 +1057,18 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
 
     /* Allocate list of buffers (within the tconv buf) */
     if (NULL == (write_bufs = (const void **)H5MM_malloc(io_info->pieces_added * sizeof(const void *))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary buffer list")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary buffer list");
 
     /* Allocate the iterator */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator");
 
     /* Allocate list of block memory spaces */
     /*!FIXME delay doing this until we find the first mem space that is non-contiguous or doesn't start at 0
      */
     if (NULL == (write_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                    "memory allocation failed for temporary memory space list")
+                    "memory allocation failed for temporary memory space list");
 
     /* Build operations to read data to background buffer and to write data */
     for (i = 0; i < io_info->pieces_added; i++) {
@@ -1093,13 +1094,13 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.src_type_size,
                                      0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize memory selection information")
+                            "unable to initialize memory selection information");
             mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
 
             /* Create block memory space */
             if (NULL ==
                 (write_mem_spaces[i] = H5S_create_simple(1, &io_info->sel_pieces[i]->piece_points, NULL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace");
             spaces_added++;
 
             /* Check for in-place type conversion */
@@ -1124,7 +1125,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                 if ((size_t)io_info->sel_pieces[i]->piece_points !=
                     H5D__gather_mem(io_info->wbufs[i], mem_iter, (size_t)io_info->sel_pieces[i]->piece_points,
                                     tmp_write_buf /*out*/))
-                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
             }
 
             /* Set buffer for writing to disk (from type conversion buffer) */
@@ -1140,6 +1141,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                 if (H5D__compound_opt_write((size_t)io_info->sel_pieces[i]->piece_points,
                                             &dset_info->type_info, tmp_write_buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
             } /* end if */
             else {
                 /* Check for background buffer */
@@ -1162,19 +1164,19 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                         assert(!bkg_file_spaces && !bkg_addrs && !bkg_element_sizes && !bkg_bufs);
                         if (NULL == (bkg_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for memory space list")
+                                        "memory allocation failed for memory space list");
                         if (NULL == (bkg_file_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for file space list")
+                                        "memory allocation failed for file space list");
                         if (NULL == (bkg_addrs = H5MM_malloc(io_info->pieces_added * sizeof(haddr_t))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for piece address list")
+                                        "memory allocation failed for piece address list");
                         if (NULL == (bkg_element_sizes = H5MM_malloc(io_info->pieces_added * sizeof(size_t))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for element size list")
+                                        "memory allocation failed for element size list");
                         if (NULL == (bkg_bufs = H5MM_malloc(io_info->pieces_added * sizeof(const void *))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for write buffer list")
+                                        "memory allocation failed for write buffer list");
                     }
 
                     /* Use same (block) memory space, file space, address, and element size as write operation
@@ -1201,12 +1203,12 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
 
                         /* Retrieve info from API context */
                         if (H5CX_get_data_transform(&data_transform) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info");
 
                         if (H5Z_xform_eval(data_transform, tmp_write_buf,
                                            (size_t)io_info->sel_pieces[i]->piece_points,
                                            dset_info->type_info.mem_type) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+                            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform");
                     }
 
                     /*
@@ -1216,14 +1218,14 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                                     dset_info->type_info.dst_type_id,
                                     (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
                                     tmp_write_buf, tmp_bkg_buf) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
                 }
             }
 
             /* Release selection iterator */
             assert(mem_iter_init);
             if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
             mem_iter_init = FALSE;
         }
     }
@@ -1238,7 +1240,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
         H5_CHECK_OVERFLOW(bkg_pieces, size_t, uint32_t);
         if (H5F_shared_select_read(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)bkg_pieces, bkg_mem_spaces,
                                    bkg_file_spaces, bkg_addrs, bkg_element_sizes, bkg_bufs) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read to background buffer failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read to background buffer failed");
 
         /* Perform type conversion on pieces with background buffers that were just read */
         for (i = 0; i < io_info->pieces_added; i++) {
@@ -1260,12 +1262,12 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
 
                     /* Retrieve info from API context */
                     if (H5CX_get_data_transform(&data_transform) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info");
 
                     if (H5Z_xform_eval(data_transform, tmp_write_buf,
                                        (size_t)io_info->sel_pieces[i]->piece_points,
                                        dset_info->type_info.mem_type) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+                        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform");
                 }
 
                 /*
@@ -1276,7 +1278,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                                 dset_info->type_info.dst_type_id,
                                 (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
                                 tmp_write_buf, bkg_bufs[j]) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
 
                 /* Advance to next background buffer */
                 j++;
@@ -1291,7 +1293,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
     if (H5F_shared_select_write(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)io_info->pieces_added,
                                 write_mem_spaces, io_info->file_spaces, io_info->addrs,
                                 io_info->element_sizes, write_bufs) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "selection write failed")
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "selection write failed");
 
 done:
     /* Release and free selection iterator */
@@ -1385,7 +1387,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size");
 
     /* Allocate the vector I/O arrays */
     if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
@@ -1393,9 +1395,9 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if (NULL == (len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
     if (NULL == (off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array");
 
     /* Get source & destination strides */
     src_stride = type_info->src_type_size;
@@ -1413,7 +1415,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
 
         /* Get list of sequences for selection to write */
         if (H5S_SELECT_ITER_GET_SEQ_LIST(iter, vec_size, nelmts, &nseq, &elmtno, off, len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
         for (curr_seq = 0; curr_seq < nseq; curr_seq++) {

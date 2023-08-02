@@ -73,7 +73,7 @@ H5VL__native_blob_put(void *obj, const void *buf, size_t size, void *blob_id, vo
 
     /* Write the VL information to disk (allocates space also) */
     if (H5HG_insert(f, size, buf, &hobjid) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "unable to write blob information")
+        HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "unable to write blob information");
 
     /* Encode the heap information */
     H5F_addr_encode(f, &id, hobjid.addr);
@@ -116,11 +116,11 @@ H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t size, vo
     if (hobjid.addr > 0)
         /* Read the VL information from disk */
         if (NULL == H5HG_read(f, &hobjid, buf, &hobj_size))
-            HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "unable to read VL information")
+            HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "unable to read VL information");
 
     /* Verify the size is correct */
     if (hobj_size != size)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "Expected global heap object size does not match")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "Expected global heap object size does not match");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -182,13 +182,13 @@ H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_args_t *
             /* Free heap object */
             if (hobjid.addr > 0)
                 if (H5HG_remove(f, &hobjid) < 0)
-                    HGOTO_ERROR(H5E_VOL, H5E_CANTREMOVE, FAIL, "unable to remove heap object")
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTREMOVE, FAIL, "unable to remove heap object");
 
             break;
         }
 
         default:
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation");
     } /* end switch */
 
 done:

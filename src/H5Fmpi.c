@@ -88,7 +88,7 @@ H5F_mpi_get_rank(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_rank(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_rank request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_rank request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -116,7 +116,7 @@ H5F_mpi_get_comm(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_comm(f->shared->lf)) == MPI_COMM_NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -144,7 +144,7 @@ H5F_shared_mpi_get_size(const H5F_shared_t *f_sh)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f_sh->lf)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -172,7 +172,7 @@ H5F_mpi_get_size(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -353,7 +353,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
 
         /* Retrieve the file structure */
         if (H5G_loc(loc_id, &loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
         f = loc.oloc->file;
         assert(f);
 
@@ -361,7 +361,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
         if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
             /* retrieve the file communicator */
             if (MPI_COMM_NULL == (*mpi_comm = H5F_mpi_get_comm(f)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator");
         }
     }
     /* otherwise, this is from H5Fopen or H5Fcreate and has to be collective */
@@ -372,20 +372,20 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
         H5FD_class_t      *driver_class = NULL;
 
         if (NULL == (plist = H5P_object_verify(acspl_id, H5P_FILE_ACCESS)))
-            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list")
+            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list");
 
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info");
 
         if (NULL == (driver_class = H5FD_get_class(driver_prop.driver_id)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver class structure")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver class structure");
 
         if (H5FD_driver_query(driver_class, &driver_feat_flags) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver feature flags")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver feature flags");
 
         if (driver_feat_flags & H5FD_FEAT_HAS_MPI)
             if (H5P_peek(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, mpi_comm) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator");
     }
 
 done:
