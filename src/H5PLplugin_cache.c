@@ -286,9 +286,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 
             /* No need to continue processing */
             break;
-
-        } /* end if */
-
+        }
     } /* end for */
 
 done:
