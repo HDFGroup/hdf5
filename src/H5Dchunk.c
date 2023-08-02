@@ -963,7 +963,8 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
 done:
     if (FAIL == ret_value)
         if (H5D__chunk_dest(dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to clean up chunk structures during error cleanup");
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL,
+                        "unable to clean up chunk structures during error cleanup");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_init() */
 
