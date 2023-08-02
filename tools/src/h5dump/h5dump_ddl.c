@@ -920,7 +920,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
     hid_t             type, space;
-    unsigned          attr_crt_order_flags;
+    unsigned          attr_crt_order_flags = 0;
     hid_t             dcpl_id;      /* dataset creation property list ID */
     h5tools_str_t     buffer;       /* string into which to render   */
     hsize_t           curr_pos = 0; /* total data element position   */
@@ -947,14 +947,16 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     outputformat                = &string_dataformat;
 
     if ((dcpl_id = H5Dget_create_plist(did)) < 0) {
-        error_msg("error in getting creation property list ID\n");
+        error_msg("error in getting creation property list ID for dataset '%s'\n", name);
         h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* query the creation properties for attributes */
-    if (H5Pget_attr_creation_order(dcpl_id, &attr_crt_order_flags) < 0) {
-        error_msg("error in getting creation properties\n");
-        h5tools_setstatus(EXIT_FAILURE);
+    if (dcpl_id >= 0) {
+        if (H5Pget_attr_creation_order(dcpl_id, &attr_crt_order_flags) < 0) {
+            error_msg("error in getting creation properties for dataset '%s'\n", name);
+            h5tools_setstatus(EXIT_FAILURE);
+        }
     }
 
     /* setup */
@@ -993,7 +995,9 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
         h5tools_dump_dcpl(rawoutstream, outputformat, &ctx, dcpl_id, type, did);
         h5dump_type_table = NULL;
     }
-    H5Pclose(dcpl_id);
+
+    if (dcpl_id >= 0)
+        H5Pclose(dcpl_id);
 
     ctx.sset          = sset;
     ctx.display_index = dump_opts.display_ai;
