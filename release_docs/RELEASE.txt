@@ -121,6 +121,15 @@ Bug Fixes since HDF5-1.14.1 release
 ===================================
     Library
     -------
+    - Fixed CVE-2018-13867
+
+      A corrupt file containing an invalid local heap datablock address
+      could trigger an assert failure when the metadata cache attempted
+      to load the datablock from storage.
+
+      The local heap now verifies that the datablock address is valid
+      when the local heap header information is parsed.
+
     - Fixed CVE-2018-11202
 
       A malformed file could result in chunk index memory leaks. Under most
