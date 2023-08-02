@@ -35,10 +35,10 @@ static const char *progname_g = "use_disable_mdc_flushes"; /* program name */
 #define UC_RANK       3                /* use case dataset rank */
 #define Chunksize_DFT 256              /* chunksize default */
 #define Hgoto_error(val)                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         ret_value = val;                                                                                     \
         goto done;                                                                                           \
-    }
+    } while(0)
 
 static char   *filename_g;
 static hsize_t nplanes_g;

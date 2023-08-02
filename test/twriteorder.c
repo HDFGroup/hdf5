@@ -71,10 +71,10 @@
 #define NLINKEDBLOCKS_DFT 512     /* default 512 */
 #define SIZE_BLKADDR      4       /* expected sizeof blkaddr */
 #define Hgoto_error(val)                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         ret_value = val;                                                                                     \
         goto done;                                                                                           \
-    }
+    } while(0)
 
 /* type declarations */
 typedef enum part_t {
