@@ -527,7 +527,6 @@ ReferenceException::ReferenceException(const H5std_string &func, const H5std_str
 {
 }
 
-
 //--------------------------------------------------------------------------
 // Subclass:    LibraryIException
 //--------------------------------------------------------------------------
@@ -571,7 +570,6 @@ LocationException::LocationException(const H5std_string &func, const H5std_strin
     : Exception(func, message)
 {
 }
-
 
 //--------------------------------------------------------------------------
 // Subclass:    IdComponentException
