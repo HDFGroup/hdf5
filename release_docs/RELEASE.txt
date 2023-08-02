@@ -258,6 +258,14 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed an issue where an assert statement was converted to an
+      incorrect error check statement
+
+      An assert statement in the library dealing with undefined dataset data
+      fill values was converted to an improper error check that would always
+      trigger when a dataset's fill value was set to NULL (undefined). This
+      has now been fixed.
+
     - Fixed an assertion failure when attempting to use the Subfiling IOC
       VFD directly
 
