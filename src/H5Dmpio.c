@@ -4701,7 +4701,8 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
         if (H5_mpio_gatherv_alloc(chunk_list->chunk_infos, (int)chunk_list->num_chunk_infos, send_type,
                                   counts_ptr, displacements_ptr, recv_type, TRUE, 0, io_info->comm, mpi_rank,
                                   mpi_size, &gathered_array, &collective_num_entries) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "can't gather chunk file space info to/from ranks");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL,
+                        "can't gather chunk file space info to/from ranks");
     }
     else {
         /*
@@ -4714,7 +4715,8 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
         if (H5_mpio_gatherv_alloc_simple(chunk_list->chunk_infos, (int)chunk_list->num_chunk_infos, send_type,
                                          recv_type, TRUE, 0, io_info->comm, mpi_rank, mpi_size,
                                          &gathered_array, &collective_num_entries) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "can't gather chunk file space info to/from ranks");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL,
+                        "can't gather chunk file space info to/from ranks");
     }
 
     /* Collectively re-allocate the modified chunks (from each rank) in the file */
