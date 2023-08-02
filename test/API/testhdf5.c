@@ -695,7 +695,7 @@ main(int argc, char *argv[])
         cleanup_genprop();
         cleanup_unicode();
         cleanup_misc();
-        H5E_END_TRY;
+        H5E_END_TRY
 
         printf("\n");
     }

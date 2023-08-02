@@ -1833,7 +1833,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         {
             lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /*
