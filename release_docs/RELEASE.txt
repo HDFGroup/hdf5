@@ -124,7 +124,12 @@ New Features
 
     Library:
     --------
-    -
+    - Change the error handling for a not found path in the find plugin process.
+
+      While attempting to load a plugin the HDF5 library will fail if one of the
+      directories in the plugin paths does not exist, even if there are more paths
+      to check. Instead of exiting the function with an error, just logged the error
+      and continue processing the list of paths to check.
 
 
     Parallel Library:
