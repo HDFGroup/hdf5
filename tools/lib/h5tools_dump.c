@@ -3067,10 +3067,14 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
                          h5tools_context_t *ctx /*in,out*/, hid_t dcpl, hid_t type_id, hid_t obj_id)
 {
     size_t size;
-    hid_t  n_type = H5I_INVALID_HID;
-    void  *buf    = NULL;
+    hid_t  n_type  = H5I_INVALID_HID;
+    void  *buf     = NULL;
+    bool   vl_data = false;
 
     n_type = H5Tget_native_type(type_id, H5T_DIR_DEFAULT);
+
+    if (h5tools_detect_vlen(type_id) == TRUE)
+        vl_data = true;
 
     size = H5Tget_size(n_type);
     buf  = malloc(size);
@@ -3080,6 +3084,17 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
     h5tools_str_sprint(buffer, info, obj_id, n_type, buf, ctx);
 
     H5Tclose(n_type);
+
+    if (vl_data) {
+        hsize_t dims[1]  = {1};
+        hid_t   space_id = H5I_INVALID_HID;
+
+        space_id = H5Screate_simple(1, dims, NULL);
+
+        H5Treclaim(type_id, space_id, H5P_DEFAULT, buf);
+
+        H5Sclose(space_id);
+    }
 
     if (buf)
         free(buf);
@@ -3097,8 +3112,8 @@ void
 h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t dcpl_id,
                   hid_t type_id, hid_t dset_id)
 {
-    int              nfilters; /* number of filters */
-    int              rank;     /* rank */
+    int              nfilters = -1; /* number of filters */
+    int              rank;          /* rank */
     int              i;
     unsigned         j;
     unsigned         filt_flags;    /* filter flags */
@@ -3106,17 +3121,17 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     unsigned         szip_options_mask;
     unsigned         szip_pixels_per_block;
     H5Z_filter_t     filtn; /* filter identification number */
-    H5D_fill_value_t fvstatus;
-    H5D_alloc_time_t at;
-    H5D_fill_time_t  ft;
-    H5D_layout_t     stl;
-    size_t           ncols = 80;  /* available output width        */
-    size_t           cd_nelmts;   /* filter client number of values */
-    off_t            offset;      /* offset of external file     */
-    char             f_name[256]; /* filter name */
-    char             name[256];   /* external or virtual file name       */
-    hsize_t          chsize[64];  /* chunk size in elements */
-    hsize_t          size;        /* size of external file   */
+    H5D_fill_value_t fvstatus = H5D_FILL_VALUE_ERROR;
+    H5D_alloc_time_t at       = H5D_ALLOC_TIME_ERROR;
+    H5D_fill_time_t  ft       = H5D_FILL_TIME_ERROR;
+    H5D_layout_t     stl      = H5D_LAYOUT_ERROR;
+    size_t           ncols    = 80; /* available output width        */
+    size_t           cd_nelmts;     /* filter client number of values */
+    off_t            offset;        /* offset of external file     */
+    char             f_name[256];   /* filter name */
+    char             name[256];     /* external or virtual file name       */
+    hsize_t          chsize[64];    /* chunk size in elements */
+    hsize_t          size;          /* size of external file   */
     hsize_t          storage_size;
     hsize_t          curr_pos = 0; /* total data element position   */
     h5tools_str_t    buffer;       /* string into which to render   */
@@ -3127,7 +3142,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         ncols = info->line_ncols;
 
     storage_size = H5Dget_storage_size(dset_id);
-    nfilters     = H5Pget_nfilters(dcpl_id);
+    if (dcpl_id >= 0)
+        nfilters = H5Pget_nfilters(dcpl_id);
+
     HDstrcpy(f_name, "\0");
 
     /*-------------------------------------------------------------------------
@@ -3140,7 +3157,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     h5tools_str_append(&buffer, "%s %s", STORAGE_LAYOUT, BEGIN);
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
-    stl = H5Pget_layout(dcpl_id);
+    if (dcpl_id >= 0)
+        stl = H5Pget_layout(dcpl_id);
+
     switch (stl) {
         case H5D_CHUNKED:
             ctx->indent_level++;
@@ -3639,7 +3658,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "FILL_TIME ");
 
-    H5Pget_fill_time(dcpl_id, &ft);
+    if (dcpl_id >= 0)
+        H5Pget_fill_time(dcpl_id, &ft);
+
     switch (ft) {
         case H5D_FILL_TIME_ALLOC:
             h5tools_str_append(&buffer, "%s", "H5D_FILL_TIME_ALLOC");
@@ -3652,7 +3673,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             break;
         case H5D_FILL_TIME_ERROR:
         default:
-            assert(0);
+            h5tools_str_append(&buffer, "%s", "INVALID");
             break;
     }
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
@@ -3661,7 +3682,10 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s ", "VALUE ");
-    H5Pfill_value_defined(dcpl_id, &fvstatus);
+
+    if (dcpl_id >= 0)
+        H5Pfill_value_defined(dcpl_id, &fvstatus);
+
     switch (fvstatus) {
         case H5D_FILL_VALUE_UNDEFINED:
             h5tools_str_append(&buffer, "%s", "H5D_FILL_VALUE_UNDEFINED");
@@ -3676,7 +3700,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             break;
         case H5D_FILL_VALUE_ERROR:
         default:
-            assert(0);
+            h5tools_str_append(&buffer, "%s", "INVALID");
             break;
     }
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
@@ -3704,7 +3728,10 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         ctx->need_prefix = TRUE;
 
         h5tools_str_reset(&buffer);
-        H5Pget_alloc_time(dcpl_id, &at);
+
+        if (dcpl_id >= 0)
+            H5Pget_alloc_time(dcpl_id, &at);
+
         switch (at) {
             case H5D_ALLOC_TIME_EARLY:
                 h5tools_str_append(&buffer, "%s", "H5D_ALLOC_TIME_EARLY");
@@ -3718,7 +3745,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             case H5D_ALLOC_TIME_ERROR:
             case H5D_ALLOC_TIME_DEFAULT:
             default:
-                assert(0);
+                h5tools_str_append(&buffer, "%s", "INVALID");
                 break;
         }
         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
