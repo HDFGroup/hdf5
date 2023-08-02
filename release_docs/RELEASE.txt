@@ -184,7 +184,21 @@ Bug Fixes since HDF5-1.14.1 release
 
     Tools
     -----
-    -
+    - Fixed an issue in h5repack for variable-length typed datasets
+
+      When repacking datasets into a new file, h5repack tries to determines whether
+      it can use H5Ocopy to copy each dataset into the new file, or if it needs to
+      manually re-create the dataset, then read data from the old dataset and write
+      it to the new dataset. H5repack was previously using H5Ocopy for datasets with
+      variable-length datatypes, but this can be problematic if the global heap
+      addresses involved do not match exactly between the old and new files. These
+      addresses could change for a variety of reasons, such as the command-line options
+      provided to h5repack, how h5repack allocate space in the repacked file, etc.      
+      Since H5Ocopy does not currently perform any translation when these addresses
+      change, datasets that were repacked with H5Ocopy could become unreadable in the
+      new file. H5repack has been fixed to repack variable-length typed datasets without
+      using H5Ocopy to ensure that the new datasets always have the correct global heap
+      addresses.
 
 
     Performance
