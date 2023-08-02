@@ -111,7 +111,7 @@ H5P__fmnt_reg_prop(H5P_genclass_t *pclass)
     /* Register property of whether symlinks is local to file */
     if (H5P__register_real(pclass, H5F_MNT_SYM_LOCAL_NAME, H5F_MNT_SYM_LOCAL_SIZE, &H5F_def_local_g, NULL,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

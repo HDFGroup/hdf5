@@ -115,7 +115,7 @@ H5_default_vfd_init(void)
      * it has of initializing the default VFD.
      */
     if (H5FD_sec2_init() == H5I_INVALID_HID) {
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to load default VFD ID")
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to load default VFD ID");
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -267,7 +267,7 @@ H5_init_library(void)
         for (i = 0; i < NELMTS(initializer); i++) {
             if (initializer[i].func() < 0) {
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                    "unable to initialize %s interface", initializer[i].descr)
+                    "unable to initialize %s interface", initializer[i].descr);
             }
         }
         /* clang-format on */
@@ -576,7 +576,7 @@ H5garbage_collect(void)
 
     /* Call the garbage collection routines in the library */
     if (H5FL_garbage_coll() < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect objects")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect objects");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -622,7 +622,7 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
     /* Call the free list function to actually set the limits */
     if (H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim,
                                   blk_list_lim, blk_global_lim, blk_list_lim) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "can't set garbage collection limits")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "can't set garbage collection limits");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -658,7 +658,7 @@ H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t
 
     /* Call the free list function to actually get the sizes */
     if (H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get garbage collection sizes")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get garbage collection sizes");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1052,11 +1052,11 @@ H5atclose(H5_atclose_func_t func, void *ctx)
 
     /* Check arguments */
     if (NULL == func)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL func pointer")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL func pointer");
 
     /* Allocate space for the 'atclose' node */
     if (NULL == (new_atclose = H5FL_MALLOC(H5_atclose_node_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate 'atclose' node")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate 'atclose' node");
 
     /* Set up 'atclose' node */
     new_atclose->func = func;

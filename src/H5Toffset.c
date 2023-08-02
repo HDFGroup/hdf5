@@ -62,11 +62,11 @@ H5Tget_offset(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
 
     /* Get offset */
     if ((ret_value = H5T_get_offset(dt)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "can't get offset for specified datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "can't get offset for specified datatype");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -109,7 +109,7 @@ H5T_get_offset(const H5T_t *dt)
     while (dt->shared->parent)
         dt = dt->shared->parent;
     if (!H5T_IS_ATOMIC(dt->shared))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type");
 
     /* Offset */
     ret_value = (int)dt->shared->u.atomic.offset;
@@ -161,20 +161,20 @@ H5Tset_offset(hid_t type_id, size_t offset)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     if (H5T_STATE_TRANSIENT != dt->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (H5T_STRING == dt->shared->type && offset != 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset must be zero for this type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset must be zero for this type");
     if (H5T_ENUM == dt->shared->type && dt->shared->u.enumer.nmembs > 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
     if (H5T_COMPOUND == dt->shared->type || H5T_REFERENCE == dt->shared->type ||
         H5T_OPAQUE == dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for this datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for this datatype");
 
     /* Do the real work */
     if (H5T__set_offset(dt, offset) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set offset")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set offset");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -229,7 +229,7 @@ H5T__set_offset(const H5T_t *dt, size_t offset)
 
     if (dt->shared->parent) {
         if (H5T__set_offset(dt->shared->parent, offset) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set offset for base type")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set offset for base type");
 
         /* Adjust size of datatype appropriately */
         if (dt->shared->type == H5T_ARRAY)

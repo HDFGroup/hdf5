@@ -141,7 +141,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
                     /* Reallocate the metadata accumulator buffer */
                     if (NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_alloc_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                    "unable to allocate metadata accumulator buffer")
+                                    "unable to allocate metadata accumulator buffer");
 
                     /* Note the new buffer size */
                     accum->alloc_size = new_alloc_size;
@@ -164,7 +164,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
 
                     /* Dispatch to driver */
                     if (H5FD_read(file, map_type, addr, amount_before, accum->buf) < 0)
-                        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
+                        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed");
                 } /* end if */
                 else
                     amount_before = 0;
@@ -180,7 +180,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
                     /* Dispatch to driver */
                     if (H5FD_read(file, map_type, (accum->loc + accum->size), amount_after,
                                   (accum->buf + accum->size + amount_before)) < 0)
-                        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
+                        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed");
                 } /* end if */
 
                 /* Copy the data out of the buffer */
@@ -194,13 +194,13 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
             else {
                 /* Dispatch to driver */
                 if (H5FD_read(file, map_type, addr, size, buf) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
+                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed");
             } /* end else */
         }     /* end if */
         else {
             /* Read the data */
             if (H5FD_read(file, map_type, addr, size, buf) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed");
 
             /* Check for overlap w/dirty accumulator */
             /* (Note that this could be improved by updating the non-dirty
@@ -244,7 +244,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
     else {
         /* Read the data */
         if (H5FD_read(file, map_type, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed");
     } /* end else */
 
 done:
@@ -330,7 +330,7 @@ H5F__accum_adjust(H5F_meta_accum_t *accum, H5FD_t *file, H5F_accum_adjust_t adju
                          */
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, (accum->loc + accum->dirty_off),
                                        accum->dirty_len, (accum->buf + accum->dirty_off)) < 0)
-                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "file write failed")
+                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "file write failed");
 
                         /* Reset accumulator dirty flag */
                         accum->dirty = FALSE;
@@ -343,7 +343,7 @@ H5F__accum_adjust(H5F_meta_accum_t *accum, H5FD_t *file, H5F_accum_adjust_t adju
                          */
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, (accum->loc + accum->dirty_off),
                                        accum->dirty_len, (accum->buf + accum->dirty_off)) < 0)
-                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "file write failed")
+                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "file write failed");
 
                         /* Reset accumulator dirty flag */
                         accum->dirty = FALSE;
@@ -373,7 +373,7 @@ H5F__accum_adjust(H5F_meta_accum_t *accum, H5FD_t *file, H5F_accum_adjust_t adju
 
             /* Reallocate the metadata accumulator buffer */
             if (NULL == (new_buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_size)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate metadata accumulator buffer")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate metadata accumulator buffer");
 
             /* Update accumulator info */
             accum->buf        = new_buf;
@@ -431,7 +431,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                 if (H5_addr_defined(accum->loc) && (addr + size) == accum->loc) {
                     /* Check if we need to adjust accumulator size */
                     if (H5F__accum_adjust(accum, file, H5F_ACCUM_PREPEND, size) < 0)
-                        HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
+                        HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator");
 
                     /* Move the existing metadata to the proper location */
                     memmove(accum->buf + size, accum->buf, accum->size);
@@ -456,7 +456,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                 else if (H5_addr_defined(accum->loc) && addr == (accum->loc + accum->size)) {
                     /* Check if we need to adjust accumulator size */
                     if (H5F__accum_adjust(accum, file, H5F_ACCUM_APPEND, size) < 0)
-                        HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
+                        HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator");
 
                     /* Copy the new metadata to the end */
                     H5MM_memcpy(accum->buf + accum->size, buf, size);
@@ -518,7 +518,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
 
                         /* Check if we need to adjust accumulator size */
                         if (H5F__accum_adjust(accum, file, H5F_ACCUM_PREPEND, add_size) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
+                            HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator");
 
                         /* Calculate the proper offset of the existing metadata */
                         H5_CHECKED_ASSIGN(old_offset, size_t, (addr + size) - accum->loc, hsize_t);
@@ -560,7 +560,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
 
                         /* Check if we need to adjust accumulator size */
                         if (H5F__accum_adjust(accum, file, H5F_ACCUM_APPEND, add_size) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
+                            HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator");
 
                         /* Compute offset of dirty region (after adjusting accumulator) */
                         dirty_off = (size_t)(addr - accum->loc);
@@ -601,7 +601,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                             if (NULL ==
                                 (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_alloc_size)))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                            "unable to allocate metadata accumulator buffer")
+                                            "unable to allocate metadata accumulator buffer");
 
                             /* Note the new buffer size */
                             accum->alloc_size = new_alloc_size;
@@ -629,7 +629,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     if (accum->dirty) {
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, accum->loc + accum->dirty_off,
                                        accum->dirty_len, accum->buf + accum->dirty_off) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
 
                         /* Reset accumulator dirty flag */
                         accum->dirty = FALSE;
@@ -647,7 +647,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                         /* Grow the metadata accumulator buffer */
                         if (NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_size)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                        "unable to allocate metadata accumulator buffer")
+                                        "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
                         accum->alloc_size = new_size;
@@ -666,7 +666,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                             /* Shrink the accumulator buffer */
                             if (NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, tmp_size)))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                            "unable to allocate metadata accumulator buffer")
+                                            "unable to allocate metadata accumulator buffer");
 
                             /* Note the new buffer size */
                             accum->alloc_size = tmp_size;
@@ -698,7 +698,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     /* Reallocate the metadata accumulator buffer */
                     if (NULL == (accum->buf = H5FL_BLK_REALLOC(meta_accum, accum->buf, new_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                    "unable to allocate metadata accumulator buffer")
+                                    "unable to allocate metadata accumulator buffer");
 
                     /* Note the new buffer size */
                     accum->alloc_size = new_size;
@@ -725,11 +725,11 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
             if ((H5F_SHARED_INTENT(f_sh) & H5F_ACC_SWMR_WRITE) > 0)
                 /* Flush if dirty and reset accumulator */
                 if (H5F__accum_reset(f_sh, TRUE) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator")
+                    HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator");
 
             /* Write the data */
             if (H5FD_write(file, map_type, addr, size, buf) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
 
             /* Check for overlap w/accumulator */
             /* (Note that this could be improved by updating the accumulator
@@ -776,7 +776,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     else { /* Access covers whole accumulator */
                         /* Reset accumulator, but don't flush */
                         if (H5F__accum_reset(f_sh, FALSE) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator")
+                            HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator");
                     }                    /* end else */
                 }                        /* end if */
                 else {                   /* Write starts after beginning of accumulator */
@@ -818,7 +818,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
     else {
         /* Write the data */
         if (H5FD_write(file, map_type, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
     } /* end else */
 
 done:
@@ -927,7 +927,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                         /* Write out the entire dirty region of the accumulator */
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, dirty_start, accum->dirty_len,
                                        accum->buf + accum->dirty_off) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
                     } /* end if */
                     /* Block to free overlaps with some/all of dirty region */
                     /* Check for unfreed dirty region to write */
@@ -943,7 +943,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                         /* Write out the unfreed dirty region of the accumulator */
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size,
                                        accum->buf + accum->dirty_off + dirty_delta) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
                     } /* end if */
 
                     /* Reset dirty flag */
@@ -964,7 +964,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                         /* Write out the unfreed end of the dirty region of the accumulator */
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size,
                                        accum->buf + accum->dirty_off + dirty_delta) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
                     } /* end if */
 
                     /* Check for block to free beginning at same location as dirty region */
@@ -1018,7 +1018,7 @@ H5F__accum_flush(H5F_shared_t *f_sh)
         /* Flush the metadata contents */
         if (H5FD_write(file, H5FD_MEM_DEFAULT, f_sh->accum.loc + f_sh->accum.dirty_off, f_sh->accum.dirty_len,
                        f_sh->accum.buf + f_sh->accum.dirty_off) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
 
         /* Reset the dirty flag */
         f_sh->accum.dirty = FALSE;
@@ -1050,7 +1050,7 @@ H5F__accum_reset(H5F_shared_t *f_sh, hbool_t flush)
     /* Flush any dirty data in accumulator, if requested */
     if (flush)
         if (H5F__accum_flush(f_sh) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "can't flush metadata accumulator")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "can't flush metadata accumulator");
 
     /* Check if we need to reset the metadata accumulator information */
     if (f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) {

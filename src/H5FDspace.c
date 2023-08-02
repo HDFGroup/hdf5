@@ -101,7 +101,7 @@ H5FD__extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 
     /* Check for overflow when extending */
     if (H5_addr_overflow(eoa, size) || (eoa + size) > file->maxaddr)
-        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed");
 
     /* Set the [NOT aligned] address to return */
     ret_value = eoa;
@@ -109,7 +109,7 @@ H5FD__extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     /* Extend the end-of-allocated space address */
     eoa += size;
     if (file->cls->set_eoa(file, type, eoa) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -181,12 +181,12 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
     if (file->cls->alloc) {
         ret_value = (file->cls->alloc)(file, type, H5CX_get_dxpl(), use_alloc_size ? size : size + extra);
         if (!H5_addr_defined(ret_value))
-            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "driver allocation request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "driver allocation request failed");
     } /* end if */
     else {
         ret_value = H5FD__extend(file, type, size + extra);
         if (!H5_addr_defined(ret_value))
-            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "driver eoa update request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "driver eoa update request failed");
     } /* end else */
 
     /* Set the [possibly aligned] address to return */
@@ -238,11 +238,11 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, H5F_t *f, hsize_t size, haddr_t *frag_
     /* Call the real 'alloc' routine */
     ret_value = H5FD__alloc_real(file, type, size, frag_addr, frag_size);
     if (!H5_addr_defined(ret_value))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "real 'alloc' request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "real 'alloc' request failed");
 
     /* Mark EOA info dirty in cache, so change will get encoded */
     if (H5F_eoa_dirty(f) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, HADDR_UNDEF, "unable to mark EOA info as dirty")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, HADDR_UNDEF, "unable to mark EOA info as dirty");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -278,14 +278,14 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 
     /* Sanity checking */
     if (!H5_addr_defined(addr))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid file offset")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid file offset");
 
     /* Convert address to absolute file offset */
     addr += file->base_addr;
 
     /* More sanity checking */
     if (addr > file->maxaddr || H5_addr_overflow(addr, size) || (addr + size) > file->maxaddr)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid file free space region to free")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid file free space region to free");
 
     /* Check for file driver 'free' callback and call it if available */
     if (file->cls->free) {
@@ -293,7 +293,7 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
         fprintf(stderr, "%s: Letting VFD free space\n", __func__);
 #endif /* H5FD_ALLOC_DEBUG */
         if ((file->cls->free)(file, type, H5CX_get_dxpl(), addr, size) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed");
     } /* end if */
     /* Check if this free block is at the end of file allocated space.
      * Truncate it if this is true.
@@ -310,7 +310,7 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
             fprintf(stderr, "%s: Reducing file size to = %" PRIuHADDR "\n", __func__, addr);
 #endif /* H5FD_ALLOC_DEBUG */
             if (file->cls->set_eoa(file, type, addr) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "set end of space allocation request failed")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "set end of space allocation request failed");
         } /* end if */
     }     /* end else-if */
     else {
@@ -355,11 +355,11 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t addr, hsize_t size)
 
     /* Call the real 'free' routine */
     if (H5FD__free_real(file, type, addr, size) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "real 'free' request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "real 'free' request failed");
 
     /* Mark EOA info dirty in cache, so change will get encoded */
     if (H5F_eoa_dirty(f) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, FAIL, "unable to mark EOA info as dirty")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, FAIL, "unable to mark EOA info as dirty");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -397,7 +397,7 @@ H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t blk_end, hsize_
 
     /* Retrieve the end of the address space */
     if (HADDR_UNDEF == (eoa = file->cls->get_eoa(file, type)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_eoa request failed");
 
     /* Adjust block end by base address of the file, to create absolute address */
     blk_end += file->base_addr;
@@ -406,11 +406,11 @@ H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t blk_end, hsize_
     if (H5_addr_eq(blk_end, eoa)) {
         /* Extend the object by extending the underlying file */
         if (HADDR_UNDEF == H5FD__extend(file, type, extra_requested))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTEXTEND, FAIL, "driver extend request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTEXTEND, FAIL, "driver extend request failed");
 
         /* Mark EOA info dirty in cache, so change will get encoded */
         if (H5F_eoa_dirty(f) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, FAIL, "unable to mark EOA info as dirty")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, FAIL, "unable to mark EOA info as dirty");
 
         /* Indicate success */
         HGOTO_DONE(TRUE);

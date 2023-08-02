@@ -83,7 +83,7 @@ do { if ((head_ptr) == NULL || (tail_ptr) == NULL ||                            
       )                                                                      \
     )                                                                        \
    ) {                                                                       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre remove SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre remove SC failed"); \
 } } while (0)
 
 #define H5C__GEN_DLL_PRE_INSERT_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
@@ -101,7 +101,7 @@ if ((entry_ptr) == NULL || (entry_ptr)->list_next != NULL || (entry_ptr)->list_p
       (tail_ptr) == NULL || (tail_ptr)->list_next != NULL)                    \
     )                                                                         \
    ) {                                                                        \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre insert SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre insert SC failed"); \
 }
 
 #define H5C__GEN_DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val) \
@@ -109,12 +109,12 @@ if ((dll_len) <= 0 || (dll_size) <= 0 || (old_size) <= 0 ||                   \
     (old_size) > (dll_size) || (new_size) <= 0 ||                             \
     ((dll_len) == 1 && (old_size) != (dll_size))                              \
    ) {                                                                        \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre size update SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre size update SC failed"); \
 }
 
 #define H5C__GEN_DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val) \
 if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))) { \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL post size update SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL post size update SC failed"); \
 }
 #else /* H5C_DO_SANITY_CHECKS */
 #define H5C__GEN_DLL_PRE_REMOVE_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)
@@ -616,7 +616,7 @@ if ((cache_ptr) == NULL ||                                              \
      (cache_ptr)->index_len != (cache_ptr)->il_len ||                   \
      (cache_ptr)->index_size != (cache_ptr)->il_size                    \
     ) {                                                                 \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "pre HT insert SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "pre HT insert SC failed"); \
 }
 
 #define H5C__POST_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)          \
@@ -634,7 +634,7 @@ if ((cache_ptr) == NULL ||                                              \
      (cache_ptr)->index_len != (cache_ptr)->il_len ||                   \
      (cache_ptr)->index_size != (cache_ptr)->il_size                    \
     ) {                                                                 \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "post HT insert SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "post HT insert SC failed"); \
 }
 
 #define H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)           \
@@ -666,7 +666,7 @@ if ( (cache_ptr) == NULL || (cache_ptr)->index_len < 1 ||               \
      (cache_ptr)->index_len != (cache_ptr)->il_len ||                   \
      (cache_ptr)->index_size != (cache_ptr)->il_size                    \
    ) {                                                                  \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT remove SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT remove SC failed"); \
 }
 
 #define H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)            \
@@ -687,22 +687,22 @@ if ((cache_ptr) == NULL ||                                                \
      (cache_ptr)->index_len != (cache_ptr)->il_len ||                     \
      (cache_ptr)->index_size != (cache_ptr)->il_size                      \
    ) {                                                                    \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT remove SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT remove SC failed"); \
 }
 
 #define H5C__PRE_HT_SEARCH_SC(cache_ptr, entry_addr, fail_val)            \
 if (H5C__PRE_HT_SEARCH_SC_CMP(cache_ptr, entry_addr)) {                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT search SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT search SC failed"); \
 }
 
 #define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k, fail_val)       \
 if(H5C__POST_SUC_HT_SEARCH_SC_CMP(cache_ptr, entry_ptr, k)) {               \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post successful HT search SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post successful HT search SC failed"); \
 }
 
 #define H5C__POST_HT_SHIFT_TO_FRONT_SC(cache_ptr, entry_ptr, k, fail_val) \
 if(H5C__POST_HT_SHIFT_TO_FRONT_SC_CMP(cache_ptr, entry_ptr, k)) {         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT shift to front SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT shift to front SC failed"); \
 }
 
 #define H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,   \
@@ -729,7 +729,7 @@ if ((cache_ptr) == NULL ||                                                \
      (cache_ptr)->index_len != (cache_ptr)->il_len ||                     \
      (cache_ptr)->index_size != (cache_ptr)->il_size                      \
    ) {                                                                    \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT entry size change SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT entry size change SC failed"); \
 }
 
 #define H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,    \
@@ -753,7 +753,7 @@ if ((cache_ptr) == NULL ||                                                  \
     (cache_ptr)->index_len != (cache_ptr)->il_len ||                        \
     (cache_ptr)->index_size != (cache_ptr)->il_size                         \
   ) {                                                                       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT entry size change SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT entry size change SC failed"); \
 }
 
 #define H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr, fail_val) \
@@ -773,7 +773,7 @@ if ((cache_ptr) == NULL || (cache_ptr)->index_len <= 0 ||                     \
       ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring] +                \
        (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])                 \
   ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT update for entry clean SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT update for entry clean SC failed"); \
 }
 
 #define H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr, fail_val) \
@@ -793,7 +793,7 @@ if ((cache_ptr) == NULL || (cache_ptr)->index_len <= 0 ||                     \
       ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring] +                \
        (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])                 \
   ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT update for entry dirty SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "pre HT update for entry dirty SC failed"); \
 }
 
 #define H5C__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr, fail_val) \
@@ -806,7 +806,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
        ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring] +               \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])                \
   ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT update for entry clean SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT update for entry clean SC failed"); \
 }
 
 #define H5C__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr, fail_val) \
@@ -819,7 +819,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
        ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring] +               \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])                \
   ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT update for entry dirty SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "post HT update for entry dirty SC failed"); \
 }
 
 #else /* H5C_DO_SANITY_CHECKS */
@@ -1065,7 +1065,7 @@ do {                                                                           \
         assert((cache_ptr)->slist_ptr);                                      \
                                                                                \
         if(H5SL_insert((cache_ptr)->slist_ptr, entry_ptr, &((entry_ptr)->addr)) < 0) \
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't insert entry in skip list") \
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't insert entry in skip list"); \
                                                                                \
         (entry_ptr)->in_slist = TRUE;                                          \
         (cache_ptr)->slist_changed = TRUE;                                     \
@@ -1114,7 +1114,7 @@ do {                                                                            
         assert((cache_ptr)->slist_size >= (entry_ptr)->size);                \
                                                                                \
         if(H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr) != (entry_ptr) ) \
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't delete entry from skip list") \
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't delete entry from skip list"); \
                                                                                \
         assert((cache_ptr)->slist_len > 0);                                  \
         if(!(during_flush))                                                    \

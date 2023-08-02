@@ -170,7 +170,7 @@ H5C__json_write_log_message(H5C_log_json_udata_t *json_udata)
     /* Write the log message and flush */
     n_chars = HDstrlen(json_udata->message);
     if ((int)n_chars != fprintf(json_udata->outfile, "%s", json_udata->message))
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message");
     memset((void *)(json_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 
 done:
@@ -217,12 +217,12 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
 
     /* Allocate memory for the JSON-specific data */
     if (NULL == (log_info->udata = H5MM_calloc(sizeof(H5C_log_json_udata_t))))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed");
     json_udata = (H5C_log_json_udata_t *)(log_info->udata);
 
     /* Allocate memory for the message buffer */
     if (NULL == (json_udata->message = (char *)H5MM_calloc(H5C_MAX_JSON_LOG_MSG_SIZE * sizeof(char))))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
     /* Possibly fix up the log file name.
      * The extra 39 characters are for adding the rank to the file name
@@ -234,7 +234,7 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
     n_chars = 5 + 39 + 1 + HDstrlen(log_location) + 1;
     if (NULL == (file_name = (char *)H5MM_calloc(n_chars * sizeof(char))))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
-                    "can't allocate memory for mdc log file name manipulation")
+                    "can't allocate memory for mdc log file name manipulation");
 
     /* Add the rank to the log file name when MPI is in use */
     if (-1 == mpi_rank)
@@ -244,7 +244,7 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
 
     /* Open log file and set it to be unbuffered */
     if (NULL == (json_udata->outfile = fopen(file_name, "w")))
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file");
     HDsetbuf(json_udata->outfile, NULL);
 
 done:
@@ -295,7 +295,7 @@ H5C__json_tear_down_logging(H5C_log_info_t *log_info)
 
     /* Close log file */
     if (EOF == fclose(json_udata->outfile))
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file");
     json_udata->outfile = NULL;
 
     /* Fre the udata */
@@ -343,7 +343,7 @@ H5C__json_write_start_log_msg(void *udata)
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -382,7 +382,7 @@ H5C__json_write_stop_log_msg(void *udata)
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -421,7 +421,7 @@ H5C__json_write_create_cache_log_msg(void *udata, herr_t fxn_ret_value)
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -459,7 +459,7 @@ H5C__json_write_destroy_cache_log_msg(void *udata)
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -498,7 +498,7 @@ H5C__json_write_evict_cache_log_msg(void *udata, herr_t fxn_ret_value)
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -539,7 +539,7 @@ H5C__json_write_expunge_entry_log_msg(void *udata, haddr_t address, int type_id,
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -578,7 +578,7 @@ H5C__json_write_flush_cache_log_msg(void *udata, herr_t fxn_ret_value)
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -623,7 +623,7 @@ H5C__json_write_insert_entry_log_msg(void *udata, haddr_t address, int type_id, 
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -664,7 +664,7 @@ H5C__json_write_mark_entry_dirty_log_msg(void *udata, const H5C_cache_entry_t *e
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -705,7 +705,7 @@ H5C__json_write_mark_entry_clean_log_msg(void *udata, const H5C_cache_entry_t *e
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -747,7 +747,7 @@ H5C__json_write_mark_unserialized_entry_log_msg(void *udata, const H5C_cache_ent
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -789,7 +789,7 @@ H5C__json_write_mark_serialized_entry_log_msg(void *udata, const H5C_cache_entry
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -833,7 +833,7 @@ H5C__json_write_move_entry_log_msg(void *udata, haddr_t old_addr, haddr_t new_ad
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -874,7 +874,7 @@ H5C__json_write_pin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, h
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -920,7 +920,7 @@ H5C__json_write_create_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -972,7 +972,7 @@ H5C__json_write_protect_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1015,7 +1015,7 @@ H5C__json_write_resize_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1056,7 +1056,7 @@ H5C__json_write_unpin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry,
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1102,7 +1102,7 @@ H5C__json_write_destroy_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1145,7 +1145,7 @@ H5C__json_write_unprotect_entry_log_msg(void *udata, haddr_t address, int type_i
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1186,7 +1186,7 @@ H5C__json_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t 
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1227,7 +1227,7 @@ H5C__json_write_remove_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
 
     /* Write the log message to the file */
     if (H5C__json_write_log_message(json_udata) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

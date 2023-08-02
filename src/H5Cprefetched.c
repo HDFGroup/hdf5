@@ -243,7 +243,7 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                 /* Destroy flush dependency with flush dependency parent */
                 if (H5C_destroy_flush_dependency(parent_ptr, entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL,
-                                "unable to destroy prefetched entry flush dependency")
+                                "unable to destroy prefetched entry flush dependency");
 
                 if (parent_ptr->prefetched) {
                     /* In prefetched entries, the fd_child_count field is
@@ -258,7 +258,7 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
             break;
 
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
             break;
     } /* end switch */
 
@@ -299,7 +299,7 @@ H5C__prefetched_entry_free_icr(void *_thing)
         assert(entry_ptr->fd_parent_count == 0);
 
     if (entry_ptr->image_ptr != NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "prefetched entry image buffer still attached?")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "prefetched entry image buffer still attached?");
 
     entry_ptr = H5FL_FREE(H5C_cache_entry_t, entry_ptr);
 

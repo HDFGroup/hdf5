@@ -87,11 +87,11 @@ H5HL__prfx_new(H5HL_t *heap)
 
     /* Allocate new local heap prefix */
     if (NULL == (prfx = H5FL_CALLOC(H5HL_prfx_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for local heap prefix")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for local heap prefix");
 
     /* Increment ref. count on heap data structure */
     if (FAIL == H5HL__inc_rc(heap))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment heap ref. count")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment heap ref. count");
 
     /* Link the heap & the prefix */
     prfx->heap = heap;
@@ -135,7 +135,7 @@ H5HL__prfx_dest(H5HL_prfx_t *prfx)
 
         /* Decrement ref. count on heap data structure */
         if (FAIL == H5HL__dec_rc(prfx->heap))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement heap ref. count")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement heap ref. count");
 
         /* Unlink heap from prefix */
         prfx->heap = NULL;
