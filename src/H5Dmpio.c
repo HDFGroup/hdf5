@@ -5462,7 +5462,8 @@ H5D__mpio_collective_filtered_vec_io(const H5D_filtered_collective_io_info_t *ch
                         "number of chunk entries in I/O operation exceeds UINT32_MAX");
 
         if (NULL == (io_addrs = H5MM_malloc(iovec_count * sizeof(*io_addrs))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O addresses vector");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate space for I/O addresses vector");
         if (NULL == (io_sizes = H5MM_malloc(iovec_count * sizeof(*io_sizes))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O sizes vector");
 
