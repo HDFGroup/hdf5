@@ -693,7 +693,7 @@ test_file_reopen(void)
 
     /* Create a dataset in the file */
     sid = H5Screate_simple(1, &dims, &dims);
-    CHECK_I(sid, "H5Screate_simple")
+    CHECK_I(sid, "H5Screate_simple");
     did = H5Dcreate2(fid, REOPEN_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(did, "H5Dcreate2");
 
