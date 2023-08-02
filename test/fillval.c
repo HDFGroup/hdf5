@@ -387,9 +387,12 @@ error:
 static int
 test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
-    hid_t file = -1, space = -1, dcpl = -1, comp_type_id = -1;
-    hid_t dset1 = -1, dset2 = -1, dset3 = -1, dset4 = -1, dset5 = -1, dset6 = -1, /* dset7=-1, */ dset8 = -1,
-          dset9                    = -1;
+    hid_t file = H5I_INVALID_HID, space = H5I_INVALID_HID, dcpl = H5I_INVALID_HID,
+          comp_type_id = H5I_INVALID_HID;
+    hid_t dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID, dset3 = H5I_INVALID_HID, dset4 = H5I_INVALID_HID,
+          dset5 = H5I_INVALID_HID, dset6 = H5I_INVALID_HID,
+          /* dset7=H5I_INVALID_HID, */ dset8 = H5I_INVALID_HID, dset9 = H5I_INVALID_HID,
+          dset10                   = H5I_INVALID_HID;
     hsize_t            cur_size[5] = {2, 8, 8, 4, 2};
     hsize_t            ch_size[5]  = {1, 1, 1, 4, 1};
     short              rd_s, fill_s = 0x1234;
@@ -550,6 +553,20 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     }
     H5E_END_TRY
 
+    /*
+     * Test that a dataset with an undefined fill value can be
+     * created and then re-opened after the file it is in has
+     * been closed and re-opened. This is to test for a bug that
+     * was introduced in the fill value object header message
+     * decoding logic.
+     */
+    if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0)
+        goto error;
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, NULL) < 0)
+        goto error;
+    if ((dset10 = H5Dcreate2(file, "dset10", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
     /* Close everything */
     if (H5D_COMPACT != layout) {
         if (H5Dclose(dset1) < 0)
@@ -568,6 +585,8 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if (H5Dclose(dset6) < 0)
         goto error;
     if (H5Dclose(dset8) < 0)
+        goto error;
+    if (H5Dclose(dset10) < 0)
         goto error;
     if (H5Sclose(space) < 0)
         goto error;
@@ -801,6 +820,15 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
+    /*
+     * Check that the dataset with an undefined fill value can
+     * be opened.
+     */
+    if ((dset10 = H5Dopen2(file, "dset10", H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dclose(dset10) < 0)
+        goto error;
+
     if (H5Fclose(file) < 0)
         goto error;
 
@@ -822,6 +850,7 @@ error:
         H5Dclose(dset5);
         H5Dclose(dset6);
         H5Dclose(dset8);
+        H5Dclose(dset10);
         H5Fclose(file);
     }
     H5E_END_TRY
