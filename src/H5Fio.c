@@ -328,8 +328,16 @@ H5F_shared_vector_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], h
      * for now, assume the caller has done this already.
      */
 #ifndef NDEBUG
-    for (uint32_t i = 0; i < count; i++)
+    for (uint32_t i = 0; i < count; i++) {
+        /* Break early if H5FD_MEM_NOLIST was specified
+         * since a full 'count'-sized array may not
+         * have been passed for 'types'
+         */
+        if (i > 0 && types[i] == H5FD_MEM_NOLIST)
+            break;
+
         assert(types[i] != H5FD_MEM_GHEAP);
+    }
 #endif
 
     /* Pass down to file driver layer (bypass page buffer for now) */
@@ -373,8 +381,16 @@ H5F_shared_vector_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], 
      * for now, assume the caller has done this already.
      */
 #ifndef NDEBUG
-    for (uint32_t i = 0; i < count; i++)
+    for (uint32_t i = 0; i < count; i++) {
+        /* Break early if H5FD_MEM_NOLIST was specified
+         * since a full 'count'-sized array may not
+         * have been passed for 'types'
+         */
+        if (i > 0 && types[i] == H5FD_MEM_NOLIST)
+            break;
+
         assert(types[i] != H5FD_MEM_GHEAP);
+    }
 #endif
 
     /* Pass down to file driver layer (bypass page buffer for now) */

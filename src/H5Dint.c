@@ -3543,11 +3543,11 @@ done:
 hid_t
 H5D_get_create_plist(const H5D_t *dset)
 {
-    H5P_genplist_t *dcpl_plist;    /* Dataset's DCPL */
-    H5P_genplist_t *new_plist;     /* Copy of dataset's DCPL */
-    H5O_layout_t    copied_layout; /* Layout to tweak */
-    H5O_fill_t      copied_fill;   /* Fill value to tweak */
-    H5O_efl_t       copied_efl;    /* External file list to tweak */
+    H5P_genplist_t *dcpl_plist;        /* Dataset's DCPL */
+    H5P_genplist_t *new_plist;         /* Copy of dataset's DCPL */
+    H5O_layout_t    copied_layout;     /* Layout to tweak */
+    H5O_fill_t      copied_fill = {0}; /* Fill value to tweak */
+    H5O_efl_t       copied_efl;        /* External file list to tweak */
     hid_t           new_dcpl_id = FAIL;
     hid_t           ret_value   = H5I_INVALID_HID; /* Return value */
 
@@ -3700,10 +3700,14 @@ H5D_get_create_plist(const H5D_t *dset)
     ret_value = new_dcpl_id;
 
 done:
-    if (ret_value < 0)
+    if (ret_value < 0) {
         if (new_dcpl_id > 0)
             if (H5I_dec_app_ref(new_dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object");
+
+        if (copied_fill.type && (H5T_close_real(copied_fill.type) < 0))
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't free temporary datatype");
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_create_plist() */

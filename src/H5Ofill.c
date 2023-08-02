@@ -273,7 +273,7 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
         /* Check for undefined fill value */
         if (flags & H5O_FILL_FLAG_UNDEFINED_VALUE) {
 
-            if (flags & (unsigned)~H5O_FILL_FLAG_HAVE_VALUE)
+            if (flags & H5O_FILL_FLAG_HAVE_VALUE)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "have value and undefined value flags both set");
 
             /* Set value for "undefined" fill value */
