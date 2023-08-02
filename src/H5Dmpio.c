@@ -5459,22 +5459,22 @@ H5D__mpio_collective_filtered_vec_io(const H5D_filtered_collective_io_info_t *ch
     if (iovec_count > 0) {
         if (chunk_list->num_chunk_infos > UINT32_MAX)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL,
-                        "number of chunk entries in I/O operation exceeds UINT32_MAX")
+                        "number of chunk entries in I/O operation exceeds UINT32_MAX");
 
         if (NULL == (io_addrs = H5MM_malloc(iovec_count * sizeof(*io_addrs))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O addresses vector")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O addresses vector");
         if (NULL == (io_sizes = H5MM_malloc(iovec_count * sizeof(*io_sizes))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O sizes vector")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O sizes vector");
 
         if (op_type == H5D_IO_OP_WRITE) {
             if (NULL == (io_wbufs = H5MM_malloc(iovec_count * sizeof(*io_wbufs))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate space for I/O buffers vector")
+                            "couldn't allocate space for I/O buffers vector");
         }
         else {
             if (NULL == (io_rbufs = H5MM_malloc(iovec_count * sizeof(*io_rbufs))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate space for I/O buffers vector")
+                            "couldn't allocate space for I/O buffers vector");
         }
 
         /*
@@ -5531,11 +5531,11 @@ H5D__mpio_collective_filtered_vec_io(const H5D_filtered_collective_io_info_t *ch
 
     if (op_type == H5D_IO_OP_WRITE) {
         if (H5F_shared_vector_write(f_sh, iovec_count, io_types, io_addrs, io_sizes, io_wbufs) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "vector write call failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "vector write call failed");
     }
     else {
         if (H5F_shared_vector_read(f_sh, iovec_count, io_types, io_addrs, io_sizes, io_rbufs) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "vector read call failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "vector read call failed");
     }
 
 done:
