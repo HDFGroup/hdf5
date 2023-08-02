@@ -961,10 +961,13 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set # of chunks for dataset");
 
 done:
-    if (FAIL == ret_value)
-        if (H5D__chunk_dest(dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL,
-                        "unable to clean up chunk structures during error cleanup");
+    if (FAIL == ret_value) {
+        if (rdcc->slot)
+            rdcc->slot = H5FL_SEQ_FREE(H5D_rdcc_ent_ptr_t, rdcc->slot);
+
+        if (sc->ops->dest && (sc->ops->dest)(&idx_info) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info");
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_init() */
 
