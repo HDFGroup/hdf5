@@ -149,10 +149,10 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * And goto a label after pushing error onto stack.
  */
 #define H5Epush_goto(func, cls, maj, min, str, label)                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, cls, maj, min, str);                                 \
         goto label;                                                                                          \
-    }
+    } while(0)
 
 /**
  * Error stack traversal direction
