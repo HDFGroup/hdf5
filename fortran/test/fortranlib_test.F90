@@ -114,6 +114,11 @@ PROGRAM fortranlibtest
   CALL test_dset_fill(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Filling dataspace elements', total_error)
 
+  ! Direct chunk IO
+  ret_total_error = 0
+  CALL test_direct_chunk_io(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Direct chunk IO', total_error)
+
 !
 !      '========================================='
 !      'Testing DATASPACE Interface             '

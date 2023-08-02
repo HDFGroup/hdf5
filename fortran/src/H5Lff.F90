@@ -1568,7 +1568,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Lvisit_by_name2()
 !!
-  SUBROUTINE H5Lvisit_by_name_f(loc_id, group_name, idx_type, order, op, op_data, hdferr)
+  SUBROUTINE H5Lvisit_by_name_f(loc_id, group_name, idx_type, order, op, op_data, hdferr, lapl_id)
 
     IMPLICIT NONE
 
@@ -1579,11 +1579,13 @@ CONTAINS
     TYPE(C_FUNPTR)               :: op
     TYPE(C_PTR)                  :: op_data
     INTEGER       , INTENT(OUT)  :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
 
+    INTEGER(HID_T) :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER(C_INT) FUNCTION H5Lvisit_by_name(loc_id, group_name, idx_type, order, op, op_data) &
+       INTEGER(C_INT) FUNCTION H5Lvisit_by_name(loc_id, group_name, idx_type, order, op, op_data, lapl_id_default) &
             BIND(C, NAME='H5Lvisit_by_name2')
          IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
@@ -1594,12 +1596,16 @@ CONTAINS
          INTEGER       , VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(HID_T), VALUE :: lapl_id_default
        END FUNCTION H5Lvisit_by_name
     END INTERFACE
 
     c_name = TRIM(group_name)//C_NULL_CHAR
 
-    hdferr = INT(H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data))
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    hdferr = INT(H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data, lapl_id_default))
 
   END SUBROUTINE H5Lvisit_by_name_f
 

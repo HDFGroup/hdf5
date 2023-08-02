@@ -101,28 +101,29 @@ MODULE H5P
      MODULE PROCEDURE h5pinsert_ptr
   END INTERFACE
 
+
   INTERFACE
-     INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue) &
-          BIND(C, NAME='h5pget_fill_value_c')
-       IMPORT :: c_ptr
+     INTEGER(C_INT) FUNCTION H5Pset_fill_value(prp_id, type_id, fillvalue) &
+          BIND(C, NAME='H5Pset_fill_value')
+       IMPORT :: C_INT, C_PTR
        IMPORT :: HID_T
        IMPLICIT NONE
-       INTEGER(HID_T), INTENT(IN) :: prp_id
-       INTEGER(HID_T), INTENT(IN) :: type_id
-       TYPE(C_PTR), VALUE :: fillvalue
-     END FUNCTION h5pget_fill_value_c
+       INTEGER(hid_t), VALUE :: prp_id
+       INTEGER(hid_t), VALUE :: type_id
+       TYPE(C_PTR)   , VALUE :: fillvalue
+     END FUNCTION H5Pset_fill_value
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue) &
-          BIND(C, NAME='h5pset_fill_value_c')
-       IMPORT :: c_ptr
+     INTEGER(C_INT) FUNCTION H5Pget_fill_value(prp_id, type_id, fillvalue) &
+          BIND(C, NAME='H5Pget_fill_value')
+       IMPORT :: C_INT, C_PTR
        IMPORT :: HID_T
        IMPLICIT NONE
-       INTEGER(HID_T), INTENT(IN) :: prp_id
-       INTEGER(HID_T), INTENT(IN) :: type_id
-       TYPE(C_PTR), VALUE :: fillvalue
-     END FUNCTION h5pset_fill_value_c
+       INTEGER(hid_t), VALUE :: prp_id
+       INTEGER(hid_t), VALUE :: type_id
+       TYPE(C_PTR)   , VALUE :: fillvalue
+     END FUNCTION H5Pget_fill_value
   END INTERFACE
 
   INTERFACE
@@ -4592,11 +4593,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER, INTENT(IN), TARGET :: fillvalue
     INTEGER, INTENT(OUT) :: hdferr
+
     TYPE(C_PTR) :: f_ptr ! C address
 
     f_ptr = C_LOC(fillvalue)
 
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pset_fill_value_integer
 
@@ -4610,7 +4612,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
     f_ptr = C_LOC(fillvalue)
 
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pget_fill_value_integer
 
@@ -4623,7 +4625,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     TYPE(C_PTR) :: f_ptr                       ! C address
 
     f_ptr = C_LOC(fillvalue(1:1))
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pset_fill_value_char
 
@@ -4650,7 +4652,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     ENDIF
 
     f_ptr = C_LOC(chr(1)(1:1))
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
+
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, f_ptr))
 
     DO i = 1, chr_len
        fillvalue(i:i) = chr(i)
@@ -4663,10 +4666,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER(HID_T), INTENT(IN) :: type_id
-    TYPE(C_PTR), INTENT(IN)    :: fillvalue
+    TYPE(C_PTR)                :: fillvalue
     INTEGER, INTENT(OUT)       :: hdferr
 
-    hdferr = h5pset_fill_value_c(prp_id, type_id, fillvalue)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, fillvalue))
 
   END SUBROUTINE h5pset_fill_value_ptr
 
@@ -4674,10 +4677,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
-    TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
+    TYPE(C_PTR)                 :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
 
-    hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, fillvalue))
 
   END SUBROUTINE h5pget_fill_value_ptr
 
