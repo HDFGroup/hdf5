@@ -57,38 +57,38 @@ MODULE H5F
   END INTERFACE
 #endif
 
-!> @brief h5f_info_t derived type.
-  TYPE, BIND(C) :: H5F_info_t_super
+!> @brief H5F_info_t_super derived type.
+  TYPE, BIND(C) :: H5F_info_super_t
      INTEGER(C_INT)   :: version        !< Superblock version number
      INTEGER(HSIZE_T) :: super_size     !< Superblock size
      INTEGER(HSIZE_T) :: super_ext_size !< Superblock extension size
-  END TYPE H5F_info_t_super
+  END TYPE  H5F_info_super_t
 
-!> @brief h5f_info_t derived type.
-  TYPE, BIND(C) :: H5F_info_t_free
+!> @brief H5F_info_t_free derived type.
+  TYPE, BIND(C) :: H5F_info_free_t
      INTEGER(C_INT)   :: version;   !< Version # of file free space management
      INTEGER(HSIZE_T) :: meta_size; !< Free space manager metadata size
      INTEGER(HSIZE_T) :: tot_space; !< Amount of free space in the file
-  END TYPE H5F_info_t_free
+  END TYPE H5F_info_free_t
 
-!> @brief h5f_info_t derived type.
+!> @brief H5_ih_info_t derived type.
   TYPE, BIND(C) :: H5_ih_info_t
      INTEGER(HSIZE_T) :: heap_size
      INTEGER(HSIZE_T) :: index_size !< btree and/or list
   END TYPE H5_ih_info_t
 
-!> @brief h5f_info_t derived type.
-  TYPE, BIND(C) :: H5F_info_t_sohm
-        INTEGER(C_INT)     :: unsigned  !< Version # of shared object header info
+!> @brief H5F_info_t_sohm derived type.
+  TYPE, BIND(C) :: H5F_info_sohm_t
+        INTEGER(C_INT)     :: version  !< Version # of shared object header info
         INTEGER(HSIZE_T)   :: hdr_size  !< Shared object header message header size
         TYPE(H5_ih_info_t) :: msgs_info !< Shared object header message index & heap size
-  END TYPE H5F_info_t_sohm
+  END TYPE H5F_info_sohm_t
 
 !> @brief h5f_info_t derived type.
   TYPE, BIND(C) :: h5f_info_t
-     TYPE(H5F_info_t_super) :: super
-     TYPE(H5F_info_t_free)  :: free
-     TYPE(H5F_info_t_sohm)  :: sohm
+     TYPE(H5F_info_super_t) :: super
+     TYPE(H5F_info_free_t)  :: free
+     TYPE(H5F_info_sohm_t)  :: sohm
   END TYPE h5f_info_t
 
 CONTAINS

@@ -1081,6 +1081,8 @@ CONTAINS
           INTEGER(HSSIZE_T) :: free_space
           INTEGER(HID_T) :: group_id      ! Group identifier
 
+          TYPE(H5F_INFO_T) :: file_info
+
           CALL h5eset_auto_f(0, error)
 
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
@@ -1120,12 +1122,17 @@ CONTAINS
 
           ! Check the free space now
           CALL h5fget_freespace_f(fid, free_space, error)
-               CALL check("h5fget_freespace_f",error,total_error)
-               if(error .eq.0 .and. free_space .ne. 1248) then
-                 total_error = total_error + 1
-                 write(*,*) "3: Wrong amount of free space reported, ", free_space
-               endif
+          CALL check("h5fget_freespace_f",error,total_error)
+          IF(error .EQ.0 .AND. free_space .NE. 1248) THEN
+             total_error = total_error + 1
+             WRITE(*,*) "3: Wrong amount of free space reported, ", free_space
+          ENDIF
 
+          ! Check H5Fget_info_f
+          CALL h5fget_info_f(fid, file_info, error)
+          CALL check("h5fget_info_f", error, total_error)
+
+          PRINT*,file_info%super%version,file_info%super%super_size, file_info%super%super_ext_size
           CALL h5fclose_f(fid, error)
               CALL check("h5fclose_f",error,total_error)
 
