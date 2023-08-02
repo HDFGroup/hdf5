@@ -199,7 +199,7 @@ test_genprop_basic_class_prop(void)
         ret = H5Pregister2(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Pregister2");
 
     /* Check the existence of the first property */
@@ -227,7 +227,7 @@ test_genprop_basic_class_prop(void)
         ret = H5Pregister2(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Pregister2");
 
     /* Check the existence of the second property */
@@ -272,7 +272,7 @@ test_genprop_basic_class_prop(void)
     {
         ret = H5Pget_size(cid1, PROP1_NAME, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Pget_size");
 
     /* Check the number of properties in class */
@@ -1968,7 +1968,7 @@ test_genprop_deprec_class(void)
     {
         ret = H5Pregister1(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Pregister1");
 
     /* Check the existence of the first property */
@@ -1994,7 +1994,7 @@ test_genprop_deprec_class(void)
     {
         ret = H5Pregister1(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Pregister1");
 
     /* Check the existence of the second property */
@@ -2038,7 +2038,7 @@ test_genprop_deprec_class(void)
     {
         ret = H5Pget_size(cid1, PROP1_NAME, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Pget_size");
 
     /* Check the number of properties in class */

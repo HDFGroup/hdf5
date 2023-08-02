@@ -250,7 +250,7 @@ test_ioc_only_fail(void)
     {
         file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VRFY((file_id < 0), "H5Fcreate failed successfully");
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
@@ -1008,7 +1008,7 @@ test_selection_strategies(void)
                     {
                         H5Fdelete(SUBF_FILENAME, fapl_id);
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
 
                     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
@@ -2022,7 +2022,7 @@ test_subfiling_h5fuse(void)
         {
             H5Fdelete(SUBF_FILENAME, fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         filename_buf = malloc(PATH_MAX);
         VRFY(filename_buf, "malloc succeeded");
