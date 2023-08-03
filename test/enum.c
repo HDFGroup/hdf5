@@ -532,7 +532,7 @@ test_value_dsnt_exist(void)
     {
         ret = H5Tenum_valueof(tid, "SAX", &val);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_PUTS_ERROR("H5Tenum_valueof should not pass with a non-existing name");
 
@@ -541,7 +541,7 @@ test_value_dsnt_exist(void)
     {
         ret = H5Tenum_nameof(tid, &val, name, size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_PUTS_ERROR("H5Tenum_nameof should not pass with a non-existing value");
 
@@ -562,7 +562,7 @@ test_value_dsnt_exist(void)
         {
             ret = H5Tenum_nameof(tid, &BAD_VALUES[i], name, size);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
             printf("Bad value: %d -- ", BAD_VALUES[i]);
@@ -576,7 +576,7 @@ test_value_dsnt_exist(void)
         {
             ret = H5Tenum_valueof(tid, BAD_NAMES[i], &val);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
             printf("Bad name: %s -- ", BAD_NAMES[i]);
@@ -652,7 +652,7 @@ test_funcs(void)
     {
         ret = H5Tset_pad(tid, H5T_PAD_ZERO, H5T_PAD_ONE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_PUTS_ERROR("H5Tset_pad should not work with enum types");
 
@@ -770,7 +770,7 @@ error:
         H5Tclose(cmpd_id);
         H5Tclose(copy_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
