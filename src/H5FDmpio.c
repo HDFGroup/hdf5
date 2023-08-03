@@ -2783,23 +2783,23 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5_flexibl
 
     /* Allocate information for num_pieces */
     if (NULL == (piece_mtype = (MPI_Datatype *)H5MM_malloc(num_pieces * sizeof(MPI_Datatype))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory datatype buffer")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory datatype buffer");
     if (NULL == (piece_ftype = (MPI_Datatype *)H5MM_malloc(num_pieces * sizeof(MPI_Datatype))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file datatype buffer")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file datatype buffer");
     if (NULL == (piece_file_disp_array = (MPI_Aint *)H5MM_malloc(num_pieces * sizeof(MPI_Aint))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file displacement buffer")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file displacement buffer");
     if (NULL == (piece_mem_disp_array = (MPI_Aint *)H5MM_calloc(num_pieces * sizeof(MPI_Aint))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory displacement buffer")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory displacement buffer");
     if (NULL == (piece_mpi_mem_counts = (int *)H5MM_calloc(num_pieces * sizeof(int))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory counts buffer")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory counts buffer");
     if (NULL == (piece_mpi_file_counts = (int *)H5MM_calloc(num_pieces * sizeof(int))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file counts buffer")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file counts buffer");
     if (NULL == (piece_mmt_is_derived_array = (hbool_t *)H5MM_calloc(num_pieces * sizeof(hbool_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                    "couldn't allocate piece memory is derived datatype flags buffer")
+                    "couldn't allocate piece memory is derived datatype flags buffer");
     if (NULL == (piece_mft_is_derived_array = (hbool_t *)H5MM_calloc(num_pieces * sizeof(hbool_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                    "couldn't allocate piece file is derived datatype flags buffer")
+                    "couldn't allocate piece file is derived datatype flags buffer");
 
     /* save lowest file address */
     base_file_addr = offsets[0];
@@ -2858,7 +2858,7 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5_flexibl
                                                  selected in case they
                                                  are out of order */
                                 &is_permuted /* OUT */) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type");
 
         /* Sanity check */
         if (is_permuted)
@@ -2879,7 +2879,7 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5_flexibl
                                                                             and applied to the
                                                                             memory selection */
                                 &is_permuted /* IN */) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buf type")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buf type");
 
         /* Sanity check */
         if (is_permuted)
@@ -2901,30 +2901,30 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5_flexibl
     /* Create final MPI derived datatype for the file */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_pieces, piece_mpi_file_counts,
                                                           piece_file_disp_array, piece_ftype, final_ftype)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(final_ftype)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
     *final_ftype_is_derived = TRUE;
 
     /* Create final MPI derived datatype for memory */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_pieces, piece_mpi_mem_counts,
                                                           piece_mem_disp_array, piece_mtype, final_mtype)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(final_mtype)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
     *final_mtype_is_derived = TRUE;
 
     /* Free the file & memory MPI datatypes for each piece */
     for (i = 0; i < num_pieces; i++) {
         if (piece_mmt_is_derived_array[i])
             if (MPI_SUCCESS != (mpi_code = MPI_Type_free(piece_mtype + i)))
-                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
 
         if (piece_mft_is_derived_array[i])
             if (MPI_SUCCESS != (mpi_code = MPI_Type_free(piece_ftype + i)))
-                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
     } /* end for */
 
 done:
@@ -3054,7 +3054,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 
     /* Get the transfer mode from the API context */
     if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
@@ -3074,19 +3074,19 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
             tmp_offset = s_offsets[0];
 
             if (NULL == (s_file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list");
             if (NULL == (s_mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for memory space list")
+                            "memory allocation failed for memory space list");
 
             for (i = 0; i < count; i++) {
                 if (NULL == (s_mem_spaces[i] = (H5S_t *)H5I_object_verify(s_mem_space_ids[i], H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID,
-                                "can't retrieve memory dataspace from ID")
+                                "can't retrieve memory dataspace from ID");
                 if (NULL ==
                     (s_file_spaces[i] = (H5S_t *)H5I_object_verify(s_file_space_ids[i], H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID,
-                                "can't retrieve file dataspace from ID")
+                                "can't retrieve file dataspace from ID");
             }
 
             /* when we setup mpi_bufs[] below, all addresses are offsets from
@@ -3130,21 +3130,21 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 
         /* some numeric conversions */
         if (H5FD_mpi_haddr_to_MPIOff(tmp_offset, &mpi_off /*out*/) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
 
         /*
          * Set the file view when we are using MPI derived types
          */
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, mpi_off, MPI_BYTE, final_ftype,
                                                          H5FD_mpi_native_g, file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
 
         /* When using types, use the address as the displacement for
          * MPI_File_set_view and reset the address for the read to zero
          */
         /* Reset mpi_off to 0 since the view now starts at the data offset */
         if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0");
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
@@ -3152,7 +3152,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 #endif
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property");
 
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
@@ -3174,17 +3174,17 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
                      * to participate in following MPI_Bcast */
                     if (MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, mpi_bufs_base, size_i,
                                                                     final_mtype, &mpi_stat)))
-                        HMPI_DONE_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                        HMPI_DONE_ERROR(FAIL, "MPI_File_read_at failed", mpi_code);
                 }
 
                 if (MPI_SUCCESS != (mpi_code = MPI_Bcast(mpi_bufs_base, size_i, final_mtype, 0, file->comm)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
             } /* end if */
             else
                 /* Perform collective read operation */
                 if (MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(file->f, mpi_off, mpi_bufs_base, size_i,
                                                                     final_mtype, &mpi_stat)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code);
         } /* end if */
         else {
 #ifdef H5FDmpio_DEBUG
@@ -3195,7 +3195,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
             /* Perform independent read operation */
             if (MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, mpi_bufs_base, size_i,
                                                             final_mtype, &mpi_stat)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code);
         } /* end else */
 
         /*
@@ -3203,7 +3203,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
          */
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
                                                          H5FD_mpi_native_g, file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
 
         /* Only retrieve bytes read if this rank _actually_ participated in I/O */
         if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
@@ -3219,10 +3219,10 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
                      * MPI_Bcast.
                      */
                     bytes_read = -1;
-                    HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+                    HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed", mpi_code);
                 }
                 else
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code);
             }
         } /* end if */
 
@@ -3238,7 +3238,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 #else
             if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_INT, 0, file->comm))
 #endif
-                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0);
 
                 /* Get the type's size */
 #if H5_CHECK_MPI_VERSION(3, 0)
@@ -3246,14 +3246,14 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 #else
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size(final_mtype, &type_size)))
 #endif
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code);
 
         /* Compute the actual number of bytes requested */
         io_size = type_size * size_i;
 
         /* Check for read failure */
         if (bytes_read < 0 || bytes_read > io_size)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
@@ -3283,15 +3283,15 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 
         if (H5FD_read_vector_from_selection(_file, type, count, mem_space_ids, file_space_ids, offsets,
                                             element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read vector from selection failed")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read vector from selection failed");
     }
 
 done:
     /* Free the MPI buf and file types, if they were derived */
     if (final_mtype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&final_mtype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
     if (final_ftype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&final_ftype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
 
     /* Cleanup dataspace arrays */
     if (s_mem_spaces)
@@ -3427,7 +3427,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
     /* Get the transfer mode from the API context */
     if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
@@ -3441,19 +3441,19 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
             tmp_offset = s_offsets[0];
 
             if (NULL == (s_file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list");
             if (NULL == (s_mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for memory space list")
+                            "memory allocation failed for memory space list");
 
             for (i = 0; i < count; i++) {
                 if (NULL ==
                     (s_file_spaces[i] = (H5S_t *)H5I_object_verify(s_file_space_ids[i], H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID,
-                                "can't retrieve file dataspace from ID")
+                                "can't retrieve file dataspace from ID");
                 if (NULL == (s_mem_spaces[i] = (H5S_t *)H5I_object_verify(s_mem_space_ids[i], H5I_DATASPACE)))
                     HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID,
-                                "can't retrieve memory dataspace from ID")
+                                "can't retrieve memory dataspace from ID");
             }
 
             /* when we setup mpi_bufs[] below, all addresses are offsets from
@@ -3497,7 +3497,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
         /* some numeric conversions */
         if (H5FD_mpi_haddr_to_MPIOff(tmp_offset, &mpi_off /*out*/) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
 
         /* To be used at the end of the routine for setting local_eof */
         save_mpi_off = mpi_off;
@@ -3507,11 +3507,11 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
          */
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, mpi_off, MPI_BYTE, final_ftype,
                                                          H5FD_mpi_native_g, file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
 
         /* Reset mpi_off to 0 since the view now starts at the data offset */
         if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0");
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
@@ -3520,7 +3520,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property");
 
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 
@@ -3532,12 +3532,12 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
             /* Perform collective write operation */
             if (MPI_SUCCESS != (mpi_code = MPI_File_write_at_all(file->f, mpi_off, mpi_bufs_base, size_i,
                                                                  final_mtype, &mpi_stat)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code);
 
             /* Do MPI_File_sync when needed by underlying ROMIO driver */
             if (file->mpi_file_sync_required) {
                 if (MPI_SUCCESS != (mpi_code = MPI_File_sync(file->f)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code);
             }
         }
         else {
@@ -3549,13 +3549,13 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
             /* Perform independent write operation */
             if (MPI_SUCCESS != (mpi_code = MPI_File_write_at(file->f, mpi_off, mpi_bufs_base, size_i,
                                                              final_mtype, &mpi_stat)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code);
         } /* end else */
 
         /* Reset the file view when we used MPI derived types */
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
                                                          H5FD_mpi_native_g, file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
 
             /* How many bytes were actually written */
 #if H5_CHECK_MPI_VERSION(3, 0)
@@ -3563,7 +3563,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 #else
         if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_written)))
 #endif
-            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code);
 
             /* Get the type's size */
 #if H5_CHECK_MPI_VERSION(3, 0)
@@ -3571,14 +3571,14 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 #else
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size(final_mtype, &type_size)))
 #endif
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code);
 
         /* Compute the actual number of bytes requested */
         io_size = type_size * size_i;
 
         /* Check for write failure */
         if (bytes_written != io_size || bytes_written < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
@@ -3613,15 +3613,15 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
         if (H5FD_write_vector_from_selection(_file, type, count, mem_space_ids, file_space_ids, offsets,
                                              element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write vector from selection failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write vector from selection failed");
     }
 
 done:
     /* Free the MPI buf and file types, if they were derived */
     if (final_mtype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&final_mtype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
     if (final_ftype_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&final_ftype)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
 
     /* Cleanup dataspace arrays */
     if (s_mem_spaces)
