@@ -50,7 +50,7 @@ H5FDperform_init(H5FD_init_t op)
      * before `init` is run.
      */
     if (H5_init_library() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID, "library initialization failed")
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID, "library initialization failed");
 
     ret_value = op();
 

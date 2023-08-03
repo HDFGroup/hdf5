@@ -239,21 +239,21 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
 
     /* Allocate new B-tree header and reset cache info */
     if (NULL == (hdr = H5B2__hdr_alloc(udata->f)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "allocation failed for B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "allocation failed for B-tree header");
 
     /* Magic number */
     if (memcmp(image, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree header signature")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree header signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5B2_HDR_VERSION)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADRANGE, NULL, "wrong B-tree header version")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADRANGE, NULL, "wrong B-tree header version");
 
     /* B-tree class */
     id = (H5B2_subid_t)*image++;
     if (id >= H5B2_NUM_BTREE_ID)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type");
 
     /* Node size (in bytes) */
     UINT32DECODE(image, cparam.node_size);
@@ -284,7 +284,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     /* Initialize B-tree header info */
     cparam.cls = H5B2_client_class_g[id];
     if (H5B2__hdr_init(hdr, &cparam, udata->ctx_udata, depth) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't initialize B-tree header info")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't initialize B-tree header info");
 
     /* Set the B-tree header's address */
     hdr->addr = udata->addr;
@@ -452,7 +452,7 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent,
                                                       (void *)hdr->top_proxy) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL,
-                                    "unable to destroy flush dependency between v2 B-tree and proxy")
+                                    "unable to destroy flush dependency between v2 B-tree and proxy");
                     hdr->parent = NULL;
                 } /* end if */
 
@@ -461,14 +461,14 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
                         HGOTO_ERROR(
                             H5E_BTREE, H5E_CANTUNDEPEND, FAIL,
-                            "unable to destroy flush dependency between header and v2 B-tree 'top' proxy")
+                            "unable to destroy flush dependency between header and v2 B-tree 'top' proxy");
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
                 break;
 
             default:
 #ifdef NDEBUG
-                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else     /* NDEBUG */
                 assert(0 && "Unknown action?!?");
 #endif    /* NDEBUG */
@@ -503,7 +503,7 @@ H5B2__cache_hdr_free_icr(void *thing)
 
     /* Destroy v2 B-tree header */
     if (H5B2__hdr_free((H5B2_hdr_t *)thing) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -608,11 +608,11 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
 
     /* Allocate new internal node and reset cache info */
     if (NULL == (internal = H5FL_CALLOC(H5B2_internal_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Increment ref. count on B-tree header */
     if (H5B2__hdr_incr(udata->hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment ref. count on B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment ref. count on B-tree header");
 
     /* Share B-tree information */
     internal->hdr          = udata->hdr;
@@ -621,28 +621,28 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
 
     /* Magic number */
     if (memcmp(image, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree internal node signature")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree internal node signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5B2_INT_VERSION)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree internal node version")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree internal node version");
 
     /* B-tree type */
     if (*image++ != (uint8_t)udata->hdr->cls->id)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type");
 
     /* Allocate space for the native keys in memory */
     if (NULL ==
         (internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(udata->hdr->node_info[udata->depth].nat_rec_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for B-tree internal native keys")
+                    "memory allocation failed for B-tree internal native keys");
 
     /* Allocate space for the node pointers in memory */
     if (NULL == (internal->node_ptrs =
                      (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(udata->hdr->node_info[udata->depth].node_ptr_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for B-tree internal node pointers")
+                    "memory allocation failed for B-tree internal node pointers");
 
     /* Set the number of records in the leaf & it's depth */
     internal->nrec  = udata->nrec;
@@ -653,7 +653,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     for (u = 0; u < internal->nrec; u++) {
         /* Decode record */
         if ((udata->hdr->cls->decode)(image, native, udata->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode B-tree record")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode B-tree record");
 
         /* Move to next record */
         image += udata->hdr->rrec_size;
@@ -769,7 +769,7 @@ H5B2__cache_int_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     for (u = 0; u < internal->nrec; u++) {
         /* Encode record */
         if ((internal->hdr->cls->encode)(image, native, internal->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record");
 
         /* Move to next record */
         image += internal->hdr->rrec_size;
@@ -836,7 +836,7 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_AFTER_LOAD:
                 /* Create flush dependency on parent */
                 if (H5B2__create_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency");
                 break;
 
             case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -852,21 +852,21 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* Destroy flush dependency on parent */
                 if (H5B2__destroy_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency");
 
                 /* Detach from 'top' proxy for v2 B-tree */
                 if (internal->top_proxy) {
                     if (H5AC_proxy_entry_remove_child(internal->top_proxy, internal) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL,
                                     "unable to destroy flush dependency between internal node and v2 B-tree "
-                                    "'top' proxy")
+                                    "'top' proxy");
                     internal->top_proxy = NULL;
                 } /* end if */
                 break;
 
             default:
 #ifdef NDEBUG
-                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else     /* NDEBUG */
                 assert(0 && "Unknown action?!?");
 #endif    /* NDEBUG */
@@ -902,7 +902,7 @@ H5B2__cache_int_free_icr(void *_thing)
 
     /* Release v2 B-tree internal node */
     if (H5B2__internal_free(internal) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree internal node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1004,11 +1004,11 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void
 
     /* Allocate new leaf node and reset cache info */
     if (NULL == (leaf = H5FL_CALLOC(H5B2_leaf_t)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed");
 
     /* Increment ref. count on B-tree header */
     if (H5B2__hdr_incr(udata->hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment ref. count on B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment ref. count on B-tree header");
 
     /* Share B-tree header information */
     leaf->hdr          = udata->hdr;
@@ -1017,20 +1017,20 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void
 
     /* Magic number */
     if (memcmp(image, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree leaf node signature")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree leaf node signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5B2_LEAF_VERSION)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADRANGE, NULL, "wrong B-tree leaf node version")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADRANGE, NULL, "wrong B-tree leaf node version");
 
     /* B-tree type */
     if (*image++ != (uint8_t)udata->hdr->cls->id)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type");
 
     /* Allocate space for the native keys in memory */
     if (NULL == (leaf->leaf_native = (uint8_t *)H5FL_FAC_MALLOC(udata->hdr->node_info[0].nat_rec_fac)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree leaf native keys")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree leaf native keys");
 
     /* Set the number of records in the leaf */
     leaf->nrec = udata->nrec;
@@ -1040,7 +1040,7 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void
     for (u = 0; u < leaf->nrec; u++) {
         /* Decode record */
         if ((udata->hdr->cls->decode)(image, native, udata->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record");
 
         /* Move to next record */
         image += udata->hdr->rrec_size;
@@ -1141,7 +1141,7 @@ H5B2__cache_leaf_serialize(const H5F_t H5_ATTR_UNUSED *f, void *_image, size_t H
     for (u = 0; u < leaf->nrec; u++) {
         /* Encode record */
         if ((leaf->hdr->cls->encode)(image, native, leaf->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record");
 
         /* Move to next record */
         image += leaf->hdr->rrec_size;
@@ -1195,7 +1195,7 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_AFTER_LOAD:
                 /* Create flush dependency on parent */
                 if (H5B2__create_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency");
                 break;
 
             case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -1211,21 +1211,21 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* Destroy flush dependency on parent */
                 if (H5B2__destroy_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency");
 
                 /* Detach from 'top' proxy for v2 B-tree */
                 if (leaf->top_proxy) {
                     if (H5AC_proxy_entry_remove_child(leaf->top_proxy, leaf) < 0)
                         HGOTO_ERROR(
                             H5E_BTREE, H5E_CANTUNDEPEND, FAIL,
-                            "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
+                            "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy");
                     leaf->top_proxy = NULL;
                 } /* end if */
                 break;
 
             default:
 #ifdef NDEBUG
-                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else     /* NDEBUG */
                 assert(0 && "Unknown action?!?");
 #endif    /* NDEBUG */
@@ -1261,7 +1261,7 @@ H5B2__cache_leaf_free_icr(void *_thing)
 
     /* Destroy v2 B-tree leaf node */
     if (H5B2__leaf_free(leaf) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

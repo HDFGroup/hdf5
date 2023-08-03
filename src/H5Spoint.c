@@ -186,7 +186,7 @@ H5S__point_iter_init(H5S_t *space, H5S_sel_iter_t *iter)
         /* Copy the point list */
         if (NULL ==
             (iter->u.pnt.pnt_lst = H5S__copy_pnt_list(space->select.sel_info.pnt_lst, space->extent.rank)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy point list")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy point list");
     } /* end if */
     else
         /* OK to share point list for internal iterations */
@@ -577,7 +577,7 @@ H5S__point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *c
 
         /* Allocate space for the new node */
         if (NULL == (new_node = (H5S_pnt_node_t *)H5FL_ARR_MALLOC(hcoords_t, space->extent.rank)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point node")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point node");
 
         /* Initialize fields in node */
         new_node->next = NULL;
@@ -736,14 +736,14 @@ H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize
     /* If we are setting a new selection, remove current selection first */
     if (op == H5S_SELECT_SET || H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS)
         if (H5S_SELECT_RELEASE(space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release point selection")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release point selection");
 
     /* Allocate space for the point selection information if necessary */
     if (H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS || space->select.sel_info.pnt_lst == NULL) {
         hsize_t tmp = HSIZET_MAX;
 
         if (NULL == (space->select.sel_info.pnt_lst = H5FL_CALLOC(H5S_pnt_list_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate element information")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate element information");
 
         /* Set the bound box to the default value */
         H5VM_array_fill(space->select.sel_info.pnt_lst->low_bounds, &tmp, sizeof(hsize_t),
@@ -753,7 +753,7 @@ H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize
 
     /* Add points to selection */
     if (H5S__point_add(space, op, num_elem, coord) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert elements")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert elements");
 
     /* Set selection type */
     space->select.type = H5S_sel_point;
@@ -796,7 +796,7 @@ H5S__copy_pnt_list(const H5S_pnt_list_t *src, unsigned rank)
 
     /* Allocate room for the head of the point list */
     if (NULL == (dst = H5FL_MALLOC(H5S_pnt_list_t)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate point list node")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate point list node");
 
     curr     = src->head;
     new_tail = NULL;
@@ -805,7 +805,7 @@ H5S__copy_pnt_list(const H5S_pnt_list_t *src, unsigned rank)
 
         /* Create new point */
         if (NULL == (new_node = (H5S_pnt_node_t *)H5FL_ARR_MALLOC(hcoords_t, rank)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate point node")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate point node");
         new_node->next = NULL;
 
         /* Copy over the point's coordinates */
@@ -916,7 +916,7 @@ H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_selec
     /* Allocate room for the head of the point list */
     if (NULL ==
         (dst->select.sel_info.pnt_lst = H5S__copy_pnt_list(src->select.sel_info.pnt_lst, src->extent.rank)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy point list")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy point list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -994,9 +994,9 @@ H5Sget_select_elem_npoints(hid_t spaceid)
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
     if (H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an element selection")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an element selection");
 
     ret_value = (hssize_t)H5S_GET_SELECT_NPOINTS(space);
 
@@ -1052,7 +1052,7 @@ H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *
     /* Get bounding box for the selection */
     memset(bounds_end, 0, sizeof(bounds_end));
     if (H5S__point_bounds(space, bounds_start, bounds_end) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds");
 
     /* Determine whether number of points or high bounds exceeds (2^32 - 1) */
     if (space->select.num_elem > H5S_UINT32_MAX)
@@ -1072,7 +1072,7 @@ H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *
 
     /* Get the file's low/high bounds */
     if (H5CX_get_libver_bounds(&low_bound, &high_bound) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get low/high bounds from API context")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get low/high bounds from API context");
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     tmp_version = MAX(tmp_version, H5O_sds_point_ver_bounds[low_bound]);
@@ -1081,12 +1081,12 @@ H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *
     if (tmp_version > H5O_sds_point_ver_bounds[high_bound]) {
         if (count_up_version)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                        "The number of points in point selection exceeds 2^32")
+                        "The number of points in point selection exceeds 2^32");
         else if (bound_up_version)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                        "The end of bounding box in point selection exceeds 2^32")
+                        "The end of bounding box in point selection exceeds 2^32");
         else
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "Dataspace point selection version out of bounds")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "Dataspace point selection version out of bounds");
     } /* end if */
 
     /* Set the version to return */
@@ -1115,7 +1115,7 @@ H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *
             break;
 
         default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size");
             break;
     } /* end switch */
 
@@ -1155,7 +1155,7 @@ H5S__point_serial_size(H5S_t *space)
 
     /* Determine the version and encoded size for point selection */
     if (H5S__point_get_version_enc_size(space, &version, &enc_size) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine version and enc_size")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine version and enc_size");
 
     /* Basic number of bytes required to serialize point selection: */
     if (version >= H5S_POINT_VERSION_2)
@@ -1224,7 +1224,7 @@ H5S__point_serialize(H5S_t *space, uint8_t **p)
 
     /* Determine the version and encoded size for point selection info */
     if (H5S__point_get_version_enc_size(space, &version, &enc_size) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine version and enc_size")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine version and enc_size");
 
     /* Store the preamble information */
     UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space)); /* Store the type of selection */
@@ -1298,7 +1298,7 @@ H5S__point_serialize(H5S_t *space, uint8_t **p)
             break;
 
         default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size");
             break;
 
     } /* end switch */
@@ -1366,85 +1366,86 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
     /* Allocate space if not provided */
     if (!*space) {
         if (NULL == (tmp_space = H5S_create(H5S_SIMPLE)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace");
     } /* end if */
     else
         tmp_space = *space;
 
     /* Decode version */
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection version")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection version");
     UINT32DECODE(pp, version);
 
     if (version < H5S_POINT_VERSION_1 || version > H5S_POINT_VERSION_LATEST)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for point selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for point selection");
 
     if (version >= (uint32_t)H5S_POINT_VERSION_2) {
         /* Decode size of point info */
         if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 1, p_end))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding point info")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding point info");
         enc_size = *(pp)++;
     }
     else {
         /* Skip over the remainder of the header */
         if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 8, p_end))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection headers")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
+                        "buffer overflow while decoding selection headers");
         pp += 8;
         enc_size = H5S_SELECT_INFO_ENC_SIZE_4;
     }
 
     /* Check encoded size */
     if (enc_size & ~H5S_SELECT_INFO_ENC_SIZE_BITS)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "unknown size of point/offset info for selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "unknown size of point/offset info for selection");
 
     /* Decode the rank of the point selection */
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection rank")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection rank");
     UINT32DECODE(pp, rank);
 
     if (!*space) {
         /* Patch the rank of the allocated dataspace */
         (void)memset(dims, 0, (size_t)rank * sizeof(dims[0]));
         if (H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions");
     } /* end if */
     else
         /* Verify the rank of the provided dataspace */
         if (rank != tmp_space->extent.rank)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-                        "rank of serialized selection does not match dataspace")
+                        "rank of serialized selection does not match dataspace");
 
     /* decode the number of points */
     switch (enc_size) {
         case H5S_SELECT_INFO_ENC_SIZE_2:
             if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint16_t), p_end))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                            "buffer overflow while decoding number of points")
+                            "buffer overflow while decoding number of points");
 
             UINT16DECODE(pp, num_elem);
             break;
         case H5S_SELECT_INFO_ENC_SIZE_4:
             if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                            "buffer overflow while decoding number of points")
+                            "buffer overflow while decoding number of points");
 
             UINT32DECODE(pp, num_elem);
             break;
         case H5S_SELECT_INFO_ENC_SIZE_8:
             if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint64_t), p_end))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                            "buffer overflow while decoding number of points")
+                            "buffer overflow while decoding number of points");
 
             UINT64DECODE(pp, num_elem);
             break;
         default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size");
             break;
     } /* end switch */
 
     /* Allocate space for the coordinates */
     if (NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
 
     /* Determine necessary size of buffer for coordinates */
     enc_type_size = 0;
@@ -1460,14 +1461,15 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
             enc_type_size = sizeof(uint64_t);
             break;
         default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size");
             break;
     }
 
     coordinate_buffer_requirement = num_elem * rank * enc_type_size;
 
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, coordinate_buffer_requirement, p_end))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection coordinates")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
+                    "buffer overflow while decoding selection coordinates");
 
     /* Retrieve the coordinates from the buffer */
     for (tcoord = coord, i = 0; i < num_elem; i++)
@@ -1483,13 +1485,13 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
                     UINT64DECODE(pp, *tcoord);
                     break;
                 default:
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size");
                     break;
             } /* end switch */
 
     /* Select points */
     if (H5S_select_elements(tmp_space, H5S_SELECT_SET, num_elem, (const hsize_t *)coord) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
     /* Update decoding pointer */
     *p = pp;
@@ -1626,11 +1628,11 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
 
     /* Check args */
     if (NULL == buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
     if (H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a point selection")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a point selection");
 
     ret_value = H5S__get_select_elem_pointlist(space, startpoint, numpoints, buf);
 
@@ -1685,7 +1687,7 @@ H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 
         /* Check for offset moving selection negative */
         if (((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] + space->select.offset[u]) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds");
 
         /* Set the low & high bounds in this dimension */
         start[u] =
@@ -1748,7 +1750,7 @@ H5S__point_offset(const H5S_t *space, hsize_t *offset)
 
         /* Check for offset moving selection out of the dataspace */
         if (pnt_offset < 0 || (hsize_t)pnt_offset >= dim_size[i])
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds");
 
         /* Add the point's offset in this dimension to the total linear offset */
         *offset += (hsize_t)pnt_offset * accum;
@@ -2231,7 +2233,7 @@ H5S__point_project_scalar(const H5S_t *space, hsize_t *offset)
     /* Check for more than one point selected */
     if (node->next)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-                    "point selection of one element has more than one node!")
+                    "point selection of one element has more than one node!");
 
     /* Calculate offset of selection in projected buffer */
     *offset = H5VM_array_offset(space->extent.rank, space->extent.size, node->pnt);
@@ -2269,11 +2271,11 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
 
     /* We are setting a new selection, remove any current selection in new dataspace */
     if (H5S_SELECT_RELEASE(new_space) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
 
     /* Allocate room for the head of the point list */
     if (NULL == (new_space->select.sel_info.pnt_lst = H5FL_MALLOC(H5S_pnt_list_t)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point list node")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point list node");
 
     /* Check if the new space's rank is < or > base space's rank */
     if (new_space->extent.rank < base_space->extent.rank) {
@@ -2293,7 +2295,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
         while (base_node) {
             /* Create new point */
             if (NULL == (new_node = (H5S_pnt_node_t *)H5FL_ARR_MALLOC(hcoords_t, new_space->extent.rank)))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point node")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point node");
             new_node->next = NULL;
 
             /* Copy over the point's coordinates */
@@ -2335,7 +2337,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
         while (base_node) {
             /* Create new point */
             if (NULL == (new_node = (H5S_pnt_node_t *)H5FL_ARR_MALLOC(hcoords_t, new_space->extent.rank)))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point node")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point node");
             new_node->next = NULL;
 
             /* Copy over the point's coordinates */
@@ -2423,19 +2425,19 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem, const hsize
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
     if (H5S_SCALAR == H5S_GET_EXTENT_TYPE(space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "point doesn't support H5S_SCALAR space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "point doesn't support H5S_SCALAR space");
     if (H5S_NULL == H5S_GET_EXTENT_TYPE(space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "point doesn't support H5S_NULL space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "point doesn't support H5S_NULL space");
     if (coord == NULL || num_elem == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "elements not specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "elements not specified");
     if (!(op == H5S_SELECT_SET || op == H5S_SELECT_APPEND || op == H5S_SELECT_PREPEND))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "unsupported operation attempted")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "unsupported operation attempted");
 
     /* Call the real element selection routine */
     if ((ret_value = H5S_select_elements(space, op, num_elem, coord)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't select elements")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't select elements");
 
 done:
     FUNC_LEAVE_API(ret_value)

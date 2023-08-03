@@ -103,7 +103,7 @@ H5FS_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
      */
     if (NULL ==
         (fspace = (H5FS_t *)H5AC_protect(f, H5AC_FSPACE_HDR, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header");
 
     /* Print opening message */
     fprintf(stream, "%*sFree Space Header...\n", indent, "");
@@ -173,7 +173,7 @@ H5FS_sect_debug(const H5FS_t *fspace, const H5FS_section_info_t *sect, FILE *str
     /* Call the section's debugging routine */
     if (fspace->sect_cls[sect->type].debug)
         if ((fspace->sect_cls[sect->type].debug)(sect, stream, indent, fwidth) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't dump section's debugging info")
+            HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't dump section's debugging info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -222,7 +222,7 @@ H5FS_sects_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int indent
      */
     if (NULL ==
         (fspace = (H5FS_t *)H5AC_protect(f, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header");
 
     /* Retrieve the client id */
     client = fspace->client;
@@ -244,12 +244,12 @@ H5FS_sects_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int indent
     switch (client) {
         case H5FS_CLIENT_FHEAP_ID:
             if (H5HF_sects_debug(f, client_addr, stream, indent + 3, MAX(0, fwidth - 3)) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_SYSTEM, FAIL, "unable to dump fractal heap free space sections")
+                HGOTO_ERROR(H5E_FSPACE, H5E_SYSTEM, FAIL, "unable to dump fractal heap free space sections");
             break;
 
         case H5FS_CLIENT_FILE_ID:
             if (H5MF_sects_debug(f, fs_addr, stream, indent + 3, MAX(0, fwidth - 3)) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_SYSTEM, FAIL, "unable to dump file free space sections")
+                HGOTO_ERROR(H5E_FSPACE, H5E_SYSTEM, FAIL, "unable to dump file free space sections");
             break;
 
         case H5FS_NUM_CLIENT_ID:

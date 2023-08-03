@@ -231,11 +231,11 @@ H5FL__malloc(size_t mem_size)
     if (NULL == (ret_value = H5MM_malloc(mem_size))) {
         /* If we can't allocate the memory now, try garbage collecting first */
         if (H5FL_garbage_coll() < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during allocation")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during allocation");
 
         /* Now try allocating the memory again */
         if (NULL == (ret_value = H5MM_malloc(mem_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk");
     } /* end if */
 
 done:
@@ -263,7 +263,7 @@ H5FL__reg_init(H5FL_reg_head_t *head)
 
     /* Allocate a new garbage collection node */
     if (NULL == (new_node = (H5FL_reg_gc_node_t *)H5MM_malloc(sizeof(H5FL_reg_gc_node_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize the new garbage collection node */
     new_node->list = head;
@@ -359,12 +359,12 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
     /* First check this particular list */
     if (head->onlist * head->size > H5FL_reg_lst_mem_lim)
         if (H5FL__reg_gc_list(head) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on regular free lists */
     if (H5FL_reg_gc_head.mem_freed > H5FL_reg_glb_mem_lim)
         if (H5FL__reg_gc() < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -393,7 +393,7 @@ H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
     /* Make certain the list is initialized first */
     if (!head->init)
         if (H5FL__reg_init(head) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'regular' blocks")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'regular' blocks");
 
     /* Check for nodes available on the free list first */
     if (head->list != NULL) {
@@ -412,7 +412,7 @@ H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
     /* Otherwise allocate a node */
     else {
         if (NULL == (ret_value = H5FL__malloc(head->size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Increment the number of blocks allocated in list */
         head->allocated++;
@@ -466,7 +466,7 @@ H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
 
     /* Allocate the block */
     if (NULL == (ret_value = H5FL_reg_malloc(head H5FL_TRACK_INFO_INT)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Clear to zeros */
     /* (Accommodate tracking information, if present) */
@@ -544,7 +544,7 @@ H5FL__reg_gc(void)
     while (gc_node != NULL) {
         /* Release the free nodes on the list */
         if (H5FL__reg_gc_list(gc_node->list) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed");
 
         /* Go on to the next free list to garbage collect */
         gc_node = gc_node->next;
@@ -702,7 +702,7 @@ H5FL__blk_create_list(H5FL_blk_node_t **head, size_t size)
 
     /* Allocate room for the new free list node */
     if (NULL == (ret_value = H5FL_CALLOC(H5FL_blk_node_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed for chunk info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed for chunk info");
 
     /* Set the correct values for the new free list */
     ret_value->size = size;
@@ -741,7 +741,7 @@ H5FL__blk_init(H5FL_blk_head_t *head)
 
     /* Allocate a new garbage collection node */
     if (NULL == (new_node = (H5FL_blk_gc_node_t *)H5MM_malloc(sizeof(H5FL_blk_gc_node_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize the new garbage collection node */
     new_node->pq = head;
@@ -818,7 +818,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
     /* Make certain the list is initialized first */
     if (!head->init)
         if (H5FL__blk_init(head) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'block' list")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'block' list");
 
     /* check if there is a free list for blocks of this size */
     /* and if there are any blocks available on the list */
@@ -846,7 +846,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
         /* Allocate new node, with room for the page info header and the actual page data */
         if (NULL ==
             (temp = (H5FL_blk_list_t *)H5FL__malloc(sizeof(H5FL_blk_list_t) + H5FL_TRACK_SIZE + size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk");
 
         /* Increment the number of blocks of this size */
         free_list->allocated++;
@@ -914,7 +914,7 @@ H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
 
     /* Allocate the block */
     if (NULL == (ret_value = H5FL_blk_malloc(head, size H5FL_TRACK_INFO_INT)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Clear the block to zeros */
     memset(ret_value, 0, size);
@@ -1001,7 +1001,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
         /* No free list available, create a new list node and insert it to the queue */
         free_list = H5FL__blk_create_list(&(head->head), free_size);
     if (NULL == free_list)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "couldn't create new list node")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "couldn't create new list node");
 
     /* Prepend the free'd native block to the front of the free list */
     temp->next      = free_list->list; /* Note: Overwrites the size field in union */
@@ -1019,12 +1019,12 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     /* First check this particular list */
     if (head->list_mem > H5FL_blk_lst_mem_lim)
         if (H5FL__blk_gc_list(head) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on block free lists */
     if (H5FL_blk_gc_head.mem_freed > H5FL_blk_glb_mem_lim)
         if (H5FL__blk_gc() < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1068,7 +1068,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
             size_t blk_size; /* Temporary block size */
 
             if ((ret_value = H5FL_blk_malloc(head, new_size H5FL_TRACK_INFO_INT)) == NULL)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block");
             blk_size = MIN(new_size, temp->size);
             H5MM_memcpy(ret_value, block, blk_size);
             H5FL_blk_free(head, block);
@@ -1221,7 +1221,7 @@ H5FL__blk_gc(void)
     while (gc_node != NULL) {
         /* For each free list being garbage collected, walk through the nodes and free them */
         if (H5FL__blk_gc_list(gc_node->pq) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed");
 
         /* Go on to the next free list to garbage collect */
         gc_node = gc_node->next;
@@ -1318,7 +1318,7 @@ H5FL__arr_init(H5FL_arr_head_t *head)
 
     /* Allocate a new garbage collection node */
     if (NULL == (new_node = (H5FL_gc_arr_node_t *)H5MM_malloc(sizeof(H5FL_gc_arr_node_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize the new garbage collection node */
     new_node->list = head;
@@ -1330,7 +1330,7 @@ H5FL__arr_init(H5FL_arr_head_t *head)
     /* Allocate room for the free lists */
     if (NULL ==
         (head->list_arr = (H5FL_arr_node_t *)H5MM_calloc((size_t)head->maxelem * sizeof(H5FL_arr_node_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize the size of each array */
     for (u = 0; u < (size_t)head->maxelem; u++)
@@ -1438,12 +1438,12 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
     /* First check this particular list */
     if (head->list_mem > H5FL_arr_lst_mem_lim)
         if (H5FL__arr_gc_list(head) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on array free lists */
     if (H5FL_arr_gc_head.mem_freed > H5FL_arr_glb_mem_lim)
         if (H5FL__arr_gc() < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1475,7 +1475,7 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS)
     /* Make certain the list is initialized first */
     if (!head->init)
         if (H5FL__arr_init(head) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'array' blocks")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'array' blocks");
 
     /* Sanity check that the number of elements is supported */
     assert(elem <= (unsigned)head->maxelem);
@@ -1503,7 +1503,7 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS)
     else {
         if (NULL ==
             (new_obj = (H5FL_arr_list_t *)H5FL__malloc(sizeof(H5FL_arr_list_t) + H5FL_TRACK_SIZE + mem_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Increment the number of blocks of this size */
         head->list_arr[elem].allocated++;
@@ -1567,7 +1567,7 @@ H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS)
 
     /* Allocate the array */
     if (NULL == (ret_value = H5FL_arr_malloc(head, elem H5FL_TRACK_INFO_INT)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Clear to zeros */
     memset(ret_value, 0, head->list_arr[elem].size);
@@ -1742,7 +1742,7 @@ H5FL__arr_gc(void)
     while (gc_arr_node != NULL) {
         /* Release the free nodes on the list */
         if (H5FL__arr_gc_list(gc_arr_node->list) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed");
 
         /* Go on to the next free list to garbage collect */
         gc_arr_node = gc_arr_node->next;
@@ -1954,14 +1954,14 @@ H5FL_fac_init(size_t size)
 
     /* Allocate room for the new factory */
     if (NULL == (factory = (H5FL_fac_head_t *)H5FL_CALLOC(H5FL_fac_head_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for factory object")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for factory object");
 
     /* Set size of blocks for factory */
     factory->size = size;
 
     /* Allocate a new garbage collection node */
     if (NULL == (new_node = (H5FL_fac_gc_node_t *)H5FL_MALLOC(H5FL_fac_gc_node_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Initialize the new garbage collection node */
     new_node->list = factory;
@@ -2069,12 +2069,12 @@ H5FL_fac_free(H5FL_fac_head_t *head, void *obj)
     /* First check this particular list */
     if (head->onlist * head->size > H5FL_fac_lst_mem_lim)
         if (H5FL__fac_gc_list(head) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on factory free lists */
     if (H5FL_fac_gc_head.mem_freed > H5FL_fac_glb_mem_lim)
         if (H5FL__fac_gc() < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2119,7 +2119,7 @@ H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS)
     /* Otherwise allocate a node */
     else {
         if (NULL == (ret_value = H5FL__malloc(head->size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Increment the number of blocks allocated in list */
         head->allocated++;
@@ -2174,7 +2174,7 @@ H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS)
 
     /* Allocate the block */
     if (NULL == (ret_value = H5FL_fac_malloc(head H5FL_TRACK_INFO_INT)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Clear to zeros */
     /* (Accommodate tracking information, if present) */
@@ -2252,7 +2252,7 @@ H5FL__fac_gc(void)
     while (gc_node != NULL) {
         /* Release the free nodes on the list */
         if (H5FL__fac_gc_list(gc_node->list) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed");
 
         /* Go on to the next free list to garbage collect */
         gc_node = gc_node->next;
@@ -2289,11 +2289,11 @@ H5FL_fac_term(H5FL_fac_head_t *factory)
 
     /* Garbage collect all the blocks in the factory's free list */
     if (H5FL__fac_gc_list(factory) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of factory failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of factory failed");
 
     /* Verify that all the blocks have been freed */
     if (factory->allocated > 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "factory still has objects allocated")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "factory still has objects allocated");
 
     /* Unlink block free list for factory from global free list */
     if (factory->prev_gc) {
@@ -2383,19 +2383,19 @@ H5FL_garbage_coll(void)
 
     /* Garbage collect the free lists for array objects */
     if (H5FL__arr_gc() < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect array objects")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect array objects");
 
     /* Garbage collect free lists for blocks */
     if (H5FL__blk_gc() < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect block objects")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect block objects");
 
     /* Garbage collect the free lists for regular objects */
     if (H5FL__reg_gc() < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect regular objects")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect regular objects");
 
     /* Garbage collect the free lists for factory objects */
     if (H5FL__fac_gc() < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect factory objects")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect factory objects");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

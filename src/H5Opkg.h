@@ -169,7 +169,7 @@
         assert(msg_type->decode);                                                                            \
         if (NULL == ((MSG)->native = (msg_type->decode)((F), (OH), (MSG)->flags, &ioflags, (MSG)->raw_size,  \
                                                         (MSG)->raw)))                                        \
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message")                           \
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message");                          \
                                                                                                              \
         /* Mark the message dirty if it was changed by decoding */                                           \
         if ((ioflags & H5O_DECODEIO_DIRTY) && (H5F_get_intent((F)) & H5F_ACC_RDWR)) {                        \
@@ -190,7 +190,7 @@
         if (msg_type->set_crt_index) {                                                                       \
             /* Set the creation index for the message */                                                     \
             if ((msg_type->set_crt_index)((MSG)->native, (MSG)->crt_idx) < 0)                                \
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, ERR, "unable to set creation index")                      \
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, ERR, "unable to set creation index");                     \
         } /* end if */                                                                                       \
     }     /* end if */
 

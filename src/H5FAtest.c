@@ -118,7 +118,7 @@ H5FA__test_crt_context(void H5_ATTR_UNUSED *udata)
 
     /* Allocate new context structure */
     if (NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "can't allocate fixed array client callback context")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "can't allocate fixed array client callback context");
 
     /* Initialize the context */
     ctx->bogus = H5FA__TEST_BOGUS_VAL;
@@ -311,7 +311,7 @@ H5FA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_a
 
     /* Allocate new context structure */
     if (NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "can't allocate fixed array client callback context")
+        HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "can't allocate fixed array client callback context");
 
     /* Initialize the context */
     ctx->bogus = H5FA__TEST_BOGUS_VAL;

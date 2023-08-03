@@ -242,9 +242,9 @@ H5CS_copy_stack(void)
     /* Allocate a new stack */
     /* (Don't use library allocate code, since this code stack supports it) */
     if (NULL == (new_stack = calloc(1, sizeof(H5CS_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack");
     if (NULL == (new_stack->rec = calloc(old_stack->nused, sizeof(const char *))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack records")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack records");
 
     /* Copy pointers on old stack to new one */
     /* (Strings don't need to be duplicated, they are statically allocated) */
