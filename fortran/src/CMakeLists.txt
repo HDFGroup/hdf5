@@ -436,6 +436,7 @@ if (BUILD_STATIC_LIBS)
       ${MOD_BUILD_DIR}/h5a.mod
       ${MOD_BUILD_DIR}/h5d.mod
       ${MOD_BUILD_DIR}/h5e.mod
+      ${MOD_BUILD_DIR}/h5es.mod
       ${MOD_BUILD_DIR}/h5f.mod
       ${MOD_BUILD_DIR}/h5g.mod
       ${MOD_BUILD_DIR}/h5i.mod
@@ -479,6 +480,7 @@ if (BUILD_SHARED_LIBS)
       ${MODSH_BUILD_DIR}/h5a.mod
       ${MODSH_BUILD_DIR}/h5d.mod
       ${MODSH_BUILD_DIR}/h5e.mod
+      ${MODSH_BUILD_DIR}/h5es.mod
       ${MODSH_BUILD_DIR}/h5f.mod
       ${MODSH_BUILD_DIR}/h5g.mod
       ${MODSH_BUILD_DIR}/h5i.mod
