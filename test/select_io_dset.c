@@ -239,7 +239,7 @@ error:
         H5Pclose(dxpl);
         H5Pclose(ntrans_dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -379,7 +379,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (wbuf)
         free(wbuf);
@@ -529,7 +529,7 @@ error:
         H5Pclose(dxpl);
         H5Pclose(ntrans_dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -672,7 +672,7 @@ error:
         H5Pclose(dxpl);
         H5Pclose(ntrans_dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -989,7 +989,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (s1_wbuf)
         free(s1_wbuf);
@@ -1288,7 +1288,7 @@ error:
         H5Sclose(mem_sids[i]);
         H5Dclose(dset_dids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (total_wbuf)
         free(total_wbuf);
@@ -1758,7 +1758,7 @@ error:
         H5Sclose(mem_sids[i]);
         H5Dclose(dset_dids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (total_wbuf)
         free(total_wbuf);
@@ -2114,7 +2114,7 @@ error:
         H5Sclose(mem_sids[i]);
         H5Dclose(dset_dids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (total_wbuf)
         free(total_wbuf);
@@ -2686,7 +2686,7 @@ error:
         H5Sclose(mem_sids[i]);
         H5Dclose(dset_dids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (total_wbuf1)
         free(total_wbuf1);
@@ -2821,7 +2821,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_set_get_select_io_mode() */
@@ -3048,7 +3048,7 @@ error:
         H5Dclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_no_selection_io_cause_mode() */

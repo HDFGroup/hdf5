@@ -93,7 +93,7 @@ H5O__dtype_isa(const H5O_t *oh)
     assert(oh);
 
     if ((ret_value = H5O_msg_exists_oh(oh, H5O_DTYPE_ID)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -123,7 +123,7 @@ H5O__dtype_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 
     /* Open the datatype */
     if (NULL == (type = H5T_open(obj_loc)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open datatype");
 
     ret_value = (void *)type;
 
@@ -160,13 +160,13 @@ H5O__dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
 
     /* Commit the type to the file */
     if (H5T__commit(f, crt_info->dt, crt_info->tcpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to commit datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to commit datatype");
 
     /* Set up the new named datatype's location */
     if (NULL == (obj_loc->oloc = H5T_oloc(crt_info->dt)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location of named datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location of named datatype");
     if (NULL == (obj_loc->path = H5T_nameof(crt_info->dt)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get path of named datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get path of named datatype");
 
     /* Set the return value */
     ret_value = crt_info->dt;
@@ -196,14 +196,14 @@ H5O__dtype_get_oloc(hid_t obj_id)
 
     /* Get the datatype */
     if (NULL == (dt = (H5T_t *)H5I_object(obj_id)))
-        HGOTO_ERROR(H5E_OHDR, H5E_BADID, NULL, "couldn't get object from ID")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADID, NULL, "couldn't get object from ID");
 
     /* If this is a named datatype, get the VOL driver pointer to the datatype */
     type = (H5T_t *)H5T_get_actual_type(dt);
 
     /* Get the datatype's object header location */
     if (NULL == (ret_value = H5T_oloc(type)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -166,7 +166,7 @@ H5FD_locate_signature(H5FD_t *file, haddr_t *sig_addr)
     eoa  = H5FD_get_eoa(file, H5FD_MEM_SUPER);
     addr = MAX(eof, eoa);
     if (HADDR_UNDEF == addr)
-        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to obtain EOF/EOA value")
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to obtain EOF/EOA value");
     for (maxpow = 0; addr; maxpow++)
         addr >>= 1;
     maxpow = MAX(maxpow, 9);
@@ -177,9 +177,9 @@ H5FD_locate_signature(H5FD_t *file, haddr_t *sig_addr)
     for (n = 8; n < maxpow; n++) {
         addr = (8 == n) ? 0 : (haddr_t)1 << n;
         if (H5FD_set_eoa(file, H5FD_MEM_SUPER, addr + H5F_SIGNATURE_LEN) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to set EOA value for file signature")
+            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to set EOA value for file signature");
         if (H5FD_read(file, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to read file signature")
+            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to read file signature");
         if (!memcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
             break;
     }
@@ -189,7 +189,7 @@ H5FD_locate_signature(H5FD_t *file, haddr_t *sig_addr)
      */
     if (n >= maxpow) {
         if (H5FD_set_eoa(file, H5FD_MEM_SUPER, eoa) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to reset EOA value")
+            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to reset EOA value");
         *sig_addr = HADDR_UNDEF;
     }
     else
@@ -245,17 +245,17 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
         haddr_t eoa;
 
         if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
         if ((addr + file->base_addr + size) > eoa)
             HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu",
                         (unsigned long long)(addr + file->base_addr), (unsigned long long)size,
-                        (unsigned long long)eoa)
+                        (unsigned long long)eoa);
     }
 
     /* Dispatch to driver */
     if ((file->cls->read)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -298,15 +298,15 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
 #endif /* H5_HAVE_PARALLEL */
 
     if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
     if ((addr + file->base_addr + size) > eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu",
                     (unsigned long long)(addr + file->base_addr), (unsigned long long)size,
-                    (unsigned long long)eoa)
+                    (unsigned long long)eoa);
 
     /* Dispatch to driver */
     if ((file->cls->write)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -445,14 +445,14 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
             }
 
             if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
             if ((addrs[i] + size) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                             "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)i,
                             (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
-                            (unsigned long long)eoa)
+                            (unsigned long long)eoa);
         }
     }
 
@@ -461,7 +461,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
 
         if ((file->cls->read_vector)(file, dxpl_id, count, types, addrs, sizes, bufs) < 0)
 
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed");
     }
     else {
 
@@ -505,7 +505,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
             }
 
             if ((file->cls->read)(file, type, dxpl_id, addrs[i], size, bufs[i]) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
+                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
         }
 
         /* Add H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB to no selection I/O cause */
@@ -651,14 +651,14 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
 
         if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
 
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
         if ((addrs[i] + size) > eoa)
 
             HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, \
                         eoa = %llu",
                         (int)i, (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
-                        (unsigned long long)eoa)
+                        (unsigned long long)eoa);
     }
 
     /* if the underlying VFD supports vector write, make the call */
@@ -666,7 +666,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
 
         if ((file->cls->write_vector)(file, dxpl_id, count, types, addrs, sizes, bufs) < 0)
 
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed");
     }
     else {
         /* otherwise, implement the vector write as a sequence of regular
@@ -709,7 +709,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
             }
 
             if ((file->cls->write)(file, type, dxpl_id, addrs[i], size, bufs[i]) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver write request failed")
+                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver write request failed");
         }
 
         /* Add H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB to no selection I/O cause */
@@ -809,9 +809,9 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
 
         /* Allocate sequence lists for memory and file spaces */
         if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator");
         if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator");
     }
 
     /* Loop over dataspaces */
@@ -848,22 +848,22 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
 
         /* Initialize sequence lists for memory and file spaces */
         if (H5S_select_iter_init(file_iter, file_spaces[i], element_size, 0) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for file space")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for file space");
         file_iter_init = TRUE;
         if (H5S_select_iter_init(mem_iter, mem_spaces[i], element_size, 0) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for memory space")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for memory space");
         mem_iter_init = TRUE;
 
         /* Get the number of elements in selection */
         if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(file_spaces[i])) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
         H5_CHECKED_ASSIGN(nelmts, size_t, hss_nelmts, hssize_t);
 
 #ifndef NDEBUG
         /* Verify mem space has the same number of elements */
         {
             if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(mem_spaces[i])) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
             assert((hssize_t)nelmts == hss_nelmts);
         }
 #endif /* NDEBUG */
@@ -881,7 +881,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
             if (file_seq_i == H5FD_SEQ_LIST_LEN) {
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
                                                  &seq_nelem, file_off, file_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
                 assert(file_nseq > 0);
 
                 nelmts -= seq_nelem;
@@ -893,7 +893,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
             if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &seq_nelem,
                                                  mem_off, mem_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
                 assert(mem_nseq > 0);
 
                 mem_seq_i = 0;
@@ -915,13 +915,13 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
                         /* Allocate dynamic arrays */
                         if (NULL == (addrs = H5MM_malloc(sizeof(addrs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for address list")
+                                        "memory allocation failed for address list");
                         if (NULL == (sizes = H5MM_malloc(sizeof(sizes_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for size list")
+                                        "memory allocation failed for size list");
                         if (NULL == (vec_bufs = H5MM_malloc(sizeof(vec_bufs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for buffer list")
+                                        "memory allocation failed for buffer list");
 
                         /* Copy the existing data */
                         (void)H5MM_memcpy(addrs, addrs_local, sizeof(addrs_local));
@@ -934,16 +934,16 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
                         /* Reallocate arrays */
                         if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * sizeof(*addrs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for address list")
+                                        "memory reallocation failed for address list");
                         addrs = tmp_ptr;
                         if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * sizeof(*sizes) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for size list")
+                                        "memory reallocation failed for size list");
                         sizes = tmp_ptr;
                         if (NULL ==
                             (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * sizeof(*vec_bufs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for buffer list")
+                                        "memory reallocation failed for buffer list");
                         vec_bufs = tmp_ptr;
                     }
 
@@ -961,7 +961,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
                 /* Issue scalar read call */
                 if ((file->cls->read)(file, type, dxpl_id, offsets[i] + file_off[file_seq_i], io_len,
                                       (void *)((uint8_t *)buf + mem_off[mem_seq_i])) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
+                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
 
             /* Update file sequence */
             if (io_len == file_len[file_seq_i])
@@ -982,14 +982,15 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
 
         /* Make sure both memory and file sequences terminated at the same time */
         if (mem_seq_i < mem_nseq)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                        "file selection terminated before memory selection");
 
         /* Terminate iterators */
         if (H5S_SELECT_ITER_RELEASE(file_iter) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator");
         file_iter_init = FALSE;
         if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator");
         mem_iter_init = FALSE;
     }
 
@@ -998,7 +999,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
         H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
         if ((file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed");
     }
     else {
         uint32_t no_selection_io_cause;
@@ -1013,12 +1014,12 @@ done:
     /* Terminate and free iterators */
     if (file_iter) {
         if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator");
         file_iter = H5FL_FREE(H5S_sel_iter_t, file_iter);
     }
     if (mem_iter) {
         if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator");
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
     }
 
@@ -1147,14 +1148,14 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
         haddr_t eoa;
 
         if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
         for (i = 0; i < count; i++) {
 
             if ((offsets[i]) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
         }
     }
 
@@ -1164,27 +1165,27 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
          * buffers */
         if (count > sizeof(mem_space_ids_local) / sizeof(mem_space_ids_local[0])) {
             if (NULL == (mem_space_ids = H5MM_malloc(count * sizeof(hid_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list");
             if (NULL == (file_space_ids = H5MM_malloc(count * sizeof(hid_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list");
         }
 
         /* Create IDs for all dataspaces */
         for (; num_spaces < count; num_spaces++) {
             if ((mem_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, mem_spaces[num_spaces], TRUE)) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
 
             if ((file_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, file_spaces[num_spaces], TRUE)) <
                 0) {
                 if (NULL == H5I_remove(mem_space_ids[num_spaces]))
                     HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
-                HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
             }
         }
 
         if ((file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                         element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
     }
     else
         /* Otherwise, implement the selection read as a sequence of regular
@@ -1192,7 +1193,8 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
          */
         if (H5FD__read_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces,
                                            offsets, element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed");
+
 
 done:
     /* undo the base addr offset to the offsets array if necessary */
@@ -1323,14 +1325,14 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
         haddr_t eoa;
 
         if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
         for (i = 0; i < count; i++) {
 
             if ((offsets[i]) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
         }
     }
 
@@ -1338,7 +1340,7 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
     if (!skip_selection_cb && file->cls->read_selection) {
         if ((file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                         element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
     }
     else {
         /* Otherwise, implement the selection read as a sequence of regular
@@ -1349,23 +1351,25 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
          * buffers */
         if (count > sizeof(mem_spaces_local) / sizeof(mem_spaces_local[0])) {
             if (NULL == (mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list");
             if (NULL == (file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list");
         }
 
         /* Get object pointers for all dataspaces */
         for (i = 0; i < count; i++) {
             if (NULL == (mem_spaces[i] = (H5S_t *)H5I_object_verify(mem_space_ids[i], H5I_DATASPACE)))
-                HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve memory dataspace from ID")
+                HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve memory dataspace from ID");
             if (NULL == (file_spaces[i] = (H5S_t *)H5I_object_verify(file_space_ids[i], H5I_DATASPACE)))
-                HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve file dataspace from ID")
+                HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve file dataspace from ID");
         }
 
         /* Translate to vector or scalar I/O */
+
         if (H5FD__read_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
                                            file_spaces, offsets, element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed");
+
     }
 
 done:
@@ -1464,9 +1468,9 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
 
         /* Allocate sequence lists for memory and file spaces */
         if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator");
         if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator");
     }
 
     /* Loop over dataspaces */
@@ -1503,22 +1507,22 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
 
         /* Initialize sequence lists for memory and file spaces */
         if (H5S_select_iter_init(file_iter, file_spaces[i], element_size, 0) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for file space")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for file space");
         file_iter_init = TRUE;
         if (H5S_select_iter_init(mem_iter, mem_spaces[i], element_size, 0) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for memory space")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for memory space");
         mem_iter_init = TRUE;
 
         /* Get the number of elements in selection */
         if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(file_spaces[i])) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
         H5_CHECKED_ASSIGN(nelmts, size_t, hss_nelmts, hssize_t);
 
 #ifndef NDEBUG
         /* Verify mem space has the same number of elements */
         {
             if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(mem_spaces[i])) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
             assert((hssize_t)nelmts == hss_nelmts);
         }
 #endif /* NDEBUG */
@@ -1536,7 +1540,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
             if (file_seq_i == H5FD_SEQ_LIST_LEN) {
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
                                                  &seq_nelem, file_off, file_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
                 assert(file_nseq > 0);
 
                 nelmts -= seq_nelem;
@@ -1548,7 +1552,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
             if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
                 if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &seq_nelem,
                                                  mem_off, mem_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
                 assert(mem_nseq > 0);
 
                 mem_seq_i = 0;
@@ -1570,13 +1574,13 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
                         /* Allocate dynamic arrays */
                         if (NULL == (addrs = H5MM_malloc(sizeof(addrs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for address list")
+                                        "memory allocation failed for address list");
                         if (NULL == (sizes = H5MM_malloc(sizeof(sizes_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for size list")
+                                        "memory allocation failed for size list");
                         if (NULL == (vec_bufs = H5MM_malloc(sizeof(vec_bufs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for buffer list")
+                                        "memory allocation failed for buffer list");
 
                         /* Copy the existing data */
                         (void)H5MM_memcpy(addrs, addrs_local, sizeof(addrs_local));
@@ -1589,16 +1593,16 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
                         /* Reallocate arrays */
                         if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * sizeof(*addrs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for address list")
+                                        "memory reallocation failed for address list");
                         addrs = tmp_ptr;
                         if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * sizeof(*sizes) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for size list")
+                                        "memory reallocation failed for size list");
                         sizes = tmp_ptr;
                         if (NULL ==
                             (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * sizeof(*vec_bufs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                        "memory reallocation failed for buffer list")
+                                        "memory reallocation failed for buffer list");
                         vec_bufs = tmp_ptr;
                     }
 
@@ -1616,7 +1620,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
                 /* Issue scalar write call */
                 if ((file->cls->write)(file, type, dxpl_id, offsets[i] + file_off[file_seq_i], io_len,
                                        (const void *)((const uint8_t *)buf + mem_off[mem_seq_i])) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
+                    HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
 
             /* Update file sequence */
             if (io_len == file_len[file_seq_i])
@@ -1637,14 +1641,15 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
 
         /* Make sure both memory and file sequences terminated at the same time */
         if (mem_seq_i < mem_nseq)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
+                        "file selection terminated before memory selection");
 
         /* Terminate iterators */
         if (H5S_SELECT_ITER_RELEASE(file_iter) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator");
         file_iter_init = FALSE;
         if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator");
         mem_iter_init = FALSE;
     }
 
@@ -1653,7 +1658,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
         H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
         if ((file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed");
     }
     else {
         uint32_t no_selection_io_cause;
@@ -1668,12 +1673,12 @@ done:
     /* Terminate and free iterators */
     if (file_iter) {
         if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator");
         file_iter = H5FL_FREE(H5S_sel_iter_t, file_iter);
     }
     if (mem_iter) {
         if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator");
         mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
     }
 
@@ -1794,14 +1799,14 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
         haddr_t eoa;
 
         if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
         for (i = 0; i < count; i++) {
 
             if ((offsets[i]) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
         }
     }
 
@@ -1811,35 +1816,37 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
          * buffers */
         if (count > sizeof(mem_space_ids_local) / sizeof(mem_space_ids_local[0])) {
             if (NULL == (mem_space_ids = H5MM_malloc(count * sizeof(hid_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list");
             if (NULL == (file_space_ids = H5MM_malloc(count * sizeof(hid_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list");
         }
 
         /* Create IDs for all dataspaces */
         for (; num_spaces < count; num_spaces++) {
             if ((mem_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, mem_spaces[num_spaces], TRUE)) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
 
             if ((file_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, file_spaces[num_spaces], TRUE)) <
                 0) {
                 if (NULL == H5I_remove(mem_space_ids[num_spaces]))
                     HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id");
-                HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
             }
         }
 
         if ((file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                          element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
     }
     else
         /* Otherwise, implement the selection write as a sequence of regular
          * or vector write calls.
          */
+
         if (H5FD__write_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces,
                                             offsets, element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed");
+
 
 done:
     /* undo the base addr offset to the offsets array if necessary */
@@ -1962,14 +1969,14 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
         haddr_t eoa;
 
         if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
         for (i = 0; i < count; i++) {
 
             if ((offsets[i]) > eoa)
 
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa)
+                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
         }
     }
 
@@ -1977,7 +1984,7 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
     if (!skip_selection_cb && file->cls->write_selection) {
         if ((file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                          element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
     }
     else {
         /* Otherwise, implement the selection write as a sequence of regular
@@ -1988,23 +1995,25 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
          * buffers */
         if (count > sizeof(mem_spaces_local) / sizeof(mem_spaces_local[0])) {
             if (NULL == (mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list");
             if (NULL == (file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list");
         }
 
         /* Get object pointers for all dataspaces */
         for (i = 0; i < count; i++) {
             if (NULL == (mem_spaces[i] = (H5S_t *)H5I_object_verify(mem_space_ids[i], H5I_DATASPACE)))
-                HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve memory dataspace from ID")
+                HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve memory dataspace from ID");
             if (NULL == (file_spaces[i] = (H5S_t *)H5I_object_verify(file_space_ids[i], H5I_DATASPACE)))
-                HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve file dataspace from ID")
+                HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve file dataspace from ID");
         }
 
         /* Translate to vector or scalar I/O */
+
         if (H5FD__write_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
                                             file_spaces, offsets, element_sizes, bufs) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed");
+
     }
 
 done:
@@ -2074,7 +2083,7 @@ H5FD_read_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, h
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_read_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
                                element_sizes, bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2127,7 +2136,7 @@ H5FD_write_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, 
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_write_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
                                 element_sizes, bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2178,7 +2187,7 @@ H5FD_read_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t me
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_read_selection_id(SKIP_SELECTION_CB | SKIP_VECTOR_CB, file, type, count, mem_space_ids,
                                file_space_ids, offsets, element_sizes, bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
 
 done:
 
@@ -2231,7 +2240,7 @@ H5FD_write_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t m
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_write_selection_id(SKIP_SELECTION_CB | SKIP_VECTOR_CB, file, type, count, mem_space_ids,
                                 file_space_ids, offsets, element_sizes, bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
 
 done:
 
@@ -2265,7 +2274,7 @@ H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
 
     /* Dispatch to driver, convert to absolute address */
     if ((file->cls->set_eoa)(file, type, addr + file->base_addr) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2298,7 +2307,7 @@ H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
 
     /* Dispatch to driver */
     if (HADDR_UNDEF == (ret_value = (file->cls->get_eoa)(file, type)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed");
 
     /* Adjust for base address in file (convert to relative address) */
     ret_value -= file->base_addr;
@@ -2335,7 +2344,7 @@ H5FD_get_eof(const H5FD_t *file, H5FD_mem_t type)
     /* Dispatch to driver */
     if (file->cls->get_eof) {
         if (HADDR_UNDEF == (ret_value = (file->cls->get_eof)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "driver get_eof request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "driver get_eof request failed");
     }
     else
         ret_value = file->maxaddr;
@@ -2448,7 +2457,7 @@ H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct
         if (H5_addr_gt(addrs[i - 1], addrs[i]))
             break;
         else if (H5_addr_eq(addrs[i - 1], addrs[i]))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in selections")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in selections");
     }
 
     /* if we traversed the entire array without breaking out, then
@@ -2465,7 +2474,7 @@ H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct
 
         if (NULL == (*srt_tmp = (H5FD_srt_tmp_t *)malloc(srt_tmp_size)))
 
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp");
 
         for (i = 0; i < count; i++) {
             (*srt_tmp)[i].addr  = addrs[i];
@@ -2482,7 +2491,7 @@ H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct
             assert(H5_addr_lt((*srt_tmp)[i - 1].addr, (*srt_tmp)[i].addr));
 
             if (H5_addr_eq(addrs[i - 1], addrs[i]))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addrs in array")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addrs in array");
         }
     }
 
@@ -2559,7 +2568,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
      * sizes[], types[], and bufs[] values at the same index.
      */
     if (H5FD__sort_io_req_real(count, addrs, vector_was_sorted, &srt_tmp) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sorting error in selection offsets")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sorting error in selection offsets");
 
     if (*vector_was_sorted) {
 
@@ -2585,7 +2594,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
             (NULL ==
              (*s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t))))) {
 
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted vector(s)")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted vector(s)");
         }
 
         assert(sizes[0] != 0);
@@ -2737,7 +2746,7 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
      * values at the same index.
      */
     if (H5FD__sort_io_req_real(count, offsets, selection_was_sorted, &srt_tmp) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sorting error in selection offsets")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sorting error in selection offsets");
 
     if (*selection_was_sorted) {
 
@@ -2765,7 +2774,7 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
             (NULL ==
              (*s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t))))) {
 
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted selection(s)")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted selection(s)");
         }
 
         assert(element_sizes[0] != 0);
@@ -2873,21 +2882,21 @@ H5FD_delete(const char *filename, hid_t fapl_id)
 
     /* Get file access property list */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     /* Get the VFD to open the file with */
     if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info");
 
     /* Get driver info */
     if (NULL == (driver = (H5FD_class_t *)H5I_object(driver_prop.driver_id)))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver ID in file access property list")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver ID in file access property list");
     if (NULL == driver->del)
-        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "file driver has no 'del' method")
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "file driver has no 'del' method");
 
     /* Dispatch to file driver */
     if ((driver->del)(filename, fapl_id))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "delete failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "delete failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3001,14 +3010,14 @@ H5FD_register_driver_by_name(const char *name, hbool_t app_ref)
 
     /* Check if driver is already registered */
     if ((driver_is_registered = H5FD_is_driver_registered_by_name(name, &driver_id)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't check if driver is already registered")
+        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't check if driver is already registered");
 
     /* If driver is already registered, increment ref count on ID and return ID */
     if (driver_is_registered) {
         assert(driver_id >= 0);
 
         if (H5I_inc_ref(driver_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFD")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFD");
     } /* end if */
     else {
         H5PL_key_t          key;
@@ -3018,11 +3027,11 @@ H5FD_register_driver_by_name(const char *name, hbool_t app_ref)
         key.vfd.kind   = H5FD_GET_DRIVER_BY_NAME;
         key.vfd.u.name = name;
         if (NULL == (cls = (const H5FD_class_t *)H5PL_load(H5PL_TYPE_VFD, &key)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VFD")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VFD");
 
         /* Register the driver we loaded */
         if ((driver_id = H5FD_register(cls, sizeof(*cls), app_ref)) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VFD ID")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VFD ID");
     } /* end else */
 
     ret_value = driver_id;
@@ -3055,14 +3064,14 @@ H5FD_register_driver_by_value(H5FD_class_value_t value, hbool_t app_ref)
 
     /* Check if driver is already registered */
     if ((driver_is_registered = H5FD_is_driver_registered_by_value(value, &driver_id)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't check if driver is already registered")
+        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't check if driver is already registered");
 
     /* If driver is already registered, increment ref count on ID and return ID */
     if (driver_is_registered) {
         assert(driver_id >= 0);
 
         if (H5I_inc_ref(driver_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFD")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFD");
     } /* end if */
     else {
         H5PL_key_t          key;
@@ -3072,11 +3081,11 @@ H5FD_register_driver_by_value(H5FD_class_value_t value, hbool_t app_ref)
         key.vfd.kind    = H5FD_GET_DRIVER_BY_VALUE;
         key.vfd.u.value = value;
         if (NULL == (cls = (const H5FD_class_t *)H5PL_load(H5PL_TYPE_VFD, &key)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VFD")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VFD");
 
         /* Register the driver we loaded */
         if ((driver_id = H5FD_register(cls, sizeof(*cls), app_ref)) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VFD ID")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VFD ID");
     } /* end else */
 
     ret_value = driver_id;
@@ -3114,7 +3123,7 @@ H5FD_is_driver_registered_by_name(const char *driver_name, hid_t *registered_id)
 
     /* Find driver with name */
     if (H5I_iterate(H5I_VFL, H5FD__get_driver_cb, &op_data, FALSE) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADITER, FAIL, "can't iterate over VFDs")
+        HGOTO_ERROR(H5E_VFL, H5E_BADITER, FAIL, "can't iterate over VFDs");
 
     /* Found a driver with that name */
     if (op_data.found_id != H5I_INVALID_HID) {
@@ -3156,7 +3165,7 @@ H5FD_is_driver_registered_by_value(H5FD_class_value_t driver_value, hid_t *regis
 
     /* Find driver with value */
     if (H5I_iterate(H5I_VFL, H5FD__get_driver_cb, &op_data, FALSE) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADITER, FAIL, "can't iterate over VFDs")
+        HGOTO_ERROR(H5E_VFL, H5E_BADITER, FAIL, "can't iterate over VFDs");
 
     /* Found a driver with that value */
     if (op_data.found_id != H5I_INVALID_HID) {
@@ -3195,13 +3204,13 @@ H5FD_get_driver_id_by_name(const char *name, hbool_t is_api)
 
     /* Find driver with specified name */
     if (H5I_iterate(H5I_VFL, H5FD__get_driver_cb, &op_data, FALSE) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VFL drivers")
+        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VFL drivers");
 
     /* Found a driver with that name */
     if (op_data.found_id != H5I_INVALID_HID) {
         ret_value = op_data.found_id;
         if (H5I_inc_ref(ret_value, is_api) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFL driver")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFL driver");
     }
 
 done:
@@ -3234,13 +3243,13 @@ H5FD_get_driver_id_by_value(H5FD_class_value_t value, hbool_t is_api)
 
     /* Find driver with specified value */
     if (H5I_iterate(H5I_VFL, H5FD__get_driver_cb, &op_data, FALSE) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VFL drivers")
+        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VFL drivers");
 
     /* Found a driver with that value */
     if (op_data.found_id != H5I_INVALID_HID) {
         ret_value = op_data.found_id;
         if (H5I_inc_ref(ret_value, is_api) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFL driver")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFL driver");
     }
 
 done:

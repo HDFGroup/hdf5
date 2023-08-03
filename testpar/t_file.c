@@ -104,7 +104,7 @@ test_split_comm_access(void)
         {
             ret = H5Fdelete(filename, acc_tpl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VRFY((ret >= 0), "H5Fdelete succeeded");
 
         /* Release file-access template */

@@ -200,14 +200,14 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     assert(p);
 
     if (NULL == (fill = H5FL_CALLOC(H5O_fill_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message");
 
     /* Version */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     fill->version = *p++;
     if (fill->version < H5O_FILL_VERSION_1 || fill->version > H5O_FILL_VERSION_LATEST)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for fill value message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for fill value message");
 
     /* Decode each version */
     if (fill->version < H5O_FILL_VERSION_3) {
@@ -241,7 +241,7 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
                 if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
                 H5MM_memcpy(fill->buf, p, (size_t)fill->size);
             }
         }
@@ -261,7 +261,7 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
         /* Check for unknown flags */
         if (flags & (unsigned)~H5O_FILL_FLAGS_ALL)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown flag for fill value message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown flag for fill value message");
 
         /* Space allocation time */
         fill->alloc_time =
@@ -273,8 +273,8 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
         /* Check for undefined fill value */
         if (flags & H5O_FILL_FLAG_UNDEFINED_VALUE) {
 
-            if (flags & (unsigned)~H5O_FILL_FLAG_HAVE_VALUE)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "have value and undefined value flags both set")
+            if (flags & H5O_FILL_FLAG_HAVE_VALUE)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "have value and undefined value flags both set");
 
             /* Set value for "undefined" fill value */
             fill->size = -1;
@@ -292,7 +292,7 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
             if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
             H5MM_memcpy(fill->buf, p, (size_t)fill->size);
 
             /* Set the "defined" flag */
@@ -340,7 +340,7 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
     assert(p);
 
     if (NULL == (fill = H5FL_CALLOC(H5O_fill_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message");
 
     /* Set non-zero default fields */
     fill->version    = H5O_FILL_VERSION_2;
@@ -362,17 +362,17 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
 
         /* Get the datatype message  */
         if ((exists = H5O_msg_exists_oh(open_oh, H5O_DTYPE_ID)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read object header")
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read object header");
         if (exists) {
             if (NULL == (dt = (H5T_t *)H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't read DTYPE message")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't read DTYPE message");
             /* Verify size */
             if (fill->size != (ssize_t)H5T_GET_SIZE(dt))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "inconsistent fill value size")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "inconsistent fill value size");
         }
 
         if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
         H5MM_memcpy(fill->buf, p, (size_t)fill->size);
         fill->fill_defined = TRUE;
     }
@@ -541,7 +541,7 @@ H5O__fill_copy(const void *_src, void *_dst)
     assert(src);
 
     if (!dst && NULL == (dst = H5FL_MALLOC(H5O_fill_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message");
 
     /* Shallow copy basic fields */
     *dst = *src;
@@ -549,7 +549,7 @@ H5O__fill_copy(const void *_src, void *_dst)
     /* Copy data type of fill value */
     if (src->type) {
         if (NULL == (dst->type = H5T_copy(src->type, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "can't copy datatype")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "can't copy datatype");
     } /* end if */
     else
         dst->type = NULL;
@@ -558,7 +558,7 @@ H5O__fill_copy(const void *_src, void *_dst)
     if (src->buf) {
         H5_CHECK_OVERFLOW(src->size, ssize_t, size_t);
         if (NULL == (dst->buf = H5MM_malloc((size_t)src->size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
         H5MM_memcpy(dst->buf, src->buf, (size_t)src->size);
 
         /* Check for needing to convert/copy fill value */
@@ -568,7 +568,7 @@ H5O__fill_copy(const void *_src, void *_dst)
             /* Set up type conversion function */
             if (NULL == (tpath = H5T_path_find(src->type, dst->type)))
                 HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, NULL,
-                            "unable to convert between src and dst data types")
+                            "unable to convert between src and dst data types");
 
             /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
             if (!H5T_path_noop(tpath)) {
@@ -579,11 +579,11 @@ H5O__fill_copy(const void *_src, void *_dst)
                 /* Wrap copies of types to convert */
                 dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->type, H5T_COPY_TRANSIENT), FALSE);
                 if (dst_id < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy/register datatype")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy/register datatype");
                 src_id = H5I_register(H5I_DATATYPE, H5T_copy(src->type, H5T_COPY_ALL), FALSE);
                 if (src_id < 0) {
                     H5I_dec_ref(dst_id);
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy/register datatype")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy/register datatype");
                 } /* end if */
 
                 /* Allocate a background buffer */
@@ -591,7 +591,7 @@ H5O__fill_copy(const void *_src, void *_dst)
                 if (H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size))) {
                     H5I_dec_ref(src_id);
                     H5I_dec_ref(dst_id);
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
                 } /* end if */
 
                 /* Convert fill value */
@@ -601,7 +601,7 @@ H5O__fill_copy(const void *_src, void *_dst)
                     H5I_dec_ref(dst_id);
                     if (bkg_buf)
                         bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, NULL, "datatype conversion failed")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, NULL, "datatype conversion failed");
                 } /* end if */
 
                 /* Release the background buffer */
@@ -727,20 +727,20 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
 
             /* Copy the fill value datatype and get an ID for it */
             if (NULL == (fill_type = H5T_copy(fill->type, H5T_COPY_TRANSIENT)))
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy fill value datatype")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy fill value datatype");
             if ((fill_type_id = H5I_register(H5I_DATATYPE, fill_type, FALSE)) < 0) {
                 (void)H5T_close_real(fill_type);
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register fill value datatype")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register fill value datatype");
             } /* end if */
 
             /* Create a scalar dataspace for the fill value element */
             if (NULL == (fill_space = H5S_create(H5S_SCALAR)))
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create scalar dataspace")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create scalar dataspace");
 
             /* Reclaim any variable length components of the fill value */
             if (H5T_reclaim(fill_type_id, fill_space, fill->buf) < 0) {
                 H5S_close(fill_space);
-                HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to reclaim variable-length fill value data")
+                HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to reclaim variable-length fill value data");
             } /* end if */
 
             /* Release the scalar fill value dataspace */
@@ -840,7 +840,7 @@ H5O__fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src, hb
     /* Check to ensure that the version of the message to be copied does not exceed
        the message version allowed by the destination file's high bound */
     if (fill_src->version > H5O_fill_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "fill value message version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "fill value message version out of bounds");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -985,7 +985,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
      * Can we convert between source and destination data types?
      */
     if (NULL == (tpath = H5T_path_find(fill->type, dset_type)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes");
 
     /* Don't bother doing anything if there will be no actual conversion */
     if (!H5T_path_noop(tpath)) {
@@ -993,7 +993,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
 
         if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill->type, H5T_COPY_ALL), FALSE)) < 0 ||
             (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dset_type, H5T_COPY_ALL), FALSE)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy/register data type")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy/register data type");
 
         /*
          * Datatype conversions are always done in place, so we need a buffer
@@ -1002,17 +1002,17 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
         fill_type_size = H5T_get_size(fill->type);
 
         if (NULL == (buf = H5MM_malloc(MAX(fill_type_size, H5T_get_size(dset_type)))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
         H5MM_memcpy(buf, fill->buf, fill_type_size);
 
         /* Use CALLOC here to clear the buffer in case later the library thinks there's
          * data in the background. */
         if (H5T_path_bkg(tpath) && NULL == (bkg = H5MM_calloc(H5T_get_size(dset_type))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
         /* Do the conversion */
         if (H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "datatype conversion failed")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
         /* Update the fill message */
         H5T_vlen_reclaim_elmt(fill->buf, fill->type);
@@ -1064,7 +1064,7 @@ H5O_fill_set_version(H5F_t *f, H5O_fill_t *fill)
 
     /* Version bounds check */
     if (version > H5O_fill_ver_bounds[H5F_HIGH_BOUND(f)])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "Filter pipeline version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "Filter pipeline version out of bounds");
 
     /* Set the message version */
     fill->version = version;

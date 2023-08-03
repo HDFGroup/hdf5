@@ -215,7 +215,7 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     else {
         /* Perform some sanity checks to ensure that a correct tag is being applied */
         if (H5C_verify_tag(entry->type->id, tag) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed");
     }
 #endif
 
@@ -226,7 +226,7 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     if (NULL == tag_info) {
         /* Allocate new tag info struct */
         if (NULL == (tag_info = H5FL_CALLOC(H5C_tag_info_t)))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate tag info for cache entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate tag info for cache entry");
 
         /* Set the tag for all entries */
         tag_info->tag = tag;
@@ -349,7 +349,7 @@ H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, v
 
             /* Make callback for entry */
             if ((cb)(entry, cb_ctx) != H5_ITER_CONT)
-                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "tagged entry iteration callback failed")
+                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "tagged entry iteration callback failed");
 
             /* Advance to next entry */
             entry = next_entry;
@@ -382,17 +382,17 @@ H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global, H5C_ta
 
     /* Iterate over the entries for this tag */
     if (H5C__iter_tagged_entries_real(cache, tag, cb, cb_ctx) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed");
 
     /* Check for iterating over global metadata */
     if (match_global) {
         /* Iterate over the entries for SOHM entries */
         if (H5C__iter_tagged_entries_real(cache, H5AC__SOHM_TAG, cb, cb_ctx) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed");
 
         /* Iterate over the entries for global heap entries */
         if (H5C__iter_tagged_entries_real(cache, H5AC__GLOBALHEAP_TAG, cb, cb_ctx) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed");
     } /* end if */
 
 done:
@@ -423,9 +423,9 @@ H5C__evict_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
 
     /* Attempt to evict entry */
     if (entry->is_protected)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Cannot evict protected entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Cannot evict protected entry");
     else if (entry->is_dirty)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Cannot evict dirty entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Cannot evict dirty entry");
     else if (entry->is_pinned)
         /* Can't evict at this time, but let's note that we hit a pinned
             entry and we'll loop back around again (as evicting other
@@ -436,7 +436,7 @@ H5C__evict_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
         if (H5C__flush_single_entry(ctx->f, entry,
                                     H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
                                         H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Entry eviction failed.")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Entry eviction failed.");
         ctx->evicted_entries_last_pass = TRUE;
     }
     else
@@ -483,7 +483,7 @@ H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
 
         /* Iterate through entries in the cache */
         if (H5C__iter_tagged_entries(cache, tag, match_global, H5C__evict_tagged_entries_cb, &ctx) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
 
         /* Keep doing this until we have stopped evicted entries */
     } while (TRUE == ctx.evicted_entries_last_pass);
@@ -514,7 +514,7 @@ H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
      * ctx.skipped_pf_dirty_entries is TRUE.
      */
     if ((!ctx.skipped_pf_dirty_entries) && (ctx.pinned_entries_need_evicted))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -571,7 +571,7 @@ H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag)
      * well as any major global entries which should always be flushed
      * when flushing based on tag value */
     if (H5C__iter_tagged_entries(cache, tag, TRUE, H5C__mark_tagged_entries_cb, NULL) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -598,18 +598,18 @@ H5C__flush_marked_entries(H5F_t *f)
 
     /* Enable the slist, as it is needed in the flush */
     if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush all marked entries */
     if (H5C_flush_cache(f, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache");
 
     /* Disable the slist.  Set the clear_slist parameter to TRUE
      * since we called H5C_flush_cache() with the
      * H5C__FLUSH_MARKED_ENTRIES_FLAG.
      */
     if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -637,10 +637,10 @@ H5C_verify_tag(int id, haddr_t tag)
      * types require certain tag values, so check that these
      * constraints are met. */
     if (tag == H5AC__IGNORE_TAG)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "cannot ignore a tag while doing verification.")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "cannot ignore a tag while doing verification.");
     else if (tag == H5AC__INVALID_TAG) {
         if (id != H5AC_PROXY_ENTRY_ID)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided");
     } /* end else-if */
     else {
         /* Perform some sanity checks on tag value. Certain entry
@@ -650,32 +650,32 @@ H5C_verify_tag(int id, haddr_t tag)
         /* Superblock */
         if ((id == H5AC_SUPERBLOCK_ID) || (id == H5AC_DRVRINFO_ID)) {
             if (tag != H5AC__SUPERBLOCK_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock not tagged with H5AC__SUPERBLOCK_TAG")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock not tagged with H5AC__SUPERBLOCK_TAG");
         } /* end if */
         else {
             if (tag == H5AC__SUPERBLOCK_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL,
-                            "H5AC__SUPERBLOCK_TAG applied to non-superblock entry")
+                            "H5AC__SUPERBLOCK_TAG applied to non-superblock entry");
         } /* end else */
 
         /* Free Space Manager */
         if (tag == H5AC__FREESPACE_TAG && ((id != H5AC_FSPACE_HDR_ID) && (id != H5AC_FSPACE_SINFO_ID)))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry");
 
         /* SOHM */
         if ((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID))
             if (tag != H5AC__SOHM_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG");
 
         /* Global Heap */
         if (id == H5AC_GHEAP_ID) {
             if (tag != H5AC__GLOBALHEAP_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "global heap not tagged with H5AC__GLOBALHEAP_TAG")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "global heap not tagged with H5AC__GLOBALHEAP_TAG");
         } /* end if */
         else {
             if (tag == H5AC__GLOBALHEAP_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL,
-                            "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry")
+                            "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry");
         } /* end else */
     }     /* end else */
 
@@ -711,11 +711,11 @@ H5C_flush_tagged_entries(H5F_t *f, haddr_t tag)
 
     /* Mark all entries with specified tag */
     if (H5C__mark_tagged_entries(cache, tag) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries");
 
     /* Flush all marked entries */
     if (H5C__flush_marked_entries(f) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -785,7 +785,7 @@ H5C__expunge_tag_type_metadata_cb(H5C_cache_entry_t *entry, void *_ctx)
     /* Found one with the same tag and type id */
     if (entry->type->id == ctx->type_id)
         if (H5C_expunge_entry(ctx->f, entry->type, entry->addr, ctx->flags) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, H5_ITER_ERROR, "can't expunge entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, H5_ITER_ERROR, "can't expunge entry");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -824,7 +824,7 @@ H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags
 
     /* Iterate through hash table entries, expunge those with specified tag and type id */
     if (H5C__iter_tagged_entries(cache, tag, FALSE, H5C__expunge_tag_type_metadata_cb, &ctx) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

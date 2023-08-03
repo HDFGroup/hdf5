@@ -90,13 +90,13 @@ H5Eget_major(H5E_major_t maj)
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(maj, H5I_ERROR_MSG)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID");
 
     /* Get the size & type of the message's text */
     if ((size = H5E__get_msg(msg, &type, NULL, (size_t)0)) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
     if (type != H5E_MAJOR)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a major one")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a major one");
 
     /* Application will free this */
     size++;
@@ -104,7 +104,7 @@ H5Eget_major(H5E_major_t maj)
 
     /* Get the text for the message */
     if (H5E__get_msg(msg, NULL, msg_str, (size_t)size) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
 
     ret_value = msg_str;
 
@@ -139,13 +139,13 @@ H5Eget_minor(H5E_minor_t min)
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(min, H5I_ERROR_MSG)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID");
 
     /* Get the size & type of the message's text */
     if ((size = H5E__get_msg(msg, &type, NULL, (size_t)0)) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
     if (type != H5E_MINOR)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a minor one")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a minor one");
 
     /* Application will free this */
     size++;
@@ -153,7 +153,7 @@ H5Eget_minor(H5E_minor_t min)
 
     /* Get the text for the message */
     if (H5E__get_msg(msg, NULL, msg_str, (size_t)size) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
 
     ret_value = msg_str;
 
@@ -192,7 +192,7 @@ H5Epush1(const char *file, const char *func, unsigned line, H5E_major_t maj, H5E
 
     /* Push the error on the default error stack */
     if (H5E__push_stack(NULL, file, func, line, H5E_ERR_CLS_g, maj, min, str) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -219,7 +219,7 @@ H5Eclear1(void)
 
     /* Clear the default error stack */
     if (H5E_clear_stack(NULL) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -250,11 +250,11 @@ H5Eprint1(FILE *stream)
 
     if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
                                                    non-threaded case */
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Print error stack */
     if (H5E__print(estack, stream, TRUE) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -284,13 +284,13 @@ H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data)
 
     if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
                                                    non-threaded case */
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Walk the error stack */
     walk_op.vers    = 1;
     walk_op.u.func1 = func;
     if (H5E__walk(estack, direction, &walk_op, client_data) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -322,15 +322,15 @@ H5Eget_auto1(H5E_auto1_t *func /*out*/, void **client_data /*out*/)
     /* Retrieve default error stack */
     if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
                                                    non-threaded case */
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Get the automatic error reporting information */
     if (H5E__get_auto(estack, &auto_op, client_data) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info");
 
     /* Fail if the printing function isn't the default(user-set) and set through H5Eset_auto2 */
     if (!auto_op.is_default && auto_op.vers == 2)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "wrong API function, H5Eset_auto2 has been called")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "wrong API function, H5Eset_auto2 has been called");
 
     if (func)
         *func = auto_op.func1;
@@ -372,11 +372,11 @@ H5Eset_auto1(H5E_auto1_t func, void *client_data)
 
     if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
                                                    non-threaded case */
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Get the automatic error reporting information */
     if (H5E__get_auto(estack, &auto_op, NULL) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info");
 
     /* Set the automatic error reporting information */
     auto_op.vers = 1;
@@ -387,7 +387,7 @@ H5Eset_auto1(H5E_auto1_t func, void *client_data)
     auto_op.func1 = func;
 
     if (H5E__set_auto(estack, &auto_op, client_data) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info");
 
 done:
     FUNC_LEAVE_API(ret_value)

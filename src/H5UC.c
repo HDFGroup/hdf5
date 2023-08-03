@@ -63,7 +63,7 @@ H5UC_create(void *o, H5UC_free_func_t free_func)
 
     /* Allocate ref-counted string structure */
     if (NULL == (ret_value = H5FL_MALLOC(H5UC_t)))
-        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Set the internal fields */
     ret_value->o         = o;
@@ -113,7 +113,7 @@ H5UC_decr(H5UC_t *rc)
     if (rc->n == 0) {
         if ((rc->free_func)(rc->o) < 0) {
             rc = H5FL_FREE(H5UC_t, rc);
-            HGOTO_ERROR(H5E_RS, H5E_CANTFREE, FAIL, "memory release failed")
+            HGOTO_ERROR(H5E_RS, H5E_CANTFREE, FAIL, "memory release failed");
         } /* end if */
         rc = H5FL_FREE(H5UC_t, rc);
     } /* end if */

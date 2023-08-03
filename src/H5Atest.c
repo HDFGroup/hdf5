@@ -85,7 +85,7 @@ H5A__is_shared_test(hid_t attr_id)
 
     /* Check arguments */
     if (NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
 
     /* Check if attribute is shared */
     ret_value = H5O_msg_is_shared(H5O_ATTR_ID, attr);
@@ -114,11 +114,11 @@ H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
 
     /* Check arguments */
     if (NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
 
     /* Push API context */
     if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set API context")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set API context");
     api_ctx_pushed = TRUE;
 
     /* Sanity check */
@@ -126,7 +126,7 @@ H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
 
     /* Retrieve ref count for shared or shareable attribute */
     if (H5SM_get_refcount(attr->oloc.file, H5O_ATTR_ID, &attr->sh_loc, ref_count) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count");
 
 done:
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)

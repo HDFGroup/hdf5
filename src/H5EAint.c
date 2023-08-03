@@ -86,7 +86,7 @@ H5EA__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
 
     /* Create a flush dependency between parent and child entry */
     if (H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEPEND, FAIL, "unable to create flush dependency");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -114,7 +114,7 @@ H5EA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
 
     /* Destroy a flush dependency between parent and child entry */
     if (H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

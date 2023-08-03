@@ -160,7 +160,7 @@ H5HF__tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
 
     /* Mark heap header as modified */
     if (H5HF__hdr_dirty(hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -245,7 +245,7 @@ H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void 
 
     /* Call the user's 'op' callback */
     if (op(id, enc_obj_size, op_data) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "application's callback failed")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "application's callback failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -276,7 +276,7 @@ H5HF__tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
 
     /* Call the internal 'op' routine */
     if (H5HF__tiny_op_real(hdr, id, H5HF__op_read, obj) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -307,7 +307,7 @@ H5HF__tiny_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_d
 
     /* Call the internal 'op' routine routine */
     if (H5HF__tiny_op_real(hdr, id, op, op_data) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -346,7 +346,7 @@ H5HF__tiny_remove(H5HF_hdr_t *hdr, const uint8_t *id)
 
     /* Mark heap header as modified */
     if (H5HF__hdr_dirty(hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

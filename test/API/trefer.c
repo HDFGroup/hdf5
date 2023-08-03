@@ -211,25 +211,25 @@ test_reference_params(void)
     {
         ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_object ref");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_object(H5I_INVALID_HID, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_object loc_id");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_object(fid1, NULL, H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_object name");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_object(fid1, "", H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_object null name");
 
     /* Test parameters to H5Rcreate_region */
@@ -237,25 +237,25 @@ test_reference_params(void)
     {
         ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_region ref");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_region(H5I_INVALID_HID, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_region loc_id");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_region(fid1, NULL, sid1, H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_region name");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_region(fid1, "/Group1/Dataset1", H5I_INVALID_HID, H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_region dataspace");
 
     /* Test parameters to H5Rcreate_attr */
@@ -263,25 +263,25 @@ test_reference_params(void)
     {
         ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", "Attr", H5P_DEFAULT, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_attr ref");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_attr(H5I_INVALID_HID, "/Group1/Dataset2", "Attr", H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_attr loc_id");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_attr(fid1, NULL, "Attr", H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_attr name");
     H5E_BEGIN_TRY
     {
         ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", NULL, H5P_DEFAULT, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcreate_attr attr_name");
 
     /* Test parameters to H5Rdestroy */
@@ -289,7 +289,7 @@ test_reference_params(void)
     {
         ret = H5Rdestroy(NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rdestroy");
 
     /* Test parameters to H5Rget_type */
@@ -297,7 +297,7 @@ test_reference_params(void)
     {
         type = H5Rget_type(NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(type, H5R_BADTYPE, "H5Rget_type ref");
 
     /* Test parameters to H5Requal */
@@ -305,13 +305,13 @@ test_reference_params(void)
     {
         ret = H5Requal(NULL, &rbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Requal ref1");
     H5E_BEGIN_TRY
     {
         ret = H5Requal(&rbuf[0], NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Requal ref2");
 
     /* Test parameters to H5Rcopy */
@@ -319,13 +319,13 @@ test_reference_params(void)
     {
         ret = H5Rcopy(NULL, &wbuf[0]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcopy src_ref");
     H5E_BEGIN_TRY
     {
         ret = H5Rcopy(&rbuf[0], NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rcopy dest_ref");
 
     /* Test parameters to H5Ropen_object */
@@ -333,13 +333,13 @@ test_reference_params(void)
     {
         dset2 = H5Ropen_object(&rbuf[0], H5I_INVALID_HID, H5I_INVALID_HID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object oapl_id");
     H5E_BEGIN_TRY
     {
         dset2 = H5Ropen_object(NULL, H5P_DEFAULT, dapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object ref");
 
     /* Test parameters to H5Ropen_region */
@@ -347,7 +347,7 @@ test_reference_params(void)
     {
         ret_id = H5Ropen_region(NULL, H5I_INVALID_HID, H5I_INVALID_HID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret_id, H5I_INVALID_HID, "H5Ropen_region ref");
 
     /* Test parameters to H5Ropen_attr */
@@ -355,7 +355,7 @@ test_reference_params(void)
     {
         ret_id = H5Ropen_attr(NULL, H5P_DEFAULT, aapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret_id, H5I_INVALID_HID, "H5Ropen_attr ref");
 
     /* Test parameters to H5Rget_obj_type3 */
@@ -363,7 +363,7 @@ test_reference_params(void)
     {
         ret = H5Rget_obj_type3(NULL, H5P_DEFAULT, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Rget_obj_type3 ref");
 
     /* Test parameters to H5Rget_file_name */
@@ -371,7 +371,7 @@ test_reference_params(void)
     {
         name_size = H5Rget_file_name(NULL, NULL, 0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(name_size, (-1), "H5Rget_file_name ref");
 
     /* Test parameters to H5Rget_obj_name */
@@ -379,7 +379,7 @@ test_reference_params(void)
     {
         name_size = H5Rget_obj_name(NULL, H5P_DEFAULT, NULL, 0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(name_size, (-1), "H5Rget_obj_name ref");
 
     /* Test parameters to H5Rget_attr_name */
@@ -387,7 +387,7 @@ test_reference_params(void)
     {
         name_size = H5Rget_attr_name(NULL, NULL, 0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(name_size, (-1), "H5Rget_attr_name ref");
 
     /* Close disk dataspace */
@@ -1304,7 +1304,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     {
         dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (dset1 < 0) {
         VERIFY(libver_high <= H5F_LIBVER_V110, TRUE, "H5Dcreate2");
@@ -1467,7 +1467,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         {
             dset2 = H5Ropen_object(&rdata_NA[0], H5P_DEFAULT, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object");
 
         /* Close and release resources. */
@@ -1480,7 +1480,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         {
             ret = H5Dclose(dset2);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Dclose");
 
         /*
@@ -1635,7 +1635,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
             {
                 ret = H5Rget_obj_type3(&nvrbuf[j], H5P_DEFAULT, &obj_type);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             VERIFY(ret, FAIL, "H5Rget_obj_type3");
         } /* end for */
 
@@ -1760,7 +1760,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     {
         dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (dset1 < 0) {
 

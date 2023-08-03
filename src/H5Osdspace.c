@@ -119,39 +119,39 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
     assert(p);
 
     if (NULL == (sdim = H5FL_CALLOC(H5S_extent_t)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "dataspace structure allocation failed")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "dataspace structure allocation failed");
     sdim->type = H5S_NO_CLASS;
 
     /* Check version */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     version = *p++;
 
     if (version < H5O_SDSPACE_VERSION_1 || version > H5O_SDSPACE_VERSION_2)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "wrong version number in dataspace message")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "wrong version number in dataspace message");
     sdim->version = version;
 
     /* Get rank */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     sdim->rank = *p++;
 
     if (sdim->rank > H5S_MAX_RANK)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "simple dataspace dimensionality is too large")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "simple dataspace dimensionality is too large");
 
     /* Get dataspace flags for later */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     flags = *p++;
 
     /* Get or determine the type of the extent */
     if (version >= H5O_SDSPACE_VERSION_2) {
         if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         sdim->type = (H5S_class_t)*p++;
 
         if (sdim->type != H5S_SIMPLE && sdim->rank > 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid rank for scalar or NULL dataspace")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid rank for scalar or NULL dataspace");
     }
     else {
         /* Set the dataspace type to be simple or scalar as appropriate
@@ -164,14 +164,14 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 
         /* Increment past reserved byte */
         if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         p++;
     }
 
     /* Version 1 has 4 reserved bytes */
     if (version == H5O_SDSPACE_VERSION_1) {
         if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         p += 4;
     }
 
@@ -182,10 +182,10 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 
         /* Check that we have space to decode sdim->rank values */
         if (H5_IS_BUFFER_OVERFLOW(p, (H5F_sizeof_size(f) * sdim->rank), p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
         if (NULL == (sdim->size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed");
         for (i = 0; i < sdim->rank; i++)
             H5F_DECODE_LENGTH(f, p, sdim->size[i]);
 
@@ -193,11 +193,11 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 
         if (flags & H5S_VALID_MAX) {
             if (NULL == (sdim->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed");
 
             /* Check that we have space to decode sdim->rank values */
             if (H5_IS_BUFFER_OVERFLOW(p, (H5F_sizeof_size(f) * sdim->rank), p_end))
-                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             for (i = 0; i < sdim->rank; i++)
                 H5F_DECODE_LENGTH(f, p, sdim->max[i]);
         }
@@ -325,11 +325,11 @@ H5O__sdspace_copy(const void *_mesg, void *_dest)
     /* check args */
     assert(mesg);
     if (!dest && NULL == (dest = H5FL_CALLOC(H5S_extent_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy extent information */
     if (H5S__extent_copy_real(dest, mesg, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
 
     /* Set return value */
     ret_value = dest;
@@ -457,7 +457,7 @@ H5O__sdspace_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     /* Check to ensure that the version of the message to be copied does not exceed
        the message version allowed by the destination file's high bound */
     if (src_space_extent->version > H5O_sdspace_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "dataspace message version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "dataspace message version out of bounds");
 
     /* If the user data is non-NULL, assume we are copying a dataset
      * and make a copy of the dataspace extent for later in the object copying
@@ -468,11 +468,11 @@ H5O__sdspace_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     if (udata) {
         /* Allocate copy of dataspace extent */
         if (NULL == (udata->src_space_extent = H5FL_CALLOC(H5S_extent_t)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_NOSPACE, FAIL, "dataspace extent allocation failed")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_NOSPACE, FAIL, "dataspace extent allocation failed");
 
         /* Create a copy of the dataspace extent */
         if (H5S__extent_copy_real(udata->src_space_extent, src_space_extent, TRUE) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent");
     } /* end if */
 
 done:
