@@ -311,7 +311,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_one_dataset_io() */
@@ -564,7 +564,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_multi_dataset_io() */
@@ -873,7 +873,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_multi_file_dataset_io() */
@@ -1182,7 +1182,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_multi_file_grp_dset_io() */
@@ -1396,7 +1396,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_set_extent() */
@@ -1516,7 +1516,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_attribute_io() */
@@ -1659,7 +1659,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_attribute_io() */
@@ -1794,7 +1794,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_attribute_io_tconv() */
@@ -2110,7 +2110,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_attribute_io_compound() */
@@ -2277,7 +2277,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_group() */
@@ -2474,7 +2474,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_link() */
@@ -2589,7 +2589,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_ocopy_orefresh() */
@@ -2660,7 +2660,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_file_reopen() */

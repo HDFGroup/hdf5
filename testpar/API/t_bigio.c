@@ -1922,7 +1922,7 @@ main(int argc, char **argv)
             H5Fdelete(FILENAME[0], fapl_id);
             H5Fdelete(FILENAME[1], fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         H5Pclose(fapl_id);
     }

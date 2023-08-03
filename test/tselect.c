@@ -1029,7 +1029,7 @@ test_select_all_hyper(hid_t xfer_plist)
     {
         ret = H5Dread(dataset, H5T_NATIVE_UCHAR, sid2, sid1, xfer_plist, rbuf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dread");
 
     /* Select entire 15x26 extent for disk dataset */
@@ -5613,14 +5613,14 @@ test_select_hyper_valid_combination(void)
     {
         tmp_sid = H5Scombine_select(single_pt_sid, H5S_SELECT_AND, single_hyper_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(tmp_sid, FAIL, "H5Scombine_select");
 
     H5E_BEGIN_TRY
     {
         tmp_sid = H5Smodify_select(single_pt_sid, H5S_SELECT_AND, single_hyper_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(tmp_sid, FAIL, "H5Smodify_select");
 
     /* Test the invalid combination between two hyperslab but of different dimension size */
@@ -5628,14 +5628,14 @@ test_select_hyper_valid_combination(void)
     {
         tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_AND, regular_hyper_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(tmp_sid, FAIL, "H5Scombine_select");
 
     H5E_BEGIN_TRY
     {
         tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_AND, regular_hyper_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(tmp_sid, FAIL, "H5Smodify_select");
 
     /* Test invalid operation inputs to the two functions */
@@ -5643,14 +5643,14 @@ test_select_hyper_valid_combination(void)
     {
         tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_SET, single_hyper_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(tmp_sid, FAIL, "H5Scombine_select");
 
     H5E_BEGIN_TRY
     {
         tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_SET, single_hyper_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(tmp_sid, FAIL, "H5Smodify_select");
 
     /* Test inputs in case of non-existent space ids */
@@ -5658,14 +5658,14 @@ test_select_hyper_valid_combination(void)
     {
         tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_AND, non_existent_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(tmp_sid, FAIL, "H5Scombine_select");
 
     H5E_BEGIN_TRY
     {
         tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_AND, non_existent_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(tmp_sid, FAIL, "H5Smodify_select");
 
     /* Close dataspaces */
@@ -6931,14 +6931,14 @@ test_select_valid(void)
     {
         sub_space = H5Screate_simple(2, dims, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(sub_space, FAIL, "H5Screate_simple");
 
     H5E_BEGIN_TRY
     {
         valid = H5Sselect_valid(sub_space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(valid, FAIL, "H5Sselect_valid");
 
     /* Set arrays and dataspace for the rest of the cases */
@@ -6959,7 +6959,7 @@ test_select_valid(void)
     {
         valid = H5Sselect_valid(sub_space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(valid, FAIL, "H5Sselect_valid");
 
     MESSAGE(8, ("Case 3 : in the dimensions\nTry offset (4,4) and size(6,6), the original space is of size "
@@ -14702,7 +14702,7 @@ test_hyper_unlim(void)
     {
         ssize_out = H5Sget_select_hyper_nblocks(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ssize_out, (hssize_t)H5S_UNLIMITED, "H5Sget_select_hyper_nblocks");
 
     /* Test H5Sget_select_bounds() */
@@ -16264,5 +16264,5 @@ cleanup_select(void)
     {
         H5Fdelete(FILENAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }
