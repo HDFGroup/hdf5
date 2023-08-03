@@ -3074,7 +3074,8 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
             tmp_offset = s_offsets[0];
 
             if (NULL == (s_file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for file space list");
             if (NULL == (s_mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for memory space list");
@@ -3441,7 +3442,8 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
             tmp_offset = s_offsets[0];
 
             if (NULL == (s_file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for file space list");
             if (NULL == (s_mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for memory space list");
