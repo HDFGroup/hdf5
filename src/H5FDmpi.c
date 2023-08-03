@@ -53,7 +53,7 @@ H5FD_mpi_get_rank(H5FD_t *file)
 
     /* Dispatch to driver */
     if ((cls->ctl)(file, H5FD_CTL_GET_MPI_RANK_OPCODE, flags, NULL, &rank_ptr) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed");
 
     assert(rank >= 0);
 
@@ -92,10 +92,10 @@ H5FD_mpi_get_size(H5FD_t *file)
 
     /* Dispatch to driver */
     if ((cls->ctl)(file, H5FD_CTL_GET_MPI_SIZE_OPCODE, flags, NULL, &size_ptr) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed");
 
     if (0 >= size)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request returned bad value")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request returned bad value");
 
     ret_value = size;
 
@@ -132,10 +132,10 @@ H5FD_mpi_get_comm(H5FD_t *file)
 
     /* Dispatch to driver */
     if ((cls->ctl)(file, H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE, flags, NULL, &comm_ptr) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed");
 
     if (comm == MPI_COMM_NULL)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed -- bad comm")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed -- bad comm");
 
     ret_value = comm;
 
@@ -230,7 +230,7 @@ H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
 
     /* Dispatch to driver */
     if ((cls->ctl)(file, H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE, flags, NULL, file_sync_required_ptr) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_mpi_file_synce request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_mpi_file_synce request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -116,7 +116,7 @@ H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /* Dump section-specific debugging information */
     if (H5FS_sect_debug(udata->fspace, _sect, udata->stream, udata->indent + 3, MAX(0, udata->fwidth - 3)) <
         0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_BADITER, FAIL, "can't dump section's debugging info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADITER, FAIL, "can't dump section's debugging info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -151,7 +151,7 @@ H5MF_sects_debug(H5F_t *f, haddr_t fs_addr, FILE *stream, int indent, int fwidth
         if (H5_addr_eq(f->shared->fs_addr[type], fs_addr)) {
             if (!f->shared->fs_man[type])
                 if (H5MF__open_fstype(f, type) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space");
 
             if (f->shared->fs_man[type]) {
                 H5MF_debug_iter_ud_t udata; /* User data for callbacks */
@@ -164,11 +164,11 @@ H5MF_sects_debug(H5F_t *f, haddr_t fs_addr, FILE *stream, int indent, int fwidth
 
                 /* Iterate over all the free space sections */
                 if (H5FS_sect_iterate(f, f->shared->fs_man[type], H5MF__sects_debug_cb, &udata) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+                    HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space");
 
                 /* Close the free space information */
                 if (H5FS_close(f, f->shared->fs_man[type]) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info");
             } /* end if */
             break;
         } /* end if */
@@ -209,7 +209,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
 
     /* Retrieve the 'eoa' for the file */
     if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed");
 #ifdef H5MF_ALLOC_DEBUG
     fprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %" PRIuHADDR "\n", __func__, eoa);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -236,7 +236,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
 
                 /* Iterate over all the free space sections */
                 if (H5FS_sect_iterate(f, f->shared->fs_man[ptype], H5MF__sects_debug_cb, &udata) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+                    HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space");
             } /* end if */
             else
                 /* No sections of this type */
@@ -275,7 +275,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
             if (H5FD_MEM_DEFAULT == f->shared->fs_type_map[atype] || atype == f->shared->fs_type_map[atype]) {
                 /* Retrieve the 'eoa' for this file memory type */
                 if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, atype)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed");
                 fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3), "eoa:", eoa);
 
                 /* Print header for sections */
@@ -293,7 +293,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
 
                     /* Iterate over all the free space sections */
                     if (H5FS_sect_iterate(f, f->shared->fs_man[atype], H5MF__sects_debug_cb, &udata) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+                        HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space");
                 }    /* end if */
                 else /* No sections of this type */
                     fprintf(stream, "%*s<none>\n", indent + 6, "");

@@ -1557,7 +1557,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     /* Initialize the library */                                                                             \
     if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
         if (H5_init_library() < 0)                                                                           \
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed")                        \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed");                       \
     }
 
 #define FUNC_ENTER_API_PUSH(err)                                                                             \
@@ -1566,7 +1566,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
     /* Push the API context */                                                                               \
     if (H5CX_push() < 0)                                                                                     \
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")                                     \
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                    \
     else                                                                                                     \
         api_ctx_pushed = TRUE;
 

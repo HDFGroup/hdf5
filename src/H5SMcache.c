@@ -214,7 +214,7 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
     /* Allocate space for the master table in memory */
     if (NULL == (table = H5FL_CALLOC(H5SM_master_table_t)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Read number of indexes and version from file superblock */
     table->num_indexes = H5F_SOHM_NINDEXES(f);
@@ -228,19 +228,19 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
     /* Check magic number */
     if (memcmp(image, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM table signature")
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM table signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Allocate space for the index headers in memory*/
     if (NULL == (table->indexes =
                      (H5SM_index_header_t *)H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed for SOHM indexes")
+        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed for SOHM indexes");
 
     /* Read in the index headers */
     for (u = 0; u < table->num_indexes; ++u) {
         /* Verify correct version of index list */
         if (H5SM_LIST_VERSION != *image++)
-            HGOTO_ERROR(H5E_SOHM, H5E_VERSION, NULL, "bad shared message list version number")
+            HGOTO_ERROR(H5E_SOHM, H5E_VERSION, NULL, "bad shared message list version number");
 
         /* Type of the index (list or B-tree) */
         table->indexes[u].index_type = (H5SM_index_type_t)*image++;
@@ -424,7 +424,7 @@ H5SM__cache_table_free_icr(void *_thing)
 
     /* Destroy Shared Object Header Message table */
     if (H5SM__table_free(table) < 0)
-        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message table")
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message table");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -536,24 +536,24 @@ H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED le
 
     /* Allocate space for the SOHM list data structure */
     if (NULL == (list = H5FL_MALLOC(H5SM_list_t)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed");
     memset(&list->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Allocate list in memory as an array*/
     if (NULL == (list->messages = (H5SM_sohm_t *)H5FL_ARR_MALLOC(H5SM_sohm_t, udata->header->list_max)))
-        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "file allocation failed for SOHM list")
+        HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "file allocation failed for SOHM list");
     list->header = udata->header;
 
     /* Check magic number */
     if (memcmp(image, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature")
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Read messages into the list array */
     ctx.sizeof_addr = H5F_SIZEOF_ADDR(udata->f);
     for (u = 0; u < udata->header->num_messages; u++) {
         if (H5SM__message_decode(image, &(list->messages[u]), &ctx) < 0)
-            HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "can't decode shared message")
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "can't decode shared message");
 
         image += H5SM_SOHM_ENTRY_SIZE(udata->f);
     } /* end for */
@@ -653,7 +653,7 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_U
     for (u = 0; ((u < list->header->list_max) && (mesgs_serialized < list->header->num_messages)); u++) {
         if (list->messages[u].location != H5SM_NO_LOC) {
             if (H5SM__message_encode(image, &(list->messages[u]), &ctx) < 0)
-                HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to serialize shared message")
+                HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to serialize shared message");
 
             image += H5SM_SOHM_ENTRY_SIZE(f);
             ++mesgs_serialized;
@@ -704,7 +704,7 @@ H5SM__cache_list_free_icr(void *_thing)
 
     /* Destroy Shared Object Header Message list */
     if (H5SM__list_free(list) < 0)
-        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message list")
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

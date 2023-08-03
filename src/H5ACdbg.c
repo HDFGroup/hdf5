@@ -111,7 +111,7 @@ H5AC_dump_cache(const H5F_t *f)
     assert(f->shared->cache);
 
     if (H5C_dump_cache(f->shared->cache, H5F_OPEN_NAME(f)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_dump_cache() failed.")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_dump_cache() failed.");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -170,7 +170,7 @@ H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr, void **entry_ptr_ptr)
     cache_ptr = f->shared->cache;
 
     if (H5C_get_entry_ptr_from_addr(cache_ptr, addr, entry_ptr_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_ptr_from_addr() failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_ptr_from_addr() failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -261,7 +261,7 @@ H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expecte
     cache_ptr = f->shared->cache;
 
     if (H5C_verify_entry_type(cache_ptr, addr, expected_type, in_cache_ptr, type_ok_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_verify_entry_type() failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_verify_entry_type() failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

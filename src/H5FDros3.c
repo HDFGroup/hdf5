@@ -382,10 +382,10 @@ H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     if (FAIL == H5FD__ros3_validate_config(fa))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ros3 config")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ros3 config");
 
     ret_value = H5P_set_driver(plist, H5FD_ROS3, (const void *)fa, NULL);
 
@@ -458,18 +458,18 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_dst /*out*/)
 #endif
 
     if (fa_dst == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL");
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
 
     if (H5FD_ROS3 != H5P_peek_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
 
     fa_src = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist);
     if (fa_src == NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
     /* Copy the ros3 fapl data out */
     H5MM_memcpy(fa_dst, fa_src, sizeof(H5FD_ros3_fapl_t));
@@ -501,7 +501,7 @@ H5FD__ros3_fapl_get(H5FD_t *_file)
 
     fa = (H5FD_ros3_fapl_t *)H5MM_calloc(sizeof(H5FD_ros3_fapl_t));
     if (fa == NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the fields of the structure */
     H5MM_memcpy(fa, &(file->fa), sizeof(H5FD_ros3_fapl_t));
@@ -607,19 +607,19 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
 #endif
 
     if (size == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size cannot be zero.")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size cannot be zero.");
     if (token_dst == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "token_dst is NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "token_dst is NULL");
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_ROS3 != H5P_peek_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist");
     if (token_exists) {
         if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value");
     }
 
     /* Copy the token data out */
@@ -660,7 +660,7 @@ H5FD__ros3_str_token_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
 
     if (*value)
         if (NULL == (*value = HDstrdup(*value)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy string property token")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy string property token");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -793,21 +793,21 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
 #endif
 
     if (fapl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_ROS3 != H5P_peek_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (HDstrlen(token) > H5FD_ROS3_MAX_SECRET_TOK_LEN)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
-                    "specified token exceeds the internally specified maximum string length")
+                    "specified token exceeds the internally specified maximum string length");
 
     if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist");
 
     if (token_exists) {
         if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value");
 
         memcpy(token_src, token, HDstrlen(token) + 1);
     }
@@ -819,7 +819,7 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
         if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char *), &token_src, NULL, NULL, NULL, NULL,
                        H5FD__ros3_str_token_delete, H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp,
                        H5FD__ros3_str_token_close) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist");
     }
 
 done:
@@ -930,28 +930,28 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Check arguments */
     if (!url || !*url)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
     if (ADDR_OVERFLOW(maxaddr))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr")
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr");
     if (flags != H5F_ACC_RDONLY)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "only Read-Only access allowed")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "only Read-Only access allowed");
 
     if (FAIL == H5Pget_fapl_ros3(fapl_id, &fa))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "can't get property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "can't get property list");
 
     if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to initialize curl global (placeholder flags)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to initialize curl global (placeholder flags)");
 
     /* Session/security token */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a file access property list");
     if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "failed to check if property token exists in plist")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "failed to check if property token exists in plist");
     if (token_exists) {
         if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get token value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get token value");
     }
 
     /* open file; procedure depends on whether or not the fapl instructs to
@@ -965,10 +965,10 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         now = gmnow();
         assert(now != NULL);
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp");
         if (FAIL == H5FD_s3comms_signing_key(signing_key, (const char *)fa.secret_key,
                                              (const char *)fa.aws_region, (const char *)iso8601now))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while computing signing key")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while computing signing key");
 
         if (token_exists)
             handle = H5FD_s3comms_s3r_open(url, (const char *)fa.aws_region, (const char *)fa.secret_id,
@@ -990,14 +990,14 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* create new file struct */
     file = H5FL_CALLOC(H5FD_ros3_t);
     if (file == NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
 
     file->s3r_handle = handle;
     H5MM_memcpy(&(file->fa), &fa, sizeof(H5FD_ros3_fapl_t));
 
 #if ROS3_STATS
     if (FAIL == ros3_reset_stats(file))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
 #endif /* ROS3_STATS */
 
     ret_value = (H5FD_t *)file;
@@ -1326,12 +1326,12 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     /* Close the underlying request handle
      */
     if (FAIL == H5FD_s3comms_s3r_close(file->s3r_handle))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
 
 #if ROS3_STATS
     /* TODO: mechanism to re-target stats printout */
     if (ros3_fprint_stats(stdout, file) == FAIL)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics");
 #endif /* ROS3_STATS */
 
     /* Release the file info */
@@ -1620,7 +1620,7 @@ H5FD__ros3_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_hand
 #endif
 
     if (!file_handle)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
 
     *file_handle = file->s3r_handle;
 
@@ -1673,10 +1673,10 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     filesize = H5FD_s3comms_s3r_get_filesize(file->s3r_handle);
 
     if ((addr > filesize) || ((addr + size) > filesize))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "range exceeds file address")
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "range exceeds file address");
 
     if (H5FD_s3comms_s3r_read(file->s3r_handle, addr, size, buf) == FAIL)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #if ROS3_STATS
 
@@ -1733,7 +1733,7 @@ H5FD__ros3_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, h
     fprintf(stdout, "H5FD__ros3_write() called.\n");
 #endif
 
-    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file.")
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file.");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1768,7 +1768,7 @@ H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
     fprintf(stdout, "H5FD__ros3_truncate() called.\n");
 #endif
 
-    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file.")
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file.");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

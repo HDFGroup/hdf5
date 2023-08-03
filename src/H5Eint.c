@@ -422,7 +422,7 @@ H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
         walk_op.vers    = 1;
         walk_op.u.func1 = H5E__walk1_cb;
         if (H5E__walk(estack, H5E_WALK_DOWNWARD, &walk_op, (void *)&eprint) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack");
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
         assert(0 && "version 1 error stack print without deprecated symbols!");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -431,7 +431,7 @@ H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
         walk_op.vers    = 2;
         walk_op.u.func2 = H5E__walk2_cb;
         if (H5E__walk(estack, H5E_WALK_DOWNWARD, &walk_op, (void *)&eprint) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack");
     } /* end else */
 
 done:
@@ -785,11 +785,11 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
         /* Decrement the IDs to indicate that they are no longer used by this stack */
         /* (In reverse order that they were incremented, so that reference counts work well) */
         if (H5I_dec_ref(error->min_num) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
         if (H5I_dec_ref(error->maj_num) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message");
         if (H5I_dec_ref(error->cls_id) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class");
 
         /* Release strings */
         /* The 'func' & 'file' strings are statically allocated (by the compiler)
@@ -829,13 +829,13 @@ H5E_clear_stack(H5E_t *estack)
     if (estack == NULL)
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
                                                        non-threaded case */
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Empty the error stack */
     assert(estack);
     if (estack->nused)
         if (H5E__clear_entries(estack, estack->nused) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -864,7 +864,7 @@ H5E__pop(H5E_t *estack, size_t count)
 
     /* Remove the entries from the error stack */
     if (H5E__clear_entries(estack, count) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTRELEASE, FAIL, "can't remove errors from stack")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTRELEASE, FAIL, "can't remove errors from stack");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

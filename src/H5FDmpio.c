@@ -268,10 +268,10 @@ H5FD_mpio_init(void)
 
             /* Initialize MPI if not already initialized */
             if (MPI_SUCCESS != MPI_Initialized(&mpi_initialized))
-                HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, H5I_INVALID_HID, "can't check if MPI is initialized")
+                HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, H5I_INVALID_HID, "can't check if MPI is initialized");
             if (!mpi_initialized) {
                 if (MPI_SUCCESS != MPI_Init(NULL, NULL))
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't initialize MPI")
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't initialize MPI");
                 H5FD_mpi_self_initialized = TRUE;
             }
         }
@@ -375,17 +375,17 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
 
     /* Check arguments */
     if (fapl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (MPI_COMM_NULL == comm)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "MPI_COMM_NULL is not a valid communicator")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "MPI_COMM_NULL is not a valid communicator");
 
     /* Set the MPI communicator and info object */
     if (H5P_set(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI communicator")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI communicator");
     if (H5P_set(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI info object")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI info object");
 
     /* duplication is done during driver setting. */
     ret_value = H5P_set_driver(plist, H5FD_MPIO, NULL, NULL);
@@ -431,17 +431,17 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/)
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_MPIO != H5P_peek_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "VFL driver is not MPI-I/O")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "VFL driver is not MPI-I/O");
 
     /* Get the MPI communicator and info object */
     if (comm)
         if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, comm) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI communicator")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI communicator");
     if (info)
         if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI info object")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI info object");
 
 done:
     /* Clean up anything duplicated on errors. The free calls will set
@@ -489,15 +489,15 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
     if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
     if (H5FD_MPIO_INDEPENDENT != xfer_mode && H5FD_MPIO_COLLECTIVE != xfer_mode)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "incorrect xfer_mode")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "incorrect xfer_mode");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -527,12 +527,12 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*/)
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Get the transfer mode */
     if (xfer_mode)
         if (H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, xfer_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -565,13 +565,13 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
     if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, &opt_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -604,13 +604,13 @@ H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
     if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &opt_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -641,13 +641,13 @@ H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
     if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, &num_chunk_per_proc) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -681,13 +681,13 @@ H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_ch
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
     if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, &percent_num_proc_per_chunk) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -816,7 +816,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 
     /* Get a pointer to the fapl */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
     if (H5FD_mpi_self_initialized) {
         comm = MPI_COMM_WORLD;
@@ -824,9 +824,9 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     else {
         /* Get the MPI communicator and info object from the property list */
         if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI communicator")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI communicator");
         if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI info object")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI info object");
     }
 
     /* Get the MPI rank of this process and the total number of processes */
@@ -912,12 +912,12 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
         }
         /* Add info to the file access property list */
         if (H5P_set(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTSET, NULL, "can't set MPI info object")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTSET, NULL, "can't set MPI info object");
     }
 
     /* Build the return value and initialize it */
     if (NULL == (file = (H5FD_mpio_t *)H5MM_calloc(sizeof(H5FD_mpio_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     file->f        = fh;
     file->comm     = comm;
     file->info     = info;
@@ -926,7 +926,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 
     /* Retrieve the flag indicating whether MPI_File_sync is needed after each write */
     if (H5_mpio_get_file_sync_required(fh, &file->mpi_file_sync_required) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get mpi_file_sync_required hint")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get mpi_file_sync_required hint");
 
     /* Only processor p0 will get the filesize and broadcast it. */
     if (mpi_rank == 0) {
@@ -1168,7 +1168,7 @@ H5FD__mpio_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_hand
     FUNC_ENTER_PACKAGE
 
     if (!file_handle)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
 
     *file_handle = &(file->f);
 
@@ -1242,7 +1242,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
     /* some numeric conversions */
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off /*out*/) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
 
     /* Only look for MPI views for raw data transfers */
@@ -1251,7 +1251,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
         /* Get the transfer mode from the API context */
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
         /*
          * Set up for a fancy xfer using complex types, or single byte block. We
@@ -1267,7 +1267,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
             /* Prepare for a full-blown xfer using btype, ftype, and disp */
             if (H5CX_get_mpi_coll_datatypes(&buf_type, &file_type) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes");
 
             /*
              * Set the file view when we are using MPI derived types
@@ -1293,7 +1293,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 #endif
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property");
 
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
@@ -1356,7 +1356,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
              */
 
             if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
 
             derived_type = TRUE;
             size_i       = 1;
@@ -1420,7 +1420,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
     /* Check for read failure */
     if (bytes_read < 0 || bytes_read > io_size)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
@@ -1512,12 +1512,12 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
     /* some numeric conversions */
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
 
     /* Get the transfer mode from the API context */
     if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
@@ -1533,7 +1533,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         /* Prepare for a full-blown xfer using btype, ftype, and disp */
         if (H5CX_get_mpi_coll_datatypes(&buf_type, &file_type) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes");
 
         /*
          * Set the file view when we are using MPI derived types
@@ -1559,7 +1559,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property");
 
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
@@ -1580,7 +1580,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         else {
             if (type != H5FD_MEM_DRAW)
                 HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL,
-                            "Metadata Coll opt property should be collective at this point")
+                            "Metadata Coll opt property should be collective at this point");
 
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)
@@ -1607,7 +1607,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
              */
 
             if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
 
             derived_type = TRUE;
             size_i       = 1;
@@ -1644,7 +1644,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
     /* Check for write failure */
     if (bytes_written != io_size || bytes_written < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
@@ -1747,7 +1747,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
         /* some numeric conversions */
         if (H5FD_mpi_haddr_to_MPIOff(addrs[0], mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI offset")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI offset");
 
         /* Check for size overflow */
         if (sizes[0] > bigio_count) {
@@ -1757,11 +1757,11 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
              * count) to 1 when using the derived_type. */
 
             if (H5_mpio_create_large_type(sizes[0], 0, MPI_BYTE, buf_type) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
             *buf_type_created = TRUE;
 
             if (H5_mpio_create_large_type(sizes[0], 0, MPI_BYTE, file_type) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
             *file_type_created = TRUE;
 
             *size_i = 1;
@@ -1780,13 +1780,13 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
          */
         if (H5FD_sort_vector_io_req(vector_was_sorted, count, types, addrs, sizes, bufs, &s_types, s_addrs,
                                     s_sizes, s_bufs) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request");
 
         if ((NULL == (mpi_block_lengths = (int *)malloc((size_t)count * sizeof(int)))) ||
             (NULL == (mpi_displacements = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint)))) ||
             (NULL == (mpi_bufs = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint))))) {
 
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement");
         }
 
         /* when we setup mpi_bufs[] below, all addresses are offsets from
@@ -1859,11 +1859,11 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                     assert(!sub_types_created);
 
                     if (NULL == (sub_types = malloc((size_t)count * sizeof(MPI_Datatype))))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array");
                     if (NULL == (sub_types_created = (uint8_t *)calloc((size_t)count, 1))) {
                         H5MM_free(sub_types);
                         sub_types = NULL;
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types created array")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types created array");
                     }
 
                     /* Initialize sub_types to all MPI_BYTE */
@@ -1874,7 +1874,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
                 /* Create type for large block */
                 if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &sub_types[i]) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
                 sub_types_created[i] = TRUE;
 
                 /* Only one of these large types for this vector element */
@@ -1944,7 +1944,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
         /* some numeric conversions */
         if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0");
     }
     else {
         /* setup for null participation in the collective operation. */
@@ -1959,7 +1959,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
         /* some numeric conversions */
         if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0");
     }
 
 done:
@@ -2115,7 +2115,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
      * read, it does mean that all ranks are here, so we can use MPI_File_set_view().
      */
     if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
         /* Build MPI types, etc. */
@@ -2124,7 +2124,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                                           &vector_was_sorted, &mpi_off,
                                           (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O");
 
         /* free sorted addrs vector if it exists */
         if (!vector_was_sorted)
@@ -2148,13 +2148,13 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
         /* Reset mpi_off to 0 since the view now starts at the data offset */
         if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0");
 
         /* Get the collective_opt property to check whether the application wants to do IO individually.
          */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
 
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property");
 
             /* Read the data. */
 #ifdef H5FDmpio_DEBUG
@@ -2245,7 +2245,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
         /* Check for read failure */
         if (bytes_read < 0 || bytes_read > io_size)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
 
         /* Check for incomplete read */
         n = io_size - bytes_read;
@@ -2301,7 +2301,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         for (i = 0; i < (int)count; i++) {
             /* Convert address to mpi offset */
             if (H5FD_mpi_haddr_to_MPIOff(addrs[i], &mpi_off) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
 
             /* Calculate I/O size */
             if (!fixed_size) {
@@ -2324,7 +2324,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                  */
 
                 if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
 
                 buf_type_created = TRUE;
                 size_i           = 1;
@@ -2358,7 +2358,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
                 /* Check for read failure */
                 if (bytes_read < 0 || bytes_read > io_size)
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
 
                 /*
                  * If we didn't read the entire I/O, fill in zeroes beyond end of
@@ -2508,7 +2508,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
      * write, it does mean that all ranks are here, so we can use MPI_File_set_view().
      */
     if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
         /* Build MPI types, etc. */
@@ -2517,7 +2517,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                                           &vector_was_sorted, &mpi_off,
                                           (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O");
 
         /* Compute max addr writted to */
         if (count > 0)
@@ -2554,12 +2554,12 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
         /* Reset mpi_off to 0 since the view now starts at the data offset */
         if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0");
 
         /* Get the collective_opt property to check whether the application wants to do IO individually.
          */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property");
 
             /* Write the data. */
 #ifdef H5FDmpio_DEBUG
@@ -2626,7 +2626,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         for (i = 0; i < (int)count; i++) {
             /* Convert address to mpi offset */
             if (H5FD_mpi_haddr_to_MPIOff(addrs[i], &mpi_off) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
 
             /* Calculate I/O size */
             if (!fixed_size) {
@@ -2649,7 +2649,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                  */
 
                 if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
 
                 buf_type_created = TRUE;
                 size_i           = 1;
@@ -2836,7 +2836,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
             HMPI_GOTO_ERROR(FAIL, "MPI_File_get_size failed", mpi_code)
 
         if (H5FD_mpi_haddr_to_MPIOff(file->eoa, &needed_eof) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
 
         /* EOA != EOF.  Set EOF to EOA */
         if (size != needed_eof) {
@@ -2894,7 +2894,7 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
     assert(filename);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     assert(H5FD_MPIO == H5P_peek_driver(plist));
 
     if (H5FD_mpi_self_initialized) {
@@ -2903,9 +2903,9 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
     else {
         /* Get the MPI communicator and info from the fapl */
         if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI info object")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI info object");
         if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI communicator")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI communicator");
     }
 
     /* Get the MPI rank of this process */
@@ -3009,7 +3009,7 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
         default: /* unknown op code */
             if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
 
-                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown")
+                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown");
             }
             break;
     }

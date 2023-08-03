@@ -345,7 +345,7 @@ H5T__init_native(void)\n\
         /* The part common to fixed and floating types */
         fprintf(rawoutstream, "\
     if(NULL == (dt = H5T__alloc()))\n\
-        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, \"datatype allocation failed\")\n\
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, \"datatype allocation failed\");\n\
     dt->shared->state = H5T_STATE_IMMUTABLE;\n\
     dt->shared->type = H5T_FLOAT;\n\
     dt->shared->size = %d;\n",
@@ -391,7 +391,7 @@ dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
         /* Register the type */
         fprintf(rawoutstream, "\
     if((H5T_NATIVE_%s_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)\n\
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, \"can't register ID for built-in datatype\")\n",
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, \"can't register ID for built-in datatype\");\n",
                 d[i].varname);
 
         /* Variables for alignment of compound datatype */

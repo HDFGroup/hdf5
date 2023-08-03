@@ -109,12 +109,12 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* Init io_info */
     if (H5D__ioinfo_init(count, H5D_IO_OP_READ, dset_info, &io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
 
     /* Allocate store buffer if necessary */
     if (count > 1)
         if (NULL == (store = (H5D_storage_t *)H5MM_malloc(count * sizeof(H5D_storage_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer");
 
 #ifdef H5_HAVE_PARALLEL
     /* Check for non-MPI-based VFD.  Only need to check first dataset since all
@@ -124,11 +124,11 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Get I/O transfer mode */
         if (H5CX_get_io_xfer_mode(&io_xfer_mode) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
         /* Collective access is not permissible without a MPI based VFD */
         if (io_xfer_mode == H5FD_MPIO_COLLECTIVE)
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only");
     }  /* end if */
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -138,29 +138,29 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* check args */
         if (NULL == dset_info[i].dset)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
         if (NULL == dset_info[i].dset->oloc.file)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
         /* set metadata tagging with dset oheader addr */
         H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
         /* Set up datatype info for operation */
         if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info");
 
         /* Make certain that the number of elements in each selection is the same, and cache nelmts in
          * dset_info */
         dset_info[i].nelmts = H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space);
         if (dset_info[i].nelmts != H5S_GET_SELECT_NPOINTS(dset_info[i].file_space))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "src and dest dataspaces have different number of elements selected")
+                        "src and dest dataspaces have different number of elements selected");
 
         /* Check for a NULL buffer */
         if (NULL == dset_info[i].buf.vp) {
             /* Check for any elements selected (which is invalid) */
             if (dset_info[i].nelmts > 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
 
             /* If the buffer is nil, and 0 element is selected, make a fake buffer.
              * This is for some MPI package like ChaMPIon on NCSA's tungsten which
@@ -171,9 +171,9 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Make sure that both selections have their extents set */
         if (!(H5S_has_extent(dset_info[i].file_space)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set");
         if (!(H5S_has_extent(dset_info[i].mem_space)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set");
 
         /* H5S_select_shape_same() has been modified to accept topologically identical
          * selections with different rank as having the same shape (if the most
@@ -199,7 +199,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                     /* Allocate buffer */
                     if (NULL == (orig_mem_space = (H5S_t **)H5MM_calloc(count * sizeof(H5S_t *))))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                                    "couldn't allocate original memory space array buffer")
+                                    "couldn't allocate original memory space array buffer");
                 }
                 else
                     /* Use local buffer */
@@ -214,7 +214,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             if (H5S_select_construct_projection(orig_mem_space[i], &dset_info[i].mem_space,
                                                 (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
                                                 (hsize_t)dset_info[i].type_info.dst_type_size, &buf_adj) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                            "unable to construct projected memory dataspace");
             assert(dset_info[i].mem_space);
 
             /* Adjust the buffer by the given amount */
@@ -236,14 +237,14 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Retrieve dataset's fill-value properties */
             if (H5P_is_fill_value_defined(&dset_info[i].dset->shared->dcpl_cache.fill, &fill_status) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined")
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
 
             /* Should be impossible, but check anyway... */
             if (fill_status == H5D_FILL_VALUE_UNDEFINED &&
                 (dset_info[i].dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC ||
                  dset_info[i].dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET))
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
-                            "read failed: dataset doesn't exist, no data can be read")
+                            "read failed: dataset doesn't exist, no data can be read");
 
             /* If we're never going to fill this dataset, just leave the junk in the user's buffer */
             if (dset_info[i].dset->shared->dcpl_cache.fill.fill_time != H5D_FILL_TIME_NEVER)
@@ -251,7 +252,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                 if (H5D__fill(dset_info[i].dset->shared->dcpl_cache.fill.buf, dset_info[i].dset->shared->type,
                               dset_info[i].buf.vp, dset_info[i].type_info.mem_type,
                               dset_info[i].mem_space) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed");
 
             /* No need to perform any more I/O for this dataset */
             dset_info[i].skip_io = TRUE;
@@ -260,7 +261,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         else {
             /* Set up I/O operation */
             if (H5D__dset_ioinfo_init(dset_info[i].dset, &(dset_info[i]), &(store[i])) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation");
 
             /* Sanity check that space is allocated, if there are elements */
             if (dset_info[i].nelmts > 0)
@@ -275,7 +276,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             /* Call storage method's I/O initialization routine */
             if (dset_info[i].layout_ops.io_init &&
                 (dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
             dset_info[i].skip_io = FALSE;
             io_op_init++;
 
@@ -292,18 +293,18 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)");
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel or selection I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "unable to adjust I/O info for parallel or selection I/O")
+                    "unable to adjust I/O info for parallel or selection I/O");
 #endif /* H5_HAVE_PARALLEL */
 
     /* Perform third phase of type info initialization */
     if (H5D__typeinfo_init_phase3(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)");
 
     H5CX_set_no_selection_io_cause(io_info.no_selection_io_cause);
 
@@ -318,7 +319,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             /* Allocate sel_pieces array */
             if (NULL ==
                 (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate array of selected pieces")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate array of selected pieces");
         }
 
         /* MDIO-specific second phase initialization */
@@ -331,7 +332,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
                 /* Make second phase IO init call */
                 if ((dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces");
 
                 /* Reset metadata tagging */
                 H5AC_tag(prev_tag, NULL);
@@ -339,7 +340,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Invoke correct "high level" I/O routine */
         if ((*io_info.md_io_ops.multi_read_md)(&io_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
     } /* end if */
     else {
         haddr_t prev_tag = HADDR_UNDEF;
@@ -348,23 +349,24 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.piece_count > 0) {
             if (NULL == (io_info.mem_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for memory space list")
+                            "memory allocation failed for memory space list");
             if (NULL == (io_info.file_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for file space list");
             if (NULL == (io_info.addrs = H5MM_malloc(io_info.piece_count * sizeof(haddr_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for piece address list")
+                            "memory allocation failed for piece address list");
             if (NULL == (io_info.element_sizes = H5MM_malloc(io_info.piece_count * sizeof(size_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for element size list")
+                            "memory allocation failed for element size list");
             if (NULL == (io_info.rbufs = H5MM_malloc(io_info.piece_count * sizeof(void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for read buffer list")
+                            "memory allocation failed for read buffer list");
             if (io_info.max_tconv_type_size > 0)
                 if (NULL ==
                     (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "unable to allocate array of selected pieces")
+                                "unable to allocate array of selected pieces");
         }
 
         /* Loop with serial & single-dset read IO path */
@@ -378,7 +380,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Invoke correct "high level" I/O routine */
             if ((*dset_info[i].io_ops.multi_read)(&io_info, &dset_info[i]) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
 
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);
@@ -391,7 +393,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             if (io_info.max_tconv_type_size > 0) {
                 /* Type conversion pathway */
                 if (H5D__scatgath_read_select(&io_info) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "type conversion selection read failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "type conversion selection read failed");
             }
             else {
                 /* Call selection I/O directly */
@@ -399,7 +401,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                 if (H5F_shared_select_read(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                            io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
                                            io_info.element_sizes, io_info.rbufs) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed");
             }
         }
 
@@ -410,7 +412,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Get the parallel I/O transfer mode */
             if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
             /* Only report the collective I/O mode if we're actually performing collective I/O */
             if (xfer_mode == H5FD_MPIO_COLLECTIVE)
@@ -506,12 +508,12 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* Init io_info */
     if (H5D__ioinfo_init(count, H5D_IO_OP_WRITE, dset_info, &io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
 
     /* Allocate store buffer if necessary */
     if (count > 1)
         if (NULL == (store = (H5D_storage_t *)H5MM_malloc(count * sizeof(H5D_storage_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer");
 
     /* iterate over all dsets and construct I/O information */
     for (i = 0; i < count; i++) {
@@ -520,9 +522,9 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* check args */
         if (NULL == dset_info[i].dset)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
         if (NULL == dset_info[i].dset->oloc.file)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
         /* set metadata tagging with dset oheader addr */
         H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
@@ -530,18 +532,18 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         /* All filters in the DCPL must have encoding enabled. */
         if (!dset_info[i].dset->shared->checked_filters) {
             if (H5Z_can_apply(dset_info[i].dset->shared->dcpl_id, dset_info[i].dset->shared->type_id) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
+                HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters");
 
             dset_info[i].dset->shared->checked_filters = TRUE;
         } /* end if */
 
         /* Check if we are allowed to write to this file */
         if (0 == (H5F_INTENT(dset_info[i].dset->oloc.file) & H5F_ACC_RDWR))
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file");
 
         /* Set up datatype info for operation */
         if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info");
 
             /* Various MPI based checks */
 #ifdef H5_HAVE_PARALLEL
@@ -551,18 +553,19 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             /* support parallel access of that yet */
             if (H5T_is_vl_storage(dset_info[i].type_info.mem_type) > 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-                            "Parallel IO does not support writing VL or region reference datatypes yet")
+                            "Parallel IO does not support writing VL or region reference datatypes yet");
         } /* end if */
         else {
             H5FD_mpio_xfer_t io_xfer_mode; /* MPI I/O transfer mode */
 
             /* Get I/O transfer mode */
             if (H5CX_get_io_xfer_mode(&io_xfer_mode) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
             /* Collective access is not permissible without a MPI based VFD */
             if (io_xfer_mode == H5FD_MPIO_COLLECTIVE)
-                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based driver only")
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                            "collective access for MPI-based driver only");
         } /* end else */
 #endif    /*H5_HAVE_PARALLEL*/
 
@@ -571,13 +574,13 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         dset_info[i].nelmts = H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space);
         if (dset_info[i].nelmts != H5S_GET_SELECT_NPOINTS(dset_info[i].file_space))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "src and dest dataspaces have different number of elements selected")
+                        "src and dest dataspaces have different number of elements selected");
 
         /* Check for a NULL buffer */
         if (NULL == dset_info[i].buf.cvp) {
             /* Check for any elements selected (which is invalid) */
             if (dset_info[i].nelmts > 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
 
             /* If the buffer is nil, and 0 element is selected, make a fake buffer.
              * This is for some MPI package like ChaMPIon on NCSA's tungsten which
@@ -588,9 +591,9 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Make sure that both selections have their extents set */
         if (!(H5S_has_extent(dset_info[i].file_space)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set");
         if (!(H5S_has_extent(dset_info[i].mem_space)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set");
 
         /* H5S_select_shape_same() has been modified to accept topologically
          * identical selections with different rank as having the same shape
@@ -616,7 +619,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                     /* Allocate buffer */
                     if (NULL == (orig_mem_space = (H5S_t **)H5MM_calloc(count * sizeof(H5S_t *))))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                                    "couldn't allocate original memory space array buffer")
+                                    "couldn't allocate original memory space array buffer");
                 }
                 else
                     /* Use local buffer */
@@ -631,7 +634,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             if (H5S_select_construct_projection(orig_mem_space[i], &dset_info[i].mem_space,
                                                 (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
                                                 dset_info[i].type_info.src_type_size, &buf_adj) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                            "unable to construct projected memory dataspace");
             assert(dset_info[i].mem_space);
 
             /* Adjust the buffer by the given amount */
@@ -643,7 +647,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Set up I/O operation */
         if (H5D__dset_ioinfo_init(dset_info[i].dset, &(dset_info[i]), &(store[i])) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation");
 
         /* Allocate dataspace and initialize it if it hasn't been. */
         should_alloc_space = dset_info[i].dset->shared->dcpl_cache.efl.nused == 0 &&
@@ -667,7 +671,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             /* Get the number of elements in file dataset's dataspace */
             if ((file_nelmts = H5S_GET_EXTENT_NPOINTS(dset_info[i].file_space)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                            "can't retrieve number of elements in file dataset")
+                            "can't retrieve number of elements in file dataset");
 
             /* Always allow fill values to be written if the dataset has a VL datatype */
             if (H5T_detect_class(dset_info[i].dset->shared->type, H5T_VLEN, FALSE))
@@ -677,14 +681,14 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Allocate storage */
             if (H5D__alloc_storage(dset_info[i].dset, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage");
         } /* end if */
 
         /* Call storage method's I/O initialization routine */
         /* Init io_info.dset_info[] and generate piece_info in skip list */
         if (dset_info[i].layout_ops.io_init &&
             (*dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
         dset_info[i].skip_io = FALSE;
         io_op_init++;
 
@@ -696,18 +700,18 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)");
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel or selection I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "unable to adjust I/O info for parallel or selection I/O")
+                    "unable to adjust I/O info for parallel or selection I/O");
 #endif /* H5_HAVE_PARALLEL */
 
     /* Perform third phase of type info initialization */
     if (H5D__typeinfo_init_phase3(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)");
 
     H5CX_set_no_selection_io_cause(io_info.no_selection_io_cause);
 
@@ -722,7 +726,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             /* Allocate sel_pieces array */
             if (NULL ==
                 (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate array of selected pieces")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate array of selected pieces");
         }
 
         /* MDIO-specific second phase initialization */
@@ -735,7 +739,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
                 /* Make second phase IO init call */
                 if ((dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces");
 
                 /* Reset metadata tagging */
                 H5AC_tag(prev_tag, NULL);
@@ -743,7 +747,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Invoke correct "high level" I/O routine */
         if ((*io_info.md_io_ops.multi_write_md)(&io_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
     } /* end if */
     else {
         haddr_t prev_tag = HADDR_UNDEF;
@@ -752,23 +756,24 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.piece_count > 0) {
             if (NULL == (io_info.mem_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for memory space list")
+                            "memory allocation failed for memory space list");
             if (NULL == (io_info.file_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for file space list");
             if (NULL == (io_info.addrs = H5MM_malloc(io_info.piece_count * sizeof(haddr_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for piece address list")
+                            "memory allocation failed for piece address list");
             if (NULL == (io_info.element_sizes = H5MM_malloc(io_info.piece_count * sizeof(size_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for element size list")
+                            "memory allocation failed for element size list");
             if (NULL == (io_info.wbufs = H5MM_malloc(io_info.piece_count * sizeof(const void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for write buffer list")
+                            "memory allocation failed for write buffer list");
             if (io_info.max_tconv_type_size > 0)
                 if (NULL ==
                     (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "unable to allocate array of selected pieces")
+                                "unable to allocate array of selected pieces");
         }
 
         /* loop with serial & single-dset write IO path */
@@ -780,7 +785,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Invoke correct "high level" I/O routine */
             if ((*dset_info[i].io_ops.multi_write)(&io_info, &dset_info[i]) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
 
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);
@@ -793,7 +798,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             if (io_info.max_tconv_type_size > 0) {
                 /* Type conversion pathway */
                 if (H5D__scatgath_write_select(&io_info) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "type conversion selection write failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "type conversion selection write failed");
             }
             else {
                 /* Call selection I/O directly */
@@ -801,7 +806,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                 if (H5F_shared_select_write(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                             io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
                                             io_info.element_sizes, io_info.wbufs) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "selection write failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "selection write failed");
             }
         }
 
@@ -812,7 +817,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Get the parallel I/O transfer mode */
             if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
             /* Only report the collective I/O mode if we're actually performing collective I/O */
             if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
@@ -1021,14 +1026,14 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
 
     /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
     if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer");
 
     /* Initialize type info safely */
     memset(type_info, 0, sizeof(*type_info));
 
     /* Get the memory & dataset datatypes */
     if (NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     type_info->dset_type = dset->shared->type;
 
     if (io_info->op_type == H5D_IO_OP_WRITE) {
@@ -1052,11 +1057,11 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
      * turns off background preservation.
      */
     if (NULL == (type_info->tpath = H5T_path_find(src_type, dst_type)))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype");
 
     /* Retrieve info from API context */
     if (H5CX_get_data_transform(&data_transform) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info");
 
     /* Precompute some useful information */
     type_info->src_type_size = H5T_get_size(src_type);
@@ -1072,7 +1077,7 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
 
         /* Get info from API context */
         if (H5CX_get_bkgr_buf_type(&bkgr_buf_type) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background buffer type")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background buffer type");
 
         /* Check if the datatypes are compound subsets of one another */
         type_info->cmpd_subset = H5T_path_compound_subset(type_info->tpath);
@@ -1168,7 +1173,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
 
         /* Get max temp buffer size from API context */
         if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size");
 
         /* Check if the needed type conversion or background buffer size is too big */
         if (io_info->tconv_buf_size > max_temp_buf) {
@@ -1234,15 +1239,15 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
 
         /* Get the original state of parallel I/O transfer mode */
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
         /* Get MPI communicator */
         if (MPI_COMM_NULL == (io_info->comm = H5F_mpi_get_comm(dset0->oloc.file)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator");
 
         /* Check if we can set direct MPI-IO read/write functions */
         if ((opt = H5D__mpio_opt_possible(io_info)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ");
 
         /* Check if we can use the optimized parallel I/O routines */
         if (opt == TRUE) {
@@ -1262,12 +1267,12 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
             if (io_info->op_type == H5D_IO_OP_WRITE) {
                 hbool_t mpi_file_sync_required = FALSE;
                 if (H5F_shared_get_mpi_file_sync_required(io_info->f_sh, &mpi_file_sync_required) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI file_sync_required flag")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI file_sync_required flag");
 
                 if (mpi_file_sync_required)
                     HGOTO_ERROR(
                         H5E_DATASET, H5E_NO_INDEPENDENT, FAIL,
-                        "Can't perform independent write when MPI_File_sync is required by ROMIO driver.")
+                        "Can't perform independent write when MPI_File_sync is required by ROMIO driver.");
             }
 
             /* Check if there are any filters in the pipeline. If there are,
@@ -1289,7 +1294,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
 
                     /* Retrieve size of MPI communicator used for file */
                     if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size");
 
                     if (comm_size > 1) {
                         char local_no_coll_cause_string[512];
@@ -1298,7 +1303,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
                         if (H5D__mpio_get_no_coll_cause_strings(local_no_coll_cause_string, 512,
                                                                 global_no_coll_cause_string, 512) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                        "can't get reasons for breaking collective I/O")
+                                        "can't get reasons for breaking collective I/O");
 
                         HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
                                     "Can't perform independent write with filters in pipeline.\n"
@@ -1316,7 +1321,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
             if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
                 /* Change the xfer_mode to independent for handling the I/O */
                 if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
             } /* end if */
         }     /* end else */
     }         /* end if */
@@ -1355,9 +1360,10 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
 
         /* Get provided buffers from API context */
         if (H5CX_get_tconv_buf(&tconv_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer");
         if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background conversion buffer pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                        "can't retrieve background conversion buffer pointer");
 
         /* Check if we're doing selection I/O */
         if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
@@ -1371,7 +1377,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
             if (io_info->tconv_buf_size > 0) {
                 if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, io_info->tconv_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for type conversion")
+                                "memory allocation failed for type conversion");
                 io_info->tconv_buf_allocated = TRUE;
             }
 
@@ -1379,7 +1385,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
             if (io_info->bkg_buf_size > 0) {
                 if (NULL == (io_info->bkg_buf = H5FL_BLK_MALLOC(type_conv, io_info->bkg_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for type conversion")
+                                "memory allocation failed for type conversion");
                 io_info->bkg_buf_allocated = TRUE;
             }
         }
@@ -1394,7 +1400,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
 
             /* Get max buffer size from API context */
             if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size");
 
             /* Set up datatype conversion/background buffers */
             target_size = max_temp_buf;
@@ -1414,7 +1420,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
                     target_size = io_info->max_tconv_type_size;
                 else
                     /* Don't get bigger than the application has requested */
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small");
             } /* end if */
 
             /* Get a temporary buffer for type conversion unless the app has already
@@ -1425,7 +1431,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
                 /* Allocate temporary buffer */
                 if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                "memory allocation failed for type conversion")
+                                "memory allocation failed for type conversion");
                 io_info->tconv_buf_allocated = TRUE;
             } /* end if */
 
@@ -1446,7 +1452,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
                      * tconv element size is max(src, dst) and the bkg element size is dst */
                     if (NULL == (io_info->bkg_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                    "memory allocation failed for background conversion")
+                                    "memory allocation failed for background conversion");
                     io_info->bkg_buf_allocated = TRUE;
                 }
             }

@@ -81,7 +81,7 @@ H5PLset_loading_state(unsigned int plugin_control_mask)
 
     /* Set the plugin control mask */
     if (H5PL__set_plugin_control_mask(plugin_control_mask) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "error setting plugin control mask")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "error setting plugin control mask");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -112,11 +112,11 @@ H5PLget_loading_state(unsigned *plugin_control_mask /*out*/)
     H5TRACE1("e", "x", plugin_control_mask);
 
     if (NULL == plugin_control_mask)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_control_mask parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_control_mask parameter cannot be NULL");
 
     /* Set the plugin control mask */
     if (H5PL__get_plugin_control_mask(plugin_control_mask) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "error getting plugin control mask")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "error getting plugin control mask");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -142,13 +142,13 @@ H5PLappend(const char *search_path)
 
     /* Check args */
     if (NULL == search_path)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL");
     if (0 == HDstrlen(search_path))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero");
 
     /* Append the search path to the path table */
     if (H5PL__append_path(search_path) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTAPPEND, FAIL, "unable to append search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTAPPEND, FAIL, "unable to append search path");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -174,13 +174,13 @@ H5PLprepend(const char *search_path)
 
     /* Check args */
     if (NULL == search_path)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL");
     if (0 == HDstrlen(search_path))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero");
 
     /* Prepend the search path to the path table */
     if (H5PL__prepend_path(search_path) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to prepend search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to prepend search path");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -207,21 +207,21 @@ H5PLreplace(const char *search_path, unsigned int idx)
 
     /* Check args */
     if (NULL == search_path)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL");
     if (0 == HDstrlen(search_path))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero");
 
     /* Check index */
     num_paths = H5PL__get_num_paths();
     if (0 == num_paths)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty");
     else if (idx >= num_paths)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index path out of bounds for table - can't be more than %u", (num_paths - 1))
+                    "index path out of bounds for table - can't be more than %u", (num_paths - 1));
 
     /* Insert the search path into the path table */
     if (H5PL__replace_path(search_path, idx) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to replace search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to replace search path");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -249,19 +249,19 @@ H5PLinsert(const char *search_path, unsigned int idx)
 
     /* Check args */
     if (NULL == search_path)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL");
     if (0 == HDstrlen(search_path))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero");
 
     /* Check index */
     num_paths = H5PL__get_num_paths();
     if ((0 != num_paths) && (idx >= num_paths))
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index path out of bounds for table - can't be more than %u", (num_paths - 1))
+                    "index path out of bounds for table - can't be more than %u", (num_paths - 1));
 
     /* Insert the search path into the path table */
     if (H5PL__insert_path(search_path, idx) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to insert search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to insert search path");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -292,14 +292,14 @@ H5PLremove(unsigned int idx)
     /* Check index */
     num_paths = H5PL__get_num_paths();
     if (0 == num_paths)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty");
     else if (idx >= num_paths)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index path out of bounds for table - can't be more than %u", (num_paths - 1))
+                    "index path out of bounds for table - can't be more than %u", (num_paths - 1));
 
     /* Delete the search path from the path table */
     if (H5PL__remove_path(idx) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTDELETE, FAIL, "unable to remove search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTDELETE, FAIL, "unable to remove search path");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -343,18 +343,18 @@ H5PLget(unsigned int idx, char *path_buf, size_t buf_size)
     /* Check index */
     num_paths = H5PL__get_num_paths();
     if (0 == num_paths)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "path table is empty");
     else if (idx >= num_paths)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                    "index path out of bounds for table - can't be more than %u", (num_paths - 1))
+                    "index path out of bounds for table - can't be more than %u", (num_paths - 1));
 
     /* Check if the search table is empty */
     if (H5PL__get_num_paths() == 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, (-1), "plugin search path table is empty")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, (-1), "plugin search path table is empty");
 
     /* Get the path at the specified index and its length */
     if (NULL == (path = H5PL__get_path(idx)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, (-1), "no path stored at that index")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, (-1), "no path stored at that index");
     path_len = HDstrlen(path);
 
     /* If the path buffer is not NULL, copy the path to the buffer */
@@ -391,7 +391,7 @@ H5PLsize(unsigned int *num_paths)
 
     /* Check arguments */
     if (!num_paths)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "num_paths parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "num_paths parameter cannot be NULL");
 
     /* Get the number of stored plugin paths */
     *num_paths = H5PL__get_num_paths();

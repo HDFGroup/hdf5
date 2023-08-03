@@ -224,7 +224,7 @@ H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
         if (dset->shared->dcpl_cache.fill.alloc_time != H5D_ALLOC_TIME_EARLY || idx_info->pline->nused > 0)
             /* Mark the layout dirty so that the address of the single chunk will be flushed later */
             if (H5D__mark(dset, H5D_MARK_LAYOUT) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark layout as dirty")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark layout as dirty");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -348,7 +348,7 @@ H5D__single_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
         nbytes = idx_info->layout->size;
 
     if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->storage->idx_addr, nbytes) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free dataset chunks")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free dataset chunks");
 
     idx_info->storage->idx_addr = HADDR_UNDEF;
 
@@ -424,7 +424,7 @@ H5D__single_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_i
 
     /* Set up information at the destination file */
     if (H5D__single_idx_create(idx_info_dst) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
 
     /* Reset metadata tag */
     H5_END_TAG

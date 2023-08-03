@@ -84,11 +84,11 @@ H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_DRVINFO_VERSION)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message");
 
     /* Allocate space for message */
     if (NULL == (mesg = (H5O_drvinfo_t *)H5MM_calloc(sizeof(H5O_drvinfo_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info message")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info message");
 
     /* Retrieve driver name */
     if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
@@ -106,7 +106,7 @@ H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     /* Allocate space for buffer */
     if (NULL == (mesg->buf = (uint8_t *)H5MM_malloc(mesg->len)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info buffer")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info buffer");
 
     /* Copy encoded driver info into buffer */
     if (H5_IS_BUFFER_OVERFLOW(p, mesg->len, p_end))
@@ -183,7 +183,7 @@ H5O__drvinfo_copy(const void *_mesg, void *_dest)
 
     if (!dest && NULL == (dest = (H5O_drvinfo_t *)H5MM_malloc(sizeof(H5O_drvinfo_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for shared message table message")
+                    "memory allocation failed for shared message table message");
 
     /* Shallow copy the fields */
     *dest = *mesg;
@@ -192,7 +192,7 @@ H5O__drvinfo_copy(const void *_mesg, void *_dest)
     if (NULL == (dest->buf = (uint8_t *)H5MM_malloc(mesg->len))) {
         if (dest != _dest)
             dest = (H5O_drvinfo_t *)H5MM_xfree(dest);
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     } /* end if */
     H5MM_memcpy(dest->buf, mesg->buf, mesg->len);
 
