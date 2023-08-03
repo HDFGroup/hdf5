@@ -246,7 +246,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -355,7 +355,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (objname)
         free(objname);
@@ -539,7 +539,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -670,7 +670,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -734,7 +734,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(H5I_INVALID_HID, "/", group_id,
                                          HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -755,7 +755,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(file_id, NULL, group_id, HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                          H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -768,7 +768,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(file_id, "", group_id, HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                          H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -789,7 +789,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(file_id, "/", H5I_INVALID_HID,
                                          HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -809,7 +809,7 @@ test_create_hard_link_invalid_params(void)
             {
                 err_ret = H5Lcreate_hard(file_id, "/", group_id, NULL, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -821,7 +821,7 @@ test_create_hard_link_invalid_params(void)
             {
                 err_ret = H5Lcreate_hard(file_id, "/", group_id, "", H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -842,7 +842,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(file_id, "/", group_id, HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                          H5I_INVALID_HID, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -863,7 +863,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(file_id, "/", group_id, HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                          H5P_DEFAULT, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -884,7 +884,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(H5L_SAME_LOC, "/", H5L_SAME_LOC,
                                          HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -914,7 +914,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(file_id, "/", ext_file_id, HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                          H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -927,7 +927,7 @@ test_create_hard_link_invalid_params(void)
                 err_ret = H5Lcreate_hard(ext_file_id, "/", group_id, HARD_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                          H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -987,7 +987,7 @@ error:
         H5Fclose(ext_file_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_create_hard_link_invalid_params */
@@ -1094,7 +1094,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1189,7 +1189,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1262,7 +1262,7 @@ test_create_soft_link_dangling_relative(void)
     {
         object_id = H5Gopen2(group_id, SOFT_LINK_DANGLING_RELATIVE_TEST_LINK_NAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (object_id >= 0) {
         H5_FAILED();
@@ -1310,7 +1310,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1384,7 +1384,7 @@ test_create_soft_link_dangling_absolute(void)
     {
         object_id = H5Gopen2(group_id, SOFT_LINK_DANGLING_ABSOLUTE_TEST_LINK_NAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (object_id >= 0) {
         H5_FAILED();
@@ -1432,7 +1432,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1541,7 +1541,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (objname)
         free(objname);
@@ -1675,7 +1675,7 @@ test_create_soft_link_many(void)
     {
         object_id = H5Gopen2(group_id, "soft16", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (object_id >= 0) {
         H5_FAILED();
@@ -1737,7 +1737,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1799,7 +1799,7 @@ test_create_soft_link_invalid_params(void)
                 err_ret = H5Lcreate_soft(NULL, group_id, SOFT_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT,
                                          H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1813,7 +1813,7 @@ test_create_soft_link_invalid_params(void)
                 err_ret = H5Lcreate_soft("", group_id, SOFT_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT,
                                          H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1835,7 +1835,7 @@ test_create_soft_link_invalid_params(void)
                 err_ret = H5Lcreate_soft("/", H5I_INVALID_HID, SOFT_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                          H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1856,7 +1856,7 @@ test_create_soft_link_invalid_params(void)
             {
                 err_ret = H5Lcreate_soft("/", group_id, NULL, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1869,7 +1869,7 @@ test_create_soft_link_invalid_params(void)
             {
                 err_ret = H5Lcreate_soft("/", group_id, "", H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1891,7 +1891,7 @@ test_create_soft_link_invalid_params(void)
                 err_ret = H5Lcreate_soft("/", group_id, SOFT_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                          H5I_INVALID_HID, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1913,7 +1913,7 @@ test_create_soft_link_invalid_params(void)
                 err_ret = H5Lcreate_soft("/", group_id, SOFT_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT,
                                          H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1971,7 +1971,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2078,7 +2078,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2159,7 +2159,7 @@ test_create_external_link_dangling(void)
     {
         object_id = H5Gopen2(group_id, EXTERNAL_LINK_TEST_DANGLING_LINK_NAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (object_id >= 0) {
         H5_FAILED();
@@ -2211,7 +2211,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(ext_file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2570,7 +2570,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2831,7 +2831,7 @@ error:
         H5Gclose(group_id2);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2906,7 +2906,7 @@ test_create_external_link_invalid_params(void)
                 err_ret = H5Lcreate_external(NULL, "/", group_id, EXTERNAL_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                              H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2920,7 +2920,7 @@ test_create_external_link_invalid_params(void)
                 err_ret = H5Lcreate_external("", "/", group_id, EXTERNAL_LINK_INVALID_PARAMS_TEST_LINK_NAME,
                                              H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2943,7 +2943,7 @@ test_create_external_link_invalid_params(void)
                     H5Lcreate_external(ext_link_filename, NULL, group_id,
                                        EXTERNAL_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2958,7 +2958,7 @@ test_create_external_link_invalid_params(void)
                     H5Lcreate_external(ext_link_filename, "", group_id,
                                        EXTERNAL_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2981,7 +2981,7 @@ test_create_external_link_invalid_params(void)
                     H5Lcreate_external(ext_link_filename, "/", H5I_INVALID_HID,
                                        EXTERNAL_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3003,7 +3003,7 @@ test_create_external_link_invalid_params(void)
                 err_ret =
                     H5Lcreate_external(ext_link_filename, "/", group_id, NULL, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3016,7 +3016,7 @@ test_create_external_link_invalid_params(void)
             {
                 err_ret = H5Lcreate_external(ext_link_filename, "/", group_id, "", H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3039,7 +3039,7 @@ test_create_external_link_invalid_params(void)
                                              EXTERNAL_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5I_INVALID_HID,
                                              H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3062,7 +3062,7 @@ test_create_external_link_invalid_params(void)
                                              EXTERNAL_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT,
                                              H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3120,7 +3120,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3209,7 +3209,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3277,7 +3277,7 @@ test_create_user_defined_link_invalid_params(void)
                     H5Lcreate_ud(H5I_INVALID_HID, UD_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5L_TYPE_EXTERNAL,
                                  udata, (size_t)udata_size, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3299,7 +3299,7 @@ test_create_user_defined_link_invalid_params(void)
                 err_ret = H5Lcreate_ud(group_id, NULL, H5L_TYPE_EXTERNAL, udata, (size_t)udata_size,
                                        H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3313,7 +3313,7 @@ test_create_user_defined_link_invalid_params(void)
                 err_ret = H5Lcreate_ud(group_id, "", H5L_TYPE_EXTERNAL, udata, (size_t)udata_size,
                                        H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3335,7 +3335,7 @@ test_create_user_defined_link_invalid_params(void)
                 err_ret = H5Lcreate_ud(group_id, UD_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5L_TYPE_HARD, udata,
                                        (size_t)udata_size, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3357,7 +3357,7 @@ test_create_user_defined_link_invalid_params(void)
                 err_ret = H5Lcreate_ud(group_id, UD_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5L_TYPE_EXTERNAL,
                                        NULL, (size_t)udata_size, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3379,7 +3379,7 @@ test_create_user_defined_link_invalid_params(void)
                 err_ret = H5Lcreate_ud(group_id, UD_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5L_TYPE_EXTERNAL,
                                        udata, (size_t)udata_size, H5I_INVALID_HID, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3401,7 +3401,7 @@ test_create_user_defined_link_invalid_params(void)
                 err_ret = H5Lcreate_ud(group_id, UD_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5L_TYPE_EXTERNAL,
                                        udata, (size_t)udata_size, H5P_DEFAULT, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -3457,7 +3457,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3595,7 +3595,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_hard_indirect)
         {
@@ -3678,7 +3678,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_soft)
         {
@@ -3747,7 +3747,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_external)
         {
@@ -3834,7 +3834,7 @@ test_delete_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_ud)
         {
@@ -3852,7 +3852,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_hard_crt_order_increasing)
         {
@@ -4085,7 +4085,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_hard_crt_order_decreasing)
         {
@@ -4318,7 +4318,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_hard_name_order_increasing)
         {
@@ -4545,7 +4545,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_hard_name_order_decreasing)
         {
@@ -4772,7 +4772,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_soft_crt_order_increasing)
         {
@@ -5008,7 +5008,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_soft_crt_order_decreasing)
         {
@@ -5244,7 +5244,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_soft_name_order_increasing)
         {
@@ -5474,7 +5474,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_soft_name_order_decreasing)
         {
@@ -5704,7 +5704,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_external_crt_order_increasing)
         {
@@ -5986,7 +5986,7 @@ test_delete_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_external_crt_order_decreasing)
         {
@@ -6268,7 +6268,7 @@ test_delete_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_external_name_order_increasing)
         {
@@ -6544,7 +6544,7 @@ test_delete_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_external_name_order_decreasing)
         {
@@ -6820,7 +6820,7 @@ test_delete_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_ud_crt_order_increasing)
         {
@@ -6838,7 +6838,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_ud_crt_order_decreasing)
         {
@@ -6856,7 +6856,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_ud_name_order_increasing)
         {
@@ -6874,7 +6874,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_by_idx_ud_name_order_decreasing)
         {
@@ -6892,7 +6892,7 @@ test_delete_link(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     END_MULTIPART;
 
@@ -6921,7 +6921,7 @@ error:
         H5Fclose(ext_file_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -7069,7 +7069,7 @@ test_delete_link_reset_grp_max_crt_order(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Ldelete_links_top_down)
         {
@@ -7149,7 +7149,7 @@ test_delete_link_reset_grp_max_crt_order(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     END_MULTIPART;
 
@@ -7177,7 +7177,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -7258,7 +7258,7 @@ test_delete_link_invalid_params(void)
                 err_ret =
                     H5Ldelete(H5I_INVALID_HID, LINK_DELETE_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7278,7 +7278,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete(group_id, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7290,7 +7290,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete(group_id, "", H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7311,7 +7311,7 @@ test_delete_link_invalid_params(void)
                 err_ret =
                     H5Ldelete(group_id, LINK_DELETE_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7331,7 +7331,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete_by_idx(H5I_INVALID_HID, ".", H5_INDEX_NAME, H5_ITER_INC, 0, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7351,7 +7351,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete_by_idx(group_id, NULL, H5_INDEX_NAME, H5_ITER_INC, 0, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7363,7 +7363,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete_by_idx(group_id, "", H5_INDEX_NAME, H5_ITER_INC, 0, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7383,7 +7383,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_UNKNOWN, H5_ITER_INC, 0, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7395,7 +7395,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_N, H5_ITER_INC, 0, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7415,7 +7415,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_UNKNOWN, 0, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7427,7 +7427,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_N, 0, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7447,7 +7447,7 @@ test_delete_link_invalid_params(void)
             {
                 err_ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -7504,7 +7504,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -8356,7 +8356,7 @@ test_copy_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lcopy_external_check)
         {
@@ -8567,7 +8567,7 @@ test_copy_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lcopy_external_same_loc)
         {
@@ -8710,7 +8710,7 @@ test_copy_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lcopy_ud_no_check)
         {
@@ -8774,7 +8774,7 @@ error:
         H5Fclose(ext_file_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -8917,7 +8917,7 @@ test_copy_link_invalid_params(void)
                     H5Lcopy(H5I_INVALID_HID, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id,
                             COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_COPY_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -8939,7 +8939,7 @@ test_copy_link_invalid_params(void)
                     H5Lcopy(src_grp_id, NULL, dst_grp_id, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_COPY_NAME,
                             H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -8953,7 +8953,7 @@ test_copy_link_invalid_params(void)
                     H5Lcopy(src_grp_id, "", dst_grp_id, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_COPY_NAME,
                             H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -8975,7 +8975,7 @@ test_copy_link_invalid_params(void)
                     H5Lcopy(src_grp_id, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5I_INVALID_HID,
                             COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_COPY_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -8996,7 +8996,7 @@ test_copy_link_invalid_params(void)
                 err_ret = H5Lcopy(src_grp_id, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id, NULL,
                                   H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -9009,7 +9009,7 @@ test_copy_link_invalid_params(void)
                 err_ret = H5Lcopy(src_grp_id, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id, "",
                                   H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -9031,7 +9031,7 @@ test_copy_link_invalid_params(void)
                     H5Lcopy(src_grp_id, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id,
                             COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_COPY_NAME, H5I_INVALID_HID, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -9053,7 +9053,7 @@ test_copy_link_invalid_params(void)
                     H5Lcopy(src_grp_id, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id,
                             COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_COPY_NAME, H5P_DEFAULT, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -9075,7 +9075,7 @@ test_copy_link_invalid_params(void)
                     H5Lcopy(H5L_SAME_LOC, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5L_SAME_LOC,
                             COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_COPY_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -9106,7 +9106,7 @@ test_copy_link_invalid_params(void)
                     H5Lcopy(src_grp_id, COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, ext_file_id,
                             COPY_LINK_INVALID_PARAMS_TEST_HARD_LINK_COPY_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -9153,7 +9153,7 @@ error:
         H5Fclose(ext_file_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -10163,7 +10163,7 @@ test_move_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lmove_external_check)
         {
@@ -10374,7 +10374,7 @@ test_move_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lmove_external_same_loc)
         {
@@ -10513,7 +10513,7 @@ test_move_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lmove_external_rename)
         {
@@ -10615,7 +10615,7 @@ test_move_link(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lmove_ud_no_check)
         {
@@ -10690,7 +10690,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(ext_file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -10877,7 +10877,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -11081,7 +11081,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -11197,7 +11197,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(H5I_INVALID_HID, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id,
                                   MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11218,7 +11218,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(src_grp_id, NULL, dst_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME,
                                   H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11231,7 +11231,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(src_grp_id, "", dst_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME,
                                   H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11252,7 +11252,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(src_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5I_INVALID_HID,
                                   MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11273,7 +11273,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(src_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id, NULL,
                                   H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11286,7 +11286,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(src_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id, "",
                                   H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11307,7 +11307,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(src_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id,
                                   MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5I_INVALID_HID, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11328,7 +11328,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(src_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id,
                                   MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5P_DEFAULT, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11388,7 +11388,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(H5L_SAME_LOC, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5L_SAME_LOC,
                                   MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11419,7 +11419,7 @@ test_move_link_invalid_params(void)
                 err_ret = H5Lmove(src_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, ext_file_id,
                                   MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -11482,7 +11482,7 @@ error:
         H5Fclose(ext_file_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -11634,7 +11634,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_external)
         {
@@ -11745,7 +11745,7 @@ test_get_link_val(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_ud)
         {
@@ -11763,7 +11763,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_soft_crt_order_increasing)
         {
@@ -11957,7 +11957,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_soft_crt_order_decreasing)
         {
@@ -12151,7 +12151,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_soft_name_order_increasing)
         {
@@ -12339,7 +12339,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_soft_name_order_decreasing)
         {
@@ -12527,7 +12527,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_external_crt_order_increasing)
         {
@@ -12777,7 +12777,7 @@ test_get_link_val(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_external_crt_order_decreasing)
         {
@@ -13027,7 +13027,7 @@ test_get_link_val(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_external_name_order_increasing)
         {
@@ -13271,7 +13271,7 @@ test_get_link_val(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_external_name_order_decreasing)
         {
@@ -13515,7 +13515,7 @@ test_get_link_val(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_ud_crt_order_increasing)
         {
@@ -13531,7 +13531,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_ud_crt_order_decreasing)
         {
@@ -13547,7 +13547,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_ud_name_order_increasing)
         {
@@ -13563,7 +13563,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_val_by_idx_ud_name_order_decreasing)
         {
@@ -13579,7 +13579,7 @@ test_get_link_val(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     END_MULTIPART;
 
@@ -13608,7 +13608,7 @@ error:
         H5Fclose(ext_file_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -13712,7 +13712,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val(H5I_INVALID_HID, GET_LINK_VAL_INVALID_PARAMS_TEST_SOFT_LINK_NAME,
                                      link_val_buf, link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13732,7 +13732,7 @@ test_get_link_val_invalid_params(void)
             {
                 err_ret = H5Lget_val(group_id, NULL, link_val_buf, link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13744,7 +13744,7 @@ test_get_link_val_invalid_params(void)
             {
                 err_ret = H5Lget_val(group_id, "", link_val_buf, link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13765,7 +13765,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val(group_id, GET_LINK_VAL_INVALID_PARAMS_TEST_SOFT_LINK_NAME, link_val_buf,
                                      link_val_buf_size, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13788,7 +13788,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val_by_idx(H5I_INVALID_HID, ".", H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13809,7 +13809,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val_by_idx(group_id, NULL, H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13822,7 +13822,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val_by_idx(group_id, "", H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13843,7 +13843,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_UNKNOWN, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13856,7 +13856,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_N, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13877,7 +13877,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_UNKNOWN, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13890,7 +13890,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_N, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13911,7 +13911,7 @@ test_get_link_val_invalid_params(void)
                 err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -13955,7 +13955,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -14098,7 +14098,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_soft)
         {
@@ -14181,7 +14181,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_external)
         {
@@ -14277,7 +14277,7 @@ test_get_link_info(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_ud)
         {
@@ -14295,7 +14295,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_hard_crt_order_increasing)
         {
@@ -14458,7 +14458,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_hard_crt_order_decreasing)
         {
@@ -14621,7 +14621,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_hard_name_order_increasing)
         {
@@ -14784,7 +14784,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_hard_name_order_decreasing)
         {
@@ -14947,7 +14947,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_soft_crt_order_increasing)
         {
@@ -15146,7 +15146,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_soft_crt_order_decreasing)
         {
@@ -15345,7 +15345,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_soft_name_order_increasing)
         {
@@ -15544,7 +15544,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_soft_name_order_decreasing)
         {
@@ -15743,7 +15743,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_external_crt_order_increasing)
         {
@@ -15947,7 +15947,7 @@ test_get_link_info(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_external_crt_order_decreasing)
         {
@@ -16151,7 +16151,7 @@ test_get_link_info(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_external_name_order_increasing)
         {
@@ -16355,7 +16355,7 @@ test_get_link_info(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_external_name_order_decreasing)
         {
@@ -16559,7 +16559,7 @@ test_get_link_info(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_ud_crt_order_increasing)
         {
@@ -16575,7 +16575,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_ud_crt_order_decreasing)
         {
@@ -16591,7 +16591,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_ud_name_order_increasing)
         {
@@ -16607,7 +16607,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_info_by_idx_ud_name_order_decreasing)
         {
@@ -16623,7 +16623,7 @@ test_get_link_info(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     END_MULTIPART;
 
@@ -16652,7 +16652,7 @@ error:
         H5Fclose(ext_file_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -16747,7 +16747,7 @@ test_get_link_info_invalid_params(void)
                 err_ret = H5Lget_info2(H5I_INVALID_HID, GET_LINK_INFO_INVALID_PARAMS_TEST_HARD_LINK_NAME,
                                        &link_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16767,7 +16767,7 @@ test_get_link_info_invalid_params(void)
             {
                 err_ret = H5Lget_info2(group_id, NULL, &link_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16779,7 +16779,7 @@ test_get_link_info_invalid_params(void)
             {
                 err_ret = H5Lget_info2(group_id, "", &link_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16800,7 +16800,7 @@ test_get_link_info_invalid_params(void)
                 err_ret = H5Lget_info2(group_id, GET_LINK_INFO_INVALID_PARAMS_TEST_HARD_LINK_NAME, &link_info,
                                        H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16823,7 +16823,7 @@ test_get_link_info_invalid_params(void)
                 err_ret = H5Lget_info_by_idx2(H5I_INVALID_HID, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                               H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16844,7 +16844,7 @@ test_get_link_info_invalid_params(void)
                 err_ret = H5Lget_info_by_idx2(group_id, NULL, H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                               H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16857,7 +16857,7 @@ test_get_link_info_invalid_params(void)
                 err_ret =
                     H5Lget_info_by_idx2(group_id, "", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16878,7 +16878,7 @@ test_get_link_info_invalid_params(void)
                 err_ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_UNKNOWN, H5_ITER_INC, 0, &link_info,
                                               H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16891,7 +16891,7 @@ test_get_link_info_invalid_params(void)
                 err_ret =
                     H5Lget_info_by_idx2(group_id, ".", H5_INDEX_N, H5_ITER_INC, 0, &link_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16912,7 +16912,7 @@ test_get_link_info_invalid_params(void)
                 err_ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_UNKNOWN, 0, &link_info,
                                               H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16926,7 +16926,7 @@ test_get_link_info_invalid_params(void)
                 err_ret =
                     H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_N, 0, &link_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16947,7 +16947,7 @@ test_get_link_info_invalid_params(void)
                 err_ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                               H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -16984,7 +16984,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -17223,7 +17223,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_hard_crt_order_decreasing)
         {
@@ -17391,7 +17391,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_hard_name_order_increasing)
         {
@@ -17553,7 +17553,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_hard_name_order_decreasing)
         {
@@ -17715,7 +17715,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_soft_crt_order_increasing)
         {
@@ -17883,7 +17883,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_soft_crt_order_decreasing)
         {
@@ -18051,7 +18051,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_soft_name_order_increasing)
         {
@@ -18213,7 +18213,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_soft_name_order_decreasing)
         {
@@ -18375,7 +18375,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_external_crt_order_increasing)
         {
@@ -18564,7 +18564,7 @@ test_get_link_name(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_external_crt_order_decreasing)
         {
@@ -18753,7 +18753,7 @@ test_get_link_name(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_external_name_order_increasing)
         {
@@ -18936,7 +18936,7 @@ test_get_link_name(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_external_name_order_decreasing)
         {
@@ -19119,7 +19119,7 @@ test_get_link_name(void)
             H5Fclose(ext_file_id);
             ext_file_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_ud_crt_order_increasing)
         {
@@ -19137,7 +19137,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_ud_crt_order_decreasing)
         {
@@ -19155,7 +19155,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_ud_name_order_increasing)
         {
@@ -19173,7 +19173,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         PART_BEGIN(H5Lget_name_by_idx_ud_name_order_decreasing)
         {
@@ -19191,7 +19191,7 @@ test_get_link_name(void)
             H5Gclose(subgroup_id);
             subgroup_id = H5I_INVALID_HID;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     END_MULTIPART;
 
@@ -19220,7 +19220,7 @@ error:
         H5Fclose(ext_file_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -19319,7 +19319,7 @@ test_get_link_name_invalid_params(void)
                 ret = H5Lget_name_by_idx(H5I_INVALID_HID, ".", H5_INDEX_NAME, H5_ITER_INC, 0, link_name_buf,
                                          link_name_buf_size + 1, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -19340,7 +19340,7 @@ test_get_link_name_invalid_params(void)
                 ret = H5Lget_name_by_idx(group_id, NULL, H5_INDEX_NAME, H5_ITER_INC, 0, link_name_buf,
                                          link_name_buf_size + 1, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -19353,7 +19353,7 @@ test_get_link_name_invalid_params(void)
                 ret = H5Lget_name_by_idx(group_id, "", H5_INDEX_NAME, H5_ITER_INC, 0, link_name_buf,
                                          link_name_buf_size + 1, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -19374,7 +19374,7 @@ test_get_link_name_invalid_params(void)
                 ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_UNKNOWN, H5_ITER_INC, 0, link_name_buf,
                                          link_name_buf_size + 1, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -19387,7 +19387,7 @@ test_get_link_name_invalid_params(void)
                 ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_N, H5_ITER_INC, 0, link_name_buf,
                                          link_name_buf_size + 1, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -19408,7 +19408,7 @@ test_get_link_name_invalid_params(void)
                 ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_UNKNOWN, 0, link_name_buf,
                                          link_name_buf_size + 1, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -19421,7 +19421,7 @@ test_get_link_name_invalid_params(void)
                 ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_N, 0, link_name_buf,
                                          link_name_buf_size + 1, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -19442,7 +19442,7 @@ test_get_link_name_invalid_params(void)
                 ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, link_name_buf,
                                          link_name_buf_size + 1, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -19483,7 +19483,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -19856,7 +19856,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -20209,7 +20209,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -20574,7 +20574,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -21090,7 +21090,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -21237,7 +21237,7 @@ test_link_iterate_invalid_params(void)
                 err_ret = H5Literate2(H5I_INVALID_HID, H5_INDEX_NAME, H5_ITER_INC, NULL,
                                       link_iter_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21258,7 +21258,7 @@ test_link_iterate_invalid_params(void)
                 err_ret = H5Literate2(group_id, H5_INDEX_UNKNOWN, H5_ITER_INC, NULL,
                                       link_iter_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21271,7 +21271,7 @@ test_link_iterate_invalid_params(void)
                 err_ret =
                     H5Literate2(group_id, H5_INDEX_N, H5_ITER_INC, NULL, link_iter_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21292,7 +21292,7 @@ test_link_iterate_invalid_params(void)
                 err_ret = H5Literate2(group_id, H5_INDEX_NAME, H5_ITER_UNKNOWN, NULL,
                                       link_iter_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21305,7 +21305,7 @@ test_link_iterate_invalid_params(void)
                 err_ret =
                     H5Literate2(group_id, H5_INDEX_NAME, H5_ITER_N, NULL, link_iter_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21327,7 +21327,7 @@ test_link_iterate_invalid_params(void)
                     H5I_INVALID_HID, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_NAME, H5_ITER_INC, NULL, link_iter_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21348,7 +21348,7 @@ test_link_iterate_invalid_params(void)
                 err_ret = H5Literate_by_name2(file_id, NULL, H5_INDEX_NAME, H5_ITER_INC, NULL,
                                               link_iter_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21361,7 +21361,7 @@ test_link_iterate_invalid_params(void)
                 err_ret = H5Literate_by_name2(file_id, "", H5_INDEX_NAME, H5_ITER_INC, NULL,
                                               link_iter_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21383,7 +21383,7 @@ test_link_iterate_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_UNKNOWN, H5_ITER_INC, NULL, link_iter_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21397,7 +21397,7 @@ test_link_iterate_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_N, H5_ITER_INC, NULL, link_iter_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21419,7 +21419,7 @@ test_link_iterate_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_NAME, H5_ITER_UNKNOWN, NULL, link_iter_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21434,7 +21434,7 @@ test_link_iterate_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_NAME, H5_ITER_N, NULL, link_iter_invalid_params_cb, &i, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21456,7 +21456,7 @@ test_link_iterate_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_NAME, H5_ITER_INC, NULL, link_iter_invalid_params_cb, NULL, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -21499,7 +21499,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -21737,7 +21737,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -22137,7 +22137,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -22517,7 +22517,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -22911,7 +22911,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -23424,7 +23424,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -23797,7 +23797,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -24176,7 +24176,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -24561,7 +24561,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -25024,7 +25024,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -25221,7 +25221,7 @@ test_link_visit_invalid_params(void)
                 err_ret = H5Lvisit2(H5I_INVALID_HID, H5_INDEX_NAME, H5_ITER_INC, link_visit_invalid_params_cb,
                                     NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25242,7 +25242,7 @@ test_link_visit_invalid_params(void)
                 err_ret =
                     H5Lvisit2(group_id, H5_INDEX_UNKNOWN, H5_ITER_INC, link_visit_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25254,7 +25254,7 @@ test_link_visit_invalid_params(void)
             {
                 err_ret = H5Lvisit2(group_id, H5_INDEX_N, H5_ITER_INC, link_visit_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25275,7 +25275,7 @@ test_link_visit_invalid_params(void)
                 err_ret =
                     H5Lvisit2(group_id, H5_INDEX_NAME, H5_ITER_UNKNOWN, link_visit_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25287,7 +25287,7 @@ test_link_visit_invalid_params(void)
             {
                 err_ret = H5Lvisit2(group_id, H5_INDEX_NAME, H5_ITER_N, link_visit_invalid_params_cb, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25310,7 +25310,7 @@ test_link_visit_invalid_params(void)
                     "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_INVALID_PARAMS_TEST_SUBGROUP_NAME, H5_INDEX_NAME,
                     H5_ITER_INC, link_visit_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25331,7 +25331,7 @@ test_link_visit_invalid_params(void)
                 err_ret = H5Lvisit_by_name2(file_id, NULL, H5_INDEX_NAME, H5_ITER_INC,
                                             link_visit_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25344,7 +25344,7 @@ test_link_visit_invalid_params(void)
                 err_ret = H5Lvisit_by_name2(file_id, "", H5_INDEX_NAME, H5_ITER_INC,
                                             link_visit_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25366,7 +25366,7 @@ test_link_visit_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_UNKNOWN, H5_ITER_INC, link_visit_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25380,7 +25380,7 @@ test_link_visit_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_N, H5_ITER_INC, link_visit_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25402,7 +25402,7 @@ test_link_visit_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_NAME, H5_ITER_UNKNOWN, link_visit_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25416,7 +25416,7 @@ test_link_visit_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_NAME, H5_ITER_N, link_visit_invalid_params_cb, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25438,7 +25438,7 @@ test_link_visit_invalid_params(void)
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_INVALID_PARAMS_TEST_SUBGROUP_NAME,
                     H5_INDEX_NAME, H5_ITER_INC, link_visit_invalid_params_cb, NULL, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -25485,7 +25485,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -25719,7 +25719,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }

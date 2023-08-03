@@ -531,26 +531,26 @@ do {                                                          \
 
 #else /* H5C_COLLECT_CACHE_STATS */
 
-#define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
-#define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr) {}
-#define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
-#define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)
-#define H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, success, depth)
-#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
-#define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)                       {}
-#define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)
-#define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership)
-#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)
-#define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
-#define H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
-#define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty)
-#define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr)
+#define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, success, depth) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr) do {} while(0)
+#define H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr) do {} while(0)
 
 #endif /* H5C_COLLECT_CACHE_STATS */
 

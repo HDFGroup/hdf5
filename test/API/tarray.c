@@ -239,14 +239,14 @@ test_array_funcs(void)
     {
         cset = H5Tget_cset(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(cset, FAIL, "H5Tget_cset");
 
     H5E_BEGIN_TRY
     {
         strpad = H5Tget_strpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(strpad, FAIL, "H5Tget_strpad");
 
     /* Close datatype */

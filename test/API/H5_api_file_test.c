@@ -98,7 +98,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -140,7 +140,7 @@ test_create_file_invalid_params(void)
             {
                 file_id = H5Fcreate(NULL, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -153,7 +153,7 @@ test_create_file_invalid_params(void)
             {
                 file_id = H5Fcreate("", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -174,7 +174,7 @@ test_create_file_invalid_params(void)
             {
                 file_id = H5Fcreate(prefixed_filename, H5F_ACC_RDWR, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -187,7 +187,7 @@ test_create_file_invalid_params(void)
             {
                 file_id = H5Fcreate(prefixed_filename, H5F_ACC_CREAT, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -200,7 +200,7 @@ test_create_file_invalid_params(void)
             {
                 file_id = H5Fcreate(prefixed_filename, H5F_ACC_SWMR_READ, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -221,7 +221,7 @@ test_create_file_invalid_params(void)
             {
                 file_id = H5Fcreate(prefixed_filename, H5F_ACC_TRUNC, H5I_INVALID_HID, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -249,7 +249,7 @@ error:
 
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -299,7 +299,7 @@ test_create_file_excl(void)
     {
         file_id = H5Fcreate(prefixed_filename, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (file_id >= 0) {
         H5_FAILED();
@@ -330,7 +330,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(file_id2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -375,7 +375,7 @@ test_open_file(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
 
@@ -398,7 +398,7 @@ test_open_file(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
 
@@ -415,7 +415,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -448,7 +448,7 @@ test_open_file_invalid_params(void)
             {
                 file_id = H5Fopen(NULL, H5F_ACC_RDWR, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -461,7 +461,7 @@ test_open_file_invalid_params(void)
             {
                 file_id = H5Fopen("", H5F_ACC_RDWR, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -482,7 +482,7 @@ test_open_file_invalid_params(void)
             {
                 file_id = H5Fopen(H5_api_test_filename, H5F_ACC_TRUNC, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -495,7 +495,7 @@ test_open_file_invalid_params(void)
             {
                 file_id = H5Fopen(H5_api_test_filename, H5F_ACC_EXCL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (file_id >= 0) {
                 H5_FAILED();
@@ -517,7 +517,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -552,7 +552,7 @@ test_open_nonexistent_file(void)
     {
         file_id = H5Fopen(prefixed_filename, H5F_ACC_RDWR, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (file_id >= 0) {
         H5_FAILED();
@@ -572,7 +572,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -660,7 +660,7 @@ test_file_permission(void)
                 group_id =
                     H5Gcreate2(file_id, FILE_PERMISSION_TEST_GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -672,7 +672,7 @@ test_file_permission(void)
             {
                 group_id = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -694,7 +694,7 @@ test_file_permission(void)
                 dset_id = H5Dcreate2(file_id, FILE_PERMISSION_TEST_DSET2_NAME, H5T_STD_U32LE, dspace_id,
                                      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (dset_id >= 0) {
                 H5_FAILED();
@@ -706,7 +706,7 @@ test_file_permission(void)
             {
                 dset_id = H5Dcreate_anon(file_id, H5T_STD_U32LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (dset_id >= 0) {
                 H5_FAILED();
@@ -728,7 +728,7 @@ test_file_permission(void)
                 attr_id = H5Acreate2(file_id, FILE_PERMISSION_TEST_ATTR_NAME, H5T_NATIVE_INT, dspace_id,
                                      H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (attr_id >= 0) {
                 H5_FAILED();
@@ -756,7 +756,7 @@ test_file_permission(void)
                 h5_ret = H5Tcommit2(file_id, FILE_PERMISSION_TEST_NAMED_DTYPE, dtype_id, H5P_DEFAULT,
                                     H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (h5_ret >= 0) {
                 H5_FAILED();
@@ -768,7 +768,7 @@ test_file_permission(void)
             {
                 h5_ret = H5Tcommit_anon(file_id, dtype_id, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (h5_ret >= 0) {
                 H5_FAILED();
@@ -808,7 +808,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -860,7 +860,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(file_id2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -886,7 +886,7 @@ test_close_file_invalid_id(void)
     {
         err_ret = H5Fclose(H5I_INVALID_HID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (err_ret >= 0) {
         H5_FAILED();
@@ -1016,7 +1016,7 @@ error:
         H5Dclose(dset_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -1081,7 +1081,7 @@ test_file_is_accessible(void)
             {
                 is_accessible = H5Fis_accessible(prefixed_filename, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (is_accessible > 0) {
                 H5_FAILED();
@@ -1268,7 +1268,7 @@ test_file_property_lists(void)
             {
                 H5Pclose(fcpl_id1);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fcpl_id1 = H5I_INVALID_HID;
         }
         if (fcpl_id2 >= 0) {
@@ -1276,7 +1276,7 @@ test_file_property_lists(void)
             {
                 H5Pclose(fcpl_id2);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fcpl_id2 = H5I_INVALID_HID;
         }
         if (fapl_id1 >= 0) {
@@ -1284,7 +1284,7 @@ test_file_property_lists(void)
             {
                 H5Pclose(fapl_id1);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fapl_id1 = H5I_INVALID_HID;
         }
         if (fapl_id2 >= 0) {
@@ -1292,7 +1292,7 @@ test_file_property_lists(void)
             {
                 H5Pclose(fapl_id2);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fapl_id2 = H5I_INVALID_HID;
         }
         if (file_id1 >= 0) {
@@ -1300,7 +1300,7 @@ test_file_property_lists(void)
             {
                 H5Fclose(file_id1);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id1 = H5I_INVALID_HID;
         }
         if (file_id2 >= 0) {
@@ -1308,7 +1308,7 @@ test_file_property_lists(void)
             {
                 H5Fclose(file_id2);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id2 = H5I_INVALID_HID;
         }
 
@@ -1405,7 +1405,7 @@ error:
         H5Fclose(file_id1);
         H5Fclose(file_id2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename1);
     free(prefixed_filename2);
@@ -1476,7 +1476,7 @@ test_get_file_intent(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
 
@@ -1512,7 +1512,7 @@ test_get_file_intent(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
 
@@ -1547,7 +1547,7 @@ test_get_file_intent(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
     }
@@ -1563,7 +1563,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -1907,7 +1907,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(file_id2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename1);
     free(prefixed_filename2);
@@ -2046,7 +2046,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(file_id2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -2135,7 +2135,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(child_fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 
@@ -2254,7 +2254,7 @@ test_get_file_name(void)
                 {
                     H5Gclose(group_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 group_id = H5I_INVALID_HID;
             }
 
@@ -2299,7 +2299,7 @@ test_get_file_name(void)
                 {
                     H5Sclose(dspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -2307,7 +2307,7 @@ test_get_file_name(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -2352,7 +2352,7 @@ test_get_file_name(void)
                 {
                     H5Sclose(dspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dspace_id = H5I_INVALID_HID;
             }
             if (attr_id >= 0) {
@@ -2360,7 +2360,7 @@ test_get_file_name(void)
                 {
                     H5Aclose(attr_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 attr_id = H5I_INVALID_HID;
             }
 
@@ -2405,7 +2405,7 @@ test_get_file_name(void)
                 {
                     H5Tclose(named_dtype_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 named_dtype_id = H5I_INVALID_HID;
             }
 
@@ -2431,7 +2431,7 @@ test_get_file_name(void)
             {
                 name_len = H5Fget_name(dspace_id, file_name_buf, (size_t)file_name_buf_len + 1);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (name_len >= 0) {
                 H5_FAILED();
@@ -2444,7 +2444,7 @@ test_get_file_name(void)
                 {
                     H5Sclose(dspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dspace_id = H5I_INVALID_HID;
             }
 
@@ -2483,7 +2483,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     free(prefixed_filename);
 

@@ -1003,5 +1003,5 @@ cleanup_vlstrings(void)
         H5Fdelete(DATAFILE2, H5P_DEFAULT);
         H5Fdelete(DATAFILE3, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }

@@ -244,7 +244,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
                                              (hsize_t)(NDATASETS + 3), dataset_name, (size_t)NAMELEN,
                                              H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
         ret = H5Gclose(root_group);
@@ -275,7 +275,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
             ret = (herr_t)H5Lget_name_by_idx(file, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3),
                                              dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
         /* Test invalid indices for starting iteration */
@@ -285,7 +285,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         {
             ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Literate2");
 
         /* Test skipping exactly as many entries as in the group */
@@ -294,7 +294,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         {
             ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Literate2");
 
         /* Test skipping more entries than are in the group */
@@ -303,7 +303,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         {
             ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Literate2");
 
         /* Test all objects in group, when callback always returns 0 */
@@ -496,7 +496,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
         {
             ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Aiterate2");
 
         /* Test skipping more attributes than there are */
@@ -505,7 +505,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
         {
             ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Aiterate2");
 
         /* Test all attributes on dataset, when callback always returns 0 */
@@ -901,7 +901,7 @@ test_grp_memb_funcs(hid_t fapl)
             (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3),
                                        dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     /* Sort the dataset names */
