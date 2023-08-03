@@ -994,7 +994,7 @@ test_h5o_link(void)
             {
                 ret = H5Pset_libver_bounds(fapl_id, low, high);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
                 continue;
@@ -1186,7 +1186,7 @@ test_h5o_comment(void)
     {
         ret = H5Oset_comment(dspace, "dataspace comment");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Oset_comment");
 
     /* Close the file */
@@ -1361,7 +1361,7 @@ test_h5o_comment_by_name(void)
     {
         ret = H5Oset_comment_by_name(dspace, ".", "dataspace comment", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Oset_comment");
 
     /* Close the file */
@@ -1882,5 +1882,5 @@ cleanup_h5o(void)
         h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
         H5Fdelete(filename, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }

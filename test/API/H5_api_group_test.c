@@ -103,7 +103,7 @@ error:
         H5Gclose(parent_gid);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -180,7 +180,7 @@ error:
         H5Gclose(parent_group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -260,7 +260,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -326,7 +326,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -368,7 +368,7 @@ error:
     {
         H5Gclose(child_gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -516,7 +516,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(crt_intmd_lcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -561,7 +561,7 @@ test_create_group_invalid_params(void)
                 group_id = H5Gcreate2(H5I_INVALID_HID, GROUP_CREATE_INVALID_PARAMS_GROUP_NAME, H5P_DEFAULT,
                                       H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -582,7 +582,7 @@ test_create_group_invalid_params(void)
             {
                 group_id = H5Gcreate2(file_id, NULL, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -595,7 +595,7 @@ test_create_group_invalid_params(void)
             {
                 group_id = H5Gcreate2(file_id, "", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -617,7 +617,7 @@ test_create_group_invalid_params(void)
                 group_id = H5Gcreate2(file_id, GROUP_CREATE_INVALID_PARAMS_GROUP_NAME, H5I_INVALID_HID,
                                       H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -639,7 +639,7 @@ test_create_group_invalid_params(void)
                 group_id = H5Gcreate2(file_id, GROUP_CREATE_INVALID_PARAMS_GROUP_NAME, H5P_DEFAULT,
                                       H5I_INVALID_HID, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -661,7 +661,7 @@ test_create_group_invalid_params(void)
                 group_id = H5Gcreate2(file_id, GROUP_CREATE_INVALID_PARAMS_GROUP_NAME, H5P_DEFAULT,
                                       H5P_DEFAULT, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -691,7 +691,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -751,7 +751,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -801,7 +801,7 @@ test_create_anonymous_group_invalid_params(void)
             {
                 new_group_id = H5Gcreate_anon(H5I_INVALID_HID, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (new_group_id >= 0) {
                 H5_FAILED();
@@ -822,7 +822,7 @@ test_create_anonymous_group_invalid_params(void)
             {
                 new_group_id = H5Gcreate_anon(container_group, H5I_INVALID_HID, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (new_group_id >= 0) {
                 H5_FAILED();
@@ -843,7 +843,7 @@ test_create_anonymous_group_invalid_params(void)
             {
                 new_group_id = H5Gcreate_anon(container_group, H5P_DEFAULT, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (new_group_id >= 0) {
                 H5_FAILED();
@@ -876,7 +876,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -910,7 +910,7 @@ test_open_nonexistent_group(void)
     {
         group_id = H5Gopen2(file_id, OPEN_NONEXISTENT_GROUP_TEST_GNAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (group_id >= 0) {
         H5_FAILED();
@@ -931,7 +931,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -975,7 +975,7 @@ test_open_group_invalid_params(void)
             {
                 group_id = H5Gopen2(H5I_INVALID_HID, GROUP_TEST_GROUP_NAME, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -996,7 +996,7 @@ test_open_group_invalid_params(void)
             {
                 group_id = H5Gopen2(file_id, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -1009,7 +1009,7 @@ test_open_group_invalid_params(void)
             {
                 group_id = H5Gopen2(file_id, "", H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -1030,7 +1030,7 @@ test_open_group_invalid_params(void)
             {
                 group_id = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -1060,7 +1060,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1087,7 +1087,7 @@ test_close_group_invalid_id(void)
     {
         err_ret = H5Gclose(H5I_INVALID_HID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (err_ret >= 0) {
         H5_FAILED();
@@ -1243,7 +1243,7 @@ test_group_property_lists(void)
             {
                 H5Pclose(gcpl_id1);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             gcpl_id1 = H5I_INVALID_HID;
         }
         if (gcpl_id2 >= 0) {
@@ -1251,7 +1251,7 @@ test_group_property_lists(void)
             {
                 H5Pclose(gcpl_id2);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             gcpl_id2 = H5I_INVALID_HID;
         }
         if (group_id1 >= 0) {
@@ -1259,7 +1259,7 @@ test_group_property_lists(void)
             {
                 H5Gclose(group_id1);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             group_id1 = H5I_INVALID_HID;
         }
         if (group_id2 >= 0) {
@@ -1267,7 +1267,7 @@ test_group_property_lists(void)
             {
                 H5Gclose(group_id2);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             group_id2 = H5I_INVALID_HID;
         }
 
@@ -1370,7 +1370,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1801,7 +1801,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1847,7 +1847,7 @@ test_get_group_info_invalid_params(void)
             {
                 err_ret = H5Gget_info(H5I_INVALID_HID, &group_info);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1867,7 +1867,7 @@ test_get_group_info_invalid_params(void)
             {
                 err_ret = H5Gget_info(file_id, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1887,7 +1887,7 @@ test_get_group_info_invalid_params(void)
             {
                 err_ret = H5Gget_info_by_name(H5I_INVALID_HID, ".", &group_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1907,7 +1907,7 @@ test_get_group_info_invalid_params(void)
             {
                 err_ret = H5Gget_info_by_name(file_id, NULL, &group_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1919,7 +1919,7 @@ test_get_group_info_invalid_params(void)
             {
                 err_ret = H5Gget_info_by_name(file_id, "", &group_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1939,7 +1939,7 @@ test_get_group_info_invalid_params(void)
             {
                 err_ret = H5Gget_info_by_name(file_id, ".", NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1960,7 +1960,7 @@ test_get_group_info_invalid_params(void)
             {
                 err_ret = H5Gget_info_by_name(file_id, ".", &group_info, H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -1981,7 +1981,7 @@ test_get_group_info_invalid_params(void)
                 err_ret = H5Gget_info_by_idx(H5I_INVALID_HID, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &group_info,
                                              H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2002,7 +2002,7 @@ test_get_group_info_invalid_params(void)
                 err_ret = H5Gget_info_by_idx(file_id, NULL, H5_INDEX_NAME, H5_ITER_INC, 0, &group_info,
                                              H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2015,7 +2015,7 @@ test_get_group_info_invalid_params(void)
                 err_ret =
                     H5Gget_info_by_idx(file_id, "", H5_INDEX_NAME, H5_ITER_INC, 0, &group_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2037,7 +2037,7 @@ test_get_group_info_invalid_params(void)
                 err_ret = H5Gget_info_by_idx(file_id, ".", H5_INDEX_UNKNOWN, H5_ITER_INC, 0, &group_info,
                                              H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2051,7 +2051,7 @@ test_get_group_info_invalid_params(void)
                 err_ret =
                     H5Gget_info_by_idx(file_id, ".", H5_INDEX_N, H5_ITER_INC, 0, &group_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2073,7 +2073,7 @@ test_get_group_info_invalid_params(void)
                 err_ret = H5Gget_info_by_idx(file_id, ".", H5_INDEX_NAME, H5_ITER_UNKNOWN, 0, &group_info,
                                              H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2087,7 +2087,7 @@ test_get_group_info_invalid_params(void)
                 err_ret =
                     H5Gget_info_by_idx(file_id, ".", H5_INDEX_NAME, H5_ITER_N, 0, &group_info, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2108,7 +2108,7 @@ test_get_group_info_invalid_params(void)
             {
                 err_ret = H5Gget_info_by_idx(file_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2130,7 +2130,7 @@ test_get_group_info_invalid_params(void)
                 err_ret = H5Gget_info_by_idx(file_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &group_info,
                                              H5I_INVALID_HID);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (err_ret >= 0) {
                 H5_FAILED();
@@ -2158,7 +2158,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2228,7 +2228,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2255,7 +2255,7 @@ test_flush_group_invalid_params(void)
     {
         status = H5Gflush(H5I_INVALID_HID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (status >= 0) {
         H5_FAILED();
@@ -2336,7 +2336,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2363,7 +2363,7 @@ test_refresh_group_invalid_params(void)
     {
         status = H5Grefresh(H5I_INVALID_HID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (status >= 0) {
         H5_FAILED();

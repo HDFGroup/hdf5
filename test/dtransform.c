@@ -70,7 +70,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                                        {25, 17, 10, 3, 4, 11, 19, 26, 33, 40, 48, 55, 62, 69, 4, 12, 19, 26}};
 
 #define UCOMPARE(TYPE, VAR1, VAR2, TOL)                                                                      \
-    {                                                                                                        \
+    do {                                                                                                     \
         size_t i, j;                                                                                         \
                                                                                                              \
         for (i = 0; i < ROWS; i++)                                                                           \
@@ -85,10 +85,10 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                 }                                                                                            \
             }                                                                                                \
         PASSED();                                                                                            \
-    }
+    } while (0)
 
 #define COMPARE(TYPE, VAR1, VAR2, TOL)                                                                       \
-    {                                                                                                        \
+    do {                                                                                                     \
         size_t i, j;                                                                                         \
                                                                                                              \
         for (i = 0; i < ROWS; i++)                                                                           \
@@ -101,10 +101,10 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                 }                                                                                            \
             }                                                                                                \
         PASSED();                                                                                            \
-    }
+    } while (0)
 
 #define COMPARE_INT(VAR1, VAR2)                                                                              \
-    {                                                                                                        \
+    do {                                                                                                     \
         size_t i, j;                                                                                         \
                                                                                                              \
         for (i = 0; i < ROWS; i++)                                                                           \
@@ -115,10 +115,10 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                     goto error;                                                                              \
                 }                                                                                            \
             }                                                                                                \
-    }
+    } while (0)
 
 #define TEST_TYPE_CONTIG(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)                              \
-    {                                                                                                        \
+    do {                                                                                                     \
         struct {                                                                                             \
             TYPE arr[ROWS][COLS];                                                                            \
         } *array           = NULL;                                                                           \
@@ -182,25 +182,25 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         if (H5Dread(dset, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0)                                     \
             TEST_ERROR;                                                                                      \
         if (SIGNED)                                                                                          \
-            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2);                                                      \
         else                                                                                                 \
-            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4)                                                      \
+            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4);                                                     \
                                                                                                              \
         TESTING("contiguous, byte order conversion (" TEST_STR "->" TEST_STR ")");                           \
                                                                                                              \
         if (H5Dread(dset_nn, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0)                                  \
             TEST_ERROR;                                                                                      \
         if (SIGNED)                                                                                          \
-            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2);                                                      \
         else                                                                                                 \
-            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4)                                                      \
+            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4);                                                     \
                                                                                                              \
         if (SIGNED) {                                                                                        \
             TESTING("contiguous, with type conversion (float->" TEST_STR ")");                               \
                                                                                                              \
             if (H5Dread(dset_id_float, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0)                        \
                 TEST_ERROR;                                                                                  \
-            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2);                                                      \
         }                                                                                                    \
                                                                                                              \
         if (H5Dclose(dset_nn) < 0)                                                                           \
@@ -211,7 +211,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             TEST_ERROR;                                                                                      \
                                                                                                              \
         free(array);                                                                                         \
-    }
+    } while (0)
 
 #define TEST_TYPE_CHUNK(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)                               \
     do {                                                                                                     \
@@ -276,16 +276,16 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         if (H5Dread(dset_chunk, HDF_TYPE, memspace, filespace, XFORM, array) < 0)                            \
             TEST_ERROR;                                                                                      \
         if (SIGNED)                                                                                          \
-            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2);                                                      \
         else                                                                                                 \
-            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4)                                                      \
+            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4);                                                     \
                                                                                                              \
         if (SIGNED) {                                                                                        \
             TESTING("chunked, with type conversion (float->" TEST_STR ")");                                  \
                                                                                                              \
             if (H5Dread(dset_id_float_chunk, HDF_TYPE, memspace, filespace, XFORM, array) < 0)               \
                 TEST_ERROR;                                                                                  \
-            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2);                                                      \
         }                                                                                                    \
                                                                                                              \
         if (H5Pclose(cparms) < 0)                                                                            \
@@ -558,7 +558,7 @@ test_poly(const hid_t dxpl_id_polynomial)
     if (H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyflread) < 0)
         TEST_ERROR;
 
-    COMPARE(float, polyflread, polyflres, 2.0F)
+    COMPARE(float, polyflread, polyflres, 2.0F);
 
     for (row = 0; row < ROWS; row++)
         for (col = 0; col < COLS; col++) {
@@ -570,7 +570,7 @@ test_poly(const hid_t dxpl_id_polynomial)
     if (H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyintread) < 0)
         TEST_ERROR;
 
-    COMPARE(int, polyintread, polyflres, 4)
+    COMPARE(int, polyintread, polyflres, 4);
 
     return 0;
 
@@ -620,7 +620,7 @@ test_specials(hid_t file)
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
         TEST_ERROR;
 
-    COMPARE_INT(read_buf, data_res)
+    COMPARE_INT(read_buf, data_res);
 
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -643,7 +643,7 @@ test_specials(hid_t file)
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
         TEST_ERROR;
 
-    COMPARE_INT(read_buf, data_res)
+    COMPARE_INT(read_buf, data_res);
 
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -666,7 +666,7 @@ test_specials(hid_t file)
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
         TEST_ERROR;
 
-    COMPARE_INT(read_buf, data_res)
+    COMPARE_INT(read_buf, data_res);
 
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -689,7 +689,7 @@ test_specials(hid_t file)
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
         TEST_ERROR;
 
-    COMPARE_INT(read_buf, data_res)
+    COMPARE_INT(read_buf, data_res);
 
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -712,7 +712,7 @@ test_specials(hid_t file)
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
         TEST_ERROR;
 
-    COMPARE_INT(read_buf, data_res)
+    COMPARE_INT(read_buf, data_res);
 
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -735,7 +735,7 @@ test_specials(hid_t file)
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
         TEST_ERROR;
 
-    COMPARE_INT(read_buf, data_res)
+    COMPARE_INT(read_buf, data_res);
 
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -761,7 +761,7 @@ test_specials(hid_t file)
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
         TEST_ERROR;
 
-    COMPARE_INT(read_buf, data_res)
+    COMPARE_INT(read_buf, data_res);
 
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -797,13 +797,13 @@ test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy)
     if (H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f_copy, windchillFintread) < 0)
         TEST_ERROR;
 
-    COMPARE(int, windchillFintread, windchillFfloat, 2)
+    COMPARE(int, windchillFintread, windchillFfloat, 2);
 
     TESTING("data transform, polynomial transform w/ copied property");
     if (H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial_copy, polyintread) < 0)
         TEST_ERROR;
 
-    COMPARE(int, polyintread, polyflres, 2)
+    COMPARE(int, polyintread, polyflres, 2);
 
     return 0;
 

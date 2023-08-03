@@ -194,6 +194,12 @@ H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, size_t len, H5HL_cache
         HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     H5F_addr_decode_len(udata->sizeof_addr, &image, &(heap->dblk_addr));
 
+    /* Check that the datablock address is valid (might not be true
+     * in a corrupt file)
+     */
+    if (!H5_addr_defined(heap->dblk_addr))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad datablock address");
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__hdr_deserialize() */

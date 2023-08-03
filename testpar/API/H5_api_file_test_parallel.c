@@ -68,7 +68,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -119,7 +119,7 @@ test_open_file(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
 
@@ -142,7 +142,7 @@ test_open_file(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
 
@@ -167,7 +167,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -302,7 +302,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }

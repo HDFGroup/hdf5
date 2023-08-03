@@ -3260,5 +3260,5 @@ cleanup_vltypes(void)
     {
         H5Fdelete(FILENAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }

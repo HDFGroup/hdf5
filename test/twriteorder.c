@@ -71,10 +71,10 @@
 #define NLINKEDBLOCKS_DFT 512     /* default 512 */
 #define SIZE_BLKADDR      4       /* expected sizeof blkaddr */
 #define Hgoto_error(val)                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         ret_value = val;                                                                                     \
         goto done;                                                                                           \
-    }
+    } while (0)
 
 /* type declarations */
 typedef enum part_t {
@@ -142,21 +142,21 @@ parse_option(int argc, char *const argv[])
                     fprintf(stderr, "bad blocksize %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
-                };
+                }
                 break;
             case 'n': /* number of planes to write/read */
                 if ((nlinkedblock_g = atoi(optarg)) < 2) {
                     fprintf(stderr, "bad number of linked blocks %s, must be greater than 1.\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
-                };
+                }
                 break;
             case 'p': /* number of planes to write/read */
                 if ((part_size_g = atoi(optarg)) <= 0) {
                     fprintf(stderr, "bad partition size %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
-                };
+                }
                 break;
             case 'l': /* launch reader or writer only */
                 switch (*optarg) {
@@ -381,8 +381,8 @@ main(int argc, char *argv[])
         if ((childpid = fork()) < 0) {
             HDperror("fork");
             Hgoto_error(1);
-        };
-    };
+        }
+    }
     mypid = HDgetpid();
 
     /* ============= */
