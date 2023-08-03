@@ -1727,7 +1727,6 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
                                element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
 
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDread_selection() */
@@ -1825,7 +1824,6 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
     if (H5FD_write_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
                                 element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
-
 
 done:
     FUNC_LEAVE_API(ret_value)

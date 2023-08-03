@@ -1195,7 +1195,6 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
                                            offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed");
 
-
 done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
@@ -1369,7 +1368,6 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
         if (H5FD__read_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
                                            file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed");
-
     }
 
 done:
@@ -1847,7 +1845,6 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
                                             offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed");
 
-
 done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
@@ -2013,7 +2010,6 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
         if (H5FD__write_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
                                             file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed");
-
     }
 
 done:
