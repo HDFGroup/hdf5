@@ -5489,6 +5489,9 @@ H5D__mpio_collective_filtered_vec_io(const H5D_filtered_collective_io_info_t *ch
         for (size_t i = 0, vec_idx = 0; i < chunk_list->num_chunk_infos; i++) {
             H5F_block_t *chunk_block;
 
+            if (op_type == H5D_IO_OP_READ && !chunk_list->chunk_infos[i].need_read)
+                continue;
+
             /*
              * Check that we aren't going to accidentally try to write past the
              * allocated memory for the I/O vector buffers in case bookkeeping
@@ -5496,9 +5499,6 @@ H5D__mpio_collective_filtered_vec_io(const H5D_filtered_collective_io_info_t *ch
              * field.
              */
             assert(vec_idx < iovec_count);
-
-            if (op_type == H5D_IO_OP_READ && !chunk_list->chunk_infos[i].need_read)
-                continue;
 
             /* Set convenience pointer for current chunk block */
             chunk_block = (op_type == H5D_IO_OP_READ) ? &chunk_list->chunk_infos[i].chunk_current
