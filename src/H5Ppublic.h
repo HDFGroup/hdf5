@@ -8411,11 +8411,9 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *          default value for modify_write_buf is FALSE.
  *
  *          This function can be used to allow the library to perform in-place
- *          type conversion on write operations to save memory space.  This is
- *          currently only used for selection I/O operations, which are used for
- *          collective I/O with type conversion.  After making an API call with
- *          this parameter set to TRUE, the contents of the write buffer are
- *          undefined.
+ *          type conversion on write operations to save memory space.  After making an 
+ *          API call with this parameter set to TRUE, the contents of the write buffer
+ *          are undefined.
  *
  * \note    When modify_write_buf is set to TRUE the library may violate the
  *          const qualifier on the API parameter for the write buffer.
