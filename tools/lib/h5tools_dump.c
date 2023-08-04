@@ -2571,7 +2571,7 @@ found_string_type:
             if (H5Tclose(super) < 0)
                 H5TOOLS_ERROR((-1), "H5Tclose failed");
 
-            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->vlenblockend);
+            h5tools_str_append(buffer, " %s", h5tools_dump_header_format->vlenblockend);
 
             break;
 
