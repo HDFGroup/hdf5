@@ -1,7 +1,7 @@
 HDF5 "tempty.h5" {
 GROUP "/" {
    DATASET "Dataset1.0" {
-      DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+      DATATYPE  H5T_VLEN { H5T_STD_I32LE }
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
       (0): (), (), (), ()
