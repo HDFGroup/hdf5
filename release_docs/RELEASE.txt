@@ -121,6 +121,29 @@ Bug Fixes since HDF5-1.14.1 release
 ===================================
     Library
     -------
+    - Fixed CVE-2018-13867
+
+      A corrupt file containing an invalid local heap datablock address
+      could trigger an assert failure when the metadata cache attempted
+      to load the datablock from storage.
+
+      The local heap now verifies that the datablock address is valid
+      when the local heap header information is parsed.
+
+    - Fixed CVE-2018-11202
+
+      A malformed file could result in chunk index memory leaks. Under most
+      conditions (i.e., when the --enable-using-memchecker option is NOT
+      used), this would result in a small memory leak and and infinite loop
+      and abort when shutting down the library. The infinite loop would be
+      due to the "free list" package not being able to clear its resources
+      so the library couldn't shut down. When the "using a memory checker"
+      option is used, the free lists are disabled so there is just a memory
+      leak with no abort on library shutdown.
+
+      The chunk index resources are now correctly cleaned up when reading
+      misparsed files and valgrind confirms no memory leaks.
+
     - Fixed an issue where an assert statement was converted to an
       incorrect error check statement
 
