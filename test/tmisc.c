@@ -1416,7 +1416,7 @@ test_misc8(void)
     {
         did = H5Dcreate2(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(did, FAIL, "H5Dcreate2");
 
     /* Set the space allocation time to incremental */
@@ -1429,7 +1429,7 @@ test_misc8(void)
     {
         did = H5Dcreate2(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(did, FAIL, "H5Dcreate2");
 
     /* Set the space allocation time to early */
@@ -1774,7 +1774,7 @@ test_misc9(void)
     {
         fid = H5Fopen(MISC9_FILE, H5F_ACC_RDWR, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(fid, FAIL, "H5Fopen");
 
     ret = H5Pclose(fapl);
@@ -6097,7 +6097,7 @@ test_misc37(void)
     {
         ret = H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Fclose");
 
 } /* end test_misc37() */
@@ -6226,5 +6226,5 @@ cleanup_misc(void)
         H5Fdelete(MISC31_FILE, H5P_DEFAULT);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 } /* end cleanup_misc() */

@@ -17,14 +17,14 @@
 
 /* Macro definitions */
 #define Hgoto_error(val)                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         ret_value = val;                                                                                     \
         goto done;                                                                                           \
-    }
+    } while (0)
 #define Hgoto_done                                                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         goto done;                                                                                           \
-    }
+    } while (0)
 #define Chunksize_DFT  256 /* chunksize default */
 #define ErrorReportMax 10  /* max number of errors reported */
 /* these two definitions must match each other */

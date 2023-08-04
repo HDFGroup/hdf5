@@ -125,7 +125,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -359,7 +359,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -702,7 +702,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -773,7 +773,7 @@ test_dot_for_object_name(void)
             {
                 group_id = H5Gcreate2(subgroup_id, ".", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (group_id >= 0) {
                 H5_FAILED();
@@ -795,7 +795,7 @@ test_dot_for_object_name(void)
                 dset_id = H5Dcreate2(subgroup_id, ".", H5T_NATIVE_INT, dspace_id, H5P_DEFAULT, H5P_DEFAULT,
                                      H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (dset_id >= 0) {
                 H5_FAILED();
@@ -822,7 +822,7 @@ test_dot_for_object_name(void)
             {
                 ret = H5Tcommit2(subgroup_id, ".", dtype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret >= 0) {
                 H5_FAILED();
@@ -869,7 +869,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1031,7 +1031,7 @@ error:
         H5Gclose(container_group);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }

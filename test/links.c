@@ -13807,7 +13807,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_public_macros() */
 

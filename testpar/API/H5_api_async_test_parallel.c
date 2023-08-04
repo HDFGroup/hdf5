@@ -408,7 +408,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -732,7 +732,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1157,7 +1157,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1572,7 +1572,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1916,7 +1916,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2069,7 +2069,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2278,7 +2278,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2473,7 +2473,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2885,7 +2885,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3062,7 +3062,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3322,7 +3322,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3483,7 +3483,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3565,7 +3565,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
