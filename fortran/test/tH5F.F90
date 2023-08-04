@@ -1258,7 +1258,7 @@ CONTAINS
 
     IF(file_info%super%version .NE. 3) THEN
        total_error = total_error + 1
-       WRITE(*,*) "Wrong uper%version, ",file_info%free%tot_space
+       WRITE(*,*) "Wrong super%version, ",file_info%free%tot_space
     ENDIF
 
     IF(file_info%super%super_size .NE. 48) THEN
