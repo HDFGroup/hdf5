@@ -509,9 +509,8 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
             /* If this is not a selection I/O operation and there is a background buffer, we cannot exceed
              * request_nelmts.  It could be part of a selection I/O operation if this read is used to fill in
              * a nonexistent chunk */
-            if (dset_info->type_info.need_bkg &&
-                !H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, in_place_tconv) &&
-                (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON))
+            assert(!H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, in_place_tconv));
+            if (dset_info->type_info.need_bkg && (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON))
                 smine_nelmts =
                     (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
             else {
@@ -686,9 +685,8 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
             /* If this is not a selection I/O operation and there is a background buffer, we cannot exceed
              * request_nelmts.  It could be part of a selection I/O operation if this is used to write the
              * fill value to a cached chunk that will immediately be evicted. */
-            if (dset_info->type_info.need_bkg &&
-                !H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, in_place_tconv) &&
-                (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON))
+            assert(!H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, in_place_tconv));
+            if (dset_info->type_info.need_bkg && (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON))
                 smine_nelmts =
                     (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
             else {
