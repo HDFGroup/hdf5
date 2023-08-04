@@ -233,8 +233,9 @@ H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    dinfo->store->compact.buf   = dinfo->dset->shared->layout.storage.u.compact.buf;
-    dinfo->store->compact.dirty = &dinfo->dset->shared->layout.storage.u.compact.dirty;
+    dinfo->store->compact.buf               = dinfo->dset->shared->layout.storage.u.compact.buf;
+    dinfo->store->compact.dirty             = &dinfo->dset->shared->layout.storage.u.compact.dirty;
+    dinfo->layout_io_info.contig_piece_info = NULL;
 
     /* Disable selection I/O */
     io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
