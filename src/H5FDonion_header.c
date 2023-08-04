@@ -47,23 +47,23 @@ H5FD__onion_ingest_header(H5FD_onion_header_t *hdr_out, H5FD_t *raw_file, haddr_
     FUNC_ENTER_PACKAGE
 
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates history beyond EOF")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates history beyond EOF");
 
     if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
 
     if (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA");
 
     if (H5FD_read(raw_file, H5FD_MEM_DRAW, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read history header from file")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read history header from file");
 
     if (H5FD__onion_header_decode(buf, hdr_out) == 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode history header")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode history header");
 
     sum = H5_checksum_fletcher32(buf, size - 4);
     if (hdr_out->checksum != sum)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored");
 
 done:
     H5MM_xfree(buf);
@@ -91,13 +91,13 @@ H5FD__onion_write_header(H5FD_onion_header_t *header, H5FD_t *file)
     FUNC_ENTER_PACKAGE
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer for updated history header")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer for updated history header");
 
     if (0 == (size = H5FD__onion_header_encode(header, buf, &sum)))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding updated history header")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding updated history header");
 
     if (H5FD_write(file, H5FD_MEM_DRAW, 0, (haddr_t)size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated history header")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated history header");
 
 done:
     H5MM_xfree(buf);
@@ -135,10 +135,10 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     assert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
 
     if (HDstrncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header signature")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header signature");
 
     if (buf[4] != H5FD_ONION_HEADER_VERSION_CURR)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header version")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header version");
 
     ptr  = buf + 5;
     ui32 = 0;
@@ -175,7 +175,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     ptr += 4;
 
     if (sum != header->checksum)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "checksum mismatch")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "checksum mismatch");
 
     ret_value = (size_t)(ptr - buf);
 

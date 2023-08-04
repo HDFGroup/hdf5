@@ -121,13 +121,13 @@ H5P__gcrt_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5G_CRT_GROUP_INFO_NAME, H5G_CRT_GROUP_INFO_SIZE, &H5G_def_ginfo_g, NULL,
                            NULL, NULL, H5G_CRT_GROUP_INFO_ENC, H5G_CRT_GROUP_INFO_DEC, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register link info property */
     if (H5P__register_real(pclass, H5G_CRT_LINK_INFO_NAME, H5G_CRT_LINK_INFO_SIZE, &H5G_def_linfo_g, NULL,
                            NULL, NULL, H5G_CRT_LINK_INFO_ENC, H5G_CRT_LINK_INFO_DEC, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -154,18 +154,18 @@ H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */
     if (H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info");
 
     /* Update field */
     H5_CHECKED_ASSIGN(ginfo.lheap_size_hint, uint32_t, size_hint, size_t);
 
     /* Set value */
     if (H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -195,11 +195,11 @@ H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/)
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get value */
         if (H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info");
 
         /* Update field */
         *size_hint = ginfo.lheap_size_hint;
@@ -236,19 +236,19 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
 
     /* Range check values */
     if (max_compact < min_dense)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be >= min dense value")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be >= min dense value");
     if (max_compact > 65535)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be < 65536")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be < 65536");
     if (min_dense > 65535)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min dense value must be < 65536")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min dense value must be < 65536");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get group info */
     if (H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info");
 
     /* Update fields */
     if (max_compact != H5G_CRT_GINFO_MAX_COMPACT || min_dense != H5G_CRT_GINFO_MIN_DENSE)
@@ -260,7 +260,7 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
 
     /* Set group info */
     if (H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -291,11 +291,11 @@ H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get group info */
         if (H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info");
 
         if (max_compact)
             *max_compact = ginfo.max_compact;
@@ -336,17 +336,17 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
 
     /* Range check values */
     if (est_num_entries > 65535)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "est. number of entries must be < 65536")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "est. number of entries must be < 65536");
     if (est_name_len > 65535)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "est. name length must be < 65536")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "est. name length must be < 65536");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get group info */
     if (H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info");
 
     /* Update fields */
     if (est_num_entries != H5G_CRT_GINFO_EST_NUM_ENTRIES || est_name_len != H5G_CRT_GINFO_EST_NAME_LEN)
@@ -358,7 +358,7 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
 
     /* Set group info */
     if (H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -389,11 +389,11 @@ H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get group info */
         if (H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info");
 
         if (est_num_entries)
             *est_num_entries = ginfo.est_num_entries;
@@ -426,15 +426,15 @@ H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
 
     /* Check for bad combination of flags */
     if (!(crt_order_flags & H5P_CRT_ORDER_TRACKED) && (crt_order_flags & H5P_CRT_ORDER_INDEXED))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tracking creation order is required for index")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tracking creation order is required for index");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get link info */
     if (H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info");
 
     /* Update fields */
     linfo.track_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);
@@ -442,7 +442,7 @@ H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
 
     /* Set link info */
     if (H5P_set(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -476,11 +476,11 @@ H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get link info */
         if (H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info");
 
         *crt_order_flags |= linfo.track_corder ? H5P_CRT_ORDER_TRACKED : 0;
         *crt_order_flags |= linfo.index_corder ? H5P_CRT_ORDER_INDEXED : 0;
@@ -632,7 +632,7 @@ H5P__gcrt_link_info_dec(const void **_pp, void *_value)
 
     enc_size = *(*pp)++;
     if (enc_size != sizeof(unsigned))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded");
 
     /* Set property to default value */
     memset(linfo, 0, sizeof(H5O_linfo_t));

@@ -150,15 +150,15 @@ H5Tvlen_create(hid_t base_id)
 
     /* Check args */
     if (NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
 
     /* Create up VL datatype */
     if ((dt = H5T__vlen_create(base)) == NULL)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
 
     /* Register the type */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -189,7 +189,7 @@ H5T__vlen_create(const H5T_t *base)
 
     /* Build new type */
     if (NULL == (dt = H5T__alloc()))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "memory allocation failed");
     dt->shared->type = H5T_VLEN;
 
     /*
@@ -198,7 +198,7 @@ H5T__vlen_create(const H5T_t *base)
      */
     dt->shared->force_conv = TRUE;
     if (NULL == (dt->shared->parent = H5T_copy(base, H5T_COPY_ALL)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy base datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy base datatype");
 
     /* Inherit encoding version from base type */
     dt->shared->version = base->shared->version;
@@ -208,7 +208,7 @@ H5T__vlen_create(const H5T_t *base)
 
     /* Set up VL information */
     if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location");
 
     /* Set return value */
     ret_value = dt;
@@ -274,7 +274,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 /* Release owned file */
                 if (dt->shared->owned_vol_obj) {
                     if (H5VL_free_object(dt->shared->owned_vol_obj) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object");
                     dt->shared->owned_vol_obj = NULL;
                 } /* end if */
 
@@ -298,7 +298,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* Get container info */
                 if (H5VL_file_get(file, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get container info")
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get container info");
 
                 /* The datatype size is equal to 4 bytes for the sequence length
                  * plus the size of a blob id */
@@ -313,7 +313,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* dt now owns a reference to file */
                 if (H5T_own_vol_obj(dt, file) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't give ownership of VOL object");
                 break;
             }
 
@@ -333,7 +333,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
             case H5T_LOC_MAXLOC:
                 /* MAXLOC is invalid */
             default:
-                HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location");
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Indicate that the location changed */
@@ -511,11 +511,11 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
         if (vl_alloc_info->alloc_func != NULL) {
             if (NULL == (vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                            "application memory allocation routine failed for VL data")
+                            "application memory allocation routine failed for VL data");
         }    /* end if */
         else /* Default to system malloc */
             if (NULL == (vl.p = malloc(len)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data");
 
         /* Copy the data into the newly allocated buffer */
         H5MM_memcpy(vl.p, buf, len);
@@ -686,11 +686,11 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
         if (NULL ==
             (t = (char *)(vl_alloc_info->alloc_func)((seq_len + 1) * base_size, vl_alloc_info->alloc_info)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                        "application memory allocation routine failed for VL data")
+                        "application memory allocation routine failed for VL data");
     }    /* end if */
     else /* Default to system malloc */
         if (NULL == (t = (char *)malloc((seq_len + 1) * base_size)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data");
 
     /* 'write' the string into the buffer, with memcpy() */
     len = (seq_len * base_size);
@@ -762,7 +762,7 @@ H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
 
     /* Check if blob ID is "nil" */
     if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to check if a blob ID is 'nil'")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to check if a blob ID is 'nil'");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -794,7 +794,7 @@ H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
     if (bg != NULL)
         /* Delete sequence in destination location */
         if (H5T__vlen_disk_delete(file, bg) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object");
 
     /* Set the length of the sequence */
     UINT32ENCODE(vl, 0);
@@ -804,7 +804,7 @@ H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
 
     /* Set blob ID to "nil" */
     if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set a blob ID to 'nil'")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set a blob ID to 'nil'");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -837,7 +837,7 @@ H5T__vlen_disk_read(H5VL_object_t *file, void *_vl, void *buf, size_t len)
 
     /* Retrieve blob */
     if (H5VL_blob_get(file, vl, buf, len, NULL) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get blob")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get blob");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -870,14 +870,14 @@ H5T__vlen_disk_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t H5_ATTR_UN
     /* Free heap object for old data, if non-NULL */
     if (bg != NULL)
         if (H5T__vlen_disk_delete(file, bg) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object");
 
     /* Set the length of the sequence */
     UINT32ENCODE(vl, seq_len);
 
     /* Store blob */
     if (H5VL_blob_put(file, buf, (seq_len * base_size), vl, NULL) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to put blob")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to put blob");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -918,7 +918,7 @@ H5T__vlen_disk_delete(H5VL_object_t *file, void *_vl)
             vol_cb_args.op_type = H5VL_BLOB_DELETE;
 
             if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob");
         } /* end if */
     }     /* end if */
 
@@ -964,7 +964,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                 for (u = 0; u < dt->shared->u.array.nelem; u++) {
                     off = ((uint8_t *)elem) + u * (dt->shared->parent->shared->size);
                     if (H5T_reclaim_cb(off, dt->shared->parent, 0, NULL, alloc_info) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free array element")
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free array element");
                 } /* end for */
             }     /* end if */
             break;
@@ -979,7 +979,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                     /* Calculate the offset member and recurse on it */
                     off = ((uint8_t *)elem) + dt->shared->u.compnd.memb[u].offset;
                     if (H5T_reclaim_cb(off, dt->shared->u.compnd.memb[u].type, 0, NULL, alloc_info) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free compound field")
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free compound field");
                 } /* end if */
             }     /* end for */
             break;
@@ -999,7 +999,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                         while (vl->len > 0) {
                             off = ((uint8_t *)vl->p) + (vl->len - 1) * dt->shared->parent->shared->size;
                             if (H5T_reclaim_cb(off, dt->shared->parent, 0, NULL, alloc_info) < 0)
-                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free VL element")
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free VL element");
                             vl->len--;
                         } /* end while */
                     }     /* end if */
@@ -1038,7 +1038,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype class")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype class");
             break;
 
     } /* end switch */ /*lint !e788 All appropriate cases are covered */
@@ -1073,11 +1073,11 @@ H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
 
     /* Get VL allocation info */
     if (H5CX_get_vlen_alloc_info(&vl_alloc_info) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info");
 
     /* Recurse on buffer to free dynamic fields */
     if (H5T__vlen_reclaim(elem, dt, &vl_alloc_info) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

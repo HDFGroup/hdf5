@@ -1228,10 +1228,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                 h5tools_str_append(str, "%u-", (unsigned)oi.type);
                                 break;
                         }
-                        H5Oclose(obj);
 
                         /* Print OID */
                         H5Otoken_to_str(obj, &oi.token, &obj_tok_str);
+
+                        H5Oclose(obj);
 
                         if (info->obj_hidefileno)
                             h5tools_str_append(str, info->obj_format, obj_tok_str);

@@ -1118,7 +1118,7 @@ test_set_configured_fapl(void)
             {
                 result = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
 
         if (C.expected == 0) {

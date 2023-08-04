@@ -100,7 +100,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
     /* Allocate space for message */
     if (NULL == (fsinfo = H5FL_CALLOC(H5O_fsinfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
         fsinfo->fs_addr[ptype - 1] = HADDR_UNDEF;
@@ -133,7 +133,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 fsinfo->persist   = TRUE;
                 fsinfo->threshold = threshold;
                 if (HADDR_UNDEF == (fsinfo->eoa_pre_fsm_fsalloc = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size");
                 for (type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
                     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
@@ -158,7 +158,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             case H5F_FILE_SPACE_NTYPES:
             case H5F_FILE_SPACE_DEFAULT:
             default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file space strategy")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file space strategy");
         }
 
         fsinfo->version = H5O_FSINFO_VERSION_1;
@@ -166,7 +166,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     }
     else {
         if (vers < H5O_FSINFO_VERSION_1)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "bad version number")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "bad version number");
 
         fsinfo->version = vers;
         if (H5_IS_BUFFER_OVERFLOW(p, 1 + 1, p_end))
@@ -274,7 +274,7 @@ H5O__fsinfo_copy(const void *_mesg, void *_dest)
     /* check args */
     assert(fsinfo);
     if (!dest && NULL == (dest = H5FL_CALLOC(H5O_fsinfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *fsinfo;
@@ -440,7 +440,7 @@ H5O_fsinfo_set_version(H5F_libver_t low, H5F_libver_t high, H5O_fsinfo_t *fsinfo
 
     /* Version bounds check */
     if (H5O_fsinfo_ver_bounds[high] == H5O_INVALID_VERSION || version > H5O_fsinfo_ver_bounds[high])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds");
 
     /* Set the message version */
     fsinfo->version = version;
@@ -471,7 +471,7 @@ H5O_fsinfo_check_version(H5F_libver_t high, H5O_fsinfo_t *fsinfo)
 
     /* Check the version */
     if (H5O_fsinfo_ver_bounds[high] == H5O_INVALID_VERSION || fsinfo->version > H5O_fsinfo_ver_bounds[high])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

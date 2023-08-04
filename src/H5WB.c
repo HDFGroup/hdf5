@@ -102,7 +102,7 @@ H5WB_wrap(void *buf, size_t buf_size)
 
     /* Create wrapped buffer info */
     if (NULL == (wb = H5FL_MALLOC(H5WB_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for wrapped buffer info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for wrapped buffer info");
 
     /* Wrap buffer given */
     wb->wrapped_buf  = buf;
@@ -165,7 +165,7 @@ H5WB_actual(H5WB_t *wb, size_t need)
     if (need > wb->wrapped_size) {
         /* Need to allocate new buffer */
         if (NULL == (wb->actual_buf = H5FL_BLK_MALLOC(extra_buf, need)))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Remember size of buffer allocated */
         wb->alloc_size = need;
@@ -213,7 +213,7 @@ H5WB_actual_clear(H5WB_t *wb, size_t need)
 
     /* Get a pointer to an actual buffer */
     if (NULL == (ret_value = H5WB_actual(wb, need)))
-        HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Clear the buffer */
     memset(ret_value, 0, need);

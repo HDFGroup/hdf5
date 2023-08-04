@@ -84,7 +84,7 @@ H5VL__reparse_def_vol_conn_variable_test(void)
 
     /* Re-check for the HDF5_VOL_CONNECTOR environment variable */
     if (H5VL__set_def_conn() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize default VOL connector")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize default VOL connector");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

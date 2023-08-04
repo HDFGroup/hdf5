@@ -94,7 +94,7 @@ H5F__efc_create(unsigned max_nfiles)
 
     /* Allocate EFC struct */
     if (NULL == (efc = H5FL_CALLOC(H5F_efc_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Initialize maximum number of files */
     efc->max_nfiles = max_nfiles;
@@ -144,26 +144,26 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
 
     /* Get the VOL info from the fapl */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, NULL, "not a file access property list");
     if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get VOL connector info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get VOL connector info");
 
     /* Stash a copy of the "top-level" connector property, before any pass-through
      *  connectors modify or unwrap it.
      */
     if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set VOL connector info in API context")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set VOL connector info in API context");
 
     /* Check if the EFC exists.  If it does not, just call H5F_open().  We
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if (!efc) {
         if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
 
         /* Make file post open call */
         if (H5F__post_open(ret_value) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
 
         /* Increment the number of open objects to prevent the file from being
          * closed out from under us - "simulate" having an open file id.  Note
@@ -183,7 +183,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
     else {
         assert(efc->nfiles == 0);
         if (NULL == (efc->slist = H5SL_create(H5SL_TYPE_STR, NULL)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create skip list")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create skip list");
     } /* end else */
 
     /* If we found the file update the LRU list and return the cached file,
@@ -229,18 +229,19 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
              * do not add it to cache */
             if (ent) {
                 if (H5F__efc_remove_ent(efc, ent) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL, "can't remove entry from external file cache")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL,
+                                "can't remove entry from external file cache");
 
                 /* Do not free ent, we will recycle it below */
             } /* end if */
             else {
                 /* Cannot cache file, just open file and return */
                 if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
 
                 /* Make file post open call */
                 if (H5F__post_open(ret_value) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
 
                 /* Increment the number of open objects to prevent the file from
                  * being closed out from under us - "simulate" having an open
@@ -253,20 +254,20 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
         else
             /* Allocate new entry */
             if (NULL == (ent = H5FL_MALLOC(H5F_efc_ent_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Build new entry */
         if (NULL == (ent->name = H5MM_strdup(name)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Open the file */
         if (NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
         open_file = TRUE;
 
         /* Make file post open call */
         if (H5F__post_open(ent->file) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
 
         /* Increment the number of open objects to prevent the file from being
          * closed out from under us - "simulate" having an open file id */
@@ -275,7 +276,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
         /* Add the file to the cache */
         /* Skip list */
         if (H5SL_insert(efc->slist, ent, ent->name) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, NULL, "can't insert entry into skip list")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, NULL, "can't insert entry into skip list");
 
         /* Add to head of LRU list and update tail if necessary */
         ent->LRU_next = efc->LRU_head;
@@ -356,7 +357,7 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
     if (!efc) {
         file->nopen_objs--;
         if (H5F_try_close(file, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
 
         HGOTO_DONE(SUCCEED);
     } /* end if */
@@ -371,7 +372,7 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
     if (!ent) {
         file->nopen_objs--;
         if (H5F_try_close(file, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
     } /* end if */
     else
         /* Reduce the open count on this entry */
@@ -440,7 +441,7 @@ H5F__efc_release_real(H5F_efc_t *efc)
     while (ent)
         if (!ent->nopen) {
             if (H5F__efc_remove_ent(efc, ent) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove entry from external file cache")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove entry from external file cache");
 
             /* Free the entry and move to next entry in LRU list */
             prev_ent = ent;
@@ -483,7 +484,7 @@ H5F__efc_release(H5F_efc_t *efc)
 
     /* Call 'real' routine */
     if (H5F__efc_release_real(efc) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't remove entry from external file cache")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't remove entry from external file cache");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -514,11 +515,11 @@ H5F__efc_destroy(H5F_efc_t *efc)
     if (efc->nfiles > 0) {
         /* Release (clear) the efc */
         if (H5F__efc_release_real(efc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache");
 
         /* If there are still cached files, return an error */
         if (efc->nfiles > 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't destroy EFC after incomplete release")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't destroy EFC after incomplete release");
     } /* end if */
 
     assert(efc->nfiles == 0);
@@ -528,7 +529,7 @@ H5F__efc_destroy(H5F_efc_t *efc)
     /* Close skip list */
     if (efc->slist)
         if (H5SL_close(efc->slist) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close skip list")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close skip list");
 
     /* Free EFC object */
     (void)H5FL_FREE(H5F_efc_t, efc);
@@ -562,7 +563,7 @@ H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
 
     /* Remove from skip list */
     if (ent != H5SL_remove(efc->slist, ent->name))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL, "can't delete entry from skip list")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL, "can't delete entry from skip list");
 
     /* Remove from LRU list */
     if (ent->LRU_next)
@@ -592,7 +593,7 @@ H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
      * from being closed out from under us. */
     ent->file->nopen_objs--;
     if (H5F_try_close(ent->file, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
     ent->file = NULL;
 
 done:
@@ -809,7 +810,7 @@ H5F__efc_try_close(H5F_t *f)
          * eventually reduce this file's reference count to 1 (though possibly
          * not from this call to H5F__efc_release_real()). */
         if (H5F__efc_release_real(f->shared->efc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache");
 
         /* If we marked the file as closeable, there must be no open files in
          * its EFC.  This is because, in order to close an open child file, the
@@ -927,7 +928,7 @@ H5F__efc_try_close(H5F_t *f)
      * Also, see the top of this function. */
     if (f->shared->efc->tag == H5F_EFC_TAG_CLOSE) {
         if (H5F__efc_release_real(f->shared->efc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache");
 
         /* Make sure the file's reference count is now 1 and will be closed by
          * H5F_dest(). */

@@ -1115,11 +1115,11 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         close_fapl = fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         if (env && !strcmp(env, "split")) {
             if (H5Pset_fapl_split(fapl_id, NULL, H5P_DEFAULT, NULL, H5P_DEFAULT) < 0)
-                H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error)
+                H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error);
         }
         else {
             if (H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE) < 0)
-                H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error)
+                H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error);
         }
 
         fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
@@ -1142,11 +1142,11 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->name     = my_strdup(name);
     if (close_fapl >= 0)
         if (H5Pclose(close_fapl) < 0)
-            H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", error)
+            H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", error);
 
-                /* Compute derived properties and open member files */
-                if (compute_next(file) < 0) H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE,
-                                                         "compute_next() failed", error);
+    /* Compute derived properties and open member files */
+    if (compute_next(file) < 0)
+        H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "compute_next() failed", error);
     if (open_members(file) < 0)
         H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "open_members() failed", error);
 

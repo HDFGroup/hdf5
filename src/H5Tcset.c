@@ -46,12 +46,12 @@ H5Tget_cset(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR, "not a data type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR, "not a data type");
     while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
         dt = dt->shared->parent; /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_CSET_ERROR,
-                    "operation not defined for data type class")
+                    "operation not defined for data type class");
 
     /* result */
     if (H5T_IS_FIXED_STRING(dt->shared))
@@ -85,15 +85,15 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (H5T_STATE_TRANSIENT != dt->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (cset < H5T_CSET_ASCII || cset >= H5T_NCSET)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal character set type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal character set type");
     while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
         dt = dt->shared->parent; /*defer to parent*/
     if (!H5T_IS_STRING(dt->shared))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for data type class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for data type class");
 
     /* Commit */
     if (H5T_IS_FIXED_STRING(dt->shared))

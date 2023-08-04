@@ -48,10 +48,10 @@ H5Tget_nmembers(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     if ((ret_value = H5T_get_nmembers(dt)) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -86,7 +86,7 @@ H5T_get_nmembers(const H5T_t *dt)
     else if (H5T_ENUM == dt->shared->type)
         ret_value = (int)dt->shared->u.enumer.nmembs;
     else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -118,10 +118,10 @@ H5Tget_member_name(hid_t type_id, unsigned membno)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
 
     if (NULL == (ret_value = H5T__get_member_name(dt, membno)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get member name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get member name");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -154,13 +154,13 @@ H5T__get_member_name(H5T_t const *dt, unsigned membno)
     switch (dt->shared->type) {
         case H5T_COMPOUND:
             if (membno >= dt->shared->u.compnd.nmembs)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
             ret_value = H5MM_xstrdup(dt->shared->u.compnd.memb[membno].name);
             break;
 
         case H5T_ENUM:
             if (membno >= dt->shared->u.enumer.nmembs)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
             ret_value = H5MM_xstrdup(dt->shared->u.enumer.name[membno]);
             break;
 
@@ -176,7 +176,7 @@ H5T__get_member_name(H5T_t const *dt, unsigned membno)
         case H5T_ARRAY:
         case H5T_NCLASSES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class");
     } /*lint !e788 All appropriate cases are covered */
 
 done:
@@ -209,7 +209,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     /* Check arguments */
     assert(name);
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     /* Locate member by name */
     switch (dt->shared->type) {
@@ -236,7 +236,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
         case H5T_ARRAY:
         case H5T_NCLASSES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for this type")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for this type");
     } /*lint !e788 All appropriate cases are covered */
 
 done:

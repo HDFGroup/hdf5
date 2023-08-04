@@ -188,7 +188,7 @@ test_h5s_basic(void)
     {
         sid1 = H5Screate_simple(H5S_MAX_RANK + 1, dims3, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(sid1, FAIL, "H5Screate_simple");
 #if 0
     /*
@@ -222,7 +222,7 @@ test_h5s_basic(void)
     {
         sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(sid1, FAIL, "H5Screate_simple");
 
     dims1[0] = H5S_UNLIMITED;
@@ -233,7 +233,7 @@ test_h5s_basic(void)
     {
         ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sset_extent_simple");
 
     ret = H5Sclose(sid1);
@@ -413,7 +413,7 @@ test_h5s_null(void)
 
         ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Check to be sure we can't set a point selection on a null dataspace */
@@ -424,7 +424,7 @@ test_h5s_null(void)
         coord[0][0] = 0;
         ret         = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
     /* Create first dataset */
@@ -759,7 +759,7 @@ test_h5s_zero_dim(void)
             {
                 ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, wdata);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             VERIFY(ret, FAIL, "H5Dwrite");
         }
 
@@ -780,7 +780,7 @@ test_h5s_zero_dim(void)
             {
                 ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &val);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             VERIFY(ret, FAIL, "H5Dwrite");
         }
 
@@ -882,7 +882,7 @@ test_h5s_zero_dim(void)
             {
                 ret = H5Dset_extent(dset1, extend_dims);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             VERIFY(ret, FAIL, "H5Dset_extent");
         }
         ret = H5Pclose(plist_id);
@@ -1283,7 +1283,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
     {
         ret_id = H5Sdecode(sbuf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret_id, FAIL, "H5Sdecode");
 
     /* Encode the simple dataspace in a buffer with the fapl setting */
@@ -1475,7 +1475,7 @@ test_h5s_encode1(void)
     {
         ret_id = H5Sdecode(sbuf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret_id, FAIL, "H5Sdecode");
 
     /* Encode the simple dataspace in a buffer */

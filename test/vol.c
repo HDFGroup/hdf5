@@ -2431,7 +2431,7 @@ test_wrap_register(void)
     {
         wrap_id = H5VLwrap_register(vol_obj, H5I_GROUP);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5I_INVALID_HID != wrap_id)
         FAIL_PUTS_ERROR("should not be able to call H5VLwrap_register in an application");
@@ -2458,7 +2458,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_wrap_register() */
@@ -2529,7 +2529,7 @@ error:
         H5VLunregister_connector(vol_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_info_to_str() */
@@ -2608,7 +2608,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_query_optional() */

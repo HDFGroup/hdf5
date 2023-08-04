@@ -944,7 +944,7 @@ H5VM_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *
 
     /* Compute the coordinates from the offset */
     if (H5VM_array_calc_pre(offset, n, idx, coords) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute coordinates")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute coordinates");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1176,7 +1176,7 @@ src_smaller:
         do {
             /* Make operator callback */
             if ((*op)(tmp_dst_off, tmp_src_off, tmp_src_len, op_data) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTOPERATE, FAIL, "can't perform operation")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTOPERATE, FAIL, "can't perform operation");
 
             /* Accumulate number of bytes copied */
             acc_len += tmp_src_len;
@@ -1218,7 +1218,7 @@ dst_smaller:
         do {
             /* Make operator callback */
             if ((*op)(tmp_dst_off, tmp_src_off, tmp_dst_len, op_data) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTOPERATE, FAIL, "can't perform operation")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTOPERATE, FAIL, "can't perform operation");
 
             /* Accumulate number of bytes copied */
             acc_len += tmp_dst_len;
@@ -1260,7 +1260,7 @@ equal:
         do {
             /* Make operator callback */
             if ((*op)(tmp_dst_off, tmp_src_off, tmp_dst_len, op_data) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTOPERATE, FAIL, "can't perform operation")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTOPERATE, FAIL, "can't perform operation");
 
             /* Accumulate number of bytes copied */
             acc_len += tmp_dst_len;

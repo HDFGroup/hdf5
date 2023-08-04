@@ -1524,6 +1524,12 @@ main(void)
         else
             my_fapl_id = old_ff_fapl_id;
 
+        /* Add extra path to check for correct error process */
+        if (H5PLprepend("bogus") < 0) {
+            fprintf(stderr, "Could not prepend path:bogus\n");
+            TEST_ERROR;
+        }
+
         /* Reopen the file for testing data reading */
         if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, my_fapl_id)) < 0)
             TEST_ERROR;

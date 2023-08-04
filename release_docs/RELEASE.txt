@@ -59,7 +59,12 @@ New Features
 
     Library:
     --------
-    -
+    - Change the error handling for a not found path in the find plugin process.
+
+      While attempting to load a plugin the HDF5 library will fail if one of the
+      directories in the plugin paths does not exist, even if there are more paths
+      to check. Instead of exiting the function with an error, just logged the error
+      and continue processing the list of paths to check.
 
 
     Parallel Library:
@@ -116,6 +121,37 @@ Bug Fixes since HDF5-1.14.1 release
 ===================================
     Library
     -------
+    - Fixed CVE-2018-13867
+
+      A corrupt file containing an invalid local heap datablock address
+      could trigger an assert failure when the metadata cache attempted
+      to load the datablock from storage.
+
+      The local heap now verifies that the datablock address is valid
+      when the local heap header information is parsed.
+
+    - Fixed CVE-2018-11202
+
+      A malformed file could result in chunk index memory leaks. Under most
+      conditions (i.e., when the --enable-using-memchecker option is NOT
+      used), this would result in a small memory leak and and infinite loop
+      and abort when shutting down the library. The infinite loop would be
+      due to the "free list" package not being able to clear its resources
+      so the library couldn't shut down. When the "using a memory checker"
+      option is used, the free lists are disabled so there is just a memory
+      leak with no abort on library shutdown.
+
+      The chunk index resources are now correctly cleaned up when reading
+      misparsed files and valgrind confirms no memory leaks.
+
+    - Fixed an issue where an assert statement was converted to an
+      incorrect error check statement
+
+      An assert statement in the library dealing with undefined dataset data
+      fill values was converted to an improper error check that would always
+      trigger when a dataset's fill value was set to NULL (undefined). This
+      has now been fixed.
+
     - Fixed an assertion failure when attempting to use the Subfiling IOC
       VFD directly
 
@@ -171,7 +207,21 @@ Bug Fixes since HDF5-1.14.1 release
 
     Tools
     -----
-    -
+    - Fixed an issue in h5repack for variable-length typed datasets
+
+      When repacking datasets into a new file, h5repack tries to determines whether
+      it can use H5Ocopy to copy each dataset into the new file, or if it needs to
+      manually re-create the dataset, then read data from the old dataset and write
+      it to the new dataset. H5repack was previously using H5Ocopy for datasets with
+      variable-length datatypes, but this can be problematic if the global heap
+      addresses involved do not match exactly between the old and new files. These
+      addresses could change for a variety of reasons, such as the command-line options
+      provided to h5repack, how h5repack allocate space in the repacked file, etc.      
+      Since H5Ocopy does not currently perform any translation when these addresses
+      change, datasets that were repacked with H5Ocopy could become unreadable in the
+      new file. H5repack has been fixed to repack variable-length typed datasets without
+      using H5Ocopy to ensure that the new datasets always have the correct global heap
+      addresses.
 
 
     Performance

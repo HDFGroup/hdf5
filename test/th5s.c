@@ -218,7 +218,7 @@ test_h5s_basic(void)
     {
         sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(sid1, FAIL, "H5Screate_simple");
 
     dims1[0] = H5S_UNLIMITED;
@@ -229,7 +229,7 @@ test_h5s_basic(void)
     {
         ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sset_extent_simple");
 
     ret = H5Sclose(sid1);
@@ -3517,5 +3517,5 @@ cleanup_h5s(void)
         H5Fdelete(ZEROFILE, H5P_DEFAULT);
         H5Fdelete(VERBFNAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }
