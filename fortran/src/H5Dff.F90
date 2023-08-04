@@ -2383,17 +2383,15 @@ CONTAINS
 !! \brief Reads a raw data chunk directly from a dataset in a file into a buffer.
 !!
 !! \param dset_id   Identifier of the dataset to read from
-!! \param offset    Logical position of the chunk&apos;s first element in the dataspace, 1-based indices
+!! \param offset    Logical position of the chunk&apos;s first element in the dataspace, 0-based indices
 !! \param filters   Mask for identifying the filters in use
 !! \param buf       Buffer containing data to be read from the chunk
 !! \param hdferr    \fortran_error
 !! \param dxpl_id   Dataset transfer property list identifier
-!! \param use_c_indx Use C indexing (0-based indices and row-major order for buf and offset)
-!!                   Default: FALSE; 1-based indices and Column-major order, so will be transposed in HDF5 file.
 !!
 !! See C API: @ref H5Dread_chunk()
 !!
-  SUBROUTINE h5dread_chunk_f(dset_id, offset, filters, buf, hdferr, dxpl_id, use_c_indx)
+  SUBROUTINE h5dread_chunk_f(dset_id, offset, filters, buf, hdferr, dxpl_id)
     IMPLICIT NONE
 
     INTEGER(HID_T)    , INTENT(IN)  :: dset_id
@@ -2402,10 +2400,8 @@ CONTAINS
     TYPE(C_PTR)                     :: buf
     INTEGER           , INTENT(OUT) :: hdferr
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
-    LOGICAL           , INTENT(IN), OPTIONAL :: use_c_indx
 
     INTEGER(HID_T) :: dxpl_id_default
-    LOGICAL        :: use_c_indx_default = .FALSE.
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
     INTEGER(HSIZE_T) :: i, rank
 
@@ -2425,32 +2421,25 @@ CONTAINS
 
     dxpl_id_default = H5P_DEFAULT_F
     IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
-    IF (PRESENT(use_c_indx)) use_c_indx_default = use_c_indx
 
-    IF(use_c_indx_default .EQV. .FALSE.)THEN
+    rank = SIZE(offset, KIND=HSIZE_T)
 
-       rank = SIZE(offset, KIND=HSIZE_T)
-
-       ALLOCATE(offset_c(rank), STAT=hdferr)
-       IF (hdferr .NE. 0 ) THEN
-          hdferr = -1
-          RETURN
-       ENDIF
-
-       !
-       ! Reverse dimensions due to C-FORTRAN storage order and convert to 0-based indexing
-       !
-       DO i = 1, rank
-          offset_c(i) = offset(rank - i + 1) - 1
-       ENDDO
-
-       hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, offset_c, filters, buf))
-
-       DEALLOCATE(offset_c)
-
-    ELSE
-       hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, offset, filters, buf))
+    ALLOCATE(offset_c(rank), STAT=hdferr)
+    IF (hdferr .NE. 0 ) THEN
+       hdferr = -1
+       RETURN
     ENDIF
+
+    !
+    ! Reverse dimensions due to C-FORTRAN storage order
+    !
+    DO i = 1, rank
+       offset_c(i) = offset(rank - i + 1)
+    ENDDO
+
+    hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, offset_c, filters, buf))
+
+    DEALLOCATE(offset_c)
 
   END SUBROUTINE h5dread_chunk_f
 
@@ -2461,17 +2450,15 @@ CONTAINS
 !!
 !! \param dset_id    Identifier of the dataset to write to
 !! \param filters    Mask for identifying the filters in use
-!! \param offset     Logical position of the chunk&apos;s first element in the dataspace, 1-based indices
+!! \param offset     Logical position of the chunk&apos;s first element in the dataspace, 0-based indices
 !! \param data_size  Size of the actual data to be written in bytes
 !! \param buf        Buffer containing data to be written to the chunk
 !! \param hdferr     \fortran_error
 !! \param dxpl_id    Dataset transfer property list identifier
-!! \param use_c_indx Use C indexing (0-based indices and row-major order for buf and offset)
-!!                   Default: FALSE; 1-based indices and Column-major order, so will be transposed in HDF5 file.
 !!
 !! See C API: @ref H5Dwrite_chunk()
 !!
-  SUBROUTINE h5dwrite_chunk_f(dset_id, filters, offset, data_size, buf, hdferr, dxpl_id, use_c_indx)
+  SUBROUTINE h5dwrite_chunk_f(dset_id, filters, offset, data_size, buf, hdferr, dxpl_id)
     IMPLICIT NONE
 
     INTEGER(HID_T)    , INTENT(IN) :: dset_id
@@ -2481,10 +2468,8 @@ CONTAINS
     TYPE(C_PTR)                     :: buf
     INTEGER           , INTENT(OUT) :: hdferr
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
-    LOGICAL           , INTENT(IN), OPTIONAL :: use_c_indx
 
     INTEGER(HID_T) :: dxpl_id_default
-    LOGICAL        :: use_c_indx_default = .FALSE.
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
     INTEGER(HSIZE_T) :: i, rank
 
@@ -2506,34 +2491,25 @@ CONTAINS
 
     dxpl_id_default = H5P_DEFAULT_F
     IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
-    IF (PRESENT(use_c_indx)) use_c_indx_default = use_c_indx
 
-    IF(use_c_indx_default .EQV. .FALSE.)THEN
+    rank = SIZE(offset, KIND=HSIZE_T)
 
-       rank = SIZE(offset, KIND=HSIZE_T)
-
-       ALLOCATE(offset_c(rank), STAT=hdferr)
-       IF (hdferr .NE. 0 ) THEN
-          hdferr = -1
-          RETURN
-       ENDIF
-
-       !
-       ! Reverse dimensions due to C-FORTRAN storage order and convert to 0-based indexing
-       !
-       DO i = 1, rank
-          offset_c(i) = offset(rank - i + 1) - 1
-       ENDDO
-
-       hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset_c, data_size, buf, hdferr))
-
-       DEALLOCATE(offset_c)
-
-    ELSE
-
-       hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset, data_size, buf, hdferr))
-
+    ALLOCATE(offset_c(rank), STAT=hdferr)
+    IF (hdferr .NE. 0 ) THEN
+       hdferr = -1
+       RETURN
     ENDIF
+
+    !
+    ! Reverse dimensions due to C-FORTRAN storage order
+    !
+    DO i = 1, rank
+       offset_c(i) = offset(rank - i + 1)
+    ENDDO
+
+    hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset_c, data_size, buf, hdferr))
+
+    DEALLOCATE(offset_c)
 
   END SUBROUTINE h5dwrite_chunk_f
 

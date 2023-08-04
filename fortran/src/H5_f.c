@@ -525,10 +525,15 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5f_flags[18] = (int_f)H5F_LIBVER_ERROR;
     h5f_flags[19] = (int_f)H5F_LIBVER_NBOUNDS;
     h5f_flags[20] = (int_f)H5F_UNLIMITED;
-    h5f_flags[21] = (int_f)H5F_LIBVER_V18;
-    h5f_flags[22] = (int_f)H5F_LIBVER_V110;
-    h5f_flags[23] = (int_f)H5F_LIBVER_V112;
-    h5f_flags[24] = (int_f)H5F_LIBVER_V114;
+    h5f_flags[21] = (int_f)H5F_FSPACE_STRATEGY_FSM_AGGR;
+    h5f_flags[22] = (int_f)H5F_FSPACE_STRATEGY_PAGE;
+    h5f_flags[23] = (int_f)H5F_FSPACE_STRATEGY_AGGR;
+    h5f_flags[24] = (int_f)H5F_FSPACE_STRATEGY_NONE;
+    h5f_flags[25] = (int_f)H5F_FSPACE_STRATEGY_NTYPES;
+    h5f_flags[26] = (int_f)H5F_LIBVER_V18;
+    h5f_flags[27] = (int_f)H5F_LIBVER_V110;
+    h5f_flags[28] = (int_f)H5F_LIBVER_V112;
+    h5f_flags[29] = (int_f)H5F_LIBVER_V114;
 
     /*
      *  H5FD flags

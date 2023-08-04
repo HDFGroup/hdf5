@@ -566,16 +566,17 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN) :: size
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pset_userblock_c(prp_id, size) &
-            BIND(C,NAME='h5pset_userblock_c')
+       INTEGER FUNCTION H5Pset_userblock(prp_id, size) &
+            BIND(C,NAME='H5Pset_userblock')
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER(HSIZE_T), INTENT(IN) :: size
-       END FUNCTION h5pset_userblock_c
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T), VALUE :: size
+       END FUNCTION H5Pset_userblock
     END INTERFACE
 
-    hdferr = h5pset_userblock_c(prp_id, size)
+    hdferr = H5Pset_userblock(prp_id, size)
+
   END SUBROUTINE h5pset_userblock_f
 
 !>
@@ -595,15 +596,17 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(OUT) ::  block_size
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pget_userblock_c(prp_id, block_size) &
-            BIND(C,NAME='h5pget_userblock_c')
+       INTEGER FUNCTION H5Pget_userblock(prp_id, block_size) &
+            BIND(C,NAME='H5Pget_userblock')
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER(HSIZE_T), INTENT(OUT) :: block_size
-       END FUNCTION h5pget_userblock_c
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T)        :: block_size
+       END FUNCTION H5Pget_userblock
     END INTERFACE
-    hdferr = h5pget_userblock_c(prp_id,  block_size)
+
+    hdferr = H5Pget_userblock(prp_id,  block_size)
+
   END SUBROUTINE h5pget_userblock_f
 
 !>
@@ -6342,6 +6345,152 @@ END SUBROUTINE h5pget_virtual_dsetname_f
      hdferr = INT( H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause))
 
    END SUBROUTINE h5pget_no_selection_io_cause_f
+
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets the file space handling strategy and persisting free-space values for a file creation property list.
+!!
+!! \param plist_id  File creation property list identifier
+!! \param strategy  The file space handling strategy to be used. See: H5F_fspace_strategy_t
+!! \param persist   Indicates whether free space should be persistent or not
+!! \param threshold The smallest free-space section size that the free space manager will track
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Pset_file_space_strategy()
+!!
+   SUBROUTINE H5Pset_file_space_strategy_f(plist_id, strategy, persist, threshold, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+     INTEGER(C_INT)  , INTENT(IN)  :: strategy
+     LOGICAL         , INTENT(IN)  :: persist
+     INTEGER(HSIZE_T), INTENT(IN)  :: threshold
+     INTEGER         , INTENT(OUT) :: hdferr
+
+     LOGICAL(C_BOOL) :: c_persist
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pset_file_space_strategy(plist_id, strategy, persist, threshold) &
+             BIND(C, NAME='H5Pset_file_space_strategy')
+          IMPORT :: HID_T, HSIZE_T, C_INT, C_INT32_T, C_BOOL
+          IMPLICIT NONE
+          INTEGER(HID_T)  , VALUE :: plist_id
+          INTEGER(C_INT)  , VALUE :: strategy
+          LOGICAL(C_BOOL) , VALUE :: persist
+          INTEGER(HSIZE_T), VALUE :: threshold
+        END FUNCTION H5Pset_file_space_strategy
+     END INTERFACE
+
+     ! Transfer value of Fortran LOGICAL to C C_BOOL type
+     c_persist = persist
+
+     hdferr = INT( H5Pset_file_space_strategy(plist_id, strategy, c_persist, threshold) )
+
+   END SUBROUTINE H5Pset_file_space_strategy_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Gets the file space handling strategy and persisting free-space values for a file creation property list.
+!!
+!! \param plist_id  File creation property list identifier
+!! \param strategy  The file space handling strategy to be used.
+!! \param persist   Indicate whether free space should be persistent or not
+!! \param threshold The free-space section size threshold value
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Pget_file_space_strategy()
+!!
+   SUBROUTINE h5pget_file_space_strategy_f(plist_id, strategy, persist, threshold, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+     INTEGER(C_INT)  , INTENT(OUT) :: strategy
+     LOGICAL         , INTENT(OUT) :: persist
+     INTEGER(HSIZE_T), INTENT(OUT) :: threshold
+     INTEGER         , INTENT(OUT) :: hdferr
+
+     LOGICAL(C_BOOL) :: c_persist
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_file_space_strategy(plist_id, strategy, persist, threshold) &
+             BIND(C, NAME='H5Pget_file_space_strategy')
+          IMPORT :: HID_T, HSIZE_T, C_INT, C_INT32_T, C_BOOL
+          IMPLICIT NONE
+          INTEGER(HID_T), VALUE :: plist_id
+          INTEGER(C_INT)   :: strategy
+          LOGICAL(C_BOOL)  :: persist
+          INTEGER(HSIZE_T) :: threshold
+        END FUNCTION H5Pget_file_space_strategy
+     END INTERFACE
+
+     hdferr = INT( H5Pget_file_space_strategy(plist_id, strategy, c_persist, threshold) )
+
+     ! Transfer value of Fortran LOGICAL and C C_BOOL type
+     persist = .FALSE.
+     IF(hdferr .GE. 0) persist = c_persist
+
+   END SUBROUTINE h5pget_file_space_strategy_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets the file space page size for a file creation property list.
+!!
+!! \param prp_id   File creation property list identifier
+!! \param fsp_size File space page size
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pset_file_space_page_size()
+!!
+  SUBROUTINE h5pset_file_space_page_size_f(prp_id, fsp_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(HSIZE_T), INTENT(IN) :: fsp_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pset_file_space_page_size(prp_id, fsp_size) &
+            BIND(C,NAME='H5Pset_file_space_page_size')
+         IMPORT :: C_INT, HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T), VALUE :: fsp_size
+       END FUNCTION H5Pset_file_space_page_size
+    END INTERFACE
+
+    hdferr = INT(h5pset_file_space_page_size(prp_id, fsp_size))
+
+  END SUBROUTINE h5pset_file_space_page_size_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Gets the file space page size for a file creation property list.
+!!
+!! \param prp_id   File creation property list identifier
+!! \param fsp_size File space page size
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pget_file_space_page_size()
+!!
+  SUBROUTINE h5pget_file_space_page_size_f(prp_id, fsp_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(HSIZE_T), INTENT(OUT) :: fsp_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_file_space_page_size(prp_id, fsp_size) &
+            BIND(C,NAME='H5Pget_file_space_page_size')
+         IMPORT :: C_INT, HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: prp_id
+         INTEGER(HSIZE_T)      :: fsp_size
+       END FUNCTION H5Pget_file_space_page_size
+    END INTERFACE
+
+    hdferr = INT(h5pget_file_space_page_size(prp_id, fsp_size))
+
+  END SUBROUTINE h5pget_file_space_page_size_f
 
 END MODULE H5P
 

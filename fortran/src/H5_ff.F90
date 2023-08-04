@@ -58,7 +58,7 @@ MODULE H5LIB
   !
   ! H5F flags declaration
   !
-  INTEGER, PARAMETER :: H5F_FLAGS_LEN = 25
+  INTEGER, PARAMETER :: H5F_FLAGS_LEN = 30
   INTEGER, DIMENSION(1:H5F_FLAGS_LEN) :: H5F_flags
   !
   ! H5generic flags declaration
@@ -350,31 +350,36 @@ CONTAINS
     !
     ! H5F flags
     !
-    H5F_ACC_RDWR_F        = H5F_flags(1)
-    H5F_ACC_RDONLY_F      = H5F_flags(2)
-    H5F_ACC_TRUNC_F       = H5F_flags(3)
-    H5F_ACC_EXCL_F        = H5F_flags(4)
-    H5F_ACC_DEBUG_F       = H5F_flags(5)
-    H5F_SCOPE_LOCAL_F     = H5F_flags(6)
-    H5F_SCOPE_GLOBAL_F    = H5F_flags(7)
-    H5F_CLOSE_DEFAULT_F   = H5F_flags(8)
-    H5F_CLOSE_WEAK_F      = H5F_flags(9)
-    H5F_CLOSE_SEMI_F      = H5F_flags(10)
-    H5F_CLOSE_STRONG_F    = H5F_flags(11)
-    H5F_OBJ_FILE_F        = H5F_flags(12)
-    H5F_OBJ_DATASET_F     = H5F_flags(13)
-    H5F_OBJ_GROUP_F       = H5F_flags(14)
-    H5F_OBJ_DATATYPE_F    = H5F_flags(15)
-    H5F_OBJ_ALL_F         = H5F_flags(16)
-    H5F_LIBVER_EARLIEST_F = H5F_flags(17)
-    H5F_LIBVER_LATEST_F   = H5F_flags(18)
-    H5F_LIBVER_ERROR_F    = H5F_flags(19)
-    H5F_LIBVER_NBOUNDS_F  = H5F_flags(20)
-    H5F_UNLIMITED_F       = H5F_flags(21)
-    H5F_LIBVER_V18_F      = H5F_flags(22)
-    H5F_LIBVER_V110_F     = H5F_flags(23)
-    H5F_LIBVER_V112_F     = H5F_flags(24)
-    H5F_LIBVER_V114_F     = H5F_flags(25)
+    H5F_ACC_RDWR_F                 = H5F_flags(1)
+    H5F_ACC_RDONLY_F               = H5F_flags(2)
+    H5F_ACC_TRUNC_F                = H5F_flags(3)
+    H5F_ACC_EXCL_F                 = H5F_flags(4)
+    H5F_ACC_DEBUG_F                = H5F_flags(5)
+    H5F_SCOPE_LOCAL_F              = H5F_flags(6)
+    H5F_SCOPE_GLOBAL_F             = H5F_flags(7)
+    H5F_CLOSE_DEFAULT_F            = H5F_flags(8)
+    H5F_CLOSE_WEAK_F               = H5F_flags(9)
+    H5F_CLOSE_SEMI_F               = H5F_flags(10)
+    H5F_CLOSE_STRONG_F             = H5F_flags(11)
+    H5F_OBJ_FILE_F                 = H5F_flags(12)
+    H5F_OBJ_DATASET_F              = H5F_flags(13)
+    H5F_OBJ_GROUP_F                = H5F_flags(14)
+    H5F_OBJ_DATATYPE_F             = H5F_flags(15)
+    H5F_OBJ_ALL_F                  = H5F_flags(16)
+    H5F_LIBVER_EARLIEST_F          = H5F_flags(17)
+    H5F_LIBVER_LATEST_F            = H5F_flags(18)
+    H5F_LIBVER_ERROR_F             = H5F_flags(19)
+    H5F_LIBVER_NBOUNDS_F           = H5F_flags(20)
+    H5F_UNLIMITED_F                = H5F_flags(21)
+    H5F_FSPACE_STRATEGY_FSM_AGGR_F = H5F_flags(22)
+    H5F_FSPACE_STRATEGY_PAGE_F     = H5F_flags(23)
+    H5F_FSPACE_STRATEGY_AGGR_F     = H5F_flags(24)
+    H5F_FSPACE_STRATEGY_NONE_F     = H5F_flags(25)
+    H5F_FSPACE_STRATEGY_NTYPES_F   = H5F_flags(26)
+    H5F_LIBVER_V18_F               = H5F_flags(27)
+    H5F_LIBVER_V110_F              = H5F_flags(28)
+    H5F_LIBVER_V112_F              = H5F_flags(29)
+    H5F_LIBVER_V114_F              = H5F_flags(30)
     !
     ! H5generic flags
     !

@@ -66,14 +66,14 @@ MODULE H5F
 
 !> @brief H5F_info_t_free derived type.
   TYPE, BIND(C) :: H5F_info_free_t
-     INTEGER(C_INT)   :: version;   !< Version # of file free space management
-     INTEGER(HSIZE_T) :: meta_size; !< Free space manager metadata size
-     INTEGER(HSIZE_T) :: tot_space; !< Amount of free space in the file
+     INTEGER(C_INT)   :: version   !< Version # of file free space management
+     INTEGER(HSIZE_T) :: meta_size !< Free space manager metadata size
+     INTEGER(HSIZE_T) :: tot_space !< Amount of free space in the file
   END TYPE H5F_info_free_t
 
 !> @brief H5_ih_info_t derived type.
   TYPE, BIND(C) :: H5_ih_info_t
-     INTEGER(HSIZE_T) :: heap_size
+     INTEGER(HSIZE_T) :: heap_size  !< Heap size
      INTEGER(HSIZE_T) :: index_size !< btree and/or list
   END TYPE H5_ih_info_t
 
