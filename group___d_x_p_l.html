@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.d6ada85</span>
+   &#160;<span id="projectnumber">1.15.0.37c60bc</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1642,7 +1642,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___d_x_p_l.html#ga6f65ca81d8a10015513a69fe76c5d542" title="Allows the library to modify the contents of the write buffer.">H5Pset_modify_write_buf()</a> sets whether the library is allowed to modify the contents of write buffers passed to HDF5 API routines that are passed the dataset transfer property list <code>plist_id</code>. The default value for modify_write_buf is FALSE.</p>
-<p>This function can be used to allow the library to perform in-place type conversion on write operations to save memory space. This is currently only used for selection I/O operations, which are used for collective I/O with type conversion. After making an API call with this parameter set to TRUE, the contents of the write buffer are undefined.</p>
+<p>This function can be used to allow the library to perform in-place type conversion on write operations to save memory space. After making an API call with this parameter set to TRUE, the contents of the write buffer are undefined.</p>
 <dl class="section note"><dt>Note</dt><dd>When modify_write_buf is set to TRUE the library may violate the const qualifier on the API parameter for the write buffer.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.14.1 </dd></dl>
 
@@ -1868,7 +1868,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Aug 4 2023 00:33:12 for HDF5 by
+    <li class="footer">Generated on Sat Aug 5 2023 00:33:19 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
