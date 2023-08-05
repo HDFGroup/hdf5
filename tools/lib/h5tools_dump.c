@@ -149,14 +149,14 @@ const h5tools_dump_header_t h5tools_standardformat = {
     "}",  /*extlinkblockend */
     "{",  /*udlinkblockbegin */
     "}",  /*udlinkblockend */
-    "{",  /*strblockbegin */
-    "}",  /*strblockend */
-    "{",  /*enumblockbegin */
-    "}",  /*enumblockend */
+    "{",  /*DO NOT USE strblockbegin */
+    "}",  /*DO NOT USE strblockend */
+    "{",  /*DO NOT USEenumblockbegin */
+    "}",  /*DO NOT USEenumblockend */
     "{",  /*structblockbegin */
     "}",  /*structblockend */
-    "{",  /*vlenblockbegin */
-    "}",  /*vlenblockend */
+    "{",  /*DO NOT USEvlenblockbegin */
+    "}",  /*DO NOT USEvlenblockend */
     "{",  /*subsettingblockbegin */
     "}",  /*subsettingblockend */
     "(",  /*startblockbegin */
@@ -2236,7 +2236,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             is_vlstr = H5Tis_variable_str(tmp_type);
 
             curr_pos = ctx->cur_column;
-            h5tools_str_append(buffer, "H5T_STRING %s", h5tools_dump_header_format->strblockbegin);
+            h5tools_str_append(buffer, "H5T_STRING %s", h5tools_dump_header_format->structblockbegin);
             h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
 
@@ -2415,7 +2415,7 @@ found_string_type:
             if (H5Tclose(tmp_type) < 0)
                 H5TOOLS_ERROR((-1), "H5Tclose failed");
 
-            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->strblockend);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->structblockend);
             break;
 
         case H5T_BITFIELD:
@@ -2532,7 +2532,7 @@ found_string_type:
             if ((super = H5Tget_super(type)) < 0)
                 H5TOOLS_THROW((-1), "H5Tget_super failed");
 
-            h5tools_str_append(buffer, "H5T_ENUM %s", h5tools_dump_header_format->enumblockbegin);
+            h5tools_str_append(buffer, "H5T_ENUM %s", h5tools_dump_header_format->structblockbegin);
             h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
             ctx->indent_level++;
@@ -2556,7 +2556,7 @@ found_string_type:
             ctx->need_prefix = TRUE;
 
             h5tools_str_reset(buffer);
-            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->enumblockend);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->structblockend);
 
             break;
 
@@ -2564,14 +2564,14 @@ found_string_type:
             if ((super = H5Tget_super(type)) < 0)
                 H5TOOLS_THROW((-1), "H5Tget_super failed");
 
-            h5tools_str_append(buffer, "H5T_VLEN %s ", h5tools_dump_header_format->vlenblockbegin);
+            h5tools_str_append(buffer, "H5T_VLEN %s ", h5tools_dump_header_format->structblockbegin);
 
             h5tools_print_datatype(stream, buffer, info, ctx, super, TRUE);
 
             if (H5Tclose(super) < 0)
                 H5TOOLS_ERROR((-1), "H5Tclose failed");
 
-            h5tools_str_append(buffer, " %s", h5tools_dump_header_format->vlenblockend);
+            h5tools_str_append(buffer, " %s", h5tools_dump_header_format->structblockend);
 
             break;
 
