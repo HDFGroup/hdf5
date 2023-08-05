@@ -427,14 +427,14 @@ GROUP "/" {
       }
    }
    ATTRIBUTE "vlen" {
-      DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+      DATATYPE  H5T_VLEN { H5T_STD_I32LE }
       DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
       DATA {
       (0): (1), (2, 3)
       }
    }
    ATTRIBUTE "vlen2D" {
-      DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+      DATATYPE  H5T_VLEN { H5T_STD_I32LE }
       DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
       DATA {
       (0,0): (0), (1),
@@ -443,7 +443,7 @@ GROUP "/" {
       }
    }
    ATTRIBUTE "vlen3D" {
-      DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+      DATATYPE  H5T_VLEN { H5T_STD_I32LE }
       DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
       DATA {
       (0,0,0): (0), (1),
@@ -1039,14 +1039,14 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "vlen" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): (1), (2, 3)
          }
       }
       ATTRIBUTE "vlen2D" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): (0), (1),
@@ -1055,7 +1055,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "vlen3D" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): (0), (1),
@@ -1501,14 +1501,14 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "vlen" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): (1), (2, 3)
          }
       }
       ATTRIBUTE "vlen2D" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): (0), (1),
@@ -1517,7 +1517,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "vlen3D" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): (0), (1),
@@ -2109,14 +2109,14 @@ GROUP "/" {
          }
       }
       DATASET "vlen" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): (1), (2, 3)
          }
       }
       DATASET "vlen2D" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): (0), (1),
@@ -2125,7 +2125,7 @@ GROUP "/" {
          }
       }
       DATASET "vlen3D" {
-         DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+         DATATYPE  H5T_VLEN { H5T_STD_I32LE }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): (0), (1),
