@@ -90,11 +90,11 @@ static herr_t  H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_
                                        const void *bufs[]);
 
 static herr_t H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
-                                        uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[],
+                                        size_t count, hid_t mem_space_ids[], hid_t file_space_ids[],
                                         haddr_t offsets[], size_t element_sizes[], void *bufs[]);
 
 static herr_t H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
-                                         uint32_t count, hid_t mem_space_ids[], hid_t file_space_ids[],
+                                         size_t count, hid_t mem_space_ids[], hid_t file_space_ids[],
                                          haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
 
 static herr_t H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
@@ -110,7 +110,7 @@ static herr_t H5FD__mpio_vector_build_types(
     MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
     hbool_t *buf_type_created, MPI_Datatype *file_type, hbool_t *file_type_created, char *unused);
 
-static herr_t H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
+static herr_t H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces,
                                           H5_flexible_const_ptr_t mbb, H5S_t **file_spaces,
                                           H5S_t **mem_spaces, haddr_t offsets[],
                                           H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
@@ -2747,7 +2747,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5_flexible_const_ptr_t mbb,
+H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_const_ptr_t mbb,
                             H5S_t **file_spaces, H5S_t **mem_spaces, haddr_t offsets[],
                             H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
                             size_t dst_element_sizes[], MPI_Datatype *final_ftype,
@@ -2976,7 +2976,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t count,
+H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, size_t count,
                           hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
                           size_t element_sizes[], void *bufs[] /* out */)
 {
@@ -3282,7 +3282,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
             }
         }
 
-        if (H5FD_read_vector_from_selection(_file, type, count, mem_space_ids, file_space_ids, offsets,
+        if (H5FD_read_from_selection(_file, type, (uint32_t)count, mem_space_ids, file_space_ids, offsets,
                                             element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read vector from selection failed");
     }
@@ -3348,7 +3348,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t count,
+H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, size_t count,
                            hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
                            size_t element_sizes[], const void *bufs[])
 {
@@ -3403,7 +3403,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering: count=%u\n", __func__, file->mpi_rank, count);
+        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -3613,7 +3613,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
             }
         }
 
-        if (H5FD_write_vector_from_selection(_file, type, count, mem_space_ids, file_space_ids, offsets,
+        if (H5FD_write_from_selection(_file, type, (uint32_t)count, mem_space_ids, file_space_ids, offsets,
                                              element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write vector from selection failed");
     }

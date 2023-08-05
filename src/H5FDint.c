@@ -2701,13 +2701,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t mem_space_ids[],
+H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, size_t count, hid_t mem_space_ids[],
                            hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
                            H5_flexible_const_ptr_t bufs[], hid_t **s_mem_space_ids_ptr,
                            hid_t **s_file_space_ids_ptr, haddr_t **s_offsets_ptr,
                            size_t **s_element_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
 {
-    size_t                 count = (size_t)_count;
     size_t                 i;
     struct H5FD_srt_tmp_t *srt_tmp   = NULL;
     herr_t                 ret_value = SUCCEED; /* Return value */
