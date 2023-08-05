@@ -110,9 +110,8 @@ static herr_t H5FD__mpio_vector_build_types(
     MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
     hbool_t *buf_type_created, MPI_Datatype *file_type, hbool_t *file_type_created, char *unused);
 
-static herr_t H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces,
-                                          H5_flexible_const_ptr_t mbb, H5S_t **file_spaces,
-                                          H5S_t **mem_spaces, haddr_t offsets[],
+static herr_t H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_const_ptr_t mbb,
+                                          H5S_t **file_spaces, H5S_t **mem_spaces, haddr_t offsets[],
                                           H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
                                           size_t dst_element_sizes[], MPI_Datatype *final_ftype,
                                           hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
@@ -3283,7 +3282,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
         }
 
         if (H5FD_read_from_selection(_file, type, (uint32_t)count, mem_space_ids, file_space_ids, offsets,
-                                            element_sizes, bufs) < 0)
+                                     element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read vector from selection failed");
     }
 
@@ -3614,7 +3613,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
         }
 
         if (H5FD_write_from_selection(_file, type, (uint32_t)count, mem_space_ids, file_space_ids, offsets,
-                                             element_sizes, bufs) < 0)
+                                      element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write vector from selection failed");
     }
 

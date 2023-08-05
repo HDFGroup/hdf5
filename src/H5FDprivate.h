@@ -191,12 +191,11 @@ H5_DLL herr_t H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count
                                       H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr, size_t **s_sizes_ptr,
                                       H5_flexible_const_ptr_t **s_bufs_ptr);
 
-H5_DLL herr_t H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, size_t count,
-                                         hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
-                                         size_t element_sizes[], H5_flexible_const_ptr_t bufs[],
-                                         hid_t **s_mem_space_ids, hid_t **s_file_space_ids,
-                                         haddr_t **s_offsets_ptr, size_t **s_element_sizes_ptr,
-                                         H5_flexible_const_ptr_t **s_bufs_ptr);
+H5_DLL herr_t H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, size_t count, hid_t mem_space_ids[],
+                                         hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                         H5_flexible_const_ptr_t bufs[], hid_t **s_mem_space_ids,
+                                         hid_t **s_file_space_ids, haddr_t **s_offsets_ptr,
+                                         size_t **s_element_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr);
 H5_DLL herr_t H5FD_init(void);
 
 /* Function prototypes for MPI based VFDs*/

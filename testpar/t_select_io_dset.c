@@ -3449,11 +3449,11 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
         no_selection_io_cause_read_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
 
         /* Exception case: This will turn off selection I/O landing at H5FD__mpio_write() */
-        if ((test_mode & TEST_TCONV_BUF_TOO_SMALL)  && !(test_mode & TEST_IN_PLACE_TCONV))
+        if ((test_mode & TEST_TCONV_BUF_TOO_SMALL) && !(test_mode & TEST_IN_PLACE_TCONV))
             no_selection_io_cause_write_expected |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
         else
             no_selection_io_cause_write_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
-        
+
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
             P_TEST_ERROR;
         tid = H5T_NATIVE_UINT;
@@ -3468,8 +3468,7 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
                     P_TEST_ERROR;
             }
             /* In-place type conversion for read doesn't require modify_write_buf */
-
-        }  
+        }
     }
 
     /* Create 1d data space */

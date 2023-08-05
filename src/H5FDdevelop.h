@@ -199,9 +199,9 @@ typedef struct H5FD_class_t {
     herr_t (*read_selection)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, size_t count, hid_t mem_spaces[],
                              hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
                              void *bufs[] /*out*/);
-    herr_t (*write_selection)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, size_t count,
-                              hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
-                              size_t element_sizes[], const void *bufs[] /*in*/);
+    herr_t (*write_selection)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, size_t count, hid_t mem_spaces[],
+                              hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
+                              const void *bufs[] /*in*/);
     herr_t (*flush)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t (*lock)(H5FD_t *file, hbool_t rw);
