@@ -2731,11 +2731,20 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 }
             } /* end if */
             else if (!skip_missing_chunks) {
+                /* Set up nonexistent dataset info for (fill value) read from nonexistent chunk */
+                nonexistent_dset_info.layout_io_info.contig_piece_info = chunk_info;
+                nonexistent_dset_info.file_space                       = chunk_info->fspace;
+                nonexistent_dset_info.mem_space                        = chunk_info->mspace;
+                nonexistent_dset_info.nelmts                           = chunk_info->piece_points;
+
+                /* Set request_nelmts.  This is not normally set by the upper layers because selection I/O
+                 * usually does not use strip mining (H5D__scatgath_write), and instead allocates buffers
+                 * large enough for the entire I/O.  Set request_nelmts to be large enough for all selected
+                 * elements in this chunk because it must be at least that large */
+                nonexistent_dset_info.type_info.request_nelmts = nonexistent_dset_info.nelmts;
+
                 /* Perform the actual read operation from the nonexistent chunk
                  */
-                nonexistent_dset_info.file_space = chunk_info->fspace;
-                nonexistent_dset_info.mem_space  = chunk_info->mspace;
-                nonexistent_dset_info.nelmts     = chunk_info->piece_points;
                 if ((dset_info->io_ops.single_read)(&nonexistent_io_info, &nonexistent_dset_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed");
             } /* end if */
@@ -2866,9 +2875,10 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
                 /* Perform the actual read operation */
                 assert(chk_io_info->count == 1);
-                chk_io_info->dsets_info[0].file_space = chunk_info->fspace;
-                chk_io_info->dsets_info[0].mem_space  = chunk_info->mspace;
-                chk_io_info->dsets_info[0].nelmts     = chunk_info->piece_points;
+                chk_io_info->dsets_info[0].layout_io_info.contig_piece_info = chunk_info;
+                chk_io_info->dsets_info[0].file_space                       = chunk_info->fspace;
+                chk_io_info->dsets_info[0].mem_space                        = chunk_info->mspace;
+                chk_io_info->dsets_info[0].nelmts                           = chunk_info->piece_points;
                 if ((dset_info->io_ops.single_read)(chk_io_info, &chk_io_info->dsets_info[0]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed");
 
@@ -3055,10 +3065,19 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 /* Set up the storage buffer information for this chunk */
                 cpt_store.compact.buf = chunk;
 
+                /* Set up compact dataset info for write to cached chunk */
+                cpt_dset_info.layout_io_info.contig_piece_info = chunk_info;
+                cpt_dset_info.file_space                       = chunk_info->fspace;
+                cpt_dset_info.mem_space                        = chunk_info->mspace;
+                cpt_dset_info.nelmts                           = chunk_info->piece_points;
+
+                /* Set request_nelmts.  This is not normally set by the upper layers because selection I/O
+                 * usually does not use strip mining (H5D__scatgath_write), and instead allocates buffers
+                 * large enough for the entire I/O.  Set request_nelmts to be large enough for all selected
+                 * elements in this chunk because it must be at least that large */
+                cpt_dset_info.type_info.request_nelmts = cpt_dset_info.nelmts;
+
                 /* Perform the actual write operation */
-                cpt_dset_info.file_space = chunk_info->fspace;
-                cpt_dset_info.mem_space  = chunk_info->mspace;
-                cpt_dset_info.nelmts     = chunk_info->piece_points;
                 if ((dset_info->io_ops.single_write)(&cpt_io_info, &cpt_dset_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed");
 
@@ -3253,9 +3272,10 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
             /* Perform the actual write operation */
             assert(chk_io_info->count == 1);
-            chk_io_info->dsets_info[0].file_space = chunk_info->fspace;
-            chk_io_info->dsets_info[0].mem_space  = chunk_info->mspace;
-            chk_io_info->dsets_info[0].nelmts     = chunk_info->piece_points;
+            chk_io_info->dsets_info[0].layout_io_info.contig_piece_info = chunk_info;
+            chk_io_info->dsets_info[0].file_space                       = chunk_info->fspace;
+            chk_io_info->dsets_info[0].mem_space                        = chunk_info->mspace;
+            chk_io_info->dsets_info[0].nelmts                           = chunk_info->piece_points;
             if ((dset_info->io_ops.single_write)(chk_io_info, &chk_io_info->dsets_info[0]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed");
 
