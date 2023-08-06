@@ -2048,8 +2048,6 @@ done:
  *              Failure:    FAIL
  *                          One or more writes failed.
  *
- * Programmer:  NAF -- 5/19/21
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2101,8 +2099,6 @@ done:
  *              Failure:    FAIL
  *                          One or more writes failed.
  *
- * Programmer:  NAF -- 5/19/21
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2153,8 +2149,6 @@ done:
  *              Failure:    FAIL
  *                          One or more writes failed.
  *
- * Programmer:  NAF -- 5/19/21
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2204,8 +2198,6 @@ done:
  *
  *              Failure:    FAIL
  *                          One or more writes failed.
- *
- * Programmer:  NAF -- 5/19/21
  *
  *-------------------------------------------------------------------------
  */
@@ -2693,7 +2685,7 @@ done:
  *              of the selection I/O request, and load it into the new
  *              selections in sorted order.
  *
- *              Note that in this case, it is the callers responsibility
+ *              Note that in this case, it is the caller's responsibility
  *              to free the sorted vectors.
  *
  * Return:      SUCCEED/FAIL

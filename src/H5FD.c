@@ -1862,7 +1862,7 @@ done:
  *
  * Return:      Success:    SUCCEED
  *                          All reads have completed successfully, and
- *                          the results havce been into the supplied
+ *                          the results have been written into the supplied
  *                          buffers.
  *
  *              Failure:    FAIL
@@ -2059,7 +2059,7 @@ done:
  *
  * Return:      Success:    SUCCEED
  *                          All reads have completed successfully, and
- *                          the results havce been into the supplied
+ *                          the results have been written into the supplied
  *                          buffers.
  *
  *              Failure:    FAIL
