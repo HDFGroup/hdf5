@@ -260,6 +260,17 @@ Bug Fixes since HDF5-1.14.1 release
 
     Testing
     -------
+    - Fixed a testing failure in testphdf5 on Cray machines
+
+      On some Cray machines, what appears to be a bug in Cray MPICH was causing
+      calls to H5Fis_accessible to create a 0-byte file with strange Unix
+      permissions. This was causing an H5Fdelete file deletion test in the
+      testphdf5 program to fail due to a just-deleted HDF5 file appearing to
+      still be accessible on the file system. The issue in Cray MPICH has been
+      worked around for the time being by resetting the MPI_Info object on the
+      File Access Property List used to MPI_INFO_NULL before passing it to the
+      H5Fis_accessible call.
+
     - A bug was fixed in the HDF5 API test random datatype generation code
 
       A bug in the random datatype generation code could cause test failures
