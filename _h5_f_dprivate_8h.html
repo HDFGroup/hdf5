@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.fb38a8b</span>
+   &#160;<span id="projectnumber">1.15.0.291b2f7</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -174,6 +174,12 @@ Macros</h2></td></tr>
 <tr class="separator:add21007ac4b65c4b2dbdaa9c244807e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28285478795571211f38de2843a05611"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a28285478795571211f38de2843a05611">H5FD_DEFAULT_FILE_IMAGE_INFO</a></td></tr>
 <tr class="separator:a28285478795571211f38de2843a05611"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae6815375b2e13c715a0c124f8b95c4f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#aae6815375b2e13c715a0c124f8b95c4f">SKIP_NO_CB</a>&#160;&#160;&#160;0x00u</td></tr>
+<tr class="separator:aae6815375b2e13c715a0c124f8b95c4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f298fd60fd4b92778cf1cb26dfe6a73"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a8f298fd60fd4b92778cf1cb26dfe6a73">SKIP_SELECTION_CB</a>&#160;&#160;&#160;0x01u</td></tr>
+<tr class="separator:a8f298fd60fd4b92778cf1cb26dfe6a73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a399947bdf27f1e72963feb12da85040f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a399947bdf27f1e72963feb12da85040f">SKIP_VECTOR_CB</a>&#160;&#160;&#160;0x02u</td></tr>
+<tr class="separator:a399947bdf27f1e72963feb12da85040f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -261,10 +267,18 @@ Functions</h2></td></tr>
 <tr class="separator:ac522a16110bc46471705208752093a2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ef7b9bdeea9a543c8184c07d4f92aa8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a7ef7b9bdeea9a543c8184c07d4f92aa8">H5FD_write_selection</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, struct H5S_t **mem_spaces, struct H5S_t **file_spaces, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], const void *bufs[])</td></tr>
 <tr class="separator:a7ef7b9bdeea9a543c8184c07d4f92aa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22c414dff56ba9ad761426cf724e10cb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a22c414dff56ba9ad761426cf724e10cb">H5FD_read_selection_id</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], void *bufs[])</td></tr>
-<tr class="separator:a22c414dff56ba9ad761426cf724e10cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab652f818a3883e107e931e935c11e1ce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#ab652f818a3883e107e931e935c11e1ce">H5FD_write_selection_id</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], const void *bufs[])</td></tr>
-<tr class="separator:ab652f818a3883e107e931e935c11e1ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59a0185be70841af0d4f2bc55863a78f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a59a0185be70841af0d4f2bc55863a78f">H5FD_read_selection_id</a> (uint32_t skip_cb, <a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], void *bufs[])</td></tr>
+<tr class="separator:a59a0185be70841af0d4f2bc55863a78f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3c865294e76f33496321783884348bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#ae3c865294e76f33496321783884348bc">H5FD_write_selection_id</a> (uint32_t skip_cb, <a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], const void *bufs[])</td></tr>
+<tr class="separator:ae3c865294e76f33496321783884348bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a8d099043106040950c8f6678b25aec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a6a8d099043106040950c8f6678b25aec">H5FD_read_vector_from_selection</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], void *bufs[])</td></tr>
+<tr class="separator:a6a8d099043106040950c8f6678b25aec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8469ecaa19f67aaee366aa44e3d45167"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a8469ecaa19f67aaee366aa44e3d45167">H5FD_write_vector_from_selection</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], const void *bufs[])</td></tr>
+<tr class="separator:a8469ecaa19f67aaee366aa44e3d45167"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a665dc11107ef233a200e44dc142a6f69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a665dc11107ef233a200e44dc142a6f69">H5FD_read_from_selection</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], void *bufs[])</td></tr>
+<tr class="separator:a665dc11107ef233a200e44dc142a6f69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3148066e5a272d6e32d928afccf5ed56"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a3148066e5a272d6e32d928afccf5ed56">H5FD_write_from_selection</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, uint32_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], const void *bufs[])</td></tr>
+<tr class="separator:a3148066e5a272d6e32d928afccf5ed56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afcddc607ee5baaabb031b5ba184d71bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#afcddc607ee5baaabb031b5ba184d71bc">H5FD_flush</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> closing)</td></tr>
 <tr class="separator:afcddc607ee5baaabb031b5ba184d71bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83514c3dca9f2ed5ad725473b62693e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a83514c3dca9f2ed5ad725473b62693e0">H5FD_truncate</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> closing)</td></tr>
@@ -289,6 +303,8 @@ Functions</h2></td></tr>
 <tr class="separator:a97df9b245a82ab327b988e6deac8e8f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07d469bb64f9a4c6c08f8820729ac99a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a07d469bb64f9a4c6c08f8820729ac99a">H5FD_sort_vector_io_req</a> (<a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *vector_was_sorted, uint32_t count, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> types[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> addrs[], size_t sizes[], H5_flexible_const_ptr_t bufs[], <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> **s_types_ptr, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> **s_addrs_ptr, size_t **s_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)</td></tr>
 <tr class="separator:a07d469bb64f9a4c6c08f8820729ac99a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1d48c048076645e2e1a888b99b10780"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#ab1d48c048076645e2e1a888b99b10780">H5FD_sort_selection_io_req</a> (<a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *selection_was_sorted, size_t count, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> mem_space_ids[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file_space_ids[], <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offsets[], size_t element_sizes[], H5_flexible_const_ptr_t bufs[], <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> **s_mem_space_ids, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> **s_file_space_ids, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> **s_offsets_ptr, size_t **s_element_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)</td></tr>
+<tr class="separator:ab1d48c048076645e2e1a888b99b10780"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab88ecc860e4cabb8dacc4e0f8c57682d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#ab88ecc860e4cabb8dacc4e0f8c57682d">H5FD_init</a> (void)</td></tr>
 <tr class="separator:ab88ecc860e4cabb8dacc4e0f8c57682d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a044be42750e8bb8213e2267fc45ea16d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dprivate_8h.html#a044be42750e8bb8213e2267fc45ea16d">H5FD_mpi_MPIOff_to_haddr</a> (MPI_Offset mpi_off)</td></tr>
@@ -372,6 +388,48 @@ Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define H5FD_MPI_XFER_MEM_MPI_TYPE_NAME&#160;&#160;&#160;&quot;H5FD_mpi_mem_mpi_type&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aae6815375b2e13c715a0c124f8b95c4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae6815375b2e13c715a0c124f8b95c4f">&#9670;&nbsp;</a></span>SKIP_NO_CB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SKIP_NO_CB&#160;&#160;&#160;0x00u</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8f298fd60fd4b92778cf1cb26dfe6a73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f298fd60fd4b92778cf1cb26dfe6a73">&#9670;&nbsp;</a></span>SKIP_SELECTION_CB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SKIP_SELECTION_CB&#160;&#160;&#160;0x01u</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a399947bdf27f1e72963feb12da85040f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a399947bdf27f1e72963feb12da85040f">&#9670;&nbsp;</a></span>SKIP_VECTOR_CB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SKIP_VECTOR_CB&#160;&#160;&#160;0x02u</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1427,6 +1485,70 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a665dc11107ef233a200e44dc142a6f69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a665dc11107ef233a200e44dc142a6f69">&#9670;&nbsp;</a></span>H5FD_read_from_selection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_read_from_selection </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>mem_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>file_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>&#160;</td>
+          <td class="paramname"><em>offsets</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>element_sizes</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>bufs</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ac522a16110bc46471705208752093a2f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac522a16110bc46471705208752093a2f">&#9670;&nbsp;</a></span>H5FD_read_selection()</h2>
 
@@ -1491,8 +1613,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a22c414dff56ba9ad761426cf724e10cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a22c414dff56ba9ad761426cf724e10cb">&#9670;&nbsp;</a></span>H5FD_read_selection_id()</h2>
+<a id="a59a0185be70841af0d4f2bc55863a78f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59a0185be70841af0d4f2bc55863a78f">&#9670;&nbsp;</a></span>H5FD_read_selection_id()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1500,6 +1622,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_read_selection_id </td>
           <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>skip_cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *&#160;</td>
           <td class="paramname"><em>file</em>, </td>
         </tr>
@@ -1590,6 +1718,70 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>sizes</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>bufs</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6a8d099043106040950c8f6678b25aec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a8d099043106040950c8f6678b25aec">&#9670;&nbsp;</a></span>H5FD_read_vector_from_selection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_read_vector_from_selection </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>mem_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>file_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>&#160;</td>
+          <td class="paramname"><em>offsets</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>element_sizes</em>[], </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1929,6 +2121,94 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ab1d48c048076645e2e1a888b99b10780"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1d48c048076645e2e1a888b99b10780">&#9670;&nbsp;</a></span>H5FD_sort_selection_io_req()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_sort_selection_io_req </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *&#160;</td>
+          <td class="paramname"><em>selection_was_sorted</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>mem_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>file_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>&#160;</td>
+          <td class="paramname"><em>offsets</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>element_sizes</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">H5_flexible_const_ptr_t&#160;</td>
+          <td class="paramname"><em>bufs</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> **&#160;</td>
+          <td class="paramname"><em>s_mem_space_ids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> **&#160;</td>
+          <td class="paramname"><em>s_file_space_ids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> **&#160;</td>
+          <td class="paramname"><em>s_offsets_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t **&#160;</td>
+          <td class="paramname"><em>s_element_sizes_ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">H5_flexible_const_ptr_t **&#160;</td>
+          <td class="paramname"><em>s_bufs_ptr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a07d469bb64f9a4c6c08f8820729ac99a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a07d469bb64f9a4c6c08f8820729ac99a">&#9670;&nbsp;</a></span>H5FD_sort_vector_io_req()</h2>
 
@@ -2161,6 +2441,70 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a3148066e5a272d6e32d928afccf5ed56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3148066e5a272d6e32d928afccf5ed56">&#9670;&nbsp;</a></span>H5FD_write_from_selection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_write_from_selection </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>mem_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>file_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>&#160;</td>
+          <td class="paramname"><em>offsets</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>element_sizes</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>bufs</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a7ef7b9bdeea9a543c8184c07d4f92aa8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7ef7b9bdeea9a543c8184c07d4f92aa8">&#9670;&nbsp;</a></span>H5FD_write_selection()</h2>
 
@@ -2225,8 +2569,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ab652f818a3883e107e931e935c11e1ce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab652f818a3883e107e931e935c11e1ce">&#9670;&nbsp;</a></span>H5FD_write_selection_id()</h2>
+<a id="ae3c865294e76f33496321783884348bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3c865294e76f33496321783884348bc">&#9670;&nbsp;</a></span>H5FD_write_selection_id()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2234,6 +2578,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_write_selection_id </td>
           <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>skip_cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *&#160;</td>
           <td class="paramname"><em>file</em>, </td>
         </tr>
@@ -2341,13 +2691,77 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a8469ecaa19f67aaee366aa44e3d45167"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8469ecaa19f67aaee366aa44e3d45167">&#9670;&nbsp;</a></span>H5FD_write_vector_from_selection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FD_write_vector_from_selection </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>mem_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>file_space_ids</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>&#160;</td>
+          <td class="paramname"><em>offsets</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>element_sizes</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>bufs</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="_h5_f_dprivate_8h.html">H5FDprivate.h</a></li>
-    <li class="footer">Generated on Sun Aug 6 2023 00:31:07 for HDF5 by
+    <li class="footer">Generated on Tue Aug 8 2023 00:33:49 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
