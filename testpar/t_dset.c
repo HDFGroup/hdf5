@@ -3356,7 +3356,7 @@ actual_io_mode_tests(void)
     ret = H5Pclose(dxpl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
-    if (selection_io_mode != H5D_SELECTION_IO_MODE_ON) {
+    if (selection_io_mode == H5D_SELECTION_IO_MODE_OFF) {
         test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
 
         /*

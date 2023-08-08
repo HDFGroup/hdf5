@@ -62,17 +62,17 @@
 
 /*************************************************************************
  *
- * H5FD_vsrt_tmp_t
+ * H5FD_srt_tmp_t
  *
- * Structure used to store vector I/O request addresses and the associated
+ * Structure used to store I/O request addresses and the associated
  * indexes in the addrs[] array for the purpose of determine the sorted
  * order.
  *
- * This is done by allocating an array of H5FD_vsrt_tmp_t of length
+ * This is done by allocating an array of H5FD_srt_tmp_t of length
  * count, loading it with the contents of the addrs[] array and the
  * associated indices, and then sorting it.
  *
- * This sorted array of H5FD_vsrt_tmp_t is then used to populate sorted
+ * This sorted array of H5FD_srt_tmp_t is then used to populate sorted
  * versions of the types[], addrs[], sizes[] and bufs[] vectors.
  *
  * addr:        haddr_t containing the value of addrs[i],
@@ -82,10 +82,10 @@
  *
  *************************************************************************/
 
-typedef struct H5FD_vsrt_tmp_t {
+typedef struct H5FD_srt_tmp_t {
     haddr_t addr;
     size_t  index;
-} H5FD_vsrt_tmp_t;
+} H5FD_srt_tmp_t;
 
 /* Information needed for iterating over the registered VFD hid_t IDs.
  * The name or value of the new VFD that is being registered is stored
@@ -109,12 +109,14 @@ typedef struct H5FD_get_driver_ud_t {
 /* Local Prototypes */
 /********************/
 static int    H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data);
-static herr_t H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                             H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
-                                             size_t element_sizes[], void *bufs[] /* out */);
-static herr_t H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                              H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
-                                              size_t element_sizes[], const void *bufs[]);
+static herr_t H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type,
+                                             hid_t dxpl_id, uint32_t count, H5S_t **mem_spaces,
+                                             H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
+                                             void *bufs[] /* out */);
+static herr_t H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type,
+                                              hid_t dxpl_id, uint32_t count, H5S_t **mem_spaces,
+                                              H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
+                                              const void *bufs[]);
 
 /*********************/
 /* Package Variables */
@@ -734,8 +736,8 @@ done:
  * Function:    H5FD__read_selection_translate
  *
  * Purpose:     Translates a selection read call to a vector read call if
- *              vector reads are supported, or a series of scalar read
- *              calls otherwise.
+ *              vector reads are supported and !skip_vector_cb,
+ *              or a series of scalar read calls otherwise.
  *
  * Return:      Success:    SUCCEED
  *                          All reads have completed successfully, and
@@ -748,8 +750,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                               H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
+H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                               uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                size_t element_sizes[], void *bufs[] /* out */)
 {
     hbool_t         extend_sizes = FALSE;
@@ -797,7 +799,7 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     assert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
-    use_vector = file->cls->read_vector != NULL;
+    use_vector = (file->cls->read_vector != NULL) && (!skip_vector_cb);
 
     if (count > 0) {
         /* Verify that the first elements of the element_sizes and bufs arrays are
@@ -1063,8 +1065,8 @@ done:
  *              If the underlying VFD supports selection reads, pass the
  *              call through directly.
  *
- *              If it doesn't, convert the vector read into a sequence
- *              of individual reads.
+ *              If it doesn't, convert the selection read into a sequence
+ *              of vector or scalar reads.
  *
  * Return:      Success:    SUCCEED
  *                          All reads have completed successfully, and
@@ -1189,8 +1191,8 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
         /* Otherwise, implement the selection read as a sequence of regular
          * or vector read calls.
          */
-        if (H5FD__read_selection_translate(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                           element_sizes, bufs) < 0)
+        if (H5FD__read_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces,
+                                           offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed");
 
 done:
@@ -1228,6 +1230,15 @@ done:
  * Purpose:     Like H5FD_read_selection(), but takes hid_t arrays instead
  *              of H5S_t * arrays for the dataspaces.
  *
+ *              Depending on the parameter skip_cb which is translated into
+ *              skip_selection_cb and skip_vector_cb:
+ *
+ *              --If the underlying VFD supports selection reads and !skip_selection_cb,
+ *                pass the call through directly.
+ *
+ *              --If it doesn't, convert the selection reads into a sequence of vector or
+ *                scalar reads depending on skip_vector_cb.
+ *
  * Return:      Success:    SUCCEED
  *                          All reads have completed successfully, and
  *                          the results havce been into the supplied
@@ -1239,7 +1250,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
                        void *bufs[] /* out */)
 {
@@ -1250,6 +1261,8 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
     H5S_t  **file_spaces = file_spaces_local;
     hid_t    dxpl_id     = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
+    uint32_t skip_selection_cb;
+    uint32_t skip_vector_cb;
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1281,6 +1294,9 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
         HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
+
+    skip_selection_cb = skip_cb & SKIP_SELECTION_CB;
+    skip_vector_cb    = skip_cb & SKIP_VECTOR_CB;
 
     if (file->base_addr > 0) {
 
@@ -1320,7 +1336,7 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
     }
 
     /* if the underlying VFD supports selection read, make the call */
-    if (file->cls->read_selection) {
+    if (!skip_selection_cb && file->cls->read_selection) {
         if ((file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                         element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
@@ -1348,8 +1364,9 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__read_selection_translate(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                           element_sizes, bufs) < 0)
+
+        if (H5FD__read_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
+                                           file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed");
     }
 
@@ -1378,8 +1395,8 @@ done:
  * Function:    H5FD__write_selection_translate
  *
  * Purpose:     Translates a selection write call to a vector write call
- *              if vector writes are supported, or a series of scalar
- *              write calls otherwise.
+ *              if vector writes are supported and !skip_vector_cb,
+ *              or a series of scalar write calls otherwise.
  *
  * Return:      Success:    SUCCEED
  *                          All writes have completed successfully.
@@ -1390,8 +1407,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
+H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                                uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                 size_t element_sizes[], const void *bufs[])
 {
     hbool_t         extend_sizes = FALSE;
@@ -1439,7 +1456,7 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     assert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
-    use_vector = file->cls->write_vector != NULL;
+    use_vector = (file->cls->write_vector != NULL) && (!skip_vector_cb);
 
     if (count > 0) {
         /* Verify that the first elements of the element_sizes and bufs arrays are
@@ -1705,8 +1722,8 @@ done:
  *              If the underlying VFD supports selection writes, pass the
  *              call through directly.
  *
- *              If it doesn't, convert the vector write into a sequence
- *              of individual writes.
+ *              If it doesn't, convert the selection write into a sequence
+ *              of vector or scalar writes.
  *
  * Return:      Success:    SUCCEED
  *                          All writes have completed successfully.
@@ -1823,8 +1840,9 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
         /* Otherwise, implement the selection write as a sequence of regular
          * or vector write calls.
          */
-        if (H5FD__write_selection_translate(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                            element_sizes, bufs) < 0)
+
+        if (H5FD__write_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces,
+                                            offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed");
 
 done:
@@ -1862,6 +1880,15 @@ done:
  * Purpose:     Like H5FD_write_selection(), but takes hid_t arrays
  *              instead of H5S_t * arrays for the dataspaces.
  *
+ *              Depending on the parameter skip_cb which is translated into
+ *              skip_selection_cb and skip_vector_cb:
+ *
+ *              --If the underlying VFD supports selection writes and !skip_selection_cb,
+ *                pass the call through directly.
+ *
+ *              --If it doesn't, convert the selection writes into a sequence of vector or
+ *                scalar reads depending on skip_vector_cb.
+ *
  * Return:      Success:    SUCCEED
  *                          All writes have completed successfully.
  *
@@ -1871,8 +1898,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
-                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t count,
+                        hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                        size_t element_sizes[], const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
     H5S_t   *mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
@@ -1881,6 +1909,8 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
     H5S_t  **file_spaces = file_spaces_local;
     hid_t    dxpl_id     = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
+    uint32_t skip_selection_cb;
+    uint32_t skip_vector_cb;
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1912,6 +1942,9 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
         HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
+
+    skip_selection_cb = skip_cb & SKIP_SELECTION_CB;
+    skip_vector_cb    = skip_cb & SKIP_VECTOR_CB;
 
     if (file->base_addr > 0) {
 
@@ -1945,7 +1978,7 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
     }
 
     /* if the underlying VFD supports selection write, make the call */
-    if (file->cls->write_selection) {
+    if (!skip_selection_cb && file->cls->write_selection) {
         if ((file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                          element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
@@ -1973,8 +2006,9 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__write_selection_translate(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                            element_sizes, bufs) < 0)
+
+        if (H5FD__write_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
+                                            file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed");
     }
 
@@ -1998,6 +2032,209 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_write_selection_id() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_read_vector_from_selection
+ *
+ * Purpose:     Internal routine for H5FDread_vector_from_selection()
+ *
+ *              It will translate the selection read to a vector read call
+ *              if vector reads are supported, or a series of scalar read
+ *              calls otherwise.
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          One or more writes failed.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_read_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                void *bufs[])
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
+
+    /* Verify that the first elements of the element_sizes and bufs arrays are
+     * valid. */
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_read_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                               element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_read_vector_from_selection() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_write_vector_from_selection
+ *
+ * Purpose:     Internal routine for H5FDwrite_vector_from_selection()
+ *
+ *              It will translate the selection write to a vector write call
+ *              if vector writes are supported, or a series of scalar write
+ *              calls otherwise.
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          One or more writes failed.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_write_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                 hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                 const void *bufs[])
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
+
+    /* Verify that the first elements of the element_sizes and bufs arrays are
+     * valid. */
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_write_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                                element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_write_vector_from_selection() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_read_from_selection
+ *
+ * Purpose:     Internal routine for H5FDread_from_selection()
+ *
+ *              It will translate the selection read to a series of
+ *              scalar read calls.
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          One or more writes failed.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_read_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                         hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
+
+    /* Verify that the first elements of the element_sizes and bufs arrays are
+     * valid. */
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_read_selection_id(SKIP_SELECTION_CB | SKIP_VECTOR_CB, file, type, count, mem_space_ids,
+                               file_space_ids, offsets, element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed");
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_read_from_selection() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_write_from_selection
+ *
+ * Purpose:     Internal routine for H5FDwrite_from_selection()
+ *
+ *               It will translate the selection write to a series of
+ *               scalar write calls.
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          One or more writes failed.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_write_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                          hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                          const void *bufs[])
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
+
+    /* Verify that the first elements of the element_sizes and bufs arrays are
+     * valid. */
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_write_selection_id(SKIP_SELECTION_CB | SKIP_VECTOR_CB, file, type, count, mem_space_ids,
+                                file_space_ids, offsets, element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed");
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_write_from_selection() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_set_eoa
@@ -2138,6 +2375,119 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_driver_query() */
 
+/*------------------------------------------------------------------------
+ * Function: H5FD__vstr_tmp_cmp()
+ *
+ * Purpose:  This is the comparison callback function used by qsort()
+ *           in H5FD__sort_io_req_real( )
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD__srt_tmp_cmp(const void *element_1, const void *element_2)
+{
+    haddr_t addr_1    = ((const H5FD_srt_tmp_t *)element_1)->addr;
+    haddr_t addr_2    = ((const H5FD_srt_tmp_t *)element_2)->addr;
+    int     ret_value = 0; /* Return value */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    assert(H5_addr_defined(addr_1));
+    assert(H5_addr_defined(addr_2));
+
+    /* Compare the addresses */
+    if (H5_addr_gt(addr_1, addr_2))
+        ret_value = 1;
+    else if (H5_addr_lt(addr_1, addr_2))
+        ret_value = -1;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__srt_tmp_cmp() */
+
+/*-------------------------------------------------------------------------
+ *  Function:    H5FD__sort_io_req_real()
+ *
+ *  Purpose:     Scan the addrs array to see if it is sorted.
+ *
+ *               If sorted, return TRUE in *was_sorted.
+ *
+ *               If not sorted, use qsort() to sort the array.
+ *               Do this by allocating an array of struct H5FD_srt_tmp_t,
+ *               where each instance of H5FD_srt_tmp_t has two fields,
+ *               addr and index.  Load the array with the contents of the
+ *               addrs array and the index of the associated entry.
+ *               Then sort the array using qsort().
+ *               Return *FALSE in was_sorted.
+ *
+ *               This is a common routine used by:
+ *               --H5FD_sort_vector_io_req ()
+ *               --H5FD_sort_selection_io_req()
+ *
+ *  Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct H5FD_srt_tmp_t **srt_tmp)
+{
+    size_t i;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+
+    /* scan the offsets array to see if it is sorted */
+    for (i = 1; i < count; i++) {
+        assert(H5_addr_defined(addrs[i - 1]));
+
+        if (H5_addr_gt(addrs[i - 1], addrs[i]))
+            break;
+        else if (H5_addr_eq(addrs[i - 1], addrs[i]))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in selections");
+    }
+
+    /* if we traversed the entire array without breaking out, then
+     * the array was already sorted */
+    if (i >= count)
+        *was_sorted = TRUE;
+    else
+        *was_sorted = FALSE;
+
+    if (!(*was_sorted)) {
+        size_t srt_tmp_size;
+
+        srt_tmp_size = (count * sizeof(struct H5FD_srt_tmp_t));
+
+        if (NULL == (*srt_tmp = (H5FD_srt_tmp_t *)malloc(srt_tmp_size)))
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp");
+
+        for (i = 0; i < count; i++) {
+            (*srt_tmp)[i].addr  = addrs[i];
+            (*srt_tmp)[i].index = i;
+        }
+
+        /* sort the srt_tmp array */
+        qsort(*srt_tmp, count, sizeof(struct H5FD_srt_tmp_t), H5FD__srt_tmp_cmp);
+
+        /* verify no duplicate entries */
+        i = 1;
+
+        for (i = 1; i < count; i++) {
+            assert(H5_addr_lt((*srt_tmp)[i - 1].addr, (*srt_tmp)[i].addr));
+
+            if (H5_addr_eq(addrs[i - 1], addrs[i]))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addrs in array");
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5FD__sort_io_req_real() */
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_sort_vector_io_req
  *
@@ -2169,38 +2519,15 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
  *
  *-------------------------------------------------------------------------
  */
-
-static int
-H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
-{
-    haddr_t addr_1    = ((const H5FD_vsrt_tmp_t *)element_1)->addr;
-    haddr_t addr_2    = ((const H5FD_vsrt_tmp_t *)element_2)->addr;
-    int     ret_value = 0; /* Return value */
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Sanity checks */
-    assert(H5_addr_defined(addr_1));
-    assert(H5_addr_defined(addr_2));
-
-    /* Compare the addresses */
-    if (H5_addr_gt(addr_1, addr_2))
-        ret_value = 1;
-    else if (H5_addr_lt(addr_1, addr_2))
-        ret_value = -1;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__vsrt_tmp_cmp() */
-
 herr_t
 H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t types[], haddr_t addrs[],
                         size_t sizes[], H5_flexible_const_ptr_t bufs[], H5FD_mem_t **s_types_ptr,
                         haddr_t **s_addrs_ptr, size_t **s_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
 {
-    herr_t                  ret_value = SUCCEED; /* Return value */
-    size_t                  count     = (size_t)_count;
-    size_t                  i;
-    struct H5FD_vsrt_tmp_t *srt_tmp = NULL;
+    herr_t                 ret_value = SUCCEED; /* Return value */
+    size_t                 count     = (size_t)_count;
+    size_t                 i;
+    struct H5FD_srt_tmp_t *srt_tmp = NULL;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2224,22 +2551,12 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
     assert((count == 0) || ((s_sizes_ptr) && (NULL == *s_sizes_ptr)));
     assert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
 
-    /* scan the addrs array to see if it is sorted */
-    for (i = 1; i < count; i++) {
-        assert(H5_addr_defined(addrs[i - 1]));
-
-        if (H5_addr_gt(addrs[i - 1], addrs[i]))
-            break;
-        else if (H5_addr_eq(addrs[i - 1], addrs[i]))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector");
-    }
-
-    /* if we traversed the entire array without breaking out, then
-     * the array was already sorted */
-    if (i >= count)
-        *vector_was_sorted = TRUE;
-    else
-        *vector_was_sorted = FALSE;
+    /* Sort the addrs array in increasing addr order, while
+     * maintaining the association between each addr, and the
+     * sizes[], types[], and bufs[] values at the same index.
+     */
+    if (H5FD__sort_io_req_real(count, addrs, vector_was_sorted, &srt_tmp) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sorting error in selection offsets");
 
     if (*vector_was_sorted) {
 
@@ -2250,46 +2567,14 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
     }
     else {
 
-        /* must sort the addrs array in increasing addr order, while
-         * maintaining the association between each addr, and the
-         * sizes[], types[], and bufs[] values at the same index.
-         *
-         * Do this by allocating an array of struct H5FD_vsrt_tmp_t, where
-         * each instance of H5FD_vsrt_tmp_t has two fields, addr and index.
-         * Load the array with the contents of the addrs array and
-         * the index of the associated entry. Sort the array, allocate
-         * the s_types_ptr, s_addrs_ptr, s_sizes_ptr, and s_bufs_ptr
+        /*
+         * Allocate the s_types_ptr, s_addrs_ptr, s_sizes_ptr, and s_bufs_ptr
          * arrays and populate them using the mapping provided by
-         * the sorted array of H5FD_vsrt_tmp_t.
+         * the sorted array of H5FD_srt_tmp_t.
          */
         size_t j;
         size_t fixed_size_index = count;
         size_t fixed_type_index = count;
-        size_t srt_tmp_size;
-
-        srt_tmp_size = (count * sizeof(struct H5FD_vsrt_tmp_t));
-
-        if (NULL == (srt_tmp = (H5FD_vsrt_tmp_t *)malloc(srt_tmp_size)))
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp");
-
-        for (i = 0; i < count; i++) {
-            srt_tmp[i].addr  = addrs[i];
-            srt_tmp[i].index = i;
-        }
-
-        /* sort the srt_tmp array */
-        qsort(srt_tmp, count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
-
-        /* verify no duplicate entries */
-        i = 1;
-
-        for (i = 1; i < count; i++) {
-            assert(H5_addr_lt(srt_tmp[i - 1].addr, srt_tmp[i].addr));
-
-            if (H5_addr_eq(addrs[i - 1], addrs[i]))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector");
-        }
 
         if ((NULL == (*s_types_ptr = (H5FD_mem_t *)malloc(count * sizeof(H5FD_mem_t)))) ||
             (NULL == (*s_addrs_ptr = (haddr_t *)malloc(count * sizeof(haddr_t)))) ||
@@ -2377,6 +2662,187 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_sort_vector_io_req() */
+
+/*-------------------------------------------------------------------------
+ * Purpose:     Determine whether the supplied selection I/O request is
+ *              sorted.
+ *
+ *              if is is, set *selection_was_sorted to TRUE, set:
+ *
+ *                  *s_mem_space_ids_ptr  = mem_space_ids;
+ *                  *s_file_space_ids_ptr = file_space_ids;
+ *                  *s_offsets_ptr        = offsets;
+ *                  *s_element_sizes_ptr  = element_sizes;
+ *                  *s_bufs_ptr           = bufs;
+ *
+ *              and return.
+ *
+ *              If it is not sorted, duplicate the mem_space_ids, file_space_ids,
+ *              offsets, element_sizes and bufs arrays, storing the base
+ *              addresses of the new arrays in *s_mem_space_ids_ptr,
+ *              s_file_space_ids_ptr, s_offsets_ptr, *s_element_sizes_ptr,
+ *              and s_bufs_ptr respectively.  Determine the sorted order
+ *              of the selection I/O request, and load it into the new
+ *              selections in sorted order.
+ *
+ *              Note that in this case, it is the caller's responsibility
+ *              to free the sorted vectors.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, size_t count, hid_t mem_space_ids[],
+                           hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                           H5_flexible_const_ptr_t bufs[], hid_t **s_mem_space_ids_ptr,
+                           hid_t **s_file_space_ids_ptr, haddr_t **s_offsets_ptr,
+                           size_t **s_element_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
+{
+    size_t                 i;
+    struct H5FD_srt_tmp_t *srt_tmp   = NULL;
+    herr_t                 ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+
+    assert(selection_was_sorted);
+
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
+
+    /* verify that the first elements of the element_sizes and bufs arrays are
+     * valid.
+     */
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0].cvp != NULL));
+
+    assert((count == 0) || ((s_mem_space_ids_ptr) && (NULL == *s_mem_space_ids_ptr)));
+    assert((count == 0) || ((s_file_space_ids_ptr) && (NULL == *s_file_space_ids_ptr)));
+    assert((count == 0) || ((s_offsets_ptr) && (NULL == *s_offsets_ptr)));
+    assert((count == 0) || ((s_element_sizes_ptr) && (NULL == *s_element_sizes_ptr)));
+    assert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
+
+    /* Sort the offsets array in increasing offset order, while
+     * maintaining the association between each offset, and the
+     * mem_space_ids[], file_space_ids[], element_sizes and bufs[]
+     * values at the same index.
+     */
+    if (H5FD__sort_io_req_real(count, offsets, selection_was_sorted, &srt_tmp) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sorting error in selection offsets");
+
+    if (*selection_was_sorted) {
+
+        *s_mem_space_ids_ptr  = mem_space_ids;
+        *s_file_space_ids_ptr = file_space_ids;
+        *s_offsets_ptr        = offsets;
+        *s_element_sizes_ptr  = element_sizes;
+        *s_bufs_ptr           = bufs;
+    }
+    else {
+
+        /*
+         * Allocate the s_mem_space_ids_ptr, s_file_space_ids_ptr, s_offsets_ptr,
+         * s_element_sizes_ptr and s_bufs_ptr arrays and populate them using the
+         * mapping provided by the sorted array of H5FD_srt_tmp_t.
+         */
+        size_t j;
+        size_t fixed_element_sizes_index = count;
+        size_t fixed_bufs_index          = count;
+
+        if ((NULL == (*s_mem_space_ids_ptr = (hid_t *)malloc(count * sizeof(hid_t)))) ||
+            (NULL == (*s_file_space_ids_ptr = (hid_t *)malloc(count * sizeof(hid_t)))) ||
+            (NULL == (*s_offsets_ptr = (haddr_t *)malloc(count * sizeof(haddr_t)))) ||
+            (NULL == (*s_element_sizes_ptr = (size_t *)malloc(count * sizeof(size_t)))) ||
+            (NULL ==
+             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t))))) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted selection(s)");
+        }
+
+        assert(element_sizes[0] != 0);
+        assert(bufs[0].cvp != NULL);
+
+        /* Scan the element_sizes and bufs array to determine if the fixed
+         * element_sizes / bufs optimization is in use, and if so, to determine
+         * the index of the last valid value on each array.
+         * We have already verified that the first
+         * elements of these arrays are valid so we can start at the second
+         * element (if it exists).
+         */
+        for (i = 1; i < count && ((fixed_element_sizes_index == count) || (fixed_bufs_index == count)); i++) {
+            if ((fixed_element_sizes_index == count) && (element_sizes[i] == 0))
+                fixed_element_sizes_index = i - 1;
+            if ((fixed_bufs_index == count) && (bufs[i].cvp == NULL))
+                fixed_bufs_index = i - 1;
+        }
+
+        assert(fixed_element_sizes_index <= count);
+        assert(fixed_bufs_index <= count);
+
+        /* Populate the sorted arrays.  Note that the index stored in srt_tmp
+         * refers to the index in the unsorted array, while the position of
+         * srt_tmp within the sorted array is the index in the sorted arrays */
+        for (i = 0; i < count; i++) {
+
+            j = srt_tmp[i].index;
+
+            (*s_mem_space_ids_ptr)[i]  = mem_space_ids[j];
+            (*s_file_space_ids_ptr)[i] = file_space_ids[j];
+            (*s_offsets_ptr)[i]        = offsets[j];
+            (*s_element_sizes_ptr)[i]  = element_sizes[MIN(j, fixed_element_sizes_index)];
+            (*s_bufs_ptr)[i]           = bufs[MIN(j, fixed_bufs_index)];
+        }
+    }
+
+done:
+    if (srt_tmp) {
+        free(srt_tmp);
+        srt_tmp = NULL;
+    }
+
+    /* On failure, free the sorted arrays if they were allocated.
+     * Note that we only allocate these arrays if the original array
+     * was not sorted -- thus we check both for failure, and for
+     * the flag indicating that the original array was not sorted
+     * in increasing address order.
+     */
+    if ((ret_value != SUCCEED) && (!(*selection_was_sorted))) {
+
+        /* free space allocated for sorted arrays */
+        if (*s_mem_space_ids_ptr) {
+            free(*s_mem_space_ids_ptr);
+            *s_mem_space_ids_ptr = NULL;
+        }
+
+        if (*s_file_space_ids_ptr) {
+            free(*s_file_space_ids_ptr);
+            *s_file_space_ids_ptr = NULL;
+        }
+
+        if (*s_offsets_ptr) {
+            free(*s_offsets_ptr);
+            *s_offsets_ptr = NULL;
+        }
+
+        if (*s_element_sizes_ptr) {
+            free(*s_element_sizes_ptr);
+            *s_element_sizes_ptr = NULL;
+        }
+
+        if (*s_bufs_ptr) {
+            free(*s_bufs_ptr);
+            *s_bufs_ptr = NULL;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_sort_selection_io_req() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_delete
