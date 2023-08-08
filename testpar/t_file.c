@@ -986,6 +986,15 @@ test_delete(void)
     ret = H5Fdelete(filename, fapl_id);
     VRFY((SUCCEED == ret), "H5Fdelete");
 
+    /*
+     * Work around a Cray MPICH bug that causes
+     * H5Fis_accessible to re-create the just-deleted
+     * file as a 0-byte file with strange Unix
+     * permissions, causing the routine to return
+     * false here instead of FAIL.
+     */
+    H5Pset_fapl_mpio(fapl_id, comm, info);
+
     /* Verify that the file is NO LONGER an HDF5 file */
     /* This should fail since there is no file */
     H5E_BEGIN_TRY
@@ -993,13 +1002,7 @@ test_delete(void)
         is_accessible = H5Fis_accessible(filename, fapl_id);
     }
     H5E_END_TRY
-
-    if (FALSE == is_accessible) {
-        VRFY((FALSE == is_accessible), "H5Fis_accessible returned FALSE");
-    }
-    if (FAIL == is_accessible) {
-        VRFY((FAIL == is_accessible), "H5Fis_accessible failed");
-    }
+    VRFY((FAIL == is_accessible), "H5Fis_accessible failed as expected");
 
     /* Release file-access plist */
     ret = H5Pclose(fapl_id);
