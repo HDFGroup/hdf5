@@ -127,54 +127,54 @@ const h5tools_dump_header_t h5tools_standardformat = {
     BLOCK,             /*blockbegin */
     "",                /*blockend */
 
-    "{",  /*fileblockbegin */
-    "}",  /*fileblockend */
-    "{",  /*bootblockblockbegin */
-    "}",  /*bootblockblockend */
-    "{",  /*groupblockbegin */
-    "}",  /*groupblockend */
-    "{",  /*datasetblockbegin */
-    "}",  /*datasetblockend */
-    "{",  /*attributeblockbegin */
-    "}",  /*attributeblockend */
-    "",   /*datatypeblockbegin */
-    "",   /*datatypeblockend */
-    "",   /*dataspaceblockbegin */
-    "",   /*dataspaceblockend */
-    "{",  /*datablockbegin */
-    "}",  /*datablockend */
-    "{",  /*softlinkblockbegin */
-    "}",  /*softlinkblockend */
-    "{",  /*extlinkblockbegin */
-    "}",  /*extlinkblockend */
-    "{",  /*udlinkblockbegin */
-    "}",  /*udlinkblockend */
-    "H5T_ARRAY { ",  /*arrblockbegin */
-    " }",  /*arrblockend */
-    "H5T_COMPOUND {",  /*cmpdblockbegin */
-    "}",  /*cmpdblockend */
-    "H5T_ENUM {",  /*enumblockbegin */
-    "}",  /*enumblockend */
-    "H5T_OPAQUE {",  /*opaqblockbegin */
-    "}",  /*opaqblockend */
-    "H5T_REFERENCE { ",  /*refblockbegin */
-    " }",  /*refblockend */
-    "H5T_STRING {",  /*strblockbegin */
-    "}",  /*strblockend */
-    "H5T_VLEN { ",  /*vlenblockbegin */
-    " }",  /*vlenblockend */
-    "{",  /*structblockbegin */
-    "}",  /*structblockend */
-    "{",  /*subsettingblockbegin */
-    "}",  /*subsettingblockend */
-    "(",  /*startblockbegin */
-    ");", /*startblockend */
-    "(",  /*strideblockbegin */
-    ");", /*strideblockend */
-    "(",  /*countblockbegin */
-    ");", /*countblockend */
-    "(",  /*blockblockbegin */
-    ");", /*blockblockend */
+    "{",                /*fileblockbegin */
+    "}",                /*fileblockend */
+    "{",                /*bootblockblockbegin */
+    "}",                /*bootblockblockend */
+    "{",                /*groupblockbegin */
+    "}",                /*groupblockend */
+    "{",                /*datasetblockbegin */
+    "}",                /*datasetblockend */
+    "{",                /*attributeblockbegin */
+    "}",                /*attributeblockend */
+    "",                 /*datatypeblockbegin */
+    "",                 /*datatypeblockend */
+    "",                 /*dataspaceblockbegin */
+    "",                 /*dataspaceblockend */
+    "{",                /*datablockbegin */
+    "}",                /*datablockend */
+    "{",                /*softlinkblockbegin */
+    "}",                /*softlinkblockend */
+    "{",                /*extlinkblockbegin */
+    "}",                /*extlinkblockend */
+    "{",                /*udlinkblockbegin */
+    "}",                /*udlinkblockend */
+    "H5T_ARRAY { ",     /*arrblockbegin */
+    " }",               /*arrblockend */
+    "H5T_COMPOUND {",   /*cmpdblockbegin */
+    "}",                /*cmpdblockend */
+    "H5T_ENUM {",       /*enumblockbegin */
+    "}",                /*enumblockend */
+    "H5T_OPAQUE {",     /*opaqblockbegin */
+    "}",                /*opaqblockend */
+    "H5T_REFERENCE { ", /*refblockbegin */
+    " }",               /*refblockend */
+    "H5T_STRING {",     /*strblockbegin */
+    "}",                /*strblockend */
+    "H5T_VLEN { ",      /*vlenblockbegin */
+    " }",               /*vlenblockend */
+    "{",                /*structblockbegin */
+    "}",                /*structblockend */
+    "{",                /*subsettingblockbegin */
+    "}",                /*subsettingblockend */
+    "(",                /*startblockbegin */
+    ");",               /*startblockend */
+    "(",                /*strideblockbegin */
+    ");",               /*strideblockend */
+    "(",                /*countblockbegin */
+    ");",               /*countblockend */
+    "(",                /*blockblockbegin */
+    ");",               /*blockblockend */
 
     "",  /*dataspacedescriptionbegin */
     "",  /*dataspacedescriptionend */
