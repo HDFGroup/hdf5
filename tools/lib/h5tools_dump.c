@@ -149,14 +149,22 @@ const h5tools_dump_header_t h5tools_standardformat = {
     "}",  /*extlinkblockend */
     "{",  /*udlinkblockbegin */
     "}",  /*udlinkblockend */
-    "{",  /*DO NOT USE strblockbegin */
-    "}",  /*DO NOT USE strblockend */
-    "{",  /*DO NOT USEenumblockbegin */
-    "}",  /*DO NOT USEenumblockend */
+    "H5T_ARRAY { ",  /*arrblockbegin */
+    " }",  /*arrblockend */
+    "H5T_COMPOUND {",  /*cmpdblockbegin */
+    "}",  /*cmpdblockend */
+    "H5T_ENUM {",  /*enumblockbegin */
+    "}",  /*enumblockend */
+    "H5T_OPAQUE {",  /*opaqblockbegin */
+    "}",  /*opaqblockend */
+    "H5T_REFERENCE { ",  /*refblockbegin */
+    " }",  /*refblockend */
+    "H5T_STRING {",  /*strblockbegin */
+    "}",  /*strblockend */
+    "H5T_VLEN { ",  /*vlenblockbegin */
+    " }",  /*vlenblockend */
     "{",  /*structblockbegin */
     "}",  /*structblockend */
-    "{",  /*DO NOT USEvlenblockbegin */
-    "}",  /*DO NOT USEvlenblockend */
     "{",  /*subsettingblockbegin */
     "}",  /*subsettingblockend */
     "(",  /*startblockbegin */
@@ -2236,7 +2244,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             is_vlstr = H5Tis_variable_str(tmp_type);
 
             curr_pos = ctx->cur_column;
-            h5tools_str_append(buffer, "H5T_STRING %s", h5tools_dump_header_format->structblockbegin);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->strblockbegin);
             h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
 
@@ -2415,7 +2423,7 @@ found_string_type:
             if (H5Tclose(tmp_type) < 0)
                 H5TOOLS_ERROR((-1), "H5Tclose failed");
 
-            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->structblockend);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->strblockend);
             break;
 
         case H5T_BITFIELD:
@@ -2440,7 +2448,7 @@ found_string_type:
             break;
 
         case H5T_OPAQUE:
-            h5tools_str_append(buffer, "H5T_OPAQUE %s", h5tools_dump_header_format->structblockbegin);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->opaqblockbegin);
             h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
             ctx->indent_level++;
@@ -2473,7 +2481,7 @@ found_string_type:
             ctx->need_prefix = TRUE;
 
             h5tools_str_reset(buffer);
-            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->structblockend);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->opaqblockend);
             break;
 
         case H5T_COMPOUND:
@@ -2481,7 +2489,7 @@ found_string_type:
                 H5TOOLS_THROW((-1), "H5Tget_nmembers failed");
             nmembers = (unsigned)snmembers;
 
-            h5tools_str_append(buffer, "H5T_COMPOUND %s", h5tools_dump_header_format->structblockbegin);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->cmpdblockbegin);
             h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
 
@@ -2509,30 +2517,31 @@ found_string_type:
             ctx->need_prefix = TRUE;
 
             h5tools_str_reset(buffer);
-            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->structblockend);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->cmpdblockend);
             break;
 
         case H5T_REFERENCE:
-            h5tools_str_append(buffer, "H5T_REFERENCE");
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->refblockbegin);
             if (H5Tequal(type, H5T_STD_REF_DSETREG) == TRUE) {
-                h5tools_str_append(buffer, " { H5T_STD_REF_DSETREG }");
+                h5tools_str_append(buffer, "H5T_STD_REF_DSETREG");
             }
             else if (H5Tequal(type, H5T_STD_REF_OBJ) == TRUE) {
-                h5tools_str_append(buffer, " { H5T_STD_REF_OBJECT }");
+                h5tools_str_append(buffer, "H5T_STD_REF_OBJECT");
             }
             else if (H5Tequal(type, H5T_STD_REF) == TRUE) {
-                h5tools_str_append(buffer, " { H5T_STD_REF }");
+                h5tools_str_append(buffer, "H5T_STD_REF");
             }
             else {
-                h5tools_str_append(buffer, " { UNDEFINED }");
+                h5tools_str_append(buffer, "UNDEFINED");
             }
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->refblockend);
             break;
 
         case H5T_ENUM:
             if ((super = H5Tget_super(type)) < 0)
                 H5TOOLS_THROW((-1), "H5Tget_super failed");
 
-            h5tools_str_append(buffer, "H5T_ENUM %s", h5tools_dump_header_format->structblockbegin);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->enumblockbegin);
             h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
             ctx->indent_level++;
@@ -2556,7 +2565,7 @@ found_string_type:
             ctx->need_prefix = TRUE;
 
             h5tools_str_reset(buffer);
-            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->structblockend);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->enumblockend);
 
             break;
 
@@ -2564,19 +2573,19 @@ found_string_type:
             if ((super = H5Tget_super(type)) < 0)
                 H5TOOLS_THROW((-1), "H5Tget_super failed");
 
-            h5tools_str_append(buffer, "H5T_VLEN %s ", h5tools_dump_header_format->structblockbegin);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->vlenblockbegin);
 
             h5tools_print_datatype(stream, buffer, info, ctx, super, TRUE);
 
             if (H5Tclose(super) < 0)
                 H5TOOLS_ERROR((-1), "H5Tclose failed");
 
-            h5tools_str_append(buffer, " %s", h5tools_dump_header_format->structblockend);
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->vlenblockend);
 
             break;
 
         case H5T_ARRAY:
-            h5tools_str_append(buffer, "H5T_ARRAY { ");
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->arrblockbegin);
 
             /* Get array information */
             if ((sndims = H5Tget_array_ndims(type)) >= 0) {
@@ -2606,7 +2615,7 @@ found_string_type:
             else
                 H5TOOLS_ERROR((-1), "H5Tget_super failed");
 
-            h5tools_str_append(buffer, " }");
+            h5tools_str_append(buffer, "%s", h5tools_dump_header_format->arrblockend);
 
             break;
 
