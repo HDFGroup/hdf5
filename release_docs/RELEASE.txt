@@ -1,4 +1,4 @@
-HDF5 version 1.14.2-1 currently under development
+HDF5 version 1.14.2 currently under development
 ================================================================================
 
 
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.14.0
+- Bug Fixes since HDF5-1.14.1
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
@@ -282,36 +282,45 @@ Bug Fixes since HDF5-1.14.1 release
 Platforms Tested
 ===================
 
+    Linux 5.19.0-1023-aws            GNU gcc, gfortran, g++
+    #24-Ubuntu SMP x86_64 GNU/Linux  (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0
+    Ubuntu 22.04                     Ubuntu clang version 14.0.0-1ubuntu1
+                                     Intel(R) oneAPI DPC++/C++ Compiler 2023.1.0
+                                     ifort (IFORT) 2021.9.0 20230302
+                                     (cmake and autotools)
+
     Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
     #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
     Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
                                      (cmake and autotools)
 
-    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.3.0-17ubuntu1
-    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.3.0-17ubuntu1
-    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4
-                                     (cmake and autotools)
-
-    Linux 5.3.18-150300-cray_shasta_c cray-mpich/8.1.16
-    #1 SMP x86_64 GNU/Linux              Cray clang 14.0.0
-    (crusher)                            GCC 11.2.0
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.23
+    #1 SMP x86_64 GNU/Linux              cce/15.0.0
+    (frontier)                           gcc/12.2.0
                                      (cmake)
 
-    Linux 4.14.0-115.35.1.1chaos     openmpi 4.0.5
-    #1 SMP aarch64 GNU/Linux             GCC 9.2.0 (ARM-build-5)
-    (stria)                              GCC 7.2.0 (Spack GCC)
+    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.4.0-1ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.4.0-1ubuntu1
+    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4ubuntu1
+                                     Intel(R) oneAPI DPC++/C++ Compiler 2023.1.0
+                                     ifort (IFORT) 2021.9.0 20230302
+                                     (cmake and autotools)
+
+    Linux 4.14.0-115.35.1.1chaos     aue/openmpi/4.1.4-arm-22.1.0.12
+    #1 SMP aarch64 GNU/Linux             Arm C/C++/Fortran Compiler version 22.1 
+    (stria)                              (based on LLVM 13.0.1)
                                      (cmake)
 
     Linux 4.14.0-115.35.1.3chaos     spectrum-mpi/rolling-release
     #1 SMP ppc64le GNU/Linux             clang 12.0.1
     (vortex)                             GCC 8.3.1
-                                         XL 16.1.1
+                                         XL 2021.09.22
                                      (cmake)
 
     Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
     #1 SMP ppc64le GNU/Linux             clang 12.0.1, 14.0.5
     (lassen)                             GCC 8.3.1
-                                         XL 16.1.1.2, 2021,09.22, 2022.08.05
+                                         XL 16.1.1.2, 2021.09.22, 2022.08.05
                                      (cmake)
 
     Linux-4.12.14-197.99-default     cray-mpich/7.7.14
@@ -327,41 +336,43 @@ Platforms Tested
     Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:
     Centos7                              Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-    (jelly/kituo/moohan)                 Version 4.9.3, Version 5.3.0, Version 6.3.0,
-                                         Version 7.2.0, Version 8.3.0, Version 9.1.0
+    (jelly/kituo/moohan)                 Version 4.9.3, Version 7.2.0, Version 8.3.0, 
+                                         Version 9.1.0, Version 10.2.0
                                      Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                      compilers:
                                          Version 17.0.0.098 Build 20160721
                                      GNU C (gcc) and C++ (g++) 4.8.5 compilers
-                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                         with NAG Fortran Compiler Release 7.1(Hanzomon)
                                      Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
-                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                         with NAG Fortran Compiler Release 7.1(Hanzomon)
                                      MPICH 3.1.4 compiled with GCC 4.9.3
                                      MPICH 3.3 compiled with GCC 7.2.0
-                                     OpenMPI 2.1.6 compiled with icc 18.0.1
-                                     OpenMPI 3.1.3 and 4.0.0 compiled with GCC 7.2.0
+                                     OpenMPI 3.1.3 compiled with GCC 7.2.0 and 4.1.2 
+                                         compiled with GCC 9.1.0
                                      PGI C, Fortran, C++ for 64-bit target on
                                      x86_64;
-                                         Version 19.10-0
+                                         Versions 18.4.0 and 19.10-0
+                                     NVIDIA nvc, nvfortran and nvc++ version 22.5-0
                                      (autotools and cmake)
+
 
     Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
     #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
     (quartz)                             GCC 7.3.0, 8.1.0
                                          Intel 19.0.4, 2022.2, oneapi.2022.2
 
-    Linux-3.10.0-1160.71.1.1chaos    openmpi/4.1
+    Linux-3.10.0-1160.90.1.1chaos    openmpi/4.1
     #1 SMP x86_64 GNU/Linux              GCC 7.2.0
     (skybridge)                          Intel/19.1
                                      (cmake)
 
-    Linux-3.10.0-1160.66.1.1chaos    openmpi/4.1
+    Linux-3.10.0-1160.90.1.1chaos    openmpi/4.1
     #1 SMP x86_64 GNU/Linux              GCC 7.2.0
     (attaway)                            Intel/19.1
                                      (cmake)
 
-    Linux-3.10.0-1160.59.1.1chaos    openmpi/4.1
-    #1 SMP x86_64 GNU/Linux              Intel/19.1
+    Linux-3.10.0-1160.90.1.1chaos    openmpi-intel/4.1
+    #1 SMP x86_64 GNU/Linux              Intel/19.1.2, 21.3.0 and 22.2.0
     (chama)                          (cmake)
 
     macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
@@ -371,14 +382,6 @@ Platforms Tested
     macOS Big Sur 11.3.1             Apple clang version 12.0.5 (clang-1205.0.22.9)
     Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
     (bigsur-1)                       Intel icc/icpc/ifort version 2021.2.0 20210228
-
-    macOS High Sierra 10.13.6        Apple LLVM version 10.0.0 (clang-1000.10.44.4)
-    64-bit                           gfortran GNU Fortran (GCC) 6.3.0
-    (bear)                           Intel icc/icpc/ifort version 19.0.4.233 20190416
-
-    macOS Sierra 10.12.6             Apple LLVM version 9.0.0 (clang-900.39.2)
-    64-bit                           gfortran GNU Fortran (GCC) 7.4.0
-    (kite)                           Intel icc/icpc/ifort version 17.0.2
 
     Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
     64-bit                           gfortran GNU Fortran (GCC) 5.2.0
@@ -394,14 +397,12 @@ Platforms Tested
                                      x86_64;
                                          Version 19.10-0
 
-    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
-                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
-                                    Visual Studio 2019 w/ clang 12.0.0
+    Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++ only cmake)
                                     Visual Studio 2022 w/ clang 15.0.1
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
@@ -430,7 +431,7 @@ Known Problems
         MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
         cray-mpich on theta and with XL compilers on ppc64le platforms.
 
-        MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
+        MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on theta.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
