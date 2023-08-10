@@ -174,7 +174,7 @@ New Features
       In-place type conversion allows the library to perform type conversion
       without an intermediate type conversion buffer.  This can improve
       performance by allowing I/O in a single operation over the entire
-      selection instead of being limited byt he size of the intermediate buffer.
+      selection instead of being limited by the size of the intermediate buffer.
       Implemented for I/O on contiguous and chunked datasets when the selection
       is contiguous in memory and when the memory datatype is not smaller than
       the file datatype.
