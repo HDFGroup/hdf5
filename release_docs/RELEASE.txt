@@ -59,6 +59,24 @@ New Features
 
     Library:
     --------
+    - Added support for in-place type conversion in most cases
+
+      In-place type conversion allows the library to perform type conversion
+      without an intermediate type conversion buffer.  This can improve
+      performance by allowing I/O in a single operation over the entire
+      selection instead of being limited by the size of the intermediate buffer.
+      Implemented for I/O on contiguous and chunked datasets when the selection
+      is contiguous in memory and when the memory datatype is not smaller than
+      the file datatype.
+
+    - Changed selection I/O to be on by default when using the MPIO file driver
+
+    - Added support for selection I/O in the MPIO file driver
+
+      Previously, only vector I/O operations were supported.  Support for
+      selection I/O should improve performance and reduce memory uses in some
+      cases.
+
     - Change the error handling for a not found path in the find plugin process.
 
       While attempting to load a plugin the HDF5 library will fail if one of the
@@ -123,6 +141,11 @@ Bug Fixes since HDF5-1.14.1 release
 ===================================
     Library
     -------
+    - Fixed bugs in selection I/O
+
+      Previously, the library could fail in some cases when performing selection
+      I/O with type conversion.
+
     - Fixed CVE-2018-13867
 
       A corrupt file containing an invalid local heap datablock address
