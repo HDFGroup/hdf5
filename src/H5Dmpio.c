@@ -622,6 +622,9 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
         if (!H5FD_mpi_opt_types_g)
             local_cause[0] |= H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
 
+        /* Decision on whether to use selection I/O should have been made by now */
+        assert(io_info->use_select_io != H5D_SELECTION_IO_MODE_DEFAULT);
+
         /* Datatype conversions and transformations are allowed with selection I/O.  If the selection I/O mode
          * is auto (default), disable collective for now and re-enable later if we can */
         if (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) {
@@ -730,25 +733,6 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
             (mpi_code = MPI_Allreduce(local_cause, global_cause, 2, MPI_UNSIGNED, MPI_BOR, io_info->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
     } /* end else */
-
-    /* If the selection I/O mode is default (auto), decide here whether it should be on or off */
-    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
-        /* If the only reason(s) we've disabled collective are type conversions and/or transforms, enable
-         * selection I/O and re-enable collective I/O since it's supported by selection I/O */
-        if (global_cause[0] && !(global_cause[0] & ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION |
-                                                     (unsigned)H5D_MPIO_DATA_TRANSFORMS))) {
-            assert(!(local_cause[0] &
-                     ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)));
-            local_cause[0]         = 0;
-            global_cause[0]        = 0;
-            io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
-        }
-        else {
-            /* Otherwise, there's currently no benefit to selection I/O, so leave it off */
-            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-            io_info->no_selection_io_cause |= H5D_SEL_IO_DEFAULT_OFF;
-        }
-    }
 
     /* Set the local & global values of no-collective-cause in the API context */
     H5CX_set_mpio_local_no_coll_cause(local_cause[0]);
