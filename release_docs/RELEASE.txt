@@ -1,4 +1,4 @@
-HDF5 version 1.14.2 currently under development
+HDF5 version 1.14.2 released on 2023-08-10
 ================================================================================
 
 
@@ -63,7 +63,7 @@ New Features
 
       While attempting to load a plugin the HDF5 library will fail if one of the
       directories in the plugin paths does not exist, even if there are more paths
-      to check. Instead of exiting the function with an error, just logged the error
+      to check. Instead of exiting the function with an error, just log the error
       and continue processing the list of paths to check.
 
 
@@ -114,7 +114,9 @@ New Features
 
 Support for new platforms, languages and compilers
 ==================================================
-    -
+    - Linux 5.14.21-cray_shasta_c     
+      #1 SMP x86_64 GNU/Linux
+      (frontier)
 
 
 Bug Fixes since HDF5-1.14.1 release
@@ -216,7 +218,7 @@ Bug Fixes since HDF5-1.14.1 release
       variable-length datatypes, but this can be problematic if the global heap
       addresses involved do not match exactly between the old and new files. These
       addresses could change for a variety of reasons, such as the command-line options
-      provided to h5repack, how h5repack allocate space in the repacked file, etc.      
+      provided to h5repack, how h5repack allocates space in the repacked file, etc.      
       Since H5Ocopy does not currently perform any translation when these addresses
       change, datasets that were repacked with H5Ocopy could become unreadable in the
       new file. H5repack has been fixed to repack variable-length typed datasets without
