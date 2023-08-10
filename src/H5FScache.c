@@ -1233,7 +1233,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
     /* There may be empty space between entries and chksum */
     chksum_image    = (uint8_t *)(_image) + len - H5FS_SIZEOF_CHKSUM;
     /* Reset the unused space between entries and chksum */
-    memset(image, 0, len - H5FS_SIZEOF_CHKSUM - ((void*)image - _image));
+    memset(image, 0, len - H5FS_SIZEOF_CHKSUM - ((void *)image - _image));
     metadata_chksum = H5_checksum_metadata(_image, (size_t)(chksum_image - (uint8_t *)_image), 0);
     /* Metadata checksum */
     UINT32ENCODE(chksum_image, metadata_chksum);
