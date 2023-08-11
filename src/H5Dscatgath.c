@@ -478,8 +478,14 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
     in_place_tconv = dset_info->layout_io_info.contig_piece_info &&
                      dset_info->layout_io_info.contig_piece_info->in_place_tconv;
 
-    /* Check if we should disable in-place type conversion for performance.  Do so if we can use the optimized compound read function, if this is not a selection I/O operation (so we have normal size conversion buffers), and the either entire I/O operation can fit in the type conversion buffer or we need to use a background buffer (and therefore could not do the I/O in one operation with in-palce conversion anyways). */
-    if (in_place_tconv && H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, FALSE) && (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) && (dset_info->type_info.need_bkg || (dset_info->nelmts <= dset_info->type_info.request_nelmts)))
+    /* Check if we should disable in-place type conversion for performance.  Do so if we can use the optimized
+     * compound read function, if this is not a selection I/O operation (so we have normal size conversion
+     * buffers), and the either entire I/O operation can fit in the type conversion buffer or we need to use a
+     * background buffer (and therefore could not do the I/O in one operation with in-palce conversion
+     * anyways). */
+    if (in_place_tconv && H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, FALSE) &&
+        (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) &&
+        (dset_info->type_info.need_bkg || (dset_info->nelmts <= dset_info->type_info.request_nelmts)))
         in_place_tconv = FALSE;
 
     /* Allocate the iterators */
@@ -657,8 +663,14 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
     in_place_tconv = dset_info->layout_io_info.contig_piece_info &&
                      dset_info->layout_io_info.contig_piece_info->in_place_tconv;
 
-    /* Check if we should disable in-place type conversion for performance.  Do so if we can use the optimized compound write function, if this is not a selection I/O operation (so we have normal size conversion buffers), and the either entire I/O operation can fit in the type conversion buffer or we need to use a background buffer (and therefore could not do the I/O in one operation with in-palce conversion anyways). */
-    if (in_place_tconv && H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, FALSE) && (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) && (dset_info->type_info.need_bkg || (dset_info->nelmts <= dset_info->type_info.request_nelmts)))
+    /* Check if we should disable in-place type conversion for performance.  Do so if we can use the optimized
+     * compound write function, if this is not a selection I/O operation (so we have normal size conversion
+     * buffers), and the either entire I/O operation can fit in the type conversion buffer or we need to use a
+     * background buffer (and therefore could not do the I/O in one operation with in-palce conversion
+     * anyways). */
+    if (in_place_tconv && H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, FALSE) &&
+        (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) &&
+        (dset_info->type_info.need_bkg || (dset_info->nelmts <= dset_info->type_info.request_nelmts)))
         in_place_tconv = FALSE;
 
     /* Allocate the iterators */
