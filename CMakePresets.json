@@ -74,7 +74,7 @@
       "cacheVariables": {
         "HDF5_ENABLE_PLUGIN_SUPPORT": "ON",
         "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/archive/refs/tags"},
-        "PLUGIN_TGZ_ORIGNAME": {"type": "STRING", "value": "hdf5_plugins-1.14.0.tar.gz"}
+        "PLUGIN_TGZ_ORIGNAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}
       }
     },
     {
