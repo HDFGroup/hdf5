@@ -67,7 +67,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Create a dataset
 </td>
-<td><a href="https://raw.githubusercontent.com//HDFGroup/hdf5/hdf5_1_14/examples/h5_crtdat.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtdat.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtdat.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateDataset.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtdat.py">Python</a>
+<td><a href="https://raw.githubusercontent.com//HDFGroup/hdf5/hdf5_1_14/examples/h5_crtdat.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_crtdat.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_crtdat.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/java/examples/intro/H5_CreateDataset.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtdat.py">Python</a>
 </td>
 <td>
 </td>
@@ -75,7 +75,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Read and write to a dataset
 </td>
-<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_rdwt.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_rdwt.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_rdwt.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_ReadWrite.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_rdwt.py">Python</a>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_rdwt.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_rdwt.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_rdwt.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/java/examples/intro/H5_ReadWrite.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_rdwt.py">Python</a>
 </td>
 <td>
 </td>
@@ -83,7 +83,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Create an attribute
 </td>
-<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_crtatt.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtatt.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtatt.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateAttribute.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtatt.py">Python</a>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_crtatt.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_crtatt.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_crtatt.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateAttribute.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtatt.py">Python</a>
 </td>
 <td>
 </td>
@@ -91,7 +91,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Create a group
 </td>
-<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_crtgrp.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtgrp.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtgrp.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateGroup.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrp.py">Python</a>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_crtgrp.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_crtgrp.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_crtgrp.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/java/examples/intro/H5_CreateGroup.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrp.py">Python</a>
 </td>
 <td>
 </td>
@@ -99,7 +99,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Create groups in a file using absolute and relative paths
 </td>
-<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_crtgrpar.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtgrpar.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtgrpar.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateGroupAbsoluteRelative.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrpar.py">Python</a>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_crtgrpar.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_crtgrpar.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_crtgrpar.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/java/examples/intro/H5_CreateGroupAbsoluteRelative.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrpar.py">Python</a>
 </td>
 <td>
 </td>
@@ -107,7 +107,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Create datasets in a group
 </td>
-<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_crtgrpd.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtgrpd.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtgrpd.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateGroupDataset.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrpd.py">Python</a>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_crtgrpd.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_crtgrpd.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_crtgrpd.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/java/examples/intro/H5_CreateGroupDataset.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrpd.py">Python</a>
 </td>
 <td>
 </td>
@@ -115,7 +115,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Create a file and dataset and select/read a subset from the dataset
 </td>
-<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_subset.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_subset.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_subset.cpp">C++</a>  Java  Python
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_subset.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_subset.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_subset.cpp">C++</a>  Java  Python
 </td>
 <td>Also see examples to Write by row (and column) below.
 </td>
@@ -123,7 +123,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Create an extendible (unlimited dimension) dataset
 </td>
-<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_extend.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_extend.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_extend.cpp">C++</a>  Java  Python
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_extend.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_extend.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_extend.cpp">C++</a>  Java  Python
 </td>
 <td>Also see examples to Extend by row (and column) below
 </td>
@@ -131,7 +131,7 @@ These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix)
 <tr>
 <td>Create a chunked and compressed dataset
 </td>
-<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_cmprss.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_cmprss.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_cmprss.cpp">C++</a>  Java  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_cmprss.py">Python</a>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/examples/h5_cmprss.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/fortran/examples/h5_cmprss.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_14/c++/examples/h5tutr_cmprss.cpp">C++</a>  Java  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_cmprss.py">Python</a>
 </td>
 <td>
 </td>
