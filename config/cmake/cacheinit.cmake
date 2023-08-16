@@ -73,6 +73,9 @@ set (KWSYS_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for KWSYS FetchConten
 set (PLUGIN_TGZ_NAME "hdf5_plugins.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
 
 set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
+set (H5PL_VERS_MAJOR "1" CACHE STRING "Major version of hdf5 package for PLUGIN package" FORCE)
+set (H5PL_VERS_MINOR "14" CACHE STRING "Minor version of hdf5 package for PLUGIN package" FORCE)
+set (H5PL_VERS_RELEASE "3" CACHE STRING "Release version of hdf5 package for PLUGIN package" FORCE)
 
 #############
 # bitshuffle
