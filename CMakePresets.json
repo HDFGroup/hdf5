@@ -9,8 +9,6 @@
       "hidden": true,
       "inherits": "ci-base",
       "cacheVariables": {
-        "description": "Basic build using Ninja generator",
-        "generator": "Ninja",
         "HDF5_ALLOW_EXTERNAL_SUPPORT": "NO",
         "TGZPATH": {"type": "STRING", "value": "${sourceParentDir}/temp"}
       }
@@ -98,7 +96,7 @@
     {
       "name": "ci-StdExamples",
       "hidden": true,
-      "inherits": ["ci-ExamplesVars", "ci-base-tgz"],
+      "inherits": ["ci-base", "ci-ExamplesVars", "ci-base-tgz"],
       "cacheVariables": {
         "EXAMPLES_USE_RELEASE_NAME": "ON",
         "EXAMPLES_USE_LOCALCONTENT": "OFF",
