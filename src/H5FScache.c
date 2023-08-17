@@ -1185,8 +1185,9 @@ done:
 static herr_t
 H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thing)
 {
-    H5FS_sinfo_t  *sinfo = (H5FS_sinfo_t *)_thing;   /* Pointer to the object */
-    H5FS_iter_ud_t udata;                            /* User data for callbacks */
+    H5FS_sinfo_t  *sinfo = (H5FS_sinfo_t *)_thing; /* Pointer to the object */
+    H5FS_iter_ud_t udata;                          /* User data for callbacks */
+    ptrdiff_t      gap_size;
     uint8_t       *image        = (uint8_t *)_image; /* Pointer into raw data buffer */
     uint8_t       *chksum_image = NULL;              /* Points to chksum location */
     uint32_t       metadata_chksum;                  /* Computed metadata checksum value */
@@ -1231,7 +1232,17 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
     /* Compute checksum */
 
     /* There may be empty space between entries and chksum */
-    chksum_image    = (uint8_t *)(_image) + len - H5FS_SIZEOF_CHKSUM;
+    chksum_image = (uint8_t *)(_image) + len - H5FS_SIZEOF_CHKSUM;
+
+    /*
+     * If there is any empty space between the entries and
+     * checksum, make sure that the space is initialized
+     * before serializing it
+     */
+    gap_size = chksum_image - image;
+    if (gap_size > 0)
+        memset(image, 0, (size_t)gap_size);
+
     metadata_chksum = H5_checksum_metadata(_image, (size_t)(chksum_image - (uint8_t *)_image), 0);
     /* Metadata checksum */
     UINT32ENCODE(chksum_image, metadata_chksum);
