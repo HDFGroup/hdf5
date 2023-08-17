@@ -12,10 +12,6 @@
 #
 # Tests for the h5repack tool
 #
-# Modification:
-#  Pedro Vicente Nunes, 11/15/2006
-#  Added $FILEN variables for file names
-#
 
 srcdir=@srcdir@
 
@@ -1109,6 +1105,56 @@ TOOLTEST_DUMP()
      (
         cd $TESTDIR
         $RUNSERIAL $H5DUMP_BIN -q creation_order -pH $outfile
+     ) >$actual 2>$actual_err
+     cat $actual_err >> $actual
+
+     RET=$?
+
+    fi
+
+    if cmp -s $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
+    fi
+
+   rm -f $actual $actual_err
+   rm -f $outfile
+}
+
+# This is same as TOOLTEST_DUMP() with comparing h5dump output
+# without any option
+#
+TOOLTEST_DUMP_NO_OPT()
+{
+    infile=$2
+    outfile=out-$1.$2
+    expect="$TESTDIR/$1.$2.ddl"
+    actual="$TESTDIR/out-$1.$2.out"
+    actual_err="$TESTDIR/out-$1.$2.err"
+
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >$actual 2>$actual_err
+    RET=$?
+    if [ $RET != 0 ] ; then
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
+    else
+     echo " PASSED"
+     VERIFY h5dump output $@
+     (
+        cd $TESTDIR
+        $RUNSERIAL $H5DUMP_BIN $outfile
      ) >$actual 2>$actual_err
      cat $actual_err >> $actual
 

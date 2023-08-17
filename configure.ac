@@ -832,6 +832,7 @@ AC_LANG_POP(C++)
 ## library is disabled.
 AC_SUBST([HDF5_HL])
 AC_SUBST([HDF5_HL_TOOLS])
+AC_SUBST([HDF5_HL_GIF_TOOLS])
 
 ## The high-level library and high-level tools are enabled unless the build mode
 ## is clean.
@@ -871,22 +872,6 @@ if test "X-$HDF5_HL" = "X-yes"; then
 else
   AC_MSG_RESULT([no])
 fi
-
-AC_MSG_CHECKING([if the high-level tools are enabled])
-AC_ARG_ENABLE([hltools],
-     [AS_HELP_STRING([--enable-hltools],
-                     [Enable the high-level tools.
-                     [default=yes]
-                     ])],
-     [HDF5_HL_TOOLS=$enableval])
-
-if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
- AC_MSG_RESULT([yes])
- HL_TOOLS="tools"
-else
-  AC_MSG_RESULT([no])
-fi
-
 
 ## ----------------------------------------------------------------------
 ## Enable new references for dimension scales
@@ -1177,6 +1162,27 @@ AC_ARG_ENABLE([tools],
               [HDF5_TOOLS=$enableval])
 
 AC_MSG_RESULT([$HDF5_TOOLS])
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building the high-level GIF
+## tools (they have unfixed CVE issues)
+##
+
+AC_MSG_CHECKING([if the high-level GIF tools are enabled])
+AC_ARG_ENABLE([hlgiftools],
+     [AS_HELP_STRING([--enable-hlgiftools],
+                     [Enable the high-level GIF tools. NOTE: These have unfixed CVE issues!
+                     [default=no]
+                     ])],
+     [HDF5_HL_GIF_TOOLS=$enableval])
+
+if test "X-$HDF5_TOOLS" = "X-yes" -a "X-$HDF5_HL" = "X-yes" -a "X-$HDF5_HL_GIF_TOOLS" = "X-yes"; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+  HDF5_HL_GIF_TOOLS="no"
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to enable building doxygen files

@@ -420,29 +420,33 @@ else ()
   )
 endif ()
 
+set (mod_export_files
+    h5fortran_types.mod
+    hdf5.mod
+    h5fortkit.mod
+    h5global.mod
+    h5a.mod
+    h5d.mod
+    h5e.mod
+    h5f.mod
+    h5g.mod
+    h5i.mod
+    h5l.mod
+    h5lib.mod
+    h5o.mod
+    h5p.mod
+    h5r.mod
+    h5s.mod
+    h5t.mod
+    h5vl.mod
+    h5z.mod
+    h5_gen.mod
+)
+
 if (BUILD_STATIC_LIBS)
-  set (mod_files
-      ${MOD_BUILD_DIR}/h5fortran_types.mod
-      ${MOD_BUILD_DIR}/hdf5.mod
-      ${MOD_BUILD_DIR}/h5fortkit.mod
-      ${MOD_BUILD_DIR}/h5global.mod
-      ${MOD_BUILD_DIR}/h5a.mod
-      ${MOD_BUILD_DIR}/h5d.mod
-      ${MOD_BUILD_DIR}/h5e.mod
-      ${MOD_BUILD_DIR}/h5f.mod
-      ${MOD_BUILD_DIR}/h5g.mod
-      ${MOD_BUILD_DIR}/h5i.mod
-      ${MOD_BUILD_DIR}/h5l.mod
-      ${MOD_BUILD_DIR}/h5lib.mod
-      ${MOD_BUILD_DIR}/h5o.mod
-      ${MOD_BUILD_DIR}/h5p.mod
-      ${MOD_BUILD_DIR}/h5r.mod
-      ${MOD_BUILD_DIR}/h5s.mod
-      ${MOD_BUILD_DIR}/h5t.mod
-      ${MOD_BUILD_DIR}/h5vl.mod
-      ${MOD_BUILD_DIR}/h5z.mod
-      ${MOD_BUILD_DIR}/h5_gen.mod
-  )
+  foreach (mod_file ${mod_export_files})
+    set (mod_files ${mod_files} ${MOD_BUILD_DIR}/${mod_file})
+  endforeach ()
   install (
       FILES
           ${mod_files}
@@ -464,28 +468,9 @@ if (BUILD_STATIC_LIBS)
 endif ()
 
 if (BUILD_SHARED_LIBS)
-  set (modsh_files
-      ${MODSH_BUILD_DIR}/h5fortran_types.mod
-      ${MODSH_BUILD_DIR}/hdf5.mod
-      ${MODSH_BUILD_DIR}/h5fortkit.mod
-      ${MODSH_BUILD_DIR}/h5global.mod
-      ${MODSH_BUILD_DIR}/h5a.mod
-      ${MODSH_BUILD_DIR}/h5d.mod
-      ${MODSH_BUILD_DIR}/h5e.mod
-      ${MODSH_BUILD_DIR}/h5f.mod
-      ${MODSH_BUILD_DIR}/h5g.mod
-      ${MODSH_BUILD_DIR}/h5i.mod
-      ${MODSH_BUILD_DIR}/h5l.mod
-      ${MODSH_BUILD_DIR}/h5lib.mod
-      ${MODSH_BUILD_DIR}/h5o.mod
-      ${MODSH_BUILD_DIR}/h5p.mod
-      ${MODSH_BUILD_DIR}/h5r.mod
-      ${MODSH_BUILD_DIR}/h5s.mod
-      ${MODSH_BUILD_DIR}/h5t.mod
-      ${MODSH_BUILD_DIR}/h5vl.mod
-      ${MODSH_BUILD_DIR}/h5z.mod
-      ${MODSH_BUILD_DIR}/h5_gen.mod
-  )
+  foreach (mod_file ${mod_export_files})
+    set (modsh_files ${modsh_files} ${MODSH_BUILD_DIR}/${mod_file})
+  endforeach ()
   install (
       FILES
           ${modsh_files}
