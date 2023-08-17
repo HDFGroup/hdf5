@@ -373,6 +373,8 @@ main(int argc, char **argv)
     AddTest("selnone", none_selection_chunk, NULL, "chunked dataset with none-selection", PARATESTFILE);
     AddTest("calloc", test_chunk_alloc, NULL, "parallel extend Chunked allocation on serial file",
             PARATESTFILE);
+    AddTest("chkallocser2par", test_chunk_alloc_incr_ser_to_par, NULL,
+            "chunk allocation from serial to parallel file access", PARATESTFILE);
     AddTest("fltread", test_filter_read, NULL, "parallel read of dataset written serially with filters",
             PARATESTFILE);
 

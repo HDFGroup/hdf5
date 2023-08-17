@@ -283,6 +283,17 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed a file space allocation bug in the parallel library for chunked
+      datasets
+
+      With the addition of support for incremental file space allocation for
+      chunked datasets with filters applied to them that are created/accessed
+      in parallel, a bug was introduced to the library's parallel file space
+      allocation code. This could cause file space to not be allocated correctly
+      for datasets without filters applied to them that are created with serial
+      file access and later opened with parallel file access. In turn, this could
+      cause parallel writes to those datasets to place incorrect data in the file.
+
     - Fixed bugs in selection I/O
 
       Previously, the library could fail in some cases when performing selection
