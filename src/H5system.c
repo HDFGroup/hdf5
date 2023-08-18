@@ -1102,28 +1102,6 @@ H5_strndup(const char *s, size_t n)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-
-/*-------------------------------------------------------------------------
- * Function:    Wstrcasestr_wrap
- *
- * Purpose:     Windows wrapper function for strcasestr to retain GNU
- *              behavior where searching for an empty substring returns the
- *              input string being searched. StrStrIA on Windows does not
- *              exhibit this same behavior.
- *
- * Return:      Pointer to input string if 'needle' is the empty substring
- *              Otherwise, returns StrStrIA(haystack, needle)
- *
- *-------------------------------------------------------------------------
- */
-char *
-Wstrcasestr_wrap(const char *haystack, const char *needle)
-{
-    if (needle && !*needle)
-        return (char *)haystack;
-    else
-        return StrStrIA(haystack, needle);
-}
 #endif /* H5_HAVE_WIN32_API */
 
 /* Global variables */
@@ -1289,42 +1267,3 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
     /* return the current flag character found */
     return optchar;
 }
-
-/*-------------------------------------------------------------------------
- * Function:    H5_strcasestr
- *
- * Purpose:     Find the first occurrence of the substring needle in the
- *              string haystack ignoring case.
- *
- * Return:      Success:  Pointer to the beginning of the located substring
- *
- *              Failure:  NULL
- *
- *-------------------------------------------------------------------------
- */
-char *
-H5_strcasestr(const char *haystack, const char *needle)
-{
-    /* Check arguments. */
-    HDassert(haystack);
-    HDassert(needle);
-
-    /* begin once from each character of haystack, until needle is found */
-    do {
-        const char *h = haystack;
-        const char *n = needle;
-        /* loop while lowercase strings match, or needle ends */
-        while (HDtolower(*h) == HDtolower(*n) && *n) {
-            h++;
-            n++;
-        }
-        /* if all characters in needle matched we found it */
-        if (*n == 0) {
-            /* must discard const qualifier here, so turn off the warning */
-            H5_GCC_CLANG_DIAG_OFF("cast-qual")
-            return (char *)haystack;
-            H5_GCC_CLANG_DIAG_ON("cast-qual")
-        }
-    } while (*haystack++);
-    return 0;
-} /* end H5_strcasestr() */

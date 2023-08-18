@@ -76,7 +76,6 @@ struct timezone {
 #define HDsleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)          _stati64(S, B)
 #define HDstrcasecmp(A, B)    _stricmp(A, B)
-#define HDstrcasestr(A, B)    Wstrcasestr_wrap(A, B)
 #define HDstrndup(S, N)       H5_strndup(S, N)
 #define HDstrdup(S)           _strdup(S)
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
@@ -103,7 +102,6 @@ H5_DLL int      Wopen_utf8(const char *path, int oflag, ...);
 H5_DLL int      Wremove_utf8(const char *path);
 H5_DLL int      H5_get_win32_times(H5_timevals_t *tvs);
 H5_DLL char    *H5_strndup(const char *s, size_t n);
-H5_DLL char    *Wstrcasestr_wrap(const char *haystack, const char *needle);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
