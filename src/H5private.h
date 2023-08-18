@@ -1479,7 +1479,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrcat
 #define HDstrcat(X, Y) strcat(X, Y)
 #endif
-#endif
 #ifndef HDstrchr
 #define HDstrchr(S, C) strchr(S, C)
 #endif
