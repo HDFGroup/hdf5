@@ -170,6 +170,7 @@
 #ifdef H5_HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <shlwapi.h>  /* For StrStrIA */
 
 #ifdef H5_HAVE_THREADSAFE
 #include <process.h> /* For _beginthread() */
