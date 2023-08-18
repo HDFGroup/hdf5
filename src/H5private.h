@@ -664,6 +664,7 @@ H5_DLL herr_t   H5_timer_stop(H5_timer_t *timer /*in,out*/);
 H5_DLL herr_t   H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
 H5_DLL herr_t   H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
 H5_DLL char    *H5_timer_get_time_string(double seconds);
+H5_DLL char    *H5_strcasestr(const char *haystack, const char *needle);
 
 /* Depth of object copy */
 typedef enum {
@@ -1479,6 +1480,13 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrcat
 #define HDstrcat(X, Y) strcat(X, Y)
 #endif
+#ifndef HDstrcasestr
+#if defined(H5_HAVE_STRCASESTR)
+#define HDstrcasestr(X, Y) strcasestr(X, Y)
+#else
+#define HDstrcasestr(X, Y) H5_strcasestr(X, Y)
+#endif
+#endif
 #ifndef HDstrchr
 #define HDstrchr(S, C) strchr(S, C)
 #endif
@@ -1520,6 +1528,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrncpy
 #define HDstrncpy(X, Y, Z) strncpy(X, Y, Z)
+#endif
+#ifndef HDstrndup
+#define HDstrndup(S, N) strndup(S, N)
 #endif
 #ifndef HDstrpbrk
 #define HDstrpbrk(X, Y) strpbrk(X, Y)
