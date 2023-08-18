@@ -34,7 +34,8 @@
       "cacheVariables": {
         "HDF5_PACKAGE_EXTLIBS": "ON",
         "ZLIB_USE_LOCALCONTENT": "OFF",
-        "LIBAEC_USE_LOCALCONTENT": "OFF"
+        "LIBAEC_USE_LOCALCONTENT": "OFF",
+        "HDF5_ENABLE_SZIP_SUPPORT": "ON"
       }
     },
     {
@@ -86,10 +87,10 @@
       "name": "ci-ExamplesVars",
       "hidden": true,
       "cacheVariables": {
-        "HDF5_EXAMPLES_COMPRESSED": {"type": "STRING", "value": "hdf5-examples-2.0.3.tar.gz"},
+        "HDF5_EXAMPLES_COMPRESSED": {"type": "STRING", "value": "hdf5-examples-2.0.4.tar.gz"},
         "HDF5_EXAMPLES_COMPRESSED_DIR": {"type": "STRING", "value": "${sourceParentDir}/temp"},
         "EXAMPLES_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5-examples/archive/refs/tags/"},
-        "EXAMPLES_TGZ_ORIGNAME": {"type": "STRING", "value": "2.0.3.tar.gz"}
+        "EXAMPLES_TGZ_ORIGNAME": {"type": "STRING", "value": "2.0.4.tar.gz"}
       }
     },
     {
@@ -97,6 +98,7 @@
       "hidden": true,
       "inherits": ["ci-base", "ci-ExamplesVars", "ci-base-tgz"],
       "cacheVariables": {
+        "EXAMPLES_USE_RELEASE_NAME": "ON",
         "EXAMPLES_USE_LOCALCONTENT": "OFF",
         "HDF5_PACK_EXAMPLES": "ON",
         "EXAMPLES_DOWNLOAD": "ON"

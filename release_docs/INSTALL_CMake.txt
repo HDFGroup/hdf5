@@ -373,7 +373,7 @@ IV. Further considerations
       the settings for the developers' environment. Then the only options needed
       on the command line are those options that are different. Example using HDF
       default cache file:
-           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 12 2013" \
+           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
