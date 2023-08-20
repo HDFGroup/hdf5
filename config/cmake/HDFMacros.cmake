@@ -77,7 +77,7 @@ macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
     if (${target_type} MATCHES "SHARED")
       set (targetfilename $<TARGET_PDB_FILE:${libtarget}>)
     else ()
-      get_property (target_name TARGET ${libtarget} PROPERTY "$<IF:$<CONFIG:Debug>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>")
+      get_property (target_name TARGET ${libtarget} PROPERTY "$<IF:$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>")
       set (targetfilename $<TARGET_FILE_DIR:${libtarget}>/${target_name}.pdb)
     endif ()
     install (
@@ -121,6 +121,7 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
   set_target_properties (${libtarget} PROPERTIES
       OUTPUT_NAME                ${LIB_RELEASE_NAME}
 #      OUTPUT_NAME_DEBUG          ${LIB_DEBUG_NAME}
+      OUTPUT_NAME_DEVELOPER      ${LIB_DEBUG_NAME}
       OUTPUT_NAME_RELEASE        ${LIB_RELEASE_NAME}
       OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
       OUTPUT_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
@@ -130,6 +131,7 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
     if (WIN32)
       set_target_properties (${libtarget} PROPERTIES
           COMPILE_PDB_NAME_DEBUG          ${LIB_DEBUG_NAME}
+          COMPILE_PDB_NAME_DEVELOPER      ${LIB_DEBUG_NAME}
           COMPILE_PDB_NAME_RELEASE        ${LIB_RELEASE_NAME}
           COMPILE_PDB_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
           COMPILE_PDB_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
@@ -155,7 +157,7 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
   if (${importtype} MATCHES "IMPORT")
     set (importprefix "${CMAKE_STATIC_LIBRARY_PREFIX}")
   endif ()
-  if (${HDF_CFG_NAME} MATCHES "Debug")
+  if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
     set (IMPORT_LIB_NAME ${LIB_DEBUG_NAME})
   else ()
     set (IMPORT_LIB_NAME ${LIB_RELEASE_NAME})

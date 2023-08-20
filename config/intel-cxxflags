@@ -81,7 +81,7 @@ if test "X-icpc" = "X-$cxx_vendor"; then
     # General #
     ###########
 
-    H5_CXXFLAGS="$H5_CXXFLAGS $arch"
+    H5_CXXFLAGS="$H5_CXXFLAGS $arch -std=c++98"
 
     ##############
     # Production #

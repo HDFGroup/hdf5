@@ -222,6 +222,7 @@ set (HDF_CONFIG_DIR          ${HDF5_SOURCE_DIR}/config)
 set (HDF_RESOURCES_DIR       ${HDF5_SOURCE_DIR}/config/cmake)
 set (HDF5_SRC_DIR            ${HDF5_SOURCE_DIR}/src)
 set (HDF5_TEST_SRC_DIR       ${HDF5_SOURCE_DIR}/test)
+set (HDF5_TEST_PAR_DIR       ${HDF5_SOURCE_DIR}/testpar)
 set (HDF5_CPP_SRC_DIR        ${HDF5_SOURCE_DIR}/c++)
 set (HDF5_CPP_TST_DIR        ${HDF5_SOURCE_DIR}/c++/test)
 set (HDF5_HL_SRC_DIR         ${HDF5_SOURCE_DIR}/hl)
@@ -653,6 +654,13 @@ if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
 endif ()
 
 #-----------------------------------------------------------------------------
+# Add some definitions for Developer Builds
+#-----------------------------------------------------------------------------
+if (${HDF_CFG_NAME} MATCHES "Developer")
+  include (${HDF_RESOURCES_DIR}/HDF5DeveloperBuild.cmake)
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to embed library info into executables
 #-----------------------------------------------------------------------------
 if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
@@ -980,11 +988,11 @@ if (BUILD_TESTING)
   mark_as_advanced (HDF5_TEST_JAVA)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
-    if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
+    if (EXISTS "${HDF5_TEST_SRC_DIR}" AND IS_DIRECTORY "${HDF5_TEST_SRC_DIR}")
       add_subdirectory (test)
     endif ()
     if (H5_HAVE_PARALLEL)
-      if (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
+      if (EXISTS "${HDF5_TEST_PAR_DIR}" AND IS_DIRECTORY "${HDF5_TEST_PAR_DIR}")
         add_subdirectory (testpar)
       endif ()
     endif ()

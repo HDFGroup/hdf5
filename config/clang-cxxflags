@@ -112,7 +112,7 @@ if test "X-clang" = "X-$cxx_vendor" -o "X-Apple LLVM" = "X-$cxx_vendor"; then
             ;;
     esac
 
-    H5_CXXFLAGS="$H5_CXXFLAGS $arch"
+    H5_CXXFLAGS="$H5_CXXFLAGS $arch -std=c++98"
 
     ##############
     # Production #

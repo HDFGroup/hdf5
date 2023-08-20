@@ -7,7 +7,7 @@ project (HDF5_TEST C)
 
 macro (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
-  target_include_directories (${file} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${file} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(${file} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${file} STATIC)
