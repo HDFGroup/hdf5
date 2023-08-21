@@ -159,7 +159,7 @@ CHECK_INCLUDE_FILE_CONCAT (stdbool.h    ${HDF_PREFIX}_HAVE_STDBOOL_H)
 ## Check for non-standard extension quadmath.h
 
 CHECK_INCLUDE_FILES(quadmath.h C_HAVE_QUADMATH)
-if (${C_HAVE_QUADMATH})
+if (C_HAVE_QUADMATH)
   set(${HDF_PREFIX}_HAVE_QUADMATH_H 1)
 else ()
   set(${HDF_PREFIX}_HAVE_QUADMATH_H 0)
@@ -898,7 +898,7 @@ endif()
 
 if (HDF5_BUILD_FORTRAN)
   HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
-  if (${_SIZEOF___FLOAT128})
+  if (_SIZEOF___FLOAT128)
     set (${HDF_PREFIX}_HAVE_FLOAT128 1)
     set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
   else ()
@@ -907,7 +907,7 @@ if (HDF5_BUILD_FORTRAN)
   endif ()
 
   HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
-  if (NOT ${_SIZEOF__QUAD})
+  if (NOT _SIZEOF__QUAD)
     set (${HDF_PREFIX}_SIZEOF__QUAD 0)
   else ()
     set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
@@ -927,12 +927,17 @@ if (HDF5_BUILD_FORTRAN)
           ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
           ${SOURCE_CODE}
       )
+      if (CMAKE_VERSION VERSION_LESS 3.25)
+        set (_RUN_OUTPUT_VARIABLE "RUN_OUTPUT_VARIABLE")
+      else ()
+        set (_RUN_OUTPUT_VARIABLE  "RUN_OUTPUT_STDOUT_VARIABLE")
+      endif()
       TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
           ${CMAKE_BINARY_DIR}
           ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
           COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
           COMPILE_OUTPUT_VARIABLE COMPILEOUT
-          RUN_OUTPUT_VARIABLE OUTPUT_VAR
+          ${_RUN_OUTPUT_VARIABLE} OUTPUT_VAR
       )
 
       set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
@@ -969,7 +974,6 @@ if (HDF5_BUILD_FORTRAN)
         message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
       endif ()
     endmacro ()
-
     set (PROG_SRC
         "
 #include <float.h>\n\
@@ -991,7 +995,7 @@ if (HDF5_BUILD_FORTRAN)
 #define C_LDBL_DIG DECIMAL_DIG\n\
 #else\n\
 #define C_LDBL_DIG LDBL_DIG\n\
-#endif\n\nint main() {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
+#endif\n\nint main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
          "
     )
 
@@ -1003,21 +1007,23 @@ if (HDF5_BUILD_FORTRAN)
 
     list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
     list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
-  endif ()
 
-  if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
-    set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-    set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-    set (_PAC_C_MAX_REAL_PRECISION ${H5_LDBL_DIG})
+    if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
+      set (${HDF_PREFIX}_HAVE_FLOAT128 0)
+      set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+      set (_PAC_C_MAX_REAL_PRECISION ${H5_LDBL_DIG})
+    else ()
+      set (_PAC_C_MAX_REAL_PRECISION ${H5_FLT128_DIG})
+    endif ()
+    if (NOT ${_PAC_C_MAX_REAL_PRECISION})
+      set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION 0)
+    else ()
+      set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${_PAC_C_MAX_REAL_PRECISION})
+    endif ()
+    message (STATUS "maximum decimal precision for C var - ${${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION}")
   else ()
-    set (_PAC_C_MAX_REAL_PRECISION ${H5_FLT128_DIG})
-  endif ()
-  if (NOT ${_PAC_C_MAX_REAL_PRECISION})
     set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION 0)
-  else ()
-    set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${_PAC_C_MAX_REAL_PRECISION})
   endif ()
-  message (STATUS "maximum decimal precision for C var - ${${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION}")
 
 endif()
 
@@ -1067,7 +1073,7 @@ endmacro ()
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine is using a special algorithm to convert
 # 'long double' to '(unsigned) long' values.  (This flag should only be set for
-# the IBM Power6 Linux.  When the bit sequence of long double is
+# the IBM Power Linux.  When the bit sequence of long double is
 # 0x4351ccf385ebc8a0bfcc2a3c3d855620, the converted value of (unsigned)long
 # is 0x004733ce17af227f, not the same as the library's conversion to 0x004733ce17af2282.
 # The machine's conversion gets the correct value.  We define the macro and disable
@@ -1077,7 +1083,7 @@ H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your syst
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine is using a special algorithm
 # to convert some values of '(unsigned) long' to 'long double' values.
-# (This flag should be off for all machines, except for IBM Power6 Linux,
+# (This flag should be off for all machines, except for IBM Power Linux,
 # when the bit sequences are 003fff..., 007fff..., 00ffff..., 01ffff...,
 # ..., 7fffff..., the compiler uses a unknown algorithm.  We define a
 # macro and skip the test for now until we know about the algorithm.

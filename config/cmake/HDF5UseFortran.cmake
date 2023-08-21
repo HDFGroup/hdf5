@@ -17,6 +17,12 @@
 enable_language (Fortran)
 
 set (HDF_PREFIX "H5")
+
+# Force lowercase Fortran module file names
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ef")
+endif ()
+
 include (CheckFortranFunctionExists)
 
 if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")

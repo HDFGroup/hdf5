@@ -126,7 +126,7 @@ HDF5 Release 1.12
         <li> \ref subsubsec_dataset_program_transfer
         <li> \ref subsubsec_dataset_program_read
     </ul>
-\li \ref subsec_dataset_transfer Data Transfer
+\li \ref subsec_dataset_transfer
     <ul>
         <li> \ref subsubsec_dataset_transfer_pipe
         <li> \ref subsubsec_dataset_transfer_filter

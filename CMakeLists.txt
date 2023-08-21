@@ -222,6 +222,7 @@ set (HDF_CONFIG_DIR          ${HDF5_SOURCE_DIR}/config)
 set (HDF_RESOURCES_DIR       ${HDF5_SOURCE_DIR}/config/cmake)
 set (HDF5_SRC_DIR            ${HDF5_SOURCE_DIR}/src)
 set (HDF5_TEST_SRC_DIR       ${HDF5_SOURCE_DIR}/test)
+set (HDF5_TEST_PAR_DIR       ${HDF5_SOURCE_DIR}/testpar)
 set (HDF5_CPP_SRC_DIR        ${HDF5_SOURCE_DIR}/c++)
 set (HDF5_CPP_TST_DIR        ${HDF5_SOURCE_DIR}/c++/test)
 set (HDF5_HL_SRC_DIR         ${HDF5_SOURCE_DIR}/hl)
@@ -236,9 +237,9 @@ set (HDF5_JAVA_JNI_SRC_DIR         ${HDF5_SOURCE_DIR}/java/src/jni)
 set (HDF5_JAVA_HDF5_SRC_DIR        ${HDF5_SOURCE_DIR}/java/src/hdf)
 set (HDF5_JAVA_TEST_SRC_DIR        ${HDF5_SOURCE_DIR}/java/test)
 set (HDF5_JAVA_LIB_DIR             ${HDF5_SOURCE_DIR}/java/lib)
-set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-1.7.33.jar)
-set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-1.7.33.jar)
-set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-1.7.33.jar)
+set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-2.0.6.jar)
+set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-2.0.6.jar)
+set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-2.0.6.jar)
 set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
 
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
@@ -574,15 +575,6 @@ if (HDF5_ENABLE_COVERAGE)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to indicate using dmalloc
-#-----------------------------------------------------------------------------
-# option (HDF5_ENABLE_USING_DMALLOC "Indicate that dmalloc is used" OFF)
-# if (HDF5_ENABLE_USING_DMALLOC)
-#   find_package (DMALLOC)
-#   set (H5_HAVE_DMALLOC DMALLOC_FOUND)
-# endif ()
-
-#-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
@@ -659,6 +651,13 @@ if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
     set (H5_HAVE_INSTRUMENTED_LIBRARY 1)
   endif ()
   mark_as_advanced (HDF5_ENABLE_INSTRUMENT)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add some definitions for Developer Builds
+#-----------------------------------------------------------------------------
+if (${HDF_CFG_NAME} MATCHES "Developer")
+  include (${HDF_RESOURCES_DIR}/HDF5DeveloperBuild.cmake)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -989,11 +988,11 @@ if (BUILD_TESTING)
   mark_as_advanced (HDF5_TEST_JAVA)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
-    if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
+    if (EXISTS "${HDF5_TEST_SRC_DIR}" AND IS_DIRECTORY "${HDF5_TEST_SRC_DIR}")
       add_subdirectory (test)
     endif ()
     if (H5_HAVE_PARALLEL)
-      if (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
+      if (EXISTS "${HDF5_TEST_PAR_DIR}" AND IS_DIRECTORY "${HDF5_TEST_PAR_DIR}")
         add_subdirectory (testpar)
       endif ()
     endif ()
