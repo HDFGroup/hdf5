@@ -59,7 +59,7 @@ set (HDF5_HL_F90_HEADERS ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTf90proto.h ${HDF5_HL_
 if (BUILD_STATIC_LIBS)
   add_library (${HDF5_HL_F90_C_LIB_TARGET} STATIC ${HDF5_HL_F90_C_SOURCES} ${HDF5_HL_F90_HEADERS})
   target_include_directories (${HDF5_HL_F90_C_LIB_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_HL_F90_C_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -76,7 +76,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_HL_F90_C_LIBSH_TARGET} SHARED ${HDF5_HL_F90_C_SOURCES} ${HDF5_HL_F90_HEADERS})
   target_include_directories (${HDF5_HL_F90_C_LIBSH_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_HL_F90_C_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -235,16 +235,19 @@ endif ()
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 
+set (mod_export_files
+    h5ds.mod
+    h5tb.mod
+    h5tb_const.mod
+    h5lt.mod
+    h5lt_const.mod
+    h5im.mod
+)
 
 if (BUILD_STATIC_LIBS)
-  set (mod_files
-      ${MOD_BUILD_DIR}/h5ds.mod
-      ${MOD_BUILD_DIR}/h5tb.mod
-      ${MOD_BUILD_DIR}/h5tb_const.mod
-      ${MOD_BUILD_DIR}/h5lt.mod
-      ${MOD_BUILD_DIR}/h5lt_const.mod
-      ${MOD_BUILD_DIR}/h5im.mod
-  )
+  foreach (mod_file ${mod_export_files})
+    set (mod_files ${mod_files} ${MOD_BUILD_DIR}/${mod_file})
+  endforeach ()
   install (
       FILES
           ${mod_files}
@@ -265,14 +268,9 @@ if (BUILD_STATIC_LIBS)
   endif ()
 endif ()
 if (BUILD_SHARED_LIBS)
-  set (modsh_files
-      ${MODSH_BUILD_DIR}/h5ds.mod
-      ${MODSH_BUILD_DIR}/h5tb.mod
-      ${MODSH_BUILD_DIR}/h5tb_const.mod
-      ${MODSH_BUILD_DIR}/h5lt.mod
-      ${MODSH_BUILD_DIR}/h5lt_const.mod
-      ${MODSH_BUILD_DIR}/h5im.mod
-  )
+  foreach (mod_file ${mod_export_files})
+    set (modsh_files ${modsh_files} ${MODSH_BUILD_DIR}/${mod_file})
+  endforeach ()
   install (
       FILES
           ${modsh_files}

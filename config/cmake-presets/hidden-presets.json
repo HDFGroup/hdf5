@@ -7,8 +7,8 @@
       "description": "Basic build using Ninja generator",
       "generator": "Ninja",
       "hidden": true,
-      "binaryDir": "${sourceParentDir}/build/${presetName}",
-      "installDir": "${sourceParentDir}/install/${presetName}"
+      "binaryDir": "${sourceParentDir}/build112/${presetName}",
+      "installDir": "${sourceParentDir}/install112/${presetName}"
     },
    {
       "name": "ci-x64",

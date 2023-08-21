@@ -116,12 +116,6 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
   macro (ADD_H5_WATCH resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5WATCH-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ${resultfile}.h5
-      )
-      set_tests_properties (H5WATCH-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      add_test (
           NAME H5WATCH-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
@@ -134,7 +128,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5WATCH-${resultfile} PROPERTIES
-          DEPENDS H5WATCH-${resultfile}-clear-objects
+          DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
       )
       set (last_test "H5WATCH-${resultfile}")
@@ -164,7 +158,12 @@ set_tests_properties (H5WATCH-clearall-objects PROPERTIES FIXTURES_REQUIRED swmr
 if (last_test)
   set_tests_properties (H5WATCH-clearall-objects PROPERTIES DEPENDS ${last_test})
 endif ()
-set (last_test "H5WATCH-clearall-objects")
+set (last_test "H5WATCH-cleanall-objects")
+add_test (
+  NAME H5WATCH-cleanall-objects
+  COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
+)
+set_tests_properties (H5WATCH-cleanall-objects PROPERTIES FIXTURES_CLEANUP swmr_vfd_check_compat)
 
 #################################################################################################
 #                                               #
@@ -189,7 +188,7 @@ set (last_test "H5WATCH-clearall-objects")
 add_test (NAME H5WATCH-h5watchgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5watchgentest>)
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    DEPENDS "H5WATCH-clearall-objects"
+    DEPENDS H5WATCH-clearall-objects
 )
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_SETUP gen_test_watch)
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_REQUIRED swmr_vfd_check_compat)

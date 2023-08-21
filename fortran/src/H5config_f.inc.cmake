@@ -11,7 +11,7 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 ! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
 
-! Define if we have parallel support
+! Define if there is parallel support
 #cmakedefine01 H5_HAVE_PARALLEL
 #if H5_HAVE_PARALLEL == 0
 #undef H5_HAVE_PARALLEL
@@ -70,3 +70,9 @@
 
 ! Fortran compiler id
 #define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
+
+! Define if deprecated public API symbols are disabled
+#cmakedefine01 H5_NO_DEPRECATED_SYMBOLS
+#if H5_NO_DEPRECATED_SYMBOLS == 0
+#undef H5_NO_DEPRECATED_SYMBOLS
+#endif

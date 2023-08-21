@@ -17,15 +17,15 @@
 ##############################################################################
 
 set (test_hl_fortran_CLEANFILES
-          dsetf1.h5
-          dsetf2.h5
-          dsetf3.h5
-          dsetf4.h5
-          dsetf5.h5
-          f1img.h5
-          f1tab.h5
-          f2tab.h5
-          tstds.h5
+    dsetf1.h5
+    dsetf2.h5
+    dsetf3.h5
+    dsetf4.h5
+    dsetf5.h5
+    f1img.h5
+    f1tab.h5
+    f2tab.h5
+    tstds.h5
 )
 
 # Remove any output file left over from previous test run
@@ -34,7 +34,19 @@ add_test (
     COMMAND    ${CMAKE_COMMAND}
         -E remove ${test_hl_fortran_CLEANFILES}
 )
-set_tests_properties (HL_FORTRAN_test-clear-objects PROPERTIES FIXTURES_SETUP clear_HL_FORTRAN_test)
+set_tests_properties (HL_FORTRAN_test-clear-objects PROPERTIES
+    FIXTURES_SETUP clear_HL_FORTRAN_test
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+add_test (
+    NAME HL_FORTRAN_test-clean-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${test_hl_fortran_CLEANFILES}
+)
+set_tests_properties (HL_FORTRAN_test-clean-objects PROPERTIES
+    FIXTURES_CLEANUP clear_HL_FORTRAN_test
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 macro (ADD_H5_FORTRAN_TEST file)
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -54,6 +66,7 @@ macro (ADD_H5_FORTRAN_TEST file)
   endif ()
   set_tests_properties (HL_FORTRAN_f90_${file} PROPERTIES
       FIXTURES_REQUIRED clear_HL_FORTRAN_test
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   )
 endmacro ()
 

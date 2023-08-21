@@ -17,20 +17,6 @@ add_custom_target(cpp_testhdf5_files ALL COMMENT "Copying files needed by cpp_te
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-# Remove any output file left over from previous test run
-add_test (
-    NAME CPP_testhdf5-clear-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-            tattr_basic.h5
-            tattr_compound.h5
-            tattr_dtype.h5
-            tattr_multi.h5
-            tattr_scalar.h5
-            tfattrs.h5
-            titerate.h5
-)
-
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME CPP_testhdf5 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cpp_testhdf5>)
 else ()
@@ -46,7 +32,9 @@ else ()
       -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (CPP_testhdf5 PROPERTIES DEPENDS CPP_testhdf5-clear-objects)
+set_tests_properties (CPP_testhdf5 PROPERTIES
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 ##############################################################################
 ##############################################################################
