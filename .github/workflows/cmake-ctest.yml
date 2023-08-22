@@ -65,13 +65,13 @@ jobs:
       - name: Publish binary (Windows)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/ci-StdShar-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build112"
+          mkdir "${{ runner.workspace }}/build112/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build112/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build112/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/README.md -Destination ${{ runner.workspace }}/build112/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/ci-StdShar-MSVC/* -Destination ${{ runner.workspace }}/build112/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build112"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip hdf5
         shell: pwsh
 
@@ -86,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
               name: zip-vs2022-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              path: ${{ runner.workspace }}/build112/${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_linux:
@@ -128,13 +128,13 @@ jobs:
       - name: Publish binary (Linux)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build112"
+          mkdir "${{ runner.workspace }}/build112/hdf5"
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build112/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build112/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build112/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/*.tar.gz ${{ runner.workspace }}/build112/hdf5
+          cd "${{ runner.workspace }}/build112"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz hdf5
         shell: bash
 
@@ -148,7 +148,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
               name: tgz-ubuntu-2204-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
+              path: ${{ runner.workspace }}/build112/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Save doxygen files created by ctest script
@@ -156,7 +156,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
               name: docs-doxygen
-              path: ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/hdf5lib_docs/html
+              path: ${{ runner.workspace }}/hdf5/build112/ci-StdShar-GNUC/hdf5lib_docs/html
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_mac:
@@ -203,13 +203,13 @@ jobs:
       - name: Publish binary (MacOS)
         id: publish-ctest-binary
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build112"
+          mkdir "${{ runner.workspace }}/build112/hdf5"
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build112/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build112/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build112/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-Clang/*.tar.gz ${{ runner.workspace }}/build112/hdf5
+          cd "${{ runner.workspace }}/build112"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz hdf5
         shell: bash
 
@@ -223,6 +223,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
               name: tgz-osx12-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz
+              path: ${{ runner.workspace }}/build112/${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
