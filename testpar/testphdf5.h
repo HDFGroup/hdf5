@@ -256,6 +256,7 @@ void none_selection_chunk(void);
 void actual_io_mode_tests(void);
 void no_collective_cause_tests(void);
 void test_chunk_alloc(void);
+void test_chunk_alloc_incr_ser_to_par(void);
 void test_filter_read(void);
 void compact_dataset(void);
 void null_dataset(void);
