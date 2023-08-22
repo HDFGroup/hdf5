@@ -619,13 +619,12 @@ H5O__msg_free_mesg(H5O_mesg_t *mesg)
 } /* end H5O__msg_free_mesg() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_free_real
+ * Function:    H5O_msg_free_real
  *
- * Purpose:	Similar to H5O_msg_reset() except it also frees the message
- *		pointer.
+ * Purpose:     Similar to H5O_msg_reset() except it also frees the message
+ *              pointer
  *
- * Return:	Success:	NULL
- *		Failure:	NULL
+ * Return:      NULL (always)
  *
  *-------------------------------------------------------------------------
  */
@@ -634,16 +633,15 @@ H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* check args */
-    assert(type);
+    /* Don't assert on args since this could be called in cleanup code */
 
     if (msg_native) {
         H5O__msg_reset_real(type, msg_native);
-        if (NULL != (type->free))
+        if (type && type->free)
             (type->free)(msg_native);
         else
             H5MM_xfree(msg_native);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5O_msg_free_real() */
