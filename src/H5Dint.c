@@ -1715,12 +1715,13 @@ done:
 static herr_t
 H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
 {
-    H5P_genplist_t *plist;                 /* Property list */
-    H5O_fill_t     *fill_prop;             /* Pointer to dataset's fill value info */
-    unsigned        alloc_time_state;      /* Allocation time state */
-    htri_t          msg_exists;            /* Whether a particular type of message exists */
-    hbool_t         layout_init = FALSE;   /* Flag to indicate that chunk information was initialized */
-    herr_t          ret_value   = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;                     /* Property list */
+    H5O_fill_t     *fill_prop;                 /* Pointer to dataset's fill value info */
+    unsigned        alloc_time_state;          /* Allocation time state */
+    htri_t          msg_exists;                /* Whether a particular type of message exists */
+    hbool_t         layout_init       = FALSE; /* Flag to indicate that chunk information was initialized */
+    hbool_t         must_init_storage = FALSE;
+    herr_t          ret_value         = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC_TAG(dataset->oloc.addr)
 
@@ -1862,17 +1863,28 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
      * Make sure all storage is properly initialized.
      * This is important only for parallel I/O where the space must
      * be fully allocated before I/O can happen.
+     *
+     * Storage will be initialized here if either the VFD being used
+     * has set the H5FD_FEAT_ALLOCATE_EARLY flag to indicate that it
+     * wishes to force early space allocation OR a parallel VFD is
+     * being used and the dataset in question doesn't have any filters
+     * applied to it. If filters are applied to the dataset, collective
+     * I/O will be required when writing to the dataset, so we don't
+     * need to initialize storage here, as the collective I/O process
+     * will coordinate that.
      */
-    if ((H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR) &&
-        !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) &&
-        H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_ALLOCATE_EARLY)) {
-        H5D_io_info_t io_info;
+    must_init_storage = (H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR) &&
+                        !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage);
+    must_init_storage = must_init_storage && (H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_ALLOCATE_EARLY) ||
+                                              (H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI) &&
+                                               dataset->shared->dcpl_cache.pline.nused == 0));
 
+    if (must_init_storage) {
         io_info.dset = dataset;
 
-        if (H5D__alloc_storage(&io_info, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
+        if (H5D__alloc_storage(dataset, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
-    } /* end if */
+    }
 
 done:
     if (ret_value < 0) {
