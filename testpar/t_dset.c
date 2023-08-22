@@ -3424,7 +3424,7 @@ actual_io_mode_tests(void)
  *         Test for Compact layout as the cause of breaking collective I/O.
  *
  *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL:
- *         Test for Externl-File storage as the cause of breaking collective I/O.
+ *         Test for External-File storage as the cause of breaking collective I/O.
  *
  */
 #define FILE_EXTERNAL "nocolcause_extern.data"
