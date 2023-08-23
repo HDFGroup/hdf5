@@ -589,6 +589,10 @@ Bug Fixes since HDF5-1.14.0 release
 
       Fixes Github issue #3034
 
+    - Fixed write buffer overflow in H5O__alloc_chunk
+
+      The overflow was found by OSS-Fuzz https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=58658
+
     Java Library
     ------------
     - Fixed switch case 'L' block missing a break statement.

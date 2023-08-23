@@ -946,6 +946,9 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null, const H5O_
                     else {
                         assert(curr_msg->type->id != H5O_CONT_ID);
 
+                        if (size < curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh))
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid size");
+
                         /* Copy the raw data */
                         H5MM_memcpy(p, curr_msg->raw - (size_t)H5O_SIZEOF_MSGHDR_OH(oh),
                                     curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
