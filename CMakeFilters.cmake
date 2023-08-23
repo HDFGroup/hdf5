@@ -131,7 +131,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option for SzLib support
 #-----------------------------------------------------------------------------
-option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
+option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" ON)
 if (HDF5_ENABLE_SZIP_SUPPORT)
   option (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" ON)
   if (NOT SZIP_USE_EXTERNAL)

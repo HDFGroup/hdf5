@@ -876,7 +876,7 @@ if (BUILD_TESTING)
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                               OFF
-HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
+HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     ON
 HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 ON
 PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS"           0
 ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"              0

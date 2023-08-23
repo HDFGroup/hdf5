@@ -40,3 +40,18 @@ jobs:
       use_environ: snapshots
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
+  check-examples:
+    needs: call-workflow-release
+    - uses: convictional/trigger-workflow-and-wait@v1.6.1
+      with:
+        owner: HDFGroup
+        repo: hdf5
+        github_token: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
+        workflow_file_name: daily-build.yml
+        ref: release-branch
+        wait_interval: 300
+        client_payload: '{}'
+        propagate_failure: false
+        trigger_workflow: true
+        wait_workflow: true
+
