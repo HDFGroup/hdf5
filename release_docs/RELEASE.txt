@@ -292,8 +292,8 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
-    - Fixed performance regression with some compount type conversions
-
+    - Fixed performance regression with some compound type conversions
+33
       In-place type conversion was introduced for most use cases in 1.14.2.
       While being able to use the read buffer for type conversion potentially
       improves performance by performing the entire I/O at once, it also
