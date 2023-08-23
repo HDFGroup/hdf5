@@ -34,8 +34,7 @@
       "cacheVariables": {
         "HDF5_PACKAGE_EXTLIBS": "ON",
         "ZLIB_USE_LOCALCONTENT": "OFF",
-        "LIBAEC_USE_LOCALCONTENT": "OFF",
-        "HDF5_ENABLE_SZIP_SUPPORT": "ON"
+        "LIBAEC_USE_LOCALCONTENT": "OFF"
       }
     },
     {

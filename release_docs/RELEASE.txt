@@ -53,6 +53,9 @@ New Features
       Since libaec is prevalent and BSD-licensed for both encoding and
       decoding, we build the szip filter by default now.
 
+      Both autotools and CMake build systems will process the szip filter the same as
+      the zlib filter is processed.
+
     - Removed CMake cross-compiling variables
 
       * HDF5_USE_PREGEN
