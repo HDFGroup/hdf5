@@ -180,7 +180,7 @@ Following are the parameters required by this call:
 <em>Fortran</em>
 \code
     h5pset_dxpl_mpi_f (prp_id, data_xfer_mode, hdferr)
-         prp_id         IN: Property List Identifer (INTEGER (HID_T))
+         prp_id         IN: Property List Identifier (INTEGER (HID_T))
          data_xfer_mode IN: Data transfer mode  (INTEGER)
                               H5FD_MPIO_INDEPENDENT_F (0)
                               H5FD_MPIO_COLLECTIVE_F (1)
