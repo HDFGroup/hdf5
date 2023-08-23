@@ -1676,7 +1676,7 @@ AC_SUBST([USE_FILTER_SZIP]) USE_FILTER_SZIP="no"
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=DIR],
                             [Use szlib library for external szlib I/O
-                             filter [default=no]])],,
+                             filter [default=yes]])],,
             [withval=yes])
 
 case "X-$withval" in
