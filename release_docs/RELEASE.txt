@@ -47,6 +47,12 @@ New Features
 
     Configuration:
     -------------
+    - Autotools builds now build the szip filter by default when an appropriate
+      library is found
+
+      Since libaec is prevalent and BSD-licensed for both encoding and
+      decoding, we build the szip filter by default now.
+
     - Removed CMake cross-compiling variables
 
       * HDF5_USE_PREGEN

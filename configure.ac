@@ -1561,7 +1561,7 @@ AC_ARG_WITH([fnord],
 ## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
-## will be filled in during the deflate (zlib) and szip processing
+## will be filled in during the deflate/zlib and szip/libaec processing
 ## below.
 ##
 AC_SUBST([EXTERNAL_FILTERS])
@@ -1666,13 +1666,18 @@ fi
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
+## libaec also implements Space Data System Standard 121.0-B-2 and has
+## an szip compatibility header. Since the AEC library is BSD licensed
+## for both encoding and decoding, we now build with the filter enabled
+## by default when the library is found.
+##
 AC_SUBST([LL_PATH])
 AC_SUBST([USE_FILTER_SZIP]) USE_FILTER_SZIP="no"
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=DIR],
                             [Use szlib library for external szlib I/O
                              filter [default=no]])],,
-            [withval=no])
+            [withval=yes])
 
 case "X-$withval" in
   X-yes)
