@@ -582,9 +582,15 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
 
                     /* Allocate entry list */
-                    if (NULL == (mesg->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(
-                                     (size_t)tmp_hsize * sizeof(H5O_storage_virtual_ent_t))))
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "unable to allocate heap block");
+                    if (tmp_hsize > 0) {
+                        if (NULL == (mesg->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(
+                                         (size_t)tmp_hsize * sizeof(H5O_storage_virtual_ent_t))))
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "unable to allocate heap block");
+                    }
+                    else {
+                        /* Avoid zero-size allocation */
+                        mesg->storage.u.virt.list = NULL;
+                    }
                     mesg->storage.u.virt.list_nalloc = (size_t)tmp_hsize;
                     mesg->storage.u.virt.list_nused  = (size_t)tmp_hsize;
 

@@ -310,7 +310,7 @@ if (HDF5_ENABLE_DEBUG_APIS)
       H5F_DEBUG
       H5HL_DEBUG
       H5I_DEBUG
-      H5M_DEBUG
+      H5MM_DEBUG
       H5O_DEBUG
       H5S_DEBUG
       H5T_DEBUG

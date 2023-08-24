@@ -2790,7 +2790,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
         /* Set up contiguous I/O info object */
         H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
-        memcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
+        H5MM_memcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
         ctg_dset_info.store      = &ctg_store;
         ctg_dset_info.layout_ops = *H5D_LOPS_CONTIG;
         ctg_io_info.dsets_info   = &ctg_dset_info;
@@ -2802,7 +2802,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
         /* Set up compact I/O info object */
         H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
-        memcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
+        H5MM_memcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
         cpt_dset_info.store      = &cpt_store;
         cpt_dset_info.layout_ops = *H5D_LOPS_COMPACT;
         cpt_io_info.dsets_info   = &cpt_dset_info;
@@ -2950,7 +2950,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Set up contiguous I/O info object */
     H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
-    memcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
+    H5MM_memcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
     ctg_dset_info.store      = &ctg_store;
     ctg_dset_info.layout_ops = *H5D_LOPS_CONTIG;
     ctg_io_info.dsets_info   = &ctg_dset_info;
@@ -2962,7 +2962,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Set up compact I/O info object */
     H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
-    memcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
+    H5MM_memcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
     cpt_dset_info.store      = &cpt_store;
     cpt_dset_info.layout_ops = *H5D_LOPS_COMPACT;
     cpt_io_info.dsets_info   = &cpt_dset_info;

@@ -3772,7 +3772,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
             mod_data_p = msg_send_bufs[num_send_requests];
 
             /* Store the chunk's index into the buffer */
-            memcpy(mod_data_p, &chunk_entry->index_info.chunk_idx, sizeof(hsize_t));
+            H5MM_memcpy(mod_data_p, &chunk_entry->index_info.chunk_idx, sizeof(hsize_t));
             mod_data_p += sizeof(hsize_t);
 
             /* Serialize the chunk's file dataspace into the buffer */
@@ -4491,7 +4491,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
         if (msg_ptr) {
             /* Retrieve the chunk's index value */
-            memcpy(&chunk_idx, msg_ptr, sizeof(hsize_t));
+            H5MM_memcpy(&chunk_idx, msg_ptr, sizeof(hsize_t));
             msg_ptr += sizeof(hsize_t);
 
             /* Find the chunk entry according to its chunk index */

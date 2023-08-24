@@ -399,7 +399,7 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
     }
     else {
         /* Copy the IOC fapl data out */
-        memcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
+        H5MM_memcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
     }
 
 done:
@@ -666,7 +666,7 @@ H5FD__ioc_fapl_copy(const void *_old_fa)
     if (NULL == new_fa_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL");
 
-    memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
+    H5MM_memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
 
     ret_value = (void *)new_fa_ptr;
 
@@ -790,7 +790,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
 
     /* Fill in the file config values */
-    memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
+    H5MM_memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
 
     /* Fully resolve the given filepath and get its dirname */
     if (H5_resolve_pathname(name, file_ptr->comm, &file_ptr->file_path) < 0)
