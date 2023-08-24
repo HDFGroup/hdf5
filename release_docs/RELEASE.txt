@@ -109,7 +109,17 @@ Bug Fixes since HDF5-1.14.2 release
 ===================================
     Library
     -------
-    - 
+    - Fixed performance regression with some compound type conversions
+
+      In-place type conversion was introduced for most use cases in 1.14.2.
+      While being able to use the read buffer for type conversion potentially
+      improves performance by performing the entire I/O at once, it also
+      disables the optimized compound type conversion used when the destination
+      is a subset of the source. Disabled in-place type conversion when using
+      this optimized conversion and there is no benefit in terms of the I/O
+      size.
+
+    - Fixed an assertion in a previous fix for CVE-2016-4332
 
 
     Java Library
