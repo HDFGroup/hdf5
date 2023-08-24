@@ -171,7 +171,6 @@ static void
 parallel_access_dataset(const char *filename, int chunk_factor, access_type action, hid_t *file_id,
                         hid_t *dataset)
 {
-    /* HDF5 gubbins */
     hid_t   memspace, dataspace; /* HDF5 file identifier */
     hid_t   access_plist;        /* HDF5 ID for file access property list */
     herr_t  hrc;                 /* HDF5 return code */
@@ -320,7 +319,6 @@ static void
 verify_data(const char *filename, int chunk_factor, write_type write_pattern, int vclose, hid_t *file_id,
             hid_t *dataset)
 {
-    /* HDF5 gubbins */
     hid_t  dataspace, memspace; /* HDF5 file identifier */
     hid_t  access_plist;        /* HDF5 ID for file access property list */
     herr_t hrc;                 /* HDF5 return code */
