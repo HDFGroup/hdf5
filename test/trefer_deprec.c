@@ -772,6 +772,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Try to read an unaddressed dataset */
+    memset(&undef_reg, 0, sizeof(undef_reg));
     dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, undef_reg);
     VERIFY(dset2, FAIL, "H5Rdereference2 haddr_undef");
 
