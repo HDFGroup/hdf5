@@ -112,8 +112,8 @@ H5G__cache_node_get_initial_load_size(void *_udata, size_t *image_len)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f);
-    HDassert(image_len);
+    assert(f);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = (size_t)(H5G_NODE_SIZE(f));
@@ -149,30 +149,30 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(f);
-    HDassert(dirty);
+    assert(image);
+    assert(len > 0);
+    assert(f);
+    assert(dirty);
 
     /* Allocate symbol table data structures */
     if (NULL == (sym = H5FL_CALLOC(H5G_node_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     sym->node_size = (size_t)(H5G_NODE_SIZE(f));
     if (NULL == (sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Magic */
     if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, image_end))
         HGOTO_ERROR(H5E_SYM, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    if (HDmemcmp(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "bad symbol table node signature")
+    if (memcmp(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "bad symbol table node signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (H5_IS_BUFFER_OVERFLOW(image, 1, image_end))
         HGOTO_ERROR(H5E_SYM, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (H5G_NODE_VERS != *image++)
-        HGOTO_ERROR(H5E_SYM, H5E_VERSION, NULL, "bad symbol table node version")
+        HGOTO_ERROR(H5E_SYM, H5E_VERSION, NULL, "bad symbol table node version");
 
     /* Reserved */
     if (H5_IS_BUFFER_OVERFLOW(image, 1, image_end))
@@ -186,7 +186,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_
 
     /* Entries */
     if (H5G__ent_decode_vec(f, &image, image_end, sym->entry, sym->nsyms) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries");
 
     /* Set return value */
     ret_value = sym;
@@ -194,7 +194,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_
 done:
     if (!ret_value)
         if (sym && H5G__node_free(sym) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__cache_node_deserialize() */
@@ -215,9 +215,9 @@ H5G__cache_node_image_len(const void *_thing, size_t *image_len)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(sym);
-    HDassert(sym->cache_info.type == H5AC_SNODE);
-    HDassert(image_len);
+    assert(sym);
+    assert(sym->cache_info.type == H5AC_SNODE);
+    assert(image_len);
 
     *image_len = sym->node_size;
 
@@ -244,11 +244,11 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len, void *_thing
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(image);
-    HDassert(sym);
-    HDassert(sym->cache_info.type == H5AC_SNODE);
-    HDassert(len == sym->node_size);
+    assert(f);
+    assert(image);
+    assert(sym);
+    assert(sym->cache_info.type == H5AC_SNODE);
+    assert(len == sym->node_size);
 
     /* Magic number */
     H5MM_memcpy(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -265,10 +265,10 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len, void *_thing
 
     /* Entries */
     if (H5G__ent_encode_vec(f, &image, sym->entry, sym->nsyms) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize");
 
     /* Clear rest of symbol table node */
-    HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+    memset(image, 0, len - (size_t)(image - (uint8_t *)_image));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -290,12 +290,12 @@ H5G__cache_node_free_icr(void *_thing)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(sym);
-    HDassert(sym->cache_info.type == H5AC_SNODE);
+    assert(sym);
+    assert(sym->cache_info.type == H5AC_SNODE);
 
     /* Destroy symbol table node */
     if (H5G__node_free(sym) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

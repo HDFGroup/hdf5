@@ -85,10 +85,10 @@
 
 MODULE H5D
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
   USE H5LIB, ONLY : h5kind_to_type
   USE H5S, ONLY : H5Sget_simple_extent_ndims_f, H5Sclose_f
+  IMPLICIT NONE
 
   PRIVATE h5dread_vl_integer, h5dread_vl_real, h5dread_vl_string
   PRIVATE h5dwrite_vl_integer, h5dwrite_vl_real, h5dwrite_vl_string
@@ -2266,6 +2266,9 @@ CONTAINS
     CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
   END SUBROUTINE h5dfill_char
+
+#endif
+
 !>
 !! \ingroup FH5D
 !!
@@ -2368,8 +2371,6 @@ CONTAINS
     hdferr = H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
   END SUBROUTINE h5dwrite_multi_f
-
-#endif
 
 END MODULE H5D
 

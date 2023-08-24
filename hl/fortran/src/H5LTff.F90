@@ -609,10 +609,6 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 22, 2004
-  !
   ! Comments:
   !
   !-------------------------------------------------------------------------
@@ -782,10 +778,6 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 22, 2004
-  !
   ! Comments:
   !
   !-------------------------------------------------------------------------
@@ -943,10 +935,6 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 22, 2004
-  !
   ! Comments:
   !
   !-------------------------------------------------------------------------
@@ -990,10 +978,6 @@ CONTAINS
   !! \brief Read a dataset
   !
   ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 22, 2004
   !
   ! Comments:
   !

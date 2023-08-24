@@ -40,8 +40,6 @@
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Vailin Choi; Aug 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -122,7 +120,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_notset() */
@@ -154,8 +152,6 @@ append_func(hid_t H5_ATTR_UNUSED dset_id, hsize_t H5_ATTR_UNUSED *cur_dims, void
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -251,7 +247,7 @@ test_dataset_append_rows_columns(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -296,7 +292,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_rows_columns() */
@@ -310,8 +306,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -387,7 +381,7 @@ test_dataset_append_rows(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -432,7 +426,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_rows() */
@@ -446,8 +440,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -524,7 +516,7 @@ test_dataset_append_columns(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -569,7 +561,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_columns() */
@@ -592,8 +584,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -687,7 +677,7 @@ test_dataset_append_BUG1(hid_t fid)
             if (buf[i][j] != rbuf[i][j])
                 TEST_ERROR;
 
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -732,7 +722,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_BUG1() */
@@ -755,8 +745,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -850,7 +838,7 @@ test_dataset_append_BUG2(hid_t fid)
             if (buf[i][j] != rbuf[i][j])
                 TEST_ERROR;
 
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -895,7 +883,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_BUG2() */
@@ -910,8 +898,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1009,7 +995,7 @@ test_dataset_append_less(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -1054,7 +1040,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_less() */
@@ -1072,8 +1058,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1166,7 +1150,7 @@ test_dataset_append_vary(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the dataset */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -1211,7 +1195,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_vary() */
@@ -1223,8 +1207,6 @@ error:
  *              along with H5DOappend().
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */

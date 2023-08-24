@@ -41,11 +41,6 @@
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -62,22 +57,22 @@ h5lcopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *de
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_src_name = HD5f2cstring(src_name, (size_t)*src_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_dest_name = HD5f2cstring(dest_name, (size_t)*dest_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Lcopy function.
      */
     if (H5Lcopy((hid_t)*src_loc_id, c_src_name, (hid_t)*dest_loc_id, c_dest_name, (hid_t)*lcpl_id,
                 (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_src_name)
-        HDfree(c_src_name);
+        free(c_src_name);
     if (c_dest_name)
-        HDfree(c_dest_name);
+        free(c_dest_name);
 
     return ret_value;
 }
@@ -99,9 +94,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 29, 2008
  * SOURCE
  */
 
@@ -135,11 +127,11 @@ h5lcreate_external_c(_fcd file_name, size_t_f *file_namelen, _fcd obj_name, size
 
 done:
     if (c_file_name)
-        HDfree(c_file_name);
+        free(c_file_name);
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_link_name)
-        HDfree(c_link_name);
+        free(c_link_name);
 
     return ret_value;
 }
@@ -158,8 +150,8 @@ done:
  * OUTPUTS
  *
  *
- *  cset - indicates the character set used for link’s name.
- *  corder - specifies the link’s creation order position.
+ *  cset - indicates the character set used for link's name.
+ *  corder - specifies the link's creation order position.
  *  corder_valid - indicates whether the value in corder is valid.
  *  link_type -  specifies the link class:
  *     	                H5L_LINK_HARD_F      - Hard link
@@ -171,11 +163,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -211,7 +198,7 @@ h5lget_info_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, int_
 
 done:
     if (c_link_name)
-        HDfree(c_link_name);
+        free(c_link_name);
 
     return ret_value;
 }
@@ -234,16 +221,11 @@ done:
  *
  *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
- *  cset - Indicates the character set used for the attribute’s name
+ *  cset - Indicates the character set used for the attribute's name
  *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -303,11 +285,6 @@ done:
  * RETURNS
  *  Returns a positive value if the link class has been registered
  *  and zero if it is unregistered. Otherwise returns a negative value
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -358,9 +335,6 @@ h5lis_registered_c(int_f *link_cls_id)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
  * SOURCE
  */
 int_f
@@ -376,22 +350,22 @@ h5lmove_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *de
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_src_name = HD5f2cstring(src_name, (size_t)*src_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_dest_name = HD5f2cstring(dest_name, (size_t)*dest_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Lmove function.
      */
     if (H5Lmove((hid_t)*src_loc_id, c_src_name, (hid_t)*dest_loc_id, c_dest_name, (hid_t)*lcpl_id,
                 (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_src_name)
-        HDfree(c_src_name);
+        free(c_src_name);
     if (c_dest_name)
-        HDfree(c_dest_name);
+        free(c_dest_name);
 
     return ret_value;
 }
@@ -416,9 +390,6 @@ done:
  *  size        - The size of the link name on success
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 10, 2008
  * SOURCE
  */
 int_f
@@ -436,20 +407,20 @@ h5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     c_size = (size_t)*size + 1;
 
     /*
      * Allocate buffer to hold name of an attribute
      */
-    if (NULL == (c_name = (char *)HDmalloc(c_size)))
-        HGOTO_DONE(FAIL)
+    if (NULL == (c_name = (char *)malloc(c_size)))
+        HGOTO_DONE(FAIL);
 
     if ((c_size_link =
              H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,
                                 (H5_iter_order_t)*order, (hsize_t)*n, c_name, c_size, (hid_t)*lapl_id)) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *size = (size_t_f)c_size_link;
 
@@ -461,9 +432,9 @@ h5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
 
 done:
     if (c_group_name)
-        HDfree(c_group_name);
+        free(c_group_name);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -486,11 +457,6 @@ done:
 /*  * */
 /*  * RETURNS */
 /*  *     0 on success, -1 on failure */
-/*  * AUTHOR */
-/*  *  M. Scot Breitenfeld */
-/*  *              March 3, 2008 */
-/*  * HISTORY */
-/*  * N/A */
 /*  * SOURCE */
 /* *\/ */
 /* int_f */
@@ -550,11 +516,6 @@ done:
 /*  * */
 /*  * RETURNS */
 /*  *     0 on success, -1 on failure */
-/*  * AUTHOR */
-/*  *  M. Scot Breitenfeld */
-/*  *              February 3, 2008 */
-/*  * HISTORY */
-/*  * */
 /*  * SOURCE */
 /* *\/ */
 
@@ -625,9 +586,9 @@ done:
 
 /* done: */
 /*   if(c_src_name) */
-/*     HDfree(c_src_name); */
+/*     free(c_src_name); */
 /*   if(c_dest_name) */
-/*     HDfree(c_dest_name); */
+/*     free(c_dest_name); */
 
 /*   return ret_value; */
 /* } */
@@ -650,9 +611,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 11, 2008
  * SOURCE
  */
 int_f
@@ -667,17 +625,17 @@ h5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_link_name = HD5f2cstring(link_name, (size_t)*link_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Lget_val
      */
     if (H5Lget_val((hid_t)*link_loc_id, c_link_name, &linkval_buff, (size_t)*size, (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_link_name)
-        HDfree(c_link_name);
+        free(c_link_name);
 
     return ret_value;
 }
@@ -705,9 +663,6 @@ done:
  *
  * RETURNS
  *  >0 on success, 0< on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  August 18, 2008
  * SOURCE
  */
 int_f
@@ -739,7 +694,7 @@ h5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, int_f *index
     *idx      = (hsize_t_f)idx_c;
 
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }

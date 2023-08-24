@@ -10,13 +10,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Vailin Choi
- *              Feb 20, 2014
- *
- * This file contains tests for:
- *  H5Odisable_mdc_flushes()
- *  H5Oenable_mdc_flushes()
- *  H5Oare_mdc_flushes_disabled()
+/*
+ *      This file contains tests for:
+ *          * H5Odisable_mdc_flushes()
+ *          * H5Oenable_mdc_flushes()
+ *          * H5Oare_mdc_flushes_disabled()
  */
 #include "h5test.h"
 
@@ -85,8 +83,6 @@ static unsigned verify_multiple_cork(hbool_t swmr);
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -141,9 +137,9 @@ verify_old_dset_cork(void)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(100, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         buf[i] = buf_data + (i * 20);
@@ -255,8 +251,8 @@ verify_old_dset_cork(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return 0;
@@ -275,10 +271,10 @@ error:
         H5Pclose(dcpl3);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return 1;
 } /* verify_old_dset_cork */
@@ -291,8 +287,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -483,7 +477,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_obj_dset_cork */
 
@@ -496,8 +490,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -653,9 +645,9 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(100, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         buf[i] = buf_data + (i * 20);
@@ -719,8 +711,8 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return 0;
@@ -738,10 +730,10 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return 1;
 } /* verify_dset_cork */
@@ -754,8 +746,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -911,7 +901,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_group_cork */
 
@@ -923,8 +913,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1186,7 +1174,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_named_cork */
 
@@ -1200,8 +1188,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1478,7 +1464,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Odisable_mdc_flushes(aidg2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1487,7 +1473,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Odisable_mdc_flushes(aidd1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1496,7 +1482,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Oare_mdc_flushes_disabled(aidt2, &corked);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1520,7 +1506,7 @@ verify_multiple_cork(hbool_t swmr)
         ret = H5Oare_mdc_flushes_disabled(fid1, &corked);
         ret = H5Odisable_mdc_flushes(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1529,7 +1515,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Oenable_mdc_flushes(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1563,7 +1549,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_multiple_cork */
 
@@ -1575,8 +1561,6 @@ error:
  *specified.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1667,7 +1651,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Odisable_mdc_flushes(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1706,7 +1690,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oenable_mdc_flushes(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1723,7 +1707,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oare_mdc_flushes_disabled(aid, &corked);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1766,7 +1750,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Odisable_mdc_flushes(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1791,7 +1775,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oenable_mdc_flushes(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1865,7 +1849,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_objs_cork() */
 
@@ -1877,8 +1861,6 @@ error:
  *manipulating datasets.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -2001,9 +1983,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (wbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+    if (NULL == (wbuf_data = (int *)calloc(DIMS0 * DIMS1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (wbuf = (int **)HDcalloc(DIMS0, sizeof(wbuf_data))))
+    if (NULL == (wbuf = (int **)calloc(DIMS0, sizeof(wbuf_data))))
         TEST_ERROR;
     for (i = 0; i < DIMS0; i++)
         wbuf[i] = wbuf_data + (i * DIMS1);
@@ -2048,7 +2030,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (rbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+    if (NULL == (rbuf_data = (int *)calloc(DIMS0 * DIMS1, sizeof(int))))
         TEST_ERROR;
 
     /* Read from the dataset */
@@ -2195,9 +2177,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
 
-    HDfree(wbuf);
-    HDfree(wbuf_data);
-    HDfree(rbuf_data);
+    free(wbuf);
+    free(wbuf_data);
+    free(rbuf_data);
 
     PASSED();
     return 0;
@@ -2215,11 +2197,11 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(wbuf);
-    HDfree(wbuf_data);
-    HDfree(rbuf_data);
+    free(wbuf);
+    free(wbuf_data);
+    free(rbuf_data);
 
     return 1;
 
@@ -2233,8 +2215,6 @@ error:
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */

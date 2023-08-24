@@ -37,9 +37,6 @@
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -54,11 +51,11 @@ H5Tget_fields(hid_t type_id, size_t *spos /*out*/, size_t *epos /*out*/, size_t 
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class");
 
     /* Get values */
     if (spos)
@@ -89,9 +86,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -105,27 +99,27 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize, size_t mpos
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (H5T_STATE_TRANSIENT != dt->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only");
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class");
     if (epos + esize > dt->shared->u.atomic.prec)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent bit field size/location is invalid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent bit field size/location is invalid");
     if (mpos + msize > dt->shared->u.atomic.prec)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mantissa bit field size/location is invalid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mantissa bit field size/location is invalid");
     if (spos >= dt->shared->u.atomic.prec)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign location is not valid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign location is not valid");
 
     /* Check for overlap */
     if (spos >= epos && spos < epos + esize)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within exponent field")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within exponent field");
     if (spos >= mpos && spos < mpos + msize)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within mantissa field")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within mantissa field");
     if ((mpos < epos && mpos + msize > epos) || (epos < mpos && epos + esize > mpos))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent and mantissa fields overlap")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent and mantissa fields overlap");
 
     /* Commit */
     dt->shared->u.atomic.u.f.sign  = spos;
@@ -147,9 +141,6 @@ done:
  *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -163,11 +154,11 @@ H5Tget_ebias(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, 0, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, 0, "operation not defined for datatype class");
 
     /* bias */
     H5_CHECKED_ASSIGN(ret_value, size_t, dt->shared->u.atomic.u.f.ebias, uint64_t);
@@ -183,9 +174,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -199,13 +187,13 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (H5T_STATE_TRANSIENT != dt->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only");
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class");
 
     /* Commit */
     dt->shared->u.atomic.u.f.ebias = ebias;
@@ -224,9 +212,6 @@ done:
  *
  *		Failure:	H5T_NORM_ERROR (Negative)
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5T_norm_t
@@ -240,11 +225,11 @@ H5Tget_norm(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR, "not a datatype");
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5T_NORM_ERROR, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5T_NORM_ERROR, "operation not defined for datatype class");
 
     /* norm */
     ret_value = dt->shared->u.atomic.u.f.norm;
@@ -261,9 +246,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -277,15 +259,15 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (H5T_STATE_TRANSIENT != dt->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only");
     if (norm < H5T_NORM_IMPLIED || norm > H5T_NORM_NONE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal normalization")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal normalization");
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class");
 
     /* Commit */
     dt->shared->u.atomic.u.f.norm = norm;
@@ -306,9 +288,6 @@ done:
  *
  *		Failure:	H5T_PAD_ERROR (Negative)
  *
- * Programmer:	Robb Matzke
- *		Friday, January	 9, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5T_pad_t
@@ -322,11 +301,11 @@ H5Tget_inpad(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR, "not a datatype");
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5T_PAD_ERROR, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5T_PAD_ERROR, "operation not defined for datatype class");
 
     /* pad */
     ret_value = dt->shared->u.atomic.u.f.pad;
@@ -345,9 +324,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Friday, January	 9, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -361,15 +337,15 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (H5T_STATE_TRANSIENT != dt->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only");
     if (pad < H5T_PAD_ZERO || pad >= H5T_NPAD)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal internal pad type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal internal pad type");
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class");
 
     /* Commit */
     dt->shared->u.atomic.u.f.pad = pad;

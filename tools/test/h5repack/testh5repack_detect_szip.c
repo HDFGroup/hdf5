@@ -26,10 +26,6 @@
  *
  * Return:
  *
- * Programmer:
- *
- * Date:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -44,10 +40,10 @@ main(void)
 
 #ifdef H5_HAVE_FILTER_SZIP
     if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
-        HDprintf("yes\n");
+        printf("yes\n");
         return (1);
     }
 #endif /* H5_HAVE_FILTER_SZIP */
-    HDprintf("no\n");
+    printf("no\n");
     return (0);
 }

@@ -1,4 +1,4 @@
-name: hdfeos5
+name: hdfeos5 dev
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
       - name: Install HDF5
         run: |
           ./autogen.sh
-          ./configure --prefix=/usr/local  --with-default-api-version=v16
+          ./configure --prefix=/usr/local --disable-tests --with-default-api-version=v16
           make
           sudo make install
       - name: Install HDF-EOS5

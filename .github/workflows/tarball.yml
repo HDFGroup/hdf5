@@ -3,6 +3,17 @@ name: hdf5 dev tarball
 # Controls when the action will run. Triggers the workflow on a schedule
 on:
   workflow_call:
+    inputs:
+#      use_tag:
+#        description: 'Release version tag'
+#        type: string
+#        required: false
+#        default: snapshot
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
     outputs:
       has_changes:
         description: "Whether there were changes the previous day"
@@ -55,6 +66,7 @@ jobs:
       with:
         seconds: 86400 # One day in seconds
         branch: '${{ steps.get-branch-name.outputs.branch_ref }}'
+      if: ${{ inputs.use_environ == 'snapshots' }}
 
     - run: echo "You have ${{ steps.check-new-commits.outputs.new-commits-number }} new commit(s) in ${{ steps.get-branch-name.outputs.BRANCH_REF }} ✅!"
       if: ${{ steps.check-new-commits.outputs.has-new-commits == 'true' }}
@@ -65,7 +77,7 @@ jobs:
     name: Create a source tarball
     runs-on: ubuntu-latest
     needs: check_commits
-    if: ${{ needs.check_commits.outputs.has_changes == 'true' }}
+    if: ${{ ((inputs.use_environ == 'snapshots') && (needs.check_commits.outputs.has_changes == 'true')) || (inputs.use_environ  == 'release') }}
     outputs:
       file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
     steps:
@@ -80,22 +92,43 @@ jobs:
              sudo apt update
              sudo apt install automake autoconf libtool libtool-bin gzip dos2unix
 
+      - name: Retrieve version
+        id: version
+        run: |
+          cd "$GITHUB_WORKSPACE/hdfsrc"
+          echo "TAG_VERSION=$(bin/h5vers)" >> $GITHUB_OUTPUT
+
       - name: Set file base name
         id: set-file-base
         run: |
-          FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' && '${{ needs.check_commits.outputs.has_changes }}' == 'true' ]]
+          then
+            FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
+          else
+            FILE_NAME_BASE=$(echo "hdf5-${{ steps.version.outputs.TAG_VERSION }}")
+          fi
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
 
-      - name: Run release script
-        id: run-release-script
+      - name: Create snapshot file base name
+        id: create-file-base
+        if: ${{ (inputs.use_environ == 'snapshots') && (needs.check_commits.outputs.has_changes == 'true') }}
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          bin/bbrelease -d $GITHUB_WORKSPACE --branch ${{ needs.check_commits.outputs.branch_ref }} --revision gzip zip
+          bin/release -d $GITHUB_WORKSPACE --branch ${{ needs.check_commits.outputs.branch_ref }} --revision gzip zip
+        shell: bash
+
+      - name: Create release file base name
+        id: create-rel-base
+        if: ${{ (inputs.use_environ == 'release') }}
+        run: |
+          cd "$GITHUB_WORKSPACE/hdfsrc"
+          bin/release -d $GITHUB_WORKSPACE gzip zip cmake-tgz cmake-zip 
         shell: bash
 
       - name: List files in the repository
         run: |
-              ls ${{ github.workspace }}
+              ls -l ${{ github.workspace }}
               ls $GITHUB_WORKSPACE
 
       # Save files created by release script

@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -40,7 +40,7 @@ test_create_file(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file aren't supported with this connector\n");
+        printf("    API functions for basic file aren't supported with this connector\n");
         return 0;
     }
 
@@ -49,7 +49,7 @@ test_create_file(void)
 
     if ((file_id = H5Fcreate(FILE_CREATE_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create file '%s'\n", FILE_CREATE_TEST_FILENAME);
+        printf("    couldn't create file '%s'\n", FILE_CREATE_TEST_FILENAME);
         goto error;
     }
 
@@ -68,7 +68,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -87,7 +87,7 @@ test_open_file(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file aren't supported with this connector\n");
+        printf("    API functions for basic file aren't supported with this connector\n");
         return 0;
     }
 
@@ -106,7 +106,7 @@ test_open_file(void)
 
             if ((file_id = H5Fopen(H5_api_test_parallel_filename, H5F_ACC_RDONLY, fapl_id)) < 0) {
                 H5_FAILED();
-                HDprintf("    unable to open file '%s' in read-only mode\n", H5_api_test_parallel_filename);
+                printf("    unable to open file '%s' in read-only mode\n", H5_api_test_parallel_filename);
                 PART_ERROR(H5Fopen_rdonly);
             }
 
@@ -119,7 +119,7 @@ test_open_file(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
 
@@ -129,7 +129,7 @@ test_open_file(void)
 
             if ((file_id = H5Fopen(H5_api_test_parallel_filename, H5F_ACC_RDWR, fapl_id)) < 0) {
                 H5_FAILED();
-                HDprintf("    unable to open file '%s' in read-write mode\n", H5_api_test_parallel_filename);
+                printf("    unable to open file '%s' in read-write mode\n", H5_api_test_parallel_filename);
                 PART_ERROR(H5Fopen_rdwrite);
             }
 
@@ -142,7 +142,7 @@ test_open_file(void)
             {
                 H5Fclose(file_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             file_id = H5I_INVALID_HID;
         }
 
@@ -167,7 +167,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -201,7 +201,7 @@ test_split_comm_file_access(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file aren't supported with this connector\n");
+        printf("    API functions for basic file aren't supported with this connector\n");
         return 0;
     }
 
@@ -210,7 +210,7 @@ test_split_comm_file_access(void)
     is_old = mpi_rank % 2;
     if (MPI_SUCCESS != MPI_Comm_split(MPI_COMM_WORLD, is_old, mpi_rank, &comm)) {
         H5_FAILED();
-        HDprintf("    failed to split communicator!\n");
+        printf("    failed to split communicator!\n");
         goto error;
     }
     MPI_Comm_rank(comm, &newrank);
@@ -237,7 +237,7 @@ test_split_comm_file_access(void)
         /* create the file collectively */
         if ((file_id = H5Fcreate(SPLIT_FILE_COMM_TEST_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't create file '%s'\n", SPLIT_FILE_COMM_TEST_FILE_NAME);
+            printf("    couldn't create file '%s'\n", SPLIT_FILE_COMM_TEST_FILE_NAME);
             err_occurred = 1;
             goto access_end;
         }
@@ -245,7 +245,7 @@ test_split_comm_file_access(void)
         /* close the file */
         if (H5Fclose(file_id) < 0) {
             H5_FAILED();
-            HDprintf("    failed to close file '%s'\n", SPLIT_FILE_COMM_TEST_FILE_NAME);
+            printf("    failed to close file '%s'\n", SPLIT_FILE_COMM_TEST_FILE_NAME);
             err_occurred = 1;
             goto access_end;
         }
@@ -253,7 +253,7 @@ test_split_comm_file_access(void)
         /* delete the test file */
         if (H5Fdelete(SPLIT_FILE_COMM_TEST_FILE_NAME, fapl_id) < 0) {
             H5_FAILED();
-            HDprintf("    failed to delete file '%s'\n", SPLIT_FILE_COMM_TEST_FILE_NAME);
+            printf("    failed to delete file '%s'\n", SPLIT_FILE_COMM_TEST_FILE_NAME);
             err_occurred = 1;
             goto access_end;
         }
@@ -269,26 +269,26 @@ access_end:
     /* Get the collective results about whether an error occurred */
     if (MPI_SUCCESS != MPI_Allreduce(MPI_IN_PLACE, &err_occurred, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD)) {
         H5_FAILED();
-        HDprintf("    MPI_Allreduce failed\n");
+        printf("    MPI_Allreduce failed\n");
         goto error;
     }
 
     if (err_occurred) {
         H5_FAILED();
-        HDprintf("    an error occurred on only some ranks during split-communicator file access! - "
-                 "collectively failing\n");
+        printf("    an error occurred on only some ranks during split-communicator file access! - "
+               "collectively failing\n");
         goto error;
     }
 
     if (MPI_SUCCESS != MPI_Comm_free(&comm)) {
         H5_FAILED();
-        HDprintf("    MPI_Comm_free failed\n");
+        printf("    MPI_Comm_free failed\n");
         goto error;
     }
 
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
         H5_FAILED();
-        HDprintf("    MPI_Barrier on MPI_COMM_WORLD failed\n");
+        printf("    MPI_Barrier on MPI_COMM_WORLD failed\n");
         goto error;
     }
 
@@ -302,7 +302,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -317,7 +317,7 @@ cleanup_files(void)
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, TRUE)) < 0) {
         if (MAINPROCESS)
-            HDprintf("    failed to create FAPL for deleting test files\n");
+            printf("    failed to create FAPL for deleting test files\n");
         return;
     }
 
@@ -328,7 +328,7 @@ cleanup_files(void)
 
     if (H5Pclose(fapl_id) < 0) {
         if (MAINPROCESS)
-            HDprintf("    failed to close FAPL used for deleting test files\n");
+            printf("    failed to close FAPL used for deleting test files\n");
         return;
     }
 }
@@ -340,11 +340,11 @@ H5_api_file_test_parallel(void)
     int    nerrors;
 
     if (MAINPROCESS) {
-        HDprintf("**********************************************\n");
-        HDprintf("*                                            *\n");
-        HDprintf("*          API Parallel File Tests           *\n");
-        HDprintf("*                                            *\n");
-        HDprintf("**********************************************\n\n");
+        printf("**********************************************\n");
+        printf("*                                            *\n");
+        printf("*          API Parallel File Tests           *\n");
+        printf("*                                            *\n");
+        printf("**********************************************\n\n");
     }
 
     for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_file_tests); i++) {
@@ -352,13 +352,13 @@ H5_api_file_test_parallel(void)
 
         if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("    MPI_Barrier() failed!\n");
+                printf("    MPI_Barrier() failed!\n");
         }
     }
 
     if (MAINPROCESS) {
-        HDprintf("\n");
-        HDprintf("Cleaning up testing files\n");
+        printf("\n");
+        printf("Cleaning up testing files\n");
     }
 
     cleanup_files();

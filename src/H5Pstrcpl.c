@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pstrcpl.c
- *			October 26 2005
- *			James Laird
  *
  * Purpose:		String creation property list class routines
  *
@@ -108,8 +106,6 @@ static const H5T_cset_t H5P_def_char_encoding_g =
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -123,7 +119,7 @@ H5P__strcrt_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5P_STRCRT_CHAR_ENCODING_NAME, H5P_STRCRT_CHAR_ENCODING_SIZE,
                            &H5P_def_char_encoding_g, NULL, NULL, NULL, H5P_STRCRT_CHAR_ENCODING_ENC,
                            H5P_STRCRT_CHAR_ENCODING_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -136,8 +132,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Wednesday, October 26, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -151,15 +145,15 @@ H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
 
     /* Check arguments */
     if (encoding <= H5T_CSET_ERROR || encoding >= H5T_NCSET)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "character encoding is not valid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "character encoding is not valid");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set the character encoding */
     if (H5P_set(plist, H5P_STRCRT_CHAR_ENCODING_NAME, &encoding) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -172,8 +166,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              November 1, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -187,12 +179,12 @@ H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */
     if (encoding)
         if (H5P_get(plist, H5P_STRCRT_CHAR_ENCODING_NAME, encoding) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get character encoding flag")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get character encoding flag");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -208,9 +200,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -222,8 +211,8 @@ H5P__strcrt_char_encoding_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(encoding);
-    HDassert(size);
+    assert(encoding);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode character set encoding */
@@ -245,9 +234,6 @@ H5P__strcrt_char_encoding_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -259,9 +245,9 @@ H5P__strcrt_char_encoding_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(encoding);
+    assert(pp);
+    assert(*pp);
+    assert(encoding);
 
     /* Decode character set encoding */
     *encoding = (H5T_cset_t) * (*pp)++;

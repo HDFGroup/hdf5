@@ -36,10 +36,10 @@
 !
 
 MODULE H5G
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_CHAR, C_INT
+
   USE H5GLOBAL
   USE H5P, ONLY : H5Pcreate_f, H5Pset_local_heap_size_hint_f, H5Pclose_f
-
+  IMPLICIT NONE
 
 !
 ! @brief Fortran2003 Derived Type for @ref H5G_info_t
@@ -1171,7 +1171,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Retrieves information about a group, according to the group’s position within an index.
+!! \brief Retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \attention  \fortran_approved
 !!
@@ -1226,7 +1226,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Asynchronously retrieves information about a group, according to the group’s position within an index.
+!! \brief Asynchronously retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \param loc_id     Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
 !! \param group_name Name of group containing group for which information is to be retrieved.
@@ -1285,7 +1285,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Retrieves information about a group, according to the group’s position within an index.
+!! \brief Retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \attention  \fortran_obsolete. Both nlinks and max_corder can overflow.
 !!

@@ -60,12 +60,12 @@ test_transfplist()
         // Find out the length of the transform expression, allocate the buffer
         // for it, then read and verify the expression from the copied plist
         size_t tran_len    = static_cast<size_t>(dxpl_c_to_f_copy.getDataTransform(NULL));
-        char  *c_to_f_read = static_cast<char *>(HDmalloc(tran_len + 1));
-        HDmemset(c_to_f_read, 0, tran_len + 1);
+        char  *c_to_f_read = static_cast<char *>(malloc(tran_len + 1));
+        memset(c_to_f_read, 0, tran_len + 1);
         dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len + 1);
         verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f),
                    "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
-        HDfree(c_to_f_read);
+        free(c_to_f_read);
 
         //
         // Read the expression of each of the prop lists and verify the read
@@ -75,12 +75,12 @@ test_transfplist()
         // Get and verify the expression with:
         // ssize_t getDataTransform(char* exp, const size_t buf_size [default=0])
         tran_len    = static_cast<size_t>(dxpl_c_to_f.getDataTransform(NULL));
-        c_to_f_read = static_cast<char *>(HDmalloc(tran_len + 1));
-        HDmemset(c_to_f_read, 0, tran_len + 1);
+        c_to_f_read = static_cast<char *>(malloc(tran_len + 1));
+        memset(c_to_f_read, 0, tran_len + 1);
         dxpl_c_to_f.getDataTransform(c_to_f_read, tran_len + 1);
         verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f),
                    "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
-        HDfree(c_to_f_read);
+        free(c_to_f_read);
 
         // Get and verify the expression with:
         // H5std_string DSetMemXferPropList::getDataTransform()
@@ -91,12 +91,12 @@ test_transfplist()
         // Get and verify the expression with:
         // ssize_t getDataTransform(char* exp, const size_t buf_size)
         tran_len              = static_cast<size_t>(dxpl_utrans_inv.getDataTransform(NULL, 0));
-        char *utrans_inv_read = static_cast<char *>(HDmalloc(tran_len + 1));
-        HDmemset(utrans_inv_read, 0, tran_len + 1);
+        char *utrans_inv_read = static_cast<char *>(malloc(tran_len + 1));
+        memset(utrans_inv_read, 0, tran_len + 1);
         dxpl_utrans_inv.getDataTransform(utrans_inv_read, tran_len + 1);
         verify_val(const_cast<const char *>(utrans_inv_read), const_cast<const char *>(utrans_inv),
                    "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
-        HDfree(utrans_inv_read);
+        free(utrans_inv_read);
 
         PASSED();
     }

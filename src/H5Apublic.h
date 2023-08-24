@@ -39,7 +39,7 @@ typedef struct {
  * \param[in] location_id The identifier for the group, dataset
  *            or named datatype being iterated over
  * \param[in] attr_name The name of the current object attribute
- * \param[in] ainfo The attribute’s info struct
+ * \param[in] ainfo The attribute's info struct
  * \param[in,out] op_data A pointer to the operator data passed in to
  *                H5Aiterate2() or H5Aiterate_by_name()
  * \returns The return values from an operator are:
@@ -128,7 +128,7 @@ H5_DLL herr_t H5Aclose_async(hid_t attr_id, hid_t es_id);
  *          with H5Aclose() resource leaks will develop.
  *
  * \note If \p loc_id is a file identifier, the attribute will be attached to
- *       that file’s root group.
+ *       that file's root group.
  *
  * \par Example
  * \snippet H5A_examples.c create
@@ -429,7 +429,7 @@ H5_DLL herr_t H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
  *                       relative to location
  * \param[in]  idx_type  Type of index
  * \param[in]  order     Index traversal order
- * \param[in]  n         Attribute’s position in index
+ * \param[in]  n         Attribute's position in index
  * \param[out] ainfo     Struct containing returned attribute information
  * \lapl_id
  *
@@ -523,7 +523,7 @@ H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
  *                        relative to location
  * \param[in]  idx_type   Type of index
  * \param[in]  order      Index traversal order
- * \param[in]  n          Attribute’s position in index
+ * \param[in]  n          Attribute's position in index
  * \param[out] name       Attribute name
  * \param[in]  size       Size, in bytes, of attribute name
  * \lapl_id
@@ -541,9 +541,9 @@ H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
  *          traversal order, and a position in the index, \p idx_type,
  *          \p order and \p n, respectively.
  *
- *          If the attribute name’s size is unknown, the values 0 and NULL
+ *          If the attribute name's size is unknown, the values 0 and NULL
  *          can be passed in for the parameters \p size and \p name. The
- *          function’s return value will provide the correct value for
+ *          function's return value will provide the correct value for
  *          \p size.
  *
  *          The link access property list, \p lapl_id, may provide
@@ -645,7 +645,7 @@ H5_DLL hid_t H5Aget_type(hid_t attr_id);
  *          The order of the iteration and the attributes iterated over
  *          are specified by three parameters: the index type,
  *          \p idx_type; the order in which the index is to be traversed,
- *          \p order; and the attribute’s position in the index, \p idx.
+ *          \p order; and the attribute's position in the index, \p idx.
  *          The next attribute to be operated on is specified by \p idx,
  *          a position in the index.
  *
@@ -703,7 +703,7 @@ H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t ord
  *          The order of the iteration and the attributes iterated over
  *          are specified by three parameters: the index type, \p idx_type;
  *          the order in which the index is to be traversed, \p order;
- *          and the attribute’s position in the index, \p idx.
+ *          and the attribute's position in the index, \p idx.
  *          The next attribute to be operated on is specified by \p idx,
  *          a position in the index.
  *
@@ -788,7 +788,7 @@ H5_DLL hid_t  H5Aopen_async(hid_t obj_id, const char *attr_name, hid_t aapl_id, 
  *                      relative to location
  * \param[in] idx_type  Type of index
  * \param[in] order     Index traversal order
- * \param[in] n         Attribute’s position in index
+ * \param[in] n         Attribute's position in index
  * \aapl_id
  * \lapl_id
  *
@@ -1172,7 +1172,7 @@ H5_DLL int H5Aget_num_attrs(hid_t loc_id);
 /**
  * \ingroup H5A
  *
- * \brief Calls a user’s function for each attribute on an object
+ * \brief Calls a user's function for each attribute on an object
  *
  * \loc_id
  * \param[in,out] idx     Starting (in) and ending (out) attribute index

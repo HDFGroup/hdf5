@@ -35,12 +35,6 @@
  *  n             - number of references to be stored.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, May 14, 2002
- * HISTORY
- *  This function was added to accommodate h5dwrite_f with the
- *  dims argument being of INTEGER(HSIZE_T) type
  * SOURCE
  */
 int_f
@@ -67,10 +61,10 @@ h5dwrite_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
     /*
      * Allocate temporary buffer and copy references from Fortran.
      */
-    buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t) * n);
+    buf_c = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * n);
     if (buf_c != NULL) {
         for (i = 0; i < n; i++) {
-            HDmemcpy(&buf_c[i], buf, H5R_DSET_REG_REF_BUF_SIZE);
+            memcpy(&buf_c[i], buf, H5R_DSET_REG_REF_BUF_SIZE);
             buf = buf + REF_REG_BUF_LEN_F;
         }
     }
@@ -85,7 +79,7 @@ h5dwrite_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
     c_mem_space_id  = (hid_t)*mem_space_id;
     c_file_space_id = (hid_t)*file_space_id;
     ret             = H5Dwrite(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
-    HDfree(buf_c);
+    free(buf_c);
     if (ret < 0)
         return ret_value;
     ret_value = 0;
@@ -107,12 +101,6 @@ h5dwrite_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
  *  n - number of references to be stored.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, May 15, 2002
- * HISTORY
- *  This function was added to accommodate h5dread_f subroutine
- *  with the dims parameter being of INTEGER(HSIZE_T_F) size.
  * SOURCE
  */
 int_f
@@ -138,7 +126,7 @@ h5dread_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
     /*
      * Allocate temporary buffer.
      */
-    buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t) * (size_t)n);
+    buf_c = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * (size_t)n);
     if (buf_c != NULL) {
         /*
          * Call H5Dread function.
@@ -150,12 +138,12 @@ h5dread_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
         ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
         if (ret >= 0) {
             for (i = 0; i < n; i++) {
-                HDmemcpy(buf, &buf_c[i], H5R_DSET_REG_REF_BUF_SIZE);
+                memcpy(buf, &buf_c[i], H5R_DSET_REG_REF_BUF_SIZE);
                 buf = buf + REF_REG_BUF_LEN_F;
             }
         }
         if (buf_c != NULL)
-            HDfree(buf_c);
+            free(buf_c);
     }
     if (ret < 0)
         return ret_value;
@@ -174,11 +162,6 @@ h5dread_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
  *  type_id - identifier of the dataset's datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 19, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -213,11 +196,6 @@ h5dget_type_c(hid_t_f *dset_id, hid_t_f *type_id)
  *  plist_id - identifier of he dataset creation property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 19, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -252,11 +230,6 @@ h5dget_create_plist_c(hid_t_f *dset_id, hid_t_f *plist_id)
  *  size    - the amount of storage required for a dataset
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, October 22, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -290,11 +263,6 @@ h5dget_storage_size_c(hid_t_f *dset_id, hsize_t_f *size)
  *  len      - maximum length of the VL dataset element
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, October 22, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -320,7 +288,7 @@ h5dvlen_get_max_len_c(hid_t_f *dset_id, hid_t_f *type_id, hid_t_f *space_id, siz
     if (num_elem < 0)
         return ret_value;
 
-    c_buf = (hvl_t *)HDmalloc(sizeof(hvl_t) * (size_t)num_elem);
+    c_buf = (hvl_t *)malloc(sizeof(hvl_t) * (size_t)num_elem);
     if (c_buf == NULL)
         return ret_value;
     status = H5Dread(c_dset_id, c_type_id, H5S_ALL, c_space_id, H5P_DEFAULT, c_buf);
@@ -336,7 +304,7 @@ h5dvlen_get_max_len_c(hid_t_f *dset_id, hid_t_f *type_id, hid_t_f *space_id, siz
 
 DONE:
 
-    HDfree(c_buf);
+    free(c_buf);
     return ret_value;
 }
 /****if* H5Df/h5dwrite_vl_integer_c
@@ -357,11 +325,6 @@ DONE:
  *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, October 23, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -393,7 +356,7 @@ h5dwrite_vl_integer_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
     c_file_space_id = (hid_t)*file_space_id;
     c_xfer_prp      = (hid_t)*xfer_prp;
 
-    c_buf = (hvl_t *)HDmalloc((size_t)num_elem * sizeof(hvl_t));
+    c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t));
     if (c_buf == NULL)
         return ret_value;
     tmp = (int_f *)buf;
@@ -411,7 +374,7 @@ h5dwrite_vl_integer_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
         goto DONE;
     ret_value = 0;
 DONE:
-    HDfree(c_buf);
+    free(c_buf);
     return ret_value;
 }
 
@@ -434,11 +397,6 @@ DONE:
  *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, October 24, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -471,7 +429,7 @@ h5dread_vl_integer_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
     if (num_elem != (hssize_t)dims[1])
         return ret_value;
 
-    c_buf = (hvl_t *)HDmalloc((size_t)num_elem * sizeof(hvl_t));
+    c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t));
     if (c_buf == NULL)
         return ret_value;
     /*
@@ -487,7 +445,7 @@ h5dread_vl_integer_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
     H5Treclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
     ret_value = 0;
 DONE:
-    HDfree(c_buf);
+    free(c_buf);
     return ret_value;
 }
 
@@ -508,11 +466,6 @@ DONE:
  *  len           - array of strings lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 28, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -547,14 +500,14 @@ h5dwrite_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
     /*
      * Allocate arra of character pointers
      */
-    c_buf = (char **)HDmalloc((size_t)num_elem * sizeof(char *));
+    c_buf = (char **)malloc((size_t)num_elem * sizeof(char *));
     if (c_buf == NULL)
         return ret_value;
 
     /* Copy data to long C string */
     tmp = (char *)HD5f2cstring(buf, (size_t)(max_len * num_elem));
     if (tmp == NULL) {
-        HDfree(c_buf);
+        free(c_buf);
         return ret_value;
     }
     /*
@@ -562,7 +515,7 @@ h5dwrite_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {
-        c_buf[i] = (char *)HDmalloc((size_t)len[i] + 1);
+        c_buf[i] = (char *)malloc((size_t)len[i] + 1);
         memcpy(c_buf[i], tmp_p, (size_t)len[i]);
         c_buf[i][len[i]] = '\0';
         tmp_p            = tmp_p + max_len;
@@ -578,8 +531,8 @@ h5dwrite_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
     ret_value = 0;
 DONE:
     H5Treclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
-    HDfree(c_buf);
-    HDfree(tmp);
+    free(c_buf);
+    free(tmp);
     return ret_value;
 }
 /****if* H5Df/h5dread_vl_string_c
@@ -599,11 +552,6 @@ DONE:
  *  len           - array of strings lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, November 1, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -638,7 +586,7 @@ h5dread_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
     /*
      * Allocate array of character pointers
      */
-    c_buf = (char **)HDmalloc((size_t)num_elem * sizeof(char *));
+    c_buf = (char **)malloc((size_t)num_elem * sizeof(char *));
     if (c_buf == NULL)
         return ret_value;
 
@@ -647,11 +595,11 @@ h5dread_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      */
     status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
     if (status < 0) {
-        HDfree(c_buf);
+        free(c_buf);
         return ret_value;
     }
     /* Copy data to long C string */
-    tmp   = (char *)HDmalloc((size_t)(max_len * num_elem) + 1);
+    tmp   = (char *)malloc((size_t)(max_len * num_elem) + 1);
     tmp_p = tmp;
     for (i = 0; i < max_len * num_elem; i++)
         tmp[i] = ' ';
@@ -664,8 +612,8 @@ h5dread_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
     HD5packFstring(tmp, _fcdtocp(buf), (size_t)(max_len * num_elem));
     ret_value = 0;
     H5Treclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
-    HDfree(c_buf);
-    HDfree(tmp);
+    free(c_buf);
+    free(tmp);
     return ret_value;
 }
 
@@ -687,11 +635,6 @@ h5dread_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
  *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, November 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -723,7 +666,7 @@ h5dwrite_vl_real_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
     c_file_space_id = (hid_t)*file_space_id;
     c_xfer_prp      = (hid_t)*xfer_prp;
 
-    c_buf = (hvl_t *)HDmalloc((size_t)num_elem * sizeof(hvl_t));
+    c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t));
     if (c_buf == NULL)
         return ret_value;
     tmp = (real_f *)buf;
@@ -741,7 +684,7 @@ h5dwrite_vl_real_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
         goto DONE;
     ret_value = 0;
 DONE:
-    HDfree(c_buf);
+    free(c_buf);
     return ret_value;
 }
 
@@ -764,11 +707,6 @@ DONE:
  *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, November 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -801,7 +739,7 @@ h5dread_vl_real_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
     if (num_elem != (hssize_t)dims[1])
         return ret_value;
 
-    c_buf = (hvl_t *)HDmalloc((size_t)num_elem * sizeof(hvl_t));
+    c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t));
     if (c_buf == NULL)
         return ret_value;
     /*
@@ -818,7 +756,7 @@ h5dread_vl_real_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
     H5Treclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
     ret_value = 0;
 DONE:
-    HDfree(c_buf);
+    free(c_buf);
     return ret_value;
 }
 
@@ -833,11 +771,6 @@ DONE:
  *  flag - status flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12, 2003
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -880,9 +813,6 @@ h5dget_space_status_c(hid_t_f *dset_id, int_f *flag)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February, 2008
  * SOURCE
  */
 int_f
@@ -919,12 +849,6 @@ DONE:
  *  buf           - data buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 28, 2008
- * HISTORY
- *
- *
  * SOURCE
  */
 int_f
@@ -979,11 +903,6 @@ h5dwrite_f_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
  *  len - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 28, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1025,10 +944,6 @@ h5dread_f_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
  *  plist_id  - the dataset access property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 13, 2009
- *
  * SOURCE
  */
 int_f
@@ -1061,10 +976,6 @@ DONE:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *   M. Scot Breitenfeld
- *  January 15, 2011
- *
  * SOURCE
  */
 int_f

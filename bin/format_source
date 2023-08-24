@@ -5,8 +5,20 @@
 #
 # Note that any files or directories that are excluded here should also be
 # added to the 'exclude' list in .github/workflows/clang-format-check.yml
-#
-# (Remember to update both bin/format_source and bin/format_source_patch)
+
+COMMAND="clang-format"
+
+if [ $# -eq 1 ]; then
+    COMMAND="$COMMAND-$1"
+fi
+
+echo ""
+echo "bin/format_source <version>"
+echo ""
+echo "Format the HDF5 C source using clang-format. The <version>"
+echo "parameter is optional and can be used to force a specific"
+echo "installed version of clang-format to be used."
+echo ""
 
 find . \( -type d -path ./config -prune -and -not -path ./config \) \
     -or \( \( \! \( \
@@ -21,6 +33,6 @@ find . \( -type d -path ./config -prune -and -not -path ./config \) \
         -or -name H5overflow.h \
         \) \) \
     -and \( -iname *.h -or -iname *.c -or -iname *.cpp -or -iname *.hpp -or -iname *.java \) \) \
-    | xargs -P0 -n1 clang-format -style=file -i -fallback-style=none
+    | xargs -P0 -n1 ${COMMAND} -style=file -i -fallback-style=none
 
 exit 0

@@ -47,7 +47,7 @@ main(void)
         TEST_ERROR;
     n_elements = (int)(VDS_PLANE[1] * VDS_PLANE[2]);
     size       = (size_t)n_elements * sizeof(int);
-    if (NULL == (buffer = (int *)HDmalloc(size)))
+    if (NULL == (buffer = (int *)malloc(size)))
         TEST_ERROR;
 
     /* Create memory dataspace */
@@ -117,9 +117,9 @@ main(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDfree(buffer);
+    free(buffer);
 
-    HDfprintf(stderr, "SWMR reader exited successfully\n");
+    fprintf(stderr, "SWMR reader exited successfully\n");
     return EXIT_SUCCESS;
 
 error:
@@ -139,9 +139,9 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buffer);
+    free(buffer);
 
-    HDfprintf(stderr, "ERROR: SWMR reader exited with errors\n");
+    fprintf(stderr, "ERROR: SWMR reader exited with errors\n");
     return EXIT_FAILURE;
 
 } /* end main */

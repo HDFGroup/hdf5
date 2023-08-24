@@ -37,11 +37,8 @@
 
 MODULE H5L
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_INT
   USE H5GLOBAL
-
   IMPLICIT NONE
-
 
   TYPE, bind(c) :: union_t
      TYPE(H5O_TOKEN_T_F) :: token !< Type for object tokens
@@ -57,7 +54,7 @@ MODULE H5L
                             !< \li H5L_TYPE_SOFT_F     Soft link
                             !< \li H5L_TYPE_EXTERNAL_F External link
                             !< \li H5L_TYPE_ERROR_F    Invalid link type id
- !   LOGICAL(c_bool) :: corder_valid ! hbool_t corder_valid
+ !   LOGICAL(c_bool) :: corder_valid ! bool corder_valid
      INTEGER(c_int64_t) :: corder !< Creation order
      INTEGER(c_int)     :: cset   !< Character set of link name is encoded. Valid values include the following:
                                   !< \li H5T_CSET_ASCII  US ASCII
@@ -833,8 +830,8 @@ CONTAINS
 !! \param link_loc_id File or group identifier.
 !! \param link_name   Name of the link for which information is being sought.
 !!                     NOTE: In C these are contained in the structure H5L_info_t
-!! \param cset         Indicates the character set used for link’s name.
-!! \param corder       Specifies the link’s creation order position.
+!! \param cset         Indicates the character set used for link&apos;s name.
+!! \param corder       Specifies the link&apos;s creation order position.
 !! \param f_corder_valid Indicates whether the value in corder is valid.
 !! \param link_type    Specifies the link class:
 !!                     \li H5L_TYPE_HARD_F     - Hard link
@@ -929,7 +926,7 @@ CONTAINS
 !!                       \li H5L_TYPE_ERROR _F    - Error
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute.
 !! \param corder         Is a positive integer containing the creation order of the attribute.
-!! \param cset           Indicates the character set used for the attribute’s name.
+!! \param cset           Indicates the character set used for the attribute&apos;s name.
 !! \param token          If the link is a hard link, token specifies the object token that the link points to.
 !! \param val_size       If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                       the length of the name of the pointed-to object with a null terminator.

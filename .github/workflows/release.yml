@@ -1,115 +1,100 @@
-name: hdf5 dev release
+name: hdf5 dev release build
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Controls when the action will run. Triggers the workflow on a manual run
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      file_base:
-        description: "The common base name of the source tarballs"
-        required: true
+      use_tag:
+        description: 'Release version tag'
         type: string
-      file_branch:
-        description: "The branch name for the source tarballs"
-        required: true
-        type: string
-      file_sha:
-        description: "The sha for the source tarballs"
-        required: true
-        type: string
+        required: false
+        default: snapshot
 
-# Previous workflows must pass to get here so tag the commit that created the files
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel.
 jobs:
-  create-tag:
+  log-the-inputs:
     runs-on: ubuntu-latest
-    permissions:
-        contents: write # In order to allow tag creation
+    outputs:
+      rel_tag: ${{ steps.get-tag-name.outputs.RELEASE_TAG }}
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - name: Get tag name
+      id: get-tag-name
+      env:
+        TAG: ${{ inputs.use_tag }}
+      run: echo "RELEASE_TAG=$TAG" >> $GITHUB_OUTPUT
 
-      - run: |
-          git checkout ${{ inputs.file_sha }}
+# tarball.yml will be used for releases when pre-tag actions are implemented
+#  call-workflow-tarball:
+#    needs: log-the-inputs
+#    uses: ./.github/workflows/tarball.yml
+#    with:
+#      use_tag: ${{ inputs.use_tag }}
+#      use_environ: release
 
-      - uses: rickstaa/action-create-tag@v1
-        id: "tag_create"
-        with:
-          commit_sha: ${{ inputs.file_sha }}
-          tag: "snapshot"
-          force_push_tag: true
-          message: "Latest snapshot"
-
-      # Print result using the action output.
-      - run: |
-          echo "Tag already present: ${{ steps.tag_create.outputs.tag_exists }}"
-
-  getfiles:
+  create-files-ctest:
+    needs: log-the-inputs
     runs-on: ubuntu-latest
+    outputs:
+      file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
     steps:
       - name: Set file base name
         id: set-file-base
         run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          FILE_NAME_BASE=$(echo "${{ needs.log-the-inputs.outputs.rel_tag }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
 
-      # Get files created by tarball script
-      - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@v3
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v3
+        with:
+          path: hdfsrc
+
+      - name: Zip Folder
+        run: |
+              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
+              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
+
+      - name: List files in the repository
+        run: |
+              ls -l ${{ github.workspace }}
+              ls $GITHUB_WORKSPACE
+
+      # Save files created by release script
+      - name: Save tgz-tarball
+        uses: actions/upload-artifact@v3
         with:
               name: tgz-tarball
-              path: ${{ github.workspace }}
+              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@v3
+      - name: Save zip-tarball
+        uses: actions/upload-artifact@v3
         with:
               name: zip-tarball
-              path: ${{ github.workspace }}
-
-      # Get files created by cmake-ctest script
-      - name: Get published binary (Windows)
-        uses: actions/download-artifact@v3
-        with:
-              name: zip-vs2022-binary
-              path: ${{ github.workspace }}
-
-      - name: Get published binary (MacOS)
-        uses: actions/download-artifact@v3
-        with:
-              name: tgz-osx12-binary
-              path: ${{ github.workspace }}
-
-      - name: Get published binary (Linux)
-        uses: actions/download-artifact@v3
-        with:
-              name: tgz-ubuntu-2204-binary
-              path: ${{ github.workspace }}
-
-      # Get files used by release script
-
-  PreRelease:
-    runs-on: ubuntu-latest
-    needs: [create-tag, getfiles]
-    environment: snapshots
-    permissions:
-        contents: write
-    steps:
-      - name: Set file base name
-        id: get-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-
-      - name: PreRelease tag
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: "snapshot"
-          prerelease: true
-          files: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  call-workflow-ctest:
+    needs: create-files-ctest
+    uses: ./.github/workflows/cmake-ctest.yml
+    with:
+      file_base: ${{ needs.create-files-ctest.outputs.file_base }}
+
+  call-workflow-release:
+    #needs: [call-workflow-tarball, call-workflow-ctest]
+    needs: [log-the-inputs, create-files-ctest, call-workflow-ctest]
+    permissions:
+      contents: write # In order to allow tag creation
+    uses: ./.github/workflows/release-files.yml
+    with:
+      file_base: ${{ needs.create-files-ctest.outputs.file_base }}
+      file_branch: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      file_sha: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_environ: release
+

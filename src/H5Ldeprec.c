@@ -103,7 +103,7 @@ H5L__iterate2_shim(hid_t group_id, const char *name, const H5L_info2_t *linfo2, 
         if (H5L_TYPE_HARD == linfo2->type) {
             if (H5VLnative_token_to_addr(group_id, linfo2->u.token, &linfo.u.address) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTUNSERIALIZE, H5_ITER_ERROR,
-                            "can't deserialize object token into address")
+                            "can't deserialize object token into address");
         }
         else
             linfo.u.val_size = linfo2->u.val_size;
@@ -154,24 +154,24 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
     /* Check arguments */
     id_type = H5I_get_type(group_id);
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified");
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
     if (!op)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
 
     /* Get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(group_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Literate1 is only meant to be used with the native VOL connector")
+                    "H5Literate1 is only meant to be used with the native VOL connector");
 
     /* Set location struct fields */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -193,7 +193,7 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
     /* Iterate over the links */
     if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
                                         H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
+        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -217,10 +217,6 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- *
- * Programmer:  Quincey Koziol
- *              Thursday, November 16, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -239,30 +235,30 @@ H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 
     /* Check arguments */
     if (!group_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be NULL");
     if (!*group_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be an empty string")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be an empty string");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified");
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
     if (!op)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Literate_by_name1 is only meant to be used with the native VOL connector")
+                    "H5Literate_by_name1 is only meant to be used with the native VOL connector");
 
     /* Set location struct fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -286,7 +282,7 @@ H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     /* Iterate over the links */
     if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
                                         H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
+        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -301,9 +297,6 @@ done:
  *
  * Return:      Success:    Non-negative with information in LINFO
  *              Failure:    Negative
- *
- * Programmer:  James Laird
- *              Wednesday, June 21, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -322,11 +315,11 @@ H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t l
 
     /* Check arguments */
     if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -336,14 +329,14 @@ H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t l
 
     /* Get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Lget_info1 is only meant to be used with the native VOL connector")
+                    "H5Lget_info1 is only meant to be used with the native VOL connector");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type             = H5VL_LINK_GET_INFO;
@@ -351,7 +344,7 @@ H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t l
 
     /* Get the link information */
     if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info");
 
     /* Copy the new-style members into the old-style struct */
     if (linfo) {
@@ -363,12 +356,12 @@ H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t l
             void *vol_obj_data;
 
             if (NULL == (vol_obj_data = H5VL_object_data(vol_obj)))
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get underlying VOL object")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get underlying VOL object");
 
             if (H5VL_native_token_to_addr(vol_obj_data, loc_params.obj_type, linfo2.u.token,
                                           &linfo->u.address) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTUNSERIALIZE, FAIL,
-                            "can't deserialize object token into address")
+                            "can't deserialize object token into address");
         } /* end if */
         else
             linfo->u.val_size = linfo2.u.val_size;
@@ -389,9 +382,6 @@ done:
  * Return:      Success:    Non-negative with information in LINFO
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, November  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -410,15 +400,15 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 
     /* Check arguments */
     if (!group_name || !*group_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified");
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
@@ -431,14 +421,14 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 
     /* Get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Lget_info_by_idx1 is only meant to be used with the native VOL connector")
+                    "H5Lget_info_by_idx1 is only meant to be used with the native VOL connector");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type             = H5VL_LINK_GET_INFO;
@@ -446,7 +436,7 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 
     /* Get the link information */
     if (H5VL_link_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info");
 
     /* Copy the new-style members into the old-style struct */
     if (linfo) {
@@ -458,12 +448,12 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
             void *vol_obj_data;
 
             if (NULL == (vol_obj_data = H5VL_object_data(vol_obj)))
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get underlying VOL object")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get underlying VOL object");
 
             if (H5VL_native_token_to_addr(vol_obj_data, loc_params.obj_type, linfo2.u.token,
                                           &linfo->u.address) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTUNSERIALIZE, FAIL,
-                            "can't deserialize object token into address")
+                            "can't deserialize object token into address");
         } /* end if */
         else
             linfo->u.val_size = linfo2.u.val_size;
@@ -498,9 +488,6 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:  Quincey Koziol
- *              November 24 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -520,13 +507,13 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
     /* Check args */
     id_type = H5I_get_type(group_id);
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified");
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
     if (!op)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified");
 
     /* Set location struct fields */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -534,14 +521,14 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
 
     /* Get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(group_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Lvisit1 is only meant to be used with the native VOL connector")
+                    "H5Lvisit1 is only meant to be used with the native VOL connector");
 
     /* Set up shim */
     shim_data.real_op      = op;
@@ -559,7 +546,7 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
     /* Iterate over the links */
     if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
                                         H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
+        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -590,9 +577,6 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:  Quincey Koziol
- *              November 3 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -611,30 +595,30 @@ H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
 
     /* Check args */
     if (!group_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be NULL");
     if (!*group_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be an empty string")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be an empty string");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified");
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
     if (!op)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL,
-                    "H5Lvisit_by_name1 is only meant to be used with the native VOL connector")
+                    "H5Lvisit_by_name1 is only meant to be used with the native VOL connector");
 
     /* Set location struct fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -658,7 +642,7 @@ H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     /* Visit the links */
     if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
                                         H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
+        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed");
 
 done:
     FUNC_LEAVE_API(ret_value)

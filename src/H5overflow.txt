@@ -24,8 +24,6 @@
 # Where <type> is a valid C type (like 'int8_t', 'hssize_t', etc. and whether
 #       the type is signed or unsigned follows.
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2009/04/09
 
 unsigned, UNSIGNED;
 int8_t, SIGNED;

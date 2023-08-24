@@ -24,12 +24,6 @@
  * Return: An  exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
- * Programmer: Pedro Vicente
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -89,15 +83,15 @@ main(int argc, char *argv[])
     for (i = 0; i < 2; i++) {
         if (opts.sset[i]) {
             if (opts.sset[i]->start.data)
-                HDfree(opts.sset[i]->start.data);
+                free(opts.sset[i]->start.data);
             if (opts.sset[i]->stride.data)
-                HDfree(opts.sset[i]->stride.data);
+                free(opts.sset[i]->stride.data);
             if (opts.sset[i]->count.data)
-                HDfree(opts.sset[i]->count.data);
+                free(opts.sset[i]->count.data);
             if (opts.sset[i]->block.data)
-                HDfree(opts.sset[i]->block.data);
+                free(opts.sset[i]->block.data);
 
-            HDfree(opts.sset[i]);
+            free(opts.sset[i]);
             opts.sset[i] = NULL;
         }
     }
@@ -112,11 +106,6 @@ main(int argc, char *argv[])
  *
  * Return: none
  *
- * Programmer: Albert Cheng
- * Date: Feb 6, 2005
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_NORETURN void
@@ -124,5 +113,5 @@ h5diff_exit(int status)
 {
     h5tools_close();
 
-    HDexit(status);
+    exit(status);
 }

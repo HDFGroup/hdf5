@@ -10,11 +10,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              9/4/15
- *
- *              This file contains declarations of all functions defined
- *		in genall5.c
+/*
+ *      This file contains declarations of all functions defined
+ *      in genall5.c
  */
 
 void create_zoo(hid_t fid, const char *base_path, int proc_num);

@@ -373,7 +373,7 @@ IV. Further considerations
       the settings for the developers' environment. Then the only options needed
       on the command line are those options that are different. Example using HDF
       default cache file:
-           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 12 2013" \
+           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
@@ -779,7 +779,6 @@ HDF5_BUILD_FORTRAN      "Build FORTRAN support"           OFF
 HDF5_BUILD_JAVA         "Build JAVA support"              OFF
 HDF5_BUILD_HL_LIB       "Build HIGH Level HDF5 Library"   ON
 HDF5_BUILD_TOOLS        "Build HDF5 Tools"                ON
-HDF5_BUILD_HL_TOOLS     "Build HIGH Level HDF5 Tools"     ON
 HDF5_BUILD_HL_GIF_TOOLS "Build HIGH Level HDF5 GIF Tools" OFF
 
 ---------------- HDF5 Folder Build Options ---------------------
@@ -832,7 +831,7 @@ HDF5_BUILD_FRAMEWORKS          "TRUE to build as frameworks libraries,
                                 FALSE to build according to BUILD_SHARED_LIBS"                   FALSE
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                              OFF
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                    OFF
-DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114)"                 "v114"
+DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114, v116)"           "v116"
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                     ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"          ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
@@ -877,7 +876,7 @@ if (BUILD_TESTING)
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                               OFF
-HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
+HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     ON
 HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 ON
 PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS"           0
 ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"              0
@@ -1030,15 +1029,6 @@ References:
     https://discourse.cmake.org/t/cross-compile-for-aarch64-on-ubuntu/2161/10
     https://stackoverflow.com/questions/54539682/how-to-set-up-cmake-to-cross-compile-with-clang-for-arm-embedded-on-windows?rq=1
     https://developer.android.com/ndk/guides/cmake
-
-Predefine H5Tinit.c file
--------------------------------
-The one file that needs to be pre-generated is the H5Tinit.c file. The variables
-indicated in the error log (see above) are the variables that need to match the target system.
-
-The HDF5 CMake variables;
-    HDF5_USE_PREGEN: set this to true
-    HDF5_USE_PREGEN_DIR: set this path to the preset H5Tinit.c file
 
 
 ========================================================================

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:   H5Pocpl.c
- *            Nov 28 2006
- *            Quincey Koziol
  *
  * Purpose:   Object creation property list class routines
  *
@@ -31,14 +29,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions */
-#include "H5Eprivate.h"  /* Error handling    */
-#include "H5Iprivate.h"  /* IDs               */
-#include "H5MMprivate.h" /* Memory management */
-#include "H5Opkg.h"      /* Object headers    */
-#include "H5Ppkg.h"      /* Property lists    */
-#include "H5PLprivate.h" /* Dynamic plugin    */
-#include "H5Zprivate.h"  /* Filter pipeline   */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Opkg.h"      /* Object headers                           */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5PLprivate.h" /* Dynamic plugin                           */
+#include "H5VMprivate.h" /* Vector Functions                         */
+#include "H5Zprivate.h"  /* Filter pipeline                          */
 
 /****************/
 /* Local Macros */
@@ -143,9 +142,6 @@ static const H5O_pline_t H5O_def_pline_g  = H5O_CRT_PIPELINE_DEF;   /* Default I
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -159,26 +155,26 @@ H5P__ocrt_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE,
                            &H5O_def_attr_max_compact_g, NULL, NULL, NULL, H5O_CRT_ATTR_MAX_COMPACT_ENC,
                            H5O_CRT_ATTR_MAX_COMPACT_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register min. dense attribute storage property */
     if (H5P__register_real(pclass, H5O_CRT_ATTR_MIN_DENSE_NAME, H5O_CRT_ATTR_MIN_DENSE_SIZE,
                            &H5O_def_attr_min_dense_g, NULL, NULL, NULL, H5O_CRT_ATTR_MIN_DENSE_ENC,
                            H5O_CRT_ATTR_MIN_DENSE_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register object header flags property */
     if (H5P__register_real(pclass, H5O_CRT_OHDR_FLAGS_NAME, H5O_CRT_OHDR_FLAGS_SIZE, &H5O_def_ohdr_flags_g,
                            NULL, NULL, NULL, H5O_CRT_OHDR_FLAGS_ENC, H5O_CRT_OHDR_FLAGS_DEC, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the pipeline property */
     if (H5P__register_real(pclass, H5O_CRT_PIPELINE_NAME, H5O_CRT_PIPELINE_SIZE, &H5O_def_pline_g, NULL,
                            H5O_CRT_PIPELINE_SET, H5O_CRT_PIPELINE_GET, H5O_CRT_PIPELINE_ENC,
                            H5O_CRT_PIPELINE_DEC, H5O_CRT_PIPELINE_DEL, H5O_CRT_PIPELINE_COPY,
                            H5O_CRT_PIPELINE_CMP, H5O_CRT_PIPELINE_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -201,9 +197,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -217,21 +210,21 @@ H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
 
     /* Range check values */
     if (max_compact < min_dense)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be >= min dense value")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be >= min dense value");
     if (max_compact > 65535)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be < 65536")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be < 65536");
     if (min_dense > 65535)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min dense value must be < 65536")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min dense value must be < 65536");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set property values */
     if (H5P_set(plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &max_compact) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set max. # of compact attributes in property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set max. # of compact attributes in property list");
     if (H5P_set(plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &min_dense) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -243,9 +236,6 @@ done:
  * Purpose:    Gets the phase change values for attribute storage
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Tuesday, November 28, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -260,16 +250,16 @@ H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
     if (max_compact) {
         if (H5P_get(plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, max_compact) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get max. # of compact attributes")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get max. # of compact attributes");
     } /* end if */
     if (min_dense) {
         if (H5P_get(plist, H5O_CRT_ATTR_MIN_DENSE_NAME, min_dense) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes");
     } /* end if */
 
 done:
@@ -282,9 +272,6 @@ done:
  * Purpose:     Set the flags for creation order of attributes on an object
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -300,15 +287,15 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
 
     /* Check for bad combination of flags */
     if (!(crt_order_flags & H5P_CRT_ORDER_TRACKED) && (crt_order_flags & H5P_CRT_ORDER_INDEXED))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tracking creation order is required for index")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tracking creation order is required for index");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get object header flags */
     if (H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags");
 
     /* Mask off previous attribute creation order flag settings */
     ohdr_flags &= (uint8_t) ~(H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED);
@@ -321,7 +308,7 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
 
     /* Set object header flags */
     if (H5P_set(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object header flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object header flags");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -334,9 +321,6 @@ done:
  *              for attributes on an object.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -358,11 +342,11 @@ H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get object header flags */
         if (H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags");
 
         /* Set creation order flags to return */
         *crt_order_flags |= (ohdr_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? H5P_CRT_ORDER_TRACKED : 0;
@@ -394,9 +378,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              March  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -411,11 +392,11 @@ H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get object header flags */
     if (H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags");
 
     /* Mask off previous time tracking flag settings */
     ohdr_flags &= (uint8_t)~H5O_HDR_STORE_TIMES;
@@ -425,7 +406,7 @@ H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
 
     /* Set object header flags */
     if (H5P_set(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object header flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object header flags");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -437,9 +418,6 @@ done:
  * Purpose:     Returns whether times are tracked for an object.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March  1, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -458,11 +436,11 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get object header flags */
         if (H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags");
 
         /* Set track times flag to return */
         *track_times = (hbool_t)((ohdr_flags & H5O_HDR_STORE_TIMES) ? TRUE : FALSE);
@@ -503,9 +481,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Wednesday, October 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -519,15 +494,15 @@ H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags, si
 
     /* Get the pipeline property to modify */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Modify the filter parameters of the I/O pipeline */
     if (H5Z_modify(&pline, filter, flags, cd_nelmts, cd_values) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
 
     /* Put the I/O pipeline information back into the property list */
     if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -564,9 +539,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Friday, April  5, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -581,19 +553,19 @@ H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t
 
     /* Check args */
     if (filter < 0 || filter > H5Z_FILTER_MAX)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identifier");
     if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
     if (cd_nelmts > 0 && !cd_values)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no client data values supplied")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no client data values supplied");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Modify the filter parameters of the I/O pipeline */
     if (H5P_modify_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't modify filter")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't modify filter");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -626,9 +598,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -643,19 +612,19 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd
 
     /* Check args */
     if (filter < 0 || filter > H5Z_FILTER_MAX)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identifier");
     if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
     if (cd_nelmts > 0 && !cd_values)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no client data values supplied")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no client data values supplied");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Call the private function */
     if (H5P__set_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "failed to call private function")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "failed to call private function");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -691,9 +660,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -708,19 +674,19 @@ H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags, 
 
     /* Check if filter is already available */
     if ((filter_avail = H5Z_filter_avail(filter)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
 
     /* Get the pipeline property to append to */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Add the filter to the I/O pipeline */
     if (H5Z_append(&pline, filter, flags, cd_nelmts, cd_values) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
 
     /* Put the I/O pipeline information back into the property list */
     if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -741,9 +707,6 @@ done:
  *
  *        Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *              Tuesday, August  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -758,11 +721,11 @@ H5Pget_nfilters(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the pipeline property to query */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Set return value */
     ret_value = (int)(pline.nused);
@@ -790,9 +753,6 @@ done:
  *
  *        Failure:    H5Z_FILTER_ERROR (Negative)
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5Z_filter_t
@@ -818,9 +778,9 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
          */
         if (cd_nelmts && *cd_nelmts > 256)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
-                        "probable uninitialized *cd_nelmts argument")
+                        "probable uninitialized *cd_nelmts argument");
         if (cd_nelmts && *cd_nelmts > 0 && !cd_values)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "client data values not supplied")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "client data values not supplied");
 
         /*
          * If cd_nelmts is null but cd_values is non-null then just ignore
@@ -832,22 +792,22 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_FILTER_ERROR, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_FILTER_ERROR, "can't find object for ID");
 
     /* Get the pipeline property to query */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline");
 
     /* Check index */
     if (idx >= pline.nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid");
 
     /* Set pointer to particular filter to query */
     filter = &pline.filter[idx];
 
     /* Get filter information */
     if (H5P__get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info");
 
     /* Set return value */
     ret_value = filter->id;
@@ -873,9 +833,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Wednesday, October 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -891,15 +848,15 @@ H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsigned int *flags
 
     /* Get pipeline info */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Get pointer to filter in pipeline */
     if (NULL == (filter = H5Z_filter_info(&pline, id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID is invalid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID is invalid");
 
     /* Get filter information */
     if (H5P__get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -922,9 +879,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Friday, April  5, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -940,7 +894,7 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
 
     /* Check args */
     if (id < 0 || id > H5Z_FILTER_MAX)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range");
     if (cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so
@@ -949,9 +903,9 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
          * is too large.
          */
         if (cd_nelmts && *cd_nelmts > 256)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "probable uninitialized *cd_nelmts argument")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "probable uninitialized *cd_nelmts argument");
         if (cd_nelmts && *cd_nelmts > 0 && !cd_values)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "client data values not supplied")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "client data values not supplied");
 
         /*
          * If cd_nelmts is null but cd_values is non-null then just ignore
@@ -963,11 +917,11 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get filter information */
     if (H5P_get_filter_by_id(plist, id, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -983,9 +937,6 @@ done:
  *                              more filters not currently available.
  *        Failure:    FAIL on error
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April  8, 2003
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1000,15 +951,15 @@ H5Pall_filters_avail(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the pipeline property to query */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Check if all filters are available */
     if ((ret_value = H5Z_all_filters_avail(&pline)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "can't check pipeline information")
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "can't check pipeline information");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1024,9 +975,6 @@ done:
  *        FALSE:        not found
  *              FAIL:         error
  *
- * Programmer:    Raymond Lu
- *              26 April 2013
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1039,11 +987,11 @@ H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id)
 
     /* Get pipeline info */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Check if the file is in the pipeline */
     if ((ret_value = H5Z_filter_in_pline(&pline, id)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTCOMPARE, FAIL, "can't find filter")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTCOMPARE, FAIL, "can't find filter");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1056,9 +1004,6 @@ done:
  *  deletes all filters if FILTER is H5Z_FILTER_NONE
  *
  * Return: Non-negative on success/Negative on failure
- *
- * Programmer:  Pedro Vicente
- *              January 26, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1074,21 +1019,21 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the pipeline property to modify */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Check if there are any filters */
     if (pline.filter) {
         /* Delete filter */
         if (H5Z_delete(&pline, filter) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter");
 
         /* Put the I/O pipeline information back into the property list */
         if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
     } /* end if */
 
 done:
@@ -1108,9 +1053,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1125,23 +1067,23 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
 
     /* Check arguments */
     if (level > 9)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid deflate level")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid deflate level");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the pipeline property to append to */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Add the filter */
     if (H5Z_append(&pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &level) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add deflate filter to pipeline")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add deflate filter to pipeline");
 
     /* Put the I/O pipeline information back into the property list */
     if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1154,9 +1096,6 @@ done:
  *              property list or group creation property list.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:    Raymond Lu
- *              Dec 19, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1172,19 +1111,19 @@ H5Pset_fletcher32(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the pipeline property to append to */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Add the Fletcher32 checksum as a filter */
     if (H5Z_append(&pline, H5Z_FILTER_FLETCHER32, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add fletcher32 filter to pipeline")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add fletcher32 filter to pipeline");
 
     /* Put the I/O pipeline information back into the property list */
     if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1197,9 +1136,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *              Monday, October 23, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1210,7 +1146,7 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(filter);
+    assert(filter);
 
     /* Filter flags */
     if (flags)
@@ -1272,9 +1208,6 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1288,11 +1221,11 @@ H5P__ocrt_pipeline_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of I/O pipeline */
     if (NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline");
 
     /* Copy new I/O pipeline message over old one */
     *pline = new_pline;
@@ -1309,9 +1242,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1325,11 +1255,11 @@ H5P__ocrt_pipeline_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of I/O pipeline */
     if (NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline");
 
     /* Copy new I/O pipeline message over old one */
     *pline = new_pline;
@@ -1348,9 +1278,6 @@ done:
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1362,8 +1289,8 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(pline);
-    HDassert(size);
+    assert(pline);
+    assert(size);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     if (NULL != *pp) {
@@ -1376,7 +1303,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
         /* encode nused value */
         enc_value = (uint64_t)pline->nused;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
@@ -1385,10 +1312,10 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             unsigned v; /* Local index variable */
 
             /* encode filter ID */
-            INT32ENCODE(*pp, pline->filter[u].id)
+            INT32ENCODE(*pp, pline->filter[u].id);
 
             /* encode filter flags */
-            H5_ENCODE_UNSIGNED(*pp, pline->filter[u].flags)
+            H5_ENCODE_UNSIGNED(*pp, pline->filter[u].flags);
 
             /* encode filter name if it exists */
             if (NULL != pline->filter[u].name) {
@@ -1406,13 +1333,13 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;
             enc_size  = H5VM_limit_enc_size(enc_value);
-            HDassert(enc_size < 256);
+            assert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
             /* encode all values */
             for (v = 0; v < pline->filter[u].cd_nelmts; v++)
-                H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v])
+                H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v]);
         } /* end for */
     }     /* end if */
 
@@ -1440,9 +1367,6 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
  * Return:       Success:    Non-negative
  *           Failure:    Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1463,16 +1387,16 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     /* Decode the size of size_t */
     enc_size = *(*pp)++;
     if (enc_size != sizeof(unsigned))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded");
 
     /* decode nused */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     nused = (size_t)enc_value;
 
     /* Set property default value */
-    HDmemset(pline, 0, sizeof(H5O_pline_t));
+    memset(pline, 0, sizeof(H5O_pline_t));
     *pline = H5O_def_pline_g;
 
     for (u = 0; u < nused; u++) {
@@ -1481,10 +1405,10 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         unsigned          v;        /* Local index variable */
 
         /* decode filter id */
-        INT32DECODE(*pp, filter.id)
+        INT32DECODE(*pp, filter.id);
 
         /* decode filter flags */
-        H5_DECODE_UNSIGNED(*pp, filter.flags)
+        H5_DECODE_UNSIGNED(*pp, filter.flags);
 
         /* decode value indicating if the name is encoded */
         has_name = *(*pp)++;
@@ -1498,24 +1422,24 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
 
         /* decode num elements */
         enc_size = *(*pp)++;
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         filter.cd_nelmts = (size_t)enc_value;
 
         if (filter.cd_nelmts) {
             if (NULL == (filter.cd_values = (unsigned *)H5MM_malloc(sizeof(unsigned) * filter.cd_nelmts)))
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for cd_values")
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for cd_values");
         } /* end if */
         else
             filter.cd_values = NULL;
 
         /* decode values */
         for (v = 0; v < filter.cd_nelmts; v++)
-            H5_DECODE_UNSIGNED(*pp, filter.cd_values[v])
+            H5_DECODE_UNSIGNED(*pp, filter.cd_values[v]);
 
         /* Add the filter to the I/O pipeline */
         if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline")
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
 
         /* Free cd_values, if it was allocated */
         filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
@@ -1533,9 +1457,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1547,11 +1468,11 @@ H5P__ocrt_pipeline_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Reset the old I/O pipeline */
     if (H5O_msg_reset(H5O_PLINE_ID, value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1565,9 +1486,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -1580,11 +1498,11 @@ H5P__ocrt_pipeline_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED s
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pline);
+    assert(pline);
 
     /* Make copy of I/O pipeline */
     if (NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline");
 
     /* Copy new I/O pipeline message over old one */
     *pline = new_pline;
@@ -1603,9 +1521,6 @@ done:
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, January 7, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1619,9 +1534,9 @@ H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(pline1);
-    HDassert(pline2);
-    HDassert(size == sizeof(H5O_pline_t));
+    assert(pline1);
+    assert(pline2);
+    assert(size == sizeof(H5O_pline_t));
 
     /* Check the number of used pipeline entries */
     if (pline1->nused < pline2->nused)
@@ -1698,9 +1613,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, Sept 3, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1711,11 +1623,11 @@ H5P__ocrt_pipeline_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Reset the old I/O pipeline */
     if (H5O_msg_reset(H5O_PLINE_ID, value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1741,9 +1653,6 @@ done:
  *
  *        Failure:    H5Z_FILTER_ERROR (Negative)
  *
- * Programmer:    Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5Z_filter_t
@@ -1768,9 +1677,9 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
          */
         if (cd_nelmts && *cd_nelmts > 256)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
-                        "probable uninitialized *cd_nelmts argument")
+                        "probable uninitialized *cd_nelmts argument");
         if (cd_nelmts && *cd_nelmts > 0 && !cd_values)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "client data values not supplied")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "client data values not supplied");
 
         /*
          * If cd_nelmts is null but cd_values is non-null then just ignore
@@ -1782,22 +1691,22 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_FILTER_ERROR, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_FILTER_ERROR, "can't find object for ID");
 
     /* Get pipeline info */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline");
 
     /* Check more args */
     if (idx >= pline.nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid");
 
     /* Set pointer to particular filter to query */
     filter = &pline.filter[idx];
 
     /* Get filter information */
     if (H5P__get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info");
 
     /* Set return value */
     ret_value = filter->id;
@@ -1822,9 +1731,6 @@ done:
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Friday, April  5, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1840,7 +1746,7 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
 
     /* Check args */
     if (id < 0 || id > H5Z_FILTER_MAX)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range");
     if (cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so
@@ -1849,9 +1755,9 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
          * is too large.
          */
         if (cd_nelmts && *cd_nelmts > 256)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "probable uninitialized *cd_nelmts argument")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "probable uninitialized *cd_nelmts argument");
         if (cd_nelmts && *cd_nelmts > 0 && !cd_values)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "client data values not supplied")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "client data values not supplied");
 
         /*
          * If cd_nelmts is null but cd_values is non-null then just ignore
@@ -1863,11 +1769,11 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get filter info */
     if (H5P_get_filter_by_id(plist, id, flags, cd_nelmts, cd_values, namelen, name, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info");
 
 done:
     FUNC_LEAVE_API(ret_value)

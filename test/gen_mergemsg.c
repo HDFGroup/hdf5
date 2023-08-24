@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Friday, June 30, 2006
- *
  *  This program creates an object with fragmented object header messages
  *  that will be merged when the object is read from the file.  This program
  *  needs to be compiled against the 1.6.5 or earlier version of the library
@@ -36,7 +33,7 @@
 #define ATTR3_LEN 1
 
 int
-main()
+main(void)
 {
     hid_t  fid;             /* File ID */
     hid_t  gid, gid2, gid3; /* Group IDs */

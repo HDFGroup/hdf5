@@ -77,9 +77,6 @@ H5FL_DEFINE_STATIC(H5SM_bt2_ctx_t);
  * Return:	Success:	non-NULL
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 26, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -92,11 +89,11 @@ H5SM__bt2_crt_context(void *_f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Allocate callback context */
     if (NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context");
 
     /* Determine the size of addresses & lengths in the file */
     ctx->sizeof_addr = H5F_SIZEOF_ADDR(f);
@@ -116,9 +113,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 26, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -129,7 +123,7 @@ H5SM__bt2_dst_context(void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Release callback context */
     ctx = H5FL_FREE(H5SM_bt2_ctx_t, ctx);
@@ -146,9 +140,6 @@ H5SM__bt2_dst_context(void *_ctx)
  *
  * Return:	Non-negative on success
  *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -173,9 +164,6 @@ H5SM__bt2_store(void *native, const void *udata)
  * Return:	Non-negative on success
  *              Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -186,14 +174,14 @@ H5SM__bt2_debug(FILE *stream, int indent, int fwidth, const void *record, const 
     FUNC_ENTER_PACKAGE_NOERR
 
     if (sohm->location == H5SM_IN_HEAP)
-        HDfprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n", indent, "", fwidth,
-                  "Shared Message in heap:", sohm->u.heap_loc.fheap_id.val, sohm->hash,
-                  sohm->u.heap_loc.ref_count);
+        fprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n", indent, "", fwidth,
+                "Shared Message in heap:", sohm->u.heap_loc.fheap_id.val, sohm->hash,
+                sohm->u.heap_loc.ref_count);
     else {
-        HDassert(sohm->location == H5SM_IN_OH);
-        HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n", indent, "", fwidth,
-                  "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id,
-                  sohm->u.mesg_loc.index);
+        assert(sohm->location == H5SM_IN_OH);
+        fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n", indent, "", fwidth,
+                "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id,
+                sohm->u.mesg_loc.index);
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

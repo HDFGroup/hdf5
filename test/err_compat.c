@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Raymond Lu
- *              October 14, 2001
- *
  * Purpose:    Tests Error API
  */
 #include "h5test.h"
@@ -22,20 +19,20 @@
 int
 main(void)
 {
-    HDprintf("Test skipped because backward compatibility with v1.6 is NOT configured in\n");
+    printf("Test skipped because backward compatibility with v1.6 is NOT configured in\n");
     return 0;
 }
 #else /* H5_NO_DEPRECATED_SYMBOLS */
 
-const char *FILENAME[] = {"errors_compat", NULL};
+static const char *FILENAME[] = {"errors_compat", NULL};
 
 #define DIM0 100
 #define DIM1 200
 
-int **ipoints2      = NULL;
-int **icheck2       = NULL;
-int  *ipoints2_data = NULL;
-int  *icheck2_data  = NULL;
+static int **ipoints2      = NULL;
+static int **icheck2       = NULL;
+static int  *ipoints2_data = NULL;
+static int  *icheck2_data  = NULL;
 
 #define DSET_NAME "a_dataset"
 
@@ -51,16 +48,13 @@ herr_t custom_print_cb2(int n, H5E_error2_t *err_desc, void *client_data);
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              4 October 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 user_print1(FILE *stream)
 {
     /* Customized way to print errors */
-    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if (H5Ewalk1(H5E_WALK_UPWARD, (H5E_walk1_t)custom_print_cb1, stream) < 0)
         TEST_ERROR;
 
@@ -79,16 +73,13 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              4 October 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 user_print2(hid_t err_stack, FILE *stream)
 {
     /* Customized way to print errors */
-    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if (H5Ewalk2(err_stack, H5E_WALK_UPWARD, (H5E_walk2_t)custom_print_cb2, stream) < 0)
         TEST_ERROR;
 
@@ -106,9 +97,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              4 October 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -125,11 +113,11 @@ custom_print_cb1(int n, H5E_error1_t *err_desc, void *client_data)
     if (NULL == (maj = H5Eget_major(err_desc->maj_num)))
         TEST_ERROR;
 
-    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
-              err_desc->func_name, err_desc->line);
+    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
+            err_desc->func_name, err_desc->line);
 
-    HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
 
     H5free_memory(maj);
     H5free_memory(min);
@@ -153,9 +141,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              4 October 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -172,11 +157,11 @@ custom_print_cb2(int n, H5E_error2_t *err_desc, void *client_data)
     if (NULL == (maj = H5Eget_major(err_desc->maj_num)))
         TEST_ERROR;
 
-    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
-              err_desc->func_name, err_desc->line);
+    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
+            err_desc->func_name, err_desc->line);
 
-    HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
 
     H5free_memory(maj);
     H5free_memory(min);
@@ -199,9 +184,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              17 September 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -218,8 +200,8 @@ test_error_compat(void)
     TESTING("error API H5Eset/get_auto");
 
     /* Add a newline and flush so the output file looks nicer */
-    HDprintf("\n");
-    HDfflush(stdout);
+    printf("\n");
+    fflush(stdout);
 
     /* Create the dataspace */
     dims[0] = DIM0;
@@ -334,9 +316,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              July 10, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -351,8 +330,8 @@ test_h5epush1(hid_t file)
     TESTING("error API based on data I/O");
 
     /* Add a newline and flush so the output file looks nicer */
-    HDprintf("\n");
-    HDfflush(stdout);
+    printf("\n");
+    fflush(stdout);
 
     /* Create the dataspace */
     dims[0] = DIM0;
@@ -366,7 +345,7 @@ test_h5epush1(hid_t file)
         did =
             H5Dcreate2(H5I_INVALID_HID, DSET_NAME, H5T_STD_I32BE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create the dataset */
     if ((did = H5Dcreate2(file, DSET_NAME, H5T_STD_I32BE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -421,21 +400,18 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              July 17, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 dump_error(void)
 {
     /* Print errors in library default way */
-    HDfprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
+    fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
     if (H5Eprint1(stderr) < 0)
         TEST_ERROR;
 
     /* Customized way to print errors */
-    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if (H5Ewalk1(H5E_WALK_UPWARD, custom_print_cb1, stderr) < 0)
         TEST_ERROR;
 
@@ -450,9 +426,6 @@ error:
  *
  * Purpose:     Test error API
  *
- * Programmer:  Raymond Lu
- *              July 10, 2003
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -464,21 +437,21 @@ main(void)
     const char *FUNC_main = "main";
     int         i;
 
-    HDfprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There are supposed to "
-                      "be some error messages\n");
+    fprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There are supposed to "
+                    "be some error messages\n");
     fapl_id = h5_fileaccess();
 
     /* Set up data arrays */
-    if (NULL == (ipoints2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+    if (NULL == (ipoints2_data = (int *)calloc(DIM0 * DIM1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (ipoints2 = (int **)HDcalloc(DIM0, sizeof(ipoints2_data))))
+    if (NULL == (ipoints2 = (int **)calloc(DIM0, sizeof(ipoints2_data))))
         TEST_ERROR;
     for (i = 0; i < DIM0; i++)
         ipoints2[i] = ipoints2_data + (i * DIM1);
 
-    if (NULL == (icheck2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+    if (NULL == (icheck2_data = (int *)calloc(DIM0 * DIM1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (icheck2 = (int **)HDcalloc(DIM0, sizeof(icheck2_data))))
+    if (NULL == (icheck2 = (int **)calloc(DIM0, sizeof(icheck2_data))))
         TEST_ERROR;
     for (i = 0; i < DIM0; i++)
         icheck2[i] = icheck2_data + (i * DIM1);
@@ -518,19 +491,19 @@ main(void)
         TEST_ERROR;
     h5_clean_files(FILENAME, fapl_id);
 
-    HDfree(ipoints2);
-    HDfree(ipoints2_data);
-    HDfree(icheck2);
-    HDfree(icheck2_data);
+    free(ipoints2);
+    free(ipoints2_data);
+    free(icheck2);
+    free(icheck2_data);
 
-    HDprintf("All error API tests passed.\n");
+    printf("All error API tests passed.\n");
     return EXIT_SUCCESS;
 
 error:
-    HDfree(ipoints2);
-    HDfree(ipoints2_data);
-    HDfree(icheck2);
-    HDfree(icheck2_data);
+    free(ipoints2);
+    free(ipoints2_data);
+    free(icheck2);
+    free(icheck2_data);
 
     H5E_BEGIN_TRY
     {
@@ -539,7 +512,7 @@ error:
     }
     H5E_END_TRY
 
-    HDprintf("***** ERROR TEST FAILED! *****\n");
+    printf("***** ERROR TEST FAILED! *****\n");
     return EXIT_FAILURE;
 }
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

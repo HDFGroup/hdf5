@@ -43,9 +43,6 @@ int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
  *                 H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
  * SOURCE
  */
 int_f
@@ -343,9 +340,6 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
  *  in the H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
  * SOURCE
  */
 int_f
@@ -404,23 +398,6 @@ h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *
  *  None
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
- * HISTORY
- *  Added Z flags. EIP,  March 12, 2003
- *  Added more FD flags and new H5LIB flags
- *  Added more FD flags for HDF5 file driver
- *           EIP, April 9, 2005
- *  Added Generic flags introduced in version 1.8
- *           MSB, January, 2008
- *  Added types in lines h5*_flags = ( )variable to match input
- *  Added E flags
- *           MSB, July 9, 2009
- *  Added type h5d_flags of type size_t
- *           MSB, Feb. 28, 2014
- *  Added type h5s_hid_flags of type hid_t
- *           MSB, Oct. 10, 2016
  * SOURCE
  */
 int_f
@@ -428,8 +405,9 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
                H5ES_status_t *h5es_flags, hid_t_f *h5es_hid_flags, int_f *h5f_flags, int_f *h5fd_flags,
                hid_t_f *h5fd_hid_flags, int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags,
                int_f *h5o_flags, hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
-               hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5z_flags,
-               int_f *h5_generic_flags, haddr_t_f *h5_haddr_generic_flags)
+               hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5vl_flags,
+               uint64_t *h5vl_int64_flags, int_f *h5z_flags, int_f *h5_generic_flags,
+               haddr_t_f *h5_haddr_generic_flags)
 /******/
 {
     /*
@@ -821,6 +799,66 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
 
     /*
+     *  H5VL flags
+     */
+
+    /*
+     * Capability flags for VOL connectors
+     */
+
+    h5vl_flags[0] = (int_f)H5VL_VERSION;
+    h5vl_flags[1] = (int_f)H5_VOL_INVALID;
+    h5vl_flags[2] = (int_f)H5_VOL_NATIVE;
+
+    h5vl_int64_flags[0]  = H5VL_CAP_FLAG_NONE;
+    h5vl_int64_flags[1]  = H5VL_CAP_FLAG_THREADSAFE;
+    h5vl_int64_flags[2]  = H5VL_CAP_FLAG_ASYNC;
+    h5vl_int64_flags[3]  = H5VL_CAP_FLAG_NATIVE_FILES;
+    h5vl_int64_flags[4]  = H5VL_CAP_FLAG_ATTR_BASIC;
+    h5vl_int64_flags[5]  = H5VL_CAP_FLAG_ATTR_MORE;
+    h5vl_int64_flags[6]  = H5VL_CAP_FLAG_DATASET_BASIC;
+    h5vl_int64_flags[7]  = H5VL_CAP_FLAG_DATASET_MORE;
+    h5vl_int64_flags[8]  = H5VL_CAP_FLAG_FILE_BASIC;
+    h5vl_int64_flags[9]  = H5VL_CAP_FLAG_FILE_MORE;
+    h5vl_int64_flags[10] = H5VL_CAP_FLAG_GROUP_BASIC;
+    h5vl_int64_flags[11] = H5VL_CAP_FLAG_GROUP_MORE;
+    h5vl_int64_flags[12] = H5VL_CAP_FLAG_LINK_BASIC;
+    h5vl_int64_flags[13] = H5VL_CAP_FLAG_LINK_MORE;
+    h5vl_int64_flags[14] = H5VL_CAP_FLAG_MAP_BASIC;
+    h5vl_int64_flags[15] = H5VL_CAP_FLAG_MAP_MORE;
+    h5vl_int64_flags[16] = H5VL_CAP_FLAG_OBJECT_BASIC;
+    h5vl_int64_flags[17] = H5VL_CAP_FLAG_OBJECT_MORE;
+    h5vl_int64_flags[18] = H5VL_CAP_FLAG_REF_BASIC;
+    h5vl_int64_flags[19] = H5VL_CAP_FLAG_REF_MORE;
+    h5vl_int64_flags[20] = H5VL_CAP_FLAG_OBJ_REF;
+    h5vl_int64_flags[21] = H5VL_CAP_FLAG_REG_REF;
+    h5vl_int64_flags[22] = H5VL_CAP_FLAG_ATTR_REF;
+    h5vl_int64_flags[23] = H5VL_CAP_FLAG_STORED_DATATYPES;
+    h5vl_int64_flags[24] = H5VL_CAP_FLAG_CREATION_ORDER;
+    h5vl_int64_flags[25] = H5VL_CAP_FLAG_ITERATE;
+    h5vl_int64_flags[26] = H5VL_CAP_FLAG_STORAGE_SIZE;
+    h5vl_int64_flags[27] = H5VL_CAP_FLAG_BY_IDX;
+    h5vl_int64_flags[28] = H5VL_CAP_FLAG_GET_PLIST;
+    h5vl_int64_flags[29] = H5VL_CAP_FLAG_FLUSH_REFRESH;
+    h5vl_int64_flags[30] = H5VL_CAP_FLAG_EXTERNAL_LINKS;
+    h5vl_int64_flags[31] = H5VL_CAP_FLAG_HARD_LINKS;
+    h5vl_int64_flags[32] = H5VL_CAP_FLAG_SOFT_LINKS;
+    h5vl_int64_flags[33] = H5VL_CAP_FLAG_UD_LINKS;
+    h5vl_int64_flags[34] = H5VL_CAP_FLAG_TRACK_TIMES;
+    h5vl_int64_flags[35] = H5VL_CAP_FLAG_MOUNT;
+    h5vl_int64_flags[36] = H5VL_CAP_FLAG_FILTERS;
+    h5vl_int64_flags[37] = H5VL_CAP_FLAG_FILL_VALUES;
+
+    h5vl_int64_flags[38] = H5VL_OPT_QUERY_SUPPORTED;
+    h5vl_int64_flags[39] = H5VL_OPT_QUERY_READ_DATA;
+    h5vl_int64_flags[40] = H5VL_OPT_QUERY_WRITE_DATA;
+    h5vl_int64_flags[41] = H5VL_OPT_QUERY_QUERY_METADATA;
+    h5vl_int64_flags[42] = H5VL_OPT_QUERY_MODIFY_METADATA;
+    h5vl_int64_flags[43] = H5VL_OPT_QUERY_COLLECTIVE;
+    h5vl_int64_flags[44] = H5VL_OPT_QUERY_NO_ASYNC;
+    h5vl_int64_flags[45] = H5VL_OPT_QUERY_MULTI_OBJ;
+
+    /*
      *  H5Z flags
      */
     h5z_flags[0]  = (int_f)H5Z_FILTER_ERROR;
@@ -888,10 +926,6 @@ h5init1_flags_c(int_f *h5lib_flags)
  *  Calls H5open call to initialize C HDF5 library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, November 17, 2000
- *
  * SOURCE
  */
 int_f
@@ -912,8 +946,6 @@ h5open_c(void)
  *  Calls H5close call to close C HDF5 library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
  * SOURCE
  */
 int_f
@@ -944,9 +976,6 @@ h5close_c(void)
  *  relnum - the release version of the library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  *
  */
@@ -984,9 +1013,6 @@ h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
  *  None
  * RETURNS
  *  0 on success, aborts on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -1013,9 +1039,6 @@ h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
  *  Calls H5garbage_collect to collect on all free-lists of all types
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -1037,9 +1060,6 @@ h5garbage_collect_c(void)
  *  Calls H5dont_atexit not to install atexit cleanup routine
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f

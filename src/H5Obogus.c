@@ -107,12 +107,12 @@ H5O__bogus_decode(H5F_t *f, H5O_t H5_ATTR_NDEBUG_UNUSED *open_oh, unsigned H5_AT
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Allocate the bogus message */
     if (NULL == (mesg = (H5O_bogus_t *)H5MM_calloc(sizeof(H5O_bogus_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -120,7 +120,7 @@ H5O__bogus_decode(H5F_t *f, H5O_t H5_ATTR_NDEBUG_UNUSED *open_oh, unsigned H5_AT
 
     /* Validate the bogus info */
     if (mesg->u != H5O_BOGUS_VALUE)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid bogus value :-)")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid bogus value :-)");
 
     /* Set return value */
     ret_value = mesg;
@@ -139,9 +139,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Jan 21 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -151,9 +148,9 @@ H5O__bogus_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* encode */
     UINT32ENCODE(p, H5O_BOGUS_VALUE);
@@ -173,9 +170,6 @@ H5O__bogus_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
  *
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Jan 21 2003
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -194,9 +188,6 @@ H5O__bogus_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Jan 21 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -207,13 +198,13 @@ H5O__bogus_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s `%u'\n", indent, "", fwidth, "Bogus Value:", mesg->u);
+    fprintf(stream, "%*s%-*s `%u'\n", indent, "", fwidth, "Bogus Value:", mesg->u);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__bogus_debug() */

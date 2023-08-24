@@ -329,19 +329,19 @@ main(void)
     for (i = 0; i < 2; i++) {
         hbool_t external = (i & 1) ? TRUE : FALSE;
         if (generate_int32le_1d(external) < 0)
-            HDprintf("A generate_int32le_1d failed!\n");
+            printf("A generate_int32le_1d failed!\n");
 
         if (generate_int32le_2d(external) < 0)
-            HDprintf("A generate_int32le_2d failed!\n");
+            printf("A generate_int32le_2d failed!\n");
 
         if (generate_int32le_3d(external) < 0)
-            HDprintf("A generate_int32le_3d failed!\n");
+            printf("A generate_int32le_3d failed!\n");
 
         if (generate_uint8be(external) < 0)
-            HDprintf("A generate_uint8be failed!\n");
+            printf("A generate_uint8be failed!\n");
 
         if (generate_f32le(external) < 0)
-            HDprintf("A generate_f32le failed!\n");
+            printf("A generate_f32le failed!\n");
 
     } /* end for external data storage or not */
 

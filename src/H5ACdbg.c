@@ -68,9 +68,6 @@
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Thursday, October 30, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -79,9 +76,9 @@ H5AC_stats(const H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     /* at present, this can't fail */
     (void)H5C_stats(f->shared->cache, H5F_OPEN_NAME(f), FALSE);
@@ -99,9 +96,6 @@ H5AC_stats(const H5F_t *f)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              Sunday, October 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -112,12 +106,12 @@ H5AC_dump_cache(const H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     if (H5C_dump_cache(f->shared->cache, H5F_OPEN_NAME(f)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_dump_cache() failed.")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_dump_cache() failed.");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -159,8 +153,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  John Mainzer, 5/30/14
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -173,12 +165,12 @@ H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr, void **entry_ptr_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     if (H5C_get_entry_ptr_from_addr(cache_ptr, addr, entry_ptr_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_ptr_from_addr() failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_ptr_from_addr() failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -205,9 +197,6 @@ done:
  * Return:      SUCCEED on success/FAIL on failure.  Note that
  *              *fd_exists_ptr is undefined on failure.
  *
- * Programmer:  John Mainzer
- *              9/28/16
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -220,8 +209,8 @@ H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     ret_value = H5C_flush_dependency_exists(cache_ptr, parent_addr, child_addr, fd_exists_ptr);
@@ -254,8 +243,6 @@ H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, 
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  John Mainzer, 5/30/14
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -269,12 +256,12 @@ H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expecte
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     if (H5C_verify_entry_type(cache_ptr, addr, expected_type, in_cache_ptr, type_ok_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_verify_entry_type() failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_verify_entry_type() failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -289,9 +276,6 @@ done:
  *
  * Return:      Current value of cache_ptr->serialization_in_progress.
  *
- * Programmer:  John Mainzer
- *              8/24/15
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -304,8 +288,8 @@ H5AC_get_serialization_in_progress(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     /* Set return value */
@@ -328,8 +312,6 @@ H5AC_get_serialization_in_progress(H5F_t *f)
  *
  * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
  *
- * Programmer:  John Mainzer, 6/18/16
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -342,8 +324,8 @@ H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     ret_value = H5C_cache_is_clean(cache_ptr, inner_ring);

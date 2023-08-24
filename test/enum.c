@@ -11,103 +11,101 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, December 22, 1998
+ *      Test enum datatypes
  */
+
 #include "h5test.h"
+
+/* Convenience macro for inserting enum values */
 #define CPTR(VAR, CONST) ((VAR) = (CONST), &(VAR))
 
-const char *FILENAME[] = {"enum1", NULL};
+static const char *FILENAME[] = {"enum1", NULL};
 
 typedef enum { E1_RED, E1_GREEN, E1_BLUE, E1_WHITE, E1_BLACK } c_e1;
 
 /*-------------------------------------------------------------------------
- * Function:	test_named
+ * Function:    test_named
  *
- * Purpose:	Create an enumeration data type and store it in the file.
+ * Purpose:     Create an enumeration data type and store it in the file
  *
- * Return:	Success:	0
- *
- *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Wednesday, December 23, 1998
- *
+ * Return:      Success:    0
+ *              Failure:    1
  *-------------------------------------------------------------------------
  */
 static int
 test_named(hid_t file)
 {
-    hid_t       type = -1, cwg = -1;
+    hid_t       tid = H5I_INVALID_HID;
+    hid_t       gid = H5I_INVALID_HID;
     c_e1        val;
     signed char val8;
 
     TESTING("named enumeration types");
-    if ((cwg = H5Gcreate2(file, "test_named", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+    if ((gid = H5Gcreate2(file, "test_named", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
     /* A native integer */
-    if ((type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "RED", CPTR(val, E1_RED)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLUE", CPTR(val, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tcommit2(cwg, "e1_a", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR;
+    if ((tid = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "RED", CPTR(val, E1_RED)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "GREEN", CPTR(val, E1_GREEN)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLUE", CPTR(val, E1_BLUE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "WHITE", CPTR(val, E1_WHITE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLACK", CPTR(val, E1_BLACK)) < 0)
+        TEST_ERROR;
+    if (H5Tcommit2(gid, "e1_a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
 
     /* A smaller type */
-    if ((type = H5Tcreate(H5T_ENUM, (size_t)1)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "RED", CPTR(val8, E1_RED)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "GREEN", CPTR(val8, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLUE", CPTR(val8, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "WHITE", CPTR(val8, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLACK", CPTR(val8, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tcommit2(cwg, "e1_b", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR;
+    if ((tid = H5Tcreate(H5T_ENUM, (size_t)1)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "RED", CPTR(val8, E1_RED)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "GREEN", CPTR(val8, E1_GREEN)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLUE", CPTR(val8, E1_BLUE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "WHITE", CPTR(val8, E1_WHITE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLACK", CPTR(val8, E1_BLACK)) < 0)
+        TEST_ERROR;
+    if (H5Tcommit2(gid, "e1_b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
 
     /* A non-native type */
     if (H5T_ORDER_BE == H5Tget_order(H5T_NATIVE_INT)) {
-        if ((type = H5Tenum_create(H5T_STD_U8LE)) < 0)
-            FAIL_STACK_ERROR;
+        if ((tid = H5Tenum_create(H5T_STD_U8LE)) < 0)
+            TEST_ERROR;
     }
     else {
-        if ((type = H5Tenum_create(H5T_STD_U8BE)) < 0)
-            FAIL_STACK_ERROR;
+        if ((tid = H5Tenum_create(H5T_STD_U8BE)) < 0)
+            TEST_ERROR;
     }
-    if (H5Tenum_insert(type, "RED", CPTR(val8, E1_RED)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "GREEN", CPTR(val8, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLUE", CPTR(val8, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "WHITE", CPTR(val8, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLACK", CPTR(val8, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tcommit2(cwg, "e1_c", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Tenum_insert(tid, "RED", CPTR(val8, E1_RED)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "GREEN", CPTR(val8, E1_GREEN)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLUE", CPTR(val8, E1_BLUE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "WHITE", CPTR(val8, E1_WHITE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLACK", CPTR(val8, E1_BLACK)) < 0)
+        TEST_ERROR;
+    if (H5Tcommit2(gid, "e1_c", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
 
-    if (H5Gclose(cwg) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Gclose(gid) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -115,173 +113,167 @@ test_named(hid_t file)
 error:
     H5E_BEGIN_TRY
     {
-        H5Tclose(type);
-        H5Gclose(cwg);
+        H5Tclose(tid);
+        H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_conv
+ * Function:    test_conv
  *
- * Purpose:	Tests writing and read data
+ * Purpose:     Tests writing and read data
  *
- * Return:	Success:	0
- *
- *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Monday, January  4, 1999
- *
- *              Raymond Lu
- *              12 October 2012
- *              I added tests for enum-integer and enum-float conversions
+ * Return:      Success:    0
+ *              Failure:    1
  *-------------------------------------------------------------------------
  */
 static int
 test_conv(hid_t file)
 {
-    hid_t cwg = -1, type = -1, space = -1, dset = -1;
+    hid_t gid = H5I_INVALID_HID;
+    hid_t tid = H5I_INVALID_HID;
+    hid_t sid = H5I_INVALID_HID;
+    hid_t did = H5I_INVALID_HID;
     c_e1  val;
     /* Some values are out of range for testing. The library should accept them */
-    static c_e1 data1[] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE, E1_WHITE, E1_BLACK,
-                           E1_GREEN, E1_BLUE,  E1_RED,   E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK,
-                           E1_WHITE, E1_RED,   E1_WHITE, (c_e1)0,  (c_e1)-1, (c_e1)-2};
-    c_e1        data2[NELMTS(data1)];
-    short       data_short[NELMTS(data1)];
-    int         data_int[NELMTS(data1)];
-    double      data_double[NELMTS(data1)];
-    hsize_t     ds_size[1] = {NELMTS(data1)};
-    size_t      i;
+    c_e1    data1[] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE, E1_WHITE, E1_BLACK,
+                    E1_GREEN, E1_BLUE,  E1_RED,   E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK,
+                    E1_WHITE, E1_RED,   E1_WHITE, (c_e1)0,  (c_e1)-1, (c_e1)-2};
+    c_e1    data2[NELMTS(data1)];
+    short   data_short[NELMTS(data1)];
+    int     data_int[NELMTS(data1)];
+    double  data_double[NELMTS(data1)];
+    hsize_t ds_size = NELMTS(data1);
+    size_t  i;
 
     TESTING("enumeration conversions");
 
-    if ((cwg = H5Gcreate2(file, "test_conv", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+    if ((gid = H5Gcreate2(file, "test_conv", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-    if ((type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "RED", CPTR(val, E1_RED)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLUE", CPTR(val, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR;
+    if ((tid = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "RED", CPTR(val, E1_RED)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "GREEN", CPTR(val, E1_GREEN)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLUE", CPTR(val, E1_BLUE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "WHITE", CPTR(val, E1_WHITE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLACK", CPTR(val, E1_BLACK)) < 0)
+        TEST_ERROR;
 
-    if ((space = H5Screate_simple(1, ds_size, NULL)) < 0)
-        FAIL_STACK_ERROR;
+    if ((sid = H5Screate_simple(1, &ds_size, NULL)) < 0)
+        TEST_ERROR;
 
     /***************************************
      *    Dataset of enumeration type
      ***************************************/
     /* Create a dataset of enum type and write enum data to it */
-    if ((dset = H5Dcreate2(cwg, "color_table1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR;
+    if ((did = H5Dcreate2(gid, "color_table1", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(did, tid, sid, sid, H5P_DEFAULT, data1) < 0)
+        TEST_ERROR;
 
     /* Test reading back the data with no conversion */
-    if (H5Dread(dset, type, space, space, H5P_DEFAULT, data2) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dread(did, tid, sid, sid, H5P_DEFAULT, data2) < 0)
+        TEST_ERROR;
 
-    for (i = 0; i < (size_t)ds_size[0]; i++)
+    for (i = 0; i < ds_size; i++)
         if (data1[i] != data2[i]) {
             H5_FAILED();
-            HDprintf("    1. data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data2[i]));
+            printf("    1. data1[%zu]=%d, data2[%zu]=%d (should be same)\n", i, (int)data1[i], i,
+                   (int)data2[i]);
             goto error;
-        } /* end if */
+        }
 
     /* Test converting the data to integer. Read enum data back as integer */
-    if (H5Dread(dset, H5T_NATIVE_SHORT, space, space, H5P_DEFAULT, data_short) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dread(did, H5T_NATIVE_SHORT, sid, sid, H5P_DEFAULT, data_short) < 0)
+        TEST_ERROR;
 
-    for (i = 0; i < (size_t)ds_size[0]; i++)
-        if ((short)data1[i] != data_short[i]) {
+    for (i = 0; i < ds_size; i++)
+        if ((int)data1[i] != (int)data_short[i]) {
             H5_FAILED();
-            HDprintf("    2. data1[%lu]=%d, data_short[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_short[i]));
+            printf("    2. data1[%zu]=%d, data_short[%zu]=%d (should be same)\n", i, (int)data1[i], i,
+                   (int)data_short[i]);
             goto error;
-        } /* end if */
+        }
 
     /* Test converting the data to floating number. Read enum data back as floating number */
-    if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dread(did, H5T_NATIVE_DOUBLE, sid, sid, H5P_DEFAULT, data_double) < 0)
+        TEST_ERROR;
 
-    for (i = 0; i < (size_t)ds_size[0]; i++)
+    for (i = 0; i < ds_size; i++)
         if ((int)data1[i] != (int)data_double[i]) {
             H5_FAILED();
-            HDprintf("    3. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
+            printf("    3. data1[%zu]=%d, data_double[%zu]=%d (should be same)\n", i, (int)data1[i], i,
+                   (int)data_double[i]);
             goto error;
-        } /* end if */
+        }
 
-    if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
 
     /***************************************
      *    Dataset of integer type
      ***************************************/
     /* Create a dataset of native integer and write enum data to it */
-    if ((dset = H5Dcreate2(cwg, "color_table2", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT,
-                           H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+    if ((did = H5Dcreate2(gid, "color_table2", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
+        TEST_ERROR;
 
-    if (H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dwrite(did, tid, sid, sid, H5P_DEFAULT, data1) < 0)
+        TEST_ERROR;
 
     /* Test reading back the data with no conversion */
-    if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, data_int) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data_int) < 0)
+        TEST_ERROR;
 
-    for (i = 0; i < (size_t)ds_size[0]; i++)
+    for (i = 0; i < ds_size; i++)
         if ((int)data1[i] != data_int[i]) {
             H5_FAILED();
-            HDprintf("    4. data1[%lu]=%d, data_int[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_int[i]));
+            printf("    4. data1[%zu]=%d, data_int[%zu]=%d (should be same)\n", i, (int)data1[i], i,
+                   data_int[i]);
             goto error;
-        } /* end if */
+        }
 
-    if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
 
     /***************************************
      *    Dataset of double type
      ***************************************/
     /* Create a dataset of native double and write enum data to it */
-    if ((dset = H5Dcreate2(cwg, "color_table3", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT,
-                           H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+    if ((did = H5Dcreate2(gid, "color_table3", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT,
+                          H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-    if (H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dwrite(did, tid, sid, sid, H5P_DEFAULT, data1) < 0)
+        TEST_ERROR;
 
     /* Test reading back the data with no conversion */
-    if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dread(did, H5T_NATIVE_DOUBLE, sid, sid, H5P_DEFAULT, data_double) < 0)
+        TEST_ERROR;
 
-    for (i = 0; i < (size_t)ds_size[0]; i++)
+    for (i = 0; i < ds_size; i++)
         if ((int)data1[i] != (int)data_double[i]) {
             H5_FAILED();
-            HDprintf("    5. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
+            printf("    5. data1[%zu]=%d, data_double[%zu]=%d (should be same)\n", i, (int)data1[i], i,
+                   (int)data_double[i]);
             goto error;
-        } /* end if */
+        }
 
-    if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Gclose(cwg) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
+    if (H5Gclose(gid) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -289,102 +281,99 @@ test_conv(hid_t file)
 error:
     H5E_BEGIN_TRY
     {
-        H5Dclose(dset);
-        H5Sclose(space);
-        H5Tclose(type);
-        H5Gclose(cwg);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Tclose(tid);
+        H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_tr1
+ * Function:    test_tr1
  *
- * Purpose:	Writes enumerated data to a dataset which requires
- *		translation. Both memory and file data types use native
- *		integers but the file type has a different mapping between
- *		the integers and symbols.
+ * Purpose:     Writes enumerated data to a dataset which requires
+ *              translation. Both memory and file data types use native
+ *              integers but the file type has a different mapping between
+ *              the integers and symbols.
  *
- * Return:	Success:	0
- *
- *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Monday, January  4, 1999
- *
+ * Return:      Success:    0
+ *              Failure:    1
  *-------------------------------------------------------------------------
  */
 static int
 test_tr1(hid_t file)
 {
-    hid_t       cwg = -1, m_type = -1, f_type = -1, space = -1, dset = -1;
-    hsize_t     ds_size[1] = {10};
-    size_t      i;
-    c_e1        eval;
-    int         ival;
-    static c_e1 data1[10] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
-                             E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
-    c_e1        data2[10];
+    hid_t   gid     = H5I_INVALID_HID;
+    hid_t   m_tid   = H5I_INVALID_HID;
+    hid_t   f_tid   = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hsize_t ds_size = 10;
+    c_e1    eval;
+    int     ival;
+    c_e1    data1[10] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
+                      E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
+    c_e1    data2[10];
 
     TESTING("O(1) conversions");
 
-    if ((cwg = H5Gcreate2(file, "test_tr1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+    if ((gid = H5Gcreate2(file, "test_tr1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-    if ((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "RED", CPTR(eval, E1_RED)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "GREEN", CPTR(eval, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "BLUE", CPTR(eval, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "WHITE", CPTR(eval, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "BLACK", CPTR(eval, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR;
+    if ((m_tid = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "RED", CPTR(eval, E1_RED)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "GREEN", CPTR(eval, E1_GREEN)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "BLUE", CPTR(eval, E1_BLUE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "WHITE", CPTR(eval, E1_WHITE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "BLACK", CPTR(eval, E1_BLACK)) < 0)
+        TEST_ERROR;
 
-    if ((f_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "RED", CPTR(ival, 105)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "GREEN", CPTR(ival, 104)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "BLUE", CPTR(ival, 103)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "WHITE", CPTR(ival, 102)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "BLACK", CPTR(ival, 101)) < 0)
-        FAIL_STACK_ERROR;
+    if ((f_tid = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "RED", CPTR(ival, 105)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "GREEN", CPTR(ival, 104)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "BLUE", CPTR(ival, 103)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "WHITE", CPTR(ival, 102)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "BLACK", CPTR(ival, 101)) < 0)
+        TEST_ERROR;
 
-    if ((space = H5Screate_simple(1, ds_size, NULL)) < 0)
-        FAIL_STACK_ERROR;
-    if ((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0)
-        FAIL_STACK_ERROR;
+    if ((sid = H5Screate_simple(1, &ds_size, NULL)) < 0)
+        TEST_ERROR;
+    if ((did = H5Dcreate2(gid, "color_table", f_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(did, m_tid, sid, sid, H5P_DEFAULT, data1) < 0)
+        TEST_ERROR;
+    if (H5Dread(did, m_tid, sid, sid, H5P_DEFAULT, data2) < 0)
+        TEST_ERROR;
 
-    for (i = 0; i < (size_t)ds_size[0]; i++)
+    for (size_t i = 0; i < ds_size; i++)
         if (data1[i] != data2[i]) {
             H5_FAILED();
-            HDprintf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i, (int)(data1[i]),
-                     (unsigned long)i, (int)(data2[i]));
+            printf("    data1[%zu]=%d, data2[%zu]=%d (should be same)\n", i, (int)data1[i], i, (int)data2[i]);
             goto error;
         }
 
-    if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(m_type) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(f_type) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Gclose(cwg) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(m_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(f_tid) < 0)
+        TEST_ERROR;
+    if (H5Gclose(gid) < 0)
+        TEST_ERROR;
 
     PASSED();
 
@@ -393,100 +382,98 @@ test_tr1(hid_t file)
 error:
     H5E_BEGIN_TRY
     {
-        H5Dclose(dset);
-        H5Sclose(space);
-        H5Tclose(m_type);
-        H5Tclose(f_type);
-        H5Gclose(cwg);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Tclose(m_tid);
+        H5Tclose(f_tid);
+        H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_tr2
+ * Function:    test_tr2
  *
- * Purpose:	Tests conversions that use the O(log N) lookup function.
+ * Purpose:     Tests conversions that use the O(log N) lookup function
  *
- * Return:	Success:	0
- *
- *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Tuesday, January  5, 1999
- *
+ * Return:      Success:    0
+ *              Failure:    1
  *-------------------------------------------------------------------------
  */
 static int
 test_tr2(hid_t file)
 {
-    hid_t       cwg = -1, m_type = -1, f_type = -1, space = -1, dset = -1;
-    hsize_t     ds_size[1] = {10};
-    size_t      i;
-    c_e1        val1;
-    int         val2;
-    static c_e1 data1[10] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
-                             E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
-    c_e1        data2[10];
+    hid_t   gid     = H5I_INVALID_HID;
+    hid_t   m_tid   = H5I_INVALID_HID;
+    hid_t   f_tid   = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hsize_t ds_size = 10;
+    size_t  i;
+    c_e1    val1;
+    int     val2;
+    c_e1    data1[10] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
+                      E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
+    c_e1    data2[10];
 
     TESTING("O(log N) conversions");
 
-    if ((cwg = H5Gcreate2(file, "test_tr2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+    if ((gid = H5Gcreate2(file, "test_tr2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-    if ((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "RED", CPTR(val1, E1_RED)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "GREEN", CPTR(val1, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "BLUE", CPTR(val1, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "WHITE", CPTR(val1, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(m_type, "BLACK", CPTR(val1, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR;
+    if ((m_tid = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "RED", CPTR(val1, E1_RED)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "GREEN", CPTR(val1, E1_GREEN)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "BLUE", CPTR(val1, E1_BLUE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "WHITE", CPTR(val1, E1_WHITE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(m_tid, "BLACK", CPTR(val1, E1_BLACK)) < 0)
+        TEST_ERROR;
 
-    if ((f_type = H5Tcreate(H5T_ENUM, sizeof(int))) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "RED", CPTR(val2, 1050)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "GREEN", CPTR(val2, 1040)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "BLUE", CPTR(val2, 1030)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "WHITE", CPTR(val2, 1020)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(f_type, "BLACK", CPTR(val2, 1010)) < 0)
-        FAIL_STACK_ERROR;
+    if ((f_tid = H5Tcreate(H5T_ENUM, sizeof(int))) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "RED", CPTR(val2, 1050)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "GREEN", CPTR(val2, 1040)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "BLUE", CPTR(val2, 1030)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "WHITE", CPTR(val2, 1020)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(f_tid, "BLACK", CPTR(val2, 1010)) < 0)
+        TEST_ERROR;
 
-    if ((space = H5Screate_simple(1, ds_size, NULL)) < 0)
-        FAIL_STACK_ERROR;
-    if ((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0)
-        FAIL_STACK_ERROR;
+    if ((sid = H5Screate_simple(1, &ds_size, NULL)) < 0)
+        TEST_ERROR;
+    if ((did = H5Dcreate2(gid, "color_table", f_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(did, m_tid, sid, sid, H5P_DEFAULT, data1) < 0)
+        TEST_ERROR;
+    if (H5Dread(did, m_tid, sid, sid, H5P_DEFAULT, data2) < 0)
+        TEST_ERROR;
 
-    for (i = 0; i < (size_t)ds_size[0]; i++)
+    for (i = 0; i < ds_size; i++)
         if (data1[i] != data2[i]) {
             H5_FAILED();
-            HDprintf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i, (int)(data1[i]),
-                     (unsigned long)i, (int)(data2[i]));
+            printf("    data1[%zu]=%d, data2[%zu]=%d (should be same)\n", i, (int)data1[i], i, (int)data2[i]);
             goto error;
         }
 
-    if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(m_type) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tclose(f_type) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Gclose(cwg) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(m_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(f_tid) < 0)
+        TEST_ERROR;
+    if (H5Gclose(gid) < 0)
+        TEST_ERROR;
 
     PASSED();
 
@@ -495,20 +482,20 @@ test_tr2(hid_t file)
 error:
     H5E_BEGIN_TRY
     {
-        H5Dclose(dset);
-        H5Sclose(space);
-        H5Tclose(m_type);
-        H5Tclose(f_type);
-        H5Gclose(cwg);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Tclose(m_tid);
+        H5Tclose(f_tid);
+        H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_value_dsnt_exist
+ * Function:    test_value_dsnt_exist
  *
- * Purpose:	Create an enumeration datatype with "gaps in values"
+ * Purpose:     Create an enumeration datatype with "gaps in values"
  *              and then request a name of non-existing value within
  *              an existing range by calling H5Tenum_nameof function.
  *              Function should fail instead of succeeding and returning
@@ -516,211 +503,201 @@ error:
  *              Request a value by supplying non-existing name by calling
  *              H5Tenum_nameof function. Function should fail.
  *
- *
- * Return:	Success:	0
- *
- *		Failure:	number of errors
- *
- * Programmer:	Elena Pourmal
- *              Wednesday, June 7, 2002
- *
+ * Return:      Success:    0
+ *              Failure:    1
  *-------------------------------------------------------------------------
  */
 static int
 test_value_dsnt_exist(void)
 {
 
-    hid_t  datatype_id = (-1); /* identifiers */
-    int    val;
-    char   name[100];
-    size_t size = 100;
+    hid_t       tid = H5I_INVALID_HID;
+    int         val;
+    char        name[32];
+    size_t      size         = 32;
+    const int   BAD_VALUES[] = {0, 3, 11};
+    const int   N_BAD_VALUES = 3;
+    const char *BAD_NAMES[]  = {"SAX", "TEEN", "A"};
+    const int   N_BAD_NAMES  = 3;
+    herr_t      ret;
+
     TESTING("for non-existing name and value");
-    /* Turn off error reporting since we expect failure in this test */
 
-    if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
-        goto error;
-
-    if ((datatype_id = H5Tenum_create(H5T_NATIVE_INT)) < 0)
-        goto error;
+    /* Create an empty enum datatype */
+    if ((tid = H5Tenum_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
 
     /* These calls should fail, since no members exist yet */
-    if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0)
-        goto error;
-    val = 3;
-    if (H5Tenum_nameof(datatype_id, &val, name, size) >= 0)
-        goto error;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tenum_valueof(tid, "SAX", &val);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("H5Tenum_valueof should not pass with a non-existing name");
 
+    val = 3;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tenum_nameof(tid, &val, name, size);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("H5Tenum_nameof should not pass with a non-existing value");
+
+    /* Insert some enum values */
     val = 2;
-    if (H5Tenum_insert(datatype_id, "TWO", (int *)&val) < 0)
-        goto error;
+    if (H5Tenum_insert(tid, "TWO", (int *)&val) < 0)
+        TEST_ERROR;
     val = 6;
-    if (H5Tenum_insert(datatype_id, "SIX", (int *)&val) < 0)
-        goto error;
+    if (H5Tenum_insert(tid, "SIX", (int *)&val) < 0)
+        TEST_ERROR;
     val = 10;
-    if (H5Tenum_insert(datatype_id, "TEN", (int *)&val) < 0)
-        goto error;
+    if (H5Tenum_insert(tid, "TEN", (int *)&val) < 0)
+        TEST_ERROR;
 
-    /* This call should fail since we did not create a member with value = 3*/
-    val = 3;
-    if (H5Tenum_nameof(datatype_id, &val, name, size) >= 0)
-        goto error;
+    /* Check that H5Tenum_nameof() fails with non-existing values */
+    for (int i = 0; i < N_BAD_VALUES; i++) {
+        H5E_BEGIN_TRY
+        {
+            ret = H5Tenum_nameof(tid, &BAD_VALUES[i], name, size);
+        }
+        H5E_END_TRY
+        if (ret >= 0) {
+            H5_FAILED();
+            printf("Bad value: %d -- ", BAD_VALUES[i]);
+            PUTS_ERROR("H5Tenum_nameof should not pass with a non-existing value");
+        }
+    }
 
-    /* This call should fail since we did not create a member with value = 11*/
-    val = 11;
-    if (H5Tenum_nameof(datatype_id, &val, name, size) >= 0)
-        goto error;
+    /* Check that H5Tenum_valueof() fails with non-existing names */
+    for (int i = 0; i < N_BAD_NAMES; i++) {
+        H5E_BEGIN_TRY
+        {
+            ret = H5Tenum_valueof(tid, BAD_NAMES[i], &val);
+        }
+        H5E_END_TRY
+        if (ret >= 0) {
+            H5_FAILED();
+            printf("Bad name: %s -- ", BAD_NAMES[i]);
+            PUTS_ERROR("H5Tenum_valueof should not pass with a non-existing name");
+        }
+    }
 
-    /* This call should fail since we did not create a member with value = 0*/
-    val = 0;
-    if (H5Tenum_nameof(datatype_id, &val, name, size) >= 0)
-        goto error;
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
 
-    /* This call should fail since we do not have SAX name in the type */
-    if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0)
-        goto error;
-
-    /* This call should fail since we do not have TEEN name in the type */
-    if (H5Tenum_valueof(datatype_id, "TEEN", &val) >= 0)
-        goto error;
-
-    /* This call should fail since we do not have A name in the type */
-    if (H5Tenum_valueof(datatype_id, "A", &val) >= 0)
-        goto error;
-
-    if (H5Tclose(datatype_id) < 0)
-        goto error;
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY
     {
-        H5Tclose(datatype_id);
+        H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_funcs
+ * Function:    test_funcs
  *
- * Purpose:	Create an enumeration data type and test some functions
- *              that are or aren't supposed to work with it.
+ * Purpose:     Create an enumeration data type and test whether setters
+ *              and getters work appropriately
  *
- * Return:	Success:	0
- *
- *		Failure:	number of errors
- *
- * Programmer:	Raymond Lu
- *              Tuesday, April 4, 2006
- *
+ * Return:      Success:    0
+ *              Failure:    1
  *-------------------------------------------------------------------------
  */
 static int
 test_funcs(void)
 {
-    hid_t      type = -1;
+    hid_t      tid = H5I_INVALID_HID;
     c_e1       val;
     size_t     size;
     H5T_pad_t  inpad;
     H5T_cset_t cset;
     herr_t     ret;
 
-    TESTING("some functions with enumeration types");
+    TESTING("setters and getters with enumeration types");
 
-    /* A native integer */
-    if ((type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "RED", CPTR(val, E1_RED)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLUE", CPTR(val, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR;
+    /* Create an enum type for testing */
+    if ((tid = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "RED", CPTR(val, E1_RED)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "GREEN", CPTR(val, E1_GREEN)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLUE", CPTR(val, E1_BLUE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "WHITE", CPTR(val, E1_WHITE)) < 0)
+        TEST_ERROR;
+    if (H5Tenum_insert(tid, "BLACK", CPTR(val, E1_BLACK)) < 0)
+        TEST_ERROR;
 
-    if (H5Tget_precision(type) == 0)
-        FAIL_STACK_ERROR;
-    if (H5Tget_size(type) == 0)
-        FAIL_STACK_ERROR;
-    if (H5Tget_offset(type) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tget_sign(type) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Tget_super(type) < 0)
-        FAIL_STACK_ERROR;
+    /* These functions should work with enum datatypes */
+    if (H5Tget_precision(tid) == 0)
+        TEST_ERROR;
+    if (H5Tget_size(tid) == 0)
+        TEST_ERROR;
+    if (H5Tget_offset(tid) < 0)
+        TEST_ERROR;
+    if (H5Tget_sign(tid) < 0)
+        TEST_ERROR;
+    if (H5Tget_super(tid) < 0)
+        TEST_ERROR;
+
+    /* These functions should FAIL with enum datatypes */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tset_pad(tid, H5T_PAD_ZERO, H5T_PAD_ONE);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("H5Tset_pad should not work with enum types");
 
     H5E_BEGIN_TRY
     {
-        ret = H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
+        size = H5Tget_ebias(tid);
     }
-    H5E_END_TRY;
-    if (ret >= 0) {
-        H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
-        goto error;
-    } /* end if */
+    H5E_END_TRY
+    if (size > 0)
+        FAIL_PUTS_ERROR("H5Tget_ebias should not work with enum types");
 
     H5E_BEGIN_TRY
     {
-        size = H5Tget_ebias(type);
+        inpad = H5Tget_inpad(tid);
     }
-    H5E_END_TRY;
-    if (size > 0) {
-        H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
-        goto error;
-    } /* end if */
+    H5E_END_TRY
+    if (inpad > -1)
+        FAIL_PUTS_ERROR("H5Tget_inpad should not work with enum types");
 
     H5E_BEGIN_TRY
     {
-        inpad = H5Tget_inpad(type);
+        cset = H5Tget_cset(tid);
     }
-    H5E_END_TRY;
-    if (inpad > -1) {
-        H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
-        goto error;
-    } /* end if */
-
-    H5E_BEGIN_TRY
-    {
-        cset = H5Tget_cset(type);
-    }
-    H5E_END_TRY;
-    if (cset > -1) {
-        H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
-        goto error;
-    } /* end if */
+    H5E_END_TRY
+    if (cset > -1)
+        FAIL_PUTS_ERROR("H5Tget_cset should not work with enum types");
 
     size = 16;
     H5E_BEGIN_TRY
     {
-        ret = H5Tset_offset(type, (size_t)size);
+        ret = H5Tset_offset(tid, size);
     }
-    H5E_END_TRY;
-    if (ret >= 0) {
-        H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
-        goto error;
-    } /* end if */
+    H5E_END_TRY
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("H5Tset_offset should not work with enum types");
 
     H5E_BEGIN_TRY
     {
-        ret = H5Tset_order(type, H5T_ORDER_BE);
+        ret = H5Tset_order(tid, H5T_ORDER_BE);
     }
-    H5E_END_TRY;
-    if (ret >= 0) {
-        H5_FAILED();
-        HDprintf("Operation not allowed for this type.\n");
-        goto error;
-    } /* end if */
+    H5E_END_TRY
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("H5Tset_order should not work with enum types");
 
-    if (H5Tclose(type) < 0)
+    if (H5Tclose(tid) < 0)
         goto error;
 
     PASSED();
@@ -729,61 +706,114 @@ test_funcs(void)
 error:
     H5E_BEGIN_TRY
     {
-        H5Tclose(type);
+        H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    test_copying_empty_enum
  *
- * Purpose:
+ * Purpose:     Test that copying an empty enum works, including implicitly
+ *              when copying compound datatypes containing empty enums
  *
- * Return:	Success:
- *
- *		Failure:
- *
- * Programmer:	Robb Matzke
- *              Tuesday, December 22, 1998
- *
+ * Return:      Success:    0
+ *              Failure:    1
  *-------------------------------------------------------------------------
  */
+static int
+test_compound_insert_empty_enum(void)
+{
+    hid_t  enum_id = H5I_INVALID_HID;
+    hid_t  cmpd_id = H5I_INVALID_HID;
+    hid_t  copy_id = H5I_INVALID_HID;
+    size_t size;
+
+    TESTING("copying empty enums works");
+
+    /* Create an empty enum */
+    if ((enum_id = H5Tenum_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+
+    /* Copy the empty enum */
+    if ((copy_id = H5Tcopy(enum_id)) < 0)
+        TEST_ERROR;
+    if (H5Tclose(copy_id) < 0)
+        TEST_ERROR;
+
+    /* Create a compound datatype containing the empty enum */
+    size = H5Tget_size(H5T_NATIVE_LONG);
+    if ((cmpd_id = H5Tcreate(H5T_COMPOUND, size)) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(cmpd_id, "empty_enum", 0, enum_id))
+        TEST_ERROR;
+
+    /* Create a copy of the compound datatype */
+    if ((copy_id = H5Tcopy(cmpd_id)) < 0)
+        TEST_ERROR;
+    if (H5Tclose(copy_id) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(enum_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(cmpd_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(enum_id);
+        H5Tclose(cmpd_id);
+        H5Tclose(copy_id);
+    }
+    H5E_END_TRY
+    return 1;
+}
+
 int
 main(void)
 {
-    hid_t fapl = -1, file = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
+    hid_t fid     = H5I_INVALID_HID;
     char  name[1024];
     int   nerrors = 0;
 
     h5_reset();
-    fapl = h5_fileaccess();
+    fapl_id = h5_fileaccess();
 
     /* Create the file */
-    h5_fixname(FILENAME[0], fapl, name, sizeof name);
-    if ((file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    h5_fixname(FILENAME[0], fapl_id, name, sizeof name);
+    if ((fid = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         goto error;
 
     /* Tests */
-    nerrors += test_named(file);
-    nerrors += test_conv(file);
-    nerrors += test_tr1(file);
-    nerrors += test_tr2(file);
+    nerrors += test_named(fid);
+    nerrors += test_conv(fid);
+    nerrors += test_tr1(fid);
+    nerrors += test_tr2(fid);
     nerrors += test_value_dsnt_exist();
     nerrors += test_funcs();
+    nerrors += test_compound_insert_empty_enum();
 
-    H5Fclose(file);
+    if (H5Fclose(fid) < 0)
+        goto error;
 
     /* Verify symbol table messages are cached */
-    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
 
     if (nerrors)
         goto error;
+
     HDputs("All enum tests passed.");
-    h5_cleanup(FILENAME, fapl);
-    return 0;
+    h5_cleanup(FILENAME, fapl_id);
+
+    return EXIT_SUCCESS;
 
 error:
     HDputs("*** ENUM TESTS FAILED ***");
-    return 1;
+    return EXIT_FAILURE;
 }

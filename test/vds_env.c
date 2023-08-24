@@ -11,14 +11,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              Monday, February 16, 2015
- *
  * Purpose:     Tests datasets with virtual layout.
  */
 #include "h5test.h"
 
-const char *FILENAME[] = {"vds_env_virt_0", "vds_env_virt_3", "vds_env_src_2", "vds_env%%_src2", NULL};
+static const char *FILENAME[] = {"vds_env_virt_0", "vds_env_virt_3", "vds_env_src_2", "vds_env%%_src2", NULL};
 
 /* I/O test config flags */
 #define TEST_IO_CLOSE_SRC      0x01u
@@ -69,17 +66,17 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
 
     TESTING("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection with ENV prefix");
 
-    if (NULL == (srcfilename = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilename = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilename_map = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilename_map = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (vfilename = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (vfilename = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (vfilename2 = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (vfilename2 = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilenamepct = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilenamepct = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilenamepct_map = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilenamepct_map = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
@@ -199,7 +196,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     }
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR;
 
@@ -237,7 +234,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     }
 
     /* Read data directly from source dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR;
 
@@ -273,23 +270,23 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
         TEST_ERROR;
     dcpl = -1;
 
-    HDfree(srcfilenamepct_map);
-    HDfree(srcfilenamepct);
-    HDfree(vfilename2);
-    HDfree(vfilename);
-    HDfree(srcfilename_map);
-    HDfree(srcfilename);
+    free(srcfilenamepct_map);
+    free(srcfilenamepct);
+    free(vfilename2);
+    free(vfilename);
+    free(srcfilename_map);
+    free(srcfilename);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(srcfilenamepct_map);
-    HDfree(srcfilenamepct);
-    HDfree(vfilename2);
-    HDfree(vfilename);
-    HDfree(srcfilename_map);
-    HDfree(srcfilename);
+    free(srcfilenamepct_map);
+    free(srcfilenamepct);
+    free(vfilename2);
+    free(vfilename);
+    free(srcfilename_map);
+    free(srcfilename);
 
     H5E_BEGIN_TRY
     {
@@ -307,7 +304,7 @@ error:
         H5Pclose(dapl);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_vds_prefix2 */
@@ -348,7 +345,7 @@ main(void)
      */
     if (driver_is_parallel || !HDstrcmp(env_h5_drvr, "splitter")) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* Set to use the latest file format */
@@ -383,9 +380,9 @@ main(void)
             HDputs(msg);
 
             for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-                HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
-                         bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
-                         bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
+                printf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
+                       bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
+                       bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
                 nerrors += test_vds_prefix_second(bit_config, fapl);
             }
 
@@ -400,13 +397,13 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All virtual dataset tests passed.\n");
+    printf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 } /* end main() */

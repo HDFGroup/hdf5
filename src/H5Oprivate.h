@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Oprivate.h
- *			Aug  5 1997
- *			Robb Matzke
  *
  * Purpose:		Object header private include file.
  *
@@ -404,7 +402,7 @@ typedef struct H5O_efl_t {
 #define H5O_LAYOUT_ALL_CHUNK_FLAGS                                                                           \
     (H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS | H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER)
 
-/* Version # of encoded virtual dataset global heap blocks */
+/* Version number of encoded virtual dataset global heap blocks */
 #define H5O_LAYOUT_VDS_GH_ENC_VERS 0
 
 /* Initial version of the layout information.  Used when space is allocated */

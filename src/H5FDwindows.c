@@ -38,9 +38,6 @@
  *
  * Return:  Non-negative on success/Negative on failure
  *
- * Programmer:  Dana Robinson
- *              October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -53,7 +50,7 @@ H5Pset_fapl_windows(hid_t fapl_id)
     H5TRACE1("e", "i", fapl_id);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     ret_value = H5P_set_driver(plist, H5FD_WINDOWS, NULL, NULL);
 

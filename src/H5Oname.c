@@ -79,14 +79,14 @@ H5O__name_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     if (NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     if (NULL == (mesg->s = (char *)H5MM_strndup((const char *)p, p_size - 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     ret_value = mesg;
 
@@ -107,9 +107,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -121,9 +118,9 @@ H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg && mesg->s);
+    assert(f);
+    assert(p);
+    assert(mesg && mesg->s);
 
     /* encode */
     HDstrcpy((char *)p, mesg->s);
@@ -141,9 +138,6 @@ H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *
  *              Failure:        NULL
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -156,15 +150,15 @@ H5O__name_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     if (!dest && NULL == (dest = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *mesg;
     if (NULL == (dest->s = H5MM_xstrdup(mesg->s)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Set return value */
     ret_value = dest;
@@ -189,9 +183,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -203,8 +194,8 @@ H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
@@ -219,9 +210,6 @@ H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -232,7 +220,7 @@ H5O__name_reset(void *_mesg)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     /* reset */
     mesg->s = (char *)H5MM_xfree(mesg->s);
@@ -247,9 +235,6 @@ H5O__name_reset(void *_mesg)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -260,13 +245,13 @@ H5O__name_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", mesg->s);
+    fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", mesg->s);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__name_debug() */

@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2013-2022 UChicago Argonne, LLC and The HDF Group.
+ * Copyright (c) 2022-2023 Intel Corporation.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -14,7 +15,9 @@
 #ifdef _WIN32
 #define _WINSOCKAPI_
 #include <windows.h>
-#define HG_THREAD_MUTEX_INITIALIZER NULL
+/* clang-format off */
+#    define HG_THREAD_MUTEX_INITIALIZER {NULL}
+/* clang-format on */
 typedef CRITICAL_SECTION hg_thread_mutex_t;
 #else
 #include <pthread.h>

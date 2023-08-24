@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, March  3, 1998
- *
  * Purpose:    Tests datasets stored in external raw files.
  */
 #include "external_common.h"
@@ -29,9 +26,6 @@
  *
  * Return:      Success:    nonzero if same, zero if different.
  *              Failure:    zero
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -53,8 +47,8 @@ files_have_same_contents(const char *name1, const char *name2)
 
     /* Loop until files are empty or we encounter a problem */
     while (1) {
-        HDmemset(buf1, 0, sizeof(buf1));
-        HDmemset(buf2, 0, sizeof(buf2));
+        memset(buf1, 0, sizeof(buf1));
+        memset(buf2, 0, sizeof(buf2));
 
         n1 = HDread(fd1, buf1, sizeof(buf1));
         if (n1 < 0 || (size_t)n1 > sizeof(buf1))
@@ -71,7 +65,7 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
         }
 
-        if (HDmemcmp(buf1, buf2, (size_t)n1) != 0)
+        if (memcmp(buf1, buf2, (size_t)n1) != 0)
             break;
 
     } /* end while */
@@ -91,9 +85,6 @@ out:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -137,7 +128,7 @@ test_non_extendible(hid_t file)
     {
         dset_addr = H5Dget_offset(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset_addr != HADDR_UNDEF)
         FAIL_STACK_ERROR;
 
@@ -149,7 +140,7 @@ test_non_extendible(hid_t file)
     if (1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        HDprintf("   got: %d\n    ans: 1\n", n);
+        printf("   got: %d\n    ans: 1\n", n);
         goto error;
     }
 
@@ -159,13 +150,13 @@ test_non_extendible(hid_t file)
     if (file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
+        printf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
         goto error;
     }
 
@@ -184,7 +175,7 @@ error:
         H5Sclose(space);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_non_extendible() */
 
@@ -196,9 +187,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -225,7 +213,7 @@ test_too_small(hid_t file)
     {
         dset = H5Dcreate2(file, "dset2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external file succeeded instead of failing.");
     if (H5Sclose(space) < 0)
@@ -243,7 +231,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_too_small() */
 
@@ -256,9 +244,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -299,7 +284,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_large_enough_current_eventual() */
 
@@ -311,9 +296,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -340,7 +322,7 @@ test_large_enough_current_not_eventual(hid_t file)
     {
         dset = H5Dcreate2(file, "dset4", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external file succeeded instead of failing.");
 
@@ -359,7 +341,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_large_enough_current_not_eventual() */
 
@@ -371,9 +353,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -418,7 +397,7 @@ test_unlimited(hid_t file)
     if (1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        HDprintf("    got: %d\n    ans: 1\n", n);
+        printf("    got: %d\n    ans: 1\n", n);
         goto error;
     } /* end if */
 
@@ -427,13 +406,13 @@ test_unlimited(hid_t file)
     if (file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (H5F_UNLIMITED != file_size) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
+        printf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
         goto error;
     }
 
@@ -452,7 +431,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_unlimited() */
 
@@ -465,9 +444,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Jacob Smith
- *              29 Sep 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -482,13 +458,13 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
     }
     for (i = 0; i < n_external_files; i++) {
         if (HDsnprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
-            HDfprintf(stderr, "External file %d overflows name buffer\n", i + 1);
-            HDfflush(stderr);
+            fprintf(stderr, "External file %d overflows name buffer\n", i + 1);
+            fflush(stderr);
             return -1;
         }
         if (H5Pset_external(dcpl_id, exname, offset, max_ext_size) < 0) {
-            HDfprintf(stderr, "Problem adding external file %s\n", exname);
-            HDfflush(stderr);
+            fprintf(stderr, "Problem adding external file %s\n", exname);
+            fflush(stderr);
             return -1;
         }
     }
@@ -502,9 +478,6 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -558,7 +531,7 @@ test_multiple_files(hid_t file)
     {
         dset = H5Dcreate2(file, "dset7", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external files succeeded instead of failing.");
 
@@ -577,7 +550,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_multiple_files() */
 
@@ -589,9 +562,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -613,7 +583,7 @@ test_add_to_unlimited(void)
     {
         status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    H5Pset_external() succeeded when it should have failed.");
 
@@ -632,7 +602,7 @@ error:
     {
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_add_to_unlimited() */
 
@@ -644,9 +614,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -667,7 +634,7 @@ test_overflow(void)
     {
         status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    H5Pset_external() succeeded when it should have failed.");
 
@@ -682,7 +649,7 @@ error:
     {
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_overflow() */
 
@@ -693,9 +660,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -756,7 +720,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -774,7 +738,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, hs_space, hs_space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -807,7 +771,7 @@ error:
         H5Sclose(hs_space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_read_file_set() */
 
@@ -818,9 +782,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -933,7 +894,7 @@ error:
         H5Sclose(file_space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_write_file_set() */
 
@@ -948,9 +909,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1004,7 +962,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1030,7 +988,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_absolute() */
 
@@ -1043,9 +1001,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1094,7 +1049,7 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1120,7 +1075,7 @@ error:
         H5Sclose(space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_relative() */
 
@@ -1135,9 +1090,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1213,12 +1165,12 @@ test_path_relative_cwd(hid_t fapl)
     {
         dset3 = H5Dopen2(file, "dset1", dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset3 >= 0)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1250,12 +1202,12 @@ test_path_relative_cwd(hid_t fapl)
     {
         dset3 = H5Dopen2(file, "dset1", dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset3 >= 0)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1291,7 +1243,7 @@ error:
         H5Sclose(space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_relative_cwd() */
 
@@ -1302,9 +1254,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Dana Robinson
- *              March 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1362,7 +1311,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_STACK_ERROR;
 
     /* Check the value for the external prefix */
-    if ((buffer = (char *)HDcalloc((size_t)64, sizeof(char))) == NULL)
+    if ((buffer = (char *)calloc((size_t)64, sizeof(char))) == NULL)
         TEST_ERROR;
     if (H5Pget_efile_prefix(dapl_id, buffer, (size_t)64) < 0)
         FAIL_STACK_ERROR;
@@ -1370,7 +1319,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_PUTS_ERROR("external file prefix from dapl incorrect");
 
     /* Close everything */
-    HDfree(buffer);
+    free(buffer);
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
@@ -1387,7 +1336,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
 
 error:
     if (buffer)
-        HDfree(buffer);
+        free(buffer);
     H5E_BEGIN_TRY
     {
         H5Dclose(did);
@@ -1396,7 +1345,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_h5d_get_access_plist() */
 
@@ -1406,9 +1355,6 @@ error:
  * Purpose:     Runs external dataset tests.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Robb Matzke
- *              Tuesday, March  3, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1525,8 +1471,8 @@ error:
         H5Pclose(fapl_id_new);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     nerrors = MAX(1, nerrors);
-    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */

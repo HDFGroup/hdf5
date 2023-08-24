@@ -10,16 +10,13 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
- * Programmer:	Raymond Lu
- *              24 April 2013
- *
  * Purpose:	Tests H5Zunregister function
  */
 #include "h5test.h"
 
 #include "H5CXprivate.h" /* API Contexts                         */
 
-const char *FILENAME[] = {"unregister_filter_1", "unregister_filter_2", NULL};
+static const char *FILENAME[] = {"unregister_filter_1", "unregister_filter_2", NULL};
 
 #define GROUP_NAME        "test_group"
 #define DSET_NAME         "test_dataset"
@@ -36,7 +33,7 @@ static size_t do_nothing(unsigned int flags, size_t cd_nelmts, const unsigned in
                          size_t *buf_size, void **buf);
 
 /* Dummy filter for test_unregister_filters only */
-const H5Z_class2_t H5Z_DUMMY[1] = {{
+static const H5Z_class2_t H5Z_DUMMY[1] = {{
     H5Z_CLASS_T_VERS, /* H5Z_class_t version              */
     H5Z_FILTER_DUMMY, /* Filter ID number                 */
     1, 1,             /* Encoding and decoding enabled    */
@@ -97,9 +94,9 @@ test_unregister_filters(hid_t fapl_id)
     TESTING("Unregistering filter");
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(DSET_DIM1, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(DSET_DIM1, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         buf[i] = buf_data + (i * DSET_DIM2);
@@ -152,10 +149,10 @@ test_unregister_filters(hid_t fapl_id)
     {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
+        printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
         goto error;
     }
 
@@ -203,10 +200,10 @@ test_unregister_filters(hid_t fapl_id)
     {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
+        printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
         goto error;
     }
 
@@ -240,8 +237,8 @@ test_unregister_filters(hid_t fapl_id)
     if (H5Fclose(fid2) < 0)
         goto error;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return SUCCEED;
@@ -258,10 +255,10 @@ error:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return FAIL;
 }
@@ -298,21 +295,21 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All filter unregistration tests passed.\n");
+    printf("All filter unregistration tests passed.\n");
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

@@ -71,7 +71,7 @@ test_split_comm_access(void)
 
     filename = (const char *)PARATESTFILE /* GetTestParameters()*/;
     if (VERBOSE_MED)
-        HDprintf("Split Communicator access test on file %s\n", filename);
+        printf("Split Communicator access test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -151,7 +151,7 @@ test_page_buffer_access(void)
     filename = (const char *)GetTestParameters();
 
     if (VERBOSE_MED)
-        HDprintf("Page Buffer Usage in Parallel %s\n", filename);
+        printf("Page Buffer Usage in Parallel %s\n", filename);
 
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     VRFY((fapl >= 0), "create_faccess_plist succeeded");
@@ -170,7 +170,7 @@ test_page_buffer_access(void)
     {
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VRFY((file_id < 0), "H5Fcreate failed");
 
     /* disable collective metadata writes for page buffering to work */
@@ -192,7 +192,7 @@ test_page_buffer_access(void)
     ret = H5Pset_file_space_page_size(fcpl, sizeof(int) * 100);
     VRFY((ret == 0), "");
 
-    data = (int *)HDmalloc(sizeof(int) * (size_t)num_elements);
+    data = (int *)malloc(sizeof(int) * (size_t)num_elements);
 
     /* initialize all the elements to have a value of -1 */
     for (i = 0; i < num_elements; i++)
@@ -441,7 +441,7 @@ test_page_buffer_access(void)
         api_ctx_pushed = FALSE;
     }
 
-    HDfree(data);
+    free(data);
     data = NULL;
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -515,8 +515,8 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
 
     num_elements = block[0] * block[1];
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(num_elements * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(num_elements * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
     /* put some trivial data in the data_array */
     for (i = 0; i < num_elements; i++)
         data_array[i] = mpi_rank + 1;
@@ -557,7 +557,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        HDmemset(data_array, 0, num_elements * sizeof(DATATYPE));
+        memset(data_array, 0, num_elements * sizeof(DATATYPE));
         dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
 
@@ -598,7 +598,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
-    HDfree(data_array);
+    free(data_array);
     return 0;
 } /* create_file */
 
@@ -674,8 +674,8 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
 
     num_elements = block[0] * block[1];
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(num_elements * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(num_elements * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
 
     /* create a memory dataspace independently */
     mem_dataspace = H5Screate_simple(1, &num_elements, NULL);
@@ -727,8 +727,8 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
         entry_ptr = cache_ptr->index[i];
 
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-            HDassert(entry_ptr->is_dirty == FALSE);
+            assert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+            assert(entry_ptr->is_dirty == FALSE);
 
             if (!entry_ptr->is_pinned && !entry_ptr->is_protected) {
                 ret = H5AC_expunge_entry(f, entry_ptr->type, entry_ptr->addr, 0);
@@ -761,7 +761,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
         api_ctx_pushed = FALSE;
     }
 
-    HDfree(data_array);
+    free(data_array);
 
     return nerrors;
 }
@@ -1034,7 +1034,7 @@ test_delete(void)
     {
         is_hdf5 = H5Fis_accessible(filename, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VRFY((is_hdf5 != SUCCEED), "H5Fis_accessible");
 
     /* Release file-access plist */

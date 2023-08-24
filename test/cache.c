@@ -10,11 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              6/9/04
- *
- *        This file contains tests for the cache implemented in
- *        H5C.c
+/*
+ *        This file contains tests for the cache implemented in H5C.c
  */
 #include "cache_common.h"
 #include "H5MFprivate.h"
@@ -53,7 +50,7 @@ hbool_t core_file_driver_failed = FALSE;
 
 /* global variable declarations: */
 
-const char *FILENAME[] = {"cache_test", NULL};
+static const char *FILENAME[] = {"cache_test", NULL};
 
 /* private typedef declarations: */
 
@@ -242,9 +239,6 @@ static void takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_det
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/16/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -286,7 +280,7 @@ smoke_check_1(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -294,17 +288,17 @@ smoke_check_1(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -322,7 +316,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -340,7 +334,7 @@ smoke_check_1(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -358,7 +352,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -368,7 +362,7 @@ smoke_check_1(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -381,7 +375,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -391,7 +385,7 @@ smoke_check_1(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -404,12 +398,12 @@ smoke_check_1(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -423,7 +417,7 @@ smoke_check_1(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -439,9 +433,6 @@ smoke_check_1(int express_test, unsigned paged)
  *        dirty.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -484,7 +475,7 @@ smoke_check_2(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -492,17 +483,17 @@ smoke_check_2(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -520,7 +511,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -538,7 +529,7 @@ smoke_check_2(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -556,7 +547,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -566,7 +557,7 @@ smoke_check_2(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -579,7 +570,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -589,7 +580,7 @@ smoke_check_2(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -602,12 +593,12 @@ smoke_check_2(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -621,7 +612,7 @@ smoke_check_2(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -636,9 +627,6 @@ smoke_check_2(int express_test, unsigned paged)
  *        protects and unprotects.  All entries are marked as clean.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/16/04
  *
  *-------------------------------------------------------------------------
  */
@@ -681,7 +669,7 @@ smoke_check_3(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -689,17 +677,17 @@ smoke_check_3(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -717,7 +705,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -735,7 +723,7 @@ smoke_check_3(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -753,7 +741,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -763,7 +751,7 @@ smoke_check_3(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -776,7 +764,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -786,7 +774,7 @@ smoke_check_3(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -799,12 +787,12 @@ smoke_check_3(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -818,7 +806,7 @@ smoke_check_3(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -834,9 +822,6 @@ smoke_check_3(int express_test, unsigned paged)
  *        marked as dirty.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -879,7 +864,7 @@ smoke_check_4(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -887,17 +872,17 @@ smoke_check_4(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -915,7 +900,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -933,7 +918,7 @@ smoke_check_4(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -951,7 +936,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -961,7 +946,7 @@ smoke_check_4(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -974,7 +959,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -984,7 +969,7 @@ smoke_check_4(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -997,12 +982,12 @@ smoke_check_4(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1016,7 +1001,7 @@ smoke_check_4(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1032,9 +1017,6 @@ smoke_check_4(int express_test, unsigned paged)
  *        as clean.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/14/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1117,7 +1099,7 @@ smoke_check_5(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -1125,12 +1107,12 @@ smoke_check_5(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1147,7 +1129,7 @@ smoke_check_5(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1158,7 +1140,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1169,7 +1151,7 @@ smoke_check_5(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1180,7 +1162,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1190,7 +1172,7 @@ smoke_check_5(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1202,7 +1184,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1212,7 +1194,7 @@ smoke_check_5(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1224,12 +1206,12 @@ smoke_check_5(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1243,7 +1225,7 @@ smoke_check_5(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1259,9 +1241,6 @@ smoke_check_5(int express_test, unsigned paged)
  *        entries are marked as dirty.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/25/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1346,18 +1325,18 @@ smoke_check_6(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1374,7 +1353,7 @@ smoke_check_6(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1385,7 +1364,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1396,7 +1375,7 @@ smoke_check_6(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1407,7 +1386,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1417,7 +1396,7 @@ smoke_check_6(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1429,7 +1408,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1439,7 +1418,7 @@ smoke_check_6(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1451,12 +1430,12 @@ smoke_check_6(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1470,7 +1449,7 @@ smoke_check_6(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1486,9 +1465,6 @@ smoke_check_6(int express_test, unsigned paged)
  *        as clean.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              12/2/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1572,7 +1548,7 @@ smoke_check_7(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -1580,12 +1556,12 @@ smoke_check_7(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1602,7 +1578,7 @@ smoke_check_7(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1613,7 +1589,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1624,7 +1600,7 @@ smoke_check_7(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1635,7 +1611,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1645,7 +1621,7 @@ smoke_check_7(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1657,7 +1633,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1667,7 +1643,7 @@ smoke_check_7(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1679,12 +1655,12 @@ smoke_check_7(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1698,7 +1674,7 @@ smoke_check_7(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1714,9 +1690,6 @@ smoke_check_7(int express_test, unsigned paged)
  *        entries are marked as dirty.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/25/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1800,7 +1773,7 @@ smoke_check_8(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -1808,12 +1781,12 @@ smoke_check_8(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1830,7 +1803,7 @@ smoke_check_8(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1841,7 +1814,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1852,7 +1825,7 @@ smoke_check_8(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1863,7 +1836,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1873,7 +1846,7 @@ smoke_check_8(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1885,7 +1858,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1895,7 +1868,7 @@ smoke_check_8(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1907,12 +1880,12 @@ smoke_check_8(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1926,7 +1899,7 @@ smoke_check_8(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1945,9 +1918,6 @@ smoke_check_8(int express_test, unsigned paged)
  *         marked as clean.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              8/1/07
  *
  *-------------------------------------------------------------------------
  */
@@ -1993,7 +1963,7 @@ smoke_check_9(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -2001,12 +1971,12 @@ smoke_check_9(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -2014,7 +1984,7 @@ smoke_check_9(int express_test, unsigned paged)
     /* disable evictions */
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2028,8 +1998,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2049,7 +2018,7 @@ smoke_check_9(int express_test, unsigned paged)
     /* enable evictions */
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2063,8 +2032,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2082,7 +2050,7 @@ smoke_check_9(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2096,8 +2064,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", __func__, mile_stone++,
+                (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2115,7 +2083,7 @@ smoke_check_9(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2129,8 +2097,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2140,7 +2107,7 @@ smoke_check_9(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2154,8 +2121,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2168,7 +2134,7 @@ smoke_check_9(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -2178,7 +2144,7 @@ smoke_check_9(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2192,8 +2158,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2206,7 +2171,7 @@ smoke_check_9(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2220,13 +2185,12 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2240,7 +2204,7 @@ smoke_check_9(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -2259,9 +2223,6 @@ smoke_check_9(int express_test, unsigned paged)
  *         the entries are marked as dirty.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              8/1/07
  *
  *-------------------------------------------------------------------------
  */
@@ -2307,7 +2268,7 @@ smoke_check_10(int express_test, unsigned paged)
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -2315,19 +2276,18 @@ smoke_check_10(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2345,7 +2305,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2359,8 +2319,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2378,7 +2337,7 @@ smoke_check_10(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2392,8 +2351,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2411,7 +2369,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2425,8 +2383,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2436,7 +2393,7 @@ smoke_check_10(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2450,8 +2407,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2464,7 +2420,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2478,8 +2434,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -2489,7 +2444,7 @@ smoke_check_10(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2503,8 +2458,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2517,7 +2471,7 @@ smoke_check_10(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2531,13 +2485,12 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2551,7 +2504,7 @@ smoke_check_10(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -2568,9 +2521,6 @@ smoke_check_10(int express_test, unsigned paged)
  *        FALSE, the test will fail.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -2616,7 +2566,7 @@ write_permitted_check(int
 
         default:
             SKIPPED();
-            HDfprintf(stdout, "    Long tests disabled.\n");
+            fprintf(stdout, "    Long tests disabled.\n");
             return 0; /* <========== note return */
             break;
     }
@@ -2624,17 +2574,17 @@ write_permitted_check(int
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(1 * 1024 * 1024), (size_t)0, paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2652,7 +2602,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = FALSE;
 
@@ -2672,7 +2622,7 @@ write_permitted_check(int
                             /* dirty_unprotects       */ NO_CHANGE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = TRUE;
 
@@ -2692,7 +2642,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2702,7 +2652,7 @@ write_permitted_check(int
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2715,7 +2665,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = FALSE;
 
@@ -2732,12 +2682,12 @@ write_permitted_check(int
     write_permitted = TRUE;
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2751,14 +2701,14 @@ write_permitted_check(int
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     SKIPPED();
 
-    HDfprintf(stdout, "    Clean and dirty LRU lists disabled.\n");
+    fprintf(stdout, "    Clean and dirty LRU lists disabled.\n");
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
@@ -2778,9 +2728,6 @@ write_permitted_check(int
  *              elsewhere.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              8/10/06
  *
  *-------------------------------------------------------------------------
  */
@@ -3039,7 +2986,7 @@ check_insert_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -3053,9 +3000,6 @@ check_insert_entry(unsigned paged)
  *        test the behaviour with different flags.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              1/10/05
  *
  *-------------------------------------------------------------------------
  */
@@ -3126,7 +3070,7 @@ check_flush_cache(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -3141,9 +3085,6 @@ check_flush_cache(unsigned paged)
  *              cache.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              1/12/05
  *
  *-------------------------------------------------------------------------
  */
@@ -3202,9 +3143,6 @@ check_flush_cache__empty_cache(H5F_t *file_ptr)
  *        contains multiple elements.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              1/14/05
  *
  *-------------------------------------------------------------------------
  */
@@ -4398,9 +4336,6 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/13/05
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4554,9 +4489,6 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
  * Purpose:     Run a multi entry flush cache test.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/5/06
  *
  *-------------------------------------------------------------------------
  */
@@ -4725,9 +4657,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              9/3/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4751,14 +4680,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         failure_mssg = "cache not empty at beginning of flush ops test.";
     }
 
-    spec = HDmalloc((size_t)max_num_spec * sizeof(struct fo_flush_cache_test_spec));
+    spec = malloc((size_t)max_num_spec * sizeof(struct fo_flush_cache_test_spec));
     if (spec == NULL) {
 
         pass         = FALSE;
         failure_mssg = "couldn't allocate flush ops test spec array";
     }
 
-    checks = HDmalloc((size_t)max_num_check * sizeof(struct fo_flush_entry_check));
+    checks = malloc((size_t)max_num_check * sizeof(struct fo_flush_entry_check));
     if (checks == NULL) {
 
         pass         = FALSE;
@@ -4780,8 +4709,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 2;
         size_t       expected_index_size      = 2 * PICO_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -4874,8 +4803,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = 0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -4965,8 +4894,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5031,8 +4960,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = 0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5104,8 +5033,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5201,8 +5130,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5294,8 +5223,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 4;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5385,8 +5314,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 4;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5478,8 +5407,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 3;
         size_t       expected_index_size      = 3 * PICO_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5560,8 +5489,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = (size_t)0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5640,8 +5569,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size =
             VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5721,8 +5650,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = (size_t)0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5801,8 +5730,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size =
             VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5905,8 +5834,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size =
             VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6020,8 +5949,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size      = (2 * VARIABLE_ENTRY_SIZE) + (VARIABLE_ENTRY_SIZE / 4) +
                                      (VARIABLE_ENTRY_SIZE / 2) + (2 * PICO_ENTRY_SIZE);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6208,8 +6137,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size      = (2 * VARIABLE_ENTRY_SIZE) + (2 * (VARIABLE_ENTRY_SIZE / 4)) +
                                      (2 * (VARIABLE_ENTRY_SIZE / 2)) + (4 * PICO_ENTRY_SIZE);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6451,8 +6380,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = 0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6690,8 +6619,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 3;
         size_t       expected_index_size      = 3 * PICO_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6809,8 +6738,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = (size_t)0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6998,8 +6927,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 13;
         size_t       expected_index_size      = 9 * VARIABLE_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -7406,8 +7335,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = (size_t)0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -7739,8 +7668,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 5;
         size_t       expected_index_size      = 4 * VARIABLE_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -7915,8 +7844,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = 0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -8074,8 +8003,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         reset_entries();
     }
 
-    HDfree(checks);
-    HDfree(spec);
+    free(checks);
+    free(spec);
 
     /* finally finish up with the flush ops eviction test */
     check_flush_cache__flush_op_eviction_test(file_ptr);
@@ -8089,9 +8018,6 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
  *              flush operations, this is a multi-entry test.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/3/06
  *
  *-------------------------------------------------------------------------
  */
@@ -8351,9 +8277,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              10/3/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -8370,7 +8293,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
     test_entry_t *entry_ptr;
     test_entry_t *base_addr;
 
-    expected = HDmalloc((size_t)num_total_entries * sizeof(struct expected_entry_status));
+    expected = malloc((size_t)num_total_entries * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -8396,8 +8319,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -8442,8 +8365,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -8465,8 +8388,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -8475,7 +8398,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].is_corked            = FALSE;
         }
 
-        HDassert(i == num_total_entries);
+        assert(i == num_total_entries);
 
         pass = TRUE;
     }
@@ -9588,7 +9511,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
         reset_entries();
     }
 
-    HDfree(expected);
+    free(expected);
 
 } /* check_flush_cache__flush_op_eviction_test() */
 
@@ -9599,9 +9522,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
  *        contains only one element.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              1/12/05
  *
  *-------------------------------------------------------------------------
  */
@@ -10654,7 +10574,7 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
         struct pinned_single_entry_test_spec *spec = NULL;
         size_t                                i;
 
-        spec = HDmalloc(256 * sizeof(struct pinned_single_entry_test_spec));
+        spec = malloc(256 * sizeof(struct pinned_single_entry_test_spec));
         if (spec == NULL) {
 
             pass         = FALSE;
@@ -10772,7 +10692,7 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             i++;
         }
 
-        HDfree(spec);
+        free(spec);
     }
 
 } /* check_flush_cache__single_entry() */
@@ -10783,9 +10703,6 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
  * Purpose:     Run a single entry flush cache test.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              1/12/05
  *
  *-------------------------------------------------------------------------
  */
@@ -10903,9 +10820,6 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
  * Purpose:     Run a pinned single entry flush cache test.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/28/06
  *
  *-------------------------------------------------------------------------
  */
@@ -11053,9 +10967,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
  * Purpose:    Verify that H5C_get_entry_status() behaves as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/28/06
  *
  *-------------------------------------------------------------------------
  */
@@ -11258,7 +11169,7 @@ check_get_entry_status(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -11271,9 +11182,6 @@ check_get_entry_status(unsigned paged)
  * Purpose:    Verify that H5C_expunge_entry() behaves as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              7/5/06
  *
  *-------------------------------------------------------------------------
  */
@@ -11290,7 +11198,7 @@ check_expunge_entry(unsigned paged)
     size_t        entry_size;
     H5F_t        *file_ptr = NULL;
     test_entry_t *base_addr;
-    test_entry_t *entry_ptr;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("H5C_expunge_entry() functionality (paged aggregation)");
@@ -11536,7 +11444,7 @@ check_expunge_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -11551,9 +11459,6 @@ check_expunge_entry(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/1/07
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -11563,7 +11468,7 @@ check_multiple_read_protect(unsigned paged)
 #if H5C_COLLECT_CACHE_STATS
     H5C_t *cache_ptr = NULL;
 #endif /* H5C_COLLECT_CACHE_STATS */
-    test_entry_t *entry_ptr;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("multiple read only protects on a single entry (paged aggr)");
@@ -11923,7 +11828,7 @@ check_multiple_read_protect(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -11938,9 +11843,6 @@ check_multiple_read_protect(unsigned paged)
  *         entries.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/26/06
  *
  *-------------------------------------------------------------------------
  */
@@ -12023,7 +11925,7 @@ check_move_entry(unsigned paged)
         H5_FAILED();
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 } /* check_move_entry() */
@@ -12036,9 +11938,6 @@ check_move_entry(unsigned paged)
  *        Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/27/06
  *
  *-------------------------------------------------------------------------
  */
@@ -12189,9 +12088,6 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/28/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -12275,7 +12171,7 @@ check_pin_protected_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -12289,9 +12185,6 @@ check_pin_protected_entry(unsigned paged)
  *              entries as expected.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/7/06
  *
  *-------------------------------------------------------------------------
  */
@@ -13137,7 +13030,7 @@ check_resize_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -13151,9 +13044,6 @@ check_resize_entry(unsigned paged)
  *              H5C_set_evictions_enabled() functions perform as expected.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              8/2/07
  *
  *-------------------------------------------------------------------------
  */
@@ -13216,7 +13106,7 @@ check_evictions_enabled(unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* create the cache */
     if (pass) {
@@ -13238,7 +13128,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that it is empty */
     if (pass) {
@@ -13254,7 +13144,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that H5C_get_evictions_enabled() returns the expected value */
     if (pass) {
@@ -13270,7 +13160,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13282,7 +13172,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache is full */
     if (pass) {
@@ -13298,7 +13188,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13308,7 +13198,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that an entry has been evicted */
     if (pass) {
@@ -13324,7 +13214,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13354,7 +13244,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13363,7 +13253,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that another entry has been evicted */
     if (pass) {
@@ -13380,7 +13270,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13410,7 +13300,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions */
     if (pass) {
@@ -13426,7 +13316,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that evictions are disabled */
     if (pass) {
@@ -13443,7 +13333,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13453,7 +13343,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entry has been evicted */
     if (pass) {
@@ -13470,7 +13360,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13479,7 +13369,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entry has been evicted */
     if (pass) {
@@ -13496,7 +13386,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* re-enable evictions */
     if (pass) {
@@ -13512,7 +13402,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 19 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13522,7 +13412,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 20 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entries have been evicted */
     if (pass) {
@@ -13539,7 +13429,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 21 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13549,7 +13439,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 22 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the entries have been evicted to bring the
      * cache back down to its normal size.
@@ -13569,7 +13459,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 23 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13599,7 +13489,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 24 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13629,7 +13519,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 25 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions again */
     if (pass) {
@@ -13645,7 +13535,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 26 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13657,7 +13547,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 27 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache has grown */
     if (pass) {
@@ -13674,7 +13564,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 28 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* re-enable evictions again */
     if (pass) {
@@ -13690,7 +13580,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 29 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13699,7 +13589,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 30 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache has returned to its maximum size */
     if (pass) {
@@ -13716,7 +13606,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 31 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13746,7 +13636,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 32 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions one last time before we shut down */
     if (pass) {
@@ -13762,7 +13652,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 33 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13770,7 +13660,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 34 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         PASSED();
@@ -13781,7 +13671,7 @@ check_evictions_enabled(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -13795,9 +13685,6 @@ check_evictions_enabled(unsigned paged)
  *              a protected entry will generate an error.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -13872,7 +13759,7 @@ check_flush_protected_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -13887,9 +13774,6 @@ check_flush_protected_err(unsigned paged)
  *        will generate an error.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/7/06
  *
  *-------------------------------------------------------------------------
  */
@@ -13958,7 +13842,7 @@ check_destroy_pinned_err(unsigned paged)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 
@@ -13971,9 +13855,6 @@ check_destroy_pinned_err(unsigned paged)
  *        a protected entry will generate an error.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -14052,7 +13933,7 @@ check_destroy_protected_err(unsigned paged)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 
@@ -14065,9 +13946,6 @@ check_destroy_protected_err(unsigned paged)
  *        already in the cache will generate an error.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */
@@ -14131,7 +14009,7 @@ check_duplicate_insert_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14146,9 +14024,6 @@ check_duplicate_insert_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/24/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14156,8 +14031,8 @@ static unsigned
 check_double_pin_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("pin a pinned entry error (paged aggregation)");
@@ -14216,7 +14091,7 @@ check_double_pin_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14231,9 +14106,6 @@ check_double_pin_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/24/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14241,8 +14113,8 @@ static unsigned
 check_double_unpin_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("unpin an unpinned entry error (paged aggregation)");
@@ -14310,7 +14182,7 @@ check_double_unpin_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14325,9 +14197,6 @@ check_double_unpin_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/24/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14335,8 +14204,8 @@ static unsigned
 check_pin_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("pin entry related errors (paged aggregation)");
@@ -14418,7 +14287,7 @@ check_pin_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14433,17 +14302,14 @@ check_pin_entry_errs(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
 static unsigned
 check_double_protect_err(unsigned paged)
 {
-    H5F_t             *file_ptr = NULL;
-    test_entry_t      *entry_ptr;
+    H5F_t             *file_ptr  = NULL;
+    test_entry_t      *entry_ptr = NULL;
     H5C_cache_entry_t *cache_entry_ptr;
 
     if (paged)
@@ -14500,7 +14366,7 @@ check_double_protect_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14515,9 +14381,6 @@ check_double_protect_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14525,8 +14388,8 @@ static unsigned
 check_double_unprotect_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("unprotect an unprotected entry error (paged aggregation)");
@@ -14578,7 +14441,7 @@ check_double_unprotect_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14596,9 +14459,6 @@ check_double_unprotect_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              5/17/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14606,8 +14466,8 @@ static unsigned
 check_mark_entry_dirty_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("mark entry dirty related errors (paged aggregation)");
@@ -14660,7 +14520,7 @@ check_mark_entry_dirty_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14675,9 +14535,6 @@ check_mark_entry_dirty_errs(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              7/6/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14685,8 +14542,8 @@ static unsigned
 check_expunge_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("expunge entry related errors (paged aggregation)");
@@ -14773,7 +14630,7 @@ check_expunge_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14788,21 +14645,18 @@ check_expunge_entry_errs(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    Quincey Koziol
- *              12/10/16
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_move_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr  = NULL;
-    H5C_t        *cache_ptr = NULL;
-    test_entry_t *entry_ptr = NULL;
-    test_entry_t *entry_0_0_ptr;
-    test_entry_t *entry_0_1_ptr;
-    test_entry_t *entry_1_0_ptr;
+    H5F_t        *file_ptr      = NULL;
+    H5C_t        *cache_ptr     = NULL;
+    test_entry_t *entry_ptr     = NULL;
+    test_entry_t *entry_0_0_ptr = NULL;
+    test_entry_t *entry_0_1_ptr = NULL;
+    test_entry_t *entry_1_0_ptr = NULL;
 
     if (paged)
         TESTING("move entry related errors (paged aggregation)");
@@ -14890,7 +14744,7 @@ check_move_entry_errs(unsigned paged)
     else {
         H5_FAILED();
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;
@@ -14904,9 +14758,6 @@ check_move_entry_errs(unsigned paged)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/7/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14914,8 +14765,8 @@ static unsigned
 check_resize_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("resize entry related errors (paged aggregation)");
@@ -14990,7 +14841,7 @@ check_resize_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15005,9 +14856,6 @@ check_resize_entry_errs(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/3/07
- *
  *-------------------------------------------------------------------------
  */
 
@@ -15015,8 +14863,8 @@ static unsigned
 check_unprotect_ro_dirty_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
 
     if (paged)
         TESTING("unprotect a read only entry dirty error (paged aggregation)");
@@ -15111,7 +14959,7 @@ check_unprotect_ro_dirty_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15126,17 +14974,14 @@ check_unprotect_ro_dirty_err(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/9/07
- *
  *-------------------------------------------------------------------------
  */
 
 static unsigned
 check_protect_ro_rw_err(unsigned paged)
 {
-    H5F_t        *file_ptr = NULL;
-    test_entry_t *entry_ptr;
+    H5F_t        *file_ptr  = NULL;
+    test_entry_t *entry_ptr = NULL;
     void         *thing_ptr = NULL;
 
     if (paged)
@@ -15194,7 +15039,7 @@ check_protect_ro_rw_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15208,8 +15053,6 @@ check_protect_ro_rw_err(unsigned paged)
  *        a speculative load.
  *
  * Return:
- *
- * Programmer:
  *
  *-------------------------------------------------------------------------
  */
@@ -15276,7 +15119,7 @@ check_protect_retries(unsigned paged)
         }
         else {
 
-            HDassert((entry_ptr->cache_ptr == NULL) || (entry_ptr->cache_ptr == cache_ptr));
+            assert((entry_ptr->cache_ptr == NULL) || (entry_ptr->cache_ptr == cache_ptr));
 
             entry_ptr->cache_ptr    = cache_ptr;
             entry_ptr->file_ptr     = file_ptr;
@@ -15285,7 +15128,7 @@ check_protect_retries(unsigned paged)
             entry_ptr->ro_ref_count++;
         }
 
-        HDassert(((entry_ptr->header).type)->id == type);
+        assert(((entry_ptr->header).type)->id == type);
     }
 
     if (pass)
@@ -15323,7 +15166,7 @@ check_protect_retries(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_msg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_msg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15337,9 +15180,6 @@ check_protect_retries(unsigned paged)
  *              H5C_set_evictions_enabled() generate errors as expected.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              8/3/07
  *
  *-------------------------------------------------------------------------
  */
@@ -15459,7 +15299,7 @@ check_check_evictions_enabled_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15475,9 +15315,6 @@ check_check_evictions_enabled_err(unsigned paged)
  *        a few of them.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/29/04
  *
  *-------------------------------------------------------------------------
  */
@@ -15554,7 +15391,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* allocate a cache, enable automatic cache resizing, and then force
      * the cache through all its operational modes.  Verify that all
@@ -15585,7 +15422,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache not full -- should result in not
      * full status.
@@ -15610,7 +15447,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full -- should result in increase
      * of cache size from .5 to 1 meg.
@@ -15636,7 +15473,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache not full -- should result in not
      * full status.
@@ -15662,7 +15499,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full again -- should result in increase
      * of cache size from 1 to 2 meg.
@@ -15689,7 +15526,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full again -- should result in increase
      * of cache size from 2 to 4 meg.
@@ -15716,7 +15553,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full again -- should result in increase
      * of cache size from 4 to 8 meg.
@@ -15743,7 +15580,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full again -- should result in increase
      * of cache size from 8 to 12 meg.  Note that max increase reduced the
@@ -15771,7 +15608,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full again -- should result in increase
      * of cache size from 12 to 14 meg.
@@ -15798,7 +15635,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full and at maximum size -- should
      * in no change in size and a result of at_max_size.
@@ -15825,7 +15662,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate with cache full and at maximum size -- should
      * result in a decrease from 14 to 13 Meg -- note that max decrease
@@ -15853,7 +15690,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* the current cache configuration is inconvenient for testing cache
      * size reduction, so lets change it some something easier to work
@@ -15920,7 +15757,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate  -- should result in a decrease from ~4 to ~3
      * M -- note that max decrease reduces the size of the reduction
@@ -15947,7 +15784,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate again  -- should result in a decrease from ~3
      * to ~2 M -- again note that max decrease reduces the size of the
@@ -15975,7 +15812,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate again  -- should result in a decrease from ~2
      * to ~1 M -- again note that max decrease reduces the size of the
@@ -16003,7 +15840,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate again  -- should result in a decrease from ~1
      * to ~0.5 M -- max decrease is no longer a factor.  New size is five
@@ -16030,7 +15867,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate again  -- should result in a decrease of five
      * bytes to the minimum cache size.
@@ -16056,7 +15893,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate again -- Already at minimum size so no change in
      * cache size and result should be at_min_size.
@@ -16082,7 +15919,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force in range hit rate  -- should be no change in cache size,
      * and result should be in_spec.
@@ -16116,7 +15953,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full -- should
      * increase cache size from .5 to 1 M.
@@ -16142,7 +15979,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should result in a decrease to the
      * minimum cache size.
@@ -16168,7 +16005,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /******************************************************************
      * now do some tests with the maximum increase and decrease sizes
@@ -16235,7 +16072,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should result in a decrease to the
      * minimum cache size.
@@ -16261,7 +16098,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full -- should increase cache size
      * from 1 to 4 Meg.
@@ -16288,7 +16125,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate again with cache full -- should increase cache
      * size from 4 to 16 Meg.
@@ -16315,7 +16152,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should result in a decrease cache size from
      * 16 to 4 Meg.
@@ -16342,7 +16179,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /******************************************************************
      * We have tested the threshold increment and decrement modes.
@@ -16411,7 +16248,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (cork_ageout)
         cork_entry_type(file_ptr, MEDIUM_ENTRY_TYPE);
@@ -16444,7 +16281,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* second epoch */
         rpt_fcn_called = FALSE;
@@ -16467,7 +16304,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* third epoch */
         rpt_fcn_called = FALSE;
@@ -16490,7 +16327,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fourth epoch -- If the hit rate were above the lower threshold,
      * we would see cache size reduction now.  However, nothing will
@@ -16517,7 +16354,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fifth epoch -- force the hit rate to 100%.  We should see cache size
      * reduction now.
@@ -16542,7 +16379,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* sixth epoch -- force the hit rate to 100% again.
      */
@@ -16566,7 +16403,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* seventh epoch -- force the hit rate to 100% again.
      */
@@ -16590,7 +16427,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* eighth epoch -- force the hit rate to 100% again -- should be steady
      * state.
@@ -16615,7 +16452,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* now just bang on one entry -- after three epochs, this should
      * get all entries other than the one evicted, and the cache size
@@ -16641,7 +16478,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* tenth epoch */
         rpt_fcn_called = FALSE;
@@ -16663,7 +16500,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* eleventh epoch -- cache size reduction */
         rpt_fcn_called = FALSE;
@@ -16686,7 +16523,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* twelfth epoch -- at minimum size so no more ageouts */
         rpt_fcn_called = FALSE;
@@ -16709,7 +16546,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (cork_ageout)
         uncork_entry_type(file_ptr, MEDIUM_ENTRY_TYPE);
@@ -16781,7 +16618,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fill the cache with 1024 byte entries -- nothing should happen
      * for three epochs while the markers are inserted into the cache
@@ -16812,7 +16649,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* second epoch */
 
@@ -16836,7 +16673,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* third epoch */
 
@@ -16860,7 +16697,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fourth epoch -- If the hit rate were above the lower threshold,
      * we would see cache size reduction now.  However, nothing will
@@ -16888,7 +16725,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fifth epoch -- force the hit rate to 100%.  We should see cache size
      * reduction now.
@@ -16915,7 +16752,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* sixth epoch -- force the hit rate to 100% again.
      */
@@ -16941,7 +16778,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* seventh epoch -- keep hit rate at 100%, and keep 2K entries active.
      */
@@ -16967,7 +16804,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* eighth epoch -- still 100% hit rate
      */
@@ -16993,7 +16830,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* ninth epoch --hit rate at 100%.
      */
@@ -17019,7 +16856,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* tenth epoch -- still 100% hit rate
      */
@@ -17045,7 +16882,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* eleventh epoch -- hit rate at 100% -- starting to stableize
      */
@@ -17070,7 +16907,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* twelfth epoch -- force the hit rate to 100% again -- should be steady
      * state.
@@ -17096,7 +16933,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* now just bang on one entry -- after three epochs, this should
      * get all entries other than the one evicted, and the cache size
@@ -17123,7 +16960,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* fourteenth epoch */
 
@@ -17147,7 +16984,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* fifteenth epoch -- cache size reduction */
 
@@ -17171,7 +17008,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* sixteenth epoch -- at minimum size so no more ageouts */
 
@@ -17195,7 +17032,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* repeat the test yet again, this time with empty reserve enabled.
      * Again, some structural changes in the test are necessary.
@@ -17263,7 +17100,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fill the cache with 1024 byte entries -- nothing should happen
      * for three epochs while the markers are inserted into the cache
@@ -17294,7 +17131,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* second epoch */
 
@@ -17318,7 +17155,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* third epoch */
 
@@ -17342,7 +17179,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fourth epoch -- If the hit rate were above the lower threshold,
      * we would see cache size reduction now.  However, nothing will
@@ -17370,7 +17207,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fifth epoch -- force the hit rate to 100%.  We should see cache size
      * reduction now.
@@ -17396,7 +17233,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* sixth epoch -- force the hit rate to 100% again.
      */
@@ -17421,7 +17258,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* seventh epoch -- force the hit rate to 100% again.
      */
@@ -17446,7 +17283,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* eighth epoch -- force the hit rate to 100% again -- should be steady
      * state.
@@ -17472,7 +17309,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* now just bang on one entry -- after three epochs, this should
      * get all entries other than the one evicted, and the cache size
@@ -17499,7 +17336,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* tenth epoch */
 
@@ -17522,7 +17359,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* eleventh epoch -- cache size reduction */
 
@@ -17546,7 +17383,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* twelfth epoch -- at minimum size so no more ageouts */
 
@@ -17570,7 +17407,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Repeat the test again, this time using the age out with threshold
      * mode.  To simplify the testing, set epochs to eviction to 1.
@@ -17641,7 +17478,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fill the cache with 4K byte entries -- increment mode is off,
      * so cache size reduction should kick in as soon as we get the
@@ -17669,7 +17506,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* second epoch -- hit rate 0 */
 
@@ -17693,7 +17530,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* third epoch -- hit rate 1.0 -- should see decrease */
 
@@ -17717,7 +17554,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fourth epoch -- load up the cache again -- hit rate 0 */
     if (pass) {
@@ -17742,7 +17579,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fifth epoch -- still loading up the cache -- hit rate 0 */
     if (pass) {
@@ -17767,7 +17604,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* sixth epoch -- force hit rate to .998 -- should be no reduction */
     if (pass) {
@@ -17792,7 +17629,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* seventh epoch -- force hit rate to .999 -- should see reduction
      */
@@ -17818,7 +17655,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* We have now tested all the major ageout modes individually.
      * Lets try them all together to look for unexpected interactions
@@ -17885,7 +17722,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fill the cache with 4K byte entries -- increment mode is threshold,
      * so the decrease code will not be executed until the hit rate exceeds
@@ -17913,7 +17750,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) { /* second epoch -- hit rate 0 */
 
@@ -17937,7 +17774,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* third epoch -- force the hit rate to 1.0.  Should be no change
      * in the cache size due to the combination of the empty reserve
@@ -17970,7 +17807,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fourth epoch -- hit rate still 1.0.  Index size should decrease,
      * but otherwise no change expected.
@@ -17998,7 +17835,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fifth epoch -- hit rate still 1.0.  Index size should decrease,
      * but otherwise no change expected.
@@ -18026,7 +17863,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* sixth epoch -- hit rate still 1.0.  Index size should decrease,
      * but otherwise no change expected.  Note that the cache size is
@@ -18055,7 +17892,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* seventh epoch -- hit rate still 1.0.  No change in index size expected.
      */
@@ -18082,7 +17919,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* eighth epoch -- start loading 1 KB entries.  Hit rate 0 so
      * decrease code shouldn't be called.
@@ -18110,7 +17947,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* ninth epoch -- access the 1 KB entries again, driving the hit rate
      * to 1.0.  Decrease code should be triggered, but the max decrease
@@ -18139,7 +17976,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* tenth epoch -- access the 1 KB entries yet again, forcing hit rate
      * to 1.0.  Decrease code should be triggered, and the empty reserve
@@ -18168,7 +18005,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* eleventh epoch -- access the 1 KB entries yet again, forcing hit rate
      * to 1.0.  Decrease code should be triggered, and the empty reserve
@@ -18197,7 +18034,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* twelfth  epoch -- hit rate 1.0 -- decrease as before.
      */
@@ -18224,7 +18061,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* thirteenth  epoch -- hit rate 1.0 -- decrease as before.
      */
@@ -18251,7 +18088,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fourteenth  epoch -- hit rate 1.0 -- decrease as before.
      */
@@ -18278,7 +18115,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* fifteenth  epoch -- hit rate 1.0 -- decrease as before.
      */
@@ -18305,7 +18142,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* sixteenth  epoch -- hit rate 1.0 -- should be stable now
      */
@@ -18332,7 +18169,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* now test the flash cache size increment code.  At least at present,
      * there should be no interaction between the regular auto-resize
@@ -18346,7 +18183,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
      */
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Place the cache in a known state via a flush-destroy on the cache
      * to clear out all entries, and then a reset on all the entries.
@@ -18361,7 +18198,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* now repeat the above tests using the add space flash cache size
      * increment algorithm.
@@ -18427,7 +18264,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Load a huge entry into the cache */
     if (pass) {
@@ -18447,7 +18284,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now load a monster entry.  Since a monster entry is larger than
      * half the size of the cache, and there is not sufficient space
@@ -18472,7 +18309,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Load a second monster entry.  Since the monster entry is larger
      * than half the size of the cache yet again, and there is not
@@ -18496,7 +18333,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Load a third moster entry.  Should be no cache size increase this
      * time.
@@ -18518,7 +18355,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* delete existing entries to prepare for next test, and reset
      * the size of the cache.
@@ -18551,7 +18388,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
      */
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* insert a huge entry into the cache */
     if (pass) {
@@ -18574,7 +18411,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now insert a monster entry.  Since a monster entry is larger than
      * half the size of the cache, and there is not sufficient space
@@ -18596,7 +18433,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Insert a second monster entry.  Cache size should increase again.
      */
@@ -18615,7 +18452,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Insert a third monster entry.  Should be no cache size increase this
      * time.
@@ -18637,7 +18474,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* delete existing entries to prepare for next test, and reset
      * the size of the cache.  We must also change the size of the needed
@@ -18689,7 +18526,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now load the variable entries into the cache */
     if (pass) {
@@ -18716,7 +18553,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* protect a variable entry, and re-size it to 3K.  Should be
      * no effect on the size of the cache.
@@ -18737,7 +18574,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* protect the variable entry again, and re-size it to 10K.  Should
      * resize the cache to 13 KB.  Note that cache_accesses will be 0
@@ -18759,7 +18596,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* protect a second variable entry, and re-size it to 10K.  Should
      * resize to 22 KB.
@@ -18780,7 +18617,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* protect a third variable entry, and re-size it to 10K.  Should
      * be no change in cache size.
@@ -18801,7 +18638,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* re-size the variable entries back down to their initial size, and
      * restore the cache to its initial size as well, in preparation
@@ -18843,7 +18680,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now test flash cache resizes with pinned entries...
      */
@@ -18863,7 +18700,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -18879,7 +18716,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -18897,7 +18734,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -18915,7 +18752,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Unpin the entries.  Note that no entries are evicted as we don't
      * load any entries.
@@ -18941,7 +18778,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* re-size the variable entries back down to their initial size, and
      * restore the cache to its initial size as well, in preparation
@@ -18998,7 +18835,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -19014,7 +18851,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -19032,7 +18869,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -19050,7 +18887,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Unpin the entries.  Note that no entries are evicted as we don't
      * load any entries.
@@ -19095,7 +18932,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* ...and then reconfigure.   Note that we change the flash_multiple
      * and flash_threshold just to make sure that such changed perform
@@ -19151,7 +18988,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -19164,7 +19001,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* protect and unprotect a large entry -- no change in cache size since
      * a large entry will just fill the available space in the cache.
@@ -19186,7 +19023,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* protect and unprotect another a large entry -- should trigger a
      * flash cache size increase to 12 KB (remember that flash_multiple is
@@ -19210,7 +19047,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* protect and unprotect two more large entries -- shouldn't trigger a
      * flash cache size increase.
@@ -19235,7 +19072,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* do many accesses of a single entry to talk the cache into reducing
      * its size to the minimum.
@@ -19261,7 +19098,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Force another flash increase */
     if (pass) {
@@ -19283,7 +19120,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force regular size increase up to maximum */
     if (pass) {
@@ -19307,7 +19144,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -19315,7 +19152,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
         PASSED();
@@ -19325,7 +19162,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     } /* end else */
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 } /* check_auto_cache_resize() */
@@ -19337,9 +19174,6 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
  *        be disabled.  Unfortunately, there are quite a few of them.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              12/16/04
  *
  *-------------------------------------------------------------------------
  */
@@ -19403,7 +19237,7 @@ check_auto_cache_resize_disable(unsigned paged)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* allocate a cache, enable automatic cache resizing, and then force
      * the cache through all its operational modes.  Verify that all
@@ -19448,7 +19282,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /******************************************************************
      * So far, we have forced the auto cache resize through all modes
@@ -19519,7 +19353,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full -- increase disabled so should
      * be no change in cache size, and result should be increase_disabled.
@@ -19547,7 +19381,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- make sure that we haven't disabled decreases.
      * should result in a decrease cache size from 4 to 2 Meg.
@@ -19575,7 +19409,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate again -- increase disabled so should
      * be no change in cache size, and result should be increase_disabled.
@@ -19603,7 +19437,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Repeat the above tests, disabling increase through the lower
      * threshold instead of the increment.
@@ -19670,7 +19504,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full -- increase disabled so should
      * be no change in cache size, and result should be in_spec.
@@ -19698,7 +19532,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- make sure that we haven't disabled decreases.
      * should result in a decrease cache size from 4 to 2 Meg.
@@ -19726,7 +19560,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate again -- increase disabled so should
      * be no change in cache size, and result should be increase_disabled.
@@ -19754,7 +19588,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Repeat the above tests yet again, disabling increase through the
      * incr_mode.
@@ -19822,7 +19656,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate with cache full -- increase disabled so should
      * be no change in cache size, and result should be in_spec.
@@ -19850,7 +19684,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- make sure that we haven't disabled decreases.
      * should result in a decrease cache size from 4 to 2 Meg.
@@ -19878,7 +19712,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate again -- increase disabled so should
      * be no change in cache size, and result should be increase_disabled.
@@ -19906,7 +19740,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now, disable size decreases, and repeat the above tests.
      */
@@ -19963,7 +19797,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -19976,7 +19810,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no change in cache size,
      * and result should be decrease_disabled.
@@ -20004,7 +19838,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- cache size should increase from 4 to 6 Meg.
      */
@@ -20031,7 +19865,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate again -- should be no change in cache size,
      * and result should be decrease_disabled.
@@ -20059,7 +19893,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Repeat the above tests, disabling decrease through the upper
      * threshold instead of the decrement.
@@ -20127,7 +19961,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no change in cache size,
      * and result should be in_spec.
@@ -20155,7 +19989,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- cache size should increase from 4 to 6 Meg.
      */
@@ -20182,7 +20016,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate again -- should be no change in cache size,
      * and result should be in_spec.
@@ -20210,7 +20044,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Repeat the above tests, disabling decrease through the decr_mode.
      */
@@ -20277,7 +20111,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no change in cache size,
      * and result should be in_spec.
@@ -20305,7 +20139,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- cache size should increase from 4 to 6 Meg.
      */
@@ -20332,7 +20166,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate again -- should be no change in cache size,
      * and result should be in_spec.
@@ -20360,7 +20194,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now do tests disabling size decrement in age out mode.
      *
@@ -20429,7 +20263,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -20438,7 +20272,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* load up the cache with small entries.  Note that it will take an
      * epoch for the ageout code to initialize itself if it is enabled.
@@ -20466,7 +20300,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Load up some more small entries.
      */
@@ -20493,7 +20327,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now force a high hit rate so that the size increase code is
      * is satisfied.  We would see a decrease here if decrease were
@@ -20522,7 +20356,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- cache size should increase from 4 to 6 Meg.
      */
@@ -20549,7 +20383,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* just bang on a single entry.  This will see to it that there are
      * many entries that could be aged out were decreases enabled.
@@ -20579,7 +20413,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now disable size decrement in age out mode via the empty reserve.
      */
@@ -20646,7 +20480,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -20655,7 +20489,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* load up the cache with small entries.  Note that it will take an
      * epoch for the ageout code to initialize itself if it is enabled.
@@ -20683,7 +20517,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Load up some more small entries.
      */
@@ -20710,7 +20544,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now force a high hit rate so that the size increase code is
      * is satisfied.  We would see a decrease here if decrease were
@@ -20739,7 +20573,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- cache size should increase from 4 to 6 Meg.
      */
@@ -20766,7 +20600,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* just bang on a single entry.  This will see to it that there are
      * many entries that could be aged out were decreases enabled.
@@ -20796,7 +20630,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now work with age out with threshold.  One can argue that we should
      * repeat the above age out tests with age out with threshold, but the
@@ -20870,7 +20704,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -20879,7 +20713,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* load up the cache with small entries.  Note that it will take an
      * epoch for the ageout code to initialize itself if it is enabled.
@@ -20907,7 +20741,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Load up some more small entries.
      */
@@ -20934,7 +20768,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now force a high hit rate so that the size increase code is
      * is satisfied.  We would see a decrease here if decrease were
@@ -20966,7 +20800,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- cache size should increase from 4 to 6 Meg.
      */
@@ -20993,7 +20827,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* just bang on a single entry.  This keeps the hit rate high, and sees
      * to it that there are many entries that could be aged out were
@@ -21025,7 +20859,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /*********************************************************************
      * Finally, use the auto cache resize code to set the size of the
@@ -21096,7 +20930,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21124,7 +20958,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21152,7 +20986,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -21216,7 +21050,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21244,7 +21078,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21272,7 +21106,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -21336,7 +21170,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21364,7 +21198,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21392,7 +21226,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -21456,7 +21290,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21484,7 +21318,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21512,7 +21346,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -21576,7 +21410,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21604,7 +21438,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21632,7 +21466,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -21696,7 +21530,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force low hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21724,7 +21558,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* force high hit rate -- should be no response as the auto-resize
      * code should be disabled.
@@ -21752,7 +21586,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now test the flash cache size increment code to verify that it
      * is disabled when it should be.
@@ -21856,11 +21690,11 @@ check_auto_cache_resize_disable(unsigned paged)
                       (cache_ptr->min_clean_size != (32 * 1024)) || (cache_ptr->index_len != 1) ||
                       (cache_ptr->index_size != LARGE_ENTRY_SIZE) || (rpt_fcn_called != FALSE)))) {
 
-            HDfprintf(stdout, "\nmax_cache_size = %ld.\n", (long)(cache_ptr->max_cache_size));
-            HDfprintf(stdout, "min_clean_size = %ld.\n", (long)(cache_ptr->min_clean_size));
-            HDfprintf(stdout, "index_len = %ld.\n", (long)(cache_ptr->index_len));
-            HDfprintf(stdout, "index_size = %ld.\n", (long)(cache_ptr->index_size));
-            HDfprintf(stdout, "rpt_fcn_called = %ld.\n", (long)(rpt_fcn_called));
+            fprintf(stdout, "\nmax_cache_size = %ld.\n", (long)(cache_ptr->max_cache_size));
+            fprintf(stdout, "min_clean_size = %ld.\n", (long)(cache_ptr->min_clean_size));
+            fprintf(stdout, "index_len = %ld.\n", (long)(cache_ptr->index_len));
+            fprintf(stdout, "index_size = %ld.\n", (long)(cache_ptr->index_size));
+            fprintf(stdout, "rpt_fcn_called = %ld.\n", (long)(rpt_fcn_called));
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache size change results 46.\n";
@@ -21868,7 +21702,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now protect and unprotect a monster entry.  If the flash cache
      * size increment code was active, this would trigger an increase.
@@ -21888,11 +21722,11 @@ check_auto_cache_resize_disable(unsigned paged)
                       (cache_ptr->min_clean_size != (32 * 1024)) || (cache_ptr->index_len != 1) ||
                       (cache_ptr->index_size != MONSTER_ENTRY_SIZE) || (rpt_fcn_called != FALSE)))) {
 
-            HDfprintf(stdout, "\nmax_cache_size = %ld.\n", (long)(cache_ptr->max_cache_size));
-            HDfprintf(stdout, "min_clean_size = %ld.\n", (long)(cache_ptr->min_clean_size));
-            HDfprintf(stdout, "index_len = %ld.\n", (long)(cache_ptr->index_len));
-            HDfprintf(stdout, "index_size = %ld.\n", (long)(cache_ptr->index_size));
-            HDfprintf(stdout, "rpt_fcn_called = %ld.\n", (long)(rpt_fcn_called));
+            fprintf(stdout, "\nmax_cache_size = %ld.\n", (long)(cache_ptr->max_cache_size));
+            fprintf(stdout, "min_clean_size = %ld.\n", (long)(cache_ptr->min_clean_size));
+            fprintf(stdout, "index_len = %ld.\n", (long)(cache_ptr->index_len));
+            fprintf(stdout, "index_size = %ld.\n", (long)(cache_ptr->index_size));
+            fprintf(stdout, "rpt_fcn_called = %ld.\n", (long)(rpt_fcn_called));
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache size change results 47.\n";
@@ -21900,7 +21734,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -21908,7 +21742,7 @@ check_auto_cache_resize_disable(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
         PASSED();
@@ -21919,7 +21753,7 @@ check_auto_cache_resize_disable(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -21933,9 +21767,6 @@ check_auto_cache_resize_disable(unsigned paged)
  *        correctly.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              12/16/04
  *
  *-------------------------------------------------------------------------
  */
@@ -22000,7 +21831,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     pass = TRUE;
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -22031,7 +21862,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now make sure that we are managing the epoch markers correctly.
      */
@@ -22098,7 +21929,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Since we just created the cache, there should be no epoch markers
      * active.  Verify that this is true.
@@ -22137,7 +21968,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -22166,7 +21997,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* we now have a full complement of epoch markers -- see if
      * we get the expected reduction.
@@ -22195,7 +22026,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* now reduce the epochs before eviction, and see if the cache
      * deletes the extra markers
@@ -22262,7 +22093,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* There should be exactly one active epoch marker at present.
      */
@@ -22302,7 +22133,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* There should be exactly one active epoch marker at present...
      */
@@ -22391,7 +22222,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* shift the decrement mode to age out with threshold.  Set epochs
      * before eviction to 10 again.
@@ -22459,7 +22290,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* build up a full set of epoch markers. */
     if (pass) {
@@ -22489,7 +22320,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Verify that there are now 10 active epoch markers.
      */
@@ -22568,7 +22399,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     /* verify that we still have the expected number of entries in the cache,
      * and that the cache is of the expected size.
@@ -22585,7 +22416,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
 
@@ -22593,7 +22424,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     }
 
     if (show_progress)
-        HDfprintf(stderr, "check point %d\n", checkpoint++);
+        fprintf(stderr, "check point %d\n", checkpoint++);
 
     if (pass) {
         PASSED();
@@ -22604,7 +22435,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -22618,9 +22449,6 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
  *        and rejects invalid input.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              10/29/04
  *
  *-------------------------------------------------------------------------
  */
@@ -24818,7 +24646,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -24837,9 +24665,6 @@ check_auto_cache_resize_input_errs(unsigned paged)
  *            H5C_reset_cache_hit_rate_stats()
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              11/4/04
  *
  *-------------------------------------------------------------------------
  */
@@ -25307,7 +25132,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -25333,9 +25158,6 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
  *
  * Return:    void
  *
- * Programmer:    Mike McGreevy
- *              12/16/08
- *
  *-------------------------------------------------------------------------
  */
 
@@ -25357,7 +25179,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
      */
     hbool_t deserialized = (hbool_t) !(fill_via_insertion);
 
-    expected = HDmalloc(150 * sizeof(struct expected_entry_status));
+    expected = malloc(150 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -25381,8 +25203,8 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -25410,7 +25232,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     } /* end else */
 
     if (show_progress) /* 0 */
-        HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "\n%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -25431,7 +25253,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -25494,7 +25316,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -25564,7 +25386,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -25618,7 +25440,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -25671,7 +25493,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -25746,7 +25568,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -25817,7 +25639,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -25876,7 +25698,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -25924,7 +25746,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -25975,7 +25797,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -26021,7 +25843,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (cache_ptr) {
 
@@ -26031,9 +25853,9 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
-    HDfree(expected);
+    free(expected);
 
     if (pass) {
         PASSED();
@@ -26052,9 +25874,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
  * Purpose:    Exercise the flush dependency routines.
  *
  * Return:    0 on success, non-zero on failure
- *
- * Programmer:    Quincey Koziol
- *               3/12/09
  *
  *-------------------------------------------------------------------------
  */
@@ -27963,7 +27782,7 @@ done:
         PASSED();
     else {
         H5_FAILED();
-        HDfprintf(stdout, "%s.\n", failure_mssg);
+        fprintf(stdout, "%s.\n", failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;
@@ -27975,9 +27794,6 @@ done:
  * Purpose:    Check  the flush dependency routines for error conditions.
  *
  * Return:    0 on success, non-zero on failure
- *
- * Programmer:    Quincey Koziol
- *               3/16/09
  *
  *-------------------------------------------------------------------------
  */
@@ -28229,7 +28045,7 @@ done:
         PASSED();
     else {
         H5_FAILED();
-        HDfprintf(stdout, "%s.\n", failure_mssg);
+        fprintf(stdout, "%s.\n", failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;
@@ -28242,9 +28058,6 @@ done:
  *              is correct
  *
  * Return:      0 on success, non-zero on failure
- *
- * Programmer:  Quincey Koziol
- *              3/17/09
  *
  *-------------------------------------------------------------------------
  */
@@ -30959,7 +30772,7 @@ done:
         PASSED();
     else {
         H5_FAILED();
-        HDfprintf(stdout, "%s.\n", failure_mssg);
+        fprintf(stdout, "%s.\n", failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;
@@ -30971,9 +30784,6 @@ done:
  * Purpose:    Exercise the client 'notify' callback.
  *
  * Return:    0 on success, non-zero on failure
- *
- * Programmer:    Quincey Koziol
- *               4/28/09
  *
  *-------------------------------------------------------------------------
  */
@@ -31175,7 +30985,7 @@ done:
         PASSED();
     else {
         H5_FAILED();
-        HDfprintf(stdout, "%s.\n", failure_mssg);
+        fprintf(stdout, "%s.\n", failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;
@@ -31190,8 +31000,6 @@ done:
  *        NOTE: This is a modification of check_metadata_blizzard_absence().
  *
  * Return:    void
- *
- * Programmer:    Vailin Choi
  *
  *-------------------------------------------------------------------------
  */
@@ -31214,7 +31022,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
      */
     hbool_t deserialized = (hbool_t) !(fill_via_insertion);
 
-    expected = HDmalloc(150 * sizeof(struct expected_entry_status));
+    expected = malloc(150 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -31238,8 +31046,8 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -31259,7 +31067,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
         TESTING("to ensure cork/uncork metadata on protect/unprotect");
 
     if (show_progress) /* 0 */
-        HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "\n%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     if (pass) {
 
@@ -31283,7 +31091,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     cork_entry_type(file_ptr, entry_type);
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -31336,7 +31144,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -31392,7 +31200,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     if (pass) {
 
@@ -31433,7 +31241,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     if (pass) {
 
@@ -31482,7 +31290,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -31495,7 +31303,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
      */
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     if (pass) {
 
@@ -31534,7 +31342,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -31578,7 +31386,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     if (pass) {
 
@@ -31621,7 +31429,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     if (pass) {
 
@@ -31665,7 +31473,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     if (pass) {
 
@@ -31705,7 +31513,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     if (pass) {
 
@@ -31749,16 +31557,16 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
     /* We're done with testing. We can take down the cache. */
     takedown_cache(file_ptr, FALSE, FALSE);
     reset_entries();
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
+        fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
-    HDfree(expected);
+    free(expected);
 
     if (pass) {
         PASSED();
@@ -31791,9 +31599,6 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              4/3/15
  *
  *-------------------------------------------------------------------------
  */
@@ -31858,7 +31663,7 @@ check_entry_deletions_during_scans(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -31885,9 +31690,6 @@ check_entry_deletions_during_scans(unsigned paged)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              4/4/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -31898,7 +31700,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
     H5C_t                        *cache_ptr = file_ptr->shared->cache;
     int                           i;
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32092,7 +31894,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__expunge_dirty_entry_in_flush_test() */
 
@@ -32117,9 +31919,6 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              4/4/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -32132,7 +31931,7 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
     const int                     num_huge_entries    = 4;
     const int                     num_monster_entries = 32;
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32446,7 +32245,7 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__H5C_make_space_in_cache() */
 
@@ -32470,9 +32269,6 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/4/15
  *
  *-------------------------------------------------------------------------
  */
@@ -32527,7 +32323,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* hbool_t     apply_empty_reserve    = */ TRUE,
         /* double      empty_reserve          = */ 0.05};
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32837,7 +32633,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__H5C__autoadjust__ageout__evict_aged_out_entries() */
 
@@ -32922,9 +32718,6 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/9/15
  *
  *-------------------------------------------------------------------------
  */
@@ -33016,7 +32809,7 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
         entry_ptr  = &(base_addr[0]);
         entry_addr = entry_ptr->header.addr;
 
-        HDassert(entry_addr == entry_ptr->addr);
+        assert(entry_addr == entry_ptr->addr);
 
         expected_hash_bucket = H5C__HASH_FCN(entry_addr);
 
@@ -33222,9 +33015,6 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
  *
  * Return:    void
  *
- * Programmer:    John Mainzer
- *              4/12/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -33270,14 +33060,14 @@ check_stats(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
 #else /* H5C_COLLECT_CACHE_STATS */
 
     SKIPPED();
 
-    HDfprintf(stdout, "    Statistics collection disabled.\n");
+    fprintf(stdout, "    Statistics collection disabled.\n");
 
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -33301,9 +33091,6 @@ check_stats(unsigned paged)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              4/22/15
  *
  *-------------------------------------------------------------------------
  */
@@ -33676,14 +33463,12 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
  *
  * Return:      Non-negative on success/Negative on failure.
  *
- * Programmer:  John Mainzer, 5/15/04
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 check_write_permitted(const H5F_t H5_ATTR_UNUSED *f, hbool_t *write_permitted_ptr)
 {
-    HDassert(write_permitted_ptr);
+    assert(write_permitted_ptr);
 
     *write_permitted_ptr = write_permitted;
 
@@ -33718,8 +33503,6 @@ check_write_permitted(const H5F_t H5_ATTR_UNUSED *f, hbool_t *write_permitted_pt
  *
  *              Failure:        NULL
  *
- * Programmer:  JRM -- 9/13/07
- *
  *****************************************************************************/
 
 H5F_t *
@@ -33738,7 +33521,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     hid_t   fcpl_id = H5P_DEFAULT;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     saved_fid = -1;
 
@@ -33781,7 +33564,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass && try_core_file_driver) {
         if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL) {
@@ -33798,7 +33581,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             core_file_driver_failed = TRUE;
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", __func__);
+                fprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", __func__);
         }
         else {
             saved_fapl_id = fapl_id;
@@ -33806,7 +33589,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* if we either aren't using the core file driver, or a create
      * with the core file driver failed, try again with a regular file.
@@ -33821,7 +33604,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5Fcreate() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", __func__);
+                fprintf(stdout, "%s: H5Fcreate() failed.\n", __func__);
         } /* end if */
     }     /* end if */
 
@@ -33829,17 +33612,17 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     H5CX_push();
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
-        HDassert(fid >= 0);
+        assert(fid >= 0);
         saved_fid = fid;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
             pass         = FALSE;
             failure_mssg = "H5Fflush() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fflush() failed.\n", __func__);
+                fprintf(stdout, "%s: H5Fflush() failed.\n", __func__);
         }
         else {
             file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
@@ -33848,13 +33631,13 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
                 failure_mssg = "Can't get file_ptr.";
 
                 if (verbose)
-                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", __func__);
+                    fprintf(stdout, "%s: H5Fflush() failed.\n", __func__);
             }
         }
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -33886,7 +33669,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
          * instance, and then close the file normally.
          */
 
-        HDassert(saved_cache == NULL);
+        assert(saved_cache == NULL);
         saved_cache             = file_ptr->shared->cache;
         file_ptr->shared->cache = NULL;
 
@@ -33897,7 +33680,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         if (cache_ptr == NULL) {
@@ -33905,12 +33688,12 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5C_create() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5C_create() failed.\n", __func__);
+                fprintf(stdout, "%s: H5C_create() failed.\n", __func__);
         }
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) { /* allocate space for test entries */
         actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
@@ -33920,7 +33703,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5MF_alloc() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", __func__);
+                fprintf(stdout, "%s: H5MF_alloc() failed.\n", __func__);
         }
         else if (actual_base_addr > BASE_ADDR) {
             /* If this happens, must increase BASE_ADDR so that the
@@ -33931,14 +33714,14 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "actual_base_addr > BASE_ADDR";
 
             if (verbose)
-                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", __func__);
+                fprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", __func__);
         }
 
         saved_actual_base_addr = actual_base_addr;
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         /* Need to set this else all cache tests will fail */
@@ -33949,7 +33732,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     return (ret_val);
 } /* setup_cache() */
@@ -33964,9 +33747,6 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
  *        If pass is FALSE, do nothing.
  *
  * Return:    void
- *
- * Programmer:    John Mainzer
- *              9/14/07
  *
  *-------------------------------------------------------------------------
  */
@@ -34014,11 +33794,11 @@ takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats)
 
     if (saved_fid != -1) {
 
-        if (H5F_addr_defined(saved_actual_base_addr)) {
+        if (H5_addr_defined(saved_actual_base_addr)) {
 
             if (NULL == file_ptr) {
                 file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);
-                HDassert(file_ptr);
+                assert(file_ptr);
             }
 
             H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, saved_actual_base_addr,
@@ -34062,9 +33842,6 @@ takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats)
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  John Mainzer
- *              6/24/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -34079,19 +33856,19 @@ main(void)
 
     express_test = GetTestExpress();
 
-    HDprintf("=========================================\n");
-    HDprintf("Internal cache tests\n");
-    HDprintf("        express_test = %d\n", express_test);
-    HDprintf("=========================================\n");
+    printf("=========================================\n");
+    printf("Internal cache tests\n");
+    printf("        express_test = %d\n", express_test);
+    printf("=========================================\n");
 
     if (!h5_using_default_driver(NULL)) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     if (create_entry_arrays() < 0) {
 
-        HDprintf("ERROR: Unable to create entries arrays. Aborting.\n");
+        printf("ERROR: Unable to create entries arrays. Aborting.\n");
         return EXIT_FAILURE;
     } /* end if */
 
@@ -34101,12 +33878,12 @@ main(void)
 
         if (paged) {
 
-            HDfprintf(stdout, "\n\nRe-running tests with paged aggregation:\n");
+            fprintf(stdout, "\n\nRe-running tests with paged aggregation:\n");
 
             if (express_test > 0)
-                HDfprintf(stdout, "    Skipping smoke checks.\n");
+                fprintf(stdout, "    Skipping smoke checks.\n");
 
-            HDfprintf(stdout, "\n");
+            fprintf(stdout, "\n");
         }
 
         nerrs += smoke_check_1(express_test, paged);

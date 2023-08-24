@@ -37,8 +37,9 @@
 !
 
 MODULE H5S
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_INT
+
   USE H5GLOBAL
+  IMPLICIT NONE
 
 CONTAINS
 !>
@@ -928,13 +929,6 @@ CONTAINS
 !            stride            - array with hyperslab strides
 !            block            - array with hyperslab block sizes
 !
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
-!
 ! NOTES
 ! Commented out until 1.6 ? 10/08/2002
 !
@@ -1043,13 +1037,6 @@ CONTAINS
 !                               Failure: -1
 ! OPTIONAL PARAMETERS            - NONE
 !
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
-!
 ! NOTES commented out until 1.6 release(?) 10/08/2002
 !
 !
@@ -1105,13 +1092,6 @@ CONTAINS
 !                               Success:  0
 !                               Failure: -1
 ! OPTIONAL PARAMETERS            - NONE
-!
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
 !
 ! NOTESCommented out until 1.6 release(?) 10/08/2002 EIP
 !

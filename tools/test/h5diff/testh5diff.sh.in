@@ -12,19 +12,6 @@
 #
 # Tests for the h5diff tool
 #
-# Modification:
-#   Albert Cheng, 2005/08/17
-#   Added the SKIP feature.
-#   Albert Cheng, 2005/2/3
-#   Added -p option for parallel h5diff tests.
-#   Pedro Vicente Nunes:
-#    10/25/2005: Added test #9
-#    11/27/2006: Added test #10, #11
-#   Jonathan Kim:
-#    Improved to use single line
-#    Improved to check exit code (only serial mode, not necessary for parallel)
-#    Added test 400 - 425  (links with --follow-symlinks option)
-#    Added test 450 - 459  (dangling links)
 
 srcdir=@srcdir@
 

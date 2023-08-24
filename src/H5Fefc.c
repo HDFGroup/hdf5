@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Defc.c
- *                      December 13, 2010
- *                      Neil Fortner
  *
  * Purpose:             External file caching routines - implements a
  *                      cache of external files to minimize the number of
@@ -81,9 +79,6 @@ H5FL_DEFINE_STATIC(H5F_efc_t);
  * Return:      Pointer to new external file cache object on success
  *              NULL on failure
  *
- * Programmer:  Neil Fortner
- *              Tuesday, December 14, 2010
- *
  *-------------------------------------------------------------------------
  */
 H5F_efc_t *
@@ -95,11 +90,11 @@ H5F__efc_create(unsigned max_nfiles)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(max_nfiles > 0);
+    assert(max_nfiles > 0);
 
     /* Allocate EFC struct */
     if (NULL == (efc = H5FL_CALLOC(H5F_efc_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Initialize maximum number of files */
     efc->max_nfiles = max_nfiles;
@@ -131,9 +126,6 @@ done:
  * Return:      Pointer to open file on success
  *              NULL on failure
  *
- * Programmer:  Neil Fortner
- *              Tuesday, December 14, 2010
- *
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -148,30 +140,30 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(name);
+    assert(name);
 
     /* Get the VOL info from the fapl */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, NULL, "not a file access property list");
     if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get VOL connector info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get VOL connector info");
 
     /* Stash a copy of the "top-level" connector property, before any pass-through
      *  connectors modify or unwrap it.
      */
     if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set VOL connector info in API context")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set VOL connector info in API context");
 
     /* Check if the EFC exists.  If it does not, just call H5F_open().  We
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if (!efc) {
         if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
 
         /* Make file post open call */
         if (H5F__post_open(ret_value) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
 
         /* Increment the number of open objects to prevent the file from being
          * closed out from under us - "simulate" having an open file id.  Note
@@ -179,7 +171,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
          * H5F_decr_nopen_objs() in H5L_extern_traverse(). */
         ret_value->nopen_objs++;
 
-        HGOTO_DONE(ret_value)
+        HGOTO_DONE(ret_value);
     } /* end if */
 
     /* Search the skip list for name if the skip list exists, create the skip
@@ -189,20 +181,20 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
             ent = (H5F_efc_ent_t *)H5SL_search(efc->slist, name);
     } /* end if */
     else {
-        HDassert(efc->nfiles == 0);
+        assert(efc->nfiles == 0);
         if (NULL == (efc->slist = H5SL_create(H5SL_TYPE_STR, NULL)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create skip list")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create skip list");
     } /* end else */
 
     /* If we found the file update the LRU list and return the cached file,
      * otherwise open the file and cache it */
     if (ent) {
-        HDassert(efc->LRU_head);
-        HDassert(efc->LRU_tail);
+        assert(efc->LRU_head);
+        assert(efc->LRU_tail);
 
         /* Move ent to the head of the LRU list, if it is not already there */
         if (ent->LRU_prev) {
-            HDassert(efc->LRU_head != ent);
+            assert(efc->LRU_head != ent);
 
             /* Remove from current position.  Note that once we touch the LRU
              * list we cannot revert to the previous state.  Make sure there can
@@ -211,7 +203,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
             if (ent->LRU_next)
                 ent->LRU_next->LRU_prev = ent->LRU_prev;
             else {
-                HDassert(efc->LRU_tail == ent);
+                assert(efc->LRU_tail == ent);
                 efc->LRU_tail = ent->LRU_prev;
             } /* end else */
             ent->LRU_prev->LRU_next = ent->LRU_next;
@@ -237,44 +229,45 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
              * do not add it to cache */
             if (ent) {
                 if (H5F__efc_remove_ent(efc, ent) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL, "can't remove entry from external file cache")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL,
+                                "can't remove entry from external file cache");
 
                 /* Do not free ent, we will recycle it below */
             } /* end if */
             else {
                 /* Cannot cache file, just open file and return */
                 if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
 
                 /* Make file post open call */
                 if (H5F__post_open(ret_value) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
 
                 /* Increment the number of open objects to prevent the file from
                  * being closed out from under us - "simulate" having an open
                  * file id */
                 ret_value->nopen_objs++;
 
-                HGOTO_DONE(ret_value)
+                HGOTO_DONE(ret_value);
             } /* end else */
         }     /* end if */
         else
             /* Allocate new entry */
             if (NULL == (ent = H5FL_MALLOC(H5F_efc_ent_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Build new entry */
         if (NULL == (ent->name = H5MM_strdup(name)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Open the file */
         if (NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
         open_file = TRUE;
 
         /* Make file post open call */
         if (H5F__post_open(ent->file) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file");
 
         /* Increment the number of open objects to prevent the file from being
          * closed out from under us - "simulate" having an open file id */
@@ -283,7 +276,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
         /* Add the file to the cache */
         /* Skip list */
         if (H5SL_insert(efc->slist, ent, ent->name) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, NULL, "can't insert entry into skip list")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, NULL, "can't insert entry into skip list");
 
         /* Add to head of LRU list and update tail if necessary */
         ent->LRU_next = efc->LRU_head;
@@ -292,7 +285,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
         ent->LRU_prev = NULL;
         efc->LRU_head = ent;
         if (!efc->LRU_tail) {
-            HDassert(!ent->LRU_next);
+            assert(!ent->LRU_next);
             efc->LRU_tail = ent;
         } /* end if */
 
@@ -305,10 +298,10 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
             ent->file->shared->efc->nrefs++;
     } /* end else */
 
-    HDassert(ent);
-    HDassert(ent->file);
-    HDassert(ent->name);
-    HDassert(ent->nopen);
+    assert(ent);
+    assert(ent->file);
+    assert(ent->name);
+    assert(ent->nopen);
 
     /* Set the return value */
     ret_value = ent->file;
@@ -319,7 +312,7 @@ done:
             if (open_file) {
                 ent->file->nopen_objs--;
                 if (H5F_try_close(ent->file, NULL) < 0)
-                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file");
             } /* end if */
             ent->name = (char *)H5MM_xfree(ent->name);
             ent       = H5FL_FREE(H5F_efc_ent_t, ent);
@@ -338,9 +331,6 @@ done:
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -353,10 +343,10 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
-    HDassert(parent);
-    HDassert(parent->shared);
-    HDassert(file);
-    HDassert(file->shared);
+    assert(parent);
+    assert(parent->shared);
+    assert(file);
+    assert(file->shared);
 
     /* Get external file cache */
     efc = parent->shared->efc;
@@ -367,9 +357,9 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
     if (!efc) {
         file->nopen_objs--;
         if (H5F_try_close(file, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
 
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Scan the parent's LRU list from the head to file file.  We do this
@@ -382,7 +372,7 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
     if (!ent) {
         file->nopen_objs--;
         if (H5F_try_close(file, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
     } /* end if */
     else
         /* Reduce the open count on this entry */
@@ -400,9 +390,6 @@ done:
  *
  * Return:      Maximum number of files (never fails)
  *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -410,8 +397,8 @@ H5F__efc_max_nfiles(H5F_efc_t *efc)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(efc);
-    HDassert(efc->max_nfiles > 0);
+    assert(efc);
+    assert(efc->max_nfiles > 0);
 
     FUNC_LEAVE_NOAPI(efc->max_nfiles)
 } /* end H5F__efc_max_nfiles */
@@ -426,9 +413,6 @@ H5F__efc_max_nfiles(H5F_efc_t *efc)
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -441,14 +425,14 @@ H5F__efc_release_real(H5F_efc_t *efc)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(efc);
+    assert(efc);
 
     /* Lock the EFC to prevent manipulation of the EFC while we are releasing it.
      * The EFC should never be locked when we enter this function because that
      * would require a cycle, a cycle would necessarily invoke
      * H5F__efc_try_close(), and that function checks the status of the lock
      * before calling this one. */
-    HDassert((efc->tag == H5F_EFC_TAG_DEFAULT) || (efc->tag == H5F_EFC_TAG_CLOSE));
+    assert((efc->tag == H5F_EFC_TAG_DEFAULT) || (efc->tag == H5F_EFC_TAG_CLOSE));
     efc->tag = H5F_EFC_TAG_LOCK;
 
     /* Walk down the LRU list, releasing any files that are not opened by an EFC
@@ -457,7 +441,7 @@ H5F__efc_release_real(H5F_efc_t *efc)
     while (ent)
         if (!ent->nopen) {
             if (H5F__efc_remove_ent(efc, ent) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove entry from external file cache")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove entry from external file cache");
 
             /* Free the entry and move to next entry in LRU list */
             prev_ent = ent;
@@ -473,7 +457,7 @@ H5F__efc_release_real(H5F_efc_t *efc)
     efc->tag = H5F_EFC_TAG_DEFAULT;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__efc_release_real() */
 
 /*-------------------------------------------------------------------------
@@ -486,9 +470,6 @@ done:
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Sunday, February 18, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -499,11 +480,11 @@ H5F__efc_release(H5F_efc_t *efc)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(efc);
+    assert(efc);
 
     /* Call 'real' routine */
     if (H5F__efc_release_real(efc) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't remove entry from external file cache")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't remove entry from external file cache");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -519,9 +500,6 @@ done:
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -532,32 +510,32 @@ H5F__efc_destroy(H5F_efc_t *efc)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(efc);
+    assert(efc);
 
     if (efc->nfiles > 0) {
         /* Release (clear) the efc */
         if (H5F__efc_release_real(efc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache");
 
         /* If there are still cached files, return an error */
         if (efc->nfiles > 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't destroy EFC after incomplete release")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't destroy EFC after incomplete release");
     } /* end if */
 
-    HDassert(efc->nfiles == 0);
-    HDassert(efc->LRU_head == NULL);
-    HDassert(efc->LRU_tail == NULL);
+    assert(efc->nfiles == 0);
+    assert(efc->LRU_head == NULL);
+    assert(efc->LRU_tail == NULL);
 
     /* Close skip list */
     if (efc->slist)
         if (H5SL_close(efc->slist) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close skip list")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close skip list");
 
     /* Free EFC object */
     (void)H5FL_FREE(H5F_efc_t, efc);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__efc_destroy() */
 
 /*-------------------------------------------------------------------------
@@ -569,9 +547,6 @@ done:
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, December 15, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -582,25 +557,25 @@ H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(efc);
-    HDassert(efc->slist);
-    HDassert(ent);
+    assert(efc);
+    assert(efc->slist);
+    assert(ent);
 
     /* Remove from skip list */
     if (ent != H5SL_remove(efc->slist, ent->name))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL, "can't delete entry from skip list")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL, "can't delete entry from skip list");
 
     /* Remove from LRU list */
     if (ent->LRU_next)
         ent->LRU_next->LRU_prev = ent->LRU_prev;
     else {
-        HDassert(efc->LRU_tail == ent);
+        assert(efc->LRU_tail == ent);
         efc->LRU_tail = ent->LRU_prev;
     } /* end else */
     if (ent->LRU_prev)
         ent->LRU_prev->LRU_next = ent->LRU_next;
     else {
-        HDassert(efc->LRU_head == ent);
+        assert(efc->LRU_head == ent);
         efc->LRU_head = ent->LRU_next;
     } /* end else */
 
@@ -618,7 +593,7 @@ H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
      * from being closed out from under us. */
     ent->file->nopen_objs--;
     if (H5F_try_close(ent->file, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file");
     ent->file = NULL;
 
 done:
@@ -634,9 +609,6 @@ done:
  *
  * Return:      void (never fails)
  *
- * Programmer:  Neil Fortner
- *              Monday, January 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -648,12 +620,12 @@ H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(sf);
-    HDassert(sf->efc);
-    HDassert((sf->efc->tag > 0) || (sf->nrefs == sf->efc->nrefs));
-    HDassert(sf->efc->tag != H5F_EFC_TAG_LOCK);
-    HDassert(tail);
-    HDassert(*tail);
+    assert(sf);
+    assert(sf->efc);
+    assert((sf->efc->tag > 0) || (sf->nrefs == sf->efc->nrefs));
+    assert(sf->efc->tag != H5F_EFC_TAG_LOCK);
+    assert(tail);
+    assert(*tail);
 
     /* Recurse into this file's cached files */
     for (ent = sf->efc->LRU_head; ent; ent = ent->LRU_next) {
@@ -662,7 +634,7 @@ H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail)
         if (esf->efc) {
             /* If tag were 0, that would mean there are more actual references
              * than are counted by nrefs */
-            HDassert(esf->efc->tag != 0);
+            assert(esf->efc->tag != 0);
 
             /* If tag has been set, we have already visited this file so just
              * decrement tag and continue */
@@ -678,7 +650,7 @@ H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail)
                      !(ent->nopen)) {
                 /* If we get here, this file's "tmp_next" pointer must be NULL
                  */
-                HDassert(esf->efc->tmp_next == NULL);
+                assert(esf->efc->tmp_next == NULL);
 
                 /* If nrefs > 1, Add this file to the list of files with nrefs >
                  * 1 and initialize tag to the number of references (except this
@@ -707,9 +679,6 @@ H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail)
  *
  * Return:      void (never fails)
  *
- * Programmer:  Neil Fortner
- *              Monday, January 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -721,8 +690,8 @@ H5F__efc_try_close_tag2(H5F_shared_t *sf, H5F_shared_t **tail)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(sf);
-    HDassert(sf->efc);
+    assert(sf);
+    assert(sf->efc);
 
     /* Recurse into this file's cached files */
     for (ent = sf->efc->LRU_head; ent; ent = ent->LRU_next) {
@@ -741,8 +710,8 @@ H5F__efc_try_close_tag2(H5F_shared_t *sf, H5F_shared_t **tail)
              ((esf->efc->tag == H5F_EFC_TAG_DEFAULT) && (esf->nrefs == esf->efc->nrefs) && !(ent->nopen)))) {
             /* tag should always be CLOSE is nrefs > 1 or DEFAULT if nrefs == 1
              * here */
-            HDassert(((esf->nrefs > 1) && ((esf->efc->tag == H5F_EFC_TAG_CLOSE))) ||
-                     ((esf->nrefs == 1) && (esf->efc->tag == H5F_EFC_TAG_DEFAULT)));
+            assert(((esf->nrefs > 1) && ((esf->efc->tag == H5F_EFC_TAG_CLOSE))) ||
+                   ((esf->nrefs == 1) && (esf->efc->tag == H5F_EFC_TAG_DEFAULT)));
 
             /* If tag is set to DONTCLOSE, we have already visited this file
              * *or* it will be the start point of another iteration so just
@@ -811,9 +780,6 @@ H5F__efc_try_close_tag2(H5F_shared_t *sf, H5F_shared_t **tail)
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Thursday, January 6, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -831,12 +797,12 @@ H5F__efc_try_close(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->efc);
-    HDassert(f->shared->nrefs > f->shared->efc->nrefs);
-    HDassert(f->shared->nrefs > 1);
-    HDassert(f->shared->efc->tag < 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->efc);
+    assert(f->shared->nrefs > f->shared->efc->nrefs);
+    assert(f->shared->nrefs > 1);
+    assert(f->shared->efc->tag < 0);
 
     if (f->shared->efc->tag == H5F_EFC_TAG_CLOSE) {
         /* We must have reentered this function, and we should close this file.
@@ -844,7 +810,7 @@ H5F__efc_try_close(H5F_t *f)
          * eventually reduce this file's reference count to 1 (though possibly
          * not from this call to H5F__efc_release_real()). */
         if (H5F__efc_release_real(f->shared->efc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache");
 
         /* If we marked the file as closeable, there must be no open files in
          * its EFC.  This is because, in order to close an open child file, the
@@ -852,9 +818,9 @@ H5F__efc_try_close(H5F_t *f)
          * detect that the parent file is open (directly or through an EFC) and
          * refuse to close it.  Verify that all files were released from this
          * EFC (i.e. none were open). */
-        HDassert(f->shared->efc->nfiles == 0);
+        assert(f->shared->efc->nfiles == 0);
 
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Conditions where we should not do anything and just return immediately */
@@ -873,15 +839,15 @@ H5F__efc_try_close(H5F_t *f)
         (f->shared->efc->nfiles == 0))
         /* We must have reentered this function, and we should not close this
          * file.  Just return. */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* If the file EFC were locked, that should always mean that there exists
      * a reference to this file that is not in an EFC (it may have just been
      * removed from an EFC), and should have been caught by the above check */
     /* If we get here then we must be beginning a new run.  Make sure that the
      * temporary variables in f->shared->efc are at the default value */
-    HDassert(f->shared->efc->tag == H5F_EFC_TAG_DEFAULT);
-    HDassert(f->shared->efc->tmp_next == NULL);
+    assert(f->shared->efc->tag == H5F_EFC_TAG_DEFAULT);
+    assert(f->shared->efc->tmp_next == NULL);
 
     /* Set up linked list for traversal into EFC tree.  f->shared is guaranteed
      * to always be at the head. */
@@ -906,7 +872,7 @@ H5F__efc_try_close(H5F_t *f)
             sf->efc->tmp_next = NULL;
             sf                = next;
         } /* end while */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     /* Run through the linked list , separating into two lists, one with tag ==
@@ -915,11 +881,11 @@ H5F__efc_try_close(H5F_t *f)
     sf   = f->shared;
     tail = NULL;
     while (sf) {
-        HDassert(sf->efc->tag >= 0);
+        assert(sf->efc->tag >= 0);
         next = sf->efc->tmp_next;
         if (sf->efc->tag > 0) {
             /* Remove from main list */
-            HDassert(tail);
+            assert(tail);
             tail->efc->tmp_next = sf->efc->tmp_next;
             sf->efc->tmp_next   = NULL;
 
@@ -950,7 +916,7 @@ H5F__efc_try_close(H5F_t *f)
     sf = uncloseable_head;
     if (sf) {
         tail = uncloseable_tail;
-        HDassert(tail);
+        assert(tail);
         while (sf != tail->efc->tmp_next) {
             H5F__efc_try_close_tag2(sf, &uncloseable_tail);
             sf = sf->efc->tmp_next;
@@ -962,11 +928,11 @@ H5F__efc_try_close(H5F_t *f)
      * Also, see the top of this function. */
     if (f->shared->efc->tag == H5F_EFC_TAG_CLOSE) {
         if (H5F__efc_release_real(f->shared->efc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache");
 
         /* Make sure the file's reference count is now 1 and will be closed by
          * H5F_dest(). */
-        HDassert(f->shared->nrefs == 1);
+        assert(f->shared->nrefs == 1);
     } /* end if */
 
     /* Clean up uncloseable files (reset tag and tmp_next).  All closeable files
@@ -975,7 +941,7 @@ H5F__efc_try_close(H5F_t *f)
         sf = uncloseable_head;
         while (sf) {
             next = sf->efc->tmp_next;
-            HDassert(sf->efc->tag == H5F_EFC_TAG_DONTCLOSE);
+            assert(sf->efc->tag == H5F_EFC_TAG_DONTCLOSE);
             sf->efc->tag      = H5F_EFC_TAG_DEFAULT;
             sf->efc->tmp_next = NULL;
             sf                = next;

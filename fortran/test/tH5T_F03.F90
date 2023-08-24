@@ -2913,10 +2913,6 @@ END SUBROUTINE setup_buffer
 !
 ! Return:      Success:        0
 !              Failure:        >0
-!
-! Programmer:  M. Scot Breitenfeld
-!              Decemeber 7, 2010
-!
 !-------------------------------------------------------------------------
 !
 
@@ -3056,9 +3052,6 @@ SUBROUTINE t_enum_conv(total_error)
 !
 ! Return: Success:	0
 !	  Failure:	number of errors
-!
-! Programmer:  M. Scot Breitenfeld
-!              October 27, 2012
 !
 ! Note:        Adapted from C test (enum.c -- test_conv)
 !              No reliance on C tests.
@@ -3401,9 +3394,9 @@ END SUBROUTINE t_enum_conv
 
 ! Tests the reading and writing of multiple datasets using H5Dread_multi and
 ! H5Dwrite_multi
-	 
+
 SUBROUTINE multiple_dset_rw(total_error)
-	 
+
 !-------------------------------------------------------------------------
 ! Subroutine: multiple_dset_rw
 !
@@ -3412,10 +3405,6 @@ SUBROUTINE multiple_dset_rw(total_error)
 !
 ! Return: Success:      0
 !         Failure:      number of errors
-!
-! Programmer:  M. Scot Breitenfeld
-!              April 2, 2014
-!
 !-------------------------------------------------------------------------
 !
   USE iso_c_binding

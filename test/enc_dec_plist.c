@@ -41,7 +41,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
         TEST_ERROR;
 
     /* Allocate the buffer for encoding */
-    if (NULL == (temp_buf = (void *)HDmalloc(temp_size)))
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
         TEST_ERROR;
 
     /* Encode the property list to the buffer */
@@ -62,7 +62,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
 
     /* Free the buffer */
     if (temp_buf)
-        HDfree(temp_buf);
+        free(temp_buf);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Test H5Pencode1() */
@@ -71,7 +71,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
     if (H5Pencode1(orig_pl, NULL, &temp_size) < 0)
         STACK_ERROR;
 
-    if (NULL == (temp_buf = (void *)HDmalloc(temp_size)))
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
         TEST_ERROR;
 
     if (H5Pencode1(orig_pl, temp_buf, &temp_size) < 0)
@@ -87,7 +87,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
         STACK_ERROR;
 
     if (temp_buf)
-        HDfree(temp_buf);
+        free(temp_buf);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     if ((H5Pclose(fapl)) < 0)
@@ -98,14 +98,14 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
 
 error:
     if (temp_buf)
-        HDfree(temp_buf);
+        free(temp_buf);
 
     H5E_BEGIN_TRY
     {
         H5Pclose(pl);
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (-1);
 } /* end test_encode_decode() */
@@ -192,7 +192,7 @@ main(void)
             HDputs(msg);
 
             if (VERBOSE_MED)
-                HDprintf("Encode/Decode DCPLs\n");
+                printf("Encode/Decode DCPLs\n");
 
             /******* ENCODE/DECODE DCPLS *****/
             TESTING("Default DCPL Encoding/Decoding");
@@ -242,7 +242,7 @@ main(void)
             /******* ENCODE/DECODE DCPLS *****/
             TESTING("DCPL Encoding/Decoding for virtual layout");
             if (high < H5F_LIBVER_V110)
-                HDprintf(" SKIPPED: virtual layout not supported yet\n");
+                printf(" SKIPPED: virtual layout not supported yet\n");
 
             else {
                 if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -679,6 +679,6 @@ main(void)
     return 0;
 
 error:
-    HDprintf("***** Plist Encode/Decode tests FAILED! *****\n");
+    printf("***** Plist Encode/Decode tests FAILED! *****\n");
     return 1;
 }

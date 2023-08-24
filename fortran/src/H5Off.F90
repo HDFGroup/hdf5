@@ -37,10 +37,8 @@
 
 MODULE H5O
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_LONG, C_INT, C_LOC
   USE H5GLOBAL
   IMPLICIT NONE
-
 
 !> @brief h5o_info_t derived type. The time values are an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
   TYPE, BIND(C) :: h5o_info_t
@@ -406,7 +404,7 @@ CONTAINS
 !! \brief Opens an object using its token within an HDF5 file.
 !!
 !! \param loc_id File or group identifier.
-!! \param token  Object’s token in the file.
+!! \param token  Object&apos;s token in the file.
 !! \param obj_id Object identifier for the opened object.
 !! \param hdferr \fortran_error
 !!

@@ -96,8 +96,8 @@ CONTAINS
     ENDDO
     WRITE(*,'("| |")')
 
-    WRITE(*,'(A)') title_centered
-
+    WRITE(*,'(A)') TRIM(title_centered)
+  
     WRITE(*,'("| |")', ADVANCE="NO")
     DO i = 1, width-5
        WRITE(*,'(1X)', ADVANCE="NO")
@@ -204,11 +204,6 @@ CONTAINS
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
-!
-! Programmer:	Elena Pourmal
-!		September 13, 2002
-!
-!
 !----------------------------------------------------------------------
   SUBROUTINE h5_fixname_f(base_name, full_name, fapl, hdferr)
 !
@@ -264,11 +259,6 @@ CONTAINS
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
-!
-! Programmer:	Elena Pourmal
-!		September 19, 2002
-!
-!
 !----------------------------------------------------------------------
   SUBROUTINE h5_cleanup_f(base_name, fapl, hdferr)
 !
@@ -316,11 +306,6 @@ CONTAINS
 !
 ! Outputs:
 !		none
-!
-! Programmer:	Quincey Koziol
-!		December 14, 2004
-!
-!
 !----------------------------------------------------------------------
   SUBROUTINE h5_exit_f(status)
 !
@@ -354,10 +339,6 @@ CONTAINS
 !
 ! Outputs:      HDF5_NOCLEANUP:  .true. - don't remove test files
 !		                .false. - remove test files
-!
-! Programmer:	M.S. Breitenfeld
-!               September 30, 2008
-!
 !----------------------------------------------------------------------
   SUBROUTINE h5_env_nocleanup_f(HDF5_NOCLEANUP)
 !

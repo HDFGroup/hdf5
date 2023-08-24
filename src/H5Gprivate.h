@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Gprivate.h
- *                      Jul 11 1997
- *                      Robb Matzke
  *
  * Purpose:             Library-visible declarations.
  *

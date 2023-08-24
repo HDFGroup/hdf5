@@ -19,9 +19,6 @@
  *     at the VFL (virtual file layer) level.
  *
  *     Demonstrates basic use cases and fapl/dxpl interaction.
- *
- * Programmer: Jacob Smith
- *             2017-10-11
  */
 
 #include "h5test.h"
@@ -72,9 +69,6 @@
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *****************************************************************************/
 
 /*----------------------------------------------------------------------------
@@ -99,14 +93,11 @@
  *
  *     *FAILED* at somefile.c:12 in function_name()...
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
+        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                              \
     }
 
 /*----------------------------------------------------------------------------
@@ -126,9 +117,6 @@
  *
  *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
  *     similar to `TEST_ERROR` in h5test.h
- *
- * Programmer: Jacob Smith
- *             2017-10-23
  *
  *----------------------------------------------------------------------------
  */
@@ -154,9 +142,6 @@
  *     `FAIL_UNLESS( 5 == my_op() )`
  *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
  *         (see JSVERIFY)
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -188,19 +173,16 @@
  *       ! Expected 425
  *       ! Actual   3
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 static inline void
 jserr_long(long expected, long actual, const char *reason)
 {
     if (reason != NULL) {
-        HDprintf("%s\n", reason);
+        printf("%s\n", reason);
     }
     else {
-        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
+        printf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
     }
 }
 
@@ -233,19 +215,16 @@ jserr_long(long expected, long actual, const char *reason)
  *     !!! Actual:
  *     not what I expected at all
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 static inline void
 jserr_str(const char *expected, const char *actual, const char *reason)
 {
     if (reason != NULL) {
-        HDprintf("%s\n", reason);
+        printf("%s\n", reason);
     }
     else {
-        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
+        printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
     }
 }
 
@@ -268,9 +247,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(expected, actual, reason)                                                                   \
@@ -289,9 +265,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     If equal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -312,9 +285,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
@@ -332,8 +302,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(actual, expected, reason)                                                                   \
@@ -345,8 +313,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(actual, expected, reason)                                                               \
@@ -358,8 +324,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
@@ -423,9 +387,6 @@ H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, FALSE, "", "", "
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             2017-10-23
  *
  *---------------------------------------------------------------------------
  */
@@ -561,7 +522,7 @@ test_fapl_config_validation(void)
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -588,7 +549,7 @@ test_fapl_config_validation(void)
              */
             success = H5Pset_fapl_ros3(fapl_id, &case_ptr->config);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         JSVERIFY(case_ptr->expected, success, case_ptr->msg)
 
@@ -629,7 +590,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return 1;
 } /* test_fapl_config_validation */
@@ -649,9 +610,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  John Mainzer
- *              7/12/17
  *
  *-------------------------------------------------------------------------
  */
@@ -706,7 +664,7 @@ error:
     {
         (void)H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 
@@ -724,9 +682,6 @@ error:
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             1027-11-03
  *
  *---------------------------------------------------------------------------
  */
@@ -842,7 +797,7 @@ test_vfd_open(void)
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -877,7 +832,7 @@ test_vfd_open(void)
         {
             fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (NULL != fd)
             JSVERIFY(1, 0, T.message); /* wrapper to print message and fail */
     }
@@ -921,14 +876,14 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (fapl_file_access >= 0) {
         H5E_BEGIN_TRY
         {
             (void)H5Pclose(fapl_file_access);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (curl_ready == TRUE) {
         curl_global_cleanup();
@@ -954,9 +909,6 @@ error:
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             2017-11-08
  *
  *---------------------------------------------------------------------------
  */
@@ -985,14 +937,14 @@ test_eof_eoa(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1062,7 +1014,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1077,9 +1029,6 @@ error:
  *
  *     Demonstrate a not-obvious constraint by the library, preventing
  *     file read before EoA is set
- *
- * Programmer: Jacob Smith
- *             2018-01-26
  *
  *-----------------------------------------------------------------------------
  */
@@ -1096,14 +1045,14 @@ test_H5FDread_without_eoa_set_fails(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1131,7 +1080,7 @@ test_H5FDread_without_eoa_set_fails(void)
 
     H5E_BEGIN_TRY{/* mute stack trace on expected failure */
                   JSVERIFY(FAIL, H5FDread(file_shakespeare, H5FD_MEM_DRAW, H5P_DEFAULT, 1200699, 102, buffer),
-                           "cannot read before eoa is set")} H5E_END_TRY;
+                           "cannot read before eoa is set")} H5E_END_TRY
     JSVERIFY_STR("", buffer, "buffer should remain untouched")
 
     /************
@@ -1160,7 +1109,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1177,9 +1126,6 @@ error:
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             2017-11-06
  *
  *---------------------------------------------------------------------------
  */
@@ -1270,14 +1216,14 @@ test_read(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1330,7 +1276,7 @@ test_read(void)
         {
             open_return = H5FDread(file_raven, H5FD_MEM_DRAW, H5P_DEFAULT, test.addr, test.len, buffer);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         JSVERIFY(test.success, open_return, test.message)
         if (open_return == SUCCEED)
@@ -1363,7 +1309,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1383,9 +1329,6 @@ error:
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             2017-11-06
  *
  *---------------------------------------------------------------------------
  */
@@ -1414,7 +1357,7 @@ test_noops_and_autofails(void)
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1443,12 +1386,12 @@ test_noops_and_autofails(void)
     /* auto-fail calls to write and truncate
      */
     H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
-                           "write must fail")} H5E_END_TRY;
+                           "write must fail")} H5E_END_TRY
 
-    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, FALSE), "truncate must fail")} H5E_END_TRY;
+    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, FALSE), "truncate must fail")} H5E_END_TRY
 
     H5E_BEGIN_TRY{
-        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY;
+        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY
 
     /************
      * TEARDOWN *
@@ -1476,7 +1419,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (file) {
         (void)H5FDclose(file);
@@ -1501,9 +1444,6 @@ error:
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             2017-11-06
  *
  *---------------------------------------------------------------------------
  */
@@ -1534,14 +1474,14 @@ test_cmp(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1610,7 +1550,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1629,9 +1569,6 @@ error:
  *
  *     PASSED : 0
  *     FAILED : 1
- *
- * Programmer: Jacob Smith
- *             2017-11-07
  *
  *---------------------------------------------------------------------------
  */
@@ -1658,14 +1595,14 @@ test_H5F_integration(void)
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        fflush(stdout);
         return 0;
     }
 
@@ -1683,11 +1620,11 @@ test_H5F_integration(void)
 
     /* Read-Write Open access is not allowed with this file driver.
      */
-    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fopen(url_h5_public, H5F_ACC_RDWR, fapl_id))} H5E_END_TRY;
+    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fopen(url_h5_public, H5F_ACC_RDWR, fapl_id))} H5E_END_TRY
 
     /* H5Fcreate() is not allowed with this file driver.
      */
-    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fcreate(url_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id))} H5E_END_TRY;
+    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fcreate(url_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id))} H5E_END_TRY
 
     /* Successful open.
      */
@@ -1711,15 +1648,15 @@ error:
     /***********
      * CLEANUP *
      ***********/
-    HDprintf("\nerror!");
-    HDfflush(stdout);
+    printf("\nerror!");
+    fflush(stdout);
 
     if (fapl_id >= 0) {
         H5E_BEGIN_TRY
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (file > 0)
         (void)H5Fclose(file);
@@ -1739,9 +1676,6 @@ error:
  * Return:      Success: 0
  *              Failure: 1
  *
- * Programmer:  Jacob Smith
- *              2017-10-23
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1753,7 +1687,7 @@ main(void)
 
 #endif /* H5_HAVE_ROS3_VFD */
 
-    HDprintf("Testing ros3 VFD functionality.\n");
+    printf("Testing ros3 VFD functionality.\n");
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -1763,8 +1697,8 @@ main(void)
 
     bucket_url_env = HDgetenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
-        HDprintf("WARNING: S3 bucket url is not defined in environment "
-                 "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
+        printf("WARNING: S3 bucket url is not defined in environment "
+               "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
     }
     else {
         HDstrncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
@@ -1774,25 +1708,25 @@ main(void)
     if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_text_restricted, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
                                           (const char *)s3_test_bucket_url,
                                           (const char *)S3_TEST_RESOURCE_TEXT_RESTRICTED)) {
-        HDprintf("* ros3 setup failed (text_restricted) ! *\n");
+        printf("* ros3 setup failed (text_restricted) ! *\n");
         return 1;
     }
     if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_text_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
                                           (const char *)s3_test_bucket_url,
                                           (const char *)S3_TEST_RESOURCE_TEXT_PUBLIC)) {
-        HDprintf("* ros3 setup failed (text_public) ! *\n");
+        printf("* ros3 setup failed (text_public) ! *\n");
         return 1;
     }
     if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_h5_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
                                           (const char *)s3_test_bucket_url,
                                           (const char *)S3_TEST_RESOURCE_H5_PUBLIC)) {
-        HDprintf("* ros3 setup failed (h5_public) ! *\n");
+        printf("* ros3 setup failed (h5_public) ! *\n");
         return 1;
     }
     if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s",
                                           (const char *)s3_test_bucket_url,
                                           (const char *)S3_TEST_RESOURCE_MISSING)) {
-        HDprintf("* ros3 setup failed (missing) ! *\n");
+        printf("* ros3 setup failed (missing) ! *\n");
         return 1;
     }
 
@@ -1836,17 +1770,17 @@ main(void)
     nerrors += test_H5F_integration();
 
     if (nerrors > 0) {
-        HDprintf("***** %d ros3 TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d ros3 TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         nerrors = 1;
     }
     else {
-        HDprintf("All ros3 tests passed.\n");
+        printf("All ros3 tests passed.\n");
     }
     return nerrors; /* 0 if no errors, 1 if any errors */
 
 #else
 
-    HDprintf("SKIPPED - read-only S3 VFD not built\n");
+    printf("SKIPPED - read-only S3 VFD not built\n");
     return EXIT_SUCCESS;
 
 #endif /* H5_HAVE_ROS3_VFD */

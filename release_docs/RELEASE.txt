@@ -47,6 +47,33 @@ New Features
 
     Configuration:
     -------------
+    - Autotools builds now build the szip filter by default when an appropriate
+      library is found
+
+      Since libaec is prevalent and BSD-licensed for both encoding and
+      decoding, we build the szip filter by default now.
+
+      Both autotools and CMake build systems will process the szip filter the same as
+      the zlib filter is processed.
+
+    - Removed CMake cross-compiling variables
+
+      * HDF5_USE_PREGEN
+      * HDF5_BATCH_H5DETECT
+
+      These were used to work around H5detect and H5make_libsettings and
+      are no longer required.
+
+    - Running H5make_libsettings is no longer required for cross-compiling
+
+      The functionality of H5make_libsettings is now handled via template files,
+      so H5make_libsettings has been removed.
+
+    - Running H5detect is no longer required for cross-compiling
+
+      The functionality of H5detect is now exercised at library startup,
+      so H5detect has been removed.
+
     - Updated HDF5 API tests CMake code to support VOL connectors
 
       * Implemented support for fetching, building and testing HDF5
@@ -145,9 +172,46 @@ New Features
 
       See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
 
+    - Added the CMake variable HDF5_ENABLE_ROS3_VFD to the HDF5 CMake config
+      file hdf5-config.cmake. This allows to easily detect if the library
+      has been built with or without read-only S3 functionality.
 
     Library:
     --------
+    - Added support for in-place type conversion in most cases
+
+      In-place type conversion allows the library to perform type conversion
+      without an intermediate type conversion buffer.  This can improve
+      performance by allowing I/O in a single operation over the entire
+      selection instead of being limited by the size of the intermediate buffer.
+      Implemented for I/O on contiguous and chunked datasets when the selection
+      is contiguous in memory and when the memory datatype is not smaller than
+      the file datatype.
+
+    - Changed selection I/O to be on by default when using the MPIO file driver
+
+    - Added support for selection I/O in the MPIO file driver
+
+      Previously, only vector I/O operations were supported.  Support for
+      selection I/O should improve performance and reduce memory uses in some
+      cases.
+
+    - Change the error handling for a not found path in the find plugin process.
+
+      While attempting to load a plugin the HDF5 library will fail if one of the
+      directories in the plugin paths does not exist, even if there are more paths
+      to check. Instead of exiting the function with an error, just logged the error
+      and continue processing the list of paths to check.
+
+    - Implemented support for temporary security credentials for the Read-Only
+      S3 (ROS3) file driver.
+
+      When using temporary security credentials, one also needs to specify a
+      session/security token next to the access key id and secret access key.
+      This token can be specified by the new API function H5Pset_fapl_ros3_token().
+      The API function H5Pget_fapl_ros3_token() can be used to retrieve
+      the currently set token.
+
     - Added a Subfiling VFD configuration file prefix environment variable
 
       The Subfiling VFD now checks for values set in a new environment
@@ -176,6 +240,9 @@ New Features
 
     Fortran Library:
     ----------------
+    - Added h5pget_vol_cap_flags_f and related Fortran VOL
+      capability definitions.
+
     - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
     - Added Fortran APIs:
@@ -225,6 +292,108 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed performance regression with some compound type conversions
+
+      In-place type conversion was introduced for most use cases in 1.14.2.
+      While being able to use the read buffer for type conversion potentially
+      improves performance by performing the entire I/O at once, it also
+      disables the optimized compound type conversion used when the destination
+      is a subset of the source. Disabled in-place type conversion when using
+      this optimized conversion and there is no benefit in terms of the I/O
+      size.
+
+    - Fixed an assertion in a previous fix for CVE-2016-4332
+
+      An assert could fail when processing corrupt files that have invalid
+      shared message flags (as in CVE-2016-4332).
+
+      The assert statement in question has been replaced with pointer checks
+      that don't raise errors. Since the function is in cleanup code, we do
+      our best to close and free things, even when presented with partially
+      initialized structs.
+
+      Fixes CVE-2016-4332 and HDFFV-9950 (confirmed via the cve_hdf5 repo)
+
+    - Fixed a file space allocation bug in the parallel library for chunked
+      datasets
+
+      With the addition of support for incremental file space allocation for
+      chunked datasets with filters applied to them that are created/accessed
+      in parallel, a bug was introduced to the library's parallel file space
+      allocation code. This could cause file space to not be allocated correctly
+      for datasets without filters applied to them that are created with serial
+      file access and later opened with parallel file access. In turn, this could
+      cause parallel writes to those datasets to place incorrect data in the file.
+
+    - Fixed an assertion failure in Parallel HDF5 when a file can't be created
+      due to an invalid library version bounds setting
+
+      An assertion failure could occur in H5MF_settle_raw_data_fsm when a file
+      can't be created with Parallel HDF5 due to specifying the use of a paged,
+      persistent file free space manager
+      (H5Pset_file_space_strategy(..., H5F_FSPACE_STRATEGY_PAGE, 1, ...)) with
+      an invalid library version bounds combination
+      (H5Pset_libver_bounds(..., H5F_LIBVER_EARLIEST, H5F_LIBVER_V18)). This
+      has now been fixed.
+
+    - Fixed bugs in selection I/O
+
+      Previously, the library could fail in some cases when performing selection
+      I/O with type conversion.
+
+    - Fixed CVE-2018-13867
+
+      A corrupt file containing an invalid local heap datablock address
+      could trigger an assert failure when the metadata cache attempted
+      to load the datablock from storage.
+
+      The local heap now verifies that the datablock address is valid
+      when the local heap header information is parsed.
+
+    - Fixed CVE-2018-11202
+
+      A malformed file could result in chunk index memory leaks. Under most
+      conditions (i.e., when the --enable-using-memchecker option is NOT
+      used), this would result in a small memory leak and and infinite loop
+      and abort when shutting down the library. The infinite loop would be
+      due to the "free list" package not being able to clear its resources
+      so the library couldn't shut down. When the "using a memory checker"
+      option is used, the free lists are disabled so there is just a memory
+      leak with no abort on library shutdown.
+
+      The chunk index resources are now correctly cleaned up when reading
+      misparsed files and valgrind confirms no memory leaks.
+
+    - Fixed an issue where an assert statement was converted to an
+      incorrect error check statement
+
+      An assert statement in the library dealing with undefined dataset data
+      fill values was converted to an improper error check that would always
+      trigger when a dataset's fill value was set to NULL (undefined). This
+      has now been fixed.
+
+    - Fixed an assertion failure when attempting to use the Subfiling IOC
+      VFD directly
+
+      The Subfiling feature makes use of two Virtual File Drivers, the
+      Subfiling VFD and the IOC (I/O Concentrator) VFD. The two VFDs are
+      intended to be stacked together such that the Subfiling VFD sits
+      "on top" of the IOC VFD and routes I/O requests through it; using the
+      IOC VFD alone is currently unsupported. The IOC VFD has been fixed so
+      that an error message is displayed in this situation rather than causing
+      an assertion failure.
+
+    - Fixed a potential bug when copying empty enum datatypes
+
+      Copying an empty enum datatype (including implicitly, as when an enum
+      is a part of a compound datatype) would fail in an assert in debug
+      mode and could fail in release mode depending on how the platform
+      handles undefined behavior regarding size 0 memory allocations and
+      using memcpy with a NULL src pointer.
+
+      The library is now more careful about using memory operations when
+      copying empty enum datatypes and will not error or raise an assert.
+
     - Added an AAPL check to H5Acreate
 
       A check was added to H5Acreate to ensure that a failure is correctly
@@ -422,14 +591,40 @@ Bug Fixes since HDF5-1.14.0 release
 
       Fixes GitHub issue #2432
 
+    - Reading a H5std_string (std::string) via a C++ DataSet previously
+      truncated the string at the first null byte as if reading a C string.
+      Fixed length datasets are now read into H5std_string as a fixed length
+      string of the appropriate size. Variable length datasets will still be
+      truncated at the first null byte.
+
+      Fixes Github issue #3034
+
+    - Fixed write buffer overflow in H5O__alloc_chunk
+
+      The overflow was found by OSS-Fuzz https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=58658
 
     Java Library
     ------------
-    -
+    - Fixed switch case 'L' block missing a break statement.
+
+      The HDF5Array.arrayify method is missing a break statement in the case 'L': section
+      which causes it to fall through and throw an HDF5JavaException when attempting to
+      read an Array[Array[Long]].
+
+      The error was fixed by inserting a break statement at the end of the case 'L': sections.
+
+      Fixes GitHub issue #3056
 
 
     Configuration
     -------------
+    - Fixed a configuration issue that prevented building of the Subfiling VFD on macOS
+
+      Checks were added to the CMake and Autotools code to verify that CLOCK_MONOTONIC_COARSE,
+      PTHREAD_MUTEX_ADAPTIVE_NP and pthread_condattr_setclock() are available before attempting
+      to use them in Subfiling VFD-related utility code. Without these checks, attempting
+      to build the Subfiling VFD on macOS would fail. 
+
     - The accum test now passes on macOS 12+ (Monterey) w/ CMake
 
       Due to changes in the way macOS handles LD_LIBRARY_PATH, the accum test
@@ -507,6 +702,22 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
+    - Fixed an issue in h5repack for variable-length typed datasets
+
+      When repacking datasets into a new file, h5repack tries to determine whether
+      it can use H5Ocopy to copy each dataset into the new file, or if it needs to
+      manually re-create the dataset, then read data from the old dataset and write
+      it to the new dataset. H5repack was previously using H5Ocopy for datasets with
+      variable-length datatypes, but this can be problematic if the global heap
+      addresses involved do not match exactly between the old and new files. These
+      addresses could change for a variety of reasons, such as the command-line options
+      provided to h5repack, how h5repack allocate space in the repacked file, etc.      
+      Since H5Ocopy does not currently perform any translation when these addresses
+      change, datasets that were repacked with H5Ocopy could become unreadable in the
+      new file. H5repack has been fixed to repack variable-length typed datasets without
+      using H5Ocopy to ensure that the new datasets always have the correct global heap
+      addresses.
+    
     - Names of objects with square brackets will have trouble without the
       special argument, --no-compact-subset, on the h5dump command line.
 
@@ -558,6 +769,26 @@ Bug Fixes since HDF5-1.14.0 release
 
     Testing
     -------
+    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
+
+      Support for MPI atomicity operations is not implemented for major
+      versions of OpenMPI less than version 5. This would cause the MPI
+      atomicity tests for parallel HDF5 to sporadically fail when run
+      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
+      skip running the atomicity tests if the major version of OpenMPI is
+      < 5.
+
+    - Fixed a testing failure in testphdf5 on Cray machines
+
+      On some Cray machines, what appears to be a bug in Cray MPICH was causing
+      calls to H5Fis_accessible to create a 0-byte file with strange Unix
+      permissions. This was causing an H5Fdelete file deletion test in the
+      testphdf5 program to fail due to a just-deleted HDF5 file appearing to
+      still be accessible on the file system. The issue in Cray MPICH has been
+      worked around for the time being by resetting the MPI_Info object on the
+      File Access Property List used to MPI_INFO_NULL before passing it to the
+      H5Fis_accessible call.
+
     - A bug was fixed in the HDF5 API test random datatype generation code
 
       A bug in the random datatype generation code could cause test failures
@@ -585,25 +816,28 @@ Platforms Tested
     Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
                                      (cmake and autotools)
 
-    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.3.0-17ubuntu1
-    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.3.0-17ubuntu1
-    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4
+    Linux 5.19.0-1027-aws            GNU gcc (GCC) 11.3.0-1ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 11.3.0-1ubuntu1
+    Ubuntu 22.04                     Intel oneAPI DPC++/C++ Compiler, IFX 2023.1.0
+                                     Ubuntu clang version 14.0.0-1ubuntu1
                                      (cmake and autotools)
 
-    Linux 5.3.18-150300-cray_shasta_c cray-mpich/8.1.16
-    #1 SMP x86_64 GNU/Linux              Cray clang 14.0.0
-    (crusher)                            GCC 11.2.0
+    Linux 5.15.0-1037-aws            GNU gcc (GCC) 9.4.0-1ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.4.0-1ubuntu1
+    Ubuntu 20.04                     Intel oneAPI DPC++/C++ Compiler, IFX 2023.1.0
+                                     Ubuntu clang version 10.0.0-4ubuntu1
+                                     (cmake and autotools)
+
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.25
+    #1 SMP x86_64 GNU/Linux            cce 15.0.1
+    (perlmutter)                       GCC 12.2.0
+                                       intel-oneapi/2023.1.0
+                                       nvidia/22.7
                                      (cmake)
 
-    Linux 4.14.0-115.35.1.1chaos     openmpi 4.0.5
-    #1 SMP aarch64 GNU/Linux             GCC 9.2.0 (ARM-build-5)
-    (stria)                              GCC 7.2.0 (Spack GCC)
-                                     (cmake)
-
-    Linux 4.14.0-115.35.1.3chaos     spectrum-mpi/rolling-release
-    #1 SMP ppc64le GNU/Linux             clang 12.0.1
-    (vortex)                             GCC 8.3.1
-                                         XL 16.1.1
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.23
+    #1 SMP x86_64 GNU/Linux              cce 15.0.1
+    (crusher)                            GCC 12.2.0
                                      (cmake)
 
     Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
@@ -621,12 +855,15 @@ Platforms Tested
     Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     Power8 (echidna)                 GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+                                     IBM XL C for Linux, V13.1
+                                     IBM XL Fortran for Linux, V15.1
 
     Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:
     Centos7                              Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly/kituo/moohan)                 Version 4.9.3, Version 5.3.0, Version 6.3.0,
                                          Version 7.2.0, Version 8.3.0, Version 9.1.0
+                                         Version 10.2.0
                                      Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                      compilers:
                                          Version 17.0.0.098 Build 20160721
@@ -634,33 +871,22 @@ Platforms Tested
                                          with NAG Fortran Compiler Release 6.1(Tozai)
                                      Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
                                          with NAG Fortran Compiler Release 6.1(Tozai)
-                                     MPICH 3.1.4 compiled with GCC 4.9.3
                                      MPICH 3.3 compiled with GCC 7.2.0
-                                     OpenMPI 2.1.6 compiled with icc 18.0.1
-                                     OpenMPI 3.1.3 and 4.0.0 compiled with GCC 7.2.0
+                                     MPICH 4.0.3 compiled with GCC 7.2.0
+                                     OpenMPI 3.1.3 compiled with GCC 7.2.0
+                                     OpenMPI 4.1.2 compiled with GCC 9.1.0
                                      PGI C, Fortran, C++ for 64-bit target on
                                      x86_64;
                                          Version 19.10-0
+                                     NVIDIA C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 22.5-0
                                      (autotools and cmake)
 
     Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
     #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
     (quartz)                             GCC 7.3.0, 8.1.0
                                          Intel 19.0.4, 2022.2, oneapi.2022.2
-
-    Linux-3.10.0-1160.71.1.1chaos    openmpi/4.1
-    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
-    (skybridge)                          Intel/19.1
-                                     (cmake)
-
-    Linux-3.10.0-1160.66.1.1chaos    openmpi/4.1
-    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
-    (attaway)                            Intel/19.1
-                                     (cmake)
-
-    Linux-3.10.0-1160.59.1.1chaos    openmpi/4.1
-    #1 SMP x86_64 GNU/Linux              Intel/19.1
-    (chama)                          (cmake)
 
     macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
     Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
@@ -674,14 +900,9 @@ Platforms Tested
     64-bit                           gfortran GNU Fortran (GCC) 6.3.0
     (bear)                           Intel icc/icpc/ifort version 19.0.4.233 20190416
 
-    macOS Sierra 10.12.6             Apple LLVM version 9.0.0 (clang-900.39.2)
-    64-bit                           gfortran GNU Fortran (GCC) 7.4.0
-    (kite)                           Intel icc/icpc/ifort version 17.0.2
-
     Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
     64-bit                           gfortran GNU Fortran (GCC) 5.2.0
     (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
-
 
     Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:
@@ -775,5 +996,5 @@ The issues with the gif tool are:
     HDFFV-11048 CVE-2020-10809
 These CVE issues have not yet been addressed and are avoided by not building
 the gif tool by default. Enable building the High-Level tools with these options:
-    autotools:   --enable-hltools
-    cmake:       HDF5_BUILD_HL_TOOLS=ON
+    autotools:   --enable-hlgiftools
+    cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON

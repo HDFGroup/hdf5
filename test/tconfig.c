@@ -25,13 +25,18 @@
  * with the macro size.
  */
 #define vrfy_cint_type(ctype, uctype, ctype_macro)                                                           \
-    /* check signed type size */                                                                             \
-    vrfy_macrosize(ctype, ctype_macro, #ctype_macro);                                                        \
-    /* check unsigned type size */                                                                           \
-    vrfy_macrosize(uctype, ctype_macro, #ctype_macro);
+    do {                                                                                                     \
+        /* check signed type size */                                                                         \
+        vrfy_macrosize(ctype, ctype_macro, #ctype_macro);                                                    \
+        /* check unsigned type size */                                                                       \
+        vrfy_macrosize(uctype, ctype_macro, #ctype_macro);                                                   \
+    } while (0)
 
 /* verify C type sizes: verify the sizeof type with the macro size. */
-#define vrfy_ctype(type, macro) vrfy_macrosize(type, macro, #macro);
+#define vrfy_ctype(type, macro)                                                                              \
+    do {                                                                                                     \
+        vrfy_macrosize(type, macro, #macro);                                                                 \
+    } while (0)
 
 /* verify if the sizeof(type) matches size defined in macro. */
 /* Needs this extra step so that we can print the macro name. */
@@ -51,9 +56,6 @@ void test_exit_definitions(void);
  *
  * Return:    none (error is fed back via global variable num_errs)
  *
- * Programmer:    Albert Cheng
- *              September 25, 2001
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -72,9 +74,6 @@ test_configure(void)
  *
  * Return:    none
  *
- * Programmer:    Albert Cheng
- *              September 25, 2001
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -89,9 +88,6 @@ cleanup_configure(void)
  * Purpose:    test C language data type sizes
  *
  * Return:    none (error is fed back via global variable num_errs)
- *
- * Programmer:    Albert Cheng
- *              September 25, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -173,9 +169,6 @@ test_config_ctypes(void)
  * Purpose:    test the exit macros values
  *
  * Return:    none (error is fed back via global variable num_errs)
- *
- * Programmer:    Albert Cheng
- *              October 12, 2009
  *
  *-------------------------------------------------------------------------
  */

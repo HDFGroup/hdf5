@@ -962,10 +962,10 @@ test_h5o_link(void)
 
     /* Allocate memory buffers */
     /* (These are treated as 2-D buffers) */
-    wdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
-    CHECK_PTR(wdata, "HDmalloc");
-    rdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
-    CHECK_PTR(rdata, "HDmalloc");
+    wdata = (int *)malloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
+    CHECK_PTR(wdata, "malloc");
+    rdata = (int *)malloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
+    CHECK_PTR(rdata, "malloc");
 
     /* Initialize the raw data */
     for (i = n = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
@@ -994,7 +994,7 @@ test_h5o_link(void)
             {
                 ret = H5Pset_libver_bounds(fapl_id, low, high);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
                 continue;
@@ -1088,8 +1088,8 @@ test_h5o_link(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Release buffers */
-    HDfree(wdata);
-    HDfree(rdata);
+    free(wdata);
+    free(rdata);
 } /* end test_h5o_link() */
 
 #if 0
@@ -1186,7 +1186,7 @@ test_h5o_comment(void)
     {
         ret = H5Oset_comment(dspace, "dataspace comment");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Oset_comment");
 
     /* Close the file */
@@ -1361,7 +1361,7 @@ test_h5o_comment_by_name(void)
     {
         ret = H5Oset_comment_by_name(dspace, ".", "dataspace comment", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Oset_comment");
 
     /* Close the file */
@@ -1463,8 +1463,8 @@ test_h5o_getinfo_same_file(void)
     CHECK(gid2, FAIL, "H5Gcreate2");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, through group IDs */
     ret = H5Oget_info3(gid1, &oinfo1, H5O_INFO_BASIC);
@@ -1475,8 +1475,8 @@ test_h5o_getinfo_same_file(void)
     VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info3");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, by name */
     ret = H5Oget_info_by_name3(fid1, "group1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
@@ -1507,8 +1507,8 @@ test_h5o_getinfo_same_file(void)
     CHECK(gid2, FAIL, "H5Gopen2");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, through group IDs */
     ret = H5Oget_info3(gid1, &oinfo1, H5O_INFO_BASIC);
@@ -1519,8 +1519,8 @@ test_h5o_getinfo_same_file(void)
     VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info3");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, by name */
     ret = H5Oget_info_by_name3(fid1, "group1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
@@ -1782,8 +1782,8 @@ test_h5o_getinfo_visit(void)
     CHECK(gid2, FAIL, "H5Gcreate2");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for "group1" via H5Oget_info1 and H5Oget_info2 */
     ret = H5Oget_info1(gid1, &oinfo1);
@@ -1796,8 +1796,8 @@ test_h5o_getinfo_visit(void)
     VERIFY(oinfo1.num_attrs, oinfo2.num_attrs, "obj info from H5Oget_info1/2");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for "group2" via H5Oget_info1 and H5Oget_info2 */
     ret = H5Oget_info_by_name1(fid, "group2", &oinfo1, H5P_DEFAULT);
@@ -1870,9 +1870,6 @@ test_h5o(void)
  *
  * Return:    none
  *
- * Programmer:    James Laird
- *              June 3, 2006
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1885,5 +1882,5 @@ cleanup_h5o(void)
         h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
         H5Fdelete(filename, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }

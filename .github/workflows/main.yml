@@ -81,6 +81,7 @@ jobs:
             cpp: ON
             fortran: OFF
             java: ON
+            docs: OFF
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -88,6 +89,7 @@ jobs:
             parallel: OFF
             mirror_vfd: OFF
             direct_vfd: OFF
+            ros3_vfd: OFF
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             run_tests: true
 
@@ -100,6 +102,7 @@ jobs:
             cpp: ON
             fortran: ON
             java: ON
+            docs: ON
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -107,6 +110,7 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: ON
+            ros3_vfd: ON
             toolchain: "config/toolchain/gcc.cmake"
             generator: "-G Ninja"
             run_tests: true
@@ -120,9 +124,11 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
+            ros3_vfd: enable
             deprec_sym: enable
             default_api: v114
             szip: yes
@@ -141,9 +147,11 @@ jobs:
             cpp: disable
             fortran: enable
             java: disable
+            docs: disable
             parallel: enable
             mirror_vfd: disable
             direct_vfd: disable
+            ros3_vfd: disable
             deprec_sym: enable
             default_api: v114
             szip: yes
@@ -161,6 +169,7 @@ jobs:
             cpp: ON
             fortran: OFF
             java: ON
+            docs: OFF
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -168,6 +177,7 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: OFF
+            ros3_vfd: OFF
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
             run_tests: true
@@ -186,9 +196,11 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
+            ros3_vfd: enable
             deprec_sym: enable
             default_api: v16
             szip: yes
@@ -209,9 +221,11 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
+            ros3_vfd: enable
             deprec_sym: enable
             default_api: v18
             szip: yes
@@ -232,9 +246,11 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
+            ros3_vfd: enable
             deprec_sym: enable
             default_api: v110
             szip: yes
@@ -255,9 +271,11 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
+            ros3_vfd: enable
             deprec_sym: enable
             default_api: v112
             szip: yes
@@ -278,9 +296,11 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
+            ros3_vfd: enable
             deprec_sym: enable
             default_api: v114
             szip: yes
@@ -301,9 +321,11 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
+            ros3_vfd: enable
             deprec_sym: disable
             default_api: default
             szip: yes
@@ -325,9 +347,11 @@ jobs:
             cpp: enable
             fortran: disable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: disable
             direct_vfd: enable
+            ros3_vfd: disable
             deprec_sym: enable
             default_api: v114
             szip: yes
@@ -349,9 +373,11 @@ jobs:
             cpp: enable
             fortran: disable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: disable
             direct_vfd: enable
+            ros3_vfd: disable
             deprec_sym: enable
             default_api: v114
             szip: yes
@@ -373,9 +399,11 @@ jobs:
             cpp: disable
             fortran: disable
             java: disable
+            docs: disable
             parallel: enable
             mirror_vfd: disable
             direct_vfd: enable
+            ros3_vfd: disable
             deprec_sym: enable
             default_api: v114
             toolchain: ""
@@ -396,9 +424,11 @@ jobs:
             cpp: disable
             fortran: disable
             java: disable
+            docs: disable
             parallel: enable
             mirror_vfd: disable
             direct_vfd: enable
+            ros3_vfd: disable
             deprec_sym: enable
             default_api: v114
             toolchain: ""
@@ -433,29 +463,31 @@ jobs:
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
 
-      - name: Install CMake Dependencies (Linux)
-        run: sudo apt-get install ninja-build
-        if: matrix.os == 'ubuntu-latest'
-
-      - name: Install Autotools Dependencies (Linux, serial)
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
         run: |
            sudo apt update
-           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
+        if: matrix.os == 'ubuntu-latest'
+
+      # CMake gets libaec from fetchcontent
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
            sudo apt install libaec0 libaec-dev
-        if: (matrix.generator == 'autogen') && (matrix.parallel != 'enable')
+        if: (matrix.generator == 'autogen')
 
       - name: Install Autotools Dependencies (Linux, parallel)
         run: |
-           sudo apt update
-           sudo apt install automake autoconf libtool libtool-bin
            sudo apt install openmpi-bin openmpi-common mpi-default-dev
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
-           sudo apt install libaec0 libaec-dev
         if: (matrix.generator == 'autogen') && (matrix.parallel == 'enable')
 
       - name: Install Dependencies (Windows)
@@ -463,7 +495,7 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Install Dependencies (macOS)
-        run: brew install ninja
+        run: brew install ninja doxygen
         if: matrix.os == 'macos-13'
 
       - name: Set environment for MSVC (Windows)
@@ -486,7 +518,19 @@ jobs:
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --${{ matrix.deprec_sym }}-deprecated-symbols --with-default-api-version=${{ matrix.default_api }} --enable-shared --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --with-szlib=${{ matrix.szip }}
+          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=${{ matrix.build_mode.autotools }} \
+            --${{ matrix.deprec_sym }}-deprecated-symbols \
+            --with-default-api-version=${{ matrix.default_api }} \
+            --enable-shared \
+            --${{ matrix.parallel }}-parallel \
+            --${{ matrix.cpp }}-cxx \
+            --${{ matrix.fortran }}-fortran \
+            --${{ matrix.java }}-java \
+            --${{ matrix.mirror_vfd }}-mirror-vfd \
+            --${{ matrix.direct_vfd }}-direct-vfd \
+            --${{ matrix.ros3_vfd }}-ros3-vfd \
+            --with-szlib=${{ matrix.szip }}
         shell: bash
         if: (matrix.generator == 'autogen') && ! (matrix.thread_safety.enabled)
 
@@ -495,7 +539,16 @@ jobs:
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.parallel }}-parallel --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --with-szlib=${{ matrix.szip }}
+          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=${{ matrix.build_mode.autotools }} \
+            --enable-shared \
+            --enable-threadsafe \
+            --disable-hl \
+            --${{ matrix.parallel }}-parallel \
+            --${{ matrix.mirror_vfd }}-mirror-vfd \
+            --${{ matrix.direct_vfd }}-direct-vfd \
+            --${{ matrix.ros3_vfd }}-ros3-vfd \
+            --with-szlib=${{ matrix.szip }}
         shell: bash
         if: (matrix.generator == 'autogen') && (matrix.thread_safety.enabled)
 
@@ -507,7 +560,25 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            ${{ matrix.generator }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
+            -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
+            -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} \
+            -DHDF5_BUILD_JAVA=${{ matrix.java }} \
+            -DHDF5_BUILD_DOC=${{ matrix.docs }} \
+            -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} \
+            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
+            -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} \
+            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
+            $GITHUB_WORKSPACE
         shell: bash
         if: (matrix.generator != 'autogen') && ! (matrix.thread_safety.enabled)
 
@@ -516,7 +587,27 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=OFF -DHDF5_BUILD_FORTRAN:BOOL=OFF -DHDF5_BUILD_JAVA:BOOL=OFF -DHDF5_BUILD_HL_LIB:BOOL=OFF -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            ${{ matrix.generator }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+            -DHDF5_BUILD_DOC=OFF \
+            -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} \
+            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
+            -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} \
+            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
+            $GITHUB_WORKSPACE
         shell: bash
         if: (matrix.generator != 'autogen') && (matrix.thread_safety.enabled)
 

@@ -34,8 +34,6 @@ $indent = 2;
 # Read in the public symbol version description text file and create the
 # appropriate headers needed by the library.
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2007/07/10
 
 ##############################################################################
 # Print the copyright into an open file
@@ -509,7 +507,7 @@ for $file (@ARGV) {
     close SOURCE;
 
     # Create header files
-    print "Generating '", $prefix, "H5version.h'\n";
+    print "Generating 'H5version.h'\n";
     create_public($prefix);
 
 #for $name (sort keys %functions) {

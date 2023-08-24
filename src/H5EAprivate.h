@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5EAprivate.h
- *              Jun 17 2008
- *              Quincey Koziol
  *
  * Purpose:     Private header for library accessible extensible
  *              array routines.

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, August 10, 1999
- *
  * Purpose:     A driver which stores the HDF5 data in main memory  using
  *              only the HDF5 public API. This driver is useful for fast
  *              access to small, temporary hdf5 files.
@@ -224,9 +221,9 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
-    HDassert(file->dirty_list);
-    HDassert(start <= end);
+    assert(file);
+    assert(file->dirty_list);
+    assert(start <= end);
 
     /* Adjust the dirty region to the nearest block boundaries */
     if (start % file->bstore_page_size != 0)
@@ -290,7 +287,7 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
             item->end   = end;
             if (H5SL_insert(file->dirty_list, item, &item->start) < 0)
                 HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't insert new dirty region: (%llu, %llu)\n",
-                            (unsigned long long)start, (unsigned long long)end)
+                            (unsigned long long)start, (unsigned long long)end);
         } /* end if */
         else {
             /* Store the new item endpoint if it's bigger */
@@ -323,7 +320,7 @@ H5FD__core_destroy_dirty_list(H5FD_core_t *file)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* Destroy the list, including any remaining list elements */
     if (file->dirty_list) {
@@ -333,7 +330,7 @@ H5FD__core_destroy_dirty_list(H5FD_core_t *file)
             region = H5FL_FREE(H5FD_core_region_t, region);
 
         if (H5SL_close(file->dirty_list) < 0)
-            HGOTO_ERROR(H5E_SLIST, H5E_CLOSEERROR, FAIL, "can't close core vfd dirty list")
+            HGOTO_ERROR(H5E_SLIST, H5E_CLOSEERROR, FAIL, "can't close core vfd dirty list");
         file->dirty_list = NULL;
     } /* end if */
 
@@ -361,12 +358,12 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
     if ((HDoff_t)addr != HDlseek(file->fd, (off_t)addr, SEEK_SET))
-        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store")
+        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
 #endif /* H5_HAVE_PREADWRITE */
 
     while (size > 0) {
@@ -407,8 +404,8 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
 
-        HDassert(bytes_wrote > 0);
-        HDassert((size_t)bytes_wrote <= size);
+        assert(bytes_wrote > 0);
+        assert((size_t)bytes_wrote <= size);
 
         size -= (size_t)bytes_wrote;
         ptr = (unsigned char *)ptr + bytes_wrote;
@@ -454,9 +451,6 @@ H5FD__core_get_default_config(void)
  * Return:      Success:    The driver ID for the core driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -492,9 +486,6 @@ H5FD_core_init(void)
  *
  * Returns:     SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -516,9 +507,6 @@ H5FD__core_term(void)
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:  Dana Robinson
- *              Tuesday, April 8, 2014
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -534,18 +522,18 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
 
     /* The page size cannot be zero */
     if (page_size == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page_size cannot be zero")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page_size cannot be zero");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID");
     if (H5FD_CORE != H5P_peek_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL == (old_fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
         old_fa = H5FD__core_get_default_config();
 
     /* Set VFD info values */
-    HDmemset(&fa, 0, sizeof(H5FD_core_fapl_t));
+    memset(&fa, 0, sizeof(H5FD_core_fapl_t));
     fa.increment      = old_fa->increment;
     fa.backing_store  = old_fa->backing_store;
     fa.write_tracking = is_enabled;
@@ -553,7 +541,7 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
 
     /* Set the property values & the driver for the FAPL */
     if (H5P_set_driver(plist, H5FD_CORE, &fa, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD as driver")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD as driver");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -566,9 +554,6 @@ done:
  *              aggregation size.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:  Dana Robinson
- *              Tuesday, April 8, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -584,11 +569,11 @@ H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled /*out*/, size_t *
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID");
     if (H5FD_CORE != H5P_peek_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
     /* Get values */
     if (is_enabled)
@@ -609,9 +594,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Thursday, February 19, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -626,10 +608,10 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 
     /* Check argument */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     /* Set VFD info values */
-    HDmemset(&fa, 0, sizeof(H5FD_core_fapl_t));
+    memset(&fa, 0, sizeof(H5FD_core_fapl_t));
     fa.increment      = increment;
     fa.backing_store  = backing_store;
     fa.write_tracking = H5FD_CORE_WRITE_TRACKING_FLAG;
@@ -637,7 +619,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 
     /* Set the property values & the driver for the FAPL */
     if (H5P_set_driver(plist, H5FD_CORE, &fa, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD as driver")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD as driver");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -649,9 +631,6 @@ done:
  * Purpose:     Queries properties set by the H5Pset_fapl_core() function.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Tuesday, August 10, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -666,11 +645,11 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_stor
     H5TRACE3("e", "ixx", fapl_id, increment, backing_store);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_CORE != H5P_peek_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
     if (increment)
         *increment = fa->increment;
@@ -689,9 +668,6 @@ done:
  * Return:      Success:    Ptr to new file access properties.
  *              Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Friday, August 13, 1999
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -704,7 +680,7 @@ H5FD__core_fapl_get(H5FD_t *_file)
     FUNC_ENTER_PACKAGE
 
     if (NULL == (fa = (H5FD_core_fapl_t *)H5MM_calloc(sizeof(H5FD_core_fapl_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     fa->increment      = file->increment;
     fa->backing_store  = (hbool_t)(file->fd >= 0);
@@ -728,9 +704,6 @@ done:
  *                          caller, which is always H5FD_open().
  *              Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -752,14 +725,14 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
     /* Check arguments */
     if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
     if (ADDR_OVERFLOW(maxaddr))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow")
-    HDassert(H5P_DEFAULT != fapl_id);
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow");
+    assert(H5P_DEFAULT != fapl_id);
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
         fa = H5FD__core_get_default_config();
 
@@ -774,15 +747,15 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
     /* Retrieve initial file image info */
     if (H5P_peek(plist, H5F_ACS_FILE_IMAGE_INFO_NAME, &file_image_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial file image info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial file image info");
 
     /* If the file image exists and this is an open, make sure the file doesn't exist */
-    HDassert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
-             ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
-    HDmemset(&sb, 0, sizeof(sb));
+    assert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
+           ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
+    memset(&sb, 0, sizeof(sb));
     if ((file_image_info.buffer != NULL) && !(H5F_ACC_CREAT & flags)) {
         if (HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW) >= 0)
-            HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file already exists")
+            HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file already exists");
 
         /* If backing store is requested, create and stat the file
          * Note: We are forcing the O_CREAT flag here, even though this is
@@ -790,7 +763,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
          */
         if (fa->backing_store) {
             if ((fd = HDopen(name, o_flags | O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file");
             if (HDfstat(fd, &sb) < 0)
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
         } /* end if */
@@ -800,14 +773,14 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
      * on. */
     else if (fa->backing_store || !(H5F_ACC_CREAT & flags)) {
         if ((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
         if (HDfstat(fd, &sb) < 0)
             HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
     } /* end if */
 
     /* Create the new file struct */
     if (NULL == (file = (H5FD_core_t *)H5MM_calloc(sizeof(H5FD_core_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
     file->fd = fd;
     if (name && *name)
         file->name = H5MM_xstrdup(name);
@@ -831,7 +804,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     else {
         /* Use the value in the property list */
         if (H5P_get(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &file->ignore_disabled_file_locks) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get ignore disabled file locks property")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get ignore disabled file locks property");
     }
 
     if (fd >= 0) {
@@ -839,10 +812,10 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 #ifdef H5_HAVE_WIN32_API
         file->hFile = (HANDLE)_get_osfhandle(fd);
         if (INVALID_HANDLE_VALUE == file->hFile)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get Windows file handle")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get Windows file handle");
 
         if (!GetFileInformationByHandle((HANDLE)file->hFile, &fileinfo))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get Windows file information")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get Windows file information");
 
         file->nFileIndexHigh       = fileinfo.nFileIndexHigh;
         file->nFileIndexLow        = fileinfo.nFileIndexLow;
@@ -869,11 +842,11 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
             if (file->fi_callbacks.image_malloc) {
                 if (NULL == (file->mem = (unsigned char *)file->fi_callbacks.image_malloc(
                                  size, H5FD_FILE_IMAGE_OP_FILE_OPEN, file->fi_callbacks.udata)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "image malloc callback failed")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "image malloc callback failed");
             } /* end if */
             else {
                 if (NULL == (file->mem = (unsigned char *)H5MM_malloc(size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate memory block")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate memory block");
             } /* end else */
 
             /* Set up data structures */
@@ -885,7 +858,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                     if (file->mem != file->fi_callbacks.image_memcpy(file->mem, file_image_info.buffer, size,
                                                                      H5FD_FILE_IMAGE_OP_FILE_OPEN,
                                                                      file->fi_callbacks.udata))
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, NULL, "image_memcpy callback failed")
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, NULL, "image_memcpy callback failed");
                 } /* end if */
                 else
                     H5MM_memcpy(file->mem, file_image_info.buffer, size);
@@ -937,8 +910,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
 
-                    HDassert(bytes_read >= 0);
-                    HDassert((size_t)bytes_read <= size);
+                    assert(bytes_read >= 0);
+                    assert((size_t)bytes_read <= size);
 
                     mem += bytes_read;
                     size -= (size_t)bytes_read;
@@ -993,9 +966,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1008,12 +978,12 @@ H5FD__core_close(H5FD_t *_file)
 
     /* Flush any changed buffers */
     if (H5FD__core_flush(_file, (hid_t)-1, TRUE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush core vfd backing store")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush core vfd backing store");
 
     /* Destroy the dirty region list */
     if (file->dirty_list)
         if (H5FD__core_destroy_dirty_list(file) != SUCCEED)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free core vfd dirty region list")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free core vfd dirty region list");
 
     /* Release resources */
     if (file->fd >= 0)
@@ -1025,12 +995,12 @@ H5FD__core_close(H5FD_t *_file)
         if (file->fi_callbacks.image_free) {
             if (file->fi_callbacks.image_free(file->mem, H5FD_FILE_IMAGE_OP_FILE_CLOSE,
                                               file->fi_callbacks.udata) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "image_free callback failed")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "image_free callback failed");
         } /* end if */
         else
             H5MM_xfree(file->mem);
     } /* end if */
-    HDmemset(file, 0, sizeof(H5FD_core_t));
+    memset(file, 0, sizeof(H5FD_core_t));
     H5MM_xfree(file);
 
 done:
@@ -1049,9 +1019,6 @@ done:
  *              Failure:    never fails (arguments were checked by the
  *                          caller).
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1067,57 +1034,57 @@ H5FD__core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         /* Compare low level file information for backing store */
 #ifdef H5_HAVE_WIN32_API
         if (f1->dwVolumeSerialNumber < f2->dwVolumeSerialNumber)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (f1->dwVolumeSerialNumber > f2->dwVolumeSerialNumber)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
 
         if (f1->nFileIndexHigh < f2->nFileIndexHigh)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (f1->nFileIndexHigh > f2->nFileIndexHigh)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
 
         if (f1->nFileIndexLow < f2->nFileIndexLow)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (f1->nFileIndexLow > f2->nFileIndexLow)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
 
 #else
 #ifdef H5_DEV_T_IS_SCALAR
         if (f1->device < f2->device)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (f1->device > f2->device)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
 #else  /* H5_DEV_T_IS_SCALAR */
         /* If dev_t isn't a scalar value on this system, just use memcmp to
          * determine if the values are the same or not.  The actual return value
          * shouldn't really matter...
          */
-        if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
-            HGOTO_DONE(-1)
-        if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
-            HGOTO_DONE(1)
+        if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
+            HGOTO_DONE(-1);
+        if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
+            HGOTO_DONE(1);
 #endif /* H5_DEV_T_IS_SCALAR */
 
         if (f1->inode < f2->inode)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (f1->inode > f2->inode)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
 
 #endif /*H5_HAVE_WIN32_API*/
     }  /* end if */
     else {
         if (NULL == f1->name && NULL == f2->name) {
             if (f1 < f2)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             if (f1 > f2)
-                HGOTO_DONE(1)
-            HGOTO_DONE(0)
+                HGOTO_DONE(1);
+            HGOTO_DONE(0);
         } /* end if */
 
         if (NULL == f1->name)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (NULL == f2->name)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
 
         ret_value = HDstrcmp(f1->name, f2->name);
     } /* end else */
@@ -1133,9 +1100,6 @@ done:
  *              (listed in H5FDpublic.h)
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October  7, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1177,9 +1141,6 @@ H5FD__core_query(const H5FD_t *_file, unsigned long *flags /* out */)
  *
  * Return:      The end-of-address marker. (Can't fail)
  *
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1201,9 +1162,6 @@ H5FD__core_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1215,7 +1173,7 @@ H5FD__core_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     FUNC_ENTER_PACKAGE
 
     if (ADDR_OVERFLOW(addr))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow")
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow");
 
     file->eoa = addr;
 
@@ -1233,9 +1191,6 @@ done:
  * Return:      End of file address, the first address past
  *              the end of the "file", either the memory
  *              or the HDF5 file. (Can't fail)
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1256,9 +1211,6 @@ H5FD__core_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  * Returns:        SUCCEED/FAIL
  *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1271,7 +1223,7 @@ H5FD__core_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
 
     /* Check args */
     if (!file_handle)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
 
     /* Check for non-default FAPL */
     if (H5P_FILE_ACCESS_DEFAULT != fapl && H5P_DEFAULT != fapl) {
@@ -1279,7 +1231,7 @@ H5FD__core_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
 
         /* Get the FAPL */
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "not a file access property list")
+            HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "not a file access property list");
 
         /* Check if private property for retrieving the backing store POSIX
          * file descriptor is set.  (This should not be set except within the
@@ -1290,7 +1242,7 @@ H5FD__core_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
 
             /* Get property */
             if (H5P_get(plist, H5F_ACS_WANT_POSIX_FD_NAME, &want_posix_fd) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get property of retrieving file descriptor")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get property of retrieving file descriptor");
 
             /* If property is set, pass back the file descriptor instead of the memory address */
             if (want_posix_fd)
@@ -1319,9 +1271,6 @@ done:
  *                          buffer BUF.
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1333,14 +1282,14 @@ H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF == addr)
-        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
+        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
     if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
+        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
 
     /* Read the part which is before the EOF marker */
     if (addr < file->eof) {
@@ -1363,7 +1312,7 @@ H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
     /* Read zeros for the part which is after the EOF markers */
     if (size > 0)
-        HDmemset(buf, 0, size);
+        memset(buf, 0, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1378,9 +1327,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1392,12 +1338,12 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
+        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
 
     /*
      * Allocate more memory if necessary, careful of overflow. Also, if the
@@ -1420,15 +1366,15 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                              file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "unable to allocate memory block of %llu bytes with callback",
-                            (unsigned long long)new_eof)
+                            (unsigned long long)new_eof);
         } /* end if */
         else {
             if (NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
+                            "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof);
         } /* end else */
 
-        HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
+        memset(x + file->eof, 0, (size_t)(new_eof - file->eof));
         file->mem = x;
 
         file->eof = new_eof;
@@ -1443,7 +1389,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
             HGOTO_ERROR(
                 H5E_VFL, H5E_CANTINSERT, FAIL,
                 "unable to add core VFD dirty region during write call - addresses: start=%llu end=%llu",
-                (unsigned long long)start, (unsigned long long)end)
+                (unsigned long long)start, (unsigned long long)end);
     }
 
     /* Write from BUF to memory */
@@ -1463,9 +1409,6 @@ done:
  *              dirty flag is set.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Friday, October 15, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1497,7 +1440,7 @@ H5FD__core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UN
                     size = (size_t)((item->end - item->start) + 1);
 
                     if (H5FD__core_write_to_bstore(file, item->start, size) != SUCCEED)
-                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
+                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store");
                 } /* end if */
 
                 item = H5FL_FREE(H5FD_core_region_t, item);
@@ -1507,7 +1450,7 @@ H5FD__core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UN
         /* Otherwise, write the entire file out at once */
         else {
             if (H5FD__core_write_to_bstore(file, (haddr_t)0, (size_t)file->eof) != SUCCEED)
-                HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
+                HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store");
         } /* end else */
 
         file->dirty = FALSE;
@@ -1547,9 +1490,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, October  7, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1561,7 +1501,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* if we are closing and not using backing store, do nothing */
     if (!closing || file->backing_store) {
@@ -1575,7 +1515,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
         } /* end else */
 
         /* Extend the file to make sure it's large enough */
-        if (!H5F_addr_eq(file->eof, (haddr_t)new_eof)) {
+        if (!H5_addr_eq(file->eof, (haddr_t)new_eof)) {
             unsigned char *x; /* Pointer to new buffer for file data */
 
             /* (Re)allocate memory for the file buffer, using callback if available */
@@ -1584,15 +1524,15 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
                     (x = (unsigned char *)file->fi_callbacks.image_realloc(
                          file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "unable to allocate memory block with callback")
+                                "unable to allocate memory block with callback");
             } /* end if */
             else {
                 if (NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block");
             } /* end else */
 
             if (file->eof < new_eof)
-                HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
+                memset(x + file->eof, 0, (size_t)(new_eof - file->eof));
             file->mem = x;
 
             /* Update backing store, if using it and if closing */
@@ -1617,12 +1557,12 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
                 if (INVALID_SET_FILE_POINTER == dwPtrLow) {
                     dwError = GetLastError();
                     if (dwError != NO_ERROR)
-                        HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to set file pointer")
+                        HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to set file pointer");
                 }
 
                 bError = SetEndOfFile(file->hFile);
                 if (0 == bError)
-                    HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+                    HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #else  /* H5_HAVE_WIN32_API */
                 if (-1 == HDftruncate(file->fd, (HDoff_t)new_eof))
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
@@ -1649,8 +1589,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1662,7 +1600,7 @@ H5FD__core_lock(H5FD_t *_file, hbool_t rw)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* Only set the lock if there is a file descriptor. If no file
      * descriptor, this is a no-op.
@@ -1695,8 +1633,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1707,7 +1643,7 @@ H5FD__core_unlock(H5FD_t *_file)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     if (file->fd >= 0)
         if (HDflock(file->fd, LOCK_UN) < 0) {
@@ -1743,10 +1679,10 @@ H5FD__core_delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(filename);
+    assert(filename);
 
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
         fa = H5FD__core_get_default_config();
 

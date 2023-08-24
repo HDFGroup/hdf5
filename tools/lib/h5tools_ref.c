@@ -49,8 +49,6 @@ static int ref_path_table_put(const char *, const H5O_token_t *token);
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -58,8 +56,8 @@ free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op
 {
     ref_path_node_t *node = (ref_path_node_t *)item;
 
-    HDfree(node->path);
-    HDfree(node);
+    free(node->path);
+    free(node);
 
     return (0);
 }
@@ -71,8 +69,6 @@ free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op
  *              all objects and enter them in the table.
  *
  * Return:      Error status.
- *
- * Programmer:  REMcG
  *
  *-------------------------------------------------------------------------
  */
@@ -112,7 +108,7 @@ ref_path_table_cmp(const void *key1, const void *key2)
     if (thefile > 0)
         H5Otoken_cmp(thefile, token1, token2, &cmp_value);
     else
-        cmp_value = HDmemcmp(token1, token2, sizeof(H5O_token_t));
+        cmp_value = memcmp(token1, token2, sizeof(H5O_token_t));
 
     return cmp_value;
 }
@@ -123,8 +119,6 @@ ref_path_table_cmp(const void *key1, const void *key2)
  * Purpose:     Initialize the reference path table
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
  *
  *-------------------------------------------------------------------------
  */
@@ -156,8 +150,6 @@ init_ref_path_table(void)
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -180,8 +172,6 @@ term_ref_path_table(void)
  *              token for the table entry is returned through the token
  *              parameter if the table entry is found by the given path
  *              name.
- *
- * Programmer:  REMcG
  *
  *-------------------------------------------------------------------------
  */
@@ -211,7 +201,7 @@ ref_path_table_lookup(const char *thepath, H5O_token_t *token)
         return -1;
 
     /* Return object token through parameter */
-    HDmemcpy(token, &oi.token, sizeof(H5O_token_t));
+    memcpy(token, &oi.token, sizeof(H5O_token_t));
 
     return 0;
 }
@@ -229,8 +219,6 @@ ref_path_table_lookup(const char *thepath, H5O_token_t *token)
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  REMcG
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -239,10 +227,10 @@ ref_path_table_put(const char *path, const H5O_token_t *token)
     ref_path_node_t *new_node;
 
     if (ref_path_table && path) {
-        if ((new_node = (ref_path_node_t *)HDmalloc(sizeof(ref_path_node_t))) == NULL)
+        if ((new_node = (ref_path_node_t *)malloc(sizeof(ref_path_node_t))) == NULL)
             return (-1);
 
-        HDmemcpy(&new_node->obj_token, token, sizeof(H5O_token_t));
+        memcpy(&new_node->obj_token, token, sizeof(H5O_token_t));
         new_node->path = HDstrdup(path);
 
         return (H5SL_insert(ref_path_table, new_node, &(new_node->obj_token)));
@@ -254,7 +242,7 @@ ref_path_table_put(const char *path, const H5O_token_t *token)
 /*
  *  counter used to disambiguate multiple instances of same object.
  */
-int xid = 1;
+static int xid = 1;
 
 int
 get_next_xid(void)
@@ -268,7 +256,7 @@ get_next_xid(void)
  *  minimizes the chance of collision with a real object id.
  *
  */
-haddr_t fake_xid = HADDR_MAX;
+static haddr_t fake_xid = HADDR_MAX;
 
 void
 get_fake_token(H5O_token_t *token)
@@ -311,8 +299,6 @@ ref_path_table_gen_fake(const char *path, H5O_token_t *token)
  * Purpose:     Lookup the path to the object with the reference 'refbuf'.
  *
  * Return:      Return a path to the object, or NULL if not found.
- *
- * Programmer:  REMcG
  *
  *-------------------------------------------------------------------------
  */
@@ -370,8 +356,6 @@ lookup_ref_path(H5R_ref_t refbuf)
  *              all objects and enter them in the table.
  *
  * Return:      Error status.
- *
- * Programmer:  REMcG
  *
  *-------------------------------------------------------------------------
  */

@@ -118,8 +118,8 @@ H5O__mtime_new_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -177,18 +177,18 @@ H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Buffer should have 14 message bytes and 2 reserved bytes */
     if (H5_IS_BUFFER_OVERFLOW(p, 16, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     for (int i = 0; i < 14; i++)
-        if (!HDisdigit(p[i]))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
+        if (!isdigit(p[i]))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message");
 
     /* Convert YYYYMMDDhhmmss UTC to a time_t. */
-    HDmemset(&tm, 0, sizeof tm);
+    memset(&tm, 0, sizeof tm);
     tm.tm_year  = (p[0] - '0') * 1000 + (p[1] - '0') * 100 + (p[2] - '0') * 10 + (p[3] - '0') - 1900;
     tm.tm_mon   = (p[4] - '0') * 10 + (p[5] - '0') - 1;
     tm.tm_mday  = (p[6] - '0') * 10 + (p[7] - '0');
@@ -197,11 +197,11 @@ H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     tm.tm_sec   = (p[12] - '0') * 10 + (p[13] - '0');
     tm.tm_isdst = -1; /* (figure it out) */
     if ((time_t)-1 == (the_time = H5_make_time(&tm)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't construct time info")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't construct time info");
 
     /* The return value */
     if (NULL == (mesg = H5FL_MALLOC(time_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     *mesg = the_time;
 
     /* Set return value */
@@ -218,9 +218,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Jan  3 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -232,9 +229,9 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* Version */
     *p++ = H5O_MTIME_VERSION;
@@ -257,9 +254,6 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -272,9 +266,9 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* encode */
     tm = HDgmtime(mesg);
@@ -294,9 +288,6 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -309,7 +300,7 @@ H5O__mtime_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
     if (!dest && NULL == (dest = H5FL_MALLOC(time_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
@@ -335,9 +326,6 @@ done:
  *
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *		Jan  3 2002
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -347,8 +335,8 @@ H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disabl
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     FUNC_LEAVE_NOAPI(8)
 } /* end H5O__mtime_new_size() */
@@ -365,9 +353,6 @@ H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disabl
  *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
- *		Jul 14 1998
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -377,8 +362,8 @@ H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     FUNC_LEAVE_NOAPI(16)
 } /* end H5O__mtime_size() */
@@ -390,9 +375,6 @@ H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, March 30, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -400,7 +382,7 @@ H5O__mtime_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(time_t, mesg);
 
@@ -414,9 +396,6 @@ H5O__mtime_free(void *mesg)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -429,17 +408,17 @@ H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* debug */
     tm = HDlocaltime(mesg);
 
     HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_debug() */

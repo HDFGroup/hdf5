@@ -108,28 +108,28 @@ H5PL__insert_at(const char *path, unsigned int idx)
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(path);
-    HDassert(HDstrlen(path));
+    assert(path);
+    assert(HDstrlen(path));
 
     /* Expand the table if it is full */
     if (H5PL_num_paths_g == H5PL_path_capacity_g)
         if (H5PL__expand_path_table() < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't expand path table")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't expand path table");
 
     /* Copy the path for storage so the caller can dispose of theirs */
     if (NULL == (path_copy = H5MM_strdup(path)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't make internal copy of path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't make internal copy of path");
 
 #ifdef H5_HAVE_WIN32_API
     /* Clean up Microsoft Windows environment variables in the path string */
     if (H5_expand_windows_env_vars(&path_copy))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCONVERT, FAIL, "can't expand environment variable string")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCONVERT, FAIL, "can't expand environment variable string");
 #endif /* H5_HAVE_WIN32_API */
 
     /* If the table entry is in use, make some space */
     if (H5PL_paths_g[idx])
         if (H5PL__make_space_at(idx) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "unable to make space in the table for the new entry")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "unable to make space in the table for the new entry");
 
     /* Insert the copy of the search path into the table at the specified index */
     H5PL_paths_g[idx] = path_copy;
@@ -158,7 +158,7 @@ H5PL__make_space_at(unsigned int idx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args - Just assert on package functions */
-    HDassert(idx < H5PL_path_capacity_g);
+    assert(idx < H5PL_path_capacity_g);
 
     /* Copy the paths back to make a space  */
     for (u = H5PL_num_paths_g; u > idx; u--)
@@ -189,21 +189,21 @@ H5PL__replace_at(const char *path, unsigned int idx)
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(path);
-    HDassert(HDstrlen(path));
+    assert(path);
+    assert(HDstrlen(path));
 
     /* Check that the table entry is in use */
     if (!H5PL_paths_g[idx])
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, FAIL, "path entry at index %u in the table is NULL", idx)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, FAIL, "path entry at index %u in the table is NULL", idx);
 
     /* Copy the path for storage so the caller can dispose of theirs */
     if (NULL == (path_copy = H5MM_strdup(path)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't make internal copy of path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't make internal copy of path");
 
 #ifdef H5_HAVE_WIN32_API
     /* Clean up Microsoft Windows environment variables in the path string */
     if (H5_expand_windows_env_vars(&path_copy))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCONVERT, FAIL, "can't expand environment variable string")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCONVERT, FAIL, "can't expand environment variable string");
 #endif /* H5_HAVE_WIN32_API */
 
     /* Free the existing path entry */
@@ -243,7 +243,7 @@ H5PL__create_path_table(void)
     H5PL_num_paths_g     = 0;
     H5PL_path_capacity_g = H5PL_INITIAL_PATH_CAPACITY;
     if (NULL == (H5PL_paths_g = (char **)H5MM_calloc((size_t)H5PL_path_capacity_g * sizeof(char *))))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path table")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path table");
 
     /* Retrieve paths from HDF5_PLUGIN_PATH if the user sets it
      * or from the default paths if it isn't set.
@@ -255,7 +255,7 @@ H5PL__create_path_table(void)
         paths = H5MM_strdup(env_var);
 
     if (NULL == paths)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path copy")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path copy");
 
     /* Separate the paths and store them */
     next_path = HDstrtok_r(paths, H5PL_PATH_SEPARATOR, &lasts);
@@ -263,7 +263,7 @@ H5PL__create_path_table(void)
 
         /* Insert the path into the table */
         if (H5PL__append_path(next_path) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't insert path: %s", next_path)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't insert path: %s", next_path);
 
         /* Get the next path from the environment string */
         next_path = HDstrtok_r(NULL, H5PL_PATH_SEPARATOR, &lasts);
@@ -356,10 +356,10 @@ H5PL__expand_path_table(void)
     /* Resize the array */
     if (NULL ==
         (H5PL_paths_g = (char **)H5MM_realloc(H5PL_paths_g, (size_t)H5PL_path_capacity_g * sizeof(char *))))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "allocating additional memory for path table failed")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "allocating additional memory for path table failed");
 
     /* Initialize the new memory */
-    HDmemset(H5PL_paths_g + H5PL_num_paths_g, 0, (size_t)H5PL_PATH_CAPACITY_ADD * sizeof(char *));
+    memset(H5PL_paths_g + H5PL_num_paths_g, 0, (size_t)H5PL_PATH_CAPACITY_ADD * sizeof(char *));
 
 done:
     /* Set the path capacity back if there were problems */
@@ -386,12 +386,12 @@ H5PL__append_path(const char *path)
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(path);
-    HDassert(HDstrlen(path));
+    assert(path);
+    assert(HDstrlen(path));
 
     /* Insert the path at the end of the table */
     if (H5PL__insert_at(path, H5PL_num_paths_g) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to append search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to append search path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -414,12 +414,12 @@ H5PL__prepend_path(const char *path)
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(path);
-    HDassert(HDstrlen(path));
+    assert(path);
+    assert(HDstrlen(path));
 
     /* Insert the path at the beginning of the table */
     if (H5PL__insert_at(path, 0) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to prepend search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to prepend search path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -442,13 +442,13 @@ H5PL__replace_path(const char *path, unsigned int idx)
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(path);
-    HDassert(HDstrlen(path));
-    HDassert(idx < H5PL_path_capacity_g);
+    assert(path);
+    assert(HDstrlen(path));
+    assert(idx < H5PL_path_capacity_g);
 
     /* Insert the path at the requested index */
     if (H5PL__replace_at(path, idx) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to replace search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to replace search path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -472,13 +472,13 @@ H5PL__insert_path(const char *path, unsigned int idx)
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(path);
-    HDassert(HDstrlen(path));
-    HDassert(idx < H5PL_path_capacity_g);
+    assert(path);
+    assert(HDstrlen(path));
+    assert(idx < H5PL_path_capacity_g);
 
     /* Insert the path at the requested index */
     if (H5PL__insert_at(path, idx) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to insert search path")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to insert search path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -503,11 +503,11 @@ H5PL__remove_path(unsigned int idx)
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(idx < H5PL_path_capacity_g);
+    assert(idx < H5PL_path_capacity_g);
 
     /* Check if the path at that index is set */
     if (!H5PL_paths_g[idx])
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTDELETE, FAIL, "search path at index %u is NULL", idx)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTDELETE, FAIL, "search path at index %u is NULL", idx);
 
     /* Delete the path */
     H5PL_num_paths_g--;
@@ -543,7 +543,7 @@ H5PL__get_path(unsigned int idx)
 
     /* Get the path at the requested index */
     if (idx >= H5PL_num_paths_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "path index %u is out of range in table", idx)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "path index %u is out of range in table", idx);
 
     return H5PL_paths_g[idx];
 done:
@@ -579,7 +579,7 @@ H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, 
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__path_table_iterate() */
 
 /*-------------------------------------------------------------------------
@@ -612,12 +612,12 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(plugin_path);
-    HDassert(iter_op);
+    assert(plugin_path);
+    assert(iter_op);
 
     /* Open the directory - skip the path if the directory can't be opened */
     if (!(dirp = HDopendir(plugin_path)))
-        HGOTO_DONE(H5_ITER_CONT)
+        HGOTO_DONE(H5_ITER_CONT);
 
     /* Iterate through all entries in the directory */
     while (NULL != (dp = HDreaddir(dirp))) {
@@ -640,14 +640,14 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
                   4; /* Extra "+4" to quiet GCC warning - 2019/07/05, QAK */
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path");
 
             HDsnprintf(path, len, "%s/%s", plugin_path, dp->d_name);
 
             /* Get info for directory entry */
             if (HDstat(path, &my_stat) == -1)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5_ITER_ERROR, "can't stat file %s -- error was: %s", path,
-                            HDstrerror(errno))
+                            HDstrerror(errno));
 
             /* If it is a directory, skip it */
             if (S_ISDIR(my_stat.st_mode))
@@ -681,7 +681,7 @@ done:
     if (dirp)
         if (HDclosedir(dirp) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, H5_ITER_ERROR, "can't close directory: %s",
-                        HDstrerror(errno))
+                        HDstrerror(errno));
 
     path = (char *)H5MM_xfree(path);
 
@@ -704,14 +704,14 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(plugin_path);
-    HDassert(iter_op);
+    assert(plugin_path);
+    assert(iter_op);
 
     /* Specify a file mask. *.* = We want everything! -
      * skip the path if the directory can't be opened */
     HDsnprintf(service, sizeof(service), "%s\\*.dll", plugin_path);
     if ((hFind = FindFirstFileA(service, &fdFile)) == INVALID_HANDLE_VALUE)
-        HGOTO_DONE(H5_ITER_CONT)
+        HGOTO_DONE(H5_ITER_CONT);
 
     /* Loop over all the files */
     do {
@@ -724,7 +724,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
             len = HDstrlen(plugin_path) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(fdFile.cFileName) + 1;
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path");
 
             HDsnprintf(path, len, "%s\\%s", plugin_path, fdFile.cFileName);
 
@@ -788,9 +788,9 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, hbool
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(search_params);
-    HDassert(found);
-    HDassert(plugin_info);
+    assert(search_params);
+    assert(found);
+    assert(plugin_info);
 
     /* Initialize output parameters */
     *found       = FALSE;
@@ -801,13 +801,12 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, hbool
 
         /* Search for the plugin in this path */
         if (H5PL__find_plugin_in_path(search_params, found, H5PL_paths_g[u], plugin_info) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in path %s encountered an error",
-                        H5PL_paths_g[u])
+            HERROR(H5E_PLUGIN, H5E_CANTGET, "search in path %s encountered an error", H5PL_paths_g[u]);
 
         /* Break out if found */
         if (*found) {
             if (!plugin_info)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "plugin info should not be NULL")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "plugin info should not be NULL");
             break;
         }
     }
@@ -844,10 +843,10 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(search_params);
-    HDassert(found);
-    HDassert(dir);
-    HDassert(plugin_info);
+    assert(search_params);
+    assert(found);
+    assert(dir);
+    assert(plugin_info);
 
     /* Initialize the found parameter */
     *found = FALSE;
@@ -855,7 +854,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     /* Open the directory */
     if (!(dirp = HDopendir(dir)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory (%s). Please verify its existence",
-                    dir)
+                    dir);
 
     /* Iterate through all entries in the directory */
     while (NULL != (dp = HDreaddir(dirp))) {
@@ -878,14 +877,14 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
                   4; /* Extra "+4" to quiet GCC warning - 2019/07/05, QAK */
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path");
 
             HDsnprintf(path, len, "%s/%s", dir, dp->d_name);
 
             /* Get info for directory entry */
             if (HDstat(path, &my_stat) == -1)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file %s -- error was: %s", path,
-                            HDstrerror(errno))
+                            HDstrerror(errno));
 
             /* If it is a directory, skip it */
             if (S_ISDIR(my_stat.st_mode)) {
@@ -895,9 +894,9 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 
             /* attempt to open the dynamic library */
             if (H5PL__open(path, search_params->type, search_params->key, found, NULL, plugin_info) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed");
             if (*found)
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
 
             path = (char *)H5MM_xfree(path);
         } /* end if */
@@ -906,7 +905,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 done:
     if (dirp)
         if (HDclosedir(dirp) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", HDstrerror(errno))
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", HDstrerror(errno));
 
     path = (char *)H5MM_xfree(path);
 
@@ -926,10 +925,10 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(search_params);
-    HDassert(found);
-    HDassert(dir);
-    HDassert(plugin_info);
+    assert(search_params);
+    assert(found);
+    assert(dir);
+    assert(plugin_info);
 
     /* Initialize the found parameter */
     *found = FALSE;
@@ -937,7 +936,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     /* Specify a file mask. *.* = We want everything! */
     HDsnprintf(service, sizeof(service), "%s\\*.dll", dir);
     if ((hFind = FindFirstFileA(service, &fdFile)) == INVALID_HANDLE_VALUE)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory");
 
     /* Loop over all the files */
     do {
@@ -952,7 +951,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
             len = HDstrlen(dir) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(fdFile.cFileName) + 1;
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path");
 
             HDsnprintf(path, len, "%s\\%s", dir, fdFile.cFileName);
 
@@ -962,9 +961,9 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 
             /* attempt to open the dynamic library */
             if (H5PL__open(path, search_params->type, search_params->key, found, NULL, plugin_info) < 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed");
             if (*found)
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
 
             path = (char *)H5MM_xfree(path);
         }

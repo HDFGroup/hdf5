@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Fdeprec.c
- *		October 1 2009
- *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5F interface.  These
  *              functions are here for compatibility purposes and may be
@@ -100,17 +98,17 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo /*out*/)
 
     /* Check args */
     if (!finfo)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct");
 
     /* Check the type */
     type = H5I_get_type(obj_id);
     if (H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type &&
         H5I_ATTR != type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
 
     /* Get the file object */
     if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
     file_opt_args.get_info.type  = type;
@@ -120,7 +118,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo /*out*/)
 
     /* Get the file information */
     if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve file info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve file info");
 
     /* Copy the compatible fields into the older struct */
     finfo->super_ext_size = finfo2.super.super_ext_size;
@@ -156,7 +154,7 @@ H5Fis_hdf5(const char *name)
 
     /* Check args and all the boring stuff. */
     if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, (-1), "no file name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, (-1), "no file name specified");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                       = H5VL_FILE_IS_ACCESSIBLE;
@@ -166,7 +164,7 @@ H5Fis_hdf5(const char *name)
 
     /* Check if file is accessible */
     if (H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, (-1), "unable to determine if file is accessible as HDF5")
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, (-1), "unable to determine if file is accessible as HDF5");
 
     /* Set return value */
     ret_value = (htri_t)is_accessible;
@@ -205,8 +203,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; December 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -223,11 +219,11 @@ H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID");
 
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(file_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info");
 
     /* 'low' and 'high' are both initialized to LATEST.
      * If latest format is not expected, set 'low' to EARLIEST
@@ -243,7 +239,7 @@ H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
 
     /* Set the library's version bounds */
     if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set library version bounds")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set library version bounds");
 
 done:
     FUNC_LEAVE_API(ret_value)

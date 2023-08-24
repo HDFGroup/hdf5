@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:     Peter X. Cao
- *                 May 01, 2005
- *
  * Purpose:    Test H5Ocopy() for references.
  */
 
@@ -23,13 +20,13 @@
 #define H5F_TESTING
 #include "H5Fpkg.h" /* File access                          */
 
-const char *FILENAME[] = {"objcopy_ref_src",
-                          "objcopy_ref_dst",
-                          "objcopy_ref_ext",
-                          "objcopy_ref_src2",
-                          "verbound_ref_src",
-                          "verbound_ref_dst",
-                          NULL};
+static const char *FILENAME[] = {"objcopy_ref_src",
+                                 "objcopy_ref_dst",
+                                 "objcopy_ref_ext",
+                                 "objcopy_ref_src2",
+                                 "verbound_ref_src",
+                                 "verbound_ref_dst",
+                                 NULL};
 
 /* Configuration, really a series of bit flags.  Maximum value is all three
  * bit flags enabled.
@@ -87,9 +84,6 @@ static int compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned 
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -105,7 +99,7 @@ token_insert(H5O_info2_t *oinfo)
     /* Extend the table */
     if (idtab_g.nobjs >= idtab_g.nalloc) {
         idtab_g.nalloc = MAX(256, 2 * idtab_g.nalloc);
-        idtab_g.obj    = (H5O_token_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
+        idtab_g.obj    = (H5O_token_t *)realloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
     }
 
     /* Insert the entry */
@@ -120,9 +114,6 @@ token_insert(H5O_info2_t *oinfo)
  *
  * Return:      Success:    TRUE/FALSE
  *              Failure:    (can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -152,16 +143,13 @@ token_lookup(hid_t loc_id, H5O_info2_t *oinfo)
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static void
 token_reset(void)
 {
     if (idtab_g.obj)
-        HDfree(idtab_g.obj);
+        free(idtab_g.obj);
     idtab_g.obj    = NULL;
     idtab_g.nalloc = idtab_g.nobjs = 0;
 } /* end token_reset() */
@@ -241,7 +229,7 @@ error:
         H5Rdestroy(&ref[0]);
         H5Rdestroy(&ref[1]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (-1);
 }
@@ -252,9 +240,6 @@ error:
  * Purpose:     Create an attribute with object references
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Monday, March 5, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -341,7 +326,7 @@ error:
         H5Rdestroy(&ref[0]);
         H5Rdestroy(&ref[1]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (-1);
 }
@@ -352,9 +337,6 @@ error:
  * Purpose:     Create a dataset with region references
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Friday, August 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -472,7 +454,7 @@ error:
         H5Rdestroy(&ref[0]);
         H5Rdestroy(&ref[1]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (-1);
 }
@@ -483,9 +465,6 @@ error:
  * Purpose:     Attach NUM_ATTRIBUTES attributes to the object to be copied
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -553,9 +532,6 @@ done:
  * Purpose:     Compare two attributes to check that they are equal
  *
  * Return:      TRUE if attributes are equal/FALSE if they are different
- *
- * Programmer:  Peter Cao
- *              Saturday, December 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -635,9 +611,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ((rbuf = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
-    if ((rbuf2 = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf2 = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
 
     /* Read data from the source attribute */
@@ -668,9 +644,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
             TEST_ERROR;
 
     /* Release raw data buffers */
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(rbuf2);
+    free(rbuf2);
     rbuf2 = NULL;
 
     /* close the source dataspace */
@@ -693,9 +669,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
 
 error:
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
     if (rbuf2)
-        HDfree(rbuf2);
+        free(rbuf2);
     H5E_BEGIN_TRY
     {
         H5Sclose(sid2);
@@ -703,7 +679,7 @@ error:
         H5Tclose(tid2);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FALSE;
 } /* end compare_attribute() */
 
@@ -713,9 +689,6 @@ error:
  * Purpose:     Compare "standard" attributes on two objects to check that they are equal
  *
  * Return:    TRUE if objects have same attributes/FALSE if they are different
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
  *
  * Note:    This isn't very general, the attributes are assumed to be
  *              those written in test_copy_attach_attributes().
@@ -790,7 +763,7 @@ error:
         H5Aclose(aid2);
         H5Aclose(aid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FALSE;
 } /* end compare_std_attributes() */
 
@@ -800,9 +773,6 @@ error:
  * Purpose:     Compare two buffers of data to check that they are equal
  *
  * Return:    TRUE if buffer are equal/FALSE if they are different
- *
- * Programmer:  Quincey Koziol
- *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -882,11 +852,11 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
             else {
                 /* vlens cannot currently be nested below the top layer of a
                  * compound */
-                HDassert(H5Tdetect_class(memb_id, H5T_VLEN) == FALSE);
+                assert(H5Tdetect_class(memb_id, H5T_VLEN) == FALSE);
 
                 /* Iterate over all elements, calling memcmp() for each */
                 for (elmt = 0; elmt < nelmts; elmt++) {
-                    if (HDmemcmp(memb1, memb2, memb_size) != 0)
+                    if (memcmp(memb1, memb2, memb_size) != 0)
                         TEST_ERROR;
 
                     /* Update member pointers */
@@ -1036,7 +1006,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
         else
             TEST_ERROR;
     } /* end else */
-    else if (HDmemcmp(buf1, buf2, (elmt_size * nelmts)) != 0)
+    else if (memcmp(buf1, buf2, (elmt_size * nelmts)) != 0)
         TEST_ERROR;
 
     /* Data should be the same. :-) */
@@ -1052,9 +1022,6 @@ error:
  * Purpose:     Compare two datasets to check that they are equal
  *
  * Return:    TRUE if datasets are equal/FALSE if they are different
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1172,9 +1139,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ((rbuf = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
-    if ((rbuf2 = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf2 = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
 
     /* Read data from datasets */
@@ -1203,9 +1170,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
             TEST_ERROR;
 
     /* Release raw data buffers */
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(rbuf2);
+    free(rbuf2);
     rbuf2 = NULL;
 
     /* close the source dataspace */
@@ -1235,9 +1202,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (rbuf)
-            HDfree(rbuf);
+            free(rbuf);
         if (rbuf2)
-            HDfree(rbuf2);
+            free(rbuf2);
         H5Pclose(dcpl2);
         H5Pclose(dcpl);
         H5Sclose(sid2);
@@ -1245,7 +1212,7 @@ error:
         H5Tclose(tid2);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FALSE;
 } /* end compare_datasets() */
 
@@ -1255,9 +1222,6 @@ error:
  * Purpose:     Compare two groups to check that they are "equal"
  *
  * Return:    TRUE if group are equal/FALSE if they are different
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1387,7 +1351,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         break;
 
                     case H5O_TYPE_MAP:
-                        HDassert(0 && "maps not supported in native VOL connector");
+                        assert(0 && "maps not supported in native VOL connector");
 
                         /* clang complains about implicit fallthrough here and
                          * our usual attributes and fall-through comments don't
@@ -1397,7 +1361,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
-                        HDassert(0 && "Unknown type of object");
+                        assert(0 && "Unknown type of object");
                         break;
                         H5_CLANG_DIAG_ON("implicit-fallthrough")
                 } /* end switch */
@@ -1420,18 +1384,18 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     char linkval2[NAME_BUF_SIZE]; /* Link value */
 
                     /* Get link values */
-                    HDassert(linfo.u.val_size <= NAME_BUF_SIZE);
+                    assert(linfo.u.val_size <= NAME_BUF_SIZE);
                     if (H5Lget_val(gid, objname, linkval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
                     if (H5Lget_val(gid2, objname2, linkval2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
 
                     /* Compare link data */
-                    if (HDmemcmp(linkval, linkval2, linfo.u.val_size) != 0)
+                    if (memcmp(linkval, linkval2, linfo.u.val_size) != 0)
                         TEST_ERROR;
                 } /* end else-if */
                 else {
-                    HDassert(0 && "Unknown type of link");
+                    assert(0 && "Unknown type of link");
                 } /* end else */
             }     /* end else */
         }         /* end for */
@@ -1448,7 +1412,7 @@ error:
     H5E_BEGIN_TRY
     {
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FALSE;
 } /* end compare_groups() */
 
@@ -1459,9 +1423,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *               March 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1831,7 +1792,7 @@ error:
         H5Fclose(fid_src);
         H5Fclose(fid_ext);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_copy_option */
 
@@ -1845,9 +1806,6 @@ error:
  *              both, or neither of the source and destination files.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1867,7 +1825,7 @@ main(void)
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
@@ -1971,8 +1929,8 @@ main(void)
 
     /* Results */
     if (nerrors) {
-        HDprintf("***** %d OBJECT COPY TEST%s FAILED! *****\n", nerrors, (1 == nerrors ? "" : "S"));
-        HDexit(EXIT_FAILURE);
+        printf("***** %d OBJECT COPY TEST%s FAILED! *****\n", nerrors, (1 == nerrors ? "" : "S"));
+        exit(EXIT_FAILURE);
     } /* end if */
 
     HDputs("All object copying tests passed.");
@@ -2002,8 +1960,8 @@ main(void)
 
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* main */

@@ -30,11 +30,11 @@ static struct h5_long_options l_opts[]  = {{"destination", require_arg, 'd'},
                                           {"version", no_arg, 'V'},
                                           {"enable-error-stack", optional_arg, 'E'},
                                           {NULL, 0, '\0'}};
-char                         *fname_src = NULL;
-char                         *fname_dst = NULL;
-char                         *oname_src = NULL;
-char                         *oname_dst = NULL;
-char                         *str_flag  = NULL;
+static char                  *fname_src = NULL;
+static char                  *fname_dst = NULL;
+static char                  *oname_src = NULL;
+static char                  *oname_dst = NULL;
+static char                  *str_flag  = NULL;
 
 /*-------------------------------------------------------------------------
  * Function:    leave
@@ -43,27 +43,24 @@ char                         *str_flag  = NULL;
  *
  * Return:      Does not return
  *
- * Programmer:  Quincey Koziol
- *              Saturday, 31. January 2004
- *
  *-------------------------------------------------------------------------
  */
 static void
 leave(int ret)
 {
     if (fname_src)
-        HDfree(fname_src);
+        free(fname_src);
     if (fname_dst)
-        HDfree(fname_dst);
+        free(fname_dst);
     if (oname_dst)
-        HDfree(oname_dst);
+        free(oname_dst);
     if (oname_src)
-        HDfree(oname_src);
+        free(oname_src);
     if (str_flag)
-        HDfree(str_flag);
+        free(str_flag);
 
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -72,8 +69,6 @@ leave(int ret)
  * Purpose: Prints a usage message on stderr and then returns.
  *
  * Return: void
- *
- * Programmer: Pedro Vicente Nunes, 7/8/2006
  *
  *-------------------------------------------------------------------------
  */
@@ -153,8 +148,6 @@ usage(void)
  * Return: Success:    SUCCEED
  *         Failure:    FAIL
  *
- * Programmer: Pedro Vicente Nunes, 7/8/2006
- *
  *-------------------------------------------------------------------------
  */
 
@@ -199,8 +192,6 @@ parse_flag(const char *s_flag, unsigned *flag)
  *
  * Purpose: main program
  *
- * Programmer: Pedro Vicente Nunes
- *
  *-------------------------------------------------------------------------
  */
 
@@ -226,7 +217,7 @@ main(int argc, char *argv[])
     h5tools_init();
 
     /* init linkinfo struct */
-    HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+    memset(&linkinfo, 0, sizeof(h5tool_link_info_t));
 
     /* Check for no command line parameters */
     if (argc == 1) {
@@ -282,7 +273,7 @@ main(int argc, char *argv[])
 
             case 'E':
                 if (H5_optarg != NULL)
-                    enable_error_stack = HDatoi(H5_optarg);
+                    enable_error_stack = atoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
@@ -369,10 +360,10 @@ main(int argc, char *argv[])
      *-------------------------------------------------------------------------*/
 
     if (verbose) {
-        HDprintf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n", fname_src, oname_src,
-                 fname_dst, oname_dst);
+        printf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n", fname_src, oname_src,
+               fname_dst, oname_dst);
         if (flag) {
-            HDprintf("Using %s flag\n", str_flag);
+            printf("Using %s flag\n", str_flag);
         }
     }
 
@@ -406,7 +397,7 @@ main(int argc, char *argv[])
 
         /* Display some output if requested */
         if (verbose)
-            HDprintf("%s: Creating parent groups\n", h5tools_getprogname());
+            printf("%s: Creating parent groups\n", h5tools_getprogname());
     } /* end if */
     else {
         /* error, if parent groups doesn't already exist in destination file */
@@ -419,15 +410,15 @@ main(int argc, char *argv[])
             if ('/' == oname_dst[i]) {
                 char *str_ptr;
 
-                str_ptr = (char *)HDcalloc(i + 1, sizeof(char));
+                str_ptr = (char *)calloc(i + 1, sizeof(char));
                 HDstrncpy(str_ptr, oname_dst, i);
                 str_ptr[i] = '\0';
                 if (H5Lexists(fid_dst, str_ptr, H5P_DEFAULT) <= 0) {
                     error_msg("group <%s> doesn't exist. Use -p to create parent groups.\n", str_ptr);
-                    HDfree(str_ptr);
+                    free(str_ptr);
                     H5TOOLS_GOTO_ERROR(EXIT_FAILURE, "H5Lexists failed");
                 }
-                HDfree(str_ptr);
+                free(str_ptr);
             }
         }
     }
@@ -458,7 +449,7 @@ main(int argc, char *argv[])
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree(linkinfo.trg_path);
+        free(linkinfo.trg_path);
 
     /* close propertis */
     if (H5Pclose(ocpl_id) < 0)
@@ -475,11 +466,11 @@ main(int argc, char *argv[])
     leave(EXIT_SUCCESS);
 
 done:
-    HDprintf("Error in copy...Exiting\n");
+    printf("Error in copy...Exiting\n");
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree(linkinfo.trg_path);
+        free(linkinfo.trg_path);
 
     H5E_BEGIN_TRY
     {
@@ -488,7 +479,7 @@ done:
         H5Fclose(fid_src);
         H5Fclose(fid_dst);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     leave(ret_value);
 }

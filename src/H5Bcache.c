@@ -95,12 +95,12 @@ H5B__cache_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(udata);
-    HDassert(image_len);
+    assert(udata);
+    assert(image_len);
 
     /* Get shared info for B-tree */
     shared = (H5B_shared_t *)H5UC_GET_OBJ(udata->rc_shared);
-    HDassert(shared);
+    assert(shared);
 
     /* Set the image length size */
     *image_len = shared->sizeof_rnode;
@@ -132,13 +132,13 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(image);
-    HDassert(udata);
+    assert(image);
+    assert(udata);
 
     /* Allocate the B-tree node in memory */
     if (NULL == (bt = H5FL_MALLOC(H5B_t)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate B-tree struct")
-    HDmemset(&bt->cache_info, 0, sizeof(H5AC_info_t));
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate B-tree struct");
+    memset(&bt->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Set & increment the ref-counted "shared" B-tree information for the node */
     bt->rc_shared = udata->rc_shared;
@@ -147,26 +147,26 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     /* Get a pointer to the shared info, for convenience */
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
     if (NULL == shared)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, NULL, "can't get a pointer to shared data")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, NULL, "can't get a pointer to shared data");
 
     /* Allocate space for the native keys and child addresses */
     if (NULL == (bt->native = H5FL_BLK_MALLOC(native_block, shared->sizeof_keys)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate buffer for native keys")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate buffer for native keys");
     if (NULL == (bt->child = H5FL_SEQ_MALLOC(haddr_t, (size_t)shared->two_k)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate buffer for child addresses")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate buffer for child addresses");
 
     /* Magic number */
     if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-    if (HDmemcmp(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree signature")
+    if (memcmp(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Node type and level */
     if (H5_IS_BUFFER_OVERFLOW(image, 2, p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*image++ != (uint8_t)udata->type->id)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree node type")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree node type");
     bt->level = *image++;
 
     /* Entries used */
@@ -176,7 +176,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
 
     /* Check if bt->nchildren is greater than two_k */
     if (bt->nchildren > shared->two_k)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "number of children is greater than maximum")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "number of children is greater than maximum");
 
     /* Sibling pointers */
     if (H5_IS_BUFFER_OVERFLOW(image, H5F_sizeof_addr(udata->f), p_end))
@@ -194,7 +194,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
         if (H5_IS_BUFFER_OVERFLOW(image, shared->sizeof_rkey, p_end))
             HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         if ((udata->type->decode)(shared, image, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key");
         image += shared->sizeof_rkey;
         native += udata->type->sizeof_nkey;
 
@@ -208,7 +208,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     if (bt->nchildren > 0) {
         /* Decode native key value */
         if ((udata->type->decode)(shared, image, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key");
     }
 
     /* Set return value */
@@ -217,7 +217,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
 done:
     if (!ret_value && bt)
         if (H5B__node_dest(bt) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__cache_deserialize() */
@@ -239,12 +239,12 @@ H5B__cache_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(bt);
-    HDassert(image_len);
+    assert(bt);
+    assert(image_len);
 
     /* Get shared info for B-tree */
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
+    assert(shared);
 
     /* Set the image length size */
     *image_len = shared->sizeof_rnode;
@@ -273,13 +273,13 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(image);
-    HDassert(bt);
-    HDassert(bt->rc_shared);
+    assert(image);
+    assert(bt);
+    assert(bt->rc_shared);
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
-    HDassert(shared->type);
-    HDassert(shared->type->encode);
+    assert(shared);
+    assert(shared->type);
+    assert(shared->type->encode);
 
     /* magic number */
     H5MM_memcpy(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -290,7 +290,7 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
 
     /* 2^8 limit: only 1 byte is used to store node level */
     if (bt->level >= HDpow(2, LEVEL_BITS))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode node level")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode node level");
 
     H5_CHECK_OVERFLOW(bt->level, unsigned, uint8_t);
     *image++ = (uint8_t)bt->level;
@@ -307,7 +307,7 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     for (u = 0; u < bt->nchildren; ++u) {
         /* encode the key */
         if (shared->type->encode(shared, image, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key");
         image += shared->sizeof_rkey;
         native += shared->type->sizeof_nkey;
 
@@ -317,15 +317,15 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     if (bt->nchildren > 0) {
         /* Encode the final key */
         if (shared->type->encode(shared, image, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key");
         image += shared->sizeof_rkey;
     } /* end if */
 
     /* Sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+    assert((size_t)(image - (uint8_t *)_image) <= len);
 
     /* Clear rest of node */
-    HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+    memset(image, 0, len - (size_t)(image - (uint8_t *)_image));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -347,11 +347,11 @@ H5B__cache_free_icr(void *thing)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(thing);
+    assert(thing);
 
     /* Destroy B-tree node */
     if (H5B__node_dest((H5B_t *)thing) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

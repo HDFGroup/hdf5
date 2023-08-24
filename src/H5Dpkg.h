@@ -92,7 +92,7 @@
                                                                                                              \
                 /* Check if the space is contiguous */                                                       \
                 if (H5S_select_contig_block((PIECE_INFO)->mspace, &is_contig, &sel_off, NULL) < 0)           \
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't check if dataspace is contiguous")   \
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't check if dataspace is contiguous");  \
                                                                                                              \
                 /* If the first sequence includes all the elements selected in this piece, it it contiguous  \
                  */                                                                                          \

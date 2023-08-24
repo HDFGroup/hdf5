@@ -9,7 +9,6 @@ Section II:    Obtain HDF5 source
 Section III:   Using ctest command to build and test
 Section IV:    Cross compiling
 Section V:     Manual alternatives
-Section VI:    Other cross compiling options
 
 ************************************************************************
 
@@ -184,21 +183,3 @@ or
 for parallel builds.
 
 Tests on machines using LSF will typically use "bsub ctestS.lsf", etc.
-
-========================================================================
-VI.    Other cross compiling options
-========================================================================
-Settings for two other cross-compiling options are also in the config/toolchain
-files which do not seem to be necessary with the Cray PrgEnv-* modules
-
-1.  HDF5_USE_PREGEN.  This option, along with the HDF5_USE_PREGEN_DIR CMake
-    variable would allow the use of an appropriate H5Tinit.c file with type
-    information generated on a compute node to be used when cross compiling
-    for those compute nodes.  The use of the variables in lines 110 and 111
-    of HDF5options.cmake file seem to preclude needing this option with the
-    available Cray modules and CMake option.
-
-2.  HDF5_BATCH_H5DETECT and associated CMake variables.  This option when
-    properly configured will run H5detect in a batch job on a compute node
-    at the beginning of the CMake build process.  It was also found to be
-    unnecessary with the available Cray modules and CMake options.
