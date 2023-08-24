@@ -810,6 +810,10 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                     /* early detection of variable-length types */
                     if ((is_vlen = H5Tdetect_class(ftype_id, H5T_VLEN)) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Tdetect_class failed");
+                    if (!is_vlen) {
+                        if ((is_vlen = H5Tis_variable_str(ftype_id)) < 0)
+                            H5TOOLS_GOTO_ERROR((-1), "H5Tis_variable_str failed");
+                    }
 
                     /* Check if the datatype is committed */
                     if ((is_named = H5Tcommitted(ftype_id)) < 0)
