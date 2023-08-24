@@ -3501,6 +3501,8 @@ test_no_collective_cause_mode(int selection_mode)
         sid = H5Screate(H5S_NULL);
         VRFY((sid >= 0), "H5Screate_simple succeeded");
         is_chunked = 0;
+
+        dims[0] = dims[1] = 0;
     }
     else {
         /* Create the basic Space */
