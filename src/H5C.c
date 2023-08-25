@@ -631,7 +631,7 @@ H5C_prep_for_file_close(H5F_t *f)
 
 #ifdef H5_HAVE_PARALLEL
     if ((H5F_INTENT(f) & H5F_ACC_RDWR) && (!image_generated) && (cache_ptr->aux_ptr != NULL) &&
-        (f->shared->sblock) && (f->shared->fs_persist)) {
+        (f->shared->fs_persist)) {
         /* If persistent free space managers are enabled, flushing the
          * metadata cache may result in the deletion, insertion, and/or
          * dirtying of entries.
