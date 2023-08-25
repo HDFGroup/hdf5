@@ -256,7 +256,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* No need to perform any more I/O for this dataset */
             dset_info[i].skip_io = TRUE;
-            io_skipped++;
+            io_skipped           = io_skipped + 1;
         } /* end if */
         else {
             /* Set up I/O operation */
