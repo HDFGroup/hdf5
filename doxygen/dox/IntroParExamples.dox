@@ -205,7 +205,7 @@ Below is the F90 example program which illustrates how to write contiguous hyper
 <table>
 <tr>
 <td>
-<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_col.f90">hyperslab_by_col.f90</a>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_col.F90">hyperslab_by_col.F90</a>
 </td>
 </tr>
 </table>
@@ -346,7 +346,7 @@ Below is the example program for writing hyperslabs by column in Parallel HDF5:
 <table>
 <tr>
 <td>
-<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_row.f90">hyperslab_by_row.f90</a>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_row.F90">hyperslab_by_row.F90</a>
 </td>
 </tr>
 </table>
@@ -436,7 +436,7 @@ Below are example programs for writing hyperslabs by pattern in Parallel HDF5:
 </tr>
 <tr>
 <td>
-<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_pattern.f90">hyperslab_by_pattern.f90</a>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_pattern.F90">hyperslab_by_pattern.F90</a>
 </td>
 </tr>
 </table>
@@ -535,7 +535,7 @@ Below are example programs for writing hyperslabs by pattern in Parallel HDF5:
 </tr>
 <tr>
 <td>
-<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_chunk.f90">hyperslab_by_chunk.f90</a>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_chunk.F90">hyperslab_by_chunk.F90</a>
 </td>
 </tr>
 </table>
