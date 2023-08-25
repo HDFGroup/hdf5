@@ -1231,7 +1231,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__dest(H5F_t *f, hbool_t flush)
+H5F__dest(H5F_t *f, hbool_t flush, hbool_t free_on_failure)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1467,7 +1467,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
 
-    if (ret_value >= 0)
+    if ((ret_value >= 0) || free_on_failure)
         f = H5FL_FREE(H5F_t, f);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1972,7 +1972,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
 done:
     if ((NULL == ret_value) && file)
-        if (H5F__dest(file, FALSE) < 0)
+        if (H5F__dest(file, FALSE, TRUE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2408,7 +2408,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
      * shared H5F_shared_t struct. If the reference count for the H5F_shared_t
      * struct reaches zero then destroy it also.
      */
-    if (H5F__dest(f, TRUE) < 0)
+    if (H5F__dest(f, TRUE, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     /* Since we closed the file, this should be set to TRUE */

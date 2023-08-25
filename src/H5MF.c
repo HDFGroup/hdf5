@@ -2681,16 +2681,14 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
         hbool_t fsm_opened[H5F_MEM_PAGE_NTYPES];  /* State of FSM */
         hbool_t fsm_visited[H5F_MEM_PAGE_NTYPES]; /* State of FSM */
 
-        /* Sanity check */
-        HDassert(f->shared->sblock);
-
         /* should only be called if file is opened R/W */
         HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
         /* shouldn't be called unless we have a superblock supporting the
          * superblock extension.
          */
-        HDassert(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2);
+        if (f->shared->sblock)
+            HDassert(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2);
 
         /* Initialize fsm_opened and fsm_visited */
         HDmemset(fsm_opened, 0, sizeof(fsm_opened));
@@ -2838,40 +2836,44 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          *            file space manager info message is guaranteed to exist.
          *            Leave it in for now, but consider removing it.
          */
-        if (H5F_addr_defined(f->shared->sblock->ext_addr))
-            if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                            "error in removing message from superblock extension")
+        if (f->shared->sblock) {
+            if (H5F_addr_defined(f->shared->sblock->ext_addr))
+                if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
+                                "error in removing message from superblock extension")
+        }
 
         /* As the final element in 1), shrink the EOA for the file */
         if (H5MF__close_shrink_eoa(f) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
 
-        /* 2) Ensure that space is allocated for the free space manager superblock
-         *    extension message.  Must do this now, before reallocating file space
-         *    for free space managers, as it is possible that this allocation may
-         *    grab the last section in a FSM -- making it unnecessary to
-         *    re-allocate file space for it.
-         *
-         * Do this by writing a free space manager superblock extension message.
-         *
-         * Since no free space manager has file space allocated for it, this
-         * message must be invalid since we can't save addresses of FSMs when
-         * those addresses are unknown.  This is OK -- we will write the correct
-         * values to the message at free space manager shutdown.
-         */
-        for (fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
-            fsinfo.fs_addr[fsm_type - 1] = HADDR_UNDEF;
-        fsinfo.strategy            = f->shared->fs_strategy;
-        fsinfo.persist             = f->shared->fs_persist;
-        fsinfo.threshold           = f->shared->fs_threshold;
-        fsinfo.page_size           = f->shared->fs_page_size;
-        fsinfo.pgend_meta_thres    = f->shared->pgend_meta_thres;
-        fsinfo.eoa_pre_fsm_fsalloc = HADDR_UNDEF;
+        if (f->shared->sblock) {
+            /* 2) Ensure that space is allocated for the free space manager superblock
+             *    extension message.  Must do this now, before reallocating file space
+             *    for free space managers, as it is possible that this allocation may
+             *    grab the last section in a FSM -- making it unnecessary to
+             *    re-allocate file space for it.
+             *
+             * Do this by writing a free space manager superblock extension message.
+             *
+             * Since no free space manager has file space allocated for it, this
+             * message must be invalid since we can't save addresses of FSMs when
+             * those addresses are unknown.  This is OK -- we will write the correct
+             * values to the message at free space manager shutdown.
+             */
+            for (fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
+                fsinfo.fs_addr[fsm_type - 1] = HADDR_UNDEF;
+            fsinfo.strategy            = f->shared->fs_strategy;
+            fsinfo.persist             = f->shared->fs_persist;
+            fsinfo.threshold           = f->shared->fs_threshold;
+            fsinfo.page_size           = f->shared->fs_page_size;
+            fsinfo.pgend_meta_thres    = f->shared->pgend_meta_thres;
+            fsinfo.eoa_pre_fsm_fsalloc = HADDR_UNDEF;
 
-        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, TRUE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL,
-                        "error in writing fsinfo message to superblock extension")
+            if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, TRUE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL,
+                            "error in writing fsinfo message to superblock extension")
+        }
 
         /* 3) Scan all free space managers not involved in allocating
          *    space for free space managers.  For each such free space
