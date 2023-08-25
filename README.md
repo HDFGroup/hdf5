@@ -3,8 +3,8 @@ HDF5 version 1.15.0 currently under development
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
 [![develop build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![oneAPI CMake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/linux-icx.yml?branch=develop&label="oneAPI CMake")](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![oneAPI Autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/linux-icx-auto.yml?branch=develop&label="oneAPI Autotools")](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![oneAPI CMake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/linux-icx.yml?branch=develop&label=oneAPI-C)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![oneAPI Autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/linux-icx-auto.yml?branch=develop&label=oneAPI-A)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
