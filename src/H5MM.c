@@ -55,63 +55,6 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5MM_malloc
- *
- * Purpose:     Similar to the C89 version of malloc().
- *
- *              On size of 0, we return a NULL pointer instead of the
- *              standard-allowed 'special' pointer since that's more
- *              difficult to check as a return value. This is still
- *              considered an error condition since allocations of zero
- *              bytes usually indicate problems.
- *
- * Return:      Success:    Pointer to new memory
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_malloc(size_t size)
-{
-    void *ret_value = NULL;
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    ret_value = malloc(size);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MM_malloc() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5MM_calloc
- *
- * Purpose:     Similar to the C89 version of calloc(), except this
- *              routine just takes a 'size' parameter.
- *
- *              On size of 0, we return a NULL pointer instead of the
- *              standard-allowed 'special' pointer since that's more
- *              difficult to check as a return value. This is still
- *              considered an error condition since allocations of zero
- *              bytes usually indicate problems.
- *
- * Return:      Success:    Pointer to new memory
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_calloc(size_t size)
-{
-    void *ret_value = NULL;
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    ret_value = calloc(1, size);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MM_calloc() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5MM_realloc
  *
  * Purpose:     Similar semantics as C89's realloc(). Specifically, the
@@ -283,6 +226,8 @@ H5MM_xfree_const(const void *mem)
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree_const() */
 
+#ifdef H5MM_DEBUG
+
 /*-------------------------------------------------------------------------
  * Function:    H5MM_memcpy
  *
@@ -313,3 +258,5 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
     FUNC_LEAVE_NOAPI(ret)
 
 } /* end H5MM_memcpy() */
+
+#endif /* H5MM_DEBUG */

@@ -79,11 +79,11 @@
          * and interfere with detection of the various properties below unless we                            \
          * know to ignore them. */                                                                           \
         _v1 = (TYPE)4.0L;                                                                                    \
-        memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                     \
+        H5MM_memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                \
         for (_i = 0; _i < (int)sizeof(TYPE); _i++)                                                           \
             for (_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char)(_byte_mask << 1)) { \
                 _buf1[_i] ^= _byte_mask;                                                                     \
-                memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                     \
+                H5MM_memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                \
                 H5_GCC_CLANG_DIAG_OFF("float-equal")                                                         \
                 if (_v1 != _v2)                                                                              \
                     _pad_mask[_i] |= _byte_mask;                                                             \
@@ -96,8 +96,8 @@
             _v3 = _v1;                                                                                       \
             _v1 += _v2;                                                                                      \
             _v2 /= (TYPE)256.0L;                                                                             \
-            memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                 \
-            memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                                 \
+            H5MM_memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                            \
+            H5MM_memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                            \
             _j = H5T__byte_cmp(sizeof(TYPE), _buf3, _buf1, _pad_mask);                                       \
             if (_j >= 0) {                                                                                   \
                 INFO.perm[_i] = _j;                                                                          \

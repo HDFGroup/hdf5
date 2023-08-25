@@ -809,13 +809,13 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
         if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value");
 
-        memcpy(token_src, token, HDstrlen(token) + 1);
+        H5MM_memcpy(token_src, token, HDstrlen(token) + 1);
     }
     else {
         token_src = (char *)malloc(sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1));
         if (token_src == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for token_src variable.");
-        memcpy(token_src, token, HDstrlen(token) + 1);
+        H5MM_memcpy(token_src, token, HDstrlen(token) + 1);
         if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char *), &token_src, NULL, NULL, NULL, NULL,
                        H5FD__ros3_str_token_delete, H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp,
                        H5FD__ros3_str_token_close) < 0)

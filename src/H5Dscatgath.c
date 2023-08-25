@@ -118,7 +118,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    H5MM_memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_WRITE;
     tmp_dset_info.buf.cvp  = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
@@ -219,7 +219,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    H5MM_memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_READ;
     tmp_dset_info.buf.vp   = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;

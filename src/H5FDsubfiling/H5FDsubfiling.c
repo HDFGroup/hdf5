@@ -553,7 +553,7 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
     }
     else {
         /* Copy the subfiling fapl data out */
-        memcpy(config_out, config_ptr, sizeof(H5FD_subfiling_config_t));
+        H5MM_memcpy(config_out, config_ptr, sizeof(H5FD_subfiling_config_t));
 
         /* Copy the driver info value */
         if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(config_out->ioc_fapl_id)) < 0)
@@ -811,7 +811,7 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
 
     /* Encode config file prefix string */
     if (sf_context->config_file_prefix) {
-        memcpy(p, sf_context->config_file_prefix, prefix_len);
+        H5MM_memcpy(p, sf_context->config_file_prefix, prefix_len);
         p += prefix_len;
     }
 
@@ -826,7 +826,7 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
                                     "unable to encode IOC VFD's superblock information");
 
         /* Copy the IOC VFD's name into our buffer */
-        memcpy(p, ioc_name, 9);
+        H5MM_memcpy(p, ioc_name, 9);
     }
 
 done:
@@ -893,9 +893,9 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate space for config file prefix string");
 
-            memcpy(sf_context->config_file_prefix, p, tmpu64);
+            H5MM_memcpy(sf_context->config_file_prefix, p, tmpu64);
 
-            /* Just in case.. */
+            /* Just in case... */
             sf_context->config_file_prefix[tmpu64 - 1] = '\0';
         }
 
@@ -905,7 +905,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     if (file->sf_file) {
         char ioc_name[9];
 
-        memcpy(ioc_name, p, 9);
+        H5MM_memcpy(ioc_name, p, 9);
         p += 9;
 
         if (H5FD_sb_load(file->sf_file, ioc_name, p) < 0)
@@ -960,7 +960,7 @@ H5FD__subfiling_fapl_get(H5FD_t *_file)
     }
 
     /* Copy the fields of the structure */
-    memcpy(fa, &(file->fa), sizeof(H5FD_subfiling_config_t));
+    H5MM_memcpy(fa, &(file->fa), sizeof(H5FD_subfiling_config_t));
 
     /* Copy the driver info value */
     if (H5FD__copy_plist(file->fa.ioc_fapl_id, &(fa->ioc_fapl_id)) < 0)
@@ -1036,7 +1036,7 @@ H5FD__subfiling_fapl_copy(const void *_old_fa)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
 
-    memcpy(new_fa, old_fa, sizeof(H5FD_subfiling_config_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_subfiling_config_t));
 
     if (H5FD__copy_plist(old_fa->ioc_fapl_id, &(new_fa->ioc_fapl_id)) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy the IOC FAPL");
@@ -1169,7 +1169,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         config_ptr = &default_config;
     }
 
-    memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
+    H5MM_memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
     if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0) {
         file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy FAPL");

@@ -957,7 +957,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
         unsigned char *block_ptr = ((unsigned char *)block) - sizeof(H5FL_track_t);
         H5FL_track_t   trk;
 
-        memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+        H5MM_memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk.stack);
@@ -979,7 +979,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
                 trk.next->prev = trk.prev;
         } /* end else */
 
-        memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+        H5MM_memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
     }
 #endif /* H5FL_TRACK */
 
@@ -1079,7 +1079,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
                 unsigned char *block_ptr = ((unsigned char *)block) - sizeof(H5FL_track_t);
                 H5FL_track_t   trk;
 
-                memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+                H5MM_memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
                 /* Release previous tracking information */
                 H5CS_close_stack(trk.stack);
@@ -1099,7 +1099,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
                 trk.func = call_func;
                 trk.line = call_line;
 
-                memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+                H5MM_memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
             }
 #endif /* H5FL_TRACK */
             ret_value = block;
@@ -1380,7 +1380,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
         unsigned char *block_ptr = ((unsigned char *)obj) - sizeof(H5FL_track_t);
         H5FL_track_t   trk;
 
-        memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+        H5MM_memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk.stack);
@@ -1402,7 +1402,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
                 trk.next->prev = trk.prev;
         } /* end else */
 
-        memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+        H5MM_memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
     }
 #endif
 
@@ -1631,7 +1631,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
             unsigned char *block_ptr = ((unsigned char *)obj) - sizeof(H5FL_track_t);
             H5FL_track_t   trk;
 
-            memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+            H5MM_memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
             /* Release previous tracking information */
             H5CS_close_stack(trk.stack);
@@ -1651,7 +1651,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
             trk.func = call_func;
             trk.line = call_line;
 
-            memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+            H5MM_memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
 #endif
             ret_value = obj;
         }

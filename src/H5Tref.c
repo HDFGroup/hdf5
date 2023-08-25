@@ -737,7 +737,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     } /* end if */
 
     /* Set output info */
-    memcpy(dst_ref, &tmp_ref, sizeof(tmp_ref));
+    H5MM_memcpy(dst_ref, &tmp_ref, sizeof(tmp_ref));
 
 done:
     if ((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
