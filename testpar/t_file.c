@@ -781,7 +781,7 @@ test_file_properties(void)
     mpi_ret = MPI_Info_create(&info);
     VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
     mpi_ret = MPI_Info_set(info, "hdf_info_prop1", "xyz");
-    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
+    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set succeeded");
 
     /* setup file access plist */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -870,7 +870,7 @@ test_file_properties(void)
     ret = H5Pset_fapl_mpio(fapl_id, comm, info);
     VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
     fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
-    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+    VRFY((fid != H5I_INVALID_HID), "H5Fopen succeeded");
 
     /* verify settings for file access properties */
 
@@ -897,7 +897,7 @@ test_file_properties(void)
     ret = H5Pset_all_coll_metadata_ops(fapl_id, TRUE);
     VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
     fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
-    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+    VRFY((fid != H5I_INVALID_HID), "H5Fopen succeeded");
 
     /* verify settings for file access properties */
 
