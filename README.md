@@ -82,15 +82,13 @@ new features and bug fixes, though we try to have at least one release of each
 maintenance branch per year. Future HDF5 releases indicated on this schedule
 are tentative.
 
-**NOTE**: HDF5 1.12 is being retired early due to its incomplete and incompatible VOL
-layer.
-
 | Release | New Features |
 | ------- | ------------ |
-| 1.10.11 | CVE fixes, Last HDF5 1.10 release |
+| 1.10.11 | CVE fixes, last HDF5 1.10 release |
 | 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
-| 1.14.2 | CVE fixes |
-| 1.14.2 | VFD SWMR (tentative) |
+| 1.14.3 | CVE-free!, better cross-compile support |
+| 1.14.4 | S3 VFD improvements |
+| TBD | VFD SWMR |
 | 2.0.0 | TBD |
 
 This list of feature release versions is also tentative, and the specific release
