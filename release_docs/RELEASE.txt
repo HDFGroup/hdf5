@@ -21,7 +21,7 @@ The official HDF5 releases can be obtained from:
 
      https://www.hdfgroup.org/downloads/hdf5/
 
-Changes from release to release and new features in the HDF5-1.10.x release series
+Changes from Release to Release and New Features in the HDF5-1.10.x release series
 can be found at:
 
      https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
