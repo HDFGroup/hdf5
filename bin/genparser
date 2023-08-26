@@ -236,6 +236,7 @@ do
     echo '#pragma GCC diagnostic ignored "-Wsign-conversion"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wstrict-overflow"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wstrict-prototypes"              ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"           ' >> tmp.out
     echo '#if !defined (__clang__)                                          ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wlarger-than="                   ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"        ' >> tmp.out

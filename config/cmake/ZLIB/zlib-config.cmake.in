@@ -30,7 +30,7 @@ set (${ZLIB_PACKAGE_NAME}_VERSION_MINOR  @ZLIB_VERSION_MINOR@)
 
 #-----------------------------------------------------------------------------
 # Don't include targets if this file is being picked up by another
-# project which has already build ZLIB as a subproject
+# project which has already built ZLIB as a subproject
 #-----------------------------------------------------------------------------
 if (NOT TARGET "@ZLIB_PACKAGE@")
   include (@PACKAGE_SHARE_INSTALL_DIR@/@ZLIB_PACKAGE@@ZLIB_PACKAGE_EXT@-targets.cmake)
