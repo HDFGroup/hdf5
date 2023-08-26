@@ -135,6 +135,17 @@ Bug Fixes since HDF5-1.10.10 release
 ===================================
     Library
     -------
+    - Fix a memory leak when parsing corrupt files
+
+      When parsing a file with a corrupt attribute object header message,
+      allocated memory would not be cleaned up. This could also trip
+      asserts in the memory sanity check code when that feature is enabled.
+
+      This fix ensures that memory allocated in the function is freed on
+      errors.
+
+      Fixes HDFFV-10774
+
     - Seg fault on file close
 
       h5debug fails at file close with core dump on a file that has an

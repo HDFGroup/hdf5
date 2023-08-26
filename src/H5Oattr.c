@@ -256,6 +256,8 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, un
 done:
     if (NULL == ret_value)
         if (attr) {
+            if(attr->shared->ds)
+                attr->shared->ds = H5FL_FREE(H5S_t, attr->shared->ds);
             if (attr->shared) {
                 /* Free any dynamically allocated items */
                 if (H5A__free(attr) < 0)
