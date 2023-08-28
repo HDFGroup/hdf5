@@ -184,6 +184,7 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tattr.c
     ${HDF5_TEST_SOURCE_DIR}/tchecksum.c
     ${HDF5_TEST_SOURCE_DIR}/tconfig.c
+    ${HDF5_TEST_SOURCE_DIR}/th5_system.c
     ${HDF5_TEST_SOURCE_DIR}/tcoords.c
     ${HDF5_TEST_SOURCE_DIR}/tfile.c
     ${HDF5_TEST_SOURCE_DIR}/tgenprop.c

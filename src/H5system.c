@@ -918,6 +918,50 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_expand_windows_env_vars() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_strndup
+ *
+ * Purpose:     Similar to strndup() for use on Windows. Allocates a new
+ *              string and copies at most `n` bytes from the original
+ *              string into the new string. If the original string is
+ *              longer than `n`, only `n` bytes are copied from the
+ *              original string. In either case, the string being returned
+ *              is guaranteed to be terminated with a null byte.
+ *
+ *              The returned pointer is allocated by H5MM_malloc in this
+ *              routine and must be freed by the caller with H5MM_free or
+ *              H5MM_xfree.
+ *
+ * Return:      Pointer to copied string on success
+ *              NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5_strndup(const char *s, size_t n)
+{
+    size_t len;
+    char  *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!s)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "string cannot be NULL")
+
+    for (len = 0; len < n && s[len] != '\0'; len++)
+        ;
+
+    if (NULL == (ret_value = H5MM_malloc(len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for string")
+
+    H5MM_memcpy(ret_value, s, len);
+    ret_value[len] = '\0';
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 #endif /* H5_HAVE_WIN32_API */
 
 /* Global variables */
