@@ -109,12 +109,12 @@ hdf5_java_JAVA =  \
 	${pkgpath}/HDFArray.java  \
 	${pkgpath}/HDFNativeData.java
 
-$(jarfile): classhdf5_java.stamp classes docs
+$(jarfile): classhdf5_java.stamp classes
 	$(JAR) cvf $@ -C $(JAVAROOT)/ $(pkgpath)
 
 hdf5_java_DATA = $(jarfile)
 
-.PHONY: docs classes
+.PHONY: classes
 
 WINDOWTITLE = 'HDF5 Java'
 DOCTITLE = '<h1>HDF5 Java Wrapper</h1>'
