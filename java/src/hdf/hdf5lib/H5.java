@@ -255,7 +255,7 @@ public class H5 implements java.io.Serializable {
      */
     private static final long serialVersionUID = 6129888282117053288L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5.class);
+    private final static Logger log = LoggerFactory.getLogger(H5.class);
 
     /**
      * @ingroup JH5
