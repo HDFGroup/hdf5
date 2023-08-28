@@ -36,7 +36,7 @@ jarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
 hdf5_javadir = $(libdir)
 
 pkgpath = hdf/hdf5lib
-CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-1.7.33.jar:$$CLASSPATH
+CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-2.0.6.jar:$$CLASSPATH
 
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
@@ -120,15 +120,11 @@ WINDOWTITLE = 'HDF5 Java'
 DOCTITLE = '<h1>HDF5 Java Wrapper</h1>'
 SRCDIR = '$(pkgpath)'
 
-docs:
-	$(JAVADOC) -sourcepath $(srcdir) -d javadoc -Xdoclint:none -use -splitIndex -windowtitle $(WINDOWTITLE) -doctitle $(DOCTITLE) -J-Xmx180m -verbose -overview $(top_srcdir)/java/src/hdf/overview.html -classpath $(CLASSPATH_ENV) hdf.hdf5lib
-
 CLEANFILES = classhdf5_java.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/callbacks/*.class $(JAVAROOT)/$(pkgpath)/exceptions/*.class $(JAVAROOT)/$(pkgpath)/structs/*.class $(JAVAROOT)/$(pkgpath)/*.class
 
 clean:
 	rm -rf $(JAVAROOT)/*
 	rm -f $(jarfile)
-	rm -rf javadoc
 	rm -f classhdf5_java.stamp
 
 

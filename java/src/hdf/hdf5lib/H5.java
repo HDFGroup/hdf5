@@ -55,6 +55,9 @@ import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @page HDF5LIB HDF5 Java API Package
  * This class is the Java interface for the HDF5 library.
