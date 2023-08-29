@@ -374,7 +374,7 @@ IV. Further considerations
       the settings for the developers' environment. Then the only options needed
       on the command line are those options that are different. Example using HDF
       default cache file:
-           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 12 2013" \
+           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
@@ -783,8 +783,7 @@ HDF5_BUILD_FORTRAN      "Build FORTRAN support"           OFF
 HDF5_BUILD_JAVA         "Build JAVA support"              OFF
 HDF5_BUILD_HL_LIB       "Build HIGH Level HDF5 Library"   ON
 HDF5_BUILD_TOOLS        "Build HDF5 Tools"                ON
-HDF5_BUILD_HL_TOOLS     "Build HIGH Level HDF5 Tools"     ON
-HDF5_BUILD_HL_GIF_TOOLS "Build HIGH Level HDF5 GIF Tools"    OFF
+HDF5_BUILD_HL_GIF_TOOLS "Build HIGH Level HDF5 GIF Tools" OFF
 
 ---------------- HDF5 Folder Build Options ---------------------
 Defaults relative to $<INSTALL_PREFIX>
