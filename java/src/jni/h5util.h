@@ -50,6 +50,11 @@ extern int    h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr, int b
 
 extern htri_t H5Tdetect_variable_str(hid_t tid);
 
+extern void translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class,
+                           jsize count, void *raw_buf);
+extern void translate_wbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class,
+                           jsize count, void *raw_buf);
+
 /*
  * Symbols used to format the output of h5str_sprintf and
  * to interpret the input to h5str_convert.
