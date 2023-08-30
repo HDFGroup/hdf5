@@ -51,7 +51,8 @@ jobs:
           -DCMAKE_C_COMPILER=icx \
           -DCMAKE_Fortran_COMPILER=ifx \
           -DMKL_ROOT="/opt/intel/oneapi/mkl/latest" \
-          -DTBB_ROOT="/opt/intel/oneapi/tbb/latest"
+          -DTBB_ROOT="/opt/intel/oneapi/tbb/latest" \
+          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
 
       - name: build
         shell: bash
