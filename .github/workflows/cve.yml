@@ -36,7 +36,7 @@ jobs:
       - name: Install HDF5
         run: |
           ./autogen.sh
-          ./configure --prefix=/usr/local --disable-tests
+          ./configure --prefix=/usr/local --disable-tests --disable-shared
           make
           sudo make install
       - name: Checkout CVE test repository
