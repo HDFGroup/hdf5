@@ -31,11 +31,11 @@ option (HDF5_VOL_ALLOW_EXTERNAL "Allow building of external HDF5 VOL connectors 
 mark_as_advanced (HDF5_VOL_ALLOW_EXTERNAL)
 if (HDF5_VOL_ALLOW_EXTERNAL)
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "NO" OR NOT HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
-    message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be set to 'GIT' or 'SOURCE_DIR' to allow building of external HDF5 VOL connectors")
+    message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be set to 'GIT' or 'LOCAL_SOURCE_DIR' to allow building of external HDF5 VOL connectors")
   endif ()
 
-  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SOURCE_DIR" AND NOT HDF5_VOL_PATH_TEMP)
-    message(FATAL_ERROR "HDF5_VOL_PATH_TEMP must have a path to VOL source when HDF5_ALLOW_EXTERNAL_SUPPORT = SOURCE_DIR")
+  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "LOCAL_SOURCE_DIR" AND NOT HDF5_VOL_PATH_TEMP)
+    message(FATAL_ERROR "HDF5_VOL_PATH_TEMP must have a path to VOL source when HDF5_ALLOW_EXTERNAL_SUPPORT = LOCAL_SOURCE_DIR")
   endif ()
 
   # For compatibility, set some variables that projects would
@@ -70,10 +70,12 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
       set (HDF5_VOL_SOURCE "HDF5_VOL_URL${vol_idx_fixed}")
       set (${HDF5_VOL_SOURCE} "" CACHE STRING "Git repository URL of an external HDF5 VOL connector to build")
       mark_as_advanced (HDF5_VOL_URL${vol_idx_fixed})
-    else () # (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SOURCE_DIR")
+    elseif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "LOCAL_SOURCE_DIR")
       set (HDF5_VOL_SOURCE "HDF5_VOL_DIR${vol_idx_fixed}")
       set (${HDF5_VOL_SOURCE} "" CACHE STRING "Path to the source directory of an external HDF5 VOL connector to build")
       mark_as_advanced (HDF5_VOL_PATH${vol_idx_fixed})
+    else()
+      set(A "TODO")
     endif()
 
     if (NOT "${HDF5_VOL_SOURCE}" STREQUAL "")
@@ -134,6 +136,8 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
         FetchContent_Declare (HDF5_VOL_${hdf5_vol_name_lower}
         SOURCE_DIR "${HDF5_VOL_SOURCE_LOCAL}"
         )
+      else ()
+        set (A "TODO")
       endif()
 
       FetchContent_GetProperties(HDF5_VOL_${hdf5_vol_name_lower})
