@@ -36,7 +36,7 @@ jobs:
       - name: Install HDF5
         run: |
           ./autogen.sh
-          ./configure --prefix=/usr/local --disable-tests --disable-shared
+          ./configure --prefix=/usr/local --disable-tests
           make
           sudo make install
       - name: Checkout CVE test repository
@@ -47,4 +47,5 @@ jobs:
       - name: Run regression tests
         run: |
           cd cve_hdf5
-          ./test_hdf5_cve.sh /usr/local/bin ./cve_out 
+          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+          ./test_hdf5_cve.sh /usr/local/bin ./cve_out
