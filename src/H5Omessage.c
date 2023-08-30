@@ -675,11 +675,12 @@ H5O__msg_free_real(const H5O_msg_class_t *type, void *msg_native)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Don't assert on args since this could be called in cleanup code */
+    /* check args */
+    HDassert(type);
 
     if (msg_native) {
         H5O__msg_reset_real(type, msg_native);
-        if (type && type->free)
+        if (NULL != (type->free))
             (type->free)(msg_native);
         else
             H5MM_xfree(msg_native);
