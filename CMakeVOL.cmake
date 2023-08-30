@@ -34,30 +34,17 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
     message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be set to 'GIT' to allow building of external HDF5 VOL connectors")
   endif ()
 
-  set (HDF5_LIB_TARGETS "")
-  set (HDF5_HL_LIB_TARGETS "")
-
-  if (BUILD_STATIC_LIBS)
-    list(APPEND HDF5_LIB_TARGETS ${HDF5_LIB_TARGET})
-    list(APPEND HDF5_HL_LIB_TARGETS ${HDF5_HL_LIB_TARGET})
-  endif()
-
-  if (BUILD_SHARED_LIBS)
-    list(APPEND HDF5_LIB_TARGETS ${HDF5_LIBSH_TARGET})
-    list(APPEND HDF5_HL_LIB_TARGETS ${HDF5_HL_LIBSH_TARGET})
-  endif()
-
   # For compatibility, set some variables that projects would
   # typically look for after calling find_package(HDF5)
   set (HDF5_FOUND 1)
-  set (HDF5_LIBRARIES "${HDF5_LIB_TARGETS};${LINK_LIBS};${LINK_COMP_LIBS};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
+  set (HDF5_LIBRARIES "${HDF5_LIBSH_TARGET};${LINK_LIBS};${LINK_COMP_LIBS};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
   set (HDF5_INCLUDE_DIRS "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   set (HDF5_DIR "${HDF5_SOURCE_DIR}")
 
-  set (HDF5_C_LIBRARIES "${HDF5_LIB_TARGETS}")
-
+  set (HDF5_C_LIBRARIES "${HDF5_LIBRARIES}")
+  
   if (HDF5_BUILD_HL_LIB)
-    set (HDF5_C_HL_LIBRARIES "${HDF5_HL_LIB_TARGETS}")
+    set (HDF5_C_HL_LIBRARIES "${HDF5_HL_LIBSH_TARGET}")
   endif()
 
   set (HDF5_MAX_EXTERNAL_VOLS 10)
