@@ -97,6 +97,16 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
 
     /* Iterate over datasets */
     for (i = 0; i < count; i++) {
+        /* Initialize fields not set here to prevent use of uninitialized */
+        memset(&dinfo[i].layout_ops, 0, sizeof(dinfo[i].layout_ops));
+        memset(&dinfo[i].io_ops, 0, sizeof(dinfo[i].io_ops));
+        memset(&dinfo[i].layout_io_info, 0, sizeof(dinfo[i].layout_io_info));
+        memset(&dinfo[i].type_info, 0, sizeof(dinfo[i].type_info));
+        dinfo[i].store   = NULL;
+        dinfo[i].layout  = NULL;
+        dinfo[i].nelmts  = 0;
+        dinfo[i].skip_io = false;
+
         /* Set up dset */
         dinfo[i].dset = (H5D_t *)obj[i];
         assert(dinfo[i].dset);

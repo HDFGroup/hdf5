@@ -3099,7 +3099,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
              */
             j = 0; /* guess at the index of the smallest value of s_bufs[] */
 
-            if (s_bufs[j + 1].vp != NULL) {
+            if ((count > 1) && (s_bufs[j + 1].vp != NULL)) {
                 for (i = 1; i < count; i++)
                     if (s_bufs[i].vp < s_bufs[j].vp)
                         j = i;
@@ -3467,7 +3467,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
              */
             j = 0; /* guess at the index of the smallest value of s_bufs[] */
 
-            if (s_bufs[j + 1].cvp != NULL) {
+            if ((count > 1) && (s_bufs[j + 1].cvp != NULL)) {
                 for (i = 1; i < count; i++)
                     if (s_bufs[i].cvp < s_bufs[j].cvp)
                         j = i;

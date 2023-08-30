@@ -61,8 +61,8 @@ H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
 H5Dwrite(..., dxpl_id, ...);
 ```
 
-The following are two simple examples of using the parallel compression
-feature:
+The following are two simple examples of using the parallel
+compression feature:
 
 [ph5_filtered_writes.c](https://github.com/HDFGroup/hdf5/blob/develop/examples/ph5_filtered_writes.c)
 
@@ -75,6 +75,27 @@ when one or MPI ranks don't have any data to write to a dataset.
 Remember that the feature requires these writes to use collective
 I/O, so the MPI ranks which have nothing to contribute must still
 participate in the collective write call.
+
+## Multi-dataset I/O support
+
+The parallel compression feature is supported when using the
+multi-dataset I/O API routines ([H5Dwrite_multi](https://hdfgroup.github.io/hdf5/group___h5_d.html#gaf6213bf3a876c1741810037ff2bb85d8)/[H5Dread_multi](https://hdfgroup.github.io/hdf5/group___h5_d.html#ga8eb1c838aff79a17de385d0707709915)), but the
+following should be kept in mind:
+
+ - Parallel writes to filtered datasets **must** still be collective,
+   even when using the multi-dataset I/O API routines
+
+ - When the multi-dataset I/O API routines are passed a mixture of
+   filtered and unfiltered datasets, the library currently has to
+   perform I/O on them separately in two phases. Since there is
+   some slight complexity involved in this, it may be best (depending
+   on the number of datasets, number of selected chunks, number of
+   filtered vs. unfiltered datasets, etc.) to make two individual
+   multi-dataset I/O calls, one for the filtered datasets and one
+   for the unfiltered datasets. When performing writes to the datasets,
+   this would also allow independent write access to the unfiltered
+   datasets if desired, while still performing collective writes to
+   the filtered datasets.
 
 ## Incremental file space allocation support
 
