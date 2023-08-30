@@ -17,7 +17,14 @@ GROUP "/" {
       }
    }
    GROUP "g2" {
-      HARDLINK "/g2"
+      GROUP "g2.1" {
+         GROUP "g2.1.1" {
+         }
+         GROUP "g2.1.2" {
+         }
+         GROUP "g2.1.3" {
+         }
+      }
    }
    GROUP "g3" {
       GROUP "g3.1" {

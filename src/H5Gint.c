@@ -940,13 +940,15 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
         /* Check if we've seen the object the link references before */
         if (NULL == H5SL_search(udata->visited, &obj_pos)) {
             H5O_type_t otype; /* Basic object type (group, dataset, etc.) */
+            unsigned   rc;    /* Reference count of object    */
 
             /* Get the object's reference count and type */
-            if (H5O_get_rc_and_type(&obj_oloc, NULL, &otype) < 0)
+            if (H5O_get_rc_and_type(&obj_oloc, &rc, &otype) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get object info")
 
-            /* Add it to the list of visited objects */
-            {
+            /* If its ref count is > 1, we add it to the list of visited objects */
+            /* (because it could come up again during traversal) */
+            if (rc > 1) {
                 H5_obj_t *new_node; /* New object node for visited list */
 
                 /* Allocate new object "position" node */
@@ -960,7 +962,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
                 if (H5SL_insert(udata->visited, new_node, new_node) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5_ITER_ERROR,
                                 "can't insert object node into visited list")
-            }
+            } /* end if */
 
             /* If it's a group, we recurse into it */
             if (otype == H5O_TYPE_GROUP) {
@@ -1056,6 +1058,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_ord
     H5G_t              *grp = NULL;            /* Group opened */
     H5G_loc_t           loc;                   /* Location of group passed in */
     H5G_loc_t           start_loc;             /* Location of starting group */
+    unsigned            rc;                    /* Reference count of object    */
     herr_t              ret_value = FAIL;      /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
@@ -1097,8 +1100,13 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_ord
     if ((udata.visited = H5SL_create(H5SL_TYPE_OBJ, NULL)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create skip list for visited objects")
 
-    /* Add it to the list of visited objects */
-    {
+    /* Get the group's reference count */
+    if (H5O_get_rc_and_type(&grp->oloc, &rc, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object info")
+
+    /* If its ref count is > 1, we add it to the list of visited objects */
+    /* (because it could come up again during traversal) */
+    if (rc > 1) {
         H5_obj_t *obj_pos; /* New object node for visited list */
 
         /* Allocate new object "position" node */
@@ -1112,7 +1120,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_ord
         /* Add to list of visited objects */
         if (H5SL_insert(udata.visited, obj_pos, obj_pos) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert object node into visited list")
-    }
+    } /* end if */
 
     /* Attempt to get the link info for this group */
     if ((linfo_exists = H5G__obj_get_linfo(&(grp->oloc), &linfo)) < 0)

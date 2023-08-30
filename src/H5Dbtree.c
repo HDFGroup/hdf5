@@ -661,8 +661,7 @@ H5D__btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key
 
         /* Retrieve coordinate offset */
         UINT64DECODE(raw, tmp_offset);
-        if (0 != (tmp_offset % layout->dim[u]))
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "bad coordinate offset");
+        HDassert(0 == (tmp_offset % layout->dim[u]));
 
         /* Convert to a scaled offset */
         key->scaled[u] = tmp_offset / layout->dim[u];
