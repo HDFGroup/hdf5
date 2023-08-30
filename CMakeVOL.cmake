@@ -31,7 +31,11 @@ option (HDF5_VOL_ALLOW_EXTERNAL "Allow building of external HDF5 VOL connectors 
 mark_as_advanced (HDF5_VOL_ALLOW_EXTERNAL)
 if (HDF5_VOL_ALLOW_EXTERNAL)
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "NO" OR NOT HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
-    message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be set to 'GIT' to allow building of external HDF5 VOL connectors")
+    message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be set to 'GIT' or 'SOURCE_DIR' to allow building of external HDF5 VOL connectors")
+  endif ()
+
+  if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SOURCE_DIR" AND NOT HDF5_VOL_PATH_TEMP)
+    message(FATAL_ERROR "HDF5_VOL_PATH_TEMP must have a path to VOL source when HDF5_ALLOW_EXTERNAL_SUPPORT = SOURCE_DIR")
   endif ()
 
   # For compatibility, set some variables that projects would
@@ -52,7 +56,7 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
 
   foreach (vol_idx RANGE 1 ${HDF5_MAX_EXTERNAL_VOLS})
     # Generate fixed-width index number prepended with 0s
-    # so URLs come in order from 1 - HDF5_MAX_EXTERNAL_VOLS
+    # so VOL sources come in order from 1 - HDF5_MAX_EXTERNAL_VOLS
     set (vol_idx_num_digits 2) # Based on HDF5_MAX_EXTERNAL_VOLS
     set (vol_idx_fixed "${vol_idx}")
     string (LENGTH "${vol_idx_fixed}" vol_idx_len)
@@ -61,33 +65,50 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
       math (EXPR vol_idx_len "${vol_idx_len}+1")
     endwhile ()
 
-    set (HDF5_VOL_URL${vol_idx_fixed} "" CACHE STRING "Git repository URL of an external HDF5 VOL connector to build")
-    mark_as_advanced (HDF5_VOL_URL${vol_idx_fixed})
+    if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
+      # TODO should create cmake/user facing var called "HDF5_VOL_URL" or "HDF5_VOL_DIR" while HDF5_VOL_SOURCE stays an internal cmake var name
+      set (HDF5_VOL_SOURCE "HDF5_VOL_URL${vol_idx_fixed}")
+      set (${HDF5_VOL_SOURCE} "" CACHE STRING "Git repository URL of an external HDF5 VOL connector to build")
+      mark_as_advanced (HDF5_VOL_URL${vol_idx_fixed})
+    else () # (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SOURCE_DIR")
+      set (HDF5_VOL_SOURCE "HDF5_VOL_DIR${vol_idx_fixed}")
+      set (${HDF5_VOL_SOURCE} "" CACHE STRING "Path to the source directory of an external HDF5 VOL connector to build")
+      mark_as_advanced (HDF5_VOL_PATH${vol_idx_fixed})
+    endif()
 
-    if (NOT "${HDF5_VOL_URL${vol_idx_fixed}}" STREQUAL "")
+    if (NOT "${HDF5_VOL_SOURCE}" STREQUAL "")
       # Extract the name of the VOL connector
-      string (FIND "${HDF5_VOL_URL${vol_idx_fixed}}" "/" hdf5_vol_name_pos REVERSE)
+      string (FIND "${HDF5_VOL_SOURCE}" "/" hdf5_vol_name_pos REVERSE)
       if (hdf5_vol_name_pos EQUAL -1)
-        message (SEND_ERROR "Invalid URL '${HDF5_VOL_URL${vol_idx_fixed}}' specified for HDF5_VOL_URL${vol_idx_fixed}")
+        if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
+          message (SEND_ERROR "Invalid URL '${HDF5_VOL_URL${vol_idx_fixed}}' specified for HDF5_VOL_URL${vol_idx_fixed}")
+        else ()
+          message (SEND_ERROR "Invalid source path '${HDF5_VOL_DIR${vol_idx_fixed}}' specified for HDF5_VOL_DIR${vol_idx_fixed}")
       endif ()
 
       math (EXPR hdf5_vol_name_pos "${hdf5_vol_name_pos}+1")
 
-      string (SUBSTRING "${HDF5_VOL_URL${vol_idx_fixed}}" ${hdf5_vol_name_pos} -1 hdf5_vol_name)
+      string (SUBSTRING "${HDF5_VOL_SOURCE}" ${hdf5_vol_name_pos} -1 hdf5_vol_name)
       string (REPLACE ".git" "" hdf5_vol_name "${hdf5_vol_name}")
       string (STRIP "${hdf5_vol_name}" hdf5_vol_name)
       string (TOUPPER "${hdf5_vol_name}" hdf5_vol_name_upper)
       string (TOLOWER "${hdf5_vol_name}" hdf5_vol_name_lower)
 
-      message (VERBOSE "Building VOL connector '${hdf5_vol_name}' with FetchContent")
+      message (VERBOSE "Building VOL connector '${hdf5_vol_name}' with FetchContent from source ${HDF5_ALLOW_EXTERNAL_SUPPORT}")
 
       # Set some cache variables that can be set by users when building
       set ("HDF5_VOL_${hdf5_vol_name_upper}_NAME" "" CACHE STRING "Name of VOL connector to set for the HDF5_VOL_CONNECTOR environment variable")
-      set ("HDF5_VOL_${hdf5_vol_name_upper}_BRANCH" "main" CACHE STRING "Git branch (or tag) to use when building VOL connector '${hdf5_vol_name}'")
+      if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
+        set ("HDF5_VOL_${hdf5_vol_name_upper}_BRANCH" "main" CACHE STRING "Git branch (or tag) to use when building VOL connector '${hdf5_vol_name}'")
+        mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_BRANCH")
+      else ()
+        set ("HDF5_VOL_${hdf5_vol_name_upper}_SOURCE_DIR" "${HDF5_VOL_SOURCE_DIR}" CACHE STRING "Local source directory to use when building VOL connector '${hdf5_vol_name}'")
+        mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_SOURCE_DIR")
+      endif()
+
       option ("HDF5_VOL_${hdf5_vol_name_upper}_TEST_PARALLEL" "Whether to test VOL connector '${hdf5_vol_name}' against the parallel API tests" OFF)
 
       mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_NAME")
-      mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_BRANCH")
       mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_TEST_PARALLEL")
 
       if (HDF5_TEST_API)
@@ -96,14 +117,24 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
         endif ()
       endif ()
 
-      if ("${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}" STREQUAL "")
+      if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" AND"${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}" STREQUAL "")
         message (SEND_ERROR "HDF5_VOL_${hdf5_vol_name_upper}_BRANCH must be set to a valid git branch name (or git tag) to build VOL connector '${hdf5_vol_name}'")
       endif ()
 
-      FetchContent_Declare (HDF5_VOL_${hdf5_vol_name_lower}
+      if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SOURCE_DIR" AND ${HDF5_VOL_{hdf5_vol_name_upper}_SOURCE_DIR} STREQUAL "")
+        message (SEND_ERROR "${HDF5_VOL_{hdf5_vol_name_upper}_SOURCE_DIR} must be set to a valid local path to build VOL connector '${hdf5_vol_name}'")
+      endif()
+
+      if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
+        FetchContent_Declare (HDF5_VOL_${hdf5_vol_name_lower}
         GIT_REPOSITORY "${HDF5_VOL_URL${vol_idx_fixed}}"
         GIT_TAG "${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}"
-      )
+        )
+      elseif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SOURCE_DIR")
+        FetchContent_Declare (HDF5_VOL_${hdf5_vol_name_lower}
+        SOURCE_DIR "${HDF5_VOL_SOURCE_LOCAL}"
+        )
+      endif()
 
       FetchContent_GetProperties(HDF5_VOL_${hdf5_vol_name_lower})
       if (NOT hdf5_vol_${hdf5_vol_name_lower}_POPULATED)
