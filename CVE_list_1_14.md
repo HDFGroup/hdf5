@@ -35,7 +35,7 @@
 | [CVE-2018-17233](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-17233)          |          |          |          |          |
 | [CVE-2018-16438](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-16438)          |          |          |          |          |
 | [CVE-2018-15672](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15672)          |          |          |          |          |
-| [CVE-2018-15671](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15671)          | FAILED   | FAILED   | FAILED   | FAILED   |
+| [CVE-2018-15671](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15671)          | FAILED   | FAILED   | FAILED   |          |
 | [CVE-2018-14460](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14460)          |          |          |          |          |
 | [CVE-2018-14035](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14035)          |          |          |          |          |
 | [CVE-2018-14034](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14034)          |          |          |          |          |
@@ -63,13 +63,12 @@
 | [CVE-2017-17507](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17507)          | FAILED   | FAILED   |          |          |
 | [CVE-2017-17506](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17506)          |          |          |          |          |
 | [CVE-2017-17505](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17505)          |          |          |          |          |
-| [CVE-2016-4333](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4333)            | UNTESTED | UNTESTED | UNTESTED | UNTESTED |
-| [CVE-2016-4332](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4332)            | UNTESTED | UNTESTED | UNTESTED | UNTESTED |
-| [CVE-2016-4331](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4331)            | UNTESTED | UNTESTED | UNTESTED | UNTESTED |
-| [CVE-2016-4330](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4330)            | UNTESTED | UNTESTED | UNTESTED | UNTESTED |
+| [CVE-2016-4333](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4333)            |          |          |          |          |
+| [CVE-2016-4332](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4332)            | FAILED   | FAILED   | FAILED   |          |
+| [CVE-2016-4331](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4331)            |          |          |          |          |
+| [CVE-2016-4330](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4330)            |          |          |          |          |
 
 ## NOTES
-* No test files are available for the 2016 CVE issues as Talos doesn't release proof-of-vulnerability files. We will add our own proof-of-vulnerability files in the future.
 * CVE-2021-45832 has no known proof of vulnerability file. We will attempt to create our own.
 * CVE-2021-31009 is not a specific vulnerability against HDF5.
 * CVE-2022-25942, CVE-2022-25972, and CVE-2022-26061 are not tested. Those vulnerabilities involve the high-level GIF tools and can be avoided by disabling those tools at build time.
