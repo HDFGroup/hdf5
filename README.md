@@ -7,6 +7,7 @@ HDF5 version 1.15.0 currently under development
 [![oneAPI Autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/linux-icx-auto.yml?branch=develop&label=oneAPI-A)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
 [![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
 [![1.10 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_10&label=1.10)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_10)
