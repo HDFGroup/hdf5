@@ -520,6 +520,7 @@ test_chunk_alloc_incr_ser_to_par(void)
     H5D_space_status_t space_status;
     const char        *filename;
     hsize_t            dset_dims[1];
+    hsize_t            mem_dims[1];
     hsize_t            start[1];
     hsize_t            stride[1];
     hsize_t            count[1];
@@ -531,6 +532,7 @@ test_chunk_alloc_incr_ser_to_par(void)
     hid_t              fapl_id      = H5I_INVALID_HID;
     hid_t              dset_id      = H5I_INVALID_HID;
     hid_t              fspace_id    = H5I_INVALID_HID;
+    hid_t              mspace_id    = H5I_INVALID_HID;
     hid_t              dxpl_id      = H5I_INVALID_HID;
     int               *data         = NULL;
     int               *correct_data = NULL;
@@ -629,7 +631,7 @@ test_chunk_alloc_incr_ser_to_par(void)
     memset(read_data, 255, dset_dims[0] * sizeof(int));
     memset(correct_data, 0, dset_dims[0] * sizeof(int));
 
-    ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, read_data);
+    ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
     VRFY((ret == SUCCEED), "H5Dread");
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -647,10 +649,18 @@ test_chunk_alloc_incr_ser_to_par(void)
     ret = H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret == SUCCEED), "H5Sselect_hyperslab");
 
+    mem_dims[0] = count[0] * block[0];
+
+    mspace_id = H5Screate_simple(1, mem_dims, NULL);
+    VRFY((mspace_id >= 0), "H5Screate_simple");
+
     memset(data, 255, (dset_dims[0] / (hsize_t)mpi_size) * sizeof(int));
 
-    ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, H5P_DEFAULT, data);
+    ret = H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
     VRFY((ret == SUCCEED), "H5Dwrite");
+
+    ret = H5Sclose(mspace_id);
+    VRFY((ret == SUCCEED), "H5Sclose");
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -665,7 +675,7 @@ test_chunk_alloc_incr_ser_to_par(void)
     memset(read_data, 0, dset_dims[0] * sizeof(int));
     memset(correct_data, 255, dset_dims[0] * sizeof(int));
 
-    ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, read_data);
+    ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
     VRFY((ret == SUCCEED), "H5Dread");
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -697,7 +707,7 @@ test_chunk_alloc_incr_ser_to_par(void)
     memset(read_data, 255, dset_dims[0] * sizeof(int));
     memset(correct_data, 0, dset_dims[0] * sizeof(int));
 
-    ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, read_data);
+    ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
     VRFY((ret == SUCCEED), "H5Dread");
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -715,6 +725,11 @@ test_chunk_alloc_incr_ser_to_par(void)
     ret = H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret == SUCCEED), "H5Sselect_hyperslab");
 
+    mem_dims[0] = count[0] * block[0];
+
+    mspace_id = H5Screate_simple(1, mem_dims, NULL);
+    VRFY((mspace_id >= 0), "H5Screate_simple");
+
     memset(data, 255, (dset_dims[0] / (hsize_t)mpi_size) * sizeof(int));
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
@@ -723,8 +738,11 @@ test_chunk_alloc_incr_ser_to_par(void)
     ret = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
     VRFY((ret == SUCCEED), "H5Pset_dxpl_mpio");
 
-    ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, dxpl_id, data);
+    ret = H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id, data);
     VRFY((ret == SUCCEED), "H5Dwrite");
+
+    ret = H5Sclose(mspace_id);
+    VRFY((ret == SUCCEED), "H5Sclose");
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -739,7 +757,7 @@ test_chunk_alloc_incr_ser_to_par(void)
     memset(read_data, 0, dset_dims[0] * sizeof(int));
     memset(correct_data, 255, dset_dims[0] * sizeof(int));
 
-    ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, read_data);
+    ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
     VRFY((ret == SUCCEED), "H5Dread");
 
     MPI_Barrier(MPI_COMM_WORLD);
