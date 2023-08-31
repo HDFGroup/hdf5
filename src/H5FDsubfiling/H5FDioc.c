@@ -235,10 +235,18 @@ H5FD_ioc_init(void)
                 /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
                 if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
                     H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
-                if (provided != MPI_THREAD_MULTIPLE)
+                if (provided != MPI_THREAD_MULTIPLE) {
+#ifdef MPICH
+                    H5_SUBFILING_GOTO_ERROR(
+                        H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                        "IOC VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE. Try setting "
+                        "the environment variable MPICH_MAX_THREAD_SAFETY=multiple");
+#else
                     H5_SUBFILING_GOTO_ERROR(
                         H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
                         "IOC VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+#endif
+                }
             }
             else {
                 int required = MPI_THREAD_MULTIPLE;
@@ -249,9 +257,17 @@ H5FD_ioc_init(void)
 
                 H5FD_mpi_self_initialized = TRUE;
 
-                if (provided != required)
+                if (provided != required) {
+#ifdef MPICH
+                    H5_SUBFILING_GOTO_ERROR(
+                        H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                        "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE. Try setting the "
+                        "environment variable MPICH_MAX_THREAD_SAFETY=multiple");
+#else
                     H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
                                             "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+#endif
+                }
             }
         }
 

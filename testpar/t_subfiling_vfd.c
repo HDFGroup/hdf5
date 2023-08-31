@@ -2142,7 +2142,12 @@ main(int argc, char **argv)
 
     if (provided != required) {
         if (MAINPROCESS)
+#ifdef MPICH
+            printf("MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE. Try setting the "
+                   "environment variable MPICH_MAX_THREAD_SAFETY=multiple\n");
+#else
             printf("MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE\n");
+#endif
         nerrors++;
         goto exit;
     }

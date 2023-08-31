@@ -501,7 +501,12 @@ main(int argc, char **argv)
     /* HDF5 Subfiling VFD requires MPI_Init_thread with MPI_THREAD_MULTIPLE */
     MPI_Init_thread(&argc, &argv, mpi_thread_required, &mpi_thread_provided);
     if (mpi_thread_provided < mpi_thread_required) {
+#ifdef MPICH
+        printf("MPI_THREAD_MULTIPLE not supported. Try setting the environment variable "
+               "MPICH_MAX_THREAD_SAFETY=multiple\n");
+#else
         printf("MPI_THREAD_MULTIPLE not supported\n");
+#endif
         MPI_Abort(comm, -1);
     }
 

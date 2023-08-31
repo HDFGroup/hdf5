@@ -5907,12 +5907,17 @@ main(int argc, char **argv)
 
 #ifdef H5_HAVE_SUBFILING_VFD
     if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
-        printf("    MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE. Exiting\n");
+        printf("    MPI_Init_thread failed. Exiting\n");
         goto finish;
     }
 
     if (provided != required) {
+#ifdef MPICH
+        printf("    MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE. Try setting the "
+               "environment variable MPICH_MAX_THREAD_SAFETY=multiple. Exiting\n");
+#else
         printf("    MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE. Exiting\n");
+#endif
         goto finish;
     }
 #else
