@@ -700,11 +700,8 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize
 
     /* Sanity checks */
     HDassert(layout);
+    HDassert(ndims > 0);
     HDassert(curr_dims);
-
-    /* Can happen when corrupt files are parsed */
-    if (ndims == 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "number of dimensions cannot be zero")
 
     /* Compute the # of chunks in dataset dimensions */
     for (u = 0, layout->nchunks = 1, layout->max_nchunks = 1; u < ndims; u++) {
@@ -917,7 +914,6 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
     H5D_rdcc_t        *rdcc = &(dset->shared->cache.chunk); /* Convenience pointer to dataset's chunk cache */
     H5P_genplist_t    *dapl;                                /* Data access property list object pointer */
     H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
-    hbool_t              idx_init  = FALSE;
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -993,21 +989,12 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
     /* Allocate any indexing structures */
     if (sc->ops->init && (sc->ops->init)(&idx_info, dset->shared->space, dset->oloc.addr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
-    idx_init = TRUE;
 
     /* Set the number of chunks in dataset, etc. */
     if (H5D__chunk_set_info(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set # of chunks for dataset")
 
 done:
-    if (FAIL == ret_value) {
-        if (rdcc->slot)
-            rdcc->slot = H5FL_SEQ_FREE(H5D_rdcc_ent_ptr_t, rdcc->slot);
-
-        if (idx_init && sc->ops->dest && (sc->ops->dest)(&idx_info) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info");
-    }
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_init() */
 
