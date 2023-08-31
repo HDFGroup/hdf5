@@ -151,7 +151,7 @@ H5A__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
     /* Decode attribute information */
     if (NULL ==
         (attr = (H5A_t *)H5O_msg_decode(udata->f, NULL, H5O_ATTR_ID, obj_len, (const unsigned char *)obj)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode attribute")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode attribute");
 
     /* Compare the string values */
     udata->cmp = HDstrcmp(udata->name, attr->shared->name);
@@ -167,7 +167,7 @@ H5A__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
 
         /* Make callback */
         if ((udata->found_op)(attr, &took_ownership, udata->found_op_data) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPERATE, FAIL, "attribute found callback failed")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPERATE, FAIL, "attribute found callback failed");
     } /* end if */
 
 done:
@@ -261,7 +261,7 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
 
         /* Check if the user's attribute and the B-tree's attribute have the same name */
         if (H5HF_op(fheap, &bt2_rec->id, H5A__dense_fh_name_cmp, &fh_udata) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
 
         /* Callback will set comparison value */
         *result = fh_udata.cmp;
@@ -456,7 +456,7 @@ H5A__dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR
     H5MM_memcpy(nrecord->id.id, raw, (size_t)H5O_FHEAP_ID_LEN);
     raw += H5O_FHEAP_ID_LEN;
     nrecord->flags = *raw++;
-    UINT32DECODE(raw, nrecord->corder)
+    UINT32DECODE(raw, nrecord->corder);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_corder_decode() */

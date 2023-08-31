@@ -1304,7 +1304,7 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
     assert(entry_ptr);
     assert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
 
-    memcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
+    H5MM_memcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
 
     /* must obtain io_queue mutex before appending */
     hg_thread_mutex_lock(&ioc_data->io_queue.q_mutex);

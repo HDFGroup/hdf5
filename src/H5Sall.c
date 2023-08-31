@@ -178,7 +178,7 @@ H5S__all_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 
     /* Calculate the coordinates for the current iterator offset */
     if (H5VM_array_calc(iter->u.all.elmt_offset, iter->rank, iter->dims, coords) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve coordinates")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve coordinates");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -642,27 +642,27 @@ H5S__all_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hboo
     /* Allocate space if not provided */
     if (!*space) {
         if (NULL == (tmp_space = H5S_create(H5S_SIMPLE)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace");
     } /* end if */
     else
         tmp_space = *space;
 
     /* Decode version */
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *p, sizeof(uint32_t), p_end))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection version")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection version");
     UINT32DECODE(*p, version);
 
     if (version < H5S_ALL_VERSION_1 || version > H5S_ALL_VERSION_LATEST)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for all selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for all selection");
 
     /* Skip over the remainder of the header */
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *p, 8, p_end))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding header")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding header");
     *p += 8;
 
     /* Change to "all" selection */
     if (H5S_select_all(tmp_space, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
     /* Return space to the caller if allocated */
     if (!*space)
@@ -672,7 +672,7 @@ done:
     /* Free temporary space if not passed to caller (only happens on error) */
     if (!*space && tmp_space)
         if (H5S_close(tmp_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__all_deserialize() */
@@ -1082,7 +1082,7 @@ H5S__all_project_simple(const H5S_t H5_ATTR_UNUSED *base_space, H5S_t *new_space
 
     /* Select the entire new space */
     if (H5S_select_all(new_space, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to set all selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to set all selection");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1119,7 +1119,7 @@ H5S_select_all(H5S_t *space, hbool_t rel_prev)
     /* Remove current selection first */
     if (rel_prev)
         if (H5S_SELECT_RELEASE(space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
 
     /* Set number of elements in selection */
     space->select.num_elem = (hsize_t)H5S_GET_EXTENT_NPOINTS(space);
@@ -1159,11 +1159,11 @@ H5Sselect_all(hid_t spaceid)
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     /* Call internal routine to do the work */
     if (H5S_select_all(space, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
 done:
     FUNC_LEAVE_API(ret_value)

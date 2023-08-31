@@ -453,7 +453,7 @@ error:
         H5VLclose(registered_con_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     MPI_Finalize();
 

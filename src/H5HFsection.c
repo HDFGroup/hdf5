@@ -297,13 +297,13 @@ H5FS__sect_init_cls(H5FS_section_class_t *cls, H5HF_hdr_t *hdr)
      * for this type of section
      */
     if (NULL == (cls_prvt = (H5HF_sect_private_t *)H5MM_malloc(sizeof(H5HF_sect_private_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     cls_prvt->hdr    = hdr;
     cls->cls_private = cls_prvt;
 
     /* Increment reference count on heap header */
     if (H5HF__hdr_incr(hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared heap header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -335,7 +335,7 @@ H5FS__sect_term_cls(H5FS_section_class_t *cls)
 
     /* Decrement reference count on heap header */
     if (H5HF__hdr_decr(cls_prvt->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header");
 
     /* Free the class private information */
     cls->cls_private = H5MM_xfree(cls_prvt);
@@ -369,7 +369,7 @@ H5FS__sect_node_new(unsigned sect_type, haddr_t sect_addr, hsize_t sect_size, H5
     /* Create free list section node */
     if (NULL == (new_sect = H5FL_MALLOC(H5HF_free_section_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for direct block free list section")
+                    "memory allocation failed for direct block free list section");
 
     /* Set the information passed in */
     new_sect->sect_info.addr = sect_addr;
@@ -410,7 +410,7 @@ H5HF__sect_node_free(H5HF_free_section_t *sect, H5HF_indirect_t *iblock)
     if (iblock)
         if (H5HF__iblock_decr(iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on section's indirect block")
+                        "can't decrement reference count on section's indirect block");
 
     /* Release the section */
     sect = H5FL_FREE(H5HF_free_section_t, sect);
@@ -444,14 +444,14 @@ H5HF__sect_single_new(hsize_t sect_off, size_t sect_size, H5HF_indirect_t *paren
     /* Create free space section node */
     if (NULL ==
         (sect = H5FS__sect_node_new(H5HF_FSPACE_SECT_SINGLE, sect_off, (hsize_t)sect_size, H5FS_SECT_LIVE)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for single section")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for single section");
 
     /* Set the 'single' specific fields */
     sect->u.single.parent = parent;
     if (sect->u.single.parent) {
         if (H5HF__iblock_incr(sect->u.single.parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL,
-                        "can't increment reference count on shared indirect block")
+                        "can't increment reference count on shared indirect block");
     } /* end if */
     sect->u.single.par_entry = par_entry;
 
@@ -496,11 +496,11 @@ H5HF__sect_single_locate_parent(H5HF_hdr_t *hdr, hbool_t refresh, H5HF_free_sect
     /* Look up indirect block containing direct blocks for range */
     if (H5HF__man_dblock_locate(hdr, sect->sect_info.addr, &sec_iblock, &sec_entry, &did_protect,
                                 H5AC__READ_ONLY_FLAG) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section");
 
     /* Increment reference count on indirect block that free section is in */
     if (H5HF__iblock_incr(sec_iblock) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block");
 
     /* Check for refreshing existing parent information */
     if (refresh) {
@@ -508,7 +508,7 @@ H5HF__sect_single_locate_parent(H5HF_hdr_t *hdr, hbool_t refresh, H5HF_free_sect
             /* Release hold on previous parent indirect block */
             if (H5HF__iblock_decr(sect->u.single.parent) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
-                            "can't decrement reference count on section's indirect block")
+                            "can't decrement reference count on section's indirect block");
         } /* end if */
     }     /* end if */
 
@@ -518,7 +518,7 @@ H5HF__sect_single_locate_parent(H5HF_hdr_t *hdr, hbool_t refresh, H5HF_free_sect
 
     /* Unlock indirect block */
     if (H5HF__man_iblock_unprotect(sec_iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
     sec_iblock = NULL;
 
 done:
@@ -558,7 +558,7 @@ H5HF__sect_single_revive(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     else {
         /* Look up indirect block information for section */
         if (H5HF__sect_single_locate_parent(hdr, FALSE, sect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get section's parent info")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get section's parent info");
     } /* end else */
 
     /* Section is "live" now */
@@ -640,7 +640,7 @@ H5HF__sect_single_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, size_t amt)
     if (sect->sect_info.size == amt) {
         /* Free single section */
         if (H5HF__sect_single_free((H5FS_section_info_t *)sect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free single section node")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free single section node");
     } /* end if */
     else {
         /* Adjust information for section */
@@ -649,7 +649,7 @@ H5HF__sect_single_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, size_t amt)
 
         /* Re-insert section node into heap's free space */
         if (H5HF__space_add(hdr, sect, 0) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't re-add single section to free space manager")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't re-add single section to free space manager");
     } /* end else */
 
 done:
@@ -687,7 +687,7 @@ H5HF__sect_single_full_dblock(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 
     /* Retrieve direct block address from section */
     if (H5HF__sect_single_dblock_info(hdr, sect, &dblock_addr, &dblock_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information");
 
     /* Check for section occupying entire direct block */
     /* (and not the root direct block) */
@@ -698,16 +698,16 @@ H5HF__sect_single_full_dblock(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 
         if (NULL == (dblock = H5HF__man_dblock_protect(hdr, dblock_addr, dblock_size, sect->u.single.parent,
                                                        sect->u.single.par_entry, H5AC__NO_FLAGS_SET)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block");
         assert(H5_addr_eq(dblock->block_off + dblock_overhead, sect->sect_info.addr));
 
         /* Convert 'single' section into 'row' section */
         if (H5HF__sect_row_from_single(hdr, sect, dblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't convert single section into row section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't convert single section into row section");
 
         /* Destroy direct block */
         if (H5HF__man_dblock_destroy(hdr, dblock, dblock_addr, &parent_removed) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release direct block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release direct block");
         dblock = NULL;
 
         /* If the parent for this direct block was removed and the indirect
@@ -715,7 +715,7 @@ H5HF__sect_single_full_dblock(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
          */
         if (parent_removed && H5FS_SECT_LIVE == sect->u.row.under->sect_info.state)
             if (H5HF__sect_row_parent_removed(sect) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "can't update section info")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "can't update section info");
     } /* end if */
 
 done:
@@ -755,7 +755,7 @@ H5HF__sect_single_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata
         /* Check if single section covers entire direct block it's in */
         /* (converts to row section possibly) */
         if (H5HF__sect_single_full_dblock(hdr, (*sect)) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't check/convert single section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't check/convert single section");
 
         /* Set the "returned space" flag if the single section was changed
          *      into a row section, so the "merging & shrinking" algorithm
@@ -796,7 +796,7 @@ H5HF__sect_single_deserialize(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
     /* Create free list section node */
     if (NULL ==
         (new_sect = H5FS__sect_node_new(H5HF_FSPACE_SECT_SINGLE, sect_addr, sect_size, H5FS_SECT_SERIALIZED)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "allocation failed for direct block free list section")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "allocation failed for direct block free list section");
 
     /* Set return value */
     ret_value = (H5FS_section_info_t *)new_sect;
@@ -882,17 +882,17 @@ H5HF__sect_single_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect
 
     /* Get rid of second section */
     if (H5HF__sect_single_free((H5FS_section_info_t *)sect2) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node");
 
     /* Check to see if we should revive first section */
     if ((*sect1)->sect_info.state != H5FS_SECT_LIVE)
         if (H5HF__sect_single_revive(hdr, (*sect1)) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section");
 
     /* Check if single section covers entire direct block it's in */
     /* (converts to row section possibly) */
     if (H5HF__sect_single_full_dblock(hdr, (*sect1)) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't check/convert single section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't check/convert single section");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -985,27 +985,27 @@ H5HF__sect_single_shrink(H5FS_section_info_t **_sect, void *_udata)
     /* Check to see if we should revive section */
     if ((*sect)->sect_info.state != H5FS_SECT_LIVE)
         if (H5HF__sect_single_revive(hdr, (*sect)) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section");
 
     /* Retrieve direct block address from section */
     if (H5HF__sect_single_dblock_info(hdr, (*sect), &dblock_addr, &dblock_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information");
 
     /* Protect the direct block for the section */
     /* (should be a root direct block) */
     assert(dblock_addr == hdr->man_dtable.table_addr);
     if (NULL == (dblock = H5HF__man_dblock_protect(hdr, dblock_addr, dblock_size, (*sect)->u.single.parent,
                                                    (*sect)->u.single.par_entry, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block");
     assert(H5_addr_eq(dblock->block_off + dblock_size, (*sect)->sect_info.addr + (*sect)->sect_info.size));
 
     /* Get rid of section */
     if (H5HF__sect_single_free((H5FS_section_info_t *)*sect) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node");
 
     /* Destroy direct block */
     if (H5HF__man_dblock_destroy(hdr, dblock, dblock_addr, NULL) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release direct block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release direct block");
     dblock = NULL;
 
     /* Indicate that the section has been released */
@@ -1046,7 +1046,7 @@ H5HF__sect_single_free(H5FS_section_info_t *_sect)
 
     /* Release the section */
     if (H5HF__sect_node_free(sect, parent) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1165,7 +1165,7 @@ H5HF__sect_row_create(haddr_t sect_off, hsize_t sect_size, hbool_t is_first, uns
     if (NULL == (sect = H5FS__sect_node_new(
                      (unsigned)(is_first ? H5HF_FSPACE_SECT_FIRST_ROW : H5HF_FSPACE_SECT_NORMAL_ROW),
                      sect_off, sect_size, under_sect->sect_info.state)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for row section")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for row section");
 
     /* Set the 'row' specific fields */
     sect->u.row.under       = under_sect;
@@ -1214,11 +1214,11 @@ H5HF__sect_row_from_single(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, H5HF_dire
 
     /* Create indirect section that underlies the row section */
     if (NULL == (sect->u.row.under = H5HF__sect_indirect_for_row(hdr, dblock->parent, sect)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "serializing row section not supported yet")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "serializing row section not supported yet");
 
     /* Release single section's hold on underlying indirect block */
     if (H5HF__iblock_decr(dblock->parent) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1253,12 +1253,12 @@ H5HF__sect_row_revive(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     if ((H5FS_SECT_LIVE == sect->u.row.under->sect_info.state) &&
         (TRUE == sect->u.row.under->u.indirect.u.iblock->removed_from_cache))
         if (H5HF__sect_row_parent_removed(sect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "can't update section info")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "can't update section info");
 
     /* Pass along "revive" request to underlying indirect section */
     /* (which will mark this section as "live") */
     if (H5HF__sect_indirect_revive_row(hdr, sect->u.row.under) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTREVIVE, FAIL, "can't revive indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTREVIVE, FAIL, "can't revive indirect section");
     assert(sect->sect_info.state == H5FS_SECT_LIVE);
 
 done:
@@ -1301,7 +1301,7 @@ H5HF__sect_row_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned *entr
     /* Forward row section to indirect routines, to handle reducing underlying indirect section */
     alloc_from_start = FALSE;
     if (H5HF__sect_indirect_reduce_row(hdr, sect, &alloc_from_start) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce underlying section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce underlying section");
 
     /* Determine entry allocated */
     *entry_p = (sect->u.row.row * hdr->man_dtable.cparam.width) + sect->u.row.col;
@@ -1312,7 +1312,7 @@ H5HF__sect_row_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned *entr
     if (sect->u.row.num_entries == 1) {
         /* Free row section */
         if (H5HF__sect_row_free((H5FS_section_info_t *)sect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free row section node")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free row section node");
     } /* end if */
     else {
         /* Check whether to allocate from the beginning or end of the row */
@@ -1330,7 +1330,7 @@ H5HF__sect_row_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned *entr
 
         /* Add 'row' section back to free space list */
         if (H5HF__space_add(hdr, sect, 0) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't re-add indirect section to free space manager")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't re-add indirect section to free space manager");
     } /* end else */
 
 done:
@@ -1367,7 +1367,7 @@ H5HF__sect_row_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     else
         /* Change row section to be the "first row" */
         if (H5HF__space_sect_change_class(hdr, sect, H5HF_FSPACE_SECT_FIRST_ROW) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set row section to be first row")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set row section to be first row");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1429,7 +1429,7 @@ H5HF__sect_row_parent_removed(H5HF_free_section_t *sect)
 
     /* Decrement the refcount on the indirect block, since serialized sections don't hold a reference */
     if (H5HF__iblock_decr(sect->u.row.under->u.indirect.u.iblock) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block");
 
     /* Switch indirect block info to serialized form */
     /* (Overwrites iblock pointer in the indirect section) */
@@ -1478,7 +1478,7 @@ H5HF__sect_row_init_cls(H5FS_section_class_t *cls, void *_udata)
 
     /* Call common class initialization */
     if (H5FS__sect_init_cls(cls, hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize common section class")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize common section class");
 
     /* First row sections actually are proxies for indirection sections on disk */
     if (cls->type == H5HF_FSPACE_SECT_FIRST_ROW)
@@ -1516,7 +1516,7 @@ H5HF__sect_row_term_cls(H5FS_section_class_t *cls)
 
     /* Call common class termination */
     if (H5FS__sect_term_cls(cls) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't terminate common section class")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't terminate common section class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1553,7 +1553,7 @@ H5HF__sect_row_serialize(const H5FS_section_class_t *cls, const H5FS_section_inf
     hdr = ((H5HF_sect_private_t *)(cls->cls_private))->hdr;
     if (H5HF__sect_indirect_serialize(hdr, sect->u.row.under, buf) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTSERIALIZE, FAIL,
-                    "can't serialize row section's underlying indirect section")
+                    "can't serialize row section's underlying indirect section");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1592,7 +1592,7 @@ H5HF__sect_row_deserialize(const H5FS_section_class_t *cls, const uint8_t *buf, 
     hdr = ((H5HF_sect_private_t *)(cls->cls_private))->hdr;
     if (NULL == (ret_value = H5HF__sect_indirect_deserialize(hdr, buf, sect_addr, sect_size, des_flags)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL,
-                    "can't deserialize row section's underlying indirect section")
+                    "can't deserialize row section's underlying indirect section");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1690,12 +1690,12 @@ H5HF__sect_row_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2, 
 
         /* Shrink away underlying indirect section */
         if (H5HF__sect_indirect_shrink(hdr, top_indir_sect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't shrink underlying indirect section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't shrink underlying indirect section");
     } /* end if */
     else
         /* Merge rows' underlying indirect sections together */
         if (H5HF__sect_indirect_merge_row(hdr, (*sect1), sect2) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTMERGE, FAIL, "can't merge underlying indirect sections")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTMERGE, FAIL, "can't merge underlying indirect sections");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1770,7 +1770,7 @@ H5HF__sect_row_shrink(H5FS_section_info_t **_sect, void *_udata)
 
     /* Shrink away underlying indirect section */
     if (H5HF__sect_indirect_shrink(hdr, top_indir_sect) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't shrink underlying indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't shrink underlying indirect section");
 
     /* Indicate that the section has been released */
     *sect = NULL;
@@ -1801,7 +1801,7 @@ H5HF__sect_row_free_real(H5HF_free_section_t *sect)
 
     /* Release the section */
     if (H5HF__sect_node_free(sect, NULL) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1831,11 +1831,11 @@ H5HF__sect_row_free(H5FS_section_info_t *_sect)
 
     /* Decrement the ref. count on the row section's underlying indirect section */
     if (H5HF__sect_indirect_decr(sect->u.row.under) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't detach section node")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't detach section node");
 
     /* Release the section */
     if (H5HF__sect_row_free_real(sect) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2015,7 +2015,7 @@ H5HF__sect_indirect_init_cls(H5FS_section_class_t *cls, void *_udata)
 
     /* Call to common class initialization */
     if (H5FS__sect_init_cls(cls, hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize common section class")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize common section class");
 
     /* Set the size of all serialized objects of this class of sections */
     cls->serial_size = H5HF_SECT_INDIRECT_SERIAL_SIZE(hdr);
@@ -2047,7 +2047,7 @@ H5HF__sect_indirect_term_cls(H5FS_section_class_t *cls)
 
     /* Call common class termination */
     if (H5FS__sect_term_cls(cls) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't terminate common section class")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't terminate common section class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2081,7 +2081,7 @@ H5HF__sect_indirect_new(H5HF_hdr_t *hdr, haddr_t sect_off, hsize_t sect_size, H5
     /* Create free space section node */
     if (NULL == (sect = H5FS__sect_node_new(H5HF_FSPACE_SECT_INDIRECT, sect_off, sect_size,
                                             (iblock ? H5FS_SECT_LIVE : H5FS_SECT_SERIALIZED))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for indirect section")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for indirect section");
 
     /* Set the 'indirect' specific fields */
     if (iblock) {
@@ -2089,7 +2089,7 @@ H5HF__sect_indirect_new(H5HF_hdr_t *hdr, haddr_t sect_off, hsize_t sect_size, H5
         sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width * sect->u.indirect.u.iblock->max_rows;
         if (H5HF__iblock_incr(sect->u.indirect.u.iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL,
-                        "can't increment reference count on shared indirect block")
+                        "can't increment reference count on shared indirect block");
     } /* end if */
     else {
         sect->u.indirect.u.iblock_off   = iblock_off;
@@ -2148,7 +2148,7 @@ H5HF__sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, H5HF_free_
     if (NULL == (sect = H5HF__sect_indirect_new(hdr, row_sect->sect_info.addr, row_sect->sect_info.size,
                                                 iblock, iblock->block_off, row_sect->u.row.row,
                                                 row_sect->u.row.col, row_sect->u.row.num_entries)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create indirect section");
 
     /* Set # of direct rows covered */
     sect->u.indirect.dir_nrows = 1;
@@ -2156,7 +2156,7 @@ H5HF__sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, H5HF_free_
     /* Allocate space for the derived row sections */
     if (NULL ==
         (sect->u.indirect.dir_rows = (H5HF_free_section_t **)H5MM_malloc(sizeof(H5HF_free_section_t *))))
-        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "allocation failed for row section pointer array")
+        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "allocation failed for row section pointer array");
 
     /* Attach the new row section to indirect section */
     sect->u.indirect.dir_rows[0] = row_sect;
@@ -2172,7 +2172,7 @@ H5HF__sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, H5HF_free_
 done:
     if (!ret_value && sect)
         if (H5HF__sect_indirect_free(sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_for_row() */
@@ -2236,7 +2236,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
         /* Allocate space for the derived row sections */
         if (NULL == (sect->u.indirect.dir_rows =
                          (H5HF_free_section_t **)H5MM_malloc(sizeof(H5HF_free_section_t *) * dir_nrows)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for row section pointer array")
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for row section pointer array");
     } /* end if */
     else {
         /* No rows of direct blocks covered, reset direct row information */
@@ -2271,7 +2271,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
         /* Allocate space for the child indirect sections */
         if (NULL == (sect->u.indirect.indir_ents = (H5HF_free_section_t **)H5MM_malloc(
                          sizeof(H5HF_free_section_t *) * sect->u.indirect.indir_nents)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for indirect section pointer array")
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for indirect section pointer array");
     } /* end if */
     else {
         /* No indirect block entries covered, reset indirect row information */
@@ -2299,7 +2299,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
             if (NULL == (row_sect = H5HF__sect_row_create(
                              curr_off, (hdr->man_dtable.row_block_size[u] - dblock_overhead), first_child, u,
                              row_col, row_entries, sect)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "creation failed for child row section")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "creation failed for child row section");
 
             /* Add new row section to array for indirect section */
             sect->u.indirect.dir_rows[curr_row] = row_sect;
@@ -2310,7 +2310,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
             else
                 /* Add new row section to free space manager for the heap */
                 if (H5HF__space_add(hdr, row_sect, space_flags) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add row section to free space")
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add row section to free space");
 
             /* Increment reference count for underlying indirect section */
             sect->u.indirect.rc++;
@@ -2348,7 +2348,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
                     if (H5HF__man_iblock_entry_addr(sect->u.indirect.u.iblock, curr_entry,
                                                     &child_iblock_addr) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL,
-                                    "unable to retrieve child indirect block's address")
+                                    "unable to retrieve child indirect block's address");
 
                     /* If the child indirect block's address is defined, protect it */
                     if (H5_addr_defined(child_iblock_addr)) {
@@ -2356,7 +2356,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
                                          hdr, child_iblock_addr, child_nrows, sect->u.indirect.u.iblock,
                                          curr_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL,
-                                        "unable to protect fractal heap indirect block")
+                                        "unable to protect fractal heap indirect block");
                     } /* end if */
                     else
                         child_iblock = NULL;
@@ -2367,20 +2367,20 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
                 /* Create free space section node */
                 if (NULL == (child_sect = H5HF__sect_indirect_new(hdr, curr_off, (hsize_t)0, child_iblock,
                                                                   curr_off, 0, 0, child_nentries)))
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section");
 
                 /* Initialize rows for new indirect section */
                 if (H5HF__sect_indirect_init_rows(hdr, child_sect, first_child, first_row_sect, space_flags,
                                                   0, 0, (child_nrows - 1),
                                                   (hdr->man_dtable.cparam.width - 1)) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize indirect section")
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize indirect section");
 
                 /* If we have a valid child indirect block, release it now */
                 /* (will be pinned, if rows reference it) */
                 if (child_iblock)
                     if (H5HF__man_iblock_unprotect(child_iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL,
-                                    "unable to release fractal heap indirect block")
+                                    "unable to release fractal heap indirect block");
 
                 /* Attach child section to this section */
                 child_sect->u.indirect.parent                 = sect;
@@ -2479,24 +2479,24 @@ H5HF__sect_indirect_add(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, unsigned start
     /* Create free space section node */
     if (NULL == (sect = H5HF__sect_indirect_new(hdr, sect_off, (hsize_t)0, iblock, iblock->block_off,
                                                 start_row, start_col, nentries)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section");
 
     /* Initialize rows for new indirect section */
     if (H5HF__sect_indirect_init_rows(hdr, sect, TRUE, &first_row_sect, H5FS_ADD_SKIP_VALID, start_row,
                                       start_col, end_row, end_col) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize indirect section");
     assert(first_row_sect);
 
     /* Now that underlying indirect section is consistent, add first row
      *  section to free space manager for the heap
      */
     if (H5HF__space_add(hdr, first_row_sect, H5FS_ADD_RETURNED_SPACE) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add row section to free space")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add row section to free space");
 
 done:
     if (ret_value < 0 && sect)
         if (H5HF__sect_indirect_free(sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_add() */
@@ -2535,13 +2535,13 @@ H5HF__sect_indirect_decr(H5HF_free_section_t *sect)
 
         /* Free indirect section */
         if (H5HF__sect_indirect_free(sect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
         /* Decrement ref. count on indirect section's parent */
         if (par_sect)
             if (H5HF__sect_indirect_decr(par_sect) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL,
-                            "can't decrement ref. count on parent indirect section")
+                            "can't decrement ref. count on parent indirect section");
     } /* end if */
 
 done:
@@ -2576,16 +2576,16 @@ H5HF__sect_indirect_revive_row(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     /* Look up indirect block containing indirect blocks for section */
     if (H5HF__man_dblock_locate(hdr, sect->sect_info.addr, &sec_iblock, NULL, &did_protect,
                                 H5AC__READ_ONLY_FLAG) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section");
 
     /* Review the section */
     if (H5HF__sect_indirect_revive(hdr, sect, sec_iblock) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTREVIVE, FAIL, "can't revive indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTREVIVE, FAIL, "can't revive indirect section");
 
 done:
     /* Unlock indirect block */
     if (sec_iblock && H5HF__man_iblock_unprotect(sec_iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_revive_row() */
@@ -2617,7 +2617,7 @@ H5HF__sect_indirect_revive(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, H5HF_indi
 
     /* Increment reference count on indirect block that free section is in */
     if (H5HF__iblock_incr(sect_iblock) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block");
 
     /* Set the pointer to the section's indirect block */
     sect->u.indirect.u.iblock = sect_iblock;
@@ -2635,7 +2635,7 @@ H5HF__sect_indirect_revive(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, H5HF_indi
     /* Revive parent indirect section, if there is one */
     if (sect->u.indirect.parent && sect->u.indirect.parent->sect_info.state == H5FS_SECT_SERIALIZED)
         if (H5HF__sect_indirect_revive(hdr, sect->u.indirect.parent, sect->u.indirect.u.iblock->parent) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTREVIVE, FAIL, "can't revive indirect section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREVIVE, FAIL, "can't revive indirect section");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2713,14 +2713,14 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
 
         /* Remove this indirect section from parent indirect section */
         if (H5HF__sect_indirect_reduce(hdr, sect->u.indirect.parent, sect->u.indirect.par_entry) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce parent indirect section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce parent indirect section");
         sect->u.indirect.parent    = NULL;
         sect->u.indirect.par_entry = 0;
 
         /* If we weren't the first section, set "first row" for this indirect section */
         if (!is_first)
             if (H5HF__sect_indirect_first(hdr, sect) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for indirect section")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for indirect section");
     } /* end if */
 
     /* Adjust indirect section's span size */
@@ -2755,7 +2755,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
                     if (row_sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW)
                         if (H5HF__sect_row_first(hdr, sect->u.indirect.dir_rows[0]) < 0)
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
-                                        "can't make new 'first row' for indirect section")
+                                        "can't make new 'first row' for indirect section");
                 } /* end if */
                 else {
                     /* Sanity check */
@@ -2769,7 +2769,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
                     if (row_sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW)
                         if (H5HF__sect_indirect_first(hdr, sect->u.indirect.indir_ents[0]) < 0)
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
-                                        "can't make new 'first row' for child indirect section")
+                                        "can't make new 'first row' for child indirect section");
                 } /* end else */
             }     /* end if */
 
@@ -2828,7 +2828,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
             if (NULL ==
                 (peer_sect = H5HF__sect_indirect_new(hdr, sect->sect_info.addr, sect->sect_info.size, iblock,
                                                      iblock_off, start_row, start_col, peer_nentries)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section");
 
             /* Set up direct row & indirect entry information for peer section */
             peer_sect->u.indirect.indir_nents = 0;
@@ -2836,7 +2836,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
             peer_sect->u.indirect.dir_nrows   = peer_dir_nrows;
             if (NULL == (peer_sect->u.indirect.dir_rows = (H5HF_free_section_t **)H5MM_malloc(
                              sizeof(H5HF_free_section_t *) * peer_dir_nrows)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "allocation failed for row section pointer array")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "allocation failed for row section pointer array");
 
             /* Transfer row sections between current & peer sections */
             H5MM_memcpy(&peer_sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[0],
@@ -2902,7 +2902,7 @@ done:
         assert(ret_value < 0);
 
         if (H5HF__sect_indirect_free(peer_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2958,7 +2958,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
 
             /* Reduce parent indirect section */
             if (H5HF__sect_indirect_reduce(hdr, sect->u.indirect.parent, sect->u.indirect.par_entry) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce parent indirect section")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce parent indirect section");
             sect->u.indirect.parent    = NULL;
             sect->u.indirect.par_entry = 0;
 
@@ -2966,7 +2966,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
             if (!is_first)
                 if (H5HF__sect_indirect_first(hdr, sect) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
-                                "can't make new 'first row' for indirect section")
+                                "can't make new 'first row' for indirect section");
         } /* end if */
 
         /* Check if we can allocate from start of indirect section */
@@ -2998,7 +2998,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
             /* Make new "first row" in new first indirect child section */
             if (H5HF__sect_indirect_first(hdr, sect->u.indirect.indir_ents[0]) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
-                            "can't make new 'first row' for child indirect section")
+                            "can't make new 'first row' for child indirect section");
         } /* end if */
         else if (child_entry == end_entry) {
             /* Sanity check */
@@ -3063,7 +3063,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
             if (NULL == (peer_sect = H5HF__sect_indirect_new(hdr, peer_sect_addr, sect->sect_info.size,
                                                              iblock, iblock_off, peer_start_row,
                                                              peer_start_col, peer_nentries)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section");
 
             /* Set up direct row & indirect entry information for peer section */
             peer_sect->u.indirect.dir_nrows   = 0;
@@ -3072,7 +3072,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
             if (NULL == (peer_sect->u.indirect.indir_ents = (H5HF_free_section_t **)H5MM_malloc(
                              sizeof(H5HF_free_section_t *) * peer_nentries)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL,
-                            "allocation failed for indirect section pointer array")
+                            "allocation failed for indirect section pointer array");
 
             /* Transfer child indirect sections between current & peer sections */
             H5MM_memcpy(&peer_sect->u.indirect.indir_ents[0],
@@ -3106,7 +3106,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
             /* Make new "first row" in peer section */
             if (H5HF__sect_indirect_first(hdr, peer_sect->u.indirect.indir_ents[0]) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
-                            "can't make new 'first row' for peer indirect section")
+                            "can't make new 'first row' for peer indirect section");
 
             /* Reset the peer_sect variable, to indicate that it has been hooked into the data structures
              * correctly and shouldn't be freed */
@@ -3126,7 +3126,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
     /* Decrement # of sections which depend on this row */
     /* (Must be last as section can be freed) */
     if (H5HF__sect_indirect_decr(sect) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't decrement section's ref. count ")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't decrement section's ref. count ");
 
 done:
     /* Free allocated peer_sect.  Note that this is necessary for all failures until peer_sect is linked
@@ -3136,7 +3136,7 @@ done:
         assert(ret_value < 0);
 
         if (H5HF__sect_indirect_free(peer_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3202,7 +3202,7 @@ H5HF__sect_indirect_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 
         /* Change first row section in indirect section to be the "first row" */
         if (H5HF__sect_row_first(hdr, sect->u.indirect.dir_rows[0]) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set row section to be first row")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set row section to be first row");
     } /* end if */
     else {
         /* Sanity checks */
@@ -3212,7 +3212,7 @@ H5HF__sect_indirect_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 
         /* Forward to first child indirect section */
         if (H5HF__sect_indirect_first(hdr, sect->u.indirect.indir_ents[0]) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set child indirect section to be first row")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set child indirect section to be first row");
     } /* end else */
 
 done:
@@ -3368,7 +3368,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1, H
             /* Extend the first section's row array */
             if (NULL == (new_dir_rows = (H5HF_free_section_t **)H5MM_realloc(
                              sect1->u.indirect.dir_rows, sizeof(H5HF_free_section_t *) * new_dir_nrows1)))
-                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for row section pointer array")
+                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for row section pointer array");
             sect1->u.indirect.dir_rows = new_dir_rows;
 
             /* Transfer the second section's rows to first section */
@@ -3415,7 +3415,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1, H
             /* Extend the first section's entry array */
             if (NULL == (new_indir_ents = (H5HF_free_section_t **)H5MM_realloc(
                              sect1->u.indirect.indir_ents, sizeof(H5HF_free_section_t *) * new_indir_nents1)))
-                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for row section pointer array")
+                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for row section pointer array");
             sect1->u.indirect.indir_ents = new_indir_ents;
 
             /* Transfer the second section's entries to first section */
@@ -3452,7 +3452,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1, H
          */
         assert(sect2->u.indirect.rc == 1);
         if (H5HF__sect_row_free((H5FS_section_info_t *)row_sect2) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free row section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free row section");
     } /* end if */
     else {
         /* Decrement ref. count on second indirect section's parent */
@@ -3460,11 +3460,11 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1, H
         if (sect2->u.indirect.parent)
             if (H5HF__sect_indirect_decr(sect2->u.indirect.parent) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL,
-                            "can't decrement ref. count on parent indirect section")
+                            "can't decrement ref. count on parent indirect section");
 
         /* Free second indirect section */
         if (H5HF__sect_indirect_free(sect2) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
         /* Re-add the second section's first row */
         /* (it's already been added to first indirect section, but it's been removed
@@ -3472,7 +3472,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1, H
          */
         row_sect2->sect_info.type = H5HF_FSPACE_SECT_NORMAL_ROW;
         if (H5HF__space_add(hdr, row_sect2, H5FS_ADD_SKIP_VALID) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't re-add second row section to free space")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't re-add second row section to free space");
     } /* end else */
 
     /* Check if we can create parent indirect section for first section */
@@ -3481,7 +3481,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1, H
         /* Build parent section for fully populated indirect section */
         assert(sect1->u.indirect.parent == NULL);
         if (H5HF__sect_indirect_build_parent(hdr, sect1) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create parent for full indirect section")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create parent for full indirect section");
     } /* end if */
 
 done:
@@ -3529,7 +3529,7 @@ H5HF__sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     else {
         /* Retrieve the information for the parent block */
         if (H5HF__man_iblock_parent_info(hdr, sect->sect_info.addr, &par_block_off, &par_entry) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get block entry")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get block entry");
         par_iblock = NULL;
     } /* end else */
 
@@ -3541,7 +3541,7 @@ H5HF__sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     /* Create parent indirect section */
     if (NULL == (par_sect = H5HF__sect_indirect_new(hdr, sect->sect_info.addr, sect->sect_info.size,
                                                     par_iblock, par_block_off, par_row, par_col, 1)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section");
 
     /* No rows of direct blocks covered in parent, reset direct row information */
     par_sect->u.indirect.dir_nrows = 0;
@@ -3551,7 +3551,7 @@ H5HF__sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     par_sect->u.indirect.indir_nents = 1;
     if (NULL == (par_sect->u.indirect.indir_ents =
                      (H5HF_free_section_t **)H5MM_malloc(sizeof(H5HF_free_section_t *))))
-        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for indirect section pointer array")
+        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for indirect section pointer array");
 
     /* Attach sections together */
     sect->u.indirect.parent            = par_sect;
@@ -3562,7 +3562,7 @@ H5HF__sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 done:
     if (ret_value < 0)
         if (par_sect && H5HF__sect_indirect_free(par_sect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__sect_indirect_build_parent() */
@@ -3598,22 +3598,22 @@ H5HF__sect_indirect_shrink(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
         if (sect->u.indirect.dir_rows[u]->sect_info.type != H5HF_FSPACE_SECT_FIRST_ROW) {
             assert(sect->u.indirect.dir_rows[u]->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
             if (H5HF__space_remove(hdr, sect->u.indirect.dir_rows[u]) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove section from heap free space")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove section from heap free space");
         } /* end if */
 
         /* Release the row section */
         if (H5HF__sect_row_free_real(sect->u.indirect.dir_rows[u]) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free child section node")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free child section node");
     } /* end for */
 
     /* Walk through indirect entries, freeing them (recursively) */
     for (u = 0; u < sect->u.indirect.indir_nents; u++)
         if (H5HF__sect_indirect_shrink(hdr, sect->u.indirect.indir_ents[u]) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free child section node")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free child section node");
 
     /* Free the indirect section itself */
     if (H5HF__sect_indirect_free(sect) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3647,7 +3647,7 @@ H5HF__sect_indirect_serialize(H5HF_hdr_t *hdr, const H5HF_free_section_t *sect, 
         if (sect->sect_info.addr == sect->u.indirect.parent->sect_info.addr)
             if (H5HF__sect_indirect_serialize(hdr, sect->u.indirect.parent, buf) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTSERIALIZE, FAIL,
-                            "can't serialize indirect section's parent indirect section")
+                            "can't serialize indirect section's parent indirect section");
     } /* end if */
     else {
         /* Indirect range's indirect block's block offset */
@@ -3720,7 +3720,7 @@ H5HF__sect_indirect_deserialize(H5HF_hdr_t *hdr, const uint8_t *buf, haddr_t sec
     /* Create free space section node */
     if (NULL == (new_sect = H5HF__sect_indirect_new(hdr, sect_addr, sect_size, NULL, iblock_off, start_row,
                                                     start_col, nentries)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create indirect section");
 
     /* Compute start entry */
     start_entry = (start_row * hdr->man_dtable.cparam.width) + start_col;
@@ -3734,7 +3734,7 @@ H5HF__sect_indirect_deserialize(H5HF_hdr_t *hdr, const uint8_t *buf, haddr_t sec
     if (H5HF__sect_indirect_init_rows(hdr, new_sect, TRUE, NULL, H5FS_ADD_DESERIALIZING,
                                       new_sect->u.indirect.row, new_sect->u.indirect.col, end_row,
                                       end_col) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize indirect section")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize indirect section");
 
     /* Indicate that this section shouldn't be added to free space manager's list */
     *des_flags |= H5FS_DESERIALIZE_NO_ADD;
@@ -3781,7 +3781,7 @@ H5HF__sect_indirect_free(H5HF_free_section_t *sect)
 
     /* Release the sections */
     if (H5HF__sect_node_free(sect, iblock) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

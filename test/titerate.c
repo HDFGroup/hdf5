@@ -1212,5 +1212,5 @@ cleanup_iterate(void)
     {
         H5Fdelete(DATAFILE, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }

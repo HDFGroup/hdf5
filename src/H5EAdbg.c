@@ -97,11 +97,11 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context");
 
     /* Load the extensible array header */
     if (NULL == (hdr = H5EA__hdr_protect(f, addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array Header...\n", indent, "");
@@ -136,9 +136,10 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL, "unable to release extensible array debugging context")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL,
+                    "unable to release extensible array debugging context");
     if (hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__hdr_debug() */
@@ -178,11 +179,11 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
     if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
     /* Sanity check */
     assert(H5_addr_eq(hdr->idx_blk_addr, addr));
@@ -191,7 +192,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
     if (NULL == (iblock = H5EA__iblock_protect(hdr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array index block, address = %llu",
-                    (unsigned long long)hdr->idx_blk_addr)
+                    (unsigned long long)hdr->idx_blk_addr);
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array Index Block...\n", indent, "");
@@ -215,7 +216,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
             if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
                                          ((uint8_t *)iblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) <
                 0)
-                HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging")
+                HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
         } /* end for */
     }     /* end if */
 
@@ -251,11 +252,12 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL, "unable to release extensible array debugging context")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL,
+                    "unable to release extensible array debugging context");
     if (iblock && H5EA__iblock_unprotect(iblock, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array index block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array index block");
     if (hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__iblock_debug() */
@@ -295,11 +297,11 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
     if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
     /* Protect super block */
     /* (Note: setting parent of super block to 'hdr' for this operation should be OK -QAK) */
@@ -307,7 +309,7 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
         (sblock = H5EA__sblock_protect(hdr, (H5EA_iblock_t *)hdr, addr, sblk_idx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array super block, address = %llu",
-                    (unsigned long long)addr)
+                    (unsigned long long)addr);
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array Super Block...\n", indent, "");
@@ -337,11 +339,12 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL, "unable to release extensible array debugging context")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL,
+                    "unable to release extensible array debugging context");
     if (sblock && H5EA__sblock_unprotect(sblock, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array super block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array super block");
     if (hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__sblock_debug() */
@@ -383,17 +386,17 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     if (cls->crt_dbg_ctx)
         /* Create debugging context */
         if (NULL == (dbg_ctx = cls->crt_dbg_ctx(f, obj_addr)))
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
     if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
     /* Protect data block */
     /* (Note: setting parent of data block to 'hdr' for this operation should be OK -QAK) */
     if (NULL == (dblock = H5EA__dblock_protect(hdr, hdr, addr, dblk_nelmts, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
-                    "unable to protect extensible array data block, address = %" PRIuHADDR, addr)
+                    "unable to protect extensible array data block, address = %" PRIuHADDR, addr);
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array data Block...\n", indent, "");
@@ -408,16 +411,17 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
         /* Call the class's 'debug' callback */
         if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
                                      ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
     } /* end for */
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL, "unable to release extensible array debugging context")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL,
+                    "unable to release extensible array debugging context");
     if (dblock && H5EA__dblock_unprotect(dblock, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array data block");
     if (hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header")
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__dblock_debug() */

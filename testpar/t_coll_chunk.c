@@ -782,7 +782,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     status = H5Pget_selection_io(xfer_plist, &selection_io_mode);
     VRFY((status >= 0), "testing property list get succeeded");
 
-    if (facc_type == FACC_MPIO && (selection_io_mode != H5D_SELECTION_IO_MODE_ON)) {
+    if (facc_type == FACC_MPIO && (selection_io_mode == H5D_SELECTION_IO_MODE_OFF)) {
         switch (api_option) {
             case API_LINK_HARD:
                 status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &prop_value);
@@ -858,7 +858,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     VRFY((acc_plist >= 0), "MPIO creation property list succeeded");
 
     file = H5Fopen(filename, H5F_ACC_RDONLY, acc_plist);
-    VRFY((file >= 0), "H5Fcreate succeeded");
+    VRFY((file >= 0), "H5Fopen succeeded");
 
     status = H5Pclose(acc_plist);
     VRFY((status >= 0), "");

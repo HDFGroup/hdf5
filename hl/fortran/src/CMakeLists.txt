@@ -236,16 +236,19 @@ endif ()
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 
+set (mod_export_files
+    h5ds.mod
+    h5tb.mod
+    h5tb_const.mod
+    h5lt.mod
+    h5lt_const.mod
+    h5im.mod
+)
 
 if (BUILD_STATIC_LIBS)
-  set (mod_files
-      ${MOD_BUILD_DIR}/h5ds.mod
-      ${MOD_BUILD_DIR}/h5tb.mod
-      ${MOD_BUILD_DIR}/h5tb_const.mod
-      ${MOD_BUILD_DIR}/h5lt.mod
-      ${MOD_BUILD_DIR}/h5lt_const.mod
-      ${MOD_BUILD_DIR}/h5im.mod
-  )
+  foreach (mod_file ${mod_export_files})
+    set (mod_files ${mod_files} ${MOD_BUILD_DIR}/${mod_file})
+  endforeach ()
   install (
       FILES
           ${mod_files}
@@ -266,14 +269,9 @@ if (BUILD_STATIC_LIBS)
   endif ()
 endif ()
 if (BUILD_SHARED_LIBS)
-  set (modsh_files
-      ${MODSH_BUILD_DIR}/h5ds.mod
-      ${MODSH_BUILD_DIR}/h5tb.mod
-      ${MODSH_BUILD_DIR}/h5tb_const.mod
-      ${MODSH_BUILD_DIR}/h5lt.mod
-      ${MODSH_BUILD_DIR}/h5lt_const.mod
-      ${MODSH_BUILD_DIR}/h5im.mod
-  )
+  foreach (mod_file ${mod_export_files})
+    set (modsh_files ${modsh_files} ${MODSH_BUILD_DIR}/${mod_file})
+  endforeach ()
   install (
       FILES
           ${modsh_files}

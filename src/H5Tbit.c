@@ -188,11 +188,11 @@ H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
 
             /* Wrap the local buffer for serialized header info */
             if (NULL == (wb = H5WB_wrap(tmp_buf, sizeof(tmp_buf))))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't wrap buffer")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't wrap buffer");
 
             /* Get a pointer to a buffer that's large enough  */
             if (NULL == (shift_buf = (uint8_t *)H5WB_actual(wb, buf_size)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "can't get actual buffer")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "can't get actual buffer");
 
             /* Shift vector by making copies */
             if (shift_dist > 0) { /* left shift */
@@ -216,7 +216,7 @@ H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
 done:
     /* Release resources */
     if (wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
+        HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__bit_shift() */

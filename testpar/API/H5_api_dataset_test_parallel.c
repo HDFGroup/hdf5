@@ -160,7 +160,7 @@ test_write_dataset_data_verification(void)
     {
         H5Dclose(dset_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     dset_id = H5I_INVALID_HID;
 
     if ((dset_id = H5Dcreate2(group_id, DATASET_WRITE_DATA_VERIFY_TEST_DSET_NAME2,
@@ -174,7 +174,7 @@ test_write_dataset_data_verification(void)
     {
         H5Dclose(dset_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     dset_id = H5I_INVALID_HID;
 
     if ((dset_id = H5Dcreate2(group_id, DATASET_WRITE_DATA_VERIFY_TEST_DSET_NAME3,
@@ -188,7 +188,7 @@ test_write_dataset_data_verification(void)
     {
         H5Dclose(dset_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     dset_id = H5I_INVALID_HID;
 
     PASSED();
@@ -250,7 +250,7 @@ test_write_dataset_data_verification(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -258,7 +258,7 @@ test_write_dataset_data_verification(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -359,7 +359,7 @@ test_write_dataset_data_verification(void)
             {
                 H5Sclose(fspace_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fspace_id = H5I_INVALID_HID;
         }
         if (dset_id >= 0) {
@@ -367,7 +367,7 @@ test_write_dataset_data_verification(void)
             {
                 H5Dclose(dset_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             dset_id = H5I_INVALID_HID;
         }
 
@@ -450,7 +450,7 @@ test_write_dataset_data_verification(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -458,7 +458,7 @@ test_write_dataset_data_verification(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -466,7 +466,7 @@ test_write_dataset_data_verification(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -574,7 +574,7 @@ test_write_dataset_data_verification(void)
             {
                 H5Sclose(fspace_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fspace_id = H5I_INVALID_HID;
         }
         if (mspace_id >= 0) {
@@ -582,7 +582,7 @@ test_write_dataset_data_verification(void)
             {
                 H5Sclose(mspace_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             mspace_id = H5I_INVALID_HID;
         }
         if (dset_id >= 0) {
@@ -590,7 +590,7 @@ test_write_dataset_data_verification(void)
             {
                 H5Dclose(dset_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             dset_id = H5I_INVALID_HID;
         }
 
@@ -684,7 +684,7 @@ test_write_dataset_data_verification(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -692,7 +692,7 @@ test_write_dataset_data_verification(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -700,7 +700,7 @@ test_write_dataset_data_verification(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -812,7 +812,7 @@ test_write_dataset_data_verification(void)
             {
                 H5Sclose(fspace_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fspace_id = H5I_INVALID_HID;
         }
         if (mspace_id >= 0) {
@@ -820,7 +820,7 @@ test_write_dataset_data_verification(void)
             {
                 H5Sclose(mspace_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             mspace_id = H5I_INVALID_HID;
         }
         if (dset_id >= 0) {
@@ -828,7 +828,7 @@ test_write_dataset_data_verification(void)
             {
                 H5Dclose(dset_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             dset_id = H5I_INVALID_HID;
         }
     }
@@ -888,7 +888,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1232,7 +1232,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1384,7 +1384,7 @@ test_write_dataset_one_proc_0_selection(void)
         {
             H5Sclose(mspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         mspace_id = H5I_INVALID_HID;
     }
     if (fspace_id >= 0) {
@@ -1392,7 +1392,7 @@ test_write_dataset_one_proc_0_selection(void)
         {
             H5Sclose(fspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         fspace_id = H5I_INVALID_HID;
     }
     if (dset_id >= 0) {
@@ -1400,7 +1400,7 @@ test_write_dataset_one_proc_0_selection(void)
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         dset_id = H5I_INVALID_HID;
     }
 
@@ -1529,7 +1529,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1694,7 +1694,7 @@ test_write_dataset_one_proc_none_selection(void)
         {
             H5Sclose(mspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         mspace_id = H5I_INVALID_HID;
     }
     if (fspace_id >= 0) {
@@ -1702,7 +1702,7 @@ test_write_dataset_one_proc_none_selection(void)
         {
             H5Sclose(fspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         fspace_id = H5I_INVALID_HID;
     }
     if (dset_id >= 0) {
@@ -1710,7 +1710,7 @@ test_write_dataset_one_proc_none_selection(void)
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         dset_id = H5I_INVALID_HID;
     }
 
@@ -1842,7 +1842,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1990,7 +1990,7 @@ test_write_dataset_one_proc_all_selection(void)
         {
             H5Sclose(mspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         mspace_id = H5I_INVALID_HID;
     }
     if (fspace_id >= 0) {
@@ -1998,7 +1998,7 @@ test_write_dataset_one_proc_all_selection(void)
         {
             H5Sclose(fspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         fspace_id = H5I_INVALID_HID;
     }
     if (dset_id >= 0) {
@@ -2006,7 +2006,7 @@ test_write_dataset_one_proc_all_selection(void)
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         dset_id = H5I_INVALID_HID;
     }
 
@@ -2130,7 +2130,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2265,7 +2265,7 @@ test_write_dataset_hyper_file_all_mem(void)
         {
             H5Sclose(fspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         fspace_id = H5I_INVALID_HID;
     }
     if (dset_id >= 0) {
@@ -2273,7 +2273,7 @@ test_write_dataset_hyper_file_all_mem(void)
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         dset_id = H5I_INVALID_HID;
     }
 
@@ -2406,7 +2406,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 #endif
@@ -2559,7 +2559,7 @@ test_write_dataset_all_file_hyper_mem(void)
         {
             H5Sclose(mspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         mspace_id = H5I_INVALID_HID;
     }
     if (fspace_id >= 0) {
@@ -2567,7 +2567,7 @@ test_write_dataset_all_file_hyper_mem(void)
         {
             H5Sclose(fspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         fspace_id = H5I_INVALID_HID;
     }
     if (dset_id >= 0) {
@@ -2575,7 +2575,7 @@ test_write_dataset_all_file_hyper_mem(void)
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         dset_id = H5I_INVALID_HID;
     }
 
@@ -2699,7 +2699,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2883,7 +2883,7 @@ test_write_dataset_all_file_point_mem(void)
         {
             H5Sclose(mspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         mspace_id = H5I_INVALID_HID;
     }
     if (fspace_id >= 0) {
@@ -2891,7 +2891,7 @@ test_write_dataset_all_file_point_mem(void)
         {
             H5Sclose(fspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         fspace_id = H5I_INVALID_HID;
     }
     if (dset_id >= 0) {
@@ -2899,7 +2899,7 @@ test_write_dataset_all_file_point_mem(void)
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         dset_id = H5I_INVALID_HID;
     }
 
@@ -3025,7 +3025,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3201,7 +3201,7 @@ test_write_dataset_hyper_file_point_mem(void)
         {
             H5Sclose(mspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         mspace_id = H5I_INVALID_HID;
     }
     if (fspace_id >= 0) {
@@ -3209,7 +3209,7 @@ test_write_dataset_hyper_file_point_mem(void)
         {
             H5Sclose(fspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         fspace_id = H5I_INVALID_HID;
     }
     if (dset_id >= 0) {
@@ -3217,7 +3217,7 @@ test_write_dataset_hyper_file_point_mem(void)
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         dset_id = H5I_INVALID_HID;
     }
 
@@ -3349,7 +3349,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3519,7 +3519,7 @@ test_write_dataset_point_file_hyper_mem(void)
         {
             H5Sclose(mspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         mspace_id = H5I_INVALID_HID;
     }
     if (fspace_id >= 0) {
@@ -3527,7 +3527,7 @@ test_write_dataset_point_file_hyper_mem(void)
         {
             H5Sclose(fspace_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         fspace_id = H5I_INVALID_HID;
     }
     if (dset_id >= 0) {
@@ -3535,7 +3535,7 @@ test_write_dataset_point_file_hyper_mem(void)
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         dset_id = H5I_INVALID_HID;
     }
 
@@ -3667,7 +3667,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -3800,7 +3800,7 @@ test_read_dataset_one_proc_0_selection(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -3808,7 +3808,7 @@ test_read_dataset_one_proc_0_selection(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -3816,7 +3816,7 @@ test_read_dataset_one_proc_0_selection(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -4001,7 +4001,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -4135,7 +4135,7 @@ test_read_dataset_one_proc_none_selection(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -4143,7 +4143,7 @@ test_read_dataset_one_proc_none_selection(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -4151,7 +4151,7 @@ test_read_dataset_one_proc_none_selection(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -4350,7 +4350,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -4481,7 +4481,7 @@ test_read_dataset_one_proc_all_selection(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -4489,7 +4489,7 @@ test_read_dataset_one_proc_all_selection(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -4497,7 +4497,7 @@ test_read_dataset_one_proc_all_selection(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -4687,7 +4687,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -4835,7 +4835,7 @@ test_read_dataset_all_file_hyper_mem(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -4843,7 +4843,7 @@ test_read_dataset_all_file_hyper_mem(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -4851,7 +4851,7 @@ test_read_dataset_all_file_hyper_mem(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -5034,7 +5034,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -5183,7 +5183,7 @@ test_read_dataset_all_file_point_mem(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -5191,7 +5191,7 @@ test_read_dataset_all_file_point_mem(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -5199,7 +5199,7 @@ test_read_dataset_all_file_point_mem(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -5397,7 +5397,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -5536,7 +5536,7 @@ test_read_dataset_hyper_file_point_mem(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -5544,7 +5544,7 @@ test_read_dataset_hyper_file_point_mem(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -5552,7 +5552,7 @@ test_read_dataset_hyper_file_point_mem(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -5755,7 +5755,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -5890,7 +5890,7 @@ test_read_dataset_point_file_hyper_mem(void)
                 {
                     H5Sclose(mspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 mspace_id = H5I_INVALID_HID;
             }
             if (fspace_id >= 0) {
@@ -5898,7 +5898,7 @@ test_read_dataset_point_file_hyper_mem(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -5906,7 +5906,7 @@ test_read_dataset_point_file_hyper_mem(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -6112,7 +6112,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -6368,7 +6368,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dcpl_id >= 0) {
@@ -6376,7 +6376,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
                 {
                     H5Pclose(dcpl_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dcpl_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -6384,7 +6384,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -6572,7 +6572,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -6831,7 +6831,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dcpl_id >= 0) {
@@ -6839,7 +6839,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
                 {
                     H5Pclose(dcpl_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dcpl_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -6847,7 +6847,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -7037,7 +7037,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -7232,7 +7232,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dcpl_id >= 0) {
@@ -7240,7 +7240,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
                 {
                     H5Pclose(dcpl_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dcpl_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -7248,7 +7248,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -7408,7 +7408,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
             {
                 H5Dclose(dset_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             dset_id = H5I_INVALID_HID;
         }
 
@@ -7493,7 +7493,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
             {
                 H5Sclose(fspace_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fspace_id = H5I_INVALID_HID;
         }
         if (dset_id >= 0) {
@@ -7501,7 +7501,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
             {
                 H5Dclose(dset_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             dset_id = H5I_INVALID_HID;
         }
 
@@ -7560,7 +7560,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -7758,7 +7758,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
                 {
                     H5Sclose(fspace_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 fspace_id = H5I_INVALID_HID;
             }
             if (dcpl_id >= 0) {
@@ -7766,7 +7766,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
                 {
                     H5Pclose(dcpl_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dcpl_id = H5I_INVALID_HID;
             }
             if (dset_id >= 0) {
@@ -7774,7 +7774,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
                 {
                     H5Dclose(dset_id);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 dset_id = H5I_INVALID_HID;
             }
 
@@ -7936,7 +7936,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
             {
                 H5Dclose(dset_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             dset_id = H5I_INVALID_HID;
         }
 
@@ -8021,7 +8021,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
             {
                 H5Sclose(fspace_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             fspace_id = H5I_INVALID_HID;
         }
         if (dset_id >= 0) {
@@ -8029,7 +8029,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
             {
                 H5Dclose(dset_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             dset_id = H5I_INVALID_HID;
         }
 
@@ -8088,7 +8088,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }

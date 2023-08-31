@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - Autotools builds now build the szip filter by default when an appropriate
+      library is found
+
+      Since libaec is prevalent and BSD-licensed for both encoding and
+      decoding, we build the szip filter by default now.
+
+      Both autotools and CMake build systems will process the szip filter the same as
+      the zlib filter is processed.
+
     - Removed CMake cross-compiling variables
 
       * HDF5_USE_PREGEN
@@ -169,9 +178,34 @@ New Features
 
     Library:
     --------
+    - Added support for in-place type conversion in most cases
+
+      In-place type conversion allows the library to perform type conversion
+      without an intermediate type conversion buffer.  This can improve
+      performance by allowing I/O in a single operation over the entire
+      selection instead of being limited by the size of the intermediate buffer.
+      Implemented for I/O on contiguous and chunked datasets when the selection
+      is contiguous in memory and when the memory datatype is not smaller than
+      the file datatype.
+
+    - Changed selection I/O to be on by default when using the MPIO file driver
+
+    - Added support for selection I/O in the MPIO file driver
+
+      Previously, only vector I/O operations were supported.  Support for
+      selection I/O should improve performance and reduce memory uses in some
+      cases.
+
+    - Change the error handling for a not found path in the find plugin process.
+
+      While attempting to load a plugin the HDF5 library will fail if one of the
+      directories in the plugin paths does not exist, even if there are more paths
+      to check. Instead of exiting the function with an error, just logged the error
+      and continue processing the list of paths to check.
+
     - Implemented support for temporary security credentials for the Read-Only
       S3 (ROS3) file driver.
-      
+
       When using temporary security credentials, one also needs to specify a
       session/security token next to the access key id and secret access key.
       This token can be specified by the new API function H5Pset_fapl_ros3_token().
@@ -266,6 +300,86 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed performance regression with some compound type conversions
+
+      In-place type conversion was introduced for most use cases in 1.14.2.
+      While being able to use the read buffer for type conversion potentially
+      improves performance by performing the entire I/O at once, it also
+      disables the optimized compound type conversion used when the destination
+      is a subset of the source. Disabled in-place type conversion when using
+      this optimized conversion and there is no benefit in terms of the I/O
+      size.
+
+    - Fixed an assertion in a previous fix for CVE-2016-4332
+
+      An assert could fail when processing corrupt files that have invalid
+      shared message flags (as in CVE-2016-4332).
+
+      The assert statement in question has been replaced with pointer checks
+      that don't raise errors. Since the function is in cleanup code, we do
+      our best to close and free things, even when presented with partially
+      initialized structs.
+
+      Fixes CVE-2016-4332 and HDFFV-9950 (confirmed via the cve_hdf5 repo)
+
+    - Fixed a file space allocation bug in the parallel library for chunked
+      datasets
+
+      With the addition of support for incremental file space allocation for
+      chunked datasets with filters applied to them that are created/accessed
+      in parallel, a bug was introduced to the library's parallel file space
+      allocation code. This could cause file space to not be allocated correctly
+      for datasets without filters applied to them that are created with serial
+      file access and later opened with parallel file access. In turn, this could
+      cause parallel writes to those datasets to place incorrect data in the file.
+
+    - Fixed an assertion failure in Parallel HDF5 when a file can't be created
+      due to an invalid library version bounds setting
+
+      An assertion failure could occur in H5MF_settle_raw_data_fsm when a file
+      can't be created with Parallel HDF5 due to specifying the use of a paged,
+      persistent file free space manager
+      (H5Pset_file_space_strategy(..., H5F_FSPACE_STRATEGY_PAGE, 1, ...)) with
+      an invalid library version bounds combination
+      (H5Pset_libver_bounds(..., H5F_LIBVER_EARLIEST, H5F_LIBVER_V18)). This
+      has now been fixed.
+
+    - Fixed bugs in selection I/O
+
+      Previously, the library could fail in some cases when performing selection
+      I/O with type conversion.
+
+    - Fixed CVE-2018-13867
+
+      A corrupt file containing an invalid local heap datablock address
+      could trigger an assert failure when the metadata cache attempted
+      to load the datablock from storage.
+
+      The local heap now verifies that the datablock address is valid
+      when the local heap header information is parsed.
+
+    - Fixed CVE-2018-11202
+
+      A malformed file could result in chunk index memory leaks. Under most
+      conditions (i.e., when the --enable-using-memchecker option is NOT
+      used), this would result in a small memory leak and and infinite loop
+      and abort when shutting down the library. The infinite loop would be
+      due to the "free list" package not being able to clear its resources
+      so the library couldn't shut down. When the "using a memory checker"
+      option is used, the free lists are disabled so there is just a memory
+      leak with no abort on library shutdown.
+
+      The chunk index resources are now correctly cleaned up when reading
+      misparsed files and valgrind confirms no memory leaks.
+
+    - Fixed an issue where an assert statement was converted to an
+      incorrect error check statement
+
+      An assert statement in the library dealing with undefined dataset data
+      fill values was converted to an improper error check that would always
+      trigger when a dataset's fill value was set to NULL (undefined). This
+      has now been fixed.
+
     - Fixed an assertion failure when attempting to use the Subfiling IOC
       VFD directly
 
@@ -493,6 +607,10 @@ Bug Fixes since HDF5-1.14.0 release
 
       Fixes Github issue #3034
 
+    - Fixed write buffer overflow in H5O__alloc_chunk
+
+      The overflow was found by OSS-Fuzz https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=58658
+
     Java Library
     ------------
     - Fixed switch case 'L' block missing a break statement.
@@ -592,6 +710,22 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
+    - Fixed an issue in h5repack for variable-length typed datasets
+
+      When repacking datasets into a new file, h5repack tries to determine whether
+      it can use H5Ocopy to copy each dataset into the new file, or if it needs to
+      manually re-create the dataset, then read data from the old dataset and write
+      it to the new dataset. H5repack was previously using H5Ocopy for datasets with
+      variable-length datatypes, but this can be problematic if the global heap
+      addresses involved do not match exactly between the old and new files. These
+      addresses could change for a variety of reasons, such as the command-line options
+      provided to h5repack, how h5repack allocate space in the repacked file, etc.      
+      Since H5Ocopy does not currently perform any translation when these addresses
+      change, datasets that were repacked with H5Ocopy could become unreadable in the
+      new file. H5repack has been fixed to repack variable-length typed datasets without
+      using H5Ocopy to ensure that the new datasets always have the correct global heap
+      addresses.
+    
     - Names of objects with square brackets will have trouble without the
       special argument, --no-compact-subset, on the h5dump command line.
 
@@ -643,6 +777,26 @@ Bug Fixes since HDF5-1.14.0 release
 
     Testing
     -------
+    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
+
+      Support for MPI atomicity operations is not implemented for major
+      versions of OpenMPI less than version 5. This would cause the MPI
+      atomicity tests for parallel HDF5 to sporadically fail when run
+      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
+      skip running the atomicity tests if the major version of OpenMPI is
+      < 5.
+
+    - Fixed a testing failure in testphdf5 on Cray machines
+
+      On some Cray machines, what appears to be a bug in Cray MPICH was causing
+      calls to H5Fis_accessible to create a 0-byte file with strange Unix
+      permissions. This was causing an H5Fdelete file deletion test in the
+      testphdf5 program to fail due to a just-deleted HDF5 file appearing to
+      still be accessible on the file system. The issue in Cray MPICH has been
+      worked around for the time being by resetting the MPI_Info object on the
+      File Access Property List used to MPI_INFO_NULL before passing it to the
+      H5Fis_accessible call.
+
     - A bug was fixed in the HDF5 API test random datatype generation code
 
       A bug in the random datatype generation code could cause test failures

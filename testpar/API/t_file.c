@@ -170,7 +170,7 @@ test_page_buffer_access(void)
     {
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VRFY((file_id < 0), "H5Fcreate failed");
 
     /* disable collective metadata writes for page buffering to work */
@@ -1034,7 +1034,7 @@ test_delete(void)
     {
         is_hdf5 = H5Fis_accessible(filename, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VRFY((is_hdf5 != SUCCEED), "H5Fis_accessible");
 
     /* Release file-access plist */

@@ -214,7 +214,7 @@ H5O__cont_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
     /* Notify the cache that the chunk has been deleted */
     /* (releases the space for the chunk) */
     if (H5O__chunk_delete(f, open_oh, mesg->chunkno) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove chunk from cache")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove chunk from cache");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -109,18 +109,18 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_AINFO_VERSION)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message");
 
     /* Allocate space for message */
     if (NULL == (ainfo = H5FL_MALLOC(H5O_ainfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Get the flags for the message */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     flags = *p++;
     if (flags & ~H5O_AINFO_ALL_FLAGS)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message");
     ainfo->track_corder = (flags & H5O_AINFO_TRACK_CORDER) ? TRUE : FALSE;
     ainfo->index_corder = (flags & H5O_AINFO_INDEX_CORDER) ? TRUE : FALSE;
 
@@ -237,7 +237,7 @@ H5O__ainfo_copy(const void *_mesg, void *_dest)
     /* check args */
     assert(ainfo);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_ainfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *ainfo;
@@ -332,7 +332,7 @@ H5O__ainfo_delete(H5F_t *f, H5O_t H5_ATTR_NDEBUG_UNUSED *open_oh, void *_mesg)
     if (H5_addr_defined(ainfo->fheap_addr))
         /* Delete the attribute */
         if (H5A__dense_delete(f, ainfo) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -398,7 +398,7 @@ H5O__ainfo_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, void *mesg_src, H5F_
 
     /* Allocate space for the destination message */
     if (NULL == (ainfo_dst = H5FL_MALLOC(H5O_ainfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the top level of the information */
     *ainfo_dst = *ainfo_src;
@@ -410,7 +410,7 @@ H5O__ainfo_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, void *mesg_src, H5F_
         H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
         if (H5A__dense_create(file_dst, ainfo_dst) < 0)
-            HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
+            HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes");
 
         /* Reset metadata tag */
         H5_END_TAG
@@ -454,7 +454,7 @@ H5O__ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
     if (H5_addr_defined(ainfo_src->fheap_addr))
         if (H5A__dense_post_copy_file_all(src_oloc, ainfo_src, dst_oloc, (H5O_ainfo_t *)mesg_dst, cpy_info) <
             0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

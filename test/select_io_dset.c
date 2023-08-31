@@ -239,7 +239,7 @@ error:
         H5Pclose(dxpl);
         H5Pclose(ntrans_dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -379,7 +379,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (wbuf)
         free(wbuf);
@@ -529,7 +529,7 @@ error:
         H5Pclose(dxpl);
         H5Pclose(ntrans_dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -672,7 +672,7 @@ error:
         H5Pclose(dxpl);
         H5Pclose(ntrans_dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -989,7 +989,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (s1_wbuf)
         free(s1_wbuf);
@@ -1288,7 +1288,7 @@ error:
         H5Sclose(mem_sids[i]);
         H5Dclose(dset_dids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (total_wbuf)
         free(total_wbuf);
@@ -1758,7 +1758,7 @@ error:
         H5Sclose(mem_sids[i]);
         H5Dclose(dset_dids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (total_wbuf)
         free(total_wbuf);
@@ -2114,7 +2114,7 @@ error:
         H5Sclose(mem_sids[i]);
         H5Dclose(dset_dids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (total_wbuf)
         free(total_wbuf);
@@ -2686,7 +2686,7 @@ error:
         H5Sclose(mem_sids[i]);
         H5Dclose(dset_dids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (total_wbuf1)
         free(total_wbuf1);
@@ -2749,9 +2749,6 @@ test_set_get_select_io_mode(hid_t fid)
 
     /* default case */
     if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
-        TEST_ERROR;
-
-    if (selection_io_mode != H5D_SELECTION_IO_MODE_DEFAULT)
         TEST_ERROR;
 
     /* Disable case */
@@ -2824,7 +2821,7 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_set_get_select_io_mode() */
@@ -3051,7 +3048,7 @@ error:
         H5Dclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_no_selection_io_cause_mode() */
@@ -3063,10 +3060,28 @@ static herr_t
 test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 {
 
-    int errs = 0;
+    hid_t                   dxpl = H5I_INVALID_HID;
+    H5D_selection_io_mode_t selection_io_mode;
+    int                     errs = 0;
 
     printf("\n");
     TESTING("H5Pget_no_selection_io_cause()");
+
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The following tests are based on H5D_SELECTION_IO_MODE_DEFAULT as the
+       default setting in the library; skip the tests if that is not true */
+    if (selection_io_mode != H5D_SELECTION_IO_MODE_DEFAULT) {
+        SKIPPED();
+        return SUCCEED;
+    }
 
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DISABLE_BY_API);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
@@ -3083,6 +3098,7 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_PAGE_BUFFER);
 #endif
 
+error:
     if (errs) {
         printf(" FAILED\n");
         return FAIL;

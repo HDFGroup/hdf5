@@ -1861,7 +1861,7 @@ main(int argc, char **argv)
 
     /* Attempt to turn off atexit post processing so that in case errors
      * happen during the test and the process is aborted, it will not get
-     * hang in the atexit post processing in which it may try to make MPI
+     * hung in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0)
@@ -1922,7 +1922,7 @@ main(int argc, char **argv)
             H5Fdelete(FILENAME[0], fapl_id);
             H5Fdelete(FILENAME[1], fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         H5Pclose(fapl_id);
     }

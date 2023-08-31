@@ -297,24 +297,24 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     /* Allocate space for the extensible array data structure */
     if (NULL == (hdr = H5EA__hdr_alloc(udata->f)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array shared header")
+                    "memory allocation failed for extensible array shared header");
 
     /* Set the extensible array header's address */
     hdr->addr = udata->addr;
 
     /* Magic number */
     if (memcmp(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header signature")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5EA_HDR_VERSION)
-        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array header version")
+        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array header version");
 
     /* Extensible array class */
     id = (H5EA_cls_id_t)*image++;
     if (id >= H5EA_NUM_CLS_ID)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, NULL, "incorrect extensible array class")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, NULL, "incorrect extensible array class");
     hdr->cparam.cls = H5EA_client_class_g[id];
 
     /* General array creation/configuration information */
@@ -375,7 +375,7 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
 
     /* Finish initializing extensible array header */
     if (H5EA__hdr_init(hdr, udata->ctx_udata) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL, "initialization failed for extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL, "initialization failed for extensible array header");
     assert(hdr->size == len);
 
     /* Set return value */
@@ -385,7 +385,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (hdr && H5EA__hdr_dest(hdr) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array header")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array header");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_hdr_deserialize() */
@@ -532,7 +532,7 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent,
                                                       (void *)hdr->top_proxy) < 0)
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
-                                    "unable to destroy flush dependency between extensible array and proxy")
+                                    "unable to destroy flush dependency between extensible array and proxy");
                     hdr->parent = NULL;
                 } /* end if */
 
@@ -541,14 +541,14 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     if (H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
                         HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                     "unable to destroy flush dependency between header and "
-                                    "extensible array 'top' proxy")
+                                    "extensible array 'top' proxy");
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
                 break;
 
             default:
 #ifdef NDEBUG
-                HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+                HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else     /* NDEBUG */
                 assert(0 && "Unknown action?!?");
 #endif    /* NDEBUG */
@@ -583,7 +583,7 @@ H5EA__cache_hdr_free_icr(void *thing)
 
     /* Release the extensible array header */
     if (H5EA__hdr_dest((H5EA_hdr_t *)thing) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array header")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -686,28 +686,28 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     /* Allocate the extensible array index block */
     if (NULL == (iblock = H5EA__iblock_alloc(hdr)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array index block")
+                    "memory allocation failed for extensible array index block");
 
     /* Set the extensible array index block's address */
     iblock->addr = hdr->idx_blk_addr;
 
     /* Magic number */
     if (memcmp(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array index block signature")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array index block signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5EA_IBLOCK_VERSION)
-        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array index block version")
+        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array index block version");
 
     /* Extensible array type */
     if (*image++ != (uint8_t)hdr->cparam.cls->id)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, NULL, "incorrect extensible array class")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, NULL, "incorrect extensible array class");
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(hdr->f, &image, &arr_addr);
     if (H5_addr_ne(arr_addr, hdr->addr))
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address");
 
     /* Internal information */
 
@@ -716,7 +716,7 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len, void *_udata, hbo
         /* Convert from raw elements on disk into native elements in memory */
         if ((hdr->cparam.cls->decode)(image, iblock->elmts, (size_t)hdr->cparam.idx_blk_elmts, hdr->cb_ctx) <
             0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTDECODE, NULL, "can't decode extensible array index elements")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTDECODE, NULL, "can't decode extensible array index elements");
         image += (hdr->cparam.idx_blk_elmts * hdr->cparam.raw_elmt_size);
     } /* end if */
 
@@ -756,7 +756,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (iblock && H5EA__iblock_dest(iblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array index block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array index block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_iblock_deserialize() */
@@ -835,7 +835,7 @@ H5EA__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
         /* Convert from native elements in memory into raw elements on disk */
         if ((iblock->hdr->cparam.cls->encode)(image, iblock->elmts, (size_t)iblock->hdr->cparam.idx_blk_elmts,
                                               iblock->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTENCODE, FAIL, "can't encode extensible array index elements")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTENCODE, FAIL, "can't encode extensible array index elements");
         image += (iblock->hdr->cparam.idx_blk_elmts * iblock->hdr->cparam.raw_elmt_size);
     } /* end if */
 
@@ -899,7 +899,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                     "unable to create flush dependency between index block and header, address = %llu",
-                    (unsigned long long)iblock->addr)
+                    (unsigned long long)iblock->addr);
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -918,21 +918,21 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                     "unable to destroy flush dependency between index block and header, address = %llu",
-                    (unsigned long long)iblock->addr)
+                    (unsigned long long)iblock->addr);
 
             /* Detach from 'top' proxy for extensible array */
             if (iblock->top_proxy) {
                 if (H5AC_proxy_entry_remove_child(iblock->top_proxy, iblock) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between index block and "
-                                "extensible array 'top' proxy")
+                                "extensible array 'top' proxy");
                 iblock->top_proxy = NULL;
             } /* end if */
             break;
 
         default:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
@@ -964,7 +964,7 @@ H5EA__cache_iblock_free_icr(void *thing)
 
     /* Release the extensible array index block */
     if (H5EA__iblock_dest((H5EA_iblock_t *)thing) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array index block")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array index block");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1089,28 +1089,28 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     /* Allocate the extensible array super block */
     if (NULL == (sblock = H5EA__sblock_alloc(udata->hdr, udata->parent, udata->sblk_idx)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array super block")
+                    "memory allocation failed for extensible array super block");
 
     /* Set the extensible array super block's address */
     sblock->addr = udata->sblk_addr;
 
     /* Magic number */
     if (memcmp(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array super block signature")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array super block signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5EA_SBLOCK_VERSION)
-        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array super block version")
+        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array super block version");
 
     /* Extensible array type */
     if (*image++ != (uint8_t)udata->hdr->cparam.cls->id)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, NULL, "incorrect extensible array class")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, NULL, "incorrect extensible array class");
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(udata->hdr->f, &image, &arr_addr);
     if (H5_addr_ne(arr_addr, udata->hdr->addr))
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address");
 
     /* Offset of block within the array's address space */
     UINT64DECODE_VAR(image, sblock->block_off, udata->hdr->arr_off_size);
@@ -1153,7 +1153,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (sblock && H5EA__sblock_dest(sblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array super block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array super block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_sblock_deserialize() */
@@ -1283,7 +1283,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                     "unable to create flush dependency between super block and index block, address = %llu",
-                    (unsigned long long)sblock->addr)
+                    (unsigned long long)sblock->addr);
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -1293,7 +1293,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between super block and header, address = %llu",
-                        (unsigned long long)sblock->addr)
+                        (unsigned long long)sblock->addr);
                 sblock->has_hdr_depend = FALSE;
             } /* end if */
             break;
@@ -1304,7 +1304,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                     "unable to destroy flush dependency between super block and index block, address = %llu",
-                    (unsigned long long)sblock->addr)
+                    (unsigned long long)sblock->addr);
 
             /* Destroy flush dependency on extensible array header, if set */
             if (sblock->has_hdr_depend) {
@@ -1312,7 +1312,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between super block and header, address = %llu",
-                        (unsigned long long)sblock->addr)
+                        (unsigned long long)sblock->addr);
                 sblock->has_hdr_depend = FALSE;
             } /* end if */
 
@@ -1321,7 +1321,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(sblock->top_proxy, sblock) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between super block and "
-                                "extensible array 'top' proxy")
+                                "extensible array 'top' proxy");
                 sblock->top_proxy = NULL;
             } /* end if */
             break;
@@ -1337,7 +1337,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
 
         default:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
@@ -1369,7 +1369,7 @@ H5EA__cache_sblock_free_icr(void *thing)
 
     /* Release the extensible array super block */
     if (H5EA__sblock_dest((H5EA_sblock_t *)thing) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array super block")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array super block");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1495,7 +1495,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     /* Allocate the extensible array data block */
     if (NULL == (dblock = H5EA__dblock_alloc(udata->hdr, udata->parent, udata->nelmts)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array data block")
+                    "memory allocation failed for extensible array data block");
 
     assert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) ||
            (len == H5EA_DBLOCK_PREFIX_SIZE(dblock)));
@@ -1505,21 +1505,21 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
     /* Magic number */
     if (memcmp(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array data block signature")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array data block signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (*image++ != H5EA_DBLOCK_VERSION)
-        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array data block version")
+        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array data block version");
 
     /* Extensible array type */
     if (*image++ != (uint8_t)udata->hdr->cparam.cls->id)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, NULL, "incorrect extensible array class")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, NULL, "incorrect extensible array class");
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(udata->hdr->f, &image, &arr_addr);
     if (H5_addr_ne(arr_addr, udata->hdr->addr))
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address")
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address");
 
     /* Offset of block within the array's address space */
     UINT64DECODE_VAR(image, dblock->block_off, udata->hdr->arr_off_size);
@@ -1531,7 +1531,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
         /* Decode elements in data block */
         /* Convert from raw elements on disk into native elements in memory */
         if ((udata->hdr->cparam.cls->decode)(image, dblock->elmts, udata->nelmts, udata->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTDECODE, NULL, "can't decode extensible array data elements")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTDECODE, NULL, "can't decode extensible array data elements");
         image += (udata->nelmts * udata->hdr->cparam.raw_elmt_size);
     } /* end if */
 
@@ -1559,7 +1559,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (dblock && H5EA__dblock_dest(dblock) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_dblock_deserialize() */
@@ -1643,7 +1643,7 @@ H5EA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
 
         /* Convert from native elements in memory into raw elements on disk */
         if ((dblock->hdr->cparam.cls->encode)(image, dblock->elmts, dblock->nelmts, dblock->hdr->cb_ctx) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTENCODE, FAIL, "can't encode extensible array data elements")
+            HGOTO_ERROR(H5E_EARRAY, H5E_CANTENCODE, FAIL, "can't encode extensible array data elements");
         image += (dblock->nelmts * dblock->hdr->cparam.raw_elmt_size);
     } /* end if */
 
@@ -1688,7 +1688,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
             if (H5EA__create_flush_depend((H5AC_info_t *)dblock->parent, (H5AC_info_t *)dblock) < 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                             "unable to create flush dependency between data block and parent, address = %llu",
-                            (unsigned long long)dblock->addr)
+                            (unsigned long long)dblock->addr);
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -1698,7 +1698,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between direct block and header, address = %llu",
-                        (unsigned long long)dblock->addr)
+                        (unsigned long long)dblock->addr);
                 dblock->has_hdr_depend = FALSE;
             } /* end if */
             break;
@@ -1709,7 +1709,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                     "unable to destroy flush dependency between data block and parent, address = %llu",
-                    (unsigned long long)dblock->addr)
+                    (unsigned long long)dblock->addr);
 
             /* Destroy flush dependency on extensible array header, if set */
             if (dblock->has_hdr_depend) {
@@ -1717,7 +1717,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between data block and header, address = %llu",
-                        (unsigned long long)dblock->addr)
+                        (unsigned long long)dblock->addr);
                 dblock->has_hdr_depend = FALSE;
             } /* end if */
 
@@ -1726,7 +1726,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block and "
-                                "extensible array 'top' proxy")
+                                "extensible array 'top' proxy");
                 dblock->top_proxy = NULL;
             } /* end if */
             break;
@@ -1742,7 +1742,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
 
         default:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
@@ -1774,7 +1774,7 @@ H5EA__cache_dblock_free_icr(void *thing)
 
     /* Release the extensible array data block */
     if (H5EA__dblock_dest((H5EA_dblock_t *)thing) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array data block")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array data block");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1914,7 +1914,7 @@ H5EA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     /* Allocate the extensible array data block page */
     if (NULL == (dblk_page = H5EA__dblk_page_alloc(udata->hdr, udata->parent)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array data block page")
+                    "memory allocation failed for extensible array data block page");
 
     /* Set the extensible array data block page's information */
     dblk_page->addr = udata->dblk_page_addr;
@@ -1925,7 +1925,7 @@ H5EA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     /* Convert from raw elements on disk into native elements in memory */
     if ((udata->hdr->cparam.cls->decode)(image, dblk_page->elmts, udata->hdr->dblk_page_nelmts,
                                          udata->hdr->cb_ctx) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTDECODE, NULL, "can't decode extensible array data elements")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTDECODE, NULL, "can't decode extensible array data elements");
     image += (udata->hdr->dblk_page_nelmts * udata->hdr->cparam.raw_elmt_size);
 
     /* Sanity check */
@@ -1950,7 +1950,7 @@ done:
     /* Release resources */
     if (!ret_value)
         if (dblk_page && H5EA__dblk_page_dest(dblk_page) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block page")
+            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block page");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_dblk_page_deserialize() */
 
@@ -2013,7 +2013,7 @@ H5EA__cache_dblk_page_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *_ima
     /* Convert from native elements in memory into raw elements on disk */
     if ((dblk_page->hdr->cparam.cls->encode)(image, dblk_page->elmts, dblk_page->hdr->dblk_page_nelmts,
                                              dblk_page->hdr->cb_ctx) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTENCODE, FAIL, "can't encode extensible array data elements")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTENCODE, FAIL, "can't encode extensible array data elements");
     image += (dblk_page->hdr->dblk_page_nelmts * dblk_page->hdr->cparam.raw_elmt_size);
 
     /* Compute metadata checksum */
@@ -2058,7 +2058,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTDEPEND, FAIL,
                     "unable to create flush dependency between data block page and parent, address = %llu",
-                    (unsigned long long)dblk_page->addr)
+                    (unsigned long long)dblk_page->addr);
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -2068,7 +2068,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block page and header, "
                                 "address = %llu",
-                                (unsigned long long)dblk_page->addr)
+                                (unsigned long long)dblk_page->addr);
                 dblk_page->has_hdr_depend = FALSE;
             } /* end if */
             break;
@@ -2079,7 +2079,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                 HGOTO_ERROR(
                     H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                     "unable to destroy flush dependency between data block page and parent, address = %llu",
-                    (unsigned long long)dblk_page->addr)
+                    (unsigned long long)dblk_page->addr);
 
             /* Destroy flush dependency on extensible array header, if set */
             if (dblk_page->has_hdr_depend) {
@@ -2087,7 +2087,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block page and header, "
                                 "address = %llu",
-                                (unsigned long long)dblk_page->addr)
+                                (unsigned long long)dblk_page->addr);
                 dblk_page->has_hdr_depend = FALSE;
             } /* end if */
 
@@ -2096,7 +2096,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                 if (H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
                     HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                                 "unable to destroy flush dependency between data block page and "
-                                "extensible array 'top' proxy")
+                                "extensible array 'top' proxy");
                 dblk_page->top_proxy = NULL;
             } /* end if */
             break;
@@ -2112,7 +2112,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
 
         default:
 #ifdef NDEBUG
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
@@ -2144,7 +2144,7 @@ H5EA__cache_dblk_page_free_icr(void *thing)
 
     /* Release the extensible array data block page */
     if (H5EA__dblk_page_dest((H5EA_dblk_page_t *)thing) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array data block page")
+        HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL, "can't free extensible array data block page");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

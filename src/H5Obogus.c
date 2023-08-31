@@ -112,7 +112,7 @@ H5O__bogus_decode(H5F_t *f, H5O_t H5_ATTR_NDEBUG_UNUSED *open_oh, unsigned H5_AT
 
     /* Allocate the bogus message */
     if (NULL == (mesg = (H5O_bogus_t *)H5MM_calloc(sizeof(H5O_bogus_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -120,7 +120,7 @@ H5O__bogus_decode(H5F_t *f, H5O_t H5_ATTR_NDEBUG_UNUSED *open_oh, unsigned H5_AT
 
     /* Validate the bogus info */
     if (mesg->u != H5O_BOGUS_VALUE)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid bogus value :-)")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid bogus value :-)");
 
     /* Set return value */
     ret_value = mesg;

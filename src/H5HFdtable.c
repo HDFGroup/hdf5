@@ -97,16 +97,16 @@ H5HF__dtable_init(H5HF_dtable_t *dtable)
 
     /* Build table of block sizes for each row */
     if (NULL == (dtable->row_block_size = (hsize_t *)H5MM_malloc(dtable->max_root_rows * sizeof(hsize_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table block size table")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table block size table");
     if (NULL == (dtable->row_block_off = (hsize_t *)H5MM_malloc(dtable->max_root_rows * sizeof(hsize_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table block offset table")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table block offset table");
     if (NULL ==
         (dtable->row_tot_dblock_free = (hsize_t *)H5MM_malloc(dtable->max_root_rows * sizeof(hsize_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "can't create doubling table total direct block free space table")
+                    "can't create doubling table total direct block free space table");
     if (NULL == (dtable->row_max_dblock_free = (size_t *)H5MM_malloc(dtable->max_root_rows * sizeof(size_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "can't create doubling table max. direct block free space table")
+                    "can't create doubling table max. direct block free space table");
     tmp_block_size            = dtable->cparam.start_block_size;
     acc_block_off             = dtable->cparam.start_block_size * dtable->cparam.width;
     dtable->row_block_size[0] = dtable->cparam.start_block_size;

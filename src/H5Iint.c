@@ -174,7 +174,7 @@ H5I_register_type(const H5I_class_t *cls)
     if (NULL == H5I_type_info_array_g[cls->type]) {
         /* Allocate the type information for new type */
         if (NULL == (type_info = (H5I_type_info_t *)H5MM_calloc(sizeof(H5I_type_info_t))))
-            HGOTO_ERROR(H5E_ID, H5E_CANTALLOC, FAIL, "ID type allocation failed")
+            HGOTO_ERROR(H5E_ID, H5E_CANTALLOC, FAIL, "ID type allocation failed");
         H5I_type_info_array_g[cls->type] = type_info;
     }
     else {
@@ -225,7 +225,7 @@ H5I_nmembers(H5I_type_t type)
 
     /* Validate parameter */
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
     if (NULL == (type_info = H5I_type_info_array_g[type]) || type_info->init_count <= 0)
         HGOTO_DONE(0);
 
@@ -298,11 +298,11 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 
     /* Validate parameters */
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
 
     udata.type_info = H5I_type_info_array_g[type];
     if (udata.type_info == NULL || udata.type_info->init_count <= 0)
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type");
 
     /* Finish constructing udata */
     udata.force   = force;
@@ -321,7 +321,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
     {
         if (!item->marked)
             if (H5I__mark_node((void *)item, NULL, (void *)&udata) < 0)
-                HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed while clearing the ID type")
+                HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed while clearing the ID type");
     }
 
     /* Unset marking flag */
@@ -452,11 +452,11 @@ H5I__destroy_type(H5I_type_t type)
 
     /* Validate parameter */
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
 
     type_info = H5I_type_info_array_g[type];
     if (type_info == NULL || type_info->init_count <= 0)
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type");
 
     /* Close/clear/destroy all IDs for this type */
     H5E_BEGIN_TRY
@@ -512,12 +512,12 @@ H5I__register(H5I_type_t type, const void *object, hbool_t app_ref, H5I_future_r
 
     /* Check arguments */
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_INVALID_HID, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_INVALID_HID, "invalid type number");
     type_info = H5I_type_info_array_g[type];
     if ((NULL == type_info) || (type_info->init_count <= 0))
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, H5I_INVALID_HID, "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, H5I_INVALID_HID, "invalid type");
     if (NULL == (info = H5FL_CALLOC(H5I_id_info_t)))
-        HGOTO_ERROR(H5E_ID, H5E_NOSPACE, H5I_INVALID_HID, "memory allocation failed")
+        HGOTO_ERROR(H5E_ID, H5E_NOSPACE, H5I_INVALID_HID, "memory allocation failed");
 
     /* Create the struct & its ID */
     new_id           = H5I_MAKE(type, type_info->nextid);
@@ -571,7 +571,7 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 
     /* Retrieve ID for object */
     if (H5I_INVALID_HID == (ret_value = H5I__register(type, object, app_ref, NULL, NULL)))
-        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -609,25 +609,25 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
 
     /* Make sure ID is not already in use */
     if (NULL != (info = H5I__find_id(existing_id)))
-        HGOTO_ERROR(H5E_ID, H5E_BADRANGE, FAIL, "ID already in use")
+        HGOTO_ERROR(H5E_ID, H5E_BADRANGE, FAIL, "ID already in use");
 
     /* Make sure type number is valid */
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
 
     /* Get type pointer from list of types */
     type_info = H5I_type_info_array_g[type];
 
     if (NULL == type_info || type_info->init_count <= 0)
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type");
 
     /* Make sure requested ID belongs to object's type */
     if (H5I_TYPE(existing_id) != type)
-        HGOTO_ERROR(H5E_ID, H5E_BADRANGE, FAIL, "invalid type for provided ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADRANGE, FAIL, "invalid type for provided ID");
 
     /* Allocate new structure to house this ID */
     if (NULL == (info = H5FL_CALLOC(H5I_id_info_t)))
-        HGOTO_ERROR(H5E_ID, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_ID, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Create the struct & insert requested ID */
     info->id        = existing_id;
@@ -674,7 +674,7 @@ H5I_subst(hid_t id, const void *new_object)
 
     /* General lookup of the ID */
     if (NULL == (info = H5I__find_id(id)))
-        HGOTO_ERROR(H5E_ID, H5E_NOTFOUND, NULL, "can't get ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_NOTFOUND, NULL, "can't get ID ref count");
 
     /* Get the old object pointer to return */
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
@@ -892,7 +892,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
             info->marked = TRUE;
     }
     else
-        HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, NULL, "can't remove ID node from hash table")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, NULL, "can't remove ID node from hash table");
 
     /* Check if this ID was the last one accessed */
     if (type_info->last_id_info == info)
@@ -936,14 +936,14 @@ H5I_remove(hid_t id)
     /* Check arguments */
     type = H5I_TYPE(id);
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid type number");
     type_info = H5I_type_info_array_g[type];
     if (type_info == NULL || type_info->init_count <= 0)
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, NULL, "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, NULL, "invalid type");
 
     /* Remove the node from the type */
     if (NULL == (ret_value = H5I__remove_common(type_info, id)))
-        HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, NULL, "can't remove ID node")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, NULL, "can't remove ID node");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -978,7 +978,7 @@ H5I__dec_ref(hid_t id, void **request)
 
     /* General lookup of the ID */
     if (NULL == (info = H5I__find_id(id)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
     /* If this is the last reference to the object then invoke the type's
      * free method on the object. If the free method is undefined or
@@ -1004,7 +1004,7 @@ H5I__dec_ref(hid_t id, void **request)
         if (!type_info->cls->free_func || (type_info->cls->free_func)((void *)info->object, request) >= 0) {
             /* Remove the node from the type */
             if (NULL == H5I__remove_common(type_info, id))
-                HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, (-1), "can't remove ID node")
+                HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, (-1), "can't remove ID node");
             ret_value = 0;
         } /* end if */
         else
@@ -1042,7 +1042,7 @@ H5I_dec_ref(hid_t id)
 
     /* Synchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_ref(id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1074,7 +1074,7 @@ H5I__dec_app_ref(hid_t id, void **request)
 
     /* Call regular decrement reference count routine */
     if ((ret_value = H5I__dec_ref(id, request)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count");
 
     /* Check if the ID still exists */
     if (ret_value > 0) {
@@ -1082,7 +1082,7 @@ H5I__dec_app_ref(hid_t id, void **request)
 
         /* General lookup of the ID */
         if (NULL == (info = H5I__find_id(id)))
-            HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID")
+            HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
         /* Adjust app_ref */
         --(info->app_count);
@@ -1119,7 +1119,7 @@ H5I_dec_app_ref(hid_t id)
 
     /* Synchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_app_ref(id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1151,7 +1151,7 @@ H5I_dec_app_ref_async(hid_t id, void **token)
 
     /* [Possibly] aynchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_app_ref(id, token)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't asynchronously decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't asynchronously decrement ID ref count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1194,7 +1194,7 @@ H5I__dec_app_ref_always_close(hid_t id, void **request)
          */
         H5I_remove(id);
 
-        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count");
     } /* end if */
 
 done:
@@ -1224,7 +1224,7 @@ H5I_dec_app_ref_always_close(hid_t id)
 
     /* Synchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_app_ref_always_close(id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't decrement ID ref count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1256,7 +1256,7 @@ H5I_dec_app_ref_always_close_async(hid_t id, void **token)
 
     /* [Possibly] aynchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_app_ref_always_close(id, token)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't asynchronously decrement ID ref count")
+        HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't asynchronously decrement ID ref count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1285,7 +1285,7 @@ H5I_inc_ref(hid_t id, hbool_t app_ref)
 
     /* General lookup of the ID */
     if (NULL == (info = H5I__find_id(id)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
     /* Adjust reference counts */
     ++(info->count);
@@ -1322,7 +1322,7 @@ H5I_get_ref(hid_t id, hbool_t app_ref)
 
     /* General lookup of the ID */
     if (NULL == (info = H5I__find_id(id)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't locate ID");
 
     /* Set return value */
     ret_value = (int)(app_ref ? info->app_count : info->count);
@@ -1355,7 +1355,7 @@ H5I__inc_type_ref(H5I_type_t type)
     /* Check arguments */
     type_info = H5I_type_info_array_g[type];
     if (NULL == type_info)
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, (-1), "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, (-1), "invalid type");
 
     /* Set return value */
     ret_value = (int)(++(type_info->init_count));
@@ -1392,11 +1392,11 @@ H5I_dec_type_ref(H5I_type_t type)
     FUNC_ENTER_NOAPI((-1))
 
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, (-1), "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, (-1), "invalid type number");
 
     type_info = H5I_type_info_array_g[type];
     if (type_info == NULL || type_info->init_count <= 0)
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, (-1), "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, (-1), "invalid type");
 
     /* Decrement the number of users of the ID type.  If this is the
      * last user of the type then release all IDs from the type and
@@ -1441,7 +1441,7 @@ H5I__get_type_ref(H5I_type_t type)
     /* Check arguments */
     type_info = H5I_type_info_array_g[type];
     if (!type_info)
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, (-1), "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, (-1), "invalid type");
 
     /* Set return value */
     ret_value = (int)type_info->init_count;
@@ -1534,7 +1534,7 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
 
     /* Check arguments */
     if (type <= H5I_BADID || (int)type >= H5I_next_type_g)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
     type_info = H5I_type_info_array_g[type];
 
     /* Only iterate through ID list if it is initialized and there are IDs in type */
@@ -1555,7 +1555,7 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
             if (!item->marked) {
                 int ret = H5I__iterate_cb((void *)item, NULL, (void *)&iter_udata);
                 if (H5_ITER_ERROR == ret)
-                    HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed")
+                    HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
                 if (H5_ITER_STOP == ret)
                     break;
             }
@@ -1712,7 +1712,7 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
 
     type_info = H5I_type_info_array_g[type];
     if (!type_info || type_info->init_count <= 0)
-        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type")
+        HGOTO_ERROR(H5E_ID, H5E_BADGROUP, FAIL, "invalid type");
 
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if (type_info->init_count > 0 && type_info->id_count > 0) {
@@ -1730,7 +1730,7 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
         {
             int ret = H5I__find_id_cb((void *)item, NULL, (void *)&udata);
             if (H5_ITER_ERROR == ret)
-                HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed")
+                HGOTO_ERROR(H5E_ID, H5E_BADITER, FAIL, "iteration failed");
             if (H5_ITER_STOP == ret)
                 break;
         }

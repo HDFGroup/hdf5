@@ -3356,7 +3356,7 @@ actual_io_mode_tests(void)
     ret = H5Pclose(dxpl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
-    if (selection_io_mode != H5D_SELECTION_IO_MODE_ON) {
+    if (selection_io_mode == H5D_SELECTION_IO_MODE_OFF) {
         test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
 
         /*
@@ -3424,7 +3424,7 @@ actual_io_mode_tests(void)
  *         Test for Compact layout as the cause of breaking collective I/O.
  *
  *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL:
- *         Test for Externl-File storage as the cause of breaking collective I/O.
+ *         Test for External-File storage as the cause of breaking collective I/O.
  *
  */
 #define FILE_EXTERNAL "nocolcause_extern.data"
@@ -3501,6 +3501,8 @@ test_no_collective_cause_mode(int selection_mode)
         sid = H5Screate(H5S_NULL);
         VRFY((sid >= 0), "H5Screate_simple succeeded");
         is_chunked = 0;
+
+        dims[0] = dims[1] = 0;
     }
     else {
         /* Create the basic Space */

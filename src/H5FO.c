@@ -78,7 +78,7 @@ H5FO_create(const H5F_t *f)
 
     /* Create container used to store open object info */
     if ((f->shared->open_objs = H5SL_create(H5SL_TYPE_HADDR, NULL)) == NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object container")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object container");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -167,7 +167,7 @@ H5FO_insert(const H5F_t *f, haddr_t addr, void *obj, hbool_t delete_flag)
 
     /* Allocate new opened object information structure */
     if ((open_obj = H5FL_MALLOC(H5FO_open_obj_t)) == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Assign information */
     open_obj->addr    = addr;
@@ -176,7 +176,7 @@ H5FO_insert(const H5F_t *f, haddr_t addr, void *obj, hbool_t delete_flag)
 
     /* Insert into container */
     if (H5SL_insert(f->shared->open_objs, &open_obj->addr, open_obj) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert object into container")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert object into container");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -217,12 +217,12 @@ H5FO_delete(H5F_t *f, haddr_t addr)
 
     /* Remove from container */
     if (NULL == (open_obj = (H5FO_open_obj_t *)H5SL_remove(f->shared->open_objs, &addr)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "can't remove object from container")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "can't remove object from container");
 
     /* Check if the object was deleted from the file */
     if (open_obj->deleted) {
         if (H5O_delete(f, addr) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file");
     } /* end if */
 
     /* Release the object information */
@@ -347,11 +347,11 @@ H5FO_dest(const H5F_t *f)
 
     /* Check if the object info set is empty */
     if (H5SL_count(f->shared->open_objs) != 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "objects still in open object info set")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "objects still in open object info set");
 
     /* Release the open object info set container */
     if (H5SL_close(f->shared->open_objs) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCLOSEOBJ, FAIL, "can't close open object info set")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCLOSEOBJ, FAIL, "can't close open object info set");
 
     f->shared->open_objs = NULL;
 
@@ -389,7 +389,7 @@ H5FO_top_create(H5F_t *f)
 
     /* Create container used to store open object info */
     if ((f->obj_count = H5SL_create(H5SL_TYPE_HADDR, NULL)) == NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object container")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object container");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -434,7 +434,7 @@ H5FO_top_incr(const H5F_t *f, haddr_t addr)
     else {
         /* Allocate new opened object information structure */
         if (NULL == (obj_count = H5FL_MALLOC(H5FO_obj_count_t)))
-            HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /* Assign information */
         obj_count->addr  = addr;
@@ -442,7 +442,7 @@ H5FO_top_incr(const H5F_t *f, haddr_t addr)
 
         /* Insert into container */
         if (H5SL_insert(f->obj_count, &obj_count->addr, obj_count) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert object into container")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert object into container");
     } /* end if */
 
 done:
@@ -489,14 +489,14 @@ H5FO_top_decr(const H5F_t *f, haddr_t addr)
         if (obj_count->count == 0) {
             /* Remove from container */
             if (NULL == (obj_count = (H5FO_obj_count_t *)H5SL_remove(f->obj_count, &addr)))
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "can't remove object from container")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "can't remove object from container");
 
             /* Release the object information */
             obj_count = H5FL_FREE(H5FO_obj_count_t, obj_count);
         } /* end if */
     }     /* end if */
     else
-        HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't decrement ref. count")
+        HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't decrement ref. count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -574,11 +574,11 @@ H5FO_top_dest(H5F_t *f)
 
     /* Check if the object count set is empty */
     if (H5SL_count(f->obj_count) != 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "objects still in open object info set")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "objects still in open object info set");
 
     /* Release the open object count set container */
     if (H5SL_close(f->obj_count) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCLOSEOBJ, FAIL, "can't close open object info set")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCLOSEOBJ, FAIL, "can't close open object info set");
 
     f->obj_count = NULL;
 

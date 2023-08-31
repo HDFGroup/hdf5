@@ -38,7 +38,10 @@ Using Visual Studio 2010 and above with HDF5 Libraries built with Visual Studio 
           library, and then optionally the HDF5 High Level, Fortran or C++
           libraries. For example, to compile a C++ application, enter:
 
-          szip.lib zlib.lib hdf5.lib hdf5_cpp.lib
+          hdf5.lib hdf5_cpp.lib
+
+          For static linking:
+          libszaec.lib libaec.lib libzlib.lib libhdf5.lib libhdf5_cpp.lib
 
 
 ==========================================================================

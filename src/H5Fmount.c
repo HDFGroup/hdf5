@@ -58,11 +58,11 @@ H5F__close_mounts(H5F_t *f)
 
             /* Close the internal group maintaining the mount point */
             if (H5G_close(f->shared->mtab.child[u].group) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group");
 
             /* Close the child file */
             if (H5F_try_close(f->shared->mtab.child[u].file, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file");
 
             /* Eliminate the mount point from the table */
             memmove(f->shared->mtab.child + u, f->shared->mtab.child + u + 1,
@@ -122,23 +122,23 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
      * that the mount wouldn't introduce a cycle in the mount tree.
      */
     if (child->parent)
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted");
     if (H5G_loc_find(loc, name, &mp_loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
     /* If the mount location is holding its file open, that file will close
      * and remove the mount as soon as we exit this function.  Prevent the
      * user from doing this.
      */
     if (mp_loc.oloc->holding_file != FALSE)
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount path cannot contain links to external files")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount path cannot contain links to external files");
 
     /* Open the mount point group */
     if (NULL == (mount_point = H5G_open(&mp_loc)))
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found");
 
     /* Check if the proposed mount point group is already a mount point */
     if (H5G_MOUNTED(mount_point))
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use");
 
     /* Retrieve information from the mount point group */
     /* (Some of which we had before but was reset in mp_loc when the group
@@ -152,11 +152,11 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
     assert(mp_loc.path);
     for (ancestor = parent; ancestor; ancestor = ancestor->parent)
         if (ancestor->shared == child->shared)
-            HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
+            HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle");
 
     /* Make certain that the parent & child files have the same "file close degree" */
     if (parent->shared->fc_degree != child->shared->fc_degree)
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mounted file has different file close degree than parent")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mounted file has different file close degree than parent");
 
     /*
      * Use a binary search to locate the position that the child should be
@@ -180,7 +180,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
     if (cmp > 0)
         md++;
     if (!cmp)
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use");
 
     /* Make room in the table */
     if (parent->shared->mtab.nmounts >= parent->shared->mtab.nalloc) {
@@ -189,7 +189,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
                                                      n * sizeof(parent->shared->mtab.child[0]));
 
         if (!x)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table");
         parent->shared->mtab.child  = x;
         parent->shared->mtab.nalloc = n;
     }
@@ -205,29 +205,29 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
 
     /* Set the group's mountpoint flag */
     if (H5G_mount(parent->shared->mtab.child[md].group) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to set group mounted flag")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to set group mounted flag");
 
     /* Get the group location for the root group in the file to unmount */
     if (NULL == (root_loc.oloc = H5G_oloc(child->shared->root_grp)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group");
     if (NULL == (root_loc.path = H5G_nameof(child->shared->root_grp)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group");
 
     /* Search the open IDs and replace names for mount operation */
     /* We pass H5G_UNKNOWN as object type; search all IDs */
     if (H5G_name_replace(NULL, H5G_NAME_MOUNT, mp_loc.oloc->file, mp_loc.path->full_path_r,
                          root_loc.oloc->file, root_loc.path->full_path_r) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name");
 
 done:
     if (ret_value < 0) {
         if (mount_point) {
             if (H5G_close(mount_point) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close mounted group")
+                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close mounted group");
         }
         else {
             if (H5G_loc_free(&mp_loc) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free mount location")
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free mount location");
         }
     }
 
@@ -280,7 +280,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
      * then we must have found the mount point.
      */
     if (H5G_loc_find(loc, name, &mp_loc /*out*/) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTFOUND, FAIL, "group not found")
+        HGOTO_ERROR(H5E_FILE, H5E_NOTFOUND, FAIL, "group not found");
     mp_loc_setup = TRUE;
     child        = mp_loc.oloc->file;
     mnt_oloc     = H5G_oloc(child->shared->root_grp);
@@ -325,7 +325,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
         }
 
         if (cmp)
-            HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "not a mount point")
+            HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "not a mount point");
 
         /* Found the correct index, set the info about the child */
         child_idx = (int)md;
@@ -346,14 +346,14 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
 
     /* Get the group location for the root group in the file to unmount */
     if (NULL == (root_loc.oloc = H5G_oloc(child->shared->root_grp)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group");
     if (NULL == (root_loc.path = H5G_nameof(child->shared->root_grp)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group");
 
     /* Search the open IDs replace names to reflect unmount operation */
     if (H5G_name_replace(NULL, H5G_NAME_UNMOUNT, mp_loc.oloc->file, mp_loc.path->full_path_r,
                          root_loc.oloc->file, root_loc.path->full_path_r) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to replace name")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to replace name");
 
     /* Eliminate the mount point from the table */
     memmove(parent->shared->mtab.child + (unsigned)child_idx,
@@ -365,14 +365,14 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
 
     /* Unmount the child file from the parent file */
     if (H5G_unmount(child_group) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to reset group mounted flag")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to reset group mounted flag");
     if (H5G_close(child_group) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group");
 
     /* Detach child file from parent & see if it should close */
     child->parent = NULL;
     if (H5F_try_close(child, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file");
 
 done:
     /* Free the mount point location's information, if it's been set up */
@@ -513,11 +513,11 @@ H5F__flush_mounts_recurse(H5F_t *f)
 
     /* Call the "real" flush routine, for this file */
     if (H5F__flush(f) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information");
 
     /* Check flush errors for children - errors are already on the stack */
     if (nerrors)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's child mounts")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's child mounts");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -548,7 +548,7 @@ H5F_flush_mounts(H5F_t *f)
 
     /* Flush the mounted file hierarchy */
     if (H5F__flush_mounts_recurse(f) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -611,11 +611,11 @@ H5F_traverse_mount(H5O_loc_t *oloc /*in,out*/)
 
             /* Release the mount point */
             if (H5O_loc_free(oloc) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to free object location")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to free object location");
 
             /* Copy the entry for the root group */
             if (H5O_loc_copy_deep(oloc, mnt_oloc) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object location")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object location");
 
             /* In case the shared root group info points to a different file handle
              * than the child, modify oloc */

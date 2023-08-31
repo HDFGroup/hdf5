@@ -129,7 +129,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
     /* Allocate level structure */
     if (NULL == (biter->curr = H5FL_MALLOC(H5HF_block_loc_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for direct block free list section")
+                    "memory allocation failed for direct block free list section");
 
     /*
     1:  <Scan down block offsets for dtable rows until find a row >= offset>
@@ -198,7 +198,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
         if (NULL ==
             (iblock = H5HF__man_iblock_protect(hdr, iblock_addr, iblock_nrows, iblock_parent,
                                                iblock_par_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block");
 
         /* Make indirect block the context for the current location */
         biter->curr->context = iblock;
@@ -206,11 +206,11 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
         /* Hold the indirect block with the location */
         if (H5HF__iblock_incr(biter->curr->context) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL,
-                        "can't increment reference count on shared indirect block")
+                        "can't increment reference count on shared indirect block");
 
         /* Release the current indirect block */
         if (H5HF__man_iblock_unprotect(iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
         iblock = NULL;
 
         /* See if the location falls in a direct block row */
@@ -227,7 +227,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
             /* Allocate level structure */
             if (NULL == (new_loc = H5FL_MALLOC(H5HF_block_loc_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                            "memory allocation failed for direct block free list section")
+                            "memory allocation failed for direct block free list section");
 
             /* Link new level into iterator */
             new_loc->up = biter->curr;
@@ -304,7 +304,7 @@ H5HF__man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, H5HF_indir
     /* Create new location for iterator */
     if (NULL == (new_loc = H5FL_MALLOC(H5HF_block_loc_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for direct block free list section")
+                    "memory allocation failed for direct block free list section");
 
     /* Set up location context */
     new_loc->entry   = start_entry;
@@ -315,7 +315,7 @@ H5HF__man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, H5HF_indir
 
     /* Increment reference count on indirect block */
     if (H5HF__iblock_incr(new_loc->context) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block");
 
     /* Make new location the current location */
     biter->curr = new_loc;
@@ -367,7 +367,7 @@ H5HF__man_iter_reset(H5HF_block_iter_t *biter)
             if (curr_loc->context)
                 if (H5HF__iblock_decr(curr_loc->context) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
-                                "can't decrement reference count on shared indirect block")
+                                "can't decrement reference count on shared indirect block");
 
             /* Free the current location context */
             curr_loc = H5FL_FREE(H5HF_block_loc_t, curr_loc);
@@ -446,7 +446,7 @@ H5HF__man_iter_up(H5HF_block_iter_t *biter)
 
     /* Release hold on current location's indirect block */
     if (H5HF__iblock_decr(biter->curr->context) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block");
 
     /* Get pointer to location context above this one */
     up_loc = biter->curr->up;
@@ -489,7 +489,7 @@ H5HF__man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
     /* Create new location to move down to */
     if (NULL == (down_loc = H5FL_MALLOC(H5HF_block_loc_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for direct block free list section")
+                    "memory allocation failed for direct block free list section");
 
     /* Initialize down location */
     down_loc->row     = 0;
@@ -500,7 +500,7 @@ H5HF__man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
 
     /* Increment reference count on indirect block */
     if (H5HF__iblock_incr(down_loc->context) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block");
 
     /* Make down location the current location */
     biter->curr = down_loc;

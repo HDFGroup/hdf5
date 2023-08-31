@@ -125,7 +125,7 @@ H5EA__test_crt_context(void *_udata)
     /* Allocate new context structure */
     if (NULL == (ctx = H5FL_MALLOC(H5EA__test_ctx_t)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "can't allocate extensible array client callback context")
+                    "can't allocate extensible array client callback context");
 
     /* Initialize the context */
     ctx->bogus = H5EA__TEST_BOGUS_VAL;
@@ -218,7 +218,7 @@ H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
     /* Check for callback action */
     if (ctx->cb) {
         if ((*ctx->cb->encode)(elmt, nelmts, ctx->cb->udata) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "extensible array testing callback action failed")
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "extensible array testing callback action failed");
     }
 
     /* Encode native elements into raw elements */
@@ -329,7 +329,7 @@ H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_a
     /* Allocate new context structure */
     if (NULL == (ctx = H5FL_MALLOC(H5EA__ctx_cb_t)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "can't allocate extensible array client callback context")
+                    "can't allocate extensible array client callback context");
 
     /* Set return value */
     ret_value = ctx;

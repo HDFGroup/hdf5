@@ -16214,7 +16214,7 @@ error:
         H5Pclose(ocpypl_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }

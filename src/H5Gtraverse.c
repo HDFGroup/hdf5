@@ -112,7 +112,7 @@ H5G__traverse_slink_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc, const char H5_ATTR_UNU
         if (udata->chk_exists)
             udata->exists = FALSE;
         else
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
     } /* end if */
     else {
         /* Copy new location information for resolved object */
@@ -164,7 +164,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
 
     /* Get the link class for this type of link. */
     if (NULL == (link_class = H5L_find_class(lnk->type)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTREGISTERED, FAIL, "unable to get UD link class")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTREGISTERED, FAIL, "unable to get UD link class");
 
     /* Set up location for user-defined callback.  Use a copy of our current
      * grp_loc. */
@@ -172,13 +172,13 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
     grp_loc_copy.oloc = &grp_oloc_copy;
     H5G_loc_reset(&grp_loc_copy);
     if (H5G_loc_copy(&grp_loc_copy, grp_loc, H5_COPY_DEEP) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "unable to copy object location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "unable to copy object location");
 
     /* Create a group ID to pass to the user-defined callback */
     if (NULL == (grp = H5G_open(&grp_loc_copy)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
     if ((cur_grp = H5VL_wrap_register(H5I_GROUP, grp, FALSE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group");
 
         /* User-defined callback function */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -209,12 +209,12 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
         } /* end if */
         /* else, we really needed to open the object */
         else
-            HGOTO_ERROR(H5E_SYM, H5E_BADID, FAIL, "traversal callback returned invalid ID")
+            HGOTO_ERROR(H5E_SYM, H5E_BADID, FAIL, "traversal callback returned invalid ID");
     } /* end if */
 
     /* Get the object location information from the ID the user callback returned */
     if (H5G_loc(cb_return, &new_loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to get object location from ID");
 
     /* Release any previous location information for the object */
     H5G_loc_free(obj_loc);
@@ -226,22 +226,22 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
      * object location will be invalidated when the file closes).
      */
     if (H5O_loc_hold_file(obj_loc->oloc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to hold file open")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to hold file open");
 
     /* We have a copy of the location and we're holding the file open.
      * Close the open ID the user passed back.
      */
     if (H5I_dec_ref(cb_return) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback");
     cb_return = (hid_t)(-1);
 
 done:
     /* Close location given to callback. */
     if (cur_grp > 0 && H5I_dec_ref(cur_grp) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID for current location")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID for current location");
 
     if (ret_value < 0 && cb_return > 0 && H5I_dec_ref(cb_return) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__traverse_ud() */
@@ -306,7 +306,7 @@ H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *
 
     /* Traverse the link */
     if (H5G__traverse_real(&tmp_grp_loc, lnk->u.soft.name, target, H5G__traverse_slink_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link");
 
     /* Pass back information about whether the object exists */
     *obj_exists = udata.exists;
@@ -356,19 +356,19 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned 
 
         /* Get the # of soft / UD links left to traverse */
         if (H5CX_get_nlinks(&nlinks) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse");
 
         /* Decrement # of links and range check */
         if ((nlinks)-- <= 0)
-            HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
+            HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links");
 
         /* Update the # of links in the API context */
         if (H5CX_set_nlinks(nlinks) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't update # of soft / UD links to traverse")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't update # of soft / UD links to traverse");
 
         /* Traverse soft link */
         if (H5G__traverse_slink(grp_loc, lnk, obj_loc, (target & H5G_TARGET_EXISTS), obj_exists) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "symbolic link traversal failed")
+            HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "symbolic link traversal failed");
     } /* end if */
 
     /*
@@ -380,19 +380,19 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned 
 
         /* Get the # of soft / UD links left to traverse */
         if (H5CX_get_nlinks(&nlinks) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse");
 
         /* Decrement # of links and range check */
         if ((nlinks)-- <= 0)
-            HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
+            HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links");
 
         /* Update the # of links in the API context */
         if (H5CX_set_nlinks(nlinks) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't update # of soft / UD links to traverse")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't update # of soft / UD links to traverse");
 
         /* Traverse user-defined link */
         if (H5G__traverse_ud(grp_loc, lnk, obj_loc, (target & H5G_TARGET_EXISTS), obj_exists) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "user-defined link traversal failed")
+            HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "user-defined link traversal failed");
     } /* end if */
 
     /*
@@ -408,7 +408,7 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned 
      */
     if (H5_addr_defined(obj_loc->oloc->addr) && (0 == (target & H5G_TARGET_MOUNT) || !last_comp)) {
         if (H5F_traverse_mount(obj_loc->oloc /*in,out*/) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "mount point traversal failed")
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "mount point traversal failed");
     } /* end if */
 
     /* If the grp_loc is the only thing holding an external file open
@@ -417,7 +417,7 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned 
      */
     if (grp_loc->oloc->holding_file && grp_loc->oloc->file == obj_loc->oloc->file)
         if (H5O_loc_hold_file(obj_loc->oloc) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to hold file open")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to hold file open");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -494,25 +494,25 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
 #if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
     /* Clear group location */
     if (H5G_loc_reset(&grp_loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location");
 #endif /* H5_USING_MEMCHECKER */
 
     /* Deep copy of the starting location to group location */
     if (H5G_loc_copy(&grp_loc, &loc, H5_COPY_DEEP) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy location");
     group_copy = TRUE;
 
     /* Clear object location */
     if (H5G_loc_reset(&obj_loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location");
 
     /* Wrap the local buffer for serialized header info */
     if (NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer");
 
     /* Get a pointer to a buffer that's large enough  */
     if (NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer");
 
     /* Traverse the path */
     while ((name = H5G__component(name, &nchars)) && *name) {
@@ -548,7 +548,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
         /* Get information for object in current group */
         lookup_status = FALSE;
         if (H5G__obj_lookup(grp_loc.oloc, comp, &lookup_status, &lnk /*out*/) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't look up component")
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't look up component");
         obj_exists = FALSE;
 
         /* If the lookup was OK, build object location and traverse special links, etc. */
@@ -560,7 +560,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
 
             /* Build object location from the link */
             if (H5G__link_to_loc(&grp_loc, &lnk, &obj_loc) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location");
             obj_loc_valid = TRUE;
 
             /* Assume object exists */
@@ -569,7 +569,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
             /* Perform any special traversals that the link needs */
             /* (soft links, user-defined links, file mounting, etc.) */
             if (H5G__traverse_special(&grp_loc, &lnk, target, last_comp, &obj_loc, &obj_exists) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed")
+                HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed");
         } /* end if */
 
         /* Check for last component in name provided */
@@ -593,7 +593,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
 
             /* Call 'operator' routine */
             if ((op)(&grp_loc, comp, cb_lnk, cb_loc, op_data, &own_loc) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CALLBACK, FAIL, "traversal operator failed")
+                HGOTO_ERROR(H5E_SYM, H5E_CALLBACK, FAIL, "traversal operator failed");
 
             HGOTO_DONE(SUCCEED);
         } /* end if */
@@ -618,11 +618,11 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 /* Check for the parent group having a group info message */
                 /* (OK if not found) */
                 if ((exists = H5O_msg_exists(grp_loc.oloc, H5O_GINFO_ID)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header");
                 if (exists) {
                     /* Get the group info for parent group */
                     if (NULL == H5O_msg_read(grp_loc.oloc, H5O_GINFO_ID, &par_ginfo))
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "group info message not present")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "group info message not present");
 
                     /* Use parent group info settings */
                     ginfo = &par_ginfo;
@@ -635,7 +635,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 /* (OK if not found) */
                 /* Get the link info for parent group */
                 if ((exists = H5G__obj_get_linfo(grp_loc.oloc, &par_linfo)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header");
                 if (exists) {
                     /* Only keep the creation order information from the parent
                      *  group's link info
@@ -652,11 +652,11 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 /* Check for the parent group having a filter pipeline message */
                 /* (OK if not found) */
                 if ((exists = H5O_msg_exists(grp_loc.oloc, H5O_PLINE_ID)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header");
                 if (exists) {
                     /* Get the filter pipeline for parent group */
                     if (NULL == H5O_msg_read(grp_loc.oloc, H5O_PLINE_ID, &par_pline))
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "filter pipeline message not present")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "filter pipeline message not present");
 
                     /* Use parent filter pipeline settings */
                     pline = &par_pline;
@@ -672,43 +672,43 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 memset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
                 if (H5G__obj_create_real(grp_oloc.file, ginfo, linfo, pline, &gcrt_info,
                                          obj_loc.oloc /*out*/) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry");
 
                 /* Insert new group into current group's symbol table */
                 if (H5G__loc_insert(&grp_loc, comp, &obj_loc, H5O_TYPE_GROUP, &gcrt_info) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert intermediate group")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert intermediate group");
 
                 /* Decrement refcount on intermediate group's object header in memory */
                 if (H5O_dec_rc_by_loc(obj_loc.oloc) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL,
-                                "unable to decrement refcount on newly created object")
+                                "unable to decrement refcount on newly created object");
 
                 /* Close new group */
                 if (H5O_close(obj_loc.oloc, NULL) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
 
                 /* If the parent group was holding the file open, the
                  * newly-created group should, as well.
                  */
                 if (grp_loc.oloc->holding_file)
                     if (H5O_loc_hold_file(obj_loc.oloc) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to hold file open")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to hold file open");
 
                 /* Reset any non-default object header messages */
                 H5_GCC_CLANG_DIAG_OFF("cast-qual")
                 if (ginfo != &def_ginfo)
                     if (H5O_msg_reset(H5O_GINFO_ID, (void *)ginfo) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset group info message")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset group info message");
                 if (linfo != &def_linfo)
                     if (H5O_msg_reset(H5O_LINFO_ID, (void *)linfo) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link info message")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link info message");
                 if (pline != &def_pline)
                     if (H5O_msg_reset(H5O_PLINE_ID, (void *)pline) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset I/O pipeline message")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset I/O pipeline message");
                 H5_GCC_CLANG_DIAG_ON("cast-qual")
             } /* end if */
             else
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
         } /* end if */
 
         /*
@@ -733,7 +733,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
      */
     assert(group_copy);
     if ((op)(NULL, ".", NULL, &grp_loc, op_data, &own_loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "traversal operator failed")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "traversal operator failed");
 
     /* If the callback took ownership of the object location, it actually has
      * ownership of grp_loc.  It shouldn't have tried to take ownership of
@@ -757,11 +757,11 @@ done:
     /* If there's valid information in the link, reset it */
     if (link_valid)
         if (H5O_msg_reset(H5O_LINK_ID, &lnk) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link message")
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link message");
 
     /* Release temporary component buffer */
     if (wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__traverse_real() */
@@ -788,11 +788,11 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Check args */
     if (!name || !*name)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no name given")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no name given");
     if (!loc)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no starting location")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no starting location");
     if (!op)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no operation provided")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no operation provided");
 
     /* Retrieve the original # of soft / UD links that are able to be traversed
      * (So that multiple calls to H5G_traverse don't incorrectly look
@@ -800,7 +800,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
      *  may need their own mechanism to set & reset the # of links to traverse)
      */
     if (H5CX_get_nlinks(&orig_nlinks) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse");
 
     /* Set up invalid tag. This is a precautionary step only. Setting an invalid
      * tag here will ensure that no metadata accessed while doing the traversal
@@ -813,14 +813,14 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Go perform "real" traversal */
     if (H5G__traverse_real(loc, name, target, op, op_data) < 0)
-        HGOTO_ERROR_TAG(H5E_SYM, H5E_NOTFOUND, FAIL, "internal path traversal failed")
+        HGOTO_ERROR_TAG(H5E_SYM, H5E_NOTFOUND, FAIL, "internal path traversal failed");
 
     /* Reset tag after traversal */
     H5_END_TAG
 
     /* Reset the # of soft / UD links that can be traversed */
     if (H5CX_set_nlinks(orig_nlinks) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't reset # of soft / UD links to traverse")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't reset # of soft / UD links to traverse");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

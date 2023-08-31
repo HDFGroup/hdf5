@@ -142,10 +142,10 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     } /* end for */
 
     if (NULL == (cache_ptr = H5FL_CALLOC(H5C_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     if (NULL == (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list");
 
     cache_ptr->tag_list = NULL;
 
@@ -156,7 +156,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->flush_in_progress = FALSE;
 
     if (NULL == (cache_ptr->log_info = (H5C_log_info_t *)H5MM_calloc(sizeof(H5C_log_info_t))))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed");
 
     cache_ptr->aux_ptr = aux_ptr;
 
@@ -343,7 +343,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
     if (H5C_reset_cache_hit_rate_stats(cache_ptr) < 0)
         /* this should be impossible... */
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "H5C_reset_cache_hit_rate_stats failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "H5C_reset_cache_hit_rate_stats failed");
 
     H5C_stats__reset(cache_ptr);
 
@@ -412,7 +412,7 @@ H5C_prep_for_file_close(H5F_t *f)
 
     /* Prepare cache image */
     if (H5C__prep_image_for_file_close(f, &image_generated) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cache image")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cache image");
 
 #ifdef H5_HAVE_PARALLEL
     if ((H5F_INTENT(f) & H5F_ACC_RDWR) && !image_generated && cache_ptr->aux_ptr != NULL &&
@@ -451,7 +451,7 @@ H5C_prep_for_file_close(H5F_t *f)
          *    deletions, insertion, or moves during the flush.
          */
         if (H5C__serialize_cache(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "serialization of the cache failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "serialization of the cache failed");
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -489,21 +489,21 @@ H5C_dest(H5F_t *f)
 
 #if H5AC_DUMP_IMAGE_STATS_ON_CLOSE
     if (H5C__image_stats(cache_ptr, TRUE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't display cache image stats")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't display cache image stats");
 #endif /* H5AC_DUMP_IMAGE_STATS_ON_CLOSE */
 
     /* Enable the slist, as it is needed in the flush */
     if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush and invalidate all cache entries */
     if (H5C__flush_invalidate_cache(f, H5C__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
 
     /* Generate & write cache image if requested */
     if (cache_ptr->image_ctl.generate_image)
         if (H5C__generate_cache_image(f, cache_ptr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "Can't generate metadata cache image")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "Can't generate metadata cache image");
 
     /* Question: Is it possible for cache_ptr->slist be non-null at this
      *           point?  If no, shouldn't this if statement be an assert?
@@ -542,7 +542,7 @@ done:
          * and the cache still exist.  JRM -- 5/15/20
          */
         if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed")
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_dest() */
@@ -568,15 +568,15 @@ H5C_evict(H5F_t *f)
 
     /* Enable the slist, as it is needed in the flush */
     if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush and invalidate all cache entries except the pinned entries */
     if (H5C__flush_invalidate_cache(f, H5C__EVICT_ALLOW_LAST_PINS_FLAG) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache");
 
     /* Disable the slist */
     if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist disabled failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist disabled failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -652,7 +652,7 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C__validate_lru_list(cache_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     destroy = ((flags & H5C__FLUSH_INVALIDATE_FLAG) != 0);
@@ -663,7 +663,7 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
 
     if (destroy) {
         if (H5C__flush_invalidate_cache(f, flags) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush invalidate failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush invalidate failed");
     } /* end if */
     else {
         /* flush each ring, starting from the outermost ring and
@@ -683,14 +683,14 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
                         /* Settle raw data FSM */
                         if (!cache_ptr->rdfsm_settled)
                             if (H5MF_settle_raw_data_fsm(f, &cache_ptr->rdfsm_settled) < 0)
-                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "RD FSM settle failed")
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "RD FSM settle failed");
                         break;
 
                     case H5C_RING_MDFSM:
                         /* Settle metadata FSM */
                         if (!cache_ptr->mdfsm_settled)
                             if (H5MF_settle_meta_data_fsm(f, &cache_ptr->mdfsm_settled) < 0)
-                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "MD FSM settle failed")
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "MD FSM settle failed");
                         break;
 
                     case H5C_RING_SBE:
@@ -698,13 +698,13 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
                         break;
 
                     default:
-                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown ring?!?!")
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown ring?!?!");
                         break;
                 } /* end switch */
             }     /* end if */
 
             if (H5C__flush_ring(f, ring, flags) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush ring failed")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush ring failed");
             ring++;
         } /* end while */
     }     /* end else */
@@ -752,16 +752,16 @@ H5C_flush_to_min_clean(H5F_t *f)
 
     if (cache_ptr->check_write_permitted != NULL) {
         if ((cache_ptr->check_write_permitted)(f, &write_permitted) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't get write_permitted")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't get write_permitted");
     } /* end if */
     else
         write_permitted = cache_ptr->write_permitted;
 
     if (!write_permitted)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "cache write is not permitted!?!")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "cache write is not permitted!?!");
 
     if (H5C__make_space_in_cache(f, (size_t)0, write_permitted) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C__make_space_in_cache failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C__make_space_in_cache failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -784,7 +784,7 @@ H5C_reset_cache_hit_rate_stats(H5C_t *cache_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     if (cache_ptr == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry");
 
     cache_ptr->cache_hits     = 0;
     cache_ptr->cache_accesses = 0;
@@ -819,27 +819,27 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
     FUNC_ENTER_NOAPI(FAIL)
 
     if (cache_ptr == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry");
     if (config_ptr == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL config_ptr on entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL config_ptr on entry");
     if (config_ptr->version != H5C__CURR_AUTO_SIZE_CTL_VER)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "unknown config version")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "unknown config version");
 
     /* check general configuration section of the config: */
     if (H5C_validate_resize_config(config_ptr, H5C_RESIZE_CFG__VALIDATE_GENERAL) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "error in general configuration fields of new config")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "error in general configuration fields of new config");
 
     /* check size increase control fields of the config: */
     if (H5C_validate_resize_config(config_ptr, H5C_RESIZE_CFG__VALIDATE_INCREMENT) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "error in the size increase control fields of new config")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "error in the size increase control fields of new config");
 
     /* check size decrease control fields of the config: */
     if (H5C_validate_resize_config(config_ptr, H5C_RESIZE_CFG__VALIDATE_DECREMENT) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "error in the size decrease control fields of new config")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "error in the size decrease control fields of new config");
 
     /* check for conflicts between size increase and size decrease controls: */
     if (H5C_validate_resize_config(config_ptr, H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "conflicting threshold fields in new config")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "conflicting threshold fields in new config");
 
     /* will set the increase possible fields to FALSE later if needed */
     cache_ptr->size_increase_possible       = TRUE;
@@ -858,7 +858,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             break;
 
         default: /* should be unreachable */
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown incr_mode?!?!?")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown incr_mode?!?!?");
     } /* end switch */
 
     /* logically, this is where configuration for flash cache size increases
@@ -891,7 +891,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             break;
 
         default: /* should be unreachable */
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown decr_mode?!?!?")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown decr_mode?!?!?");
     } /* end switch */
 
     if (config_ptr->max_size == config_ptr->min_size) {
@@ -943,18 +943,18 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
 
     if (H5C_reset_cache_hit_rate_stats(cache_ptr) < 0)
         /* this should be impossible... */
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_reset_cache_hit_rate_stats failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_reset_cache_hit_rate_stats failed");
 
     /* remove excess epoch markers if any */
     if ((config_ptr->decr_mode == H5C_decr__age_out_with_threshold) ||
         (config_ptr->decr_mode == H5C_decr__age_out)) {
         if (cache_ptr->epoch_markers_active > cache_ptr->resize_ctl.epochs_before_eviction)
             if (H5C__autoadjust__ageout__remove_excess_markers(cache_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't remove excess epoch markers")
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't remove excess epoch markers");
     } /* end if */
     else if (cache_ptr->epoch_markers_active > 0) {
         if (H5C__autoadjust__ageout__remove_all_markers(cache_ptr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "error removing all epoch markers")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "error removing all epoch markers");
     }
 
     /* configure flash size increase facility.  We wait until the
@@ -977,7 +977,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
                 break;
 
             default: /* should be unreachable */
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown flash_incr_mode?!?!?")
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown flash_incr_mode?!?!?");
                 break;
         } /* end switch */
     }     /* end if */
@@ -1004,7 +1004,7 @@ H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled)
     FUNC_ENTER_NOAPI(FAIL)
 
     if (cache_ptr == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry");
 
     /* There is no fundamental reason why we should not permit
      * evictions to be disabled while automatic resize is enabled.
@@ -1013,7 +1013,7 @@ H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled)
      */
     if ((evictions_enabled != TRUE) && ((cache_ptr->resize_ctl.incr_mode != H5C_incr__off) ||
                                         (cache_ptr->resize_ctl.decr_mode != H5C_decr__off)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't disable evictions when auto resize enabled")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't disable evictions when auto resize enabled");
 
     cache_ptr->evictions_enabled = evictions_enabled;
 
@@ -1084,13 +1084,13 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
     FUNC_ENTER_NOAPI(FAIL)
 
     if (cache_ptr == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry");
 
     if (slist_enabled) {
         if (cache_ptr->slist_enabled)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist already enabled?")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist already enabled?");
         if ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty?")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty?");
 
         /* set cache_ptr->slist_enabled to TRUE so that the slist
          * maintenance macros will be enabled.
@@ -1115,7 +1115,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
     }
     else { /* take down the skip list */
         if (!cache_ptr->slist_enabled)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist already disabled?")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist already disabled?");
 
         if ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)) {
             if (clear_slist) {
@@ -1129,7 +1129,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
                 }
             }
             else
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty?")
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty?");
         }
 
         cache_ptr->slist_enabled = FALSE;
@@ -1182,7 +1182,7 @@ H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring)
         case H5C_RING_RDFSM:
             if (cache_ptr->rdfsm_settled) {
                 if (cache_ptr->close_warning_received)
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected rdfsm ring unsettle")
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected rdfsm ring unsettle");
                 cache_ptr->rdfsm_settled = FALSE;
             } /* end if */
             break;
@@ -1190,7 +1190,7 @@ H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring)
         case H5C_RING_MDFSM:
             if (cache_ptr->mdfsm_settled) {
                 if (cache_ptr->close_warning_received)
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected mdfsm ring unsettle")
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected mdfsm ring unsettle");
                 cache_ptr->mdfsm_settled = FALSE;
             } /* end if */
             break;
@@ -1225,40 +1225,41 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
     FUNC_ENTER_NOAPI(FAIL)
 
     if (config_ptr == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL config_ptr on entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL config_ptr on entry");
 
     if (config_ptr->version != H5C__CURR_AUTO_SIZE_CTL_VER)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown config version")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown config version");
 
     if ((tests & H5C_RESIZE_CFG__VALIDATE_GENERAL) != 0) {
         if (config_ptr->max_size > H5C__MAX_MAX_CACHE_SIZE)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "max_size too big")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "max_size too big");
         if (config_ptr->min_size < H5C__MIN_MAX_CACHE_SIZE)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size too small")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size too small");
         if (config_ptr->min_size > config_ptr->max_size)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size > max_size")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_size > max_size");
         if (config_ptr->set_initial_size && ((config_ptr->initial_size < config_ptr->min_size) ||
                                              (config_ptr->initial_size > config_ptr->max_size)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "initial_size must be in the interval [min_size, max_size]")
+                        "initial_size must be in the interval [min_size, max_size]");
         if ((config_ptr->min_clean_fraction < 0.0) || (config_ptr->min_clean_fraction > 1.0))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_clean_fraction must be in the interval [0.0, 1.0]")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                        "min_clean_fraction must be in the interval [0.0, 1.0]");
         if (config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too small")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too small");
         if (config_ptr->epoch_length > H5C__MAX_AR_EPOCH_LENGTH)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too big")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epoch_length too big");
     } /* H5C_RESIZE_CFG__VALIDATE_GENERAL */
 
     if ((tests & H5C_RESIZE_CFG__VALIDATE_INCREMENT) != 0) {
         if ((config_ptr->incr_mode != H5C_incr__off) && (config_ptr->incr_mode != H5C_incr__threshold))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode");
 
         if (config_ptr->incr_mode == H5C_incr__threshold) {
             if ((config_ptr->lower_hr_threshold < 0.0) || (config_ptr->lower_hr_threshold > 1.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "lower_hr_threshold must be in the range [0.0, 1.0]")
+                            "lower_hr_threshold must be in the range [0.0, 1.0]");
             if (config_ptr->increment < 1.0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "increment must be greater than or equal to 1.0")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "increment must be greater than or equal to 1.0");
 
             /* no need to check max_increment, as it is a size_t,
              * and thus must be non-negative.
@@ -1273,14 +1274,14 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
             case H5C_flash_incr__add_space:
                 if ((config_ptr->flash_multiple < 0.1) || (config_ptr->flash_multiple > 10.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "flash_multiple must be in the range [0.1, 10.0]")
+                                "flash_multiple must be in the range [0.1, 10.0]");
                 if ((config_ptr->flash_threshold < 0.1) || (config_ptr->flash_threshold > 1.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "flash_threshold must be in the range [0.1, 1.0]")
+                                "flash_threshold must be in the range [0.1, 1.0]");
                 break;
 
             default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid flash_incr_mode")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid flash_incr_mode");
                 break;
         } /* end switch */
     }     /* H5C_RESIZE_CFG__VALIDATE_INCREMENT */
@@ -1289,13 +1290,13 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
         if ((config_ptr->decr_mode != H5C_decr__off) && (config_ptr->decr_mode != H5C_decr__threshold) &&
             (config_ptr->decr_mode != H5C_decr__age_out) &&
             (config_ptr->decr_mode != H5C_decr__age_out_with_threshold))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid decr_mode")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid decr_mode");
 
         if (config_ptr->decr_mode == H5C_decr__threshold) {
             if (config_ptr->upper_hr_threshold > 1.0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "upper_hr_threshold must be <= 1.0")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "upper_hr_threshold must be <= 1.0");
             if ((config_ptr->decrement > 1.0) || (config_ptr->decrement < 0.0))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "decrement must be in the interval [0.0, 1.0]")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "decrement must be in the interval [0.0, 1.0]");
 
             /* no need to check max_decrement as it is a size_t
              * and thus must be non-negative.
@@ -1305,12 +1306,12 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
         if ((config_ptr->decr_mode == H5C_decr__age_out) ||
             (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)) {
             if (config_ptr->epochs_before_eviction < 1)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction must be positive")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction must be positive");
             if (config_ptr->epochs_before_eviction > H5C__MAX_EPOCH_MARKERS)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction too big")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction too big");
             if (config_ptr->apply_empty_reserve &&
                 (config_ptr->empty_reserve > 1.0 || config_ptr->empty_reserve < 0.0))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty_reserve must be in the interval [0.0, 1.0]")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty_reserve must be in the interval [0.0, 1.0]");
 
             /* no need to check max_decrement as it is a size_t
              * and thus must be non-negative.
@@ -1320,7 +1321,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
         if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)
             if ((config_ptr->upper_hr_threshold > 1.0) || (config_ptr->upper_hr_threshold < 0.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "upper_hr_threshold must be in the interval [0.0, 1.0]")
+                            "upper_hr_threshold must be in the interval [0.0, 1.0]");
     } /* H5C_RESIZE_CFG__VALIDATE_DECREMENT */
 
     if ((tests & H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) != 0) {
@@ -1328,7 +1329,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
             ((config_ptr->decr_mode == H5C_decr__threshold) ||
              (config_ptr->decr_mode == H5C_decr__age_out_with_threshold)) &&
             (config_ptr->lower_hr_threshold >= config_ptr->upper_hr_threshold))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "conflicting threshold fields in config")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "conflicting threshold fields in config");
     } /* H5C_RESIZE_CFG__VALIDATE_INTERACTIONS */
 
 done:
@@ -1387,7 +1388,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
             if (NULL == tag_info) {
                 /* Allocate new tag info struct */
                 if (NULL == (tag_info = H5FL_CALLOC(H5C_tag_info_t)))
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate tag info for cache entry")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate tag info for cache entry");
 
                 /* Set the tag for all entries */
                 tag_info->tag = obj_addr;
@@ -1398,7 +1399,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
             else {
                 /* Check for object already corked */
                 if (tag_info->corked)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCORK, FAIL, "object already corked")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCORK, FAIL, "object already corked");
                 assert(tag_info->entry_cnt > 0 && tag_info->head);
             }
 
@@ -1409,11 +1410,11 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
         else {
             /* Sanity check */
             if (NULL == tag_info)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNCORK, FAIL, "tag info pointer is NULL")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNCORK, FAIL, "tag info pointer is NULL");
 
             /* Check for already uncorked */
             if (!tag_info->corked)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNCORK, FAIL, "object already uncorked")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNCORK, FAIL, "object already uncorked");
 
             /* Set the corked status for the entire object */
             tag_info->corked = FALSE;

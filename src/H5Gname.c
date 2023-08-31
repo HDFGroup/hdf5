@@ -147,7 +147,7 @@ H5G_normalize(const char *name)
 
     /* Duplicate the name, to return */
     if (NULL == (norm = H5MM_strdup(name)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for normalized string")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for normalized string");
 
     /* Walk through the characters, omitting duplicated '/'s */
     s = d      = 0;
@@ -265,7 +265,7 @@ H5G__build_fullpath(const char *prefix, const char *name)
 
     /* Create full path */
     if (NULL == (ret_value = H5RS_create(prefix)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, NULL, "can't create ref-counted string")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, NULL, "can't create ref-counted string");
     if (prefix[HDstrlen(prefix) - 1] != '/')
         H5RS_aputc(ret_value, '/'); /* Add separator, if the prefix doesn't end in one */
     H5RS_acat(ret_value, name);
@@ -361,14 +361,14 @@ H5G_name_set(const H5G_name_t *loc, H5G_name_t *obj, const char *name)
     if (loc->full_path_r) {
         /* Go build the new full path */
         if ((obj->full_path_r = H5G_build_fullpath_refstr_str(loc->full_path_r, name)) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build user path name")
+            HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build user path name");
     } /* end if */
 
     /* Create the object's user path, if a user path exists in the location */
     if (loc->user_path_r) {
         /* Go build the new user path */
         if ((obj->user_path_r = H5G_build_fullpath_refstr_str(loc->user_path_r, name)) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build user path name")
+            HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build user path name");
     } /* end if */
 
 done:
@@ -472,7 +472,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name
     else if (!loc->path->obj_hidden) {
         /* Search for name of object */
         if (H5G_get_name_by_addr(loc->oloc->file, loc->oloc, name, size, name_len) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name");
 
         /* Indicate that the name is _not_ cached, if requested */
         /* (Currently only used for testing - QAK, 2010/07/26) */
@@ -607,7 +607,7 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
 
         /* Allocate new ref-counted string */
         if (NULL == (rs = H5RS_create(NULL)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string");
 
         /* Create the new path */
         if (path_prefix2_len > 0)
@@ -672,7 +672,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             break;
 
         case H5I_MAP:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector");
 
         case H5I_UNINIT:
         case H5I_BADID:
@@ -690,7 +690,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object");
     } /* end switch */
     assert(oloc);
     assert(obj_path);
@@ -744,7 +744,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
                 /* Create new full path */
                 if (NULL == (rs = H5RS_create(src_path)))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string");
                 H5RS_acat(rs, full_path);
 
                 /* Release previous full path */
@@ -785,7 +785,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
                 /* Create new full path suffix */
                 if (NULL == (rs = H5RS_create(full_suffix)))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string");
 
                 /* Release previous full path */
                 H5RS_decr(obj_path->full_path_r);
@@ -853,11 +853,11 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 /* Update the user path, if one exists */
                 if (obj_path->user_path_r)
                     if (H5G__name_move_path(&(obj_path->user_path_r), full_suffix, src_path, dst_path) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build user path name")
+                        HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build user path name");
 
                 /* Create new full path */
                 if (NULL == (rs = H5RS_create(dst_path)))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create ref-counted string");
                 H5RS_acat(rs, full_suffix);
 
                 /* Release previous full path */
@@ -869,7 +869,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             break;
 
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid operation")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid operation");
     } /* end switch */
 
 done:
@@ -921,7 +921,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
 
                     /* Get the type of the object */
                     if (H5O_obj_type(&tmp_oloc, &obj_type) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type");
 
                     /* Determine which type of objects to operate on */
                     switch (obj_type) {
@@ -942,13 +942,13 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
 
                         case H5O_TYPE_MAP:
                             HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL,
-                                        "maps not supported in native VOL connector")
+                                        "maps not supported in native VOL connector");
 
                         case H5O_TYPE_UNKNOWN:
                         case H5O_TYPE_NTYPES:
                             /* Search and replace names through datatype IDs */
                         default:
-                            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not valid object type")
+                            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not valid object type");
                     } /* end switch */
                 }     /* end case */
                 break;
@@ -964,7 +964,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
                 default: /* User-defined link */
                     /* Check for unknown library-defined link type */
                     if (lnk->type < H5L_TYPE_UD_MIN)
-                        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
+                        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type");
 
                     /* User-defined & external links automatically wipe out
                      * names (because it would be too much work to track them),
@@ -996,17 +996,17 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
             /* Search through group IDs */
             if (search_group)
                 if (H5I_iterate(H5I_GROUP, H5G__name_replace_cb, &names, FALSE) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over groups")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over groups");
 
             /* Search through dataset IDs */
             if (search_dataset)
                 if (H5I_iterate(H5I_DATASET, H5G__name_replace_cb, &names, FALSE) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datasets")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datasets");
 
             /* Search through datatype IDs */
             if (search_datatype)
                 if (H5I_iterate(H5I_DATATYPE, H5G__name_replace_cb, &names, FALSE) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes");
         } /* end if */
     }     /* end if */
 
@@ -1049,14 +1049,14 @@ H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo, 
 
         /* Retrieve hard link address from VOL token */
         if (H5VL_native_token_to_addr(udata->loc->file, H5I_FILE, linfo->u.token, &link_addr) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address");
 
         if (udata->loc->addr == link_addr) {
             H5G_loc_t grp_loc; /* Location of group */
 
             /* Get group's location */
             if (H5G_loc(gid, &grp_loc) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "bad group location")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "bad group location");
 
             /* Set up opened object location to fill in */
             obj_loc.oloc = &obj_oloc;
@@ -1065,14 +1065,14 @@ H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo, 
 
             /* Find the object */
             if (H5G_loc_find(&grp_loc, path, &obj_loc /*out*/) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "object not found")
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "object not found");
             obj_found = TRUE;
 
             /* Check for object in same file (handles mounted files) */
             /* (re-verify address, in case we traversed a file mount) */
             if (udata->loc->addr == obj_loc.oloc->addr && udata->loc->file == obj_loc.oloc->file) {
                 if (NULL == (udata->path = H5MM_strdup(path)))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "can't duplicate path string")
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "can't duplicate path string");
 
                 /* We found a match so we return immediately */
                 HGOTO_DONE(H5_ITER_STOP);
@@ -1082,7 +1082,7 @@ H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo, 
 
 done:
     if (obj_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_name_by_addr_cb() */
@@ -1117,12 +1117,12 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
 
     /* Construct a group location for root group of the file */
     if (H5G_root_loc(f, &root_loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location");
 
     /* Check for root group being the object looked for */
     if (root_loc.oloc->addr == loc->addr && root_loc.oloc->file == loc->file) {
         if (NULL == (udata.path = H5MM_strdup("")))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "can't duplicate path string")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "can't duplicate path string");
         found_obj = TRUE;
     } /* end if */
     else {
@@ -1133,7 +1133,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
         /* Visit all the links in the file */
         if ((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G__get_name_by_addr_cb,
                                 &udata)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group traversal failed while looking for object name")
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group traversal failed while looking for object name");
         else if (status > 0)
             found_obj = TRUE;
     } /* end else */

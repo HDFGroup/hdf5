@@ -653,6 +653,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     int                ifil;
     int                is_ref = 0;
     htri_t             is_named;
+    htri_t             is_vlen = 0;
     hbool_t            limit_maxdims;
     hsize_t            size_dset;
     int                ret_value = 0;
@@ -806,6 +807,14 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                     if (H5T_REFERENCE == H5Tget_class(ftype_id))
                         is_ref = 1;
 
+                    /* early detection of variable-length types */
+                    if ((is_vlen = H5Tdetect_class(ftype_id, H5T_VLEN)) < 0)
+                        H5TOOLS_GOTO_ERROR((-1), "H5Tdetect_class failed");
+                    if (!is_vlen) {
+                        if ((is_vlen = H5Tis_variable_str(ftype_id)) < 0)
+                            H5TOOLS_GOTO_ERROR((-1), "H5Tis_variable_str failed");
+                    }
+
                     /* Check if the datatype is committed */
                     if ((is_named = H5Tcommitted(ftype_id)) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Tcommitted failed");
@@ -823,10 +832,16 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                      * check if we should use H5Ocopy or not
                      * if there is a request for filters/layout, we read/write the object
                      * otherwise we do a copy using H5Ocopy
+                     *
+                     * Note that H5Ocopy is currently unsafe to use for objects that reside in
+                     * or interact with global heaps, such as variable-length datatypes. This
+                     * appears to be due to H5Ocopy not correctly translating in the case where
+                     * these objects move to different global heap addresses in the repacked
+                     * file.
                      *-------------------------------------------------------------------------
                      */
                     use_h5ocopy = !(options->op_tbl->nelems || options->all_filter == 1 ||
-                                    options->all_layout == 1 || is_ref || is_named);
+                                    options->all_layout == 1 || is_ref || is_vlen || is_named);
 
                     /*
                      * Check if we are using different source and destination VOL connectors.

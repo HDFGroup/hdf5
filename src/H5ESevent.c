@@ -94,13 +94,13 @@ H5ES__event_new(H5VL_t *connector, void *token)
     /* Create vol object for token */
     if (NULL == (request = H5VL_create_object(token, connector))) {
         if (H5VL_request_free(token) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTFREE, NULL, "can't free request")
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, NULL, "can't create vol object for request token")
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTFREE, NULL, "can't free request");
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, NULL, "can't create vol object for request token");
     } /* end if */
 
     /* Allocate space for new event */
     if (NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, NULL, "can't allocate event object")
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, NULL, "can't allocate event object");
 
     /* Set request for event */
     ev->request = request;
@@ -142,11 +142,11 @@ H5ES__event_free(H5ES_event_t *ev)
     if (ev->request) {
         /* Free the request */
         if (H5VL_request_free(ev->request) < 0)
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free request")
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free request");
 
         /* Free the VOL object for the request */
         if (H5VL_free_object(ev->request) < 0)
-            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "can't free VOL request object")
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, FAIL, "can't free VOL request object");
     } /* end if */
 
     H5FL_FREE(H5ES_event_t, ev);
@@ -179,7 +179,7 @@ H5ES__event_completed(H5ES_event_t *ev, H5ES_event_list_t *el)
 
     /* Free the event */
     if (H5ES__event_free(ev) < 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free event")
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTFREE, FAIL, "unable to free event");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

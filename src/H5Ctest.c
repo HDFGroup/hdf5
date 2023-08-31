@@ -96,7 +96,7 @@ H5C__verify_cork_tag_test_cb(H5C_cache_entry_t *entry, void *_ctx)
 
     /* Verify corked status for entry */
     if (is_corked != ctx->status)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, H5_ITER_ERROR, "bad cork status")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, H5_ITER_ERROR, "bad cork status");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -126,12 +126,12 @@ H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status)
 
     /* Get file pointer */
     if (NULL == (f = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
     /* Convert token to address */
     tag = HADDR_UNDEF;
     if (H5VL_native_token_to_addr(f, H5I_FILE, tag_token, &tag) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get address for token")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get address for token");
 
     /* Get cache pointer */
     cache = f->shared->cache;
@@ -141,7 +141,7 @@ H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status)
 
     /* Iterate through tagged entries in the cache */
     if (H5C__iter_tagged_entries(cache, tag, FALSE, H5C__verify_cork_tag_test_cb, &ctx) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

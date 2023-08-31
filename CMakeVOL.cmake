@@ -40,6 +40,12 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
   set (HDF5_LIBRARIES "${HDF5_LIBSH_TARGET};${LINK_LIBS};${LINK_COMP_LIBS};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
   set (HDF5_INCLUDE_DIRS "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 
+  set (HDF5_C_LIBRARIES "${HDF5_LIBRARIES}")
+  
+  if (HDF5_BUILD_HL_LIB)
+    set (HDF5_C_HL_LIBRARIES "${HDF5_HL_LIBSH_TARGET}")
+  endif()
+
   set (HDF5_MAX_EXTERNAL_VOLS 10)
   set (HDF5_EXTERNAL_VOL_TARGETS "")
 
@@ -134,6 +140,8 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
         define_property (
           TARGET
           PROPERTY HDF5_VOL_TARGETS
+          BRIEF_DOCS "Generated targets of this connector"
+          FULL_DOCS "Generated targets of this connector"
         )
 
         set_target_properties (
@@ -149,6 +157,7 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
           TARGET
           PROPERTY HDF5_VOL_NAME
           BRIEF_DOCS "VOL connector name to use for the HDF5_VOL_CONNECTOR environment variable when testing"
+          FULL_DOCS "VOL connector name to use for the HDF5_VOL_CONNECTOR environment variable when testing"
         )
 
         set_target_properties (
@@ -164,6 +173,7 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
           TARGET
           PROPERTY HDF5_VOL_TEST_PARALLEL
           BRIEF_DOCS "Whether the VOL connector should be tested with the parallel API tests"
+          FULL_DOCS "Whether the VOL connector should be tested with the parallel API tests"
         )
 
         set_target_properties (

@@ -79,7 +79,7 @@ H5D__layout_version_test(hid_t did, unsigned *version)
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset");
 
     if (version)
         *version = dset->shared->layout.version;
@@ -117,7 +117,7 @@ H5D__layout_contig_size_test(hid_t did, hsize_t *size)
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset");
 
     if (size) {
         assert(dset->shared->layout.type == H5D_CONTIGUOUS);
@@ -157,7 +157,7 @@ H5D__layout_compact_dirty_test(hid_t did, hbool_t *dirty)
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset");
 
     if (dirty) {
         assert(dset->shared->layout.type == H5D_COMPACT);
@@ -199,7 +199,7 @@ H5D__layout_type_test(hid_t did, H5D_layout_t *layout_type)
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     if (layout_type)
         *layout_type = dset->shared->layout.type;
@@ -237,9 +237,9 @@ H5D__layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type)
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     if (dset->shared->layout.type != H5D_CHUNKED)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not chunked")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not chunked");
 
     if (idx_type)
         *idx_type = dset->shared->layout.u.chunk.idx_type;
@@ -277,7 +277,7 @@ H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused)
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     if (nbytes_used) {
         assert(dset->shared->layout.type == H5D_CHUNKED);

@@ -127,15 +127,15 @@ H5Z__can_apply_nbit(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_U
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     /* Get datatype's class, for checking the "datatype class" */
     if (H5T_get_class(type, TRUE) == H5T_NO_CLASS)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class");
 
     /* Get datatype's size, for checking the "datatype size" */
     if (H5T_get_size(type) == 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -217,11 +217,11 @@ H5Z__calc_parms_array(const H5T_t *type, size_t *cd_values_actual_nparms)
 
     /* Get array datatype's base datatype */
     if (NULL == (dtype_base = H5T_get_super(type)))
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad base datatype")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad base datatype");
 
     /* Get base datatype's class */
     if ((dtype_base_class = H5T_get_class(dtype_base, TRUE)) == H5T_NO_CLASS)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad base datatype class")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad base datatype class");
 
     /* Calculate number of the rest parameters according to base datatype's class */
     switch (dtype_base_class) {
@@ -232,12 +232,12 @@ H5Z__calc_parms_array(const H5T_t *type, size_t *cd_values_actual_nparms)
 
         case H5T_ARRAY:
             if (H5Z__calc_parms_array(dtype_base, cd_values_actual_nparms) == FAIL)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype");
             break;
 
         case H5T_COMPOUND:
             if (H5Z__calc_parms_compound(dtype_base, cd_values_actual_nparms) == FAIL)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype");
             break;
 
         case H5T_TIME:
@@ -255,14 +255,14 @@ H5Z__calc_parms_array(const H5T_t *type, size_t *cd_values_actual_nparms)
         case H5T_NCLASSES:
         default:
             /* Badness */
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype");
             break;
     } /* end switch */
 
 done:
     if (dtype_base)
         if (H5T_close_real(dtype_base) < 0)
-            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close base datatype")
+            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close base datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__calc_parms_array() */
@@ -297,7 +297,7 @@ H5Z__calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
 
     /* Get number of members */
     if ((nmembers = H5T_get_nmembers(type)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype number of members")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype number of members");
 
     /* Store number of members */
     *cd_values_actual_nparms += 1;
@@ -308,11 +308,11 @@ H5Z__calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
 
         /* Get member datatype */
         if (NULL == (dtype_member = H5T_get_member_type(type, u)))
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype");
 
         /* Get member datatype's class */
         if ((dtype_member_class = H5T_get_class(dtype_member, TRUE)) == H5T_NO_CLASS)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype class")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype class");
 
         /* Store member offset */
         *cd_values_actual_nparms += 1;
@@ -326,12 +326,12 @@ H5Z__calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
 
             case H5T_ARRAY:
                 if (H5Z__calc_parms_array(dtype_member, cd_values_actual_nparms) == FAIL)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype");
                 break;
 
             case H5T_COMPOUND:
                 if (H5Z__calc_parms_compound(dtype_member, cd_values_actual_nparms) == FAIL)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype");
                 break;
 
             case H5T_TIME:
@@ -349,20 +349,20 @@ H5Z__calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
             case H5T_NCLASSES:
             default:
                 /* Badness */
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype");
                 break;
         } /* end switch */
 
         /* Close member datatype */
         if (H5T_close_real(dtype_member) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype");
         dtype_member = NULL;
     } /* end for */
 
 done:
     if (dtype_member)
         if (H5T_close_real(dtype_member) < 0)
-            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype")
+            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_calc_params_compound */
@@ -393,7 +393,7 @@ H5Z__set_parms_nooptype(const H5T_t *type, unsigned *cd_values_index, unsigned c
 
     /* Get datatype's size */
     if ((dtype_size = H5T_get_size(type)) == 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     /* Set "local" parameter for datatype size */
     H5_CHECK_OVERFLOW(dtype_size, size_t, unsigned);
@@ -432,7 +432,7 @@ H5Z__set_parms_atomic(const H5T_t *type, unsigned *cd_values_index, unsigned cd_
 
     /* Get datatype's size */
     if ((dtype_size = H5T_get_size(type)) == 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     /* Set "local" parameter for datatype size */
     H5_CHECK_OVERFLOW(dtype_size, size_t, unsigned);
@@ -440,7 +440,7 @@ H5Z__set_parms_atomic(const H5T_t *type, unsigned *cd_values_index, unsigned cd_
 
     /* Get datatype's endianness order */
     if ((dtype_order = H5T_get_order(type)) == H5T_ORDER_ERROR)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order");
 
     /* Set "local" parameter for datatype endianness */
     switch (dtype_order) {
@@ -457,21 +457,21 @@ H5Z__set_parms_atomic(const H5T_t *type, unsigned *cd_values_index, unsigned cd_
         case H5T_ORDER_ERROR:
         case H5T_ORDER_NONE:
         default:
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order");
     } /* end switch */
 
     /* Get datatype's precision */
     if ((dtype_precision = H5T_get_precision(type)) == 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype precision")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype precision");
 
     /* Get datatype's offset */
     if ((sdtype_offset = H5T_get_offset(type)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype offset")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype offset");
     dtype_offset = (unsigned)sdtype_offset;
 
     /* Check values of precision and offset */
     if (dtype_precision > dtype_size * 8 || (dtype_precision + dtype_offset) > dtype_size * 8)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset");
 
     /* Set "local" parameter for datatype precision */
     H5_CHECK_OVERFLOW(dtype_precision, size_t, unsigned);
@@ -519,7 +519,7 @@ H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_v
 
     /* Get array datatype's size */
     if ((dtype_size = H5T_get_size(type)) == 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     /* Set "local" parameter for array datatype's size */
     H5_CHECK_OVERFLOW(dtype_size, size_t, unsigned);
@@ -527,42 +527,42 @@ H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_v
 
     /* Get array datatype's base datatype */
     if (NULL == (dtype_base = H5T_get_super(type)))
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad base datatype")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad base datatype");
 
     /* Get base datatype's class */
     if ((dtype_base_class = H5T_get_class(dtype_base, TRUE)) == H5T_NO_CLASS)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad base datatype class")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad base datatype class");
 
     /* Call appropriate function according to base datatype's class */
     switch (dtype_base_class) {
         case H5T_INTEGER:
         case H5T_FLOAT:
             if (H5Z__set_parms_atomic(dtype_base, cd_values_index, cd_values, need_not_compress) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
 
         case H5T_ARRAY:
             if (H5Z__set_parms_array(dtype_base, cd_values_index, cd_values, need_not_compress) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
 
         case H5T_COMPOUND:
             if (H5Z__set_parms_compound(dtype_base, cd_values_index, cd_values, need_not_compress) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
 
         case H5T_VLEN:
             /* Check if base datatype is a variable-length string */
             if ((is_vlstring = H5T_is_variable_str(dtype_base)) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL,
-                            "cannot determine if datatype is a variable-length string")
+                            "cannot determine if datatype is a variable-length string");
 
             /* base datatype of VL or VL-string is not supported */
             if (dtype_base_class == H5T_VLEN || is_vlstring)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype not supported by nbit")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype not supported by nbit");
 
             if (H5Z__set_parms_nooptype(dtype_base, cd_values_index, cd_values) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
 
         case H5T_TIME:
@@ -572,21 +572,21 @@ H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_v
         case H5T_REFERENCE:
         case H5T_ENUM:
             if (H5Z__set_parms_nooptype(dtype_base, cd_values_index, cd_values) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
 
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
             /* Badness */
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype");
             break;
     } /* end switch */
 
 done:
     if (dtype_base)
         if (H5T_close_real(dtype_base) < 0)
-            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close base datatype")
+            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close base datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__set_parms_array() */
@@ -624,7 +624,7 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
 
     /* Get datatype's size */
     if ((dtype_size = H5T_get_size(type)) == 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     /* Set "local" parameter for compound datatype size */
     H5_CHECK_OVERFLOW(dtype_size, size_t, unsigned);
@@ -632,7 +632,7 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
 
     /* Get number of members */
     if ((snmembers = H5T_get_nmembers(type)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype number of members")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype number of members");
     nmembers = (unsigned)snmembers;
 
     /* Set "local" parameter for number of members */
@@ -642,11 +642,11 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
     for (u = 0; u < nmembers; u++) {
         /* Get member datatype */
         if (NULL == (dtype_member = H5T_get_member_type(type, u)))
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype");
 
         /* Get member datatype's class */
         if ((dtype_member_class = H5T_get_class(dtype_member, TRUE)) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype class")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype class");
 
         /* Get member offset, success if H5T_get_class() success */
         dtype_member_offset = H5T_get_member_offset(type, u);
@@ -660,24 +660,24 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
             case H5T_INTEGER:
             case H5T_FLOAT:
                 if (H5Z__set_parms_atomic(dtype_member, cd_values_index, cd_values, need_not_compress) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
                 break;
 
             case H5T_ARRAY:
                 if (H5Z__set_parms_array(dtype_member, cd_values_index, cd_values, need_not_compress) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
                 break;
 
             case H5T_COMPOUND:
                 if (H5Z__set_parms_compound(dtype_member, cd_values_index, cd_values, need_not_compress) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
                 break;
 
             case H5T_VLEN:
                 /* Check if datatype is a variable-length string */
                 if ((is_vlstring = H5T_is_variable_str(dtype_member)) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL,
-                                "cannot determine if datatype is a variable-length string")
+                                "cannot determine if datatype is a variable-length string");
 
                 /* Because for some no-op datatype (VL datatype and VL string datatype), its
                  * size can not be retrieved correctly by using function call H5T_get_size,
@@ -710,27 +710,27 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
             case H5T_ENUM:
                 /* other datatype that nbit does no compression */
                 if (H5Z__set_parms_nooptype(dtype_member, cd_values_index, cd_values) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
                 break;
 
             case H5T_NO_CLASS:
             case H5T_NCLASSES:
             default:
                 /* Badness */
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit was passed bad datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit was passed bad datatype");
                 break;
         } /* end switch */
 
         /* Close member datatype */
         if (H5T_close_real(dtype_member) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype");
         dtype_member = NULL;
     } /* end for */
 
 done:
     if (dtype_member)
         if (H5T_close_real(dtype_member) < 0)
-            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype")
+            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_set_params_compound */
@@ -765,11 +765,11 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     /* Get datatype's class */
     if ((dtype_class = H5T_get_class(type, TRUE)) == H5T_NO_CLASS)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class");
 
     /* Calculate how many parameters will fill the cd_values array
      * First three parameters reserved for:
@@ -786,12 +786,12 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
         case H5T_ARRAY:
             if (H5Z__calc_parms_array(type, &cd_values_actual_nparms) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype");
             break;
 
         case H5T_COMPOUND:
             if (H5Z__calc_parms_compound(type, &cd_values_actual_nparms) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype");
             break;
 
         case H5T_TIME:
@@ -808,34 +808,34 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_NCLASSES:
         default:
             /* Badness */
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype");
             break;
     } /* end switch */
 
     /* Check if the number of parameters exceed what cd_values[] can store */
     if (cd_values_actual_nparms > H5Z_NBIT_MAX_NPARMS)
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype needs too many nbit parameters")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype needs too many nbit parameters");
 
     /* Allocate memory space for cd_values[] */
     if (NULL == (cd_values = (unsigned *)H5MM_malloc(cd_values_actual_nparms * sizeof(unsigned))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for cd_values[]")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for cd_values[]");
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the filter's current parameters */
     if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_NBIT, &flags, &cd_nelmts, cd_values, (size_t)0, NULL,
                              NULL) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get nbit parameters")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get nbit parameters");
 
     /* Get dataspace */
     if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     /* Get total number of elements in the chunk */
     if ((npoints = H5S_GET_EXTENT_NPOINTS(ds)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace");
     assert(npoints);
 
     /* Initialize index for cd_values array starting from the third entry */
@@ -853,17 +853,17 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_INTEGER:
         case H5T_FLOAT:
             if (H5Z__set_parms_atomic(type, &cd_values_index, cd_values, &need_not_compress) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
 
         case H5T_ARRAY:
             if (H5Z__set_parms_array(type, &cd_values_index, cd_values, &need_not_compress) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
 
         case H5T_COMPOUND:
             if (H5Z__set_parms_compound(type, &cd_values_index, cd_values, &need_not_compress) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
 
         case H5T_TIME:
@@ -880,7 +880,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_NCLASSES:
         default:
             /* Badness */
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype");
             break;
     } /* end switch */
 
@@ -894,7 +894,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Modify the filter's parameters for this dataset */
     if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_NBIT, flags, cd_values_actual_nparms, cd_values) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local nbit parameters")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local nbit parameters");
 
 done:
     if (cd_values)
@@ -928,7 +928,7 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
      * cd_values[0] stores actual number of parameters in cd_values[]
      */
     if (cd_nelmts != cd_values[0])
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid nbit aggression level")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid nbit aggression level");
 
     /* check if need to do nbit compress or decompress
      * cd_values[1] stores the flag if true indicating no need to compress
@@ -945,11 +945,11 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
 
         /* allocate memory space for decompressed buffer */
         if (NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit decompression")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit decompression");
 
         /* decompress the buffer */
         if (H5Z__nbit_decompress(outbuf, d_nelmts, (unsigned char *)*buf, cd_values) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, 0, "can't decompress buffer")
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, 0, "can't decompress buffer");
     } /* end if */
     /* output; compress */
     else {
@@ -959,7 +959,7 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
 
         /* allocate memory space for compressed buffer */
         if (NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit compression")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit compression");
 
         /* compress the buffer, size_out will be changed */
         H5Z__nbit_compress((unsigned char *)*buf, d_nelmts, outbuf, &size_out, cd_values);
@@ -1132,7 +1132,7 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
 
             /* Check values of precision and offset */
             if (p.precision > p.size * 8 || (p.precision + p.offset) > p.size * 8)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset");
 
             n = total_size / p.size;
             for (i = 0; i < n; i++)
@@ -1147,7 +1147,7 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
             for (i = 0; i < n; i++) {
                 if (H5Z__nbit_decompress_one_array(data, data_offset + i * (size_t)base_size, buffer, j,
                                                    buf_len, parms, parms_index) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress array")
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress array");
                 *parms_index = begin_index;
             }
             break;
@@ -1159,7 +1159,7 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
             for (i = 0; i < n; i++) {
                 if (H5Z__nbit_decompress_one_compound(data, data_offset + i * (size_t)base_size, buffer, j,
                                                       buf_len, parms, parms_index) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress compound")
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress compound");
                 *parms_index = begin_index;
             }
             break;
@@ -1198,7 +1198,7 @@ H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data_offset, unsig
         member_size = parms[*parms_index];
         used_size += member_size;
         if (used_size > size)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "compound member offset overflowed compound size")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "compound member offset overflowed compound size");
         switch (member_class) {
             case H5Z_NBIT_ATOMIC:
                 p.size = member_size;
@@ -1210,7 +1210,7 @@ H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data_offset, unsig
 
                 /* Check values of precision and offset */
                 if (p.precision > p.size * 8 || (p.precision + p.offset) > p.size * 8)
-                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset")
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset");
 
                 H5Z__nbit_decompress_one_atomic(data, data_offset + member_offset, buffer, j, buf_len, &p);
                 break;
@@ -1218,13 +1218,13 @@ H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data_offset, unsig
             case H5Z_NBIT_ARRAY:
                 if (H5Z__nbit_decompress_one_array(data, data_offset + member_offset, buffer, j, buf_len,
                                                    parms, parms_index) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress array")
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress array");
                 break;
 
             case H5Z_NBIT_COMPOUND:
                 if (H5Z__nbit_decompress_one_compound(data, data_offset + member_offset, buffer, j, buf_len,
                                                       parms, parms_index) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress compound")
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress compound");
                 break;
 
             case H5Z_NBIT_NOOPTYPE:
@@ -1273,7 +1273,7 @@ H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buff
 
             /* Check values of precision and offset */
             if (p.precision > p.size * 8 || (p.precision + p.offset) > p.size * 8)
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset");
 
             for (i = 0; i < d_nelmts; i++)
                 H5Z__nbit_decompress_one_atomic(data, i * (size_t)p.size, buffer, &j, &buf_len, &p);
@@ -1285,7 +1285,7 @@ H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buff
             for (i = 0; i < d_nelmts; i++) {
                 if (H5Z__nbit_decompress_one_array(data, i * size, buffer, &j, &buf_len, parms,
                                                    &parms_index) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress array")
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress array");
                 parms_index = 4;
             }
             break;
@@ -1296,7 +1296,7 @@ H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buff
             for (i = 0; i < d_nelmts; i++) {
                 if (H5Z__nbit_decompress_one_compound(data, i * size, buffer, &j, &buf_len, parms,
                                                       &parms_index) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress compound")
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress compound");
                 parms_index = 4;
             }
             break;
