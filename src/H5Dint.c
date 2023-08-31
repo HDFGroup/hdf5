@@ -1812,9 +1812,11 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
                                                dataset->shared->dcpl_cache.pline.nused == 0));
 
     if (must_init_storage) {
+        H5D_io_info_t io_info;
+
         io_info.dset = dataset;
 
-        if (H5D__alloc_storage(dataset, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
+        if (H5D__alloc_storage(&io_info, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
     }
 
