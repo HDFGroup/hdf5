@@ -1480,7 +1480,7 @@ done:
 
         /* Check if the superblock has been allocated yet */
         if (sblock) {
-            if (non_default_fs_settings && H5_addr_defined(superblock_addr)) {
+            if (non_default_fs_settings && H5F_addr_defined(superblock_addr)) {
                 /*
                  * For non-default free-space settings, the allocation of
                  * space in the file for the superblock may have have allocated
