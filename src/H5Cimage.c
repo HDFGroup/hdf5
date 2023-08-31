@@ -1161,7 +1161,7 @@ H5C__load_cache_image(H5F_t *f)
 
 done:
     if (ret_value < 0) {
-        if (H5_addr_defined(cache_ptr->image_addr))
+        if (H5F_addr_defined(cache_ptr->image_addr))
             cache_ptr->image_buffer = H5MM_xfree(cache_ptr->image_buffer);
     }
 
