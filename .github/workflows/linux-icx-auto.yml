@@ -16,7 +16,7 @@ jobs:
       - name: Install Dependencies
         run:  |
           sudo apt-get update
-          sudo apt-get install autoconf automake libtool libtool-bin
+          sudo apt-get install autoconf automake libtool libtool-bin libaec-dev
       - name: Add oneAPI to apt
         shell: bash
         run: |
@@ -45,7 +45,7 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           export PATH=$PATH:/opt/intel/oneapi/mpi/2021.10.0/bin:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           ./autogen.sh
-          ./configure  --enable-fortran --enable-parallel CXX="$(which mpiicpc) -cc=$(which icpx)" CC="$(which mpiicc) -cc=$(which icx)" FC="$(which mpiifort) -fc=$(which ifx)" LDFLAGS="-L/opt/intel/oneapi/mpi/2021.10.0/lib -L/opt/intel/oneapi/mpi/2021.10.0/lib/release/"
+          ./configure  --disable-fortran --disable-parallel CXX="$(which mpiicpc) -cc=$(which icpx)" CC="$(which mpiicc) -cc=$(which icx)" FC="$(which mpiifort) -fc=$(which ifx)" LDFLAGS="-L/opt/intel/oneapi/mpi/2021.10.0/lib -L/opt/intel/oneapi/mpi/2021.10.0/lib/release/"
           make -j
           export SYCL_DEVICE_FILTER=opencl.cpu
           make check -j 

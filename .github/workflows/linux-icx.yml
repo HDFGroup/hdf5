@@ -44,14 +44,15 @@ jobs:
           cmake -S . -B build \
           -DCMAKE_BUILD_TYPE="RelWithDebInfo" \
           -DCMAKE_INSTALL_PREFIX=install \
-          -DHDF5_BUILD_FORTRAN=ON \
-          -DHDF5_ENABLE_PARALLEL=ON \
+          -DHDF5_BUILD_FORTRAN=OFF \
+          -DHDF5_ENABLE_PARALLEL=OFF \
           -DHDF5_BUILD_HL_LIB=ON \
           -DCMAKE_CXX_COMPILER=dpcpp \
           -DCMAKE_C_COMPILER=icx \
           -DCMAKE_Fortran_COMPILER=ifx \
           -DMKL_ROOT="/opt/intel/oneapi/mkl/latest" \
-          -DTBB_ROOT="/opt/intel/oneapi/tbb/latest"
+          -DTBB_ROOT="/opt/intel/oneapi/tbb/latest" \
+          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
 
       - name: build
         shell: bash
