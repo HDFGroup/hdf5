@@ -135,6 +135,20 @@ Bug Fixes since HDF5-1.10.10 release
 ===================================
     Library
     -------
+    - Fixed CVE-2018-11202
+
+      A malformed file could result in chunk index memory leaks. Under most
+      conditions (i.e., when the --enable-using-memchecker option is NOT
+      used), this would result in a small memory leak and and infinite loop
+      and abort when shutting down the library. The infinite loop would be
+      due to the "free list" package not being able to clear its resources
+      so the library couldn't shut down. When the "using a memory checker"
+      option is used, the free lists are disabled so there is just a memory
+      leak with no abort on library shutdown.
+
+      The chunk index resources are now correctly cleaned up when reading
+      misparsed files and valgrind confirms no memory leaks.
+
     - Fixed an assertion in a previous fix for CVE-2016-4332
 
       An assert could fail when processing corrupt files that have invalid
