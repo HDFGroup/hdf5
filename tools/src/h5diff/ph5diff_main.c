@@ -63,7 +63,7 @@ main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
 
     if (g_nTasks == 1) {
-        printf("Only 1 task available...doing serial diff\n");
+        fprintf(stderr, "Only 1 task available...doing serial diff\n");
 
         g_Parallel = 0;
 
@@ -279,10 +279,12 @@ h5diff_exit(int status)
             phdiff_dismiss_workers();
             MPI_Barrier(MPI_COMM_WORLD);
         }
-        MPI_Finalize();
-        status = EXIT_SUCCESS; /* Reset exit status, since some mpiexec commands generate output on failure
-                                  status */
     }
+
+    MPI_Finalize();
+
+    status =
+        EXIT_SUCCESS; /* Reset exit status, since some mpiexec commands generate output on failure status */
 
     h5tools_close();
 
