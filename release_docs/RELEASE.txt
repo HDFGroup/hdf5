@@ -241,6 +241,17 @@ Bug Fixes since HDF5-1.12.2 release
 ===================================
     Library
     -------
+    - Fixed an assertion failure in Parallel HDF5 when a file can't be created
+      due to an invalid library version bounds setting
+
+      An assertion failure could occur in H5MF_settle_raw_data_fsm when a file
+      can't be created with Parallel HDF5 due to specifying the use of a paged,
+      persistent file free space manager
+      (H5Pset_file_space_strategy(..., H5F_FSPACE_STRATEGY_PAGE, 1, ...)) with
+      an invalid library version bounds combination
+      (H5Pset_libver_bounds(..., H5F_LIBVER_EARLIEST, H5F_LIBVER_V18)). This
+      has now been fixed.
+
     - Fixed a bug in H5Ocopy that could generate invalid HDF5 files
 
       H5Ocopy was missing a check to determine whether the new object's
