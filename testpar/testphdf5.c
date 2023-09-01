@@ -359,6 +359,9 @@ main(int argc, char **argv)
 
     AddTest("delete", test_delete, NULL, "MPI-IO VFD file delete", PARATESTFILE);
 
+    AddTest("invlibverassert", test_invalid_libver_bounds_file_close_assert, NULL,
+            "Invalid libver bounds assertion failure", PARATESTFILE);
+
     AddTest("idsetw", dataset_writeInd, NULL, "dataset independent write", PARATESTFILE);
     AddTest("idsetr", dataset_readInd, NULL, "dataset independent read", PARATESTFILE);
 

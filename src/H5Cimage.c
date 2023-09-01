@@ -654,6 +654,11 @@ H5C__load_cache_image(H5F_t *f)
     } /* end if */
 
 done:
+    if (ret_value < 0) {
+        if (H5_addr_defined(cache_ptr->image_addr))
+            cache_ptr->image_buffer = H5MM_xfree(cache_ptr->image_buffer);
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__load_cache_image() */
 
@@ -2682,7 +2687,8 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
     if (NULL == (pf_entry_ptr->image_ptr = H5MM_malloc(pf_entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer");
 #if H5C_DO_MEMORY_SANITY_CHECKS
-    H5MM_memcpy(((uint8_t *)pf_entry_ptr->image_ptr) + size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+    H5MM_memcpy(((uint8_t *)pf_entry_ptr->image_ptr) + pf_entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
+                H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
     /* Copy the entry image from the cache image block */
