@@ -846,10 +846,7 @@ dump_group(hid_t gid, const char *name)
 
     H5Oget_info2(gid, &oinfo, H5O_INFO_BASIC);
 
-    /* Must check for uniqueness of all objects if we've traversed an elink,
-     * otherwise only check if the reference count > 1.
-     */
-    if (oinfo.rc > 1 || hit_elink) {
+    {
         obj_t *found_obj; /* Found object */
 
         found_obj = search_obj(group_table, oinfo.addr);
@@ -872,10 +869,6 @@ dump_group(hid_t gid, const char *name)
             attr_iteration(gid, attr_crt_order_flags);
             link_iteration(gid, crt_order_flags);
         }
-    }
-    else {
-        attr_iteration(gid, attr_crt_order_flags);
-        link_iteration(gid, crt_order_flags);
     }
 
     dump_indent -= COL;
