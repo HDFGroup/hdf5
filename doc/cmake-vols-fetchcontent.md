@@ -18,22 +18,18 @@ are the following:
 ## Building
 
 To enable building of an HDF5 VOL connector using HDF5's CMake functionality,
-two CMake variables must first be set:
+a CMake variable must first be set:
 
-    HDF5_VOL_ALLOW_EXTERNAL (Default: OFF)
-        This variable determines whether or not building of external HDF5 VOL connectors
-        is enabled.
-
-    HDF5_ALLOW_EXTERNAL_SUPPORT (Default: "NO")
+    HDF5_VOL_ALLOW_EXTERNAL (Default: "NO")
         This variable is a string that specifies the manner in which the source code for
         an external VOL connector will be retrieved. This variable must be set
         to "GIT" for building external VOL connectors from a Github repository, or
         set to "LOCAL_DIR" to build from a local source directory.
 
+
 ### Building
 
-If the `HDF5_VOL_ALLOW_EXTERNAL` option is set to ON and the `HDF5_ALLOW_EXTERNAL_SUPPORT`
-variable is set to "GIT", the CMake cache will be populated with a predefined
+If the `HDF5_VOL_ALLOW_EXTERNAL` option is set to "GIT", the CMake cache will be populated with a predefined
 (currently 10) amount of new variables, named:
 
     HDF5_VOL_URL01
@@ -54,7 +50,7 @@ functionality to retrieve the source code for a VOL connector pointed to by
 that URL and will try to build that VOL connector as part of the HDF5 library
 build process. 
 
-If `HDF5_ALLOW_EXTERNAL_SUPPORT` is set to "LOCAL_DIR", then the CMake cache 
+If `HDF5_VOL_ALLOW_EXTERNAL` is instead set to "LOCAL_DIR", then the CMake cache 
 will instead be populated with the variables:
 
     HDF5_VOL_PATH01
@@ -141,8 +137,7 @@ would typically be passed when building HDF5, such as `CMAKE_INSTALL_PREFIX`,
       -DHDF5_ENABLE_PARALLEL=ON
       -DALLOW_UNSUPPORTED=ON
       -DHDF5_TEST_API=ON
-      -DHDF5_VOL_ALLOW_EXTERNAL=ON
-      -DHDF5_ALLOW_EXTERNAL_SUPPORT="GIT"
+      -DHDF5_VOL_ALLOW_EXTERNAL="GIT"
       -DHDF5_VOL_URL01=https://github.com/hpc-io/vol-async.git
       -DHDF5_VOL_VOL-ASYNC_BRANCH=develop 
       -DHDF5_VOL_VOL-ASYNC_NAME="async under_vol=0\;under_info={}"
