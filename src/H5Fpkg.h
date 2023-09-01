@@ -399,7 +399,7 @@ H5_DLLVAR htri_t use_locks_env_g;
 
 /* General routines */
 H5_DLL H5F_t  *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
-H5_DLL herr_t  H5F__dest(H5F_t *f, hbool_t flush);
+H5_DLL herr_t  H5F__dest(H5F_t *f, hbool_t flush, hbool_t free_on_failure);
 H5_DLL herr_t  H5F__flush(H5F_t *f);
 H5_DLL htri_t  H5F__is_hdf5(const char *name);
 H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
