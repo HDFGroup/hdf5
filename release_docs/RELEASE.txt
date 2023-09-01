@@ -206,7 +206,14 @@ Bug Fixes since HDF5-1.14.2 release
 
     Testing
     -------
-    -
+    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
+
+      Support for MPI atomicity operations is not implemented for major
+      versions of OpenMPI less than version 5. This would cause the MPI
+      atomicity tests for parallel HDF5 to sporadically fail when run
+      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
+      skip running the atomicity tests if the major version of OpenMPI is
+      < 5.
 
 
 Platforms Tested
