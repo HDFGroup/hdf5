@@ -234,9 +234,11 @@ parse_options(int argc, char **argv)
                 nerrors++;
                 return (1);
             }
-        printf("Test filenames are:\n");
-        for (i = 0; i < n; i++)
-            printf("    %s\n", filenames[i]);
+        if (mpi_rank == 0) {
+            printf("Test filenames are:\n");
+            for (i = 0; i < n; i++)
+                printf("    %s\n", filenames[i]);
+        }
     }
 
     return (0);
@@ -313,6 +315,8 @@ main(int argc, char **argv)
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    mpi_rank_framework_g = mpi_rank;
 
     dim0 = ROW_FACTOR * mpi_size;
     dim1 = COL_FACTOR * mpi_size;

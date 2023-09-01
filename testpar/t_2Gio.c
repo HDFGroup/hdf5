@@ -4278,6 +4278,8 @@ main(int argc, char **argv)
     MPI_Comm_size(test_comm, &mpi_size);
     MPI_Comm_rank(test_comm, &mpi_rank);
 
+    mpi_rank_framework_g = mpi_rank;
+
     memset(filenames, 0, sizeof(filenames));
 
     dim0 = BIG_X_FACTOR;

@@ -353,6 +353,7 @@ H5TEST_DLLVAR size_t   n_tests_passed_g;
 H5TEST_DLLVAR size_t   n_tests_failed_g;
 H5TEST_DLLVAR size_t   n_tests_skipped_g;
 H5TEST_DLLVAR uint64_t vol_cap_flags_g;
+H5TEST_DLLVAR int      mpi_rank_framework_g;
 
 H5TEST_DLL void   h5_send_message(const char *file, const char *arg1, const char *arg2);
 H5TEST_DLL herr_t h5_wait_message(const char *file);

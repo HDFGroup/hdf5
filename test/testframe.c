@@ -49,6 +49,7 @@ static const void *Test_parameters                  = NULL;
 static const char *TestProgName                     = NULL;
 static void (*TestPrivateUsage)(void)               = NULL;
 static int (*TestPrivateParser)(int ac, char *av[]) = NULL;
+int mpi_rank_framework_g                            = 0;
 
 /*
  * Setup a test function and add it to the list of tests.
@@ -303,7 +304,8 @@ PerformTests(void)
             MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
         }
         else {
-            MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
+            if (mpi_rank_framework_g == 0)
+                MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
             MESSAGE(5, ("===============================================\n"));
             Test[Loop].NumErrors = num_errs;
             Test_parameters      = Test[Loop].Parameters;
@@ -316,12 +318,14 @@ PerformTests(void)
         }
 
     Test_parameters = NULL; /* clear it. */
-    MESSAGE(2, ("\n\n"));
 
-    if (num_errs)
-        print_func("!!! %d Error(s) were detected !!!\n\n", (int)num_errs);
-    else
-        print_func("All tests were successful. \n\n");
+    if (mpi_rank_framework_g == 0) {
+        MESSAGE(2, ("\n\n"));
+        if (num_errs)
+            print_func("!!! %d Error(s) were detected !!!\n\n", (int)num_errs);
+        else
+            print_func("All tests were successful. \n\n");
+    }
 }
 
 /*
