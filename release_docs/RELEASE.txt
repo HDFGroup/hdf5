@@ -146,19 +146,16 @@ Bug Fixes since HDF5-1.10.10 release
       file access and later opened with parallel file access. In turn, this could
       cause parallel writes to those datasets to place incorrect data in the file.
 
-    - Fixed CVE-2018-11202
+    - Fixed an assertion failure in Parallel HDF5 when a file can't be created
+      due to an invalid library version bounds setting
 
-      A malformed file could result in chunk index memory leaks. Under most
-      conditions (i.e., when the --enable-using-memchecker option is NOT
-      used), this would result in a small memory leak and and infinite loop
-      and abort when shutting down the library. The infinite loop would be
-      due to the "free list" package not being able to clear its resources
-      so the library couldn't shut down. When the "using a memory checker"
-      option is used, the free lists are disabled so there is just a memory
-      leak with no abort on library shutdown.
-
-      The chunk index resources are now correctly cleaned up when reading
-      misparsed files and valgrind confirms no memory leaks.
+      An assertion failure could occur in H5MF_settle_raw_data_fsm when a file
+      can't be created with Parallel HDF5 due to specifying the use of a paged,
+      persistent file free space manager
+      (H5Pset_file_space_strategy(..., H5F_FSPACE_STRATEGY_PAGE, 1, ...)) with
+      an invalid library version bounds combination
+      (H5Pset_libver_bounds(..., H5F_LIBVER_EARLIEST, H5F_LIBVER_V18)). This
+      has now been fixed.
 
     - Fixed an assertion in a previous fix for CVE-2016-4332
 

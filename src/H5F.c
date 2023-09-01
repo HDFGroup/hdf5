@@ -616,7 +616,7 @@ H5Freopen(hid_t file_id)
 
 done:
     if (ret_value < 0 && new_file)
-        if (H5F__dest(new_file, FALSE) < 0)
+        if (H5F__dest(new_file, FALSE, TRUE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "can't close file")
 
     FUNC_LEAVE_API(ret_value)

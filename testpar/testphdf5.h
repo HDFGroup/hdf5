@@ -230,6 +230,7 @@ extern int dxfer_coll_type;
 void test_plist_ed(void);
 void zero_dim_dset(void);
 void test_file_properties(void);
+void test_invalid_libver_bounds_file_close_assert(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);
