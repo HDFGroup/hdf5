@@ -14,6 +14,8 @@
 /* Module Setup */
 /****************/
 
+/* THIS IS A TRIVIAL COMMIT */
+
 #include "H5Dmodule.h" /* This source code file is part of the H5D module */
 
 /***********/
