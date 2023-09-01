@@ -226,7 +226,7 @@ public class TestH5Drw {
     @Test
     public void testH5Dread_32bit_ints()
     {
-        int[][] dset_data = new int[DIM_X][DIM16_Y];
+        int[][] dset_data = new int[DIM_X][DIM32_Y];
 
         try {
             openH5file(H5_INTS_FILE, DATASETU32);
