@@ -55,8 +55,8 @@ static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 static herr_t init_subfiling(const char *base_filename, uint64_t file_id,
                              H5FD_subfiling_params_t *subfiling_config, int file_acc_flags, MPI_Comm comm,
                              int64_t *context_id_out);
-static herr_t init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_Comm node_comm,
-                                sf_topology_t **app_topology_out);
+static herr_t init_app_topology(int64_t sf_context_id, H5FD_subfiling_params_t *subfiling_config,
+                                MPI_Comm comm, MPI_Comm node_comm, sf_topology_t **app_topology_out);
 static herr_t get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
                                                   char                       **ioc_sel_info_str);
 static herr_t find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config,
@@ -64,7 +64,7 @@ static herr_t find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *
 static herr_t init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm);
 static herr_t gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_comm);
 static int    compare_layout_nodelocal(const void *layout1, const void *layout2);
-static herr_t identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride);
+static herr_t identify_ioc_ranks(int64_t sf_context_id, sf_topology_t *app_topology, int rank_stride);
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, const char *base_filename,
                                      uint64_t file_id, H5FD_subfiling_params_t *subfiling_config,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
@@ -886,7 +886,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
      * Setup the application topology information, including the computed
      * number and distribution map of the set of I/O concentrators
      */
-    if (init_app_topology(subfiling_config, comm, node_comm, &app_topology) < 0)
+    if (init_app_topology(context_id, subfiling_config, comm, node_comm, &app_topology) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize application topology");
 
     new_context->sf_context_id = context_id;
@@ -938,8 +938,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_Comm node_comm,
-                  sf_topology_t **app_topology_out)
+init_app_topology(int64_t sf_context_id, H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm,
+                  MPI_Comm node_comm, sf_topology_t **app_topology_out)
 {
     H5FD_subfiling_ioc_select_t ioc_selection_type;
     sf_topology_t              *app_topology   = NULL;
@@ -1142,7 +1142,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
          * Determine which ranks are I/O concentrator ranks, based on the
          * given IOC selection strategy and MPI information.
          */
-        if (identify_ioc_ranks(app_topology, rank_multiple) < 0)
+        if (identify_ioc_ranks(sf_context_id, app_topology, rank_multiple) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                                     "couldn't determine which MPI ranks are I/O concentrators");
     }
@@ -1600,7 +1600,7 @@ compare_layout_nodelocal(const void *layout1, const void *layout2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
+identify_ioc_ranks(int64_t sf_context_id, sf_topology_t *app_topology, int rank_stride)
 {
     app_layout_t *app_layout       = NULL;
     int          *io_concentrators = NULL;
@@ -1613,6 +1613,11 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
     assert(app_topology->app_layout);
     assert(app_topology->app_layout->layout);
     assert(app_topology->app_layout->node_count > 0);
+    assert(app_topology->app_layout->node_count <= app_topology->app_layout->world_size);
+
+#ifndef H5_SUBFILING_DEBUG
+    (void)sf_context_id;
+#endif
 
     app_layout = app_topology->app_layout;
 
@@ -1629,36 +1634,52 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
         case SELECT_IOC_ONE_PER_NODE: {
             int total_ioc_count = 0;
             int iocs_per_node   = 1;
+            int last_lead_rank;
 
             if (app_topology->n_io_concentrators > app_layout->node_count)
                 iocs_per_node = app_topology->n_io_concentrators / app_layout->node_count;
 
-            assert(app_layout->node_ranks);
+            /*
+             * NOTE: The below code assumes that the app_layout->layout
+             * array was sorted according to the node_lead_rank field,
+             * such that entries for MPI ranks on the same node will occur
+             * together in the array.
+             */
 
-            for (size_t i = 0; i < (size_t)app_layout->node_count; i++) {
-                int node_index = app_layout->node_ranks[i];
-                int local_size = app_layout->layout[node_index].node_local_size;
+            last_lead_rank = app_layout->layout[0].node_lead_rank;
+            for (size_t i = 0, layout_idx = 0; i < (size_t)app_layout->node_count; i++) {
+                int local_size = app_layout->layout[layout_idx].node_local_size;
 
+                /* Assign first I/O concentrator from this node */
                 assert(total_ioc_count < app_topology->n_io_concentrators);
-                io_concentrators[total_ioc_count] = app_layout->layout[node_index++].rank;
+                io_concentrators[total_ioc_count] = app_layout->layout[layout_idx++].rank;
 
                 if (app_layout->world_rank == io_concentrators[total_ioc_count]) {
+                    assert(!app_topology->rank_is_ioc);
+
                     app_topology->ioc_idx     = total_ioc_count;
                     app_topology->rank_is_ioc = TRUE;
                 }
 
                 total_ioc_count++;
 
+                /* Assign any additional I/O concentrators from this node */
                 for (size_t j = 1; j < (size_t)iocs_per_node; j++) {
                     if (total_ioc_count >= max_iocs)
                         break;
                     if (j >= (size_t)local_size)
                         break;
 
+                    /* Sanity check to make sure this rank is on the same node */
+                    assert(app_layout->layout[layout_idx].node_lead_rank ==
+                           app_layout->layout[layout_idx - 1].node_lead_rank);
+
                     assert(total_ioc_count < app_topology->n_io_concentrators);
-                    io_concentrators[total_ioc_count] = app_layout->layout[node_index++].rank;
+                    io_concentrators[total_ioc_count] = app_layout->layout[layout_idx++].rank;
 
                     if (app_layout->world_rank == io_concentrators[total_ioc_count]) {
+                        assert(!app_topology->rank_is_ioc);
+
                         app_topology->ioc_idx     = total_ioc_count;
                         app_topology->rank_is_ioc = TRUE;
                     }
@@ -1668,7 +1689,24 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
 
                 if (total_ioc_count >= max_iocs)
                     break;
+
+                /* Find the block of layout structures for the next node */
+                while ((layout_idx < (size_t)app_layout->world_size) &&
+                       (last_lead_rank == app_layout->layout[layout_idx].node_lead_rank))
+                    layout_idx++;
+
+                if (layout_idx >= (size_t)app_layout->world_size)
+                    break;
+
+                last_lead_rank = app_layout->layout[layout_idx].node_lead_rank;
             }
+
+#ifdef H5_SUBFILING_DEBUG
+            if (app_topology->n_io_concentrators != total_ioc_count)
+                H5_subfiling_log(sf_context_id,
+                                 "%s: **WARN** Number of I/O concentrators adjusted from %d to %d", __func__,
+                                 app_topology->n_io_concentrators, total_ioc_count);
+#endif
 
             /* Set final number of I/O concentrators after adjustments */
             app_topology->n_io_concentrators = total_ioc_count;

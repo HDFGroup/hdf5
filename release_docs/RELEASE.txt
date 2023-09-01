@@ -109,6 +109,19 @@ Bug Fixes since HDF5-1.14.2 release
 ===================================
     Library
     -------
+    - Fixed a bug with the way the Subfiling VFD assigns I/O concentrators
+
+      During a file open operation, the Subfiling VFD determines the topology
+      of the application and uses that to select a subset of MPI ranks that
+      I/O will be forwarded to, called I/O concentrators. The code for this
+      had previously assumed that the parallel job launcher application (e.g.,
+      mpirun, srun, etc.) would distribute MPI ranks sequentially among a node
+      until all processors on that node have been assigned before going on to
+      the next node. When the launcher application mapped MPI ranks to nodes
+      in a different fashion, such as round-robin, this could cause the Subfiling
+      VFD to incorrectly map MPI ranks as I/O concentrators, leading to missing
+      subfiles.
+
     - Fixed a file space allocation bug in the parallel library for chunked
       datasets
 

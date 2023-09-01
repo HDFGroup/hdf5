@@ -155,6 +155,25 @@ typedef enum io_ops {
  * will be broadcast to all MPI ranks and will
  * provide a basis for determining which MPI ranks
  * will host an I/O concentrator.
+ *
+ * - rank
+ *     The MPI rank value for this processor
+ *
+ * - node_local_rank
+ *     The MPI rank value for this processor in an MPI
+ *     communicator that only involves MPI ranks on the
+ *     same node as this processor
+ *
+ * - node_local_size
+ *     The number of MPI ranks on the same node as this
+ *     processor, including this processor itself
+ *
+ * - node_lead_rank
+ *     The lowest MPI rank value for processors on the
+ *     same node as this processor (possibly the MPI
+ *     rank value for this processor); Denotes a "lead"
+ *     MPI rank for certain operations.
+ *
  */
 typedef struct {
     int rank;

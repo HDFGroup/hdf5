@@ -40,11 +40,6 @@
 #include "H5subfiling_common.h"
 #include "H5subfiling_err.h"
 
-/*
- * Some definitions for debugging the Subfiling VFD
- */
-/* #define H5FD_SUBFILING_DEBUG */
-
 #define DRIVER_INFO_MESSAGE_MAX_INFO   65536
 #define DRIVER_INFO_MESSAGE_MAX_LENGTH 65552 /* MAX_INFO + sizeof(info_header_t) */
 
