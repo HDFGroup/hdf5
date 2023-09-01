@@ -84,6 +84,7 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
           message (SEND_ERROR "Invalid URL '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_URL${vol_idx_fixed}")
         elseif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "LOCAL_DIR")
           message (SEND_ERROR "Invalid source path '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_PATH${vol_idx_fixed}")
+        else()
         endif()
       endif ()
 
