@@ -67,12 +67,12 @@
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes, t) (H5_DBL_ABS_EQUAL(t, 0.0) ? 0.0 : ((((double)(bytes)) / (double)ONE_MB) / (t)))
 
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-#define FALSE (!TRUE)
-#endif /* FALSE */
+#ifndef true
+#define true 1
+#endif /* true */
+#ifndef false
+#define false (!true)
+#endif /* false */
 
 /* global variables */
 FILE *output;              /* output file                          */
@@ -824,14 +824,14 @@ parse_command_line(int argc, const char *const *argv)
 
     cl_opts->vfd = sec2;
 
-    cl_opts->print_times   = FALSE; /* Printing times is off by default */
-    cl_opts->print_raw     = FALSE; /* Printing raw data throughput is off by default */
+    cl_opts->print_times   = false; /* Printing times is off by default */
+    cl_opts->print_raw     = false; /* Printing raw data throughput is off by default */
     cl_opts->h5_alignment  = 1;     /* No alignment for HDF5 objects by default */
     cl_opts->h5_threshold  = 1;     /* No threshold for aligning HDF5 objects by default */
-    cl_opts->h5_use_chunks = FALSE; /* Don't chunk the HDF5 dataset by default */
-    cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
-    cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
-    cl_opts->verify        = FALSE; /* No Verify data correctness by default */
+    cl_opts->h5_use_chunks = false; /* Don't chunk the HDF5 dataset by default */
+    cl_opts->h5_write_only = false; /* Do both read and write by default */
+    cl_opts->h5_extendable = false; /* Use extendable dataset */
+    cl_opts->verify        = false; /* No Verify data correctness by default */
 
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
@@ -941,15 +941,15 @@ parse_command_line(int argc, const char *const *argv)
                         switch (*buf) {
                             case 'r':
                                 /* Turn on raw data throughput info */
-                                cl_opts->print_raw = TRUE;
+                                cl_opts->print_raw = true;
                                 break;
                             case 't':
                                 /* Turn on time printing */
-                                cl_opts->print_times = TRUE;
+                                cl_opts->print_times = true;
                                 break;
                             case 'v':
                                 /* Turn on verify data correctness*/
-                                cl_opts->verify = TRUE;
+                                cl_opts->verify = true;
                                 break;
                             default:
                                 fprintf(stderr, "sio_perf: invalid --debug option %s\n", buf);
@@ -1029,10 +1029,10 @@ parse_command_line(int argc, const char *const *argv)
                 }
                 break;
             case 'w':
-                cl_opts->h5_write_only = TRUE;
+                cl_opts->h5_write_only = true;
                 break;
             case 't':
-                cl_opts->h5_extendable = TRUE;
+                cl_opts->h5_extendable = true;
                 break;
             case 'x': {
                 const char *end = H5_optarg;

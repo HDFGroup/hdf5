@@ -572,7 +572,7 @@ gen_ext(const char *fname, unsigned new_format, unsigned what)
             H5Pset_shared_mesg_nindexes(fcpl, 4);
             break;
         case 2:
-            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1);
+            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1);
             break;
         case 3:
             H5Pset_istore_k(fcpl, ISTORE_IK);
@@ -580,7 +580,7 @@ gen_ext(const char *fname, unsigned new_format, unsigned what)
             break;
         case 4:
             H5Pset_istore_k(fcpl, ISTORE_IK);
-            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1);
+            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1);
             break;
         case 5:
             H5Pset_shared_mesg_nindexes(fcpl, 4);
@@ -589,7 +589,7 @@ gen_ext(const char *fname, unsigned new_format, unsigned what)
         case 6:
             H5Pset_istore_k(fcpl, ISTORE_IK);
             H5Pset_shared_mesg_nindexes(fcpl, 4);
-            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_NONE, FALSE, (hsize_t)1);
+            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_NONE, false, (hsize_t)1);
             break;
         default:
             break;
@@ -793,7 +793,7 @@ main(void)
     gen_err_level(ERR_LEVEL_FILE);
 
     /* Generate old/new format file with/without messages in the superblock extension */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         for (i = 0; i < 8; i++) {
             char filename[50];
 

@@ -64,7 +64,7 @@ gen_cache_image_file(const char *fname)
         int arr[50][100];
     } * buf;                                       /* Buffer for data to write */
     H5AC_cache_image_config_t cache_image_config = /* Cache image input configuration */
-        {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE, H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
+        {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, true, false, H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
 
     /* Create and fill array */
     buf = malloc(sizeof(*buf));
@@ -168,7 +168,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-gen_enhance_files(hbool_t user)
+gen_enhance_files(bool user)
 {
     hid_t    fid  = H5I_INVALID_HID; /* File ID */
     hid_t    fcpl = H5I_INVALID_HID; /* File creation property list */
@@ -193,7 +193,7 @@ gen_enhance_files(hbool_t user)
     }
 
     /* Set file space strategy and persisting free-space */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
         goto error;
 
     /*
@@ -383,9 +383,9 @@ main(void)
         goto error;
 
     /* Generate the first 6 files in FILENAME_ENHANCE[]  */
-    if (gen_enhance_files(FALSE) < 0)
+    if (gen_enhance_files(false) < 0)
         goto error;
-    if (gen_enhance_files(TRUE) < 0)
+    if (gen_enhance_files(true) < 0)
         goto error;
 
     /*
@@ -407,7 +407,7 @@ main(void)
      *      --FILENAME[0]: "h5clear_sec2_v3.h5", "latest_h5clear_sec2_v3.h5"
      *      --FILENAME[1]: "h5clear_log_v3.h5", "latest_h5clear_log_v3.h5"
      */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         hid_t fapl2, my_fapl; /* File access property lists */
 
         /* Set to use the appropriate file access property list */
@@ -559,7 +559,7 @@ main(void)
         goto error;
 
     /* Set file space strategy and persisting free-space */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
         goto error;
 
     /* Create the file with the set file space info */

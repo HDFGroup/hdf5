@@ -35,7 +35,7 @@
 /* File space default information */
 #define FS_PAGESIZE_DEF  4096
 #define FS_STRATEGY_DEF  H5F_FSPACE_STRATEGY_FSM_AGGR
-#define FS_PERSIST_DEF   FALSE
+#define FS_PERSIST_DEF   false
 #define FS_THRESHOLD_DEF 1
 
 /*-------------------------------------------------------------------------
@@ -111,11 +111,11 @@ typedef struct {
     chunk_info_t   chunk_g;                          /* global chunk INFO for the ALL case */
     H5D_layout_t   layout_g;                         /* global layout information for the ALL case */
     int            verbose;                          /* verbose mode */
-    hbool_t        merge;                            /* Merge external file. */
-    hbool_t        prune;                            /* Don't follow external file. */
+    bool           merge;                            /* Merge external file. */
+    bool           prune;                            /* Don't follow external file. */
     hsize_t        min_comp;                         /* minimum size to compress, in bytes */
     int            use_native;                       /* use a native type in write */
-    hbool_t        latest;                           /* pack file with the latest file format */
+    bool           latest;                           /* pack file with the latest file format */
     H5F_libver_t   low_bound;                        /* The file's low bound as in H5Fset_libver_bounds() */
     H5F_libver_t   high_bound;                       /* The file's high bound as in H5Fset_libver_bounds() */
     hid_t          fin_fapl;                         /* FAPL to use for opening the input file */
@@ -153,7 +153,7 @@ extern "C" {
 int h5repack(const char *infile, const char *outfile, pack_opt_t *options);
 int h5repack_addfilter(const char *str, pack_opt_t *options);
 int h5repack_addlayout(const char *str, pack_opt_t *options);
-int h5repack_init(pack_opt_t *options, int verbose, hbool_t latest);
+int h5repack_init(pack_opt_t *options, int verbose, bool latest);
 int h5repack_end(pack_opt_t *options);
 int h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options);
 int h5repack_cmp_pl(const char *fname1, hid_t fname1_fapl, const char *fname2, hid_t fname2_fapl);

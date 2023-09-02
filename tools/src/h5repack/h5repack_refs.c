@@ -451,7 +451,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
     unsigned    u, i, j;
     int         rank;
     H5T_class_t type_class = -1;
-    hbool_t     is_ref = 0, is_ref_vlen = 0, is_ref_array = 0, is_ref_comp = 0;
+    bool        is_ref = 0, is_ref_vlen = 0, is_ref_array = 0, is_ref_comp = 0;
     void       *refbuf           = NULL;
     void       *buf              = NULL;
     unsigned   *ref_comp_index   = NULL;

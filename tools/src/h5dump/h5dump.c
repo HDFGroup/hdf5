@@ -18,24 +18,24 @@
 #define PROGRAMNAME "h5dump"
 
 const char        *outfname_g    = NULL;
-static hbool_t     doxml_g       = FALSE;
-static hbool_t     useschema_g   = TRUE;
+static bool        doxml_g       = false;
+static bool        useschema_g   = true;
 static const char *xml_dtd_uri_g = NULL;
 
-static hbool_t use_custom_vol_g = FALSE;
-static hbool_t use_custom_vfd_g = FALSE;
+static bool use_custom_vol_g = false;
+static bool use_custom_vfd_g = false;
 
 static h5tools_vol_info_t vol_info_g = {0};
 static h5tools_vfd_info_t vfd_info_g = {0};
 
-static hbool_t get_onion_revision_count = FALSE;
+static bool get_onion_revision_count = false;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_ext_t ros3_fa_g = {
     {
         1,     /* Structure Version */
-        FALSE, /* Authenticate?     */
+        false, /* Authenticate?     */
         "",    /* AWS Region        */
         "",    /* Access Key ID     */
         "",    /* Secret Access Key */
@@ -752,7 +752,7 @@ parse_command_line(int argc, const char *const *argv)
     struct handler_t *last_dset = NULL;
     int               i;
     int               opt;
-    int               last_was_dset = FALSE;
+    int               last_was_dset = false;
 
     /* no arguments */
     if (argc == 1) {
@@ -770,50 +770,50 @@ parse_command_line(int argc, const char *const *argv)
 parse_start:
         switch ((char)opt) {
             case 'R':
-                dump_opts.display_region = TRUE;
-                region_output            = TRUE;
+                dump_opts.display_region = true;
+                region_output            = true;
                 break;
             case 'B':
-                dump_opts.display_bb = TRUE;
-                last_was_dset        = FALSE;
+                dump_opts.display_bb = true;
+                last_was_dset        = false;
                 break;
             case 'n':
-                dump_opts.display_fi = TRUE;
-                last_was_dset        = FALSE;
+                dump_opts.display_fi = true;
+                last_was_dset        = false;
                 if (H5_optarg != NULL)
                     h5trav_set_verbose(atoi(H5_optarg));
                 break;
             case 'p':
-                dump_opts.display_dcpl = TRUE;
+                dump_opts.display_dcpl = true;
                 break;
             case 'y':
-                dump_opts.display_ai = FALSE;
+                dump_opts.display_ai = false;
                 break;
             case 'e':
-                dump_opts.display_escape = TRUE;
+                dump_opts.display_escape = true;
                 break;
             case 'H':
-                dump_opts.display_data      = FALSE;
-                dump_opts.display_attr_data = FALSE;
-                last_was_dset               = FALSE;
+                dump_opts.display_data      = false;
+                dump_opts.display_attr_data = false;
+                last_was_dset               = false;
                 break;
             case 'A':
                 if (H5_optarg != NULL) {
                     if (0 == atoi(H5_optarg))
-                        dump_opts.include_attrs = FALSE;
+                        dump_opts.include_attrs = false;
                 }
                 else {
-                    dump_opts.display_data      = FALSE;
-                    dump_opts.display_attr_data = TRUE;
-                    last_was_dset               = FALSE;
+                    dump_opts.display_data      = false;
+                    dump_opts.display_attr_data = true;
+                    last_was_dset               = false;
                 }
                 break;
             case 'i':
-                dump_opts.display_oid = TRUE;
-                last_was_dset         = FALSE;
+                dump_opts.display_oid = true;
+                last_was_dset         = false;
                 break;
             case 'r':
-                dump_opts.display_char = TRUE;
+                dump_opts.display_char = true;
                 break;
             case 'V':
                 print_version(h5tools_getprogname());
@@ -829,7 +829,7 @@ parse_start:
                     h5tools_nCols = 65535;
                 else
                     h5tools_nCols = (unsigned)sh5tools_nCols;
-                last_was_dset = FALSE;
+                last_was_dset = false;
             } break;
             case 'N':
                 dump_opts.display_all = 0;
@@ -841,7 +841,7 @@ parse_start:
                         break;
                     }
 
-                last_was_dset = FALSE;
+                last_was_dset = false;
                 break;
             case 'a':
                 dump_opts.display_all = 0;
@@ -853,7 +853,7 @@ parse_start:
                         break;
                     }
 
-                last_was_dset = FALSE;
+                last_was_dset = false;
                 break;
             case 'd':
                 dump_opts.display_all = 0;
@@ -868,12 +868,12 @@ parse_start:
                         break;
                     }
 
-                last_was_dset = TRUE;
+                last_was_dset = true;
                 break;
             case 'f':
                 vfd_info_g.type   = VFD_BY_NAME;
                 vfd_info_g.u.name = H5_optarg;
-                use_custom_vfd_g  = TRUE;
+                use_custom_vfd_g  = true;
 
 #ifdef H5_HAVE_ROS3_VFD
                 if (0 == HDstrcmp(vfd_info_g.u.name, drivernames[ROS3_VFD_IDX]))
@@ -897,7 +897,7 @@ parse_start:
                         break;
                     }
 
-                last_was_dset = FALSE;
+                last_was_dset = false;
                 break;
             case 'l':
                 dump_opts.display_all = 0;
@@ -909,7 +909,7 @@ parse_start:
                         break;
                     }
 
-                last_was_dset = FALSE;
+                last_was_dset = false;
                 break;
             case 't':
                 dump_opts.display_all = 0;
@@ -921,7 +921,7 @@ parse_start:
                         break;
                     }
 
-                last_was_dset = FALSE;
+                last_was_dset = false;
                 break;
 
             case 'O':
@@ -953,8 +953,8 @@ parse_start:
                     }
                 }
 
-                dump_opts.usingdasho = TRUE;
-                last_was_dset        = FALSE;
+                dump_opts.usingdasho = true;
+                last_was_dset        = false;
                 outfname_g           = H5_optarg;
                 break;
 
@@ -966,7 +966,7 @@ parse_start:
                         goto error;
                     }
                 }
-                bin_output = TRUE;
+                bin_output = true;
                 if (outfname_g != NULL) {
                     if (h5tools_set_data_output_file(outfname_g, 1) < 0) {
                         /* failed to set output file */
@@ -974,7 +974,7 @@ parse_start:
                         goto error;
                     }
 
-                    last_was_dset = FALSE;
+                    last_was_dset = false;
                 }
                 break;
 
@@ -1003,10 +1003,10 @@ parse_start:
                     usage(h5tools_getprogname());
                     goto error;
                 }
-                dump_opts.display_packed_bits = TRUE;
+                dump_opts.display_packed_bits = true;
                 break;
             case 'v':
-                dump_opts.display_vds_first = TRUE;
+                dump_opts.display_vds_first = true;
                 break;
             case 'G':
                 dump_opts.vds_gap_size = atoi(H5_optarg);
@@ -1019,15 +1019,15 @@ parse_start:
             /** begin XML parameters **/
             case 'x':
                 /* select XML output */
-                doxml_g                    = TRUE;
-                useschema_g                = TRUE;
+                doxml_g                    = true;
+                useschema_g                = true;
                 h5tools_dump_header_format = NULL;
                 dump_function_table        = &xml_function_table;
                 h5tools_nCols              = 0;
                 break;
             case 'u':
-                doxml_g                    = TRUE;
-                useschema_g                = FALSE;
+                doxml_g                    = true;
+                useschema_g                = false;
                 xmlnsprefix                = "";
                 h5tools_dump_header_format = NULL;
                 dump_function_table        = &xml_function_table;
@@ -1131,7 +1131,7 @@ parse_start:
                 } while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF);
 
 end_collect:
-                last_was_dset = FALSE;
+                last_was_dset = false;
 
                 if (opt != EOF)
                     goto parse_start;
@@ -1147,7 +1147,7 @@ end_collect:
                     enable_error_stack = 1;
                 break;
             case 'C':
-                dump_opts.disable_compact_subset = TRUE;
+                dump_opts.disable_compact_subset = true;
                 break;
             case 'h':
                 usage(h5tools_getprogname());
@@ -1197,13 +1197,13 @@ end_collect:
             case '1':
                 vol_info_g.type    = VOL_BY_VALUE;
                 vol_info_g.u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                use_custom_vol_g   = TRUE;
+                use_custom_vol_g   = true;
                 break;
 
             case '2':
                 vol_info_g.type   = VOL_BY_NAME;
                 vol_info_g.u.name = H5_optarg;
-                use_custom_vol_g  = TRUE;
+                use_custom_vol_g  = true;
                 break;
 
             case '3':
@@ -1213,13 +1213,13 @@ end_collect:
             case '4':
                 vfd_info_g.type    = VFD_BY_VALUE;
                 vfd_info_g.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                use_custom_vfd_g   = TRUE;
+                use_custom_vfd_g   = true;
                 break;
 
             case '5':
                 vfd_info_g.type   = VFD_BY_NAME;
                 vfd_info_g.u.name = H5_optarg;
-                use_custom_vfd_g  = TRUE;
+                use_custom_vfd_g  = true;
                 break;
 
             case '6':
@@ -1238,7 +1238,7 @@ end_collect:
 
         if (vfd_info_g.info) {
             if (!HDstrcmp(vfd_info_g.info, "revision_count"))
-                get_onion_revision_count = TRUE;
+                get_onion_revision_count = true;
             else {
                 errno                   = 0;
                 onion_fa_g.revision_num = strtoull(vfd_info_g.info, NULL, 10);
@@ -1333,7 +1333,7 @@ main(int argc, char *argv[])
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        else if (dump_opts.display_char == TRUE) {
+        else if (dump_opts.display_char == true) {
             error_msg("option \"%s\" not available for XML\n", "--string");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;

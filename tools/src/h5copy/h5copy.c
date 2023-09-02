@@ -322,13 +322,13 @@ main(int argc, char *argv[])
     /* Attempt to open an existing HDF5 file first. Need to open the dst file
        before the src file just in case that the dst and src are the same file
      */
-    fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, H5P_DEFAULT, FALSE, NULL, 0);
+    fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, H5P_DEFAULT, false, NULL, 0);
 
     /*-------------------------------------------------------------------------
      * open input file
      *-------------------------------------------------------------------------*/
 
-    fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, 0);
+    fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, H5P_DEFAULT, false, NULL, 0);
 
     /*-------------------------------------------------------------------------
      * test for error in opening input file

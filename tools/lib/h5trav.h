@@ -57,7 +57,7 @@ typedef struct symlink_trav_t {
     size_t               nalloc;
     size_t               nused;
     symlink_trav_path_t *objs;
-    hbool_t              dangle_link;
+    bool                 dangle_link;
 } symlink_trav_t;
 
 typedef struct trav_path_t {
@@ -93,7 +93,7 @@ typedef struct trav_link_t {
 typedef struct trav_obj_t {
     H5O_token_t   obj_token;      /* object token */
     unsigned      flags[2];       /* h5diff.object is present or not in both files*/
-    hbool_t       is_same_trgobj; /* same target object? no need to compare */
+    bool          is_same_trgobj; /* same target object? no need to compare */
     char         *name;           /* name */
     h5trav_type_t type;           /* type of object */
     trav_link_t  *links;          /* array of possible link names */
@@ -126,14 +126,14 @@ extern "C" {
  * "h5trav general" public functions
  *-------------------------------------------------------------------------
  */
-H5TOOLS_DLL void    h5trav_set_index(H5_index_t print_index_by, H5_iter_order_t print_index_order);
-H5TOOLS_DLL int     h5trav_visit(hid_t file_id, const char *grp_name, hbool_t visit_start, hbool_t recurse,
-                                 h5trav_obj_func_t visit_obj, h5trav_lnk_func_t visit_lnk, void *udata,
-                                 unsigned fields);
-H5TOOLS_DLL herr_t  symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file,
+H5TOOLS_DLL void   h5trav_set_index(H5_index_t print_index_by, H5_iter_order_t print_index_order);
+H5TOOLS_DLL int    h5trav_visit(hid_t file_id, const char *grp_name, bool visit_start, bool recurse,
+                                h5trav_obj_func_t visit_obj, h5trav_lnk_func_t visit_lnk, void *udata,
+                                unsigned fields);
+H5TOOLS_DLL herr_t symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file,
+                                     const char *path);
+H5TOOLS_DLL bool   symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file,
                                       const char *path);
-H5TOOLS_DLL hbool_t symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file,
-                                       const char *path);
 
 /*-------------------------------------------------------------------------
  * "h5trav info" public functions

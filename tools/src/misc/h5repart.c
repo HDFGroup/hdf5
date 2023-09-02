@@ -146,11 +146,11 @@ main(int argc, char *argv[])
     ssize_t     nio;               /*I/O return value        */
     int         argno = 1;         /*program argument number    */
     int         src, dst = -1;     /*source & destination files    */
-    int         need_seek = FALSE; /*destination needs to seek?    */
+    int         need_seek = false; /*destination needs to seek?    */
     int         need_write;        /*data needs to be written?    */
     h5_stat_t   sb;                /*temporary file stat buffer    */
 
-    int verbose = FALSE; /*display file names?        */
+    int verbose = false; /*display file names?        */
 
     const char *src_gen_name;    /*general source name        */
     char       *src_name = NULL; /*source member name        */
@@ -172,7 +172,7 @@ main(int argc, char *argv[])
     hid_t   fapl;            /*file access property list     */
     hid_t   file;
     hsize_t hdsize;                   /*destination logical memb size */
-    hbool_t family_to_single = FALSE; /*change family to single file driver? */
+    bool    family_to_single = false; /*change family to single file driver? */
 
     /*
      * Get the program name from argv[0]. Use only the last component.
@@ -187,7 +187,7 @@ main(int argc, char *argv[])
      */
     while (argno < argc && '-' == argv[argno][0]) {
         if (!HDstrcmp(argv[argno], "-v")) {
-            verbose = TRUE;
+            verbose = true;
             argno++;
         }
         else if (!HDstrcmp(argv[argno], "-V")) {
@@ -196,11 +196,11 @@ main(int argc, char *argv[])
             exit(EXIT_SUCCESS);
         }
         else if (!HDstrcmp(argv[argno], "-family_to_sec2")) {
-            family_to_single = TRUE;
+            family_to_single = true;
             argno++;
         }
         else if (!HDstrcmp(argv[argno], "-family_to_single")) {
-            family_to_single = TRUE;
+            family_to_single = true;
             argno++;
         }
         else if ('b' == argv[argno][1]) {
@@ -278,7 +278,7 @@ main(int argc, char *argv[])
         if (left_overs) {
             n          = (size_t)MIN((off_t)n, left_overs);
             left_overs = left_overs - (off_t)n;
-            need_write = FALSE;
+            need_write = false;
         }
         else if (src_offset < src_act_size) {
             n = (size_t)MIN((off_t)n, src_act_size - src_offset);
@@ -299,7 +299,7 @@ main(int argc, char *argv[])
         else {
             n          = 0;
             left_overs = src_size - src_act_size;
-            need_write = FALSE;
+            need_write = false;
         }
 
         /*
@@ -320,10 +320,10 @@ main(int argc, char *argv[])
                 fprintf(stderr, "%s: short write\n", dst_name);
                 exit(EXIT_FAILURE);
             }
-            need_seek = FALSE;
+            need_seek = false;
         }
         else {
-            need_seek = TRUE;
+            need_seek = true;
         }
 
         /*
@@ -395,7 +395,7 @@ main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
             }
             dst_offset = 0;
-            need_seek  = FALSE;
+            need_seek  = false;
             if (verbose)
                 fprintf(stderr, "> %s\n", dst_name);
         }

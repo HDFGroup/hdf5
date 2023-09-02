@@ -73,7 +73,7 @@ int
 main(int argc, char *argv[])
 {
     struct Options *opt;
-    int             outfile_named = FALSE;
+    int             outfile_named = false;
     int             token;
     int             i;
     int             state = 0;
@@ -163,7 +163,7 @@ main(int argc, char *argv[])
                     goto err;
                 }
                 (void)HDstrcpy(opt->outfile, argv[i]);
-                outfile_named = TRUE;
+                outfile_named = true;
                 break;
 
             case 6: /* -h found; help, then exit */
@@ -228,7 +228,7 @@ main(int argc, char *argv[])
         }
     }
 
-    if (FALSE == outfile_named) {
+    if (false == outfile_named) {
         (void)fprintf(stderr, "%s", err3);
         usage(argv[0]);
         goto err;

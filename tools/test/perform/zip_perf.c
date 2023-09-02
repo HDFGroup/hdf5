@@ -36,13 +36,13 @@
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes, t) ((fabs(t) < 0.0000000001) ? 0.0 : ((((double)(bytes)) / (double)ONE_MB) / (t)))
 
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
+#ifndef true
+#define true 1
+#endif /* true */
 
-#ifndef FALSE
-#define FALSE (!TRUE)
-#endif /* FALSE */
+#ifndef false
+#define false (!true)
+#endif /* false */
 
 #ifndef S_IRWXU
 #define S_IRWXU (_S_IREAD | _S_IWRITE)
@@ -54,7 +54,7 @@ static const char *option_prefix    = NULL;
 static char       *filename         = NULL;
 static int         compress_percent = 0;
 static int         compress_level   = Z_DEFAULT_COMPRESSION;
-static int         output, random_test = FALSE;
+static int         output, random_test = false;
 static int         report_once_flag;
 static double      compression_time;
 
@@ -500,7 +500,7 @@ main(int argc, char *argv[])
                 option_prefix = H5_optarg;
                 break;
             case 'r':
-                random_test = TRUE;
+                random_test = true;
                 break;
             case 's':
                 file_size = parse_size_directive(H5_optarg);

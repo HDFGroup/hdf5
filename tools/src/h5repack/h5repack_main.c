@@ -526,10 +526,10 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     h5tools_vol_info_t out_vol_info;
     h5tools_vfd_info_t in_vfd_info;
     h5tools_vfd_info_t out_vfd_info;
-    hbool_t            custom_in_vol  = FALSE;
-    hbool_t            custom_in_vfd  = FALSE;
-    hbool_t            custom_out_vol = FALSE;
-    hbool_t            custom_out_vfd = FALSE;
+    bool               custom_in_vol  = false;
+    bool               custom_in_vfd  = false;
+    bool               custom_out_vol = false;
+    bool               custom_out_vfd = false;
     hid_t              tmp_fapl       = H5I_INVALID_HID;
     int                bound, opt;
     int                ret_value = 0;
@@ -621,7 +621,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'L':
-                options->latest = TRUE;
+                options->latest = true;
                 break;
 
             case 'j':
@@ -647,30 +647,30 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'X':
-                options->merge = TRUE;
+                options->merge = true;
                 break;
 
             case 'W':
-                options->prune = TRUE;
+                options->prune = true;
                 break;
 
             case 'c':
                 options->grp_compact = atoi(H5_optarg);
                 if (options->grp_compact > 0)
-                    options->latest = TRUE; /* must use latest format */
+                    options->latest = true; /* must use latest format */
                 break;
 
             case 'd':
                 options->grp_indexed = atoi(H5_optarg);
                 if (options->grp_indexed > 0)
-                    options->latest = TRUE; /* must use latest format */
+                    options->latest = true; /* must use latest format */
                 break;
 
             case 's': {
                 int   idx       = 0;
                 int   ssize     = 0;
                 char *msgPtr    = HDstrchr(H5_optarg, ':');
-                options->latest = TRUE; /* must use latest format */
+                options->latest = true; /* must use latest format */
                 if (msgPtr == NULL) {
                     ssize = atoi(H5_optarg);
                     for (idx = 0; idx < 5; idx++)
@@ -793,13 +793,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '1':
                 in_vol_info.type    = VOL_BY_VALUE;
                 in_vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                custom_in_vol       = TRUE;
+                custom_in_vol       = true;
                 break;
 
             case '2':
                 in_vol_info.type   = VOL_BY_NAME;
                 in_vol_info.u.name = H5_optarg;
-                custom_in_vol      = TRUE;
+                custom_in_vol      = true;
                 break;
 
             case '3':
@@ -809,13 +809,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '4':
                 out_vol_info.type    = VOL_BY_VALUE;
                 out_vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                custom_out_vol       = TRUE;
+                custom_out_vol       = true;
                 break;
 
             case '5':
                 out_vol_info.type   = VOL_BY_NAME;
                 out_vol_info.u.name = H5_optarg;
-                custom_out_vol      = TRUE;
+                custom_out_vol      = true;
                 break;
 
             case '6':
@@ -825,13 +825,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '7':
                 in_vfd_info.type    = VFD_BY_VALUE;
                 in_vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                custom_in_vfd       = TRUE;
+                custom_in_vfd       = true;
                 break;
 
             case '8':
                 in_vfd_info.type   = VFD_BY_NAME;
                 in_vfd_info.u.name = H5_optarg;
-                custom_in_vfd      = TRUE;
+                custom_in_vfd      = true;
                 break;
 
             case '9':
@@ -841,13 +841,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '0':
                 out_vfd_info.type    = VFD_BY_VALUE;
                 out_vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                custom_out_vfd       = TRUE;
+                custom_out_vfd       = true;
                 break;
 
             case 'Y':
                 out_vfd_info.type   = VFD_BY_NAME;
                 out_vfd_info.u.name = H5_optarg;
-                custom_out_vfd      = TRUE;
+                custom_out_vfd      = true;
                 break;
 
             case 'Z':
@@ -982,7 +982,7 @@ main(int argc, char **argv)
     }
 
     /* initialize options  */
-    if (h5repack_init(&options, 0, FALSE) < 0) {
+    if (h5repack_init(&options, 0, false) < 0) {
         printf("Error occurred while initializing repack options\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;

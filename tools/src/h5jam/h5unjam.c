@@ -24,7 +24,7 @@ hsize_t write_pad(int, hsize_t);
 hsize_t compute_pad(hsize_t);
 herr_t  copy_to_file(FILE *, FILE *, ssize_t, ssize_t);
 
-int   do_delete   = FALSE;
+int   do_delete   = false;
 char *output_file = NULL;
 char *input_file  = NULL;
 char *ub_file     = NULL;
@@ -92,7 +92,7 @@ usage(const char *prog)
 static int
 parse_command_line(int argc, const char *const *argv)
 {
-    int opt = FALSE;
+    int opt = false;
 
     /* parse command line options */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
@@ -118,7 +118,7 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'd':
-                do_delete = TRUE;
+                do_delete = true;
                 break;
 
             case 'h':
