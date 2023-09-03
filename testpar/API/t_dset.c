@@ -3041,10 +3041,10 @@ test_actual_io_mode(int selection_mode)
     H5D_mpio_actual_io_mode_t        actual_io_mode_expected        = H5D_MPIO_NO_COLLECTIVE;
     const char                      *filename;
     const char                      *test_name;
-    hbool_t                          direct_multi_chunk_io;
-    hbool_t                          multi_chunk_io;
-    hbool_t                          is_chunked;
-    hbool_t                          is_collective;
+    bool                             direct_multi_chunk_io;
+    bool                             multi_chunk_io;
+    bool                             is_chunked;
+    bool                             is_collective;
     int                              mpi_size = -1;
     int                              mpi_rank = -1;
     int                              length;
@@ -3492,7 +3492,7 @@ actual_io_mode_tests(void)
     /* Only run these tests if selection I/O is not being used - selection I/O
      * bypasses this IO mode decision - it's effectively always multi chunk
      * currently */
-    if (/* !H5_use_selection_io_g */ TRUE) {
+    if (/* !H5_use_selection_io_g */ true) {
         test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
 
         /*
@@ -3579,8 +3579,8 @@ test_no_collective_cause_mode(int selection_mode)
 
     const char *filename;
     const char *test_name;
-    hbool_t     is_chunked     = 1;
-    hbool_t     is_independent = 0;
+    bool        is_chunked     = 1;
+    bool        is_independent = 0;
     int         mpi_size       = -1;
     int         mpi_rank       = -1;
     int         length;
@@ -3922,7 +3922,7 @@ dataset_atomicity(void)
     herr_t      ret; /* Generic return value */
     int         mpi_size, mpi_rank;
     int         i, j, k;
-    hbool_t     atomicity = FALSE;
+    bool        atomicity = false;
     MPI_Comm    comm      = MPI_COMM_WORLD;
     MPI_Info    info      = MPI_INFO_NULL;
 
@@ -4015,7 +4015,7 @@ dataset_atomicity(void)
         /* should fail */
         H5E_BEGIN_TRY
         {
-            ret = H5Fset_mpi_atomicity(fid, TRUE);
+            ret = H5Fset_mpi_atomicity(fid, true);
         }
         H5E_END_TRY
         VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
@@ -4038,7 +4038,7 @@ dataset_atomicity(void)
     ret = H5Pclose(acc_tpl);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
-    ret = H5Fset_mpi_atomicity(fid, TRUE);
+    ret = H5Fset_mpi_atomicity(fid, true);
     VRFY((ret >= 0), "H5Fset_mpi_atomicity succeeded");
 
     /* open dataset1 (contiguous case) */
@@ -4059,7 +4059,7 @@ dataset_atomicity(void)
     /* check that the atomicity flag is set */
     ret = H5Fget_mpi_atomicity(fid, &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
-    VRFY((atomicity == TRUE), "atomcity set failed");
+    VRFY((atomicity == true), "atomcity set failed");
 
     MPI_Barrier(comm);
 
@@ -4129,11 +4129,11 @@ dataset_atomicity(void)
         read_buf[i] = 8;
     }
 
-    atomicity = FALSE;
+    atomicity = false;
     /* check that the atomicity flag is set */
     ret = H5Fget_mpi_atomicity(fid, &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
-    VRFY((atomicity == TRUE), "atomcity set failed");
+    VRFY((atomicity == true), "atomcity set failed");
 
     block[0]  = (hsize_t)(dim0 / mpi_size - 1);
     block[1]  = (hsize_t)(dim1 / mpi_size - 1);

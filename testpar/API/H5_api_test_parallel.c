@@ -105,7 +105,7 @@ H5_api_test_run(void)
 }
 
 hid_t
-create_mpi_fapl(MPI_Comm comm, MPI_Info info, hbool_t coll_md_read)
+create_mpi_fapl(MPI_Comm comm, MPI_Info info, bool coll_md_read)
 {
     hid_t ret_pl = H5I_INVALID_HID;
 
@@ -118,7 +118,7 @@ create_mpi_fapl(MPI_Comm comm, MPI_Info info, hbool_t coll_md_read)
         goto error;
     if (H5Pset_all_coll_metadata_ops(ret_pl, coll_md_read) < 0)
         goto error;
-    if (H5Pset_coll_metadata_write(ret_pl, TRUE) < 0)
+    if (H5Pset_coll_metadata_write(ret_pl, true) < 0)
         goto error;
 
     return ret_pl;
@@ -290,7 +290,7 @@ main(int argc, char **argv)
 
     BEGIN_INDEPENDENT_OP(create_fapl)
     {
-        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, FALSE)) < 0) {
+        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, false)) < 0) {
             if (MAINPROCESS)
                 fprintf(stderr, "Unable to create FAPL\n");
             INDEPENDENT_OP_ERROR(create_fapl);

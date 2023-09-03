@@ -114,12 +114,12 @@ test_plist_ed(void)
     hsize_t             max_size[1]; /*data space maximum size */
     const char         *c_to_f          = "x+32";
     H5AC_cache_config_t my_cache_config = {H5AC__CURR_CACHE_CONFIG_VERSION,
-                                           TRUE,
-                                           FALSE,
-                                           FALSE,
+                                           true,
+                                           false,
+                                           false,
                                            "temp",
-                                           TRUE,
-                                           FALSE,
+                                           true,
+                                           false,
                                            (2 * 2048 * 1024),
                                            0.3,
                                            (64 * 1024 * 1024),
@@ -128,7 +128,7 @@ test_plist_ed(void)
                                            H5C_incr__threshold,
                                            0.8,
                                            3.0,
-                                           TRUE,
+                                           true,
                                            (8 * 1024 * 1024),
                                            H5C_flash_incr__add_space,
                                            2.0,
@@ -136,10 +136,10 @@ test_plist_ed(void)
                                            H5C_decr__age_out_with_threshold,
                                            0.997,
                                            0.8,
-                                           TRUE,
+                                           true,
                                            (3 * 1024 * 1024),
                                            3,
-                                           FALSE,
+                                           false,
                                            0.2,
                                            (256 * 2048),
                                            H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
@@ -285,7 +285,7 @@ test_plist_ed(void)
     lcpl = H5Pcreate(H5P_LINK_CREATE);
     VRFY((lcpl >= 0), "H5Pcreate succeeded");
 
-    ret = H5Pset_create_intermediate_group(lcpl, TRUE);
+    ret = H5Pset_create_intermediate_group(lcpl, true);
     VRFY((ret >= 0), "H5Pset_create_intermediate_group succeeded");
 
     ret = test_encode_decode(lcpl, mpi_rank, recv_proc);
@@ -594,10 +594,10 @@ external_links(void)
             VRFY((ret >= 0), "H5Pset_elink_fapl succeeded");
 
             tri_status = H5Lexists(fid, link_path, H5P_DEFAULT);
-            VRFY((tri_status == TRUE), "H5Lexists succeeded");
+            VRFY((tri_status == true), "H5Lexists succeeded");
 
             tri_status = H5Lexists(fid, link_path, lapl);
-            VRFY((tri_status == TRUE), "H5Lexists succeeded");
+            VRFY((tri_status == true), "H5Lexists succeeded");
 
             group = H5Oopen(fid, link_path, H5P_DEFAULT);
             VRFY((group >= 0), "H5Oopen succeeded");

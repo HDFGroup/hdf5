@@ -47,7 +47,7 @@ static int (*par_async_tests[])(void) = {
     test_file_reopen,
 };
 
-hbool_t coll_metadata_read = TRUE;
+bool coll_metadata_read = true;
 
 /* Highest "printf" file created (starting at 0) */
 int max_printf_file = -1;
@@ -65,8 +65,8 @@ test_one_dataset_io(void)
     hsize_t  stride[ONE_DATASET_IO_TEST_SPACE_RANK];
     hsize_t  count[ONE_DATASET_IO_TEST_SPACE_RANK];
     hsize_t  block[ONE_DATASET_IO_TEST_SPACE_RANK];
-    hbool_t  op_failed     = false;
-    hbool_t  is_native_vol = false;
+    bool     op_failed     = false;
+    bool     is_native_vol = false;
     size_t   i, data_size, num_in_progress;
     hid_t    file_id   = H5I_INVALID_HID;
     hid_t    fapl_id   = H5I_INVALID_HID;
@@ -429,7 +429,7 @@ test_multi_dataset_io(void)
     hsize_t  stride[MULTI_DATASET_IO_TEST_SPACE_RANK];
     hsize_t  count[MULTI_DATASET_IO_TEST_SPACE_RANK];
     hsize_t  block[MULTI_DATASET_IO_TEST_SPACE_RANK];
-    hbool_t  op_failed;
+    bool     op_failed;
     size_t   i, j, data_size, num_in_progress;
     hid_t    file_id                               = H5I_INVALID_HID;
     hid_t    fapl_id                               = H5I_INVALID_HID;
@@ -753,8 +753,8 @@ test_multi_file_dataset_io(void)
     hsize_t  stride[MULTI_FILE_DATASET_IO_TEST_SPACE_RANK];
     hsize_t  count[MULTI_FILE_DATASET_IO_TEST_SPACE_RANK];
     hsize_t  block[MULTI_FILE_DATASET_IO_TEST_SPACE_RANK];
-    hbool_t  op_failed     = false;
-    hbool_t  is_native_vol = false;
+    bool     op_failed     = false;
+    bool     is_native_vol = false;
     size_t   i, j, data_size, num_in_progress;
     hid_t    fapl_id                                    = H5I_INVALID_HID;
     hid_t    file_id[MULTI_FILE_DATASET_IO_TEST_NFILES] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
@@ -1178,7 +1178,7 @@ test_multi_file_grp_dset_io(void)
     hsize_t  stride[MULTI_FILE_GRP_DSET_IO_TEST_SPACE_RANK];
     hsize_t  count[MULTI_FILE_GRP_DSET_IO_TEST_SPACE_RANK];
     hsize_t  block[MULTI_FILE_GRP_DSET_IO_TEST_SPACE_RANK];
-    hbool_t  op_failed;
+    bool     op_failed;
     size_t   i, j, data_size, num_in_progress;
     hid_t    file_id   = H5I_INVALID_HID;
     hid_t    fapl_id   = H5I_INVALID_HID;
@@ -1597,8 +1597,8 @@ test_set_extent(void)
     hsize_t  stride[SET_EXTENT_TEST_SPACE_RANK];
     hsize_t  count[SET_EXTENT_TEST_SPACE_RANK];
     hsize_t  block[SET_EXTENT_TEST_SPACE_RANK];
-    hbool_t  op_failed     = false;
-    hbool_t  is_native_vol = false;
+    bool     op_failed     = false;
+    bool     is_native_vol = false;
     size_t   i, j, data_size, num_in_progress;
     hid_t    file_id      = H5I_INVALID_HID;
     hid_t    fapl_id      = H5I_INVALID_HID;
@@ -1933,11 +1933,11 @@ static int
 test_attribute_exists(void)
 {
     hsize_t *dims          = NULL;
-    hbool_t  op_failed     = false;
-    hbool_t  is_native_vol = false;
+    bool     op_failed     = false;
+    bool     is_native_vol = false;
     size_t   num_in_progress;
-    hbool_t  exists1  = false;
-    hbool_t  exists2  = false;
+    bool     exists1  = false;
+    bool     exists2  = false;
     hid_t    file_id  = H5I_INVALID_HID;
     hid_t    fapl_id  = H5I_INVALID_HID;
     hid_t    dset_id  = H5I_INVALID_HID;
@@ -2022,9 +2022,9 @@ test_attribute_exists(void)
 
     /* Check if H5Aexists returned the correct values */
     if (exists1)
-        FAIL_PUTS_ERROR("    H5Aexists returned TRUE for an attribute that should not exist")
+        FAIL_PUTS_ERROR("    H5Aexists returned true for an attribute that should not exist")
     if (!exists2)
-        FAIL_PUTS_ERROR("    H5Aexists returned FALSE for an attribute that should exist");
+        FAIL_PUTS_ERROR("    H5Aexists returned false for an attribute that should exist");
 
     /* Close */
     if (H5Aclose_async(attr_id, es_id) < 0)
@@ -2085,8 +2085,8 @@ static int
 test_attribute_io(void)
 {
     hsize_t *dims          = NULL;
-    hbool_t  op_failed     = false;
-    hbool_t  is_native_vol = false;
+    bool     op_failed     = false;
+    bool     is_native_vol = false;
     size_t   num_in_progress;
     size_t   i, data_size;
     hid_t    file_id   = H5I_INVALID_HID;
@@ -2293,7 +2293,7 @@ static int
 test_attribute_io_tconv(void)
 {
     hsize_t *dims = NULL;
-    hbool_t  op_failed;
+    bool     op_failed;
     size_t   num_in_progress;
     size_t   i, data_size;
     hid_t    file_id   = H5I_INVALID_HID;
@@ -2493,7 +2493,7 @@ static int
 test_attribute_io_compound(void)
 {
     hsize_t      *dims = NULL;
-    hbool_t       op_failed;
+    bool          op_failed;
     size_t        num_in_progress;
     size_t        i, data_size;
     hid_t         file_id   = H5I_INVALID_HID;
@@ -2907,7 +2907,7 @@ test_group(void)
     H5G_info_t info2;
     H5G_info_t info3;
     size_t     num_in_progress;
-    hbool_t    op_failed;
+    bool       op_failed;
 
     TESTING("group operations");
 
@@ -3073,21 +3073,21 @@ error:
 static int
 test_link(void)
 {
-    hid_t   file_id         = H5I_INVALID_HID;
-    hid_t   fapl_id         = H5I_INVALID_HID;
-    hid_t   parent_group_id = H5I_INVALID_HID;
-    hid_t   group_id        = H5I_INVALID_HID;
-    hid_t   gcpl_id         = H5I_INVALID_HID;
-    hid_t   es_id           = H5I_INVALID_HID;
-    hbool_t existsh1;
-    hbool_t existsh2;
-    hbool_t existsh3;
-    hbool_t existss1;
-    hbool_t existss2;
-    hbool_t existss3;
-    size_t  num_in_progress;
-    hbool_t op_failed     = false;
-    hbool_t is_native_vol = false;
+    hid_t  file_id         = H5I_INVALID_HID;
+    hid_t  fapl_id         = H5I_INVALID_HID;
+    hid_t  parent_group_id = H5I_INVALID_HID;
+    hid_t  group_id        = H5I_INVALID_HID;
+    hid_t  gcpl_id         = H5I_INVALID_HID;
+    hid_t  es_id           = H5I_INVALID_HID;
+    bool   existsh1;
+    bool   existsh2;
+    bool   existsh3;
+    bool   existss1;
+    bool   existss2;
+    bool   existss3;
+    size_t num_in_progress;
+    bool   op_failed     = false;
+    bool   is_native_vol = false;
 
     TESTING("link operations");
 
@@ -3276,17 +3276,17 @@ test_link(void)
 
     /* Check if existence returns were correct */
     if (!existsh1)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
+        FAIL_PUTS_ERROR("    link exists returned false for link that should exist");
     if (!existss1)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
+        FAIL_PUTS_ERROR("    link exists returned false for link that should exist");
     if (!existsh2)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
+        FAIL_PUTS_ERROR("    link exists returned false for link that should exist");
     if (existss2)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
+        FAIL_PUTS_ERROR("    link exists returned true for link that should not exist");
     if (existsh3)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
+        FAIL_PUTS_ERROR("    link exists returned true for link that should not exist");
     if (existsh3)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
+        FAIL_PUTS_ERROR("    link exists returned true for link that should not exist");
 
     /* Close */
     if (H5Gclose_async(parent_group_id, es_id) < 0)
@@ -3342,8 +3342,8 @@ test_ocopy_orefresh(void)
     hid_t    space_id        = H5I_INVALID_HID;
     hid_t    es_id           = H5I_INVALID_HID;
     size_t   num_in_progress;
-    hbool_t  op_failed     = false;
-    hbool_t  is_native_vol = false;
+    bool     op_failed     = false;
+    bool     is_native_vol = false;
 
     TESTING("H5Ocopy() and H5Orefresh()");
 
@@ -3495,12 +3495,12 @@ error:
 static int
 test_file_reopen(void)
 {
-    hid_t   file_id          = H5I_INVALID_HID;
-    hid_t   fapl_id          = H5I_INVALID_HID;
-    hid_t   reopened_file_id = H5I_INVALID_HID;
-    hid_t   es_id            = H5I_INVALID_HID;
-    size_t  num_in_progress;
-    hbool_t op_failed;
+    hid_t  file_id          = H5I_INVALID_HID;
+    hid_t  fapl_id          = H5I_INVALID_HID;
+    hid_t  reopened_file_id = H5I_INVALID_HID;
+    hid_t  es_id            = H5I_INVALID_HID;
+    size_t num_in_progress;
+    bool   op_failed;
 
     TESTING("H5Freopen()");
 
@@ -3631,7 +3631,7 @@ H5_api_async_test_parallel(void)
         printf("\n * Re-testing with independent metadata reads *\n");
     }
 
-    coll_metadata_read = FALSE;
+    coll_metadata_read = false;
 
     for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_async_tests); i++) {
         nerrors += (*par_async_tests[i])() ? 1 : 0;

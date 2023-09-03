@@ -224,7 +224,7 @@ compact_dataset(void)
     herr_t      ret;
     const char *filename;
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    hbool_t prop_value;
+    bool prop_value;
 #endif
 
     size = get_size();
@@ -314,10 +314,10 @@ compact_dataset(void)
     VRFY((ret >= 0), "H5Dread succeeded");
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    prop_value = FALSE;
+    prop_value = false;
     ret        = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
     VRFY((ret >= 0), "H5Pget succeeded");
-    VRFY((prop_value == FALSE && dxfer_coll_type == DXFER_COLLECTIVE_IO),
+    VRFY((prop_value == false && dxfer_coll_type == DXFER_COLLECTIVE_IO),
          "rank 0 Bcast optimization was performed for a compact dataset");
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
@@ -588,7 +588,7 @@ dataset_fillvalue(void)
     herr_t      ret;                 /* Generic return value */
     const char *filename;
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    hbool_t prop_value;
+    bool prop_value;
 #endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -656,13 +656,13 @@ dataset_fillvalue(void)
         VRFY((ret >= 0), "H5Dread succeeded");
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-        prop_value = FALSE;
+        prop_value = false;
         ret        = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
         VRFY((ret >= 0), "testing property list get succeeded");
         if (ii == 0)
-            VRFY((prop_value == FALSE), "correctly handled rank 0 Bcast");
+            VRFY((prop_value == false), "correctly handled rank 0 Bcast");
         else
-            VRFY((prop_value == TRUE), "correctly handled rank 0 Bcast");
+            VRFY((prop_value == true), "correctly handled rank 0 Bcast");
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
         /* Verify all data read are the fill value 0 */
@@ -746,13 +746,13 @@ dataset_fillvalue(void)
         VRFY((ret >= 0), "H5Dread succeeded");
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-        prop_value = FALSE;
+        prop_value = false;
         ret        = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
         VRFY((ret >= 0), "testing property list get succeeded");
         if (ii == 0)
-            VRFY((prop_value == FALSE), "correctly handled rank 0 Bcast");
+            VRFY((prop_value == false), "correctly handled rank 0 Bcast");
         else
-            VRFY((prop_value == TRUE), "correctly handled rank 0 Bcast");
+            VRFY((prop_value == true), "correctly handled rank 0 Bcast");
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
         /* Verify correct data read */
@@ -936,7 +936,7 @@ independent_group_read(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
-    H5Pset_all_coll_metadata_ops(plist, FALSE);
+    H5Pset_all_coll_metadata_ops(plist, false);
 
     fid = H5Fopen(filename, H5F_ACC_RDONLY, plist);
     VRFY((fid > 0), "H5Fopen");
@@ -1516,7 +1516,7 @@ io_mode_confusion(void)
      */
 
     const char            *fcn_name = "io_mode_confusion";
-    const hbool_t          verbose  = FALSE;
+    const bool             verbose  = false;
     const H5Ptest_param_t *pt;
     char                  *filename;
 
@@ -1765,8 +1765,8 @@ rr_obj_hdr_flush_confusion(void)
     MPI_Comm comm;
 
     /* test bed related variables */
-    const char   *fcn_name = "rr_obj_hdr_flush_confusion";
-    const hbool_t verbose  = FALSE;
+    const char *fcn_name = "rr_obj_hdr_flush_confusion";
+    const bool  verbose  = false;
 
     /* Create two new private communicators from MPI_COMM_WORLD.
      * Even and odd ranked processes go to comm_writers and comm_readers
@@ -1843,7 +1843,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
 
     /* test bed related variables */
     const char            *fcn_name = "rr_obj_hdr_flush_confusion_writer";
-    const hbool_t          verbose  = FALSE;
+    const bool             verbose  = false;
     const H5Ptest_param_t *pt;
     char                  *filename;
 
@@ -2222,7 +2222,7 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
 
     /* test bed related variables */
     const char            *fcn_name = "rr_obj_hdr_flush_confusion_reader";
-    const hbool_t          verbose  = FALSE;
+    const bool             verbose  = false;
     const H5Ptest_param_t *pt;
     char                  *filename;
 

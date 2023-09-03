@@ -86,7 +86,7 @@ int curr_nerrors = 0;
 typedef void (*test_func)(void);
 
 /* Utility functions */
-static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
+static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, bool custom_config,
                                        H5FD_subfiling_params_t *custom_cfg, int32_t thread_pool_size);
 
 /* Test functions */
@@ -125,7 +125,7 @@ static test_func tests[] = {
  * ---------------------------------------------------------------------------
  */
 static hid_t
-create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
+create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, bool custom_config,
                           H5FD_subfiling_params_t *custom_cfg, int32_t thread_pool_size)
 {
     H5FD_subfiling_config_t subfiling_conf;
@@ -200,7 +200,7 @@ test_create_and_close(void)
         TESTING_2("file creation and immediate close");
 
     /* Get a default Subfiling FAPL */
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, FALSE, NULL, 0);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -302,7 +302,7 @@ test_config_file(void)
     cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : stripe_size;
     cfg.stripe_count  = num_iocs_g > 1 ? (num_iocs_g / 2) : 1;
 
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, true, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -518,7 +518,7 @@ test_stripe_sizes(void)
 
             c_write_buf = write_buf;
 
-            fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, TRUE, &cfg,
+            fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, true, &cfg,
                                                 H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
             VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
@@ -656,7 +656,7 @@ test_stripe_sizes(void)
 
         cfg.stripe_count = num_iocs_g;
 
-        fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+        fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, true, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
         VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
         /* Create and close file with H5Fcreate to setup superblock */
@@ -965,7 +965,7 @@ test_selection_strategies(void)
                     if (num_active_ranks < mpi_size)
                         file_comm = MPI_COMM_SELF;
 
-                    fapl_id = create_subfiling_ioc_fapl(file_comm, info_g, TRUE, &cfg,
+                    fapl_id = create_subfiling_ioc_fapl(file_comm, info_g, true, &cfg,
                                                         H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
                     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
@@ -1079,7 +1079,7 @@ test_read_different_stripe_size(void)
     cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : 1048576;
     cfg.stripe_count  = num_iocs_g;
 
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, true, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -1163,7 +1163,7 @@ test_read_different_stripe_size(void)
     cfg.stripe_size += (cfg.stripe_size / 2);
     cfg.stripe_count *= 2;
 
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, true, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, fapl_id);
@@ -1317,7 +1317,7 @@ test_subfiling_precreate_rank_0(void)
         cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
         cfg.stripe_count  = num_iocs_g;
 
-        fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, TRUE, &cfg,
+        fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, true, &cfg,
                                             H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
         VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
@@ -1395,7 +1395,7 @@ test_subfiling_precreate_rank_0(void)
 
     /* Open the file on all ranks */
 
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, FALSE, NULL, 0);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, fapl_id);
@@ -1481,7 +1481,7 @@ test_subfiling_write_many_read_one(void)
         TESTING_2("reading back file with single MPI rank");
 
     /* Get a default Subfiling FAPL */
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, FALSE, NULL, 0);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     /* Create file on all ranks */
@@ -1541,7 +1541,7 @@ test_subfiling_write_many_read_one(void)
     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
     if (MAINPROCESS) {
-        fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, FALSE, NULL, 0);
+        fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, false, NULL, 0);
         VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
         file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, fapl_id);
@@ -1606,7 +1606,7 @@ test_subfiling_write_many_read_few(void)
     hsize_t  start[1];
     hsize_t  count[1];
     hsize_t  dset_dims[1];
-    hbool_t  reading_file = FALSE;
+    bool     reading_file = false;
     size_t   target_size;
     hid_t    file_id   = H5I_INVALID_HID;
     hid_t    fapl_id   = H5I_INVALID_HID;
@@ -1637,7 +1637,7 @@ test_subfiling_write_many_read_few(void)
     }
 
     /* Get a default Subfiling FAPL */
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, FALSE, NULL, 0);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     /* Create file on all ranks */
@@ -1717,17 +1717,17 @@ test_subfiling_write_many_read_few(void)
         }
 
         if (color)
-            reading_file = TRUE;
+            reading_file = true;
     }
     else {
         if (node_local_rank == 0) {
             sub_comm     = ioc_comm;
-            reading_file = TRUE;
+            reading_file = true;
         }
     }
 
     if (reading_file) {
-        fapl_id = create_subfiling_ioc_fapl(sub_comm, MPI_INFO_NULL, FALSE, NULL, 0);
+        fapl_id = create_subfiling_ioc_fapl(sub_comm, MPI_INFO_NULL, false, NULL, 0);
         VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
         file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, fapl_id);
@@ -1848,7 +1848,7 @@ test_subfiling_h5fuse(void)
     }
 
     /* Get a default Subfiling FAPL */
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, FALSE, NULL, 0);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     /* Create file on all ranks */
@@ -2117,10 +2117,10 @@ int
 main(int argc, char **argv)
 {
     unsigned seed;
-    hbool_t  must_unset_stripe_size_env      = FALSE;
-    hbool_t  must_unset_ioc_per_node_env     = FALSE;
-    hbool_t  must_unset_ioc_thread_count_env = FALSE;
-    hbool_t  must_unset_config_dir_env       = FALSE;
+    bool     must_unset_stripe_size_env      = false;
+    bool     must_unset_ioc_per_node_env     = false;
+    bool     must_unset_ioc_thread_count_env = false;
+    bool     must_unset_config_dir_env       = false;
     char    *env_value                       = NULL;
     int      required                        = MPI_THREAD_MULTIPLE;
     int      provided                        = 0;
@@ -2317,7 +2317,7 @@ main(int argc, char **argv)
             goto exit;
         }
 
-        must_unset_stripe_size_env = TRUE;
+        must_unset_stripe_size_env = true;
     }
     if (ioc_per_node_g < 0) {
         const char *ioc_per_node_str;
@@ -2334,7 +2334,7 @@ main(int argc, char **argv)
             goto exit;
         }
 
-        must_unset_ioc_per_node_env = TRUE;
+        must_unset_ioc_per_node_env = true;
     }
     if (ioc_thread_pool_size_g < 0) {
         if (HDsetenv(H5FD_IOC_THREAD_POOL_SIZE, "2", 1) < 0) {
@@ -2344,7 +2344,7 @@ main(int argc, char **argv)
             goto exit;
         }
 
-        must_unset_ioc_thread_count_env = TRUE;
+        must_unset_ioc_thread_count_env = true;
     }
 
     if (!(env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
@@ -2397,7 +2397,7 @@ main(int argc, char **argv)
             }
         }
 
-        must_unset_config_dir_env = TRUE;
+        must_unset_config_dir_env = true;
     }
 
     /* Grab values from environment variables */

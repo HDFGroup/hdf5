@@ -267,9 +267,9 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
         /* set Parallel access with communicator */
         ret = H5Pset_fapl_mpio(ret_pl, comm, info);
         VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
-        ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
+        ret = H5Pset_all_coll_metadata_ops(ret_pl, true);
         VRFY((ret >= 0), "H5Pset_all_coll_metadata_ops succeeded");
-        ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
+        ret = H5Pset_coll_metadata_write(ret_pl, true);
         VRFY((ret >= 0), "H5Pset_coll_metadata_write succeeded");
         return (ret_pl);
     }

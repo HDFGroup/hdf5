@@ -153,7 +153,7 @@ set_dxpl(hid_t dxpl, H5D_selection_io_mode_t select_io_mode, H5FD_mpio_xfer_t mp
         P_TEST_ERROR;
 
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             P_TEST_ERROR;
 
 } /* set_dxpl() */
@@ -3407,7 +3407,7 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
     hsize_t  cdims[1];
-    hbool_t  is_chunked                           = FALSE;
+    bool     is_chunked                           = false;
     hid_t    tid                                  = H5T_NATIVE_INT;
     uint32_t no_selection_io_cause_write          = 0;
     uint32_t no_selection_io_cause_read           = 0;
@@ -3464,7 +3464,7 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
                 P_TEST_ERROR;
 
             if (test_mode & TEST_IN_PLACE_TCONV) {
-                if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+                if (H5Pset_modify_write_buf(dxpl, true) < 0)
                     P_TEST_ERROR;
             }
             /* In-place type conversion for read doesn't require modify_write_buf */
@@ -3972,14 +3972,14 @@ main(int argc, char *argv[])
         P_TEST_ERROR;
 
     /* Test with contiguous or chunked dataset */
-    for (chunked = FALSE; chunked <= TRUE; chunked++) {
+    for (chunked = false; chunked <= true; chunked++) {
 
         /* Data transforms only apply to integer or floating-point datasets */
         /* therefore, not all tests are run with data transform */
-        for (dtrans = FALSE; dtrans <= TRUE; dtrans++) {
+        for (dtrans = false; dtrans <= true; dtrans++) {
 
             /* Test with and without modify_write_buf turned on */
-            for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
+            for (mwbuf = false; mwbuf <= true; mwbuf++) {
 
                 if (MAINPROCESS) {
                     /* Print configuration message */
