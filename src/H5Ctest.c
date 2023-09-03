@@ -92,7 +92,7 @@ H5C__verify_cork_tag_test_cb(H5C_cache_entry_t *entry, void *_ctx)
     assert(ctx);
 
     /* Retrieve corked status for entry */
-    is_corked = entry->tag_info ? entry->tag_info->corked : FALSE;
+    is_corked = entry->tag_info ? entry->tag_info->corked : false;
 
     /* Verify corked status for entry */
     if (is_corked != ctx->status)
@@ -140,7 +140,7 @@ H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, bool status)
     ctx.status = status;
 
     /* Iterate through tagged entries in the cache */
-    if (H5C__iter_tagged_entries(cache, tag, FALSE, H5C__verify_cork_tag_test_cb, &ctx) < 0)
+    if (H5C__iter_tagged_entries(cache, tag, false, H5C__verify_cork_tag_test_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed");
 
 done:

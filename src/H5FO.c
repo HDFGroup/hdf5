@@ -285,7 +285,7 @@ H5FO_mark(const H5F_t *f, haddr_t addr, bool deleted)
         haddr_t addr;           IN: Address of object to delete
 
  RETURNS
-    Returns a TRUE/FALSE on success
+    Returns a true/false on success
  DESCRIPTION
     Checks if the object is currently in the "opened objects" tree and
     whether its marks for deletion from the file when it is closed.
@@ -298,7 +298,7 @@ bool
 H5FO_marked(const H5F_t *f, haddr_t addr)
 {
     H5FO_open_obj_t *open_obj;          /* Information about open object */
-    bool             ret_value = FALSE; /* Return value */
+    bool             ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 

@@ -98,7 +98,7 @@
                  */                                                                                          \
                 if (is_contig) {                                                                             \
                     H5_CHECK_OVERFLOW(sel_off, hsize_t, size_t);                                             \
-                    (PIECE_INFO)->in_place_tconv = TRUE;                                                     \
+                    (PIECE_INFO)->in_place_tconv = true;                                                     \
                     (PIECE_INFO)->buf_off        = (size_t)sel_off * mem_type_size;                          \
                 }                                                                                            \
             }                                                                                                \
@@ -528,7 +528,7 @@ struct H5D_shared_t {
     hid_t            dapl_id;         /* Dataset access property id */
     H5D_dcpl_cache_t dcpl_cache;      /* Cached DCPL values */
     H5O_layout_t     layout;          /* Data layout                  */
-    bool             checked_filters; /* TRUE if dataset passes can_apply check */
+    bool             checked_filters; /* true if dataset passes can_apply check */
 
     /* Cached dataspace info */
     unsigned ndims;                       /* The dataset's dataspace rank */

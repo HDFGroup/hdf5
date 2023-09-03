@@ -401,7 +401,7 @@ done:
  *              coordinates between the file-global flag and the flag set
  *              for the current operation in the current API context.
  *
- * Return:      TRUE/FALSE (can't fail)
+ * Return:      true/false (can't fail)
  *
  *-------------------------------------------------------------------------
  */
@@ -409,7 +409,7 @@ bool
 H5F_get_coll_metadata_reads(const H5F_t *file)
 {
     H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
-    bool                    ret_value = FALSE;
+    bool                    ret_value = false;
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -419,11 +419,11 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
     file_flag = H5F_COLL_MD_READ(file);
 
     /* If file flag is set to H5P_FORCE_FALSE, exit early
-     * with FALSE, since collective metadata reads have
+     * with false, since collective metadata reads have
      * been explicitly disabled somewhere in the library.
      */
     if (H5P_FORCE_FALSE == file_flag)
-        ret_value = FALSE;
+        ret_value = false;
     else {
         /* If file flag is set to H5P_USER_TRUE, ignore
          * any settings in the API context. A file-global
@@ -432,7 +432,7 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
          * Property List for an individual operation.
          */
         if (H5P_USER_TRUE == file_flag)
-            ret_value = TRUE;
+            ret_value = true;
         else {
             /* Get the collective metadata reads flag from
              * the current API context.
@@ -487,7 +487,7 @@ void
 H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, bool *context_flag)
 {
     H5P_coll_md_read_flag_t prev_file_flag    = H5P_USER_FALSE;
-    bool                    prev_context_flag = FALSE;
+    bool                    prev_context_flag = false;
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -516,12 +516,12 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, boo
  * Function:    H5F_mpi_get_file_block_type
  *
  * Purpose:     Creates an MPI derived datatype for communicating an
- *              H5F_block_t structure. If `commit` is specified as TRUE,
+ *              H5F_block_t structure. If `commit` is specified as true,
  *              the resulting datatype will be committed and ready for
  *              use in communication. Otherwise, the type is only suitable
  *              for building other derived types.
  *
- *              If TRUE is returned through `new_type_derived`, this lets
+ *              If true is returned through `new_type_derived`, this lets
  *              the caller know that the datatype has been derived and
  *              should be freed with MPI_Type_free once it is no longer
  *              needed.
@@ -545,7 +545,7 @@ H5F_mpi_get_file_block_type(bool commit, MPI_Datatype *new_type, bool *new_type_
     assert(new_type);
     assert(new_type_derived);
 
-    *new_type_derived = FALSE;
+    *new_type_derived = false;
 
     field_count = 2;
     assert(field_count == sizeof(types) / sizeof(MPI_Datatype));
@@ -559,7 +559,7 @@ H5F_mpi_get_file_block_type(bool commit, MPI_Datatype *new_type, bool *new_type_
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-    *new_type_derived = TRUE;
+    *new_type_derived = true;
 
     if (commit && MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
@@ -569,7 +569,7 @@ done:
         if (*new_type_derived) {
             if (MPI_SUCCESS != (mpi_code = MPI_Type_free(new_type)))
                 HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-            *new_type_derived = FALSE;
+            *new_type_derived = false;
         }
     }
 

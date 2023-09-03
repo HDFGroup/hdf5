@@ -400,7 +400,7 @@ done:
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -411,7 +411,7 @@ H5HF__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;                /* Return value */
+    htri_t         ret_value = true;                /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -422,7 +422,7 @@ H5HF__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_hdr_verify_chksum() */
@@ -628,8 +628,8 @@ H5HF__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t len,
 
 #ifndef NDEBUG
     {
-        bool descendants_clean = TRUE;
-        bool fd_children_clean = TRUE;
+        bool descendants_clean = true;
+        bool fd_children_clean = true;
 
         /* Verify that flush dependencies are working correctly.  Do this
          * by verifying that either:
@@ -764,7 +764,7 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
         UINT32ENCODE(image, hdr->pline_root_direct_filter_mask);
 
         /* Encode I/O filter information */
-        if (H5O_msg_encode(hdr->f, H5O_PLINE_ID, FALSE, image, &(hdr->pline)) < 0)
+        if (H5O_msg_encode(hdr->f, H5O_PLINE_ID, false, image, &(hdr->pline)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, FAIL, "can't encode I/O pipeline filters");
         image += hdr->filter_len;
     } /* end if */
@@ -855,7 +855,7 @@ H5HF__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored checksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -866,7 +866,7 @@ H5HF__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;                /* Return value */
+    htri_t         ret_value = true;                /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -877,7 +877,7 @@ H5HF__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_iblock_verify_chksum() */
@@ -1145,8 +1145,8 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
 
 #ifndef NDEBUG
     {
-        bool     descendants_clean = TRUE;
-        bool     fd_children_clean = TRUE;
+        bool     descendants_clean = true;
+        bool     fd_children_clean = true;
         unsigned iblock_status     = 0;
 
         /* verify that flush dependencies are working correctly.  Do this
@@ -1521,7 +1521,7 @@ H5HF__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -1538,7 +1538,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     uint32_t                computed_chksum;  /* Computed metadata checksum value */
     size_t                  chk_size;         /* The size for validating checksum */
     uint8_t                *chk_p;            /* Pointer to the area for validating checksum */
-    htri_t                  ret_value = TRUE; /* Return value */
+    htri_t                  ret_value = true; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1552,7 +1552,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
 
     /* Get out if data block is not checksummed */
     if (!(hdr->checksum_dblocks))
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(true);
 
     if (hdr->filter_len > 0) {
         size_t   nbytes;      /* Number of bytes used in buffer, after applying reverse filters */
@@ -1581,7 +1581,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed");
 
         /* Update info about direct block */
-        udata->decompressed = TRUE;
+        udata->decompressed = true;
         len                 = nbytes;
     }
     else {
@@ -1613,7 +1613,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
 
     /* Verify checksum */
     if (stored_chksum != computed_chksum)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
     /* Save the decompressed data to be used later in deserialize callback */
     if (hdr->filter_len > 0) {
@@ -2108,7 +2108,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
 
         /* Check for root direct block */
         if (dblock->parent == NULL) {
-            bool hdr_changed = FALSE; /* Whether the header info changed */
+            bool hdr_changed = false; /* Whether the header info changed */
 
             /* Sanity check */
             assert(H5_addr_eq(hdr->man_dtable.table_addr, addr));
@@ -2117,7 +2117,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
             /* Check if the filter mask changed */
             if (hdr->pline_root_direct_filter_mask != filter_mask) {
                 hdr->pline_root_direct_filter_mask = filter_mask;
-                hdr_changed                        = TRUE;
+                hdr_changed                        = true;
             } /* end if */
 
             /* verify that the cache's last record of the compressed
@@ -2153,7 +2153,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
                 hdr->pline_root_direct_size = write_size;
 
                 /* Note that heap header was modified */
-                hdr_changed = TRUE;
+                hdr_changed = true;
             } /* end if */
 
             /* Check if heap header was modified */
@@ -2162,7 +2162,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty");
         }                             /* end if */
         else {                        /* the direct block's parent is an indirect block */
-            bool par_changed = FALSE; /* Whether the parent's infochanged */
+            bool par_changed = false; /* Whether the parent's infochanged */
 
             /* Sanity check */
             assert(par_iblock);
@@ -2171,7 +2171,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
             /* Check if the filter mask changed */
             if (par_iblock->filt_ents[par_entry].filter_mask != filter_mask) {
                 par_iblock->filt_ents[par_entry].filter_mask = filter_mask;
-                par_changed                                  = TRUE;
+                par_changed                                  = true;
             } /* end if */
 
             /* verify that the cache's last record of the compressed
@@ -2208,7 +2208,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
                 par_iblock->filt_ents[par_entry].size = write_size;
 
                 /* Note that parent was modified */
-                par_changed = TRUE;
+                par_changed = true;
             } /* end if */
 
             /* Check if parent was modified */
@@ -2493,7 +2493,7 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  * Purpose:	Sanity checking routine that verifies that all indirect
  *		and direct blocks that are descendants of the supplied
  *		instance of H5HF_hdr_t are clean.  Set *clean to
- *		TRUE if this is the case, and to FALSE otherwise.
+ *		true if this is the case, and to false otherwise.
  *
  *		Update -- 8/24/15
  *
@@ -2551,7 +2551,7 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
 static herr_t
 H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, bool *fd_clean, bool *clean)
 {
-    bool     fd_exists = FALSE;    /* whether flush dependency exists. */
+    bool     fd_exists = false;    /* whether flush dependency exists. */
     haddr_t  hdr_addr;             /* Address of header */
     unsigned hdr_status = 0;       /* Header cache entry status */
     herr_t   ret_value  = SUCCEED; /* Return value */
@@ -2627,13 +2627,13 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, bool *fd_cle
         assert(root_iblock_in_cache || (root_iblock == NULL));
 
         if (!root_iblock_in_cache) { /* we are done */
-            *clean    = TRUE;
-            *fd_clean = TRUE;
+            *clean    = true;
+            *fd_clean = true;
         } /* end if */
         else if ((root_iblock_status & H5AC_ES__IS_DIRTY) &&
                  (((root_iblock_status & H5AC_ES__IMAGE_IS_UP_TO_DATE) == 0) ||
                   (!H5AC_get_serialization_in_progress(f)))) {
-            *clean = FALSE;
+            *clean = false;
 
             /* verify that a flush dependency exists between the header and
              * the root inode.
@@ -2642,10 +2642,10 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, bool *fd_cle
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't check flush dependency");
             assert(fd_exists);
 
-            *fd_clean = FALSE;
+            *fd_clean = false;
         }      /* end else-if */
         else { /* must examine children */
-            bool unprotect_root_iblock = FALSE;
+            bool unprotect_root_iblock = false;
 
             /* At this point, the root iblock may be pinned, protected,
              * both, or neither, and we may or may not have a pointer
@@ -2683,7 +2683,7 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, bool *fd_cle
 
                     H5_END_TAG
 
-                    unprotect_root_iblock = TRUE;
+                    unprotect_root_iblock = true;
                 } /* end if */
                 else {
                     /* the root iblock is protected, and we have no
@@ -2758,7 +2758,7 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, bool *fd_cle
 
                     H5_END_TAG
 
-                    unprotect_root_iblock = TRUE;
+                    unprotect_root_iblock = true;
                     assert(iblock == root_iblock);
                 } /* end if */
             }     /* end else */
@@ -2824,16 +2824,16 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, bool *fd_cle
             *fd_clean = *clean;
         }      /* end if */
         else { /* root dblock not in cache */
-            *fd_clean = TRUE;
-            *clean    = TRUE;
+            *fd_clean = true;
+            *clean    = true;
         } /* end else */
     }     /* end else-if */
     else {
         /* this is scenario 3 -- the fractal heap is empty, and we
          * have nothing to do.
          */
-        *fd_clean = TRUE;
-        *clean    = TRUE;
+        *fd_clean = true;
+        *clean    = true;
     } /* end else */
 
 done:
@@ -2847,7 +2847,7 @@ done:
  * Purpose:	Sanity checking routine that verifies that all indirect
  *		and direct blocks that are descendants of the supplied
  *		instance of H5HF_indirect_t are clean.  Set *clean
- *		to TRUE if this is the case, and to FALSE otherwise.
+ *		to true if this is the case, and to false otherwise.
  *
  *		In passing, the function also does a cursory check to
  *		spot any obvious errors in the flush dependency setup.
@@ -2911,8 +2911,8 @@ static herr_t
 H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, haddr_t fd_parent_addr, H5HF_indirect_t *iblock,
                                             unsigned *iblock_status, bool *fd_clean, bool *clean)
 {
-    bool   has_dblocks = FALSE;
-    bool   has_iblocks = FALSE;
+    bool   has_dblocks = false;
+    bool   has_iblocks = false;
     herr_t ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2925,7 +2925,7 @@ H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, haddr_t fd_parent_addr, H5
     assert(iblock_status);
     assert(fd_clean);
     assert(*fd_clean);
-    assert(clean); /* note that *clean need not be TRUE */
+    assert(clean); /* note that *clean need not be true */
 
     if ((*fd_clean) && H5HF__cache_verify_iblocks_dblocks_clean(f, fd_parent_addr, iblock, fd_clean, clean,
                                                                 &has_dblocks) < 0)
@@ -3072,18 +3072,18 @@ H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5HF_
 
                 assert(dblock_status & H5AC_ES__IN_CACHE);
 
-                *has_dblocks = TRUE;
+                *has_dblocks = true;
 
                 if ((dblock_status & H5AC_ES__IS_DIRTY) &&
                     (((dblock_status & H5AC_ES__IMAGE_IS_UP_TO_DATE) == 0) ||
                      (!H5AC_get_serialization_in_progress(f)))) {
-                    *clean = FALSE;
+                    *clean = false;
 
                     if (H5AC_flush_dependency_exists(f, fd_parent_addr, dblock_addr, &fd_exists) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't check flush dependency");
 
                     if (fd_exists)
-                        *fd_clean = FALSE;
+                        *fd_clean = false;
                 } /* end if */
 
                 /* If a child dblock is in cache, it must have a flush
@@ -3222,22 +3222,22 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
             if (child_iblock_status & H5AC_ES__IN_CACHE) {
                 bool fd_exists;
 
-                *has_iblocks = TRUE;
+                *has_iblocks = true;
 
                 if ((child_iblock_status & H5AC_ES__IS_DIRTY) &&
                     (((child_iblock_status & H5AC_ES__IMAGE_IS_UP_TO_DATE) == 0) ||
                      (!H5AC_get_serialization_in_progress(f)))) {
 
-                    *clean = FALSE;
+                    *clean = false;
 
                     if (H5AC_flush_dependency_exists(f, fd_parent_addr, child_iblock_addr, &fd_exists) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't check flush dependency");
 
                     if (fd_exists)
-                        *fd_clean = FALSE;
+                        *fd_clean = false;
                 } /* end if */
 
-                /* if the child iblock is in cache and *fd_clean is TRUE,
+                /* if the child iblock is in cache and *fd_clean is true,
                  * we must continue to explore down the fractal heap tree
                  * structure to verify that all descendant blocks that are
                  * flush dependency children of the entry at parent_addr are
@@ -3291,7 +3291,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
                  */
                 if (*fd_clean) {
                     H5HF_indirect_t *child_iblock           = NULL;
-                    bool             unprotect_child_iblock = FALSE;
+                    bool             unprotect_child_iblock = false;
 
                     if (0 == (child_iblock_status & H5AC_ES__IS_PINNED)) {
                         /* child iblock is not pinned */
@@ -3323,7 +3323,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
 
                             H5_END_TAG
 
-                            unprotect_child_iblock = TRUE;
+                            unprotect_child_iblock = true;
                         } /* end if */
                         else {
                             /* child iblock is protected -- use             */

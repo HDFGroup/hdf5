@@ -136,7 +136,7 @@ static herr_t H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* Chunked dataset I/O ops for v2 B-tree indexing */
 const H5D_chunk_ops_t H5D_COPS_BT2[1] = {{
-    TRUE,                        /* Fixed array indices support SWMR access */
+    true,                        /* Fixed array indices support SWMR access */
     H5D__bt2_idx_init,           /* init */
     H5D__bt2_idx_create,         /* create */
     H5D__bt2_idx_is_space_alloc, /* is_space_alloc */
@@ -608,7 +608,7 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
     oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
 
     /* Get header */
-    if (NULL == (oh = H5O_protect(&oloc, H5AC__READ_ONLY_FLAG, TRUE)))
+    if (NULL == (oh = H5O_protect(&oloc, H5AC__READ_ONLY_FLAG, true)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header");
 
     /* Retrieve the dataset's object header proxy */
@@ -811,7 +811,7 @@ H5D__bt2_mod_cb(void *_record, void *_op_data, bool *changed)
     *record = op_data->rec;
 
     /* Note that the record changed */
-    *changed = TRUE;
+    *changed = true;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__bt2_mod_cb() */
@@ -970,7 +970,7 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
         bt2_udata.rec.scaled[u] = udata->common.scaled[u];
 
     /* Go get chunk information from v2 B-tree */
-    found = FALSE;
+    found = false;
     if (H5B2_find(bt2, &bt2_udata, &found, H5D__bt2_found_cb, &found_rec) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "can't check for chunk in v2 B-tree");
 

@@ -419,7 +419,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
                 targ_oloc.addr = lnk->u.hard.addr;
 
                 /* Get the object header */
-                if (NULL == (oh = H5O_protect(&targ_oloc, H5AC__READ_ONLY_FLAG, FALSE)))
+                if (NULL == (oh = H5O_protect(&targ_oloc, H5AC__READ_ONLY_FLAG, false)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect target object header");
 
                 /* Check if a symbol table message exists */

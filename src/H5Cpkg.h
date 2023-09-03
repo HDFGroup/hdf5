@@ -61,7 +61,7 @@
  * NULL on entry in the insertion macros.
  *
  * Finally, observe that the sanity checking macros evaluate to the empty
- * string when H5C_DO_SANITY_CHECKS is FALSE.  They also contain calls
+ * string when H5C_DO_SANITY_CHECKS is false.  They also contain calls
  * to the HGOTO_ERROR macro, which may not be appropriate in all cases.
  * If so, we will need versions of the insertion and deletion macros which
  * do not reference the sanity checking macros.
@@ -758,7 +758,7 @@ if ((cache_ptr) == NULL ||                                                  \
 
 #define H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr, fail_val) \
 if ((cache_ptr) == NULL || (cache_ptr)->index_len <= 0 ||                     \
-    (entry_ptr) == NULL || (entry_ptr)->is_dirty != FALSE ||                  \
+    (entry_ptr) == NULL || (entry_ptr)->is_dirty != false ||                  \
     (cache_ptr)->index_size < (entry_ptr)->size ||                            \
     (cache_ptr)->dirty_index_size < (entry_ptr)->size ||                      \
     (cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) || \
@@ -778,7 +778,7 @@ if ((cache_ptr) == NULL || (cache_ptr)->index_len <= 0 ||                     \
 
 #define H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr, fail_val) \
 if ((cache_ptr) == NULL || (cache_ptr)->index_len <= 0 ||                     \
-    (entry_ptr) == NULL || (entry_ptr)->is_dirty != TRUE ||                   \
+    (entry_ptr) == NULL || (entry_ptr)->is_dirty != true ||                   \
     (cache_ptr)->index_size < (entry_ptr)->size ||                            \
     (cache_ptr)->clean_index_size < (entry_ptr)->size ||                      \
     (cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ||   \
@@ -1001,7 +1001,7 @@ do {                                                                           \
 
 #else /* H5C_DO_SLIST_SANITY_CHECKS */
 
-#define H5C__ENTRY_IN_SLIST(cache_ptr, entry_ptr) FALSE
+#define H5C__ENTRY_IN_SLIST(cache_ptr, entry_ptr) false
 
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
 
@@ -1067,8 +1067,8 @@ do {                                                                           \
         if(H5SL_insert((cache_ptr)->slist_ptr, entry_ptr, &((entry_ptr)->addr)) < 0) \
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val), "can't insert entry in skip list"); \
                                                                                \
-        (entry_ptr)->in_slist = TRUE;                                          \
-        (cache_ptr)->slist_changed = TRUE;                                     \
+        (entry_ptr)->in_slist = true;                                          \
+        (cache_ptr)->slist_changed = true;                                     \
         (cache_ptr)->slist_len++;                                              \
         (cache_ptr)->slist_size += (entry_ptr)->size;                          \
         ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])++;                    \
@@ -1118,7 +1118,7 @@ do {                                                                            
                                                                                \
         assert((cache_ptr)->slist_len > 0);                                  \
         if(!(during_flush))                                                    \
-            (cache_ptr)->slist_changed = TRUE;                                 \
+            (cache_ptr)->slist_changed = true;                                 \
         (cache_ptr)->slist_len--;                                              \
         assert((cache_ptr)->slist_size >= (entry_ptr)->size);                \
         (cache_ptr)->slist_size -= (entry_ptr)->size;                          \
@@ -1126,7 +1126,7 @@ do {                                                                            
         assert((cache_ptr)->slist_ring_size[(entry_ptr)->ring] >= (entry_ptr)->size); \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size;\
         H5C__SLIST_REMOVE_ENTRY_SC(cache_ptr, entry_ptr);                       \
-        (entry_ptr)->in_slist = FALSE;                                         \
+        (entry_ptr)->in_slist = false;                                         \
     } else { /* slist disabled */                                              \
         assert((cache_ptr)->slist_len == 0);                                 \
         assert((cache_ptr)->slist_size == 0);                                \
@@ -2004,8 +2004,8 @@ typedef struct H5C_tag_info_t {
  * be useful to disable all cache evictions, and thereby postpone metadata
  * writes.  The following field is used to implement this.
  *
- * evictions_enabled:  Boolean flag that is initialized to TRUE.  When
- *         this flag is set to FALSE, the metadata cache will not
+ * evictions_enabled:  Boolean flag that is initialized to true.  When
+ *         this flag is set to false, the metadata cache will not
  *         attempt to evict entries to make space for newly protected
  *         entries, and instead the will grow without limit.
  *
@@ -2161,7 +2161,7 @@ typedef struct H5C_tag_info_t {
  * on flush and close, it is maintained only when needed.
  *
  * To do this, we add a flag to control maintenanace of the skip list.
- * This flag is initially set to FALSE, which disables all operations
+ * This flag is initially set to false, which disables all operations
  * on the skip list.
  *
  * At the beginning of either flush or close, we scan the index list,
@@ -2178,8 +2178,8 @@ typedef struct H5C_tag_info_t {
  * the next flush or close.
  *
  * slist_enabled: Boolean flag used to control operation of the skip
- *        list.  If this filed is FALSE, operations on the slist are
- *        no-ops, and the slist must be empty.  If it is TRUE,
+ *        list.  If this filed is false, operations on the slist are
+ *        no-ops, and the slist must be empty.  If it is true,
  *        operations on the skip list proceed as usual, and all dirty
  *        entries in the metadata cache must be listed in the skip list.
  *
@@ -2228,7 +2228,7 @@ typedef struct H5C_tag_info_t {
  * The cache must deal with the case in which entries may be dirtied, moved,
  * or have their sizes changed during a flush.  To allow sanity checks in this
  * situation, the following two fields have been added.  They are only
- * compiled in when H5C_DO_SANITY_CHECKS is TRUE.
+ * compiled in when H5C_DO_SANITY_CHECKS is true.
  *
  * slist_len_increase: Number of entries that have been added to the
  *        skip list since the last time this field was set to zero.
@@ -2473,10 +2473,10 @@ typedef struct H5C_tag_info_t {
  *        full, so we can refrain from increasing the size of a
  *        cache which hasn't used up the space allotted to it.
  *
- *        The field is initialized to FALSE, and then set to TRUE
+ *        The field is initialized to false, and then set to true
  *        whenever we attempt to make space in the cache.
  *
- * size_decreased:  Boolean flag set to TRUE whenever the maximum cache
+ * size_decreased:  Boolean flag set to true whenever the maximum cache
  *        size is decreased.  The flag triggers a call to
  *        H5C__make_space_in_cache() on the next call to H5C_protect().
  *
@@ -2576,7 +2576,7 @@ typedef struct H5C_tag_info_t {
  * image_ctl: Instance of H5C_cache_image_ctl_t containing configuration
  *        data for generation of a cache image on file close.
  *
- * serialization_in_progress: Boolean field that is set to TRUE iff
+ * serialization_in_progress: Boolean field that is set to true iff
  *        the cache is in the process of being serialized.  This field is
  *        needed to support the H5C_serialization_in_progress() call, which
  *        is in turn required for sanity checks in some cache clients.
@@ -2593,7 +2593,7 @@ typedef struct H5C_tag_info_t {
  *        superblock message should be deleted and the cache image
  *        file space freed after they have been read and decoded.
  *
- *        This flag should be set to TRUE iff the file is opened
+ *        This flag should be set to true iff the file is opened
  *        R/W and there is a cache image to be read.
  *
  * image_addr: The base address of the on-disk metadata cache image, or

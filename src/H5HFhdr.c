@@ -375,7 +375,7 @@ H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "I/O filters can't operate on this heap");
 
         /* Mark the filters as checked */
-        hdr->checked_filters = TRUE;
+        hdr->checked_filters = true;
 
         /* Make the "set local" filter callbacks for this dataset */
         if (H5Z_set_local_direct(&(cparam->pline)) < 0)
@@ -390,7 +390,7 @@ H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "can't set version of I/O filter pipeline");
 
         /* Compute the I/O filters' encoded size */
-        if (0 == (hdr->filter_len = (unsigned)H5O_msg_raw_size(hdr->f, H5O_PLINE_ID, FALSE, &(hdr->pline))))
+        if (0 == (hdr->filter_len = (unsigned)H5O_msg_raw_size(hdr->f, H5O_PLINE_ID, false, &(hdr->pline))))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, HADDR_UNDEF, "can't get I/O filter pipeline size");
 
         /* Compute size of header on disk */
@@ -404,7 +404,7 @@ H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
         hdr->heap_size = H5HF_HEADER_SIZE(hdr);
 
         /* Mark filters as checked, for performance reasons */
-        hdr->checked_filters = TRUE;
+        hdr->checked_filters = true;
     } /* end else */
 
     /* Set the length of IDs in the heap */
@@ -946,7 +946,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
 
         do {
             /* Reset conditions for leaving loop */
-            walked_up = walked_down = FALSE;
+            walked_up = walked_down = false;
 
             /* Check for walking off end of indirect block */
             /* (walk up iterator) */
@@ -973,7 +973,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
                                 "unable to retrieve current block iterator location");
 
                 /* Indicate that we walked up */
-                walked_up = TRUE;
+                walked_up = true;
             } /* end while */
 
             /* Check for walking into child indirect block */
@@ -1021,7 +1021,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
 
                     /* Lock new indirect block */
                     if (NULL == (new_iblock = H5HF__man_iblock_protect(hdr, new_iblock_addr, child_nrows,
-                                                                       iblock, next_entry, FALSE,
+                                                                       iblock, next_entry, false,
                                                                        H5AC__NO_FLAGS_SET, &did_protect)))
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL,
                                     "unable to protect fractal heap indirect block");
@@ -1056,7 +1056,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
                                 "unable to retrieve current block iterator location");
 
                 /* Indicate that we walked down */
-                walked_down = TRUE;
+                walked_down = true;
             } /* end if */
         } while (walked_down || walked_up);
     } /* end else */
@@ -1145,8 +1145,8 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
         int tmp_entry; /* Temp. entry for iterator (use signed value to detect errors) */
 
         /* Reset loop flags */
-        walked_down = FALSE;
-        walked_up   = FALSE;
+        walked_down = false;
+        walked_up   = false;
 
         /* Walk backwards through entries, until we find one that has a child */
         /* (Skip direct block that will be deleted, if we find it) */
@@ -1172,7 +1172,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
                 curr_entry--;
 
                 /* Note that we walked up */
-                walked_up = TRUE;
+                walked_up = true;
             } /* end if */
             else {
                 /* Reset iterator offset */
@@ -1216,7 +1216,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
 
                 /* Lock child indirect block */
                 if (NULL == (child_iblock = H5HF__man_iblock_protect(hdr, iblock->ents[curr_entry].addr,
-                                                                     child_nrows, iblock, curr_entry, FALSE,
+                                                                     child_nrows, iblock, curr_entry, false,
                                                                      H5AC__NO_FLAGS_SET, &did_protect)))
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL,
                                 "unable to protect fractal heap indirect block");
@@ -1240,7 +1240,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
                                 "unable to release fractal heap indirect block");
 
                 /* Note that we walked down */
-                walked_down = TRUE;
+                walked_down = true;
             } /* end else */
         }     /* end else */
     } while (walked_down || walked_up);

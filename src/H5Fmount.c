@@ -108,7 +108,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
     assert(loc);
     assert(name && *name);
     assert(child);
-    assert(TRUE == H5P_isa_class(plist_id, H5P_FILE_MOUNT));
+    assert(true == H5P_isa_class(plist_id, H5P_FILE_MOUNT));
 
     /* Set up group location to fill in */
     mp_loc.oloc = &mp_oloc;
@@ -129,7 +129,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
      * and remove the mount as soon as we exit this function.  Prevent the
      * user from doing this.
      */
-    if (mp_loc.oloc->holding_file != FALSE)
+    if (mp_loc.oloc->holding_file != false)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount path cannot contain links to external files");
 
     /* Open the mount point group */
@@ -259,7 +259,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
     H5G_name_t mp_path;              /* Mount point group hier. path */
     H5O_loc_t  mp_oloc;              /* Mount point object location  */
     H5G_loc_t  mp_loc;               /* entry used to open mount point*/
-    bool       mp_loc_setup = FALSE; /* Whether mount point location is set up */
+    bool       mp_loc_setup = false; /* Whether mount point location is set up */
     H5G_loc_t  root_loc;             /* Group location of root of file to unmount */
     int        child_idx;            /* Index of child in parent's mtab */
     herr_t     ret_value = SUCCEED;  /*return value			*/
@@ -281,7 +281,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
      */
     if (H5G_loc_find(loc, name, &mp_loc /*out*/) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTFOUND, FAIL, "group not found");
-    mp_loc_setup = TRUE;
+    mp_loc_setup = true;
     child        = mp_loc.oloc->file;
     mnt_oloc     = H5G_oloc(child->shared->root_grp);
     child_idx    = -1;
@@ -330,7 +330,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
         /* Found the correct index, set the info about the child */
         child_idx = (int)md;
         H5G_loc_free(&mp_loc);
-        mp_loc_setup = FALSE;
+        mp_loc_setup = false;
         mp_loc.oloc  = mnt_oloc;
         mp_loc.path  = H5G_nameof(parent->shared->mtab.child[md].group);
         child        = parent->shared->mtab.child[child_idx].file;
@@ -387,7 +387,7 @@ done:
  *
  * Purpose:	Check if a file is mounted within another file.
  *
- * Return:	Success:	TRUE/FALSE
+ * Return:	Success:	true/false
  *		Failure:	(can't happen)
  *
  *-------------------------------------------------------------------------
@@ -395,16 +395,16 @@ done:
 bool
 H5F_is_mount(const H5F_t *file)
 {
-    bool ret_value = FALSE; /* Return value */
+    bool ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
 
     if (file->parent != NULL)
-        ret_value = TRUE;
+        ret_value = true;
     else
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_is_mount() */

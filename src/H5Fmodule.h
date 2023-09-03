@@ -856,9 +856,9 @@
  *
  * The backing_store Boolean flag is set when the in-memory file is created.
  * backing_store indicates whether to write the file contents to disk when the file is closed. If
- * backing_store is set to 1 (TRUE), the file contents are flushed to a file with the same name as the
+ * backing_store is set to 1 (true), the file contents are flushed to a file with the same name as the
  * in-memory file when the file is closed or access to the file is terminated in memory. If
- * backing_store is set to 0 (FALSE), the file is not saved.
+ * backing_store is set to 0 (false), the file is not saved.
  *
  * The application is allowed to open an existing file with the #H5FD_CORE driver. While using
  * #H5Fopen to open an existing file, if backing_store is set to 1 and the flag for #H5Fopen is set to

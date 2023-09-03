@@ -249,10 +249,10 @@ struct H5F_shared_t {
     bool drvinfo_sb_msg_exists; /* Convenience field used to track
                                  * whether the driver info superblock
                                  * extension message has been created
-                                 * yet. This field should be TRUE iff the
+                                 * yet. This field should be true iff the
                                  * superblock extension exists and contains
                                  * a driver info message.  Under all other
-                                 * circumstances, it must be set to FALSE.
+                                 * circumstances, it must be set to false.
                                  */
     unsigned   nrefs;           /* Ref count for times file is opened	*/
     unsigned   flags;           /* Access Permissions for file          */

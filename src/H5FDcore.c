@@ -100,7 +100,7 @@ typedef struct H5FD_core_fapl_t {
 
 /* Allocate memory in multiples of this size by default */
 #define H5FD_CORE_INCREMENT                8192
-#define H5FD_CORE_WRITE_TRACKING_FLAG      FALSE
+#define H5FD_CORE_WRITE_TRACKING_FLAG      false
 #define H5FD_CORE_WRITE_TRACKING_PAGE_SIZE 524288
 
 /* These macros check for overflow of various quantities.  These macros
@@ -192,8 +192,8 @@ static const H5FD_class_t H5FD_core_g = {
 
 /* Default configurations, if none provided */
 static const H5FD_core_fapl_t H5FD_core_default_config_g = {
-    (size_t)H5_MB, TRUE, H5FD_CORE_WRITE_TRACKING_FLAG, H5FD_CORE_WRITE_TRACKING_PAGE_SIZE};
-static const H5FD_core_fapl_t H5FD_core_default_paged_config_g = {(size_t)H5_MB, TRUE, TRUE, (size_t)4096};
+    (size_t)H5_MB, true, H5FD_CORE_WRITE_TRACKING_FLAG, H5FD_CORE_WRITE_TRACKING_PAGE_SIZE};
+static const H5FD_core_fapl_t H5FD_core_default_paged_config_g = {(size_t)H5_MB, true, true, (size_t)4096};
 
 /* Define a free list to manage the region type */
 H5FL_DEFINE(H5FD_core_region_t);
@@ -216,7 +216,7 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
     H5FD_core_region_t *item            = NULL;
     haddr_t             b_addr          = 0;
     haddr_t             a_addr          = 0;
-    bool                create_new_node = TRUE;
+    bool                create_new_node = true;
     herr_t              ret_value       = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -257,7 +257,7 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
             /* We won't need to insert a new node since we can
              * just update an existing one instead.
              */
-            create_new_node = FALSE;
+            create_new_node = false;
         } /* end if */
 
     /* Remove any old nodes that are no longer needed */
@@ -464,14 +464,14 @@ H5FD_core_init(void)
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+        ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+        ignore_disabled_file_locks_s = false; /* Override: Don't ignore disabled locks */
     else
         ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5I_VFL != H5I_get_type(H5FD_CORE_g))
-        H5FD_CORE_g = H5FD_register(&H5FD_core_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_CORE_g = H5FD_register(&H5FD_core_g, sizeof(H5FD_class_t), false);
 
     /* Set return value */
     ret_value = H5FD_CORE_g;
@@ -927,14 +927,14 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     /* Set up write tracking if the backing store is on */
     file->dirty_list = NULL;
     if (fa->backing_store) {
-        bool use_write_tracking = FALSE; /* what we're actually doing */
+        bool use_write_tracking = false; /* what we're actually doing */
 
         /* default is to have write tracking OFF for create (hence the check to see
          * if the user explicitly set a page size) and ON with the default page size
          * on open (when not read-only).
          */
         /* Only use write tracking if the file is open for writing */
-        use_write_tracking = (TRUE == fa->write_tracking) /* user asked for write tracking */
+        use_write_tracking = (true == fa->write_tracking) /* user asked for write tracking */
                              && !(o_flags & O_RDONLY)     /* file is open for writing (i.e. not read-only) */
                              && (file->bstore_page_size != 0); /* page size is not zero */
 
@@ -977,7 +977,7 @@ H5FD__core_close(H5FD_t *_file)
     FUNC_ENTER_PACKAGE
 
     /* Flush any changed buffers */
-    if (H5FD__core_flush(_file, (hid_t)-1, TRUE) < 0)
+    if (H5FD__core_flush(_file, (hid_t)-1, true) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush core vfd backing store");
 
     /* Destroy the dirty region list */
@@ -1396,7 +1396,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     H5MM_memcpy(file->mem + addr, buf, size);
 
     /* Mark memory buffer as modified */
-    file->dirty = TRUE;
+    file->dirty = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1453,7 +1453,7 @@ H5FD__core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSE
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store");
         } /* end else */
 
-        file->dirty = FALSE;
+        file->dirty = false;
     }
 
 done:
@@ -1584,8 +1584,8 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *        The lock type to apply depends on the parameter "rw":
- *            TRUE--opens for write: an exclusive lock
- *            FALSE--opens for read: a shared lock
+ *            true--opens for write: an exclusive lock
+ *            false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *

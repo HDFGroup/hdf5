@@ -107,19 +107,19 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set up object access arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_DACC, TRUE, &dapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_DACC, true, &dapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Get link creation property list */
     if (H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+    else if (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "lcpl_id is not a link creation property list");
 
     /* Get dataset creation property list */
     if (H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
+    else if (true != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID,
                     "dcpl_id is not a dataset create property list ID");
 
@@ -135,7 +135,7 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create dataset");
 
     /* Get an ID for the dataset */
-    if ((ret_value = H5VL_register(H5I_DATASET, dset, (*vol_obj_ptr)->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_DATASET, dset, (*vol_obj_ptr)->connector, true)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset");
 
 done:
@@ -283,19 +283,19 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
     /* Check arguments */
     if (H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
+    else if (true != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not dataset create property list ID");
 
     if (H5P_DEFAULT == dapl_id)
         dapl_id = H5P_DATASET_ACCESS_DEFAULT;
-    else if (TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+    else if (true != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not dataset access property list ID");
 
     /* Set the DCPL for the API context */
     H5CX_set_dcpl(dcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, true) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* get the location object */
@@ -313,7 +313,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset");
 
     /* Get an ID for the dataset */
-    if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset");
 
 done:
@@ -355,7 +355,7 @@ H5D__open_api_common(hid_t loc_id, const char *name, hid_t dapl_id, void **token
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set up object access arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_DACC, FALSE, &dapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_DACC, false, &dapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Open the dataset */
@@ -364,7 +364,7 @@ H5D__open_api_common(hid_t loc_id, const char *name, hid_t dapl_id, void **token
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset");
 
     /* Register an atom for the dataset */
-    if ((ret_value = H5VL_register(H5I_DATASET, dset, (*vol_obj_ptr)->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_DATASET, dset, (*vol_obj_ptr)->connector, true)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset ID");
 
 done:
@@ -999,7 +999,7 @@ H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t m
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Read the data */
@@ -1216,7 +1216,7 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
     /* Set up VOL callback arguments */
@@ -1308,7 +1308,7 @@ H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Write the data */
@@ -1534,7 +1534,7 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
     /* Set up VOL callback arguments */
@@ -1572,7 +1572,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_
     H5T_t          *type;                     /* Datatype */
     H5S_t          *dst_space;                /* Dataspace */
     H5S_sel_iter_t *iter           = NULL;    /* Selection iteration info*/
-    bool            iter_init      = FALSE;   /* Selection iteration info has been initialized */
+    bool            iter_init      = false;   /* Selection iteration info has been initialized */
     const void     *src_buf        = NULL;    /* Source (contiguous) data buffer */
     size_t          src_buf_nbytes = 0;       /* Size of src_buf */
     size_t          type_size;                /* Datatype element size */
@@ -1608,7 +1608,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_
     /* Initialize selection iterator */
     if (H5S_select_iter_init(iter, dst_space, type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information");
-    iter_init = TRUE;
+    iter_init = true;
 
     /* Loop until all data has been scattered */
     while (nelmts > 0) {
@@ -1666,7 +1666,7 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
     H5T_t          *type;                /* Datatype */
     H5S_t          *src_space;           /* Dataspace */
     H5S_sel_iter_t *iter      = NULL;    /* Selection iteration info*/
-    bool            iter_init = FALSE;   /* Selection iteration info has been initialized */
+    bool            iter_init = false;   /* Selection iteration info has been initialized */
     size_t          type_size;           /* Datatype element size */
     hssize_t        nelmts;              /* Number of remaining elements in selection */
     size_t          dst_buf_nelmts;      /* Number of elements that can fit in dst_buf */
@@ -1714,7 +1714,7 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
     /* Initialize selection iterator */
     if (H5S_select_iter_init(iter, src_space, type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information");
-    iter_init = TRUE;
+    iter_init = true;
 
     /* Loop until all data has been scattered */
     while (nelmts > 0) {
@@ -2477,7 +2477,7 @@ H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t op, void *op_dat
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+    else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
     /* Set up VOL callback arguments */

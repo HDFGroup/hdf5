@@ -41,7 +41,7 @@
 /* ======================== File Mount properties ====================*/
 /* Definition for whether absolute symlinks local to file. */
 #define H5F_MNT_SYM_LOCAL_SIZE sizeof(bool)
-#define H5F_MNT_SYM_LOCAL_DEF  FALSE
+#define H5F_MNT_SYM_LOCAL_DEF  false
 
 /******************/
 /* Local Typedefs */

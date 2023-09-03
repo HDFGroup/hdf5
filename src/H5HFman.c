@@ -48,7 +48,7 @@
                 if (H5Z_can_apply_direct(&((HDR)->pline)) < 0)                                               \
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "I/O filters can't operate on this heap");     \
                                                                                                              \
-            (HDR)->checked_filters = TRUE;                                                                   \
+            (HDR)->checked_filters = true;                                                                   \
         } /* end if */                                                                                       \
     }
 
@@ -526,7 +526,7 @@ H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
 {
     H5HF_free_section_t *sec_node    = NULL;  /* Pointer to free space section for block */
     H5HF_indirect_t     *iblock      = NULL;  /* Pointer to indirect block */
-    bool                 did_protect = FALSE; /* Whether we protected the indirect block or not */
+    bool                 did_protect = false; /* Whether we protected the indirect block or not */
     hsize_t              obj_off;             /* Object's offset in heap */
     size_t               obj_len;             /* Object's length in heap */
     size_t               dblock_size;         /* Direct block size */

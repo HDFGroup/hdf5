@@ -323,7 +323,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_FILE_SPACE_STRATEGY_DEF H5F_FSPACE_STRATEGY_FSM_AGGR
 
 /* Default free space section threshold used by free-space managers */
-#define H5F_FREE_SPACE_PERSIST_DEF FALSE
+#define H5F_FREE_SPACE_PERSIST_DEF false
 
 /* Default free space section threshold used by free-space managers */
 #define H5F_FREE_SPACE_THRESHOLD_DEF 1

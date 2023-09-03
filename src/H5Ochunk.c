@@ -122,7 +122,7 @@ done:
 
     /* Release resources */
     if (cont_chk_proxy)
-        if (H5O__chunk_unprotect(f, cont_chk_proxy, FALSE) < 0)
+        if (H5O__chunk_unprotect(f, cont_chk_proxy, false) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)

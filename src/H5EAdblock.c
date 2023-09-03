@@ -144,7 +144,7 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, void *parent, bool *stats_changed, hsize_t 
 {
     H5EA_dblock_t *dblock = NULL;     /* Extensible array data block */
     haddr_t        dblock_addr;       /* Extensible array data block address */
-    bool           inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool           inserted  = false; /* Whether the header was inserted into cache */
     haddr_t        ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE
@@ -182,7 +182,7 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, void *parent, bool *stats_changed, hsize_t 
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF,
                     "can't add extensible array data block to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add data block as child of 'top' proxy */
     if (hdr->top_proxy) {
@@ -200,7 +200,7 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, void *parent, bool *stats_changed, hsize_t 
     hdr->stats.stored.nelmts += nelmts;
 
     /* Mark the statistics as changed */
-    *stats_changed = TRUE;
+    *stats_changed = true;
 
     /* Set address of data block to return */
     ret_value = dblock_addr;

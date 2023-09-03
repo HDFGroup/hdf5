@@ -78,12 +78,12 @@ static const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 1;
 #ifdef H5_HAVE_THREADSAFE
 H5_api_t H5_g;
 #else
-bool H5_libinit_g = FALSE; /* Library hasn't been initialized */
-bool H5_libterm_g = FALSE; /* Library isn't being shutdown */
+bool H5_libinit_g = false; /* Library hasn't been initialized */
+bool H5_libterm_g = false; /* Library isn't being shutdown */
 #endif
 
 char        H5_lib_vers_info_g[] = H5_VERS_INFO;
-static bool H5_dont_atexit_g     = FALSE;
+static bool H5_dont_atexit_g     = false;
 H5_debug_t  H5_debug_g; /* debugging info */
 
 /*******************/
@@ -150,7 +150,7 @@ H5_init_library(void)
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
      */
-    H5_INIT_GLOBAL = TRUE;
+    H5_INIT_GLOBAL = true;
 
 #ifdef H5_HAVE_PARALLEL
     {
@@ -224,7 +224,7 @@ H5_init_library(void)
         /* Normal library termination code */
         (void)atexit(H5_term_library);
 
-        H5_dont_atexit_g = TRUE;
+        H5_dont_atexit_g = true;
     } /* end if */
 
     /*
@@ -313,7 +313,7 @@ H5_term_library(void)
         goto done;
 
     /* Indicate that the library is being shut down */
-    H5_TERM_GLOBAL = TRUE;
+    H5_TERM_GLOBAL = true;
 
     /* Push the API context without checking for errors */
     H5CX_push_special();
@@ -498,10 +498,10 @@ H5_term_library(void)
     } /* end while */
 
     /* Reset flag indicating that the library is being shut down */
-    H5_TERM_GLOBAL = FALSE;
+    H5_TERM_GLOBAL = false;
 
     /* Mark library as closed */
-    H5_INIT_GLOBAL = FALSE;
+    H5_INIT_GLOBAL = false;
 
     /* Don't pop the API context (i.e. H5CX_pop), since it's been shut down already */
 
@@ -544,7 +544,7 @@ H5dont_atexit(void)
     if (H5_dont_atexit_g)
         ret_value = FAIL;
     else
-        H5_dont_atexit_g = TRUE;
+        H5_dont_atexit_g = true;
 
     FUNC_LEAVE_API_NOFS(ret_value)
 } /* end H5dont_atexit() */
@@ -701,15 +701,15 @@ H5__debug_mask(const char *s)
 
             /* Enable or Disable debugging? */
             if ('-' == *s) {
-                clear = TRUE;
+                clear = true;
                 s++;
             }
             else if ('+' == *s) {
-                clear = FALSE;
+                clear = false;
                 s++;
             }
             else {
-                clear = FALSE;
+                clear = false;
             } /* end if */
 
             /* Get the name */
@@ -1220,9 +1220,9 @@ H5is_library_threadsafe(bool *is_ts /*out*/)
 
     if (is_ts) {
 #ifdef H5_HAVE_THREADSAFE
-        *is_ts = TRUE;
+        *is_ts = true;
 #else  /* H5_HAVE_THREADSAFE */
-        *is_ts = FALSE;
+        *is_ts = false;
 #endif /* H5_HAVE_THREADSAFE */
     }
     else
@@ -1276,7 +1276,7 @@ H5is_library_terminating(bool *is_terminating /*out*/)
  *              Only enabled when the shared Windows library is built with
  *              thread safety enabled.
  *
- * Return:      TRUE on success, FALSE on failure
+ * Return:      true on success, false on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1290,7 +1290,7 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
      * This includes any functions that are called by from here!
      */
 
-    BOOL fOkay = TRUE;
+    BOOL fOkay = true;
 
     switch (fdwReason) {
         case DLL_PROCESS_ATTACH:
@@ -1302,20 +1302,20 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
         case DLL_THREAD_ATTACH:
 #ifdef H5_HAVE_WIN_THREADS
             if (H5TS_win32_thread_enter() < 0)
-                fOkay = FALSE;
+                fOkay = false;
 #endif /* H5_HAVE_WIN_THREADS */
             break;
 
         case DLL_THREAD_DETACH:
 #ifdef H5_HAVE_WIN_THREADS
             if (H5TS_win32_thread_exit() < 0)
-                fOkay = FALSE;
+                fOkay = false;
 #endif /* H5_HAVE_WIN_THREADS */
             break;
 
         default:
             /* Shouldn't get here */
-            fOkay = FALSE;
+            fOkay = false;
             break;
     }
 

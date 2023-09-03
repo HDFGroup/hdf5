@@ -24,11 +24,11 @@
 
 #include "hdf5.h"
 
-#ifndef FALSE
-#define FALSE 0
+#ifndef false
+#define false 0
 #endif
-#ifndef TRUE
-#define TRUE 1
+#ifndef true
+#define true 1
 #endif
 
 /* Windows doesn't like some POSIX names and redefines them with an
@@ -285,7 +285,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const c
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if (H5FD_split_populate_config(meta_ext, meta_plist_id, raw_ext, raw_plist_id, TRUE, &fa) < 0)
+    if (H5FD_split_populate_config(meta_ext, meta_plist_id, raw_ext, raw_plist_id, true, &fa) < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_CANTSET, "can't setup split driver configuration",
                     -1);
 
@@ -356,7 +356,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const c
  *
  *            hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
  *            H5Pset_fapl_multi(fapl, memb_map, memb_fapl,
- *                              memb_name, memb_addr, TRUE);
+ *                              memb_name, memb_addr, true);
  *
  *
  * Return:    Success:    Non-negative
@@ -378,7 +378,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_f
     H5Eclear2(H5E_DEFAULT);
 
     /* Check arguments and supply default values */
-    if (H5I_GENPROP_LST != H5Iget_type(fapl_id) || TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+    if (H5I_GENPROP_LST != H5Iget_type(fapl_id) || true != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "not an access list", -1);
     if (H5FD_multi_populate_config(memb_map, memb_fapl, memb_name, memb_addr, relax, &fa) < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_CANTSET, "can't setup driver configuration", -1);
@@ -413,7 +413,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid_t *memb_fapl 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if (H5I_GENPROP_LST != H5Iget_type(fapl_id) || TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+    if (H5I_GENPROP_LST != H5Iget_type(fapl_id) || true != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not an access list", -1);
     if (H5FD_MULTI != H5Pget_driver(fapl_id))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1);
@@ -423,7 +423,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid_t *memb_fapl 
     }
     H5E_END_TRY
     if (!fa || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
-        if (H5FD_multi_populate_config(NULL, NULL, NULL, NULL, TRUE, &default_fa) < 0)
+        if (H5FD_multi_populate_config(NULL, NULL, NULL, NULL, true, &default_fa) < 0)
             H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTSET, "can't setup default driver configuration",
                         -1);
         fa = &default_fa;
@@ -548,7 +548,7 @@ H5FD_split_populate_config(const char *meta_ext, hid_t meta_plist_id, const char
          * All members of MEMB_FAPL must be either defaults or actual file
          * access property lists.
          */
-        if (H5P_DEFAULT != _memb_fapl[mmt] && TRUE != H5Pisa_class(_memb_fapl[mmt], H5P_FILE_ACCESS))
+        if (H5P_DEFAULT != _memb_fapl[mmt] && true != H5Pisa_class(_memb_fapl[mmt], H5P_FILE_ACCESS))
             H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "file resource type incorrect", -1);
 
         /* All names must be defined */
@@ -648,7 +648,7 @@ H5FD_multi_populate_config(const H5FD_mem_t *memb_map, const hid_t *memb_fapl, c
          * All members of MEMB_FAPL must be either defaults or actual file
          * access property lists.
          */
-        if (H5P_DEFAULT != memb_fapl[mmt] && TRUE != H5Pisa_class(memb_fapl[mmt], H5P_FILE_ACCESS))
+        if (H5P_DEFAULT != memb_fapl[mmt] && true != H5Pisa_class(memb_fapl[mmt], H5P_FILE_ACCESS))
             H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "file resource type incorrect", -1);
 
         /* All names must be defined */
@@ -827,7 +827,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     H5FD_mem_t         map[H5FD_MEM_NTYPES];
     int                i;
     size_t             nseen       = 0;
-    bool               map_changed = FALSE;
+    bool               map_changed = false;
     bool               in_use[H5FD_MEM_NTYPES];
     const char        *memb_name[H5FD_MEM_NTYPES];
     haddr_t            memb_addr[H5FD_MEM_NTYPES];
@@ -858,7 +858,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     for (i = 0; i < 6; i++) {
         map[i + 1] = (H5FD_mem_t)buf[i];
         if (file->fa.memb_map[i + 1] != map[i + 1])
-            map_changed = TRUE;
+            map_changed = true;
     }
 
     UNIQUE_MEMBERS (map, mt) {
@@ -905,7 +905,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
         /* Close files which are unused now */
         memset(in_use, 0, sizeof in_use);
         UNIQUE_MEMBERS (map, mt) {
-            in_use[mt] = TRUE;
+            in_use[mt] = true;
         }
         END_MEMBERS
         ALL_MEMBERS (mt) {
@@ -1118,7 +1118,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                 H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error);
         }
         else {
-            if (H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE) < 0)
+            if (H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, true) < 0)
                 H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error);
         }
 
@@ -2112,11 +2112,11 @@ H5FD_multi_delete(const char *filename, hid_t fapl_id)
         char *env = getenv(HDF5_DRIVER);
 
         if (env && !strcmp(env, "split")) {
-            if (H5FD_split_populate_config(NULL, H5P_DEFAULT, NULL, H5P_DEFAULT, TRUE, &default_fa) < 0)
+            if (H5FD_split_populate_config(NULL, H5P_DEFAULT, NULL, H5P_DEFAULT, true, &default_fa) < 0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTSET, "can't setup driver configuration", -1);
         }
         else {
-            if (H5FD_multi_populate_config(NULL, NULL, NULL, NULL, TRUE, &default_fa) < 0)
+            if (H5FD_multi_populate_config(NULL, NULL, NULL, NULL, true, &default_fa) < 0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTSET, "can't setup driver configuration", -1);
         }
 

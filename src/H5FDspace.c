@@ -374,8 +374,8 @@ done:
  *		marking an entry dirty without a H5F_t*, this routine should
  *		be changed to take a H5F_super_t* directly.
  *
- * Return:	Success:	TRUE(1)  - Block was extended
- *                              FALSE(0) - Block could not be extended
+ * Return:	Success:	true(1)  - Block was extended
+ *                              false(0) - Block could not be extended
  * 		Failure:	FAIL
  *
  *-------------------------------------------------------------------------
@@ -384,7 +384,7 @@ htri_t
 H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t blk_end, hsize_t extra_requested)
 {
     haddr_t eoa;               /* End of allocated space in file */
-    htri_t  ret_value = FALSE; /* Return value */
+    htri_t  ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -413,7 +413,7 @@ H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t blk_end, hsize_
             HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, FAIL, "unable to mark EOA info as dirty");
 
         /* Indicate success */
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(true);
     } /* end if */
 
 done:

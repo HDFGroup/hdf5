@@ -65,7 +65,7 @@
 static uint32_t H5_crc_table[256];
 
 /* Flag: has the table been computed? */
-static bool H5_crc_table_computed = FALSE;
+static bool H5_crc_table_computed = false;
 
 /*-------------------------------------------------------------------------
  * Function:	H5_checksum_fletcher32
@@ -162,7 +162,7 @@ H5__checksum_crc_make_table(void)
                 c = c >> 1;
         H5_crc_table[n] = c;
     }
-    H5_crc_table_computed = TRUE;
+    H5_crc_table_computed = true;
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5__checksum_crc_make_table() */

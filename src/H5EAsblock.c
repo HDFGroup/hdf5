@@ -172,7 +172,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, bool *stats_changed,
     H5EA_sblock_t *sblock = NULL;           /* Extensible array super block */
     haddr_t        sblock_addr;             /* Extensible array super block address */
     haddr_t        tmp_addr  = HADDR_UNDEF; /* Address value to fill data block addresses with */
-    bool           inserted  = FALSE;       /* Whether the header was inserted into cache */
+    bool           inserted  = false;       /* Whether the header was inserted into cache */
     haddr_t        ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE
@@ -205,7 +205,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, bool *stats_changed,
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_SBLOCK, sblock_addr, sblock, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF,
                     "can't add extensible array super block to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add super block as child of 'top' proxy */
     if (hdr->top_proxy) {
@@ -220,7 +220,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, bool *stats_changed,
     hdr->stats.stored.super_blk_size += sblock->size;
 
     /* Mark the statistics as changed */
-    *stats_changed = TRUE;
+    *stats_changed = true;
 
     /* Set address of super block to return */
     ret_value = sblock_addr;

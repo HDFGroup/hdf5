@@ -173,7 +173,7 @@
                                                                                                              \
         /* Mark the message dirty if it was changed by decoding */                                           \
         if ((ioflags & H5O_DECODEIO_DIRTY) && (H5F_get_intent((F)) & H5F_ACC_RDWR)) {                        \
-            (MSG)->dirty = TRUE;                                                                             \
+            (MSG)->dirty = true;                                                                             \
             /* Increment the count of messages dirtied by decoding, but */                                   \
             /* only ifndef NDEBUG */                                                                         \
             INCR_NDECODE_DIRTIED(OH)                                                                         \

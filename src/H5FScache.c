@@ -171,7 +171,7 @@ H5FS__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -182,7 +182,7 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;                /* Return value */
+    htri_t         ret_value = true;                /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -193,7 +193,7 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_hdr_verify_chksum() */
@@ -404,8 +404,8 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          *
          * 1) The instance of H5FS_sinfo_t is not in the metadata cache.
          *
-         *    This will be TRUE iff H5_addr_defined(fspace->sect_addr)
-         *    is FALSE, and fspace->sinfo is not NULL.  This is sometimes
+         *    This will be true iff H5_addr_defined(fspace->sect_addr)
+         *    is false, and fspace->sinfo is not NULL.  This is sometimes
          *    referred to as "floating" section info in the comments.
          *
          *    If the section info structure contains free space data
@@ -417,7 +417,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          *
          *        H5_addr_defined(fspace->addr)
          *
-         *    will both be TRUE.  If this condition does not hold, then
+         *    will both be true.  If this condition does not hold, then
          *    either the free space info is not persistent
          *    (!H5_addr_defined(fspace->addr)???) or the section info
          *    contains no free space data that must be written to file
@@ -435,7 +435,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          *    may be protected either RW or RO (as indicated by
          *    fspace->sinfo_protected and  fspace->sinfo_accmod).
          *
-         * Observe that fspace->serial_sect_count > 0 must be TRUE in
+         * Observe that fspace->serial_sect_count > 0 must be true in
          * cases 2) and 3), as the section info should not be stored on
          * disk if it doesn't exist.  Similarly, since the section info
          * will not be stored to disk unless the header is,
@@ -874,7 +874,7 @@ H5FS__cache_sinfo_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -885,7 +885,7 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;                /* Return value */
+    htri_t         ret_value = true;                /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -896,7 +896,7 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_sinfo_verify_chksum() */

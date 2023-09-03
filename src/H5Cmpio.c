@@ -315,14 +315,14 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
             total_entries_to_flush++;
 #endif
             entries_to_flush[entry_ptr->ring]++;
-            entry_ptr->flush_immediately = TRUE;
+            entry_ptr->flush_immediately = true;
         } /* end if */
         else {
 #ifndef NDEBUG
             total_entries_to_clear++;
 #endif
             entries_to_clear[entry_ptr->ring]++;
-            entry_ptr->clear_on_unprotect = TRUE;
+            entry_ptr->clear_on_unprotect = true;
         } /* end else */
 
         /* Entries marked as collectively accessed and are in the
@@ -332,7 +332,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
          * ranks.
          */
         if (entry_ptr->coll_access) {
-            entry_ptr->coll_access = FALSE;
+            entry_ptr->coll_access = false;
             H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
         } /* end if */
     }     /* end for */
@@ -688,12 +688,12 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
 
             /* Make sure first that we clear the collective flag from
                it so it can be cleared */
-            if (TRUE == entry_ptr->coll_access) {
-                entry_ptr->coll_access = FALSE;
+            if (true == entry_ptr->coll_access) {
+                entry_ptr->coll_access = false;
                 H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
             } /* end if */
 
-            entry_ptr->clear_on_unprotect = TRUE;
+            entry_ptr->clear_on_unprotect = true;
             if (entry_ptr->is_pinned)
                 pinned_entries_marked++;
 #ifdef H5C_DO_SANITY_CHECKS
@@ -730,7 +730,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
     entry_ptr        = cache_ptr->LRU_tail_ptr;
     while (entry_ptr != NULL && entries_examined <= initial_list_len && entries_cleared < ce_array_len) {
         if (entry_ptr->clear_on_unprotect) {
-            entry_ptr->clear_on_unprotect = FALSE;
+            entry_ptr->clear_on_unprotect = false;
             clear_ptr                     = entry_ptr;
             entry_ptr                     = entry_ptr->prev;
             entries_cleared++;
@@ -753,18 +753,18 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
      * pinned list.  Must scan that also.
      */
     pinned_entries_cleared = 0;
-    progress               = TRUE;
+    progress               = true;
     while ((pinned_entries_cleared < pinned_entries_marked) && progress) {
-        progress  = FALSE;
+        progress  = false;
         entry_ptr = cache_ptr->pel_head_ptr;
         while (entry_ptr != NULL) {
             if (entry_ptr->clear_on_unprotect && entry_ptr->flush_dep_ndirty_children == 0) {
-                entry_ptr->clear_on_unprotect = FALSE;
+                entry_ptr->clear_on_unprotect = false;
                 clear_ptr                     = entry_ptr;
                 entry_ptr                     = entry_ptr->next;
                 entries_cleared++;
                 pinned_entries_cleared++;
-                progress = TRUE;
+                progress = true;
 
                 if (H5C__flush_single_entry(f, clear_ptr,
                                             (H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG |
@@ -836,7 +836,7 @@ H5C_clear_coll_entries(H5C_t *cache_ptr, bool partial)
         assert(entry_ptr->coll_access);
 
         /* Mark entry as independent */
-        entry_ptr->coll_access = FALSE;
+        entry_ptr->coll_access = false;
         H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
 
         /* Decrement entry count */
@@ -1065,7 +1065,7 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    cache_ptr->flush_in_progress = TRUE;
+    cache_ptr->flush_in_progress = true;
 
     /* flush each ring, starting from the outermost ring and
      * working inward.
@@ -1079,7 +1079,7 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
     } /* end while */
 
 done:
-    cache_ptr->flush_in_progress = FALSE;
+    cache_ptr->flush_in_progress = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__flush_candidate_entries() */
@@ -1122,7 +1122,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
 {
     H5C_t   *cache_ptr;
     bool     progress;
-    bool     restart_scan    = FALSE;
+    bool     restart_scan    = false;
     unsigned entries_flushed = 0;
     unsigned entries_cleared = 0;
 #ifdef H5C_DO_SANITY_CHECKS
@@ -1167,11 +1167,11 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
      *
      * It is possible that this will change -- hence the assertion.
      */
-    restart_scan = FALSE;
+    restart_scan = false;
     entry_ptr    = cache_ptr->LRU_tail_ptr;
     while (((entries_flushed < entries_to_flush) || (entries_cleared < entries_to_clear)) &&
            (entry_ptr != NULL)) {
-        bool               prev_is_dirty = FALSE;
+        bool               prev_is_dirty = false;
         H5C_cache_entry_t *next_ptr;
 
         /* Entries in the LRU must not have flush dependency children */
@@ -1195,7 +1195,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                 next_ptr = entry_ptr->next;
 
                 /* Reset entry flag */
-                entry_ptr->clear_on_unprotect = FALSE;
+                entry_ptr->clear_on_unprotect = false;
                 entries_cleared++;
             } /* end if */
             else if (entry_ptr->flush_immediately) {
@@ -1209,7 +1209,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                 next_ptr = entry_ptr->next;
 
                 /* Reset entry flag */
-                entry_ptr->flush_immediately = FALSE;
+                entry_ptr->flush_immediately = false;
                 entries_flushed++;
             } /* end else-if */
             else {
@@ -1247,7 +1247,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush entry");
 
                 if (cache_ptr->entries_removed_counter != 0 || cache_ptr->last_entry_removed_ptr != NULL)
-                    restart_scan = TRUE;
+                    restart_scan = true;
             } /* end if */
         }     /* end if */
         else {
@@ -1278,9 +1278,9 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
             assert(!entry_ptr->is_protected);
             assert(!entry_ptr->is_pinned);
 
-            assert(FALSE); /* see comment above */
+            assert(false); /* see comment above */
 
-            restart_scan = FALSE;
+            restart_scan = false;
             entry_ptr    = cache_ptr->LRU_tail_ptr;
 
             H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr);
@@ -1308,14 +1308,14 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
      *  this may change, and to that end, I have included code to detect
      *  such changes and cause this function to fail if they are detected.
      */
-    progress = TRUE;
+    progress = true;
     while (progress && ((entries_flushed < entries_to_flush) || (entries_cleared < entries_to_clear))) {
-        progress  = FALSE;
+        progress  = false;
         entry_ptr = cache_ptr->pel_head_ptr;
         while ((entry_ptr != NULL) &&
                ((entries_flushed < entries_to_flush) || (entries_cleared < entries_to_clear))) {
             H5C_cache_entry_t *prev_ptr;
-            bool               next_is_dirty = FALSE;
+            bool               next_is_dirty = false;
 
             assert(entry_ptr->is_pinned);
 
@@ -1332,9 +1332,9 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                     op_flags = clear_flags;
 
                     /* Reset entry flag */
-                    entry_ptr->clear_on_unprotect = FALSE;
+                    entry_ptr->clear_on_unprotect = false;
                     entries_cleared++;
-                    progress = TRUE;
+                    progress = true;
                 } /* end if */
                 else if (entry_ptr->flush_immediately) {
                     assert(entry_ptr->is_dirty);
@@ -1344,9 +1344,9 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                     op_flags = flush_flags;
 
                     /* Reset entry flag */
-                    entry_ptr->flush_immediately = FALSE;
+                    entry_ptr->flush_immediately = false;
                     entries_flushed++;
-                    progress = TRUE;
+                    progress = true;
                 } /* end else-if */
                 else
                     /* No operation for this entry */
@@ -1379,7 +1379,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush entry");
 
                     if (cache_ptr->entries_removed_counter != 0 || cache_ptr->last_entry_removed_ptr != NULL)
-                        restart_scan = TRUE;
+                        restart_scan = true;
                 } /* end if */
             }     /* end if */
 
@@ -1409,9 +1409,9 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                  * present.  Hence the following assertion which should be
                  * removed if the above changes.
                  */
-                assert(FALSE);
+                assert(false);
 
-                restart_scan = FALSE;
+                restart_scan = false;
 
                 entry_ptr = cache_ptr->pel_head_ptr;
 

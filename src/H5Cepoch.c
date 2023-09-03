@@ -136,7 +136,7 @@ H5C__epoch_marker_verify_chksum(const void H5_ATTR_UNUSED *image_ptr, size_t H5_
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
-    FUNC_LEAVE_NOAPI(FALSE)
+    FUNC_LEAVE_NOAPI(false)
 } /* end H5C__epoch_marker_verify_chksum() */
 
 static void *

@@ -265,7 +265,7 @@ ioc__read_independent_async(int64_t context_id, int64_t offset, int64_t elements
     subfiling_context_t *sf_context    = NULL;
     MPI_Request          ack_request   = MPI_REQUEST_NULL;
     io_req_t            *sf_io_request = NULL;
-    bool                 need_data_tag = FALSE;
+    bool                 need_data_tag = false;
     int64_t              ioc_start;
     int64_t              ioc_offset;
     int64_t              ioc_subfile_idx;

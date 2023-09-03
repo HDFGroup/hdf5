@@ -105,7 +105,7 @@ typedef struct {
     H5T_cset_t       cset;             /* Char set for new name */
     const H5G_loc_t *dst_loc;          /* Destination location for moving object */
     unsigned         dst_target_flags; /* Target flags for destination object */
-    bool             copy;             /* TRUE if this is a copy operation */
+    bool             copy;             /* true if this is a copy operation */
     size_t           orig_nlinks; /* The original value for the # of soft / UD links that can be traversed */
 } H5L_trav_mv_t;
 
@@ -113,7 +113,7 @@ typedef struct {
 typedef struct {
     H5F_t      *file; /* Pointer to the file */
     H5O_link_t *lnk;  /* Pointer to link information to insert */
-    bool        copy; /* TRUE if this is a copy operation */
+    bool        copy; /* true if this is a copy operation */
 } H5L_trav_mv2_t;
 
 /* User data for path traversal routine for checking if a link exists */
@@ -407,10 +407,10 @@ H5L_is_registered(H5L_type_t id, bool *is_registered)
     assert(is_registered);
 
     /* Is the link class already registered? */
-    *is_registered = FALSE;
+    *is_registered = false;
     for (i = 0; i < H5L_table_used_g; i++)
         if (H5L_table_g[i].id == id) {
-            *is_registered = TRUE;
+            *is_registered = true;
             break;
         }
 
@@ -512,8 +512,8 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
     H5G_t         *grp    = NULL;   /* H5G_t for this group, opened to pass to user callback */
     hid_t          grp_id = FAIL;   /* Id for this group (passed to user callback */
     H5G_loc_t      temp_loc;        /* For UD callback */
-    bool   temp_loc_init = FALSE;   /* Temporary location for UD callback (temp_loc) has been initialized */
-    bool   obj_created   = FALSE;   /* Whether an object was created (through a hard link) */
+    bool   temp_loc_init = false;   /* Temporary location for UD callback (temp_loc) has been initialized */
+    bool   obj_created   = false;   /* Whether an object was created (through a hard link) */
     herr_t ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -543,7 +543,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
             udata->path = new_loc.path;
 
             /* Indicate that an object was created */
-            obj_created = TRUE;
+            obj_created = true;
         } /* end if */
         else {
             /* Check that both objects are in same file */
@@ -555,7 +555,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
     /* Set 'standard' aspects of link */
     udata->lnk->corder =
         0; /* Will be re-written during group insertion, if the group is tracking creation order */
-    udata->lnk->corder_valid = FALSE; /* Creation order not valid (yet) */
+    udata->lnk->corder_valid = false; /* Creation order not valid (yet) */
 
     /* Check for non-default link creation properties */
     if (udata->lc_plist) {
@@ -572,7 +572,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Insert link into group */
-    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, TRUE,
+    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, true,
                        udata->ocrt_info ? udata->ocrt_info->obj_type : H5O_TYPE_UNKNOWN,
                        udata->ocrt_info ? udata->ocrt_info->crt_info : NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link for object");
@@ -603,12 +603,12 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
 
             temp_loc.oloc = &temp_oloc;
             temp_loc.path = &temp_path;
-            temp_loc_init = TRUE;
+            temp_loc_init = true;
 
             /* Set up location for user-defined callback */
             if (NULL == (grp = H5G_open(&temp_loc)))
                 HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-            if ((grp_id = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
+            if ((grp_id = H5VL_wrap_register(H5I_GROUP, grp, true)) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTREGISTER, FAIL, "unable to register ID for group");
 
             /* Make callback */
@@ -755,7 +755,7 @@ H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name, const H5G_loc_t *link
     H5G_loc_t  obj_loc;              /* Location of object to link to */
     H5G_name_t path;                 /* obj_loc's path*/
     H5O_loc_t  oloc;                 /* obj_loc's oloc */
-    bool       loc_valid = FALSE;
+    bool       loc_valid = false;
     herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -779,7 +779,7 @@ H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name, const H5G_loc_t *link
     H5G_loc_reset(&obj_loc);
     if (H5G_loc_find(cur_loc, norm_cur_name, &obj_loc) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "source object not found");
-    loc_valid = TRUE;
+    loc_valid = true;
 
     /* Construct link information for eventual insertion */
     lnk.u.hard.addr = obj_loc.oloc->addr;
@@ -1045,7 +1045,7 @@ H5L__get_val_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_A
 {
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata; /* User data passed in */
     H5O_link_t       fnd_lnk;                           /* Link within group */
-    bool             lnk_copied = FALSE;                /* Whether the link was copied */
+    bool             lnk_copied = false;                /* Whether the link was copied */
     herr_t           ret_value  = SUCCEED;              /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1057,7 +1057,7 @@ H5L__get_val_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_A
     /* Query link */
     if (H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n, &fnd_lnk) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found");
-    lnk_copied = TRUE;
+    lnk_copied = true;
 
     /* Retrieve the value for the link */
     if (H5L__get_val_real(&fnd_lnk, udata->buf, udata->size) < 0)
@@ -1290,7 +1290,7 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
     H5G_t          *grp    = NULL; /* H5G_t for this group, opened to pass to user callback */
     hid_t           grp_id = FAIL; /* ID for this group (passed to user callback */
     H5G_loc_t       temp_loc;      /* For UD callback */
-    bool            temp_loc_init = FALSE;
+    bool            temp_loc_init = false;
     herr_t          ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1312,7 +1312,7 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Insert the link into the group */
-    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, TRUE, H5O_TYPE_UNKNOWN, NULL) < 0)
+    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, true, H5O_TYPE_UNKNOWN, NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object");
 
     /* If the link was a user-defined link, call its move callback if it has one */
@@ -1336,12 +1336,12 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
 
             temp_loc.oloc = &temp_oloc;
             temp_loc.path = &temp_path;
-            temp_loc_init = TRUE;
+            temp_loc_init = true;
 
             /* Set up location for user-defined callback */
             if (NULL == (grp = H5G_open(&temp_loc)))
                 HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-            if ((grp_id = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
+            if ((grp_id = H5VL_wrap_register(H5I_GROUP, grp, true)) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTREGISTER, FAIL, "unable to register group ID");
 
             if (udata->copy) {
@@ -1399,7 +1399,7 @@ H5L__move_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *lnk,
     H5L_trav_mv_t *udata = (H5L_trav_mv_t *)_udata; /* User data passed in */
     H5L_trav_mv2_t udata_out;                       /* User data for H5L__move_dest_cb traversal */
     char          *orig_name   = NULL;              /* The name of the link in this group */
-    bool           link_copied = FALSE;             /* Has udata_out.lnk been allocated? */
+    bool           link_copied = false;             /* Has udata_out.lnk been allocated? */
     herr_t         ret_value   = SUCCEED;           /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1420,7 +1420,7 @@ H5L__move_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *lnk,
      * destination, so we should free it here.
      */
     udata_out.lnk->name = (char *)H5MM_xfree(udata_out.lnk->name);
-    link_copied         = TRUE;
+    link_copied         = true;
 
     udata_out.lnk->cset = udata->cset;
     udata_out.file      = grp_loc->oloc->file;
@@ -1502,7 +1502,7 @@ done:
  *              location, while DST_LOC and DST_NAME together define its
  *              final location.
  *
- *              If copy_flag is FALSE, the original link is removed
+ *              If copy_flag is false, the original link is removed
  *              (effectively moving the link).
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1641,10 +1641,10 @@ H5L__exists_inter_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
                 HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if link exists");
         } /* end if */
         else
-            *udata->exists = TRUE;
+            *udata->exists = true;
     } /* end if */
     else
-        *udata->exists = FALSE;
+        *udata->exists = false;
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -1660,9 +1660,9 @@ done:
  * Purpose:	Returns whether a link exists in a group
  *
  * Note:	Same as H5L__exists, except that missing links are reported
- *		as 'FALSE' instead of causing failures
+ *		as 'false' instead of causing failures
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ * Return:	Non-negative (true/false) on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1689,7 +1689,7 @@ H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, bool *exists)
 
     /* A path of "/" will always exist in a file */
     if ('\0' == *name_trav)
-        *exists = TRUE;
+        *exists = true;
     else {
         /* Set up user data & correct callback */
         udata.exists = exists;
@@ -1743,7 +1743,7 @@ H5L__exists(const H5G_loc_t *loc, const char *name, bool *exists)
 
     /* A path of "/" will always exist in a file */
     if (0 == HDstrcmp(name, "/"))
-        *exists = TRUE;
+        *exists = true;
     else {
         /* Traverse the group hierarchy to locate the object to get info about */
         udata.exists = exists;
@@ -1833,7 +1833,7 @@ H5L__get_info_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 {
     H5L_trav_gibi_t *udata = (H5L_trav_gibi_t *)_udata; /* User data passed in */
     H5O_link_t       fnd_lnk;                           /* Link within group */
-    bool             lnk_copied = FALSE;                /* Whether the link was copied */
+    bool             lnk_copied = false;                /* Whether the link was copied */
     herr_t           ret_value  = SUCCEED;              /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1845,7 +1845,7 @@ H5L__get_info_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     /* Query link */
     if (H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n, &fnd_lnk) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found");
-    lnk_copied = TRUE;
+    lnk_copied = true;
 
     /* Get information from the link */
     if (H5G_link_to_info(obj_loc->oloc, &fnd_lnk, udata->linfo) < 0)
@@ -1998,8 +1998,8 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
 {
     H5O_link_t        tmp_src_lnk;                   /* Temporary copy of src link, when needed */
     const H5O_link_t *src_lnk            = _src_lnk; /* Source link */
-    bool              dst_lnk_init       = FALSE;    /* Whether the destination link is initialized */
-    bool              expanded_link_open = FALSE;    /* Whether the target location has been opened */
+    bool              dst_lnk_init       = false;    /* Whether the destination link is initialized */
+    bool              expanded_link_open = false;    /* Whether the target location has been opened */
     H5G_loc_t         tmp_src_loc;                   /* Group location holding target object */
     H5G_name_t        tmp_src_path;                  /* Path for target object */
     H5O_loc_t         tmp_src_oloc;                  /* Object location for target object */
@@ -2018,7 +2018,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
         (H5L_TYPE_EXTERNAL == src_lnk->type && cpy_info->expand_ext_link)) {
         H5G_loc_t  lnk_grp_loc;        /* Group location holding link */
         H5G_name_t lnk_grp_path;       /* Path for link */
-        bool       tar_exists = FALSE; /* Whether the target object exists */
+        bool       tar_exists = false; /* Whether the target object exists */
 
         /* Set up group location for link */
         H5G_name_reset(&lnk_grp_path);
@@ -2047,7 +2047,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
             /* Find the target object */
             if (H5G_loc_find(&lnk_grp_loc, src_lnk->name, &tmp_src_loc) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to find target object");
-            expanded_link_open = TRUE;
+            expanded_link_open = true;
 
             /* Convert symbolic link to hard link */
             if (tmp_src_lnk.type == H5L_TYPE_SOFT)
@@ -2063,7 +2063,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
     /* Copy src link information to dst link information */
     if (NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, dst_lnk))
         HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy message");
-    dst_lnk_init = TRUE;
+    dst_lnk_init = true;
 
     /* Check if object in source group is a hard link & copy it */
     if (H5L_TYPE_HARD == src_lnk->type) {
@@ -2084,7 +2084,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
         /* Copy the shared object from source to destination */
         /* Don't care about obj_type or udata because those are only important
          * for old style groups */
-        if (H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, cpy_info, TRUE, NULL, NULL) < 0)
+        if (H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, cpy_info, true, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object");
 
         /* Copy new destination object's information for eventual insertion */

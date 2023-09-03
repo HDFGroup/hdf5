@@ -111,8 +111,8 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     flags = *p++;
     if (flags & ~H5O_GINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message");
-    ginfo->store_link_phase_change = (flags & H5O_GINFO_STORE_PHASE_CHANGE) ? TRUE : FALSE;
-    ginfo->store_est_entry_info    = (flags & H5O_GINFO_STORE_EST_ENTRY_INFO) ? TRUE : FALSE;
+    ginfo->store_link_phase_change = (flags & H5O_GINFO_STORE_PHASE_CHANGE) ? true : false;
+    ginfo->store_est_entry_info    = (flags & H5O_GINFO_STORE_EST_ENTRY_INFO) ? true : false;
 
     /* Get the max. # of links to store compactly & the min. # of links to store densely */
     if (ginfo->store_link_phase_change) {

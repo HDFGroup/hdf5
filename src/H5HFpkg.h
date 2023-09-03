@@ -66,7 +66,7 @@
  */
 #define H5HF_HEADER_SIZE(h)                                                                                  \
     (/* General metadata fields */                                                                           \
-     H5HF_METADATA_PREFIX_SIZE(TRUE)                                                                         \
+     H5HF_METADATA_PREFIX_SIZE(true)                                                                         \
                                                                                                              \
      /* Fractal Heap Header specific fields */                                                               \
                                                                                                              \
@@ -118,7 +118,7 @@
 /* Size of managed indirect block */
 #define H5HF_MAN_INDIRECT_SIZE(h, r)                                                                         \
     (/* General metadata fields */                                                                           \
-     H5HF_METADATA_PREFIX_SIZE(TRUE)                                                                         \
+     H5HF_METADATA_PREFIX_SIZE(true)                                                                         \
                                                                                                              \
      /* Fractal heap managed, absolutely mapped indirect block specific fields */                            \
      + (unsigned)(h)->sizeof_addr   /* File address of heap owning the block */                              \
@@ -356,7 +356,7 @@ struct H5HF_hdr_t {
                                     (i.e. w/extra byte) */
     uint8_t heap_off_size;    /* Size of heap offsets (in bytes) */
     uint8_t heap_len_size;    /* Size of heap ID lengths (in bytes) */
-    bool    checked_filters;  /* TRUE if pipeline passes can_apply checks */
+    bool    checked_filters;  /* true if pipeline passes can_apply checks */
 };
 
 /* Common indirect block doubling table entry */

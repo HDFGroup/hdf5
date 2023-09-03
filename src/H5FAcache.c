@@ -185,7 +185,7 @@ H5FA__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -196,7 +196,7 @@ H5FA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;
+    htri_t         ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -207,7 +207,7 @@ H5FA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_hdr_verify_chksum() */
@@ -568,7 +568,7 @@ H5FA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -579,7 +579,7 @@ H5FA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;
+    htri_t         ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -590,7 +590,7 @@ H5FA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_dblock_verify_chksum() */
@@ -970,7 +970,7 @@ H5FA__cache_dblk_page_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -981,7 +981,7 @@ H5FA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;
+    htri_t         ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -992,7 +992,7 @@ H5FA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__cache_dblk_page_verify_chksum() */

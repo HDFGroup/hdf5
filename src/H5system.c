@@ -61,7 +61,7 @@
 /*******************/
 
 /* Track whether tzset routine was called */
-static bool H5_ntzset = FALSE;
+static bool H5_ntzset = false;
 
 #ifndef H5_HAVE_VASPRINTF
 /* HDvasprintf provides vasprintf-like function on targets where it is
@@ -224,7 +224,7 @@ H5_make_time(struct tm *tm)
     /* Initialize timezone information */
     if (!H5_ntzset) {
         HDtzset();
-        H5_ntzset = TRUE;
+        H5_ntzset = true;
     } /* end if */
 
     /* Perform base conversion */
@@ -378,7 +378,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
     FILETIME             ExitTime;
     LARGE_INTEGER        counts_start;
     static LARGE_INTEGER counts_freq;
-    static bool          is_initialized = FALSE;
+    static bool          is_initialized = false;
     BOOL                 err;
 
     assert(tvs);
@@ -389,7 +389,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
         err            = QueryPerformanceFrequency(&counts_freq);
         if (0 == err)
             return -1;
-        is_initialized = TRUE;
+        is_initialized = true;
     } /* end if */
 
     /*************************
@@ -808,9 +808,9 @@ H5_nanosleep(uint64_t nanosec)
 
     /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
      * don't care about the return value since the second parameter
-     * (bAlertable) is FALSE, so it will always be zero.
+     * (bAlertable) is false, so it will always be zero.
      */
-    ignore = SleepEx(dwMilliseconds, FALSE);
+    ignore = SleepEx(dwMilliseconds, false);
 
 #else
 

@@ -108,7 +108,7 @@ H5C_log_set_up(H5C_t *cache, const char log_location[], H5C_log_style_t style, b
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unknown logging style");
 
     /* Set logging flags */
-    cache->log_info->enabled = TRUE;
+    cache->log_info->enabled = true;
 
     /* Start logging if requested */
     if (start_immediately)
@@ -140,7 +140,7 @@ H5C_log_tear_down(H5C_t *cache)
     assert(cache);
 
     /* Check logging flags */
-    if (FALSE == cache->log_info->enabled)
+    if (false == cache->log_info->enabled)
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "logging not enabled");
 
     /* Stop logging if that's going on */
@@ -154,7 +154,7 @@ H5C_log_tear_down(H5C_t *cache)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "log-specific tear down call failed");
 
     /* Unset logging flags */
-    cache->log_info->enabled = FALSE;
+    cache->log_info->enabled = false;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -180,7 +180,7 @@ H5C_start_logging(H5C_t *cache)
     assert(cache);
 
     /* Check logging flags */
-    if (FALSE == cache->log_info->enabled)
+    if (false == cache->log_info->enabled)
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "logging not enabled");
 
     /* Start logging */
@@ -189,7 +189,7 @@ H5C_start_logging(H5C_t *cache)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "log-specific start call failed");
 
     /* Set logging flags */
-    cache->log_info->logging = TRUE;
+    cache->log_info->logging = true;
 
     /* Write a log message */
     if (cache->log_info->cls->write_start_log_msg)
@@ -220,9 +220,9 @@ H5C_stop_logging(H5C_t *cache)
     assert(cache);
 
     /* Check logging flags */
-    if (FALSE == cache->log_info->enabled)
+    if (false == cache->log_info->enabled)
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "logging not enabled");
-    if (FALSE == cache->log_info->logging)
+    if (false == cache->log_info->logging)
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "logging not in progress");
 
     /* Write a log message */
@@ -236,7 +236,7 @@ H5C_stop_logging(H5C_t *cache)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "log-specific stop call failed");
 
     /* Set logging flags */
-    cache->log_info->logging = FALSE;
+    cache->log_info->logging = false;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -121,8 +121,8 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     flags = *p++;
     if (flags & ~H5O_AINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message");
-    ainfo->track_corder = (flags & H5O_AINFO_TRACK_CORDER) ? TRUE : FALSE;
-    ainfo->index_corder = (flags & H5O_AINFO_INDEX_CORDER) ? TRUE : FALSE;
+    ainfo->track_corder = (flags & H5O_AINFO_TRACK_CORDER) ? true : false;
+    ainfo->index_corder = (flags & H5O_AINFO_INDEX_CORDER) ? true : false;
 
     /* Set the number of attributes on the object to an invalid value, so we query it later */
     ainfo->nattrs = HSIZET_MAX;
@@ -363,7 +363,7 @@ H5O__ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUS
      *  that this message should be deleted.
      */
     if (cpy_info->copy_without_attr)
-        *deleted = TRUE;
+        *deleted = true;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__ainfo_pre_copy_file() */

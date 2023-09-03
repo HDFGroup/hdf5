@@ -103,7 +103,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
     /* Get object access property list */
     if (H5P_DEFAULT == oapl_id)
         oapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else if (TRUE != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
+    else if (true != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "oapl_id is not a link access property list ID");
 
     /* Get the VOL object */
@@ -115,7 +115,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the file for the object */
-    if ((file_id = H5F_get_file_id(vol_obj, obj_type, FALSE)) < 0)
+    if ((file_id = H5F_get_file_id(vol_obj, obj_type, false)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
 
     /* Retrieve VOL file object */
@@ -151,7 +151,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create object reference");
 
     /* Attach loc_id to reference and hold reference to it */
-    if (H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE, TRUE) < 0)
+    if (H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, true, true) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference");
 
 done:
@@ -204,7 +204,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
     /* Get object access property list */
     if (H5P_DEFAULT == oapl_id)
         oapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else if (TRUE != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
+    else if (true != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "oapl_id is not a link access property list ID");
 
     /* Get the VOL object */
@@ -216,7 +216,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the file for the object */
-    if ((file_id = H5F_get_file_id(vol_obj, obj_type, FALSE)) < 0)
+    if ((file_id = H5F_get_file_id(vol_obj, obj_type, false)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
 
     /* Retrieve VOL file object */
@@ -253,7 +253,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create region reference");
 
     /* Attach loc_id to reference and hold reference to it */
-    if (H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE, TRUE) < 0)
+    if (H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, true, true) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference");
 
 done:
@@ -302,7 +302,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
     /* Get object access property list */
     if (H5P_DEFAULT == oapl_id)
         oapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else if (TRUE != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
+    else if (true != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "oapl_id is not a link access property list ID");
 
     /* Get the VOL object */
@@ -314,7 +314,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the file for the object */
-    if ((file_id = H5F_get_file_id(vol_obj, obj_type, FALSE)) < 0)
+    if ((file_id = H5F_get_file_id(vol_obj, obj_type, false)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
 
     /* Retrieve VOL file object */
@@ -351,7 +351,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create attribute reference");
 
     /* Attach loc_id to reference and hold reference to it */
-    if (H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE, TRUE) < 0)
+    if (H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, true, true) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference");
 
 done:
@@ -429,7 +429,7 @@ done:
  *
  * Purpose:     Compare two references
  *
- * Return:      TRUE if equal, FALSE if unequal, FAIL if error
+ * Return:      true if equal, false if unequal, FAIL if error
  *
  *-------------------------------------------------------------------------
  */
@@ -526,7 +526,7 @@ H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
     }
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&oapl_id, H5P_CLS_DACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&oapl_id, H5P_CLS_DACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* Get object token */
@@ -543,7 +543,7 @@ H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((ret_value = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, true)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
 done:
@@ -682,7 +682,7 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, FALSE)) < 0)
+    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, false)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
     /* Get VOL object object */
@@ -852,11 +852,11 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, FALSE)) < 0)
+    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, false)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* Set location parameters */
@@ -875,7 +875,7 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
                     H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr));
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, opened_attr, (*vol_obj_ptr)->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, opened_attr, (*vol_obj_ptr)->connector, true)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute handle");
 
 done:

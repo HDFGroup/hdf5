@@ -180,11 +180,11 @@ H5FD__family_get_default_config(H5FD_family_fapl_t *fa_out)
      */
     if (NULL == (def_plist = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if ((fa_out->memb_fapl_id = H5P_copy_plist(def_plist, FALSE)) < 0)
+    if ((fa_out->memb_fapl_id = H5P_copy_plist(def_plist, false)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "can't copy property list");
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fa_out->memb_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if (H5P_set_driver_by_value(plist, H5_VFD_SEC2, NULL, TRUE) < 0)
+    if (H5P_set_driver_by_value(plist, H5_VFD_SEC2, NULL, true) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set default driver on member FAPL");
 
 done:
@@ -285,7 +285,7 @@ H5FD_family_init(void)
     FUNC_ENTER_NOAPI_NOERR
 
     if (H5I_VFL != H5I_get_type(H5FD_FAMILY_g))
-        H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), false);
 
     /* Set return value */
     ret_value = H5FD_FAMILY_g;
@@ -339,14 +339,14 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t msize, hid_t memb_fapl_id)
     H5TRACE3("e", "ihi", fapl_id, msize, memb_fapl_id);
 
     /* Check arguments */
-    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5P_DEFAULT == memb_fapl_id) {
         /* Get default configuration for member FAPL */
         if (H5FD__family_get_default_config(&fa) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get default driver configuration info");
     }
-    else if (TRUE != H5P_isa_class(memb_fapl_id, H5P_FILE_ACCESS))
+    else if (true != H5P_isa_class(memb_fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
 
     /* Initialize driver specific information. */
@@ -395,7 +395,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize /*out*/, hid_t *memb_fapl_id /*
     if (memb_fapl_id) {
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fa->memb_fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
-        *memb_fapl_id = H5P_copy_plist(plist, TRUE);
+        *memb_fapl_id = H5P_copy_plist(plist, true);
     } /* end if */
 
 done:
@@ -430,7 +430,7 @@ H5FD__family_fapl_get(H5FD_t *_file)
     fa->memb_size = file->memb_size;
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(file->memb_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    fa->memb_fapl_id = H5P_copy_plist(plist, FALSE);
+    fa->memb_fapl_id = H5P_copy_plist(plist, false);
 
     /* Set return value */
     ret_value = fa;
@@ -472,13 +472,13 @@ H5FD__family_fapl_copy(const void *_old_fa)
 
     /* Deep copy the property list objects in the structure */
     if (old_fa->memb_fapl_id == H5P_FILE_ACCESS_DEFAULT) {
-        if (H5I_inc_ref(new_fa->memb_fapl_id, FALSE) < 0)
+        if (H5I_inc_ref(new_fa->memb_fapl_id, false) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver");
     } /* end if */
     else {
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(old_fa->memb_fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-        new_fa->memb_fapl_id = H5P_copy_plist(plist, FALSE);
+        new_fa->memb_fapl_id = H5P_copy_plist(plist, false);
     } /* end else */
 
     /* Set return value */
@@ -659,7 +659,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     H5FD_family_t *file      = NULL;
     char          *memb_name = NULL, *temp = NULL;
     hsize_t        eof            = HADDR_UNDEF;
-    bool           default_config = FALSE;
+    bool           default_config = false;
     unsigned       t_flags        = flags & ~H5F_ACC_CREAT;
     H5FD_t        *ret_value      = NULL;
 
@@ -686,7 +686,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         file->pmem_size    = H5FD_FAM_DEF_MEM_SIZE; /* Member size passed in through property */
         file->mem_newsize  = 0;                     /*New member size used by h5repart only       */
 
-        default_config = TRUE;
+        default_config = true;
     } /* end if */
     else {
         H5P_genplist_t           *plist; /* Property list pointer */
@@ -699,7 +699,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
             if (H5FD__family_get_default_config(&default_fa) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get default family VFD configuration");
             fa             = &default_fa;
-            default_config = TRUE;
+            default_config = true;
         }
 
         /* Check for new family file size. It's used by h5repart only. */
@@ -709,18 +709,18 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get new family member size");
 
             /* Set flag for later */
-            file->repart_members = TRUE;
+            file->repart_members = true;
         } /* end if */
 
         if (fa->memb_fapl_id == H5P_FILE_ACCESS_DEFAULT) {
-            if (H5I_inc_ref(fa->memb_fapl_id, FALSE) < 0)
+            if (H5I_inc_ref(fa->memb_fapl_id, false) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver");
             file->memb_fapl_id = fa->memb_fapl_id;
         } /* end if */
         else {
             if (NULL == (plist = (H5P_genplist_t *)H5I_object(fa->memb_fapl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-            file->memb_fapl_id = H5P_copy_plist(plist, FALSE);
+            file->memb_fapl_id = H5P_copy_plist(plist, false);
         }                                /* end else */
         file->memb_size = fa->memb_size; /* Actual member size to be updated later */
         file->pmem_size = fa->memb_size; /* Member size passed in through property */
@@ -1334,8 +1334,8 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *              The lock type to apply depends on the parameter "rw":
- *                      TRUE--opens for write: an exclusive lock
- *                      FALSE--opens for read: a shared lock
+ *                      true--opens for write: an exclusive lock
+ *                      false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1417,7 +1417,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     H5P_genplist_t           *plist;
     const H5FD_family_fapl_t *fa;
     H5FD_family_fapl_t        default_fa     = {0, H5I_INVALID_HID};
-    bool                      default_config = FALSE;
+    bool                      default_config = false;
     hid_t                     memb_fapl_id   = H5I_INVALID_HID;
     unsigned                  current_member;
     char                     *member_name  = NULL;
@@ -1436,7 +1436,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
         if (H5FD__family_get_default_config(&default_fa) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get default family VFD configuration");
         memb_fapl_id   = default_fa.memb_fapl_id;
-        default_config = TRUE;
+        default_config = true;
     }
     else {
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1445,7 +1445,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
             if (H5FD__family_get_default_config(&default_fa) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get default family VFD configuration");
             fa             = &default_fa;
-            default_config = TRUE;
+            default_config = true;
         }
         memb_fapl_id = fa->memb_fapl_id;
     }

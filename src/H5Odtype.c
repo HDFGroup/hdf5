@@ -111,9 +111,9 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  *
  * Purpose:     Decodes a datatype
  *
- * Return:      TRUE if we can upgrade the parent type's version even
+ * Return:      true if we can upgrade the parent type's version even
  *                  with strict format checks
- *              FALSE if we cannot
+ *              false if we cannot
  *              NEGATIVE on failure
  *-------------------------------------------------------------------------
  */
@@ -123,7 +123,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 {
     unsigned flags;
     unsigned version;
-    htri_t   ret_value = FALSE;
+    htri_t   ret_value = false;
 
     FUNC_ENTER_PACKAGE
 
@@ -459,7 +459,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                     upgrade_to = temp_type->shared->version;
 
                     /* Pass "can_upgrade" flag down to parent type */
-                    ret_value = TRUE;
+                    ret_value = true;
                 }
 
                 /* Go create the array datatype now, for older versions of the datatype message */
@@ -497,7 +497,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 
                             /* Set the return value to indicate that we should freely
                              * upgrade parent types */
-                            ret_value = TRUE;
+                            ret_value = true;
                         }
                     }
                 }
@@ -509,8 +509,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 /* Set the "force conversion" flag if VL datatype fields exist in this
                  * type or any component types
                  */
-                if (temp_type->shared->force_conv == TRUE)
-                    dt->shared->force_conv = TRUE;
+                if (temp_type->shared->force_conv == true)
+                    dt->shared->force_conv = true;
 
                 /* Member size */
                 dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].size = temp_type->shared->size;
@@ -582,16 +582,16 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             if (dt->shared->u.atomic.u.r.rtype == H5R_OBJECT2 ||
                 dt->shared->u.atomic.u.r.rtype == H5R_DATASET_REGION2 ||
                 dt->shared->u.atomic.u.r.rtype == H5R_ATTR) {
-                dt->shared->u.atomic.u.r.opaque  = TRUE;
+                dt->shared->u.atomic.u.r.opaque  = true;
                 dt->shared->u.atomic.u.r.version = (unsigned)((flags >> 4) & 0x0f);
                 if (dt->shared->u.atomic.u.r.version != H5R_ENCODE_VERSION)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "reference version does not match");
             }
             else
-                dt->shared->u.atomic.u.r.opaque = FALSE;
+                dt->shared->u.atomic.u.r.opaque = false;
 
             /* This type needs conversion */
-            dt->shared->force_conv = TRUE;
+            dt->shared->force_conv = true;
 
             /* Mark location of this type as undefined for now.  The caller
              * function should decide the location. */
@@ -701,7 +701,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
              * vlen itself. */
             H5O_DTYPE_CHECK_VERSION(dt, version, dt->shared->parent->shared->version, ioflags, "vlen", FAIL)
 
-            dt->shared->force_conv = TRUE;
+            dt->shared->force_conv = true;
 
             /* Mark location this type as undefined for now.  The caller function should
              * decide the location. */
@@ -761,8 +761,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             /* Set the "force conversion" flag if a VL base datatype is used or
              * or if any components of the base datatype are VL types.
              */
-            if (dt->shared->parent->shared->force_conv == TRUE)
-                dt->shared->force_conv = TRUE;
+            if (dt->shared->parent->shared->force_conv == true)
+                dt->shared->force_conv = true;
             break;
 
         case H5T_NO_CLASS:
@@ -1330,7 +1330,7 @@ H5O__dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
      * the library will have set p_size to SIZE_MAX and we can use that
      * as a signal to skip bounds checking.
      */
-    skip = (p_size == SIZE_MAX ? TRUE : FALSE);
+    skip = (p_size == SIZE_MAX ? true : false);
 
     /* Perform actual decode of message */
     if (H5O__dtype_decode_helper(ioflags, &p, dt, skip, p_end) < 0)
@@ -1672,8 +1672,8 @@ done:
  *              not.  Immutable datatypes or datatypes that are already
  *              shared cannot be shared (again).
  *
- * Return:	TRUE if datatype can be shared
- *              FALSE if datatype may not shared
+ * Return:	true if datatype can be shared
+ *              false if datatype may not shared
  *              Negative on failure
  *
  *-------------------------------------------------------------------------
@@ -1683,7 +1683,7 @@ H5O__dtype_can_share(const void *_mesg)
 {
     const H5T_t *mesg = (const H5T_t *)_mesg;
     htri_t       tri_ret;
-    htri_t       ret_value = TRUE;
+    htri_t       ret_value = true;
 
     FUNC_ENTER_PACKAGE
 
@@ -1691,13 +1691,13 @@ H5O__dtype_can_share(const void *_mesg)
 
     /* Don't share immutable datatypes */
     if ((tri_ret = H5T_is_immutable(mesg)) > 0)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
     else if (tri_ret < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable");
 
     /* Don't share committed datatypes */
     if ((tri_ret = H5T_is_named(mesg)) > 0)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
     else if (tri_ret < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is shared");
 

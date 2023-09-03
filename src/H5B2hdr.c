@@ -264,7 +264,7 @@ haddr_t
 H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
 {
     H5B2_hdr_t *hdr       = NULL;        /* The new v2 B-tree header information */
-    bool        inserted  = FALSE;       /* Whether the header was inserted into cache */
+    bool        inserted  = false;       /* Whether the header was inserted into cache */
     haddr_t     ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -295,7 +295,7 @@ H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
     /* Cache the new B-tree node */
     if (H5AC_insert_entry(f, H5AC_BT2_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, HADDR_UNDEF, "can't add B-tree header to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add header as child of 'top' proxy */
     if (hdr->top_proxy)

@@ -51,10 +51,10 @@
  *
  * `authenticate` (hbool_t)
  *
- *     Flag TRUE or FALSE whether or not requests are to be authenticated
+ *     Flag true or false whether or not requests are to be authenticated
  *     with the AWS4 algorithm.
- *     If TRUE, `aws_region`, `secret_id`, and `secret_key` must be populated.
- *     If FALSE, those three components are unused.
+ *     If true, `aws_region`, `secret_id`, and `secret_key` must be populated.
+ *     If false, those three components are unused.
  *
  * `aws_region` (char[])
  *

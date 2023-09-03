@@ -236,7 +236,7 @@ H5F_get_shared(const H5F_t *f)
  *
  * Purpose:  Determine if two files have the same shared file pointer
  *
- * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:   true/false on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 bool
@@ -277,7 +277,7 @@ H5F_get_nopen_objs(const H5F_t *f)
  *
  * Purpose:     Determines if a file ID exists for this file struct
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *-------------------------------------------------------------------------
  */
 bool
@@ -503,7 +503,7 @@ H5F_sym_leaf_k(const H5F_t *f)
  *
  * Purpose:  Get the setting flag for minimized dataset object headers
  *
- * Return:   TRUE/FALSE as set in file
+ * Return:   true/false as set in file
  *-------------------------------------------------------------------------
  */
 bool
@@ -799,7 +799,7 @@ H5F_store_msg_crt_idx(const H5F_t *f)
  *
  * Purpose:  Check if a file has a particular feature enabled
  *
- * Return:   Success:    Non-negative - TRUE or FALSE
+ * Return:   Success:    Non-negative - true or false
  *           Failure:    Negative (should not happen)
  *-------------------------------------------------------------------------
  */
@@ -819,7 +819,7 @@ H5F_shared_has_feature(const H5F_shared_t *f_sh, unsigned feature)
  *
  * Purpose:  Check if a file has a particular feature enabled
  *
- * Return:   Success:    Non-negative - TRUE or FALSE
+ * Return:   Success:    Non-negative - true or false
  *           Failure:    Negative (should not happen)
  *-------------------------------------------------------------------------
  */
@@ -999,7 +999,7 @@ done:
  *           (Mainly added to stop non-file routines from poking about in the
  *           H5F_t data structure)
  *
- * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:   true/false on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 bool
@@ -1022,7 +1022,7 @@ H5F_is_tmp_addr(const H5F_t *f, haddr_t addr)
  *           (Mainly added to stop non-file routines from poking about in the
  *           H5F_t data structure)
  *
- * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:   true/false on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 bool
@@ -1096,7 +1096,7 @@ done:
  *           (Mainly added to stop non-file routines from poking about in the
  *           H5F_t data structure)
  *
- * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:   true/false on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 bool
@@ -1119,7 +1119,7 @@ H5F_use_mdc_logging(const H5F_t *f)
  *           (Mainly added to stop non-file routines from poking about in the
  *           H5F_t data structure)
  *
- * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:   true/false on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 bool
@@ -1142,7 +1142,7 @@ H5F_start_mdc_log_on_access(const H5F_t *f)
  *           (Mainly added to stop non-file routines from poking about in the
  *           H5F_t data structure)
  *
- * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:   true/false on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 char *
@@ -1340,7 +1340,7 @@ done:
  *
  * Purpose:  Get the file locking flag for the file
  *
- * Return:   TRUE/FALSE
+ * Return:   true/false
  *
  *-------------------------------------------------------------------------
  */
@@ -1360,7 +1360,7 @@ H5F_get_file_locking(const H5F_t *f)
  *
  * Purpose:  Determine if vector or selection I/O is supported by this file
  *
- * Return:   TRUE/FALSE
+ * Return:   true/false
  *
  *-------------------------------------------------------------------------
  */

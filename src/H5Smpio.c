@@ -136,7 +136,7 @@ H5S__mpio_all_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
         /* fill in the return values */
         *new_type = MPI_BYTE;
         H5_CHECKED_ASSIGN(*count, int, total_bytes, hsize_t);
-        *is_derived_type = FALSE;
+        *is_derived_type = false;
     }
     else {
         /* Create a LARGE derived datatype for this transfer */
@@ -144,7 +144,7 @@ H5S__mpio_all_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
                         "couldn't create a large datatype from the all selection");
         *count           = 1;
-        *is_derived_type = TRUE;
+        *is_derived_type = true;
     }
 
 done:
@@ -173,7 +173,7 @@ H5S__mpio_none_type(MPI_Datatype *new_type, int *count, bool *is_derived_type)
     /* fill in the return values */
     *new_type        = MPI_BYTE;
     *count           = 0;
-    *is_derived_type = FALSE;
+    *is_derived_type = false;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5S__mpio_none_type() */
@@ -193,7 +193,7 @@ static herr_t
 H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *disp, MPI_Datatype *new_type)
 {
     MPI_Datatype  elmt_type;                 /* MPI datatype for individual element */
-    bool          elmt_type_created = FALSE; /* Whether the element MPI datatype was created */
+    bool          elmt_type_created = false; /* Whether the element MPI datatype was created */
     int          *inner_blocks      = NULL;  /* Arrays for MPI datatypes when "large" datatype needed */
     MPI_Aint     *inner_disps       = NULL;
     MPI_Datatype *inner_types       = NULL;
@@ -210,7 +210,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
     /* Create an MPI datatype for an element */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE, &elmt_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
-    elmt_type_created = TRUE;
+    elmt_type_created = true;
 
     bigio_count = H5_mpi_get_bigio_count();
 
@@ -414,7 +414,7 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
             if (u > 0 && disp[u] < disp[u - 1]) {
                 hsize_t s = 0, l = u, m = u / 2;
 
-                *is_permuted = TRUE;
+                *is_permuted = true;
                 do {
                     if (disp[u] > disp[m])
                         s = m + 1;
@@ -453,7 +453,7 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
 
     /* Set values about MPI datatype created */
     *count           = 1;
-    *is_derived_type = TRUE;
+    *is_derived_type = true;
 
 done:
     if (NULL != disp)
@@ -495,7 +495,7 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
 {
     MPI_Aint       *disp          = NULL;  /* Datatype displacement for each point*/
     H5S_sel_iter_t *sel_iter      = NULL;  /* Selection iteration info */
-    bool            sel_iter_init = FALSE; /* Selection iteration info has been initialized */
+    bool            sel_iter_init = false; /* Selection iteration info has been initialized */
     hssize_t        snum_points;           /* Signed number of elements in selection */
     hsize_t         num_points;            /* Number of points in the selection */
     hsize_t        *off = NULL;
@@ -531,7 +531,7 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
     /* Initialize selection iterator */
     if (H5S_select_iter_init(sel_iter, space, elmt_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-    sel_iter_init = TRUE; /* Selection iteration info has been initialized */
+    sel_iter_init = true; /* Selection iteration info has been initialized */
 
     /* Set the number of elements to iterate over */
     H5_CHECKED_ASSIGN(max_elem, size_t, num_points, hsize_t);
@@ -597,7 +597,7 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
 
     /* Set values about MPI datatype created */
     *count           = 1;
-    *is_derived_type = TRUE;
+    *is_derived_type = true;
 
 done:
     /* Release selection iterator */
@@ -640,7 +640,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
                          bool *is_derived_type)
 {
     H5S_sel_iter_t *sel_iter      = NULL;  /* Selection iteration info */
-    bool            sel_iter_init = FALSE; /* Selection iteration info has been initialized */
+    bool            sel_iter_init = false; /* Selection iteration info has been initialized */
 
     struct dim { /* less hassle than malloc/free & ilk */
         hssize_t start;
@@ -678,7 +678,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
     /* Initialize selection iterator */
     if (H5S_select_iter_init(sel_iter, space, elmt_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-    sel_iter_init = TRUE; /* Selection iteration info has been initialized */
+    sel_iter_init = true; /* Selection iteration info has been initialized */
 
     /* Abbreviate args */
     diminfo = sel_iter->u.hyp.diminfo;
@@ -954,7 +954,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
 
     /* fill in the remaining return values */
     *count           = 1; /* only have to move one of these suckers! */
-    *is_derived_type = TRUE;
+    *is_derived_type = true;
 
 done:
     /* Release selection iterator */
@@ -993,7 +993,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
 {
     H5S_mpio_mpitype_list_t type_list;                    /* List to track MPI data types created */
     MPI_Datatype            elmt_type;                    /* MPI datatype for an element */
-    bool                    elmt_type_is_derived = FALSE; /* Whether the element type has been created */
+    bool                    elmt_type_is_derived = false; /* Whether the element type has been created */
     MPI_Datatype            span_type;                    /* MPI datatype for overall span tree */
     hsize_t                 bigio_count;                  /* Transition point to create derived type */
     hsize_t                 down[H5S_MAX_RANK];           /* 'down' sizes for each dimension */
@@ -1018,7 +1018,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
     else if (H5_mpio_create_large_type(elmt_size, 0, MPI_BYTE, &elmt_type) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
                     "couldn't create a large element datatype in span_hyper selection");
-    elmt_type_is_derived = TRUE;
+    elmt_type_is_derived = true;
 
     /* Compute 'down' sizes for each dimension */
     H5VM_array_down(space->extent.rank, space->extent.size, down);
@@ -1044,7 +1044,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
 
     /* fill in the remaining return values */
     *count           = 1;
-    *is_derived_type = TRUE;
+    *is_derived_type = true;
 
 done:
     /* Release resources */
@@ -1120,7 +1120,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
     size_t            alloc_count       = 0; /* Number of span tree nodes allocated at this level */
     size_t            outercount        = 0; /* Number of span tree nodes at this level */
     MPI_Datatype     *inner_type        = NULL;
-    bool              inner_types_freed = FALSE; /* Whether the inner_type MPI datatypes have been freed */
+    bool              inner_types_freed = false; /* Whether the inner_type MPI datatypes have been freed */
     int              *blocklen          = NULL;
     MPI_Aint         *disp              = NULL;
     size_t            u;                   /* Local index variable */
@@ -1148,7 +1148,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
         /* If this is the fastest changing dimension, it is the base case for derived datatype. */
         span = spans->head;
         if (NULL == span->down) {
-            bool large_block = FALSE; /* Whether the block length is larger than 32 bit integer */
+            bool large_block = false; /* Whether the block length is larger than 32 bit integer */
 
             outercount = 0;
             while (span) {
@@ -1182,14 +1182,14 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                 blocklen[outercount] = (int)nelmts;
 
                 if (bigio_count < (hsize_t)blocklen[outercount])
-                    large_block = TRUE; /* at least one block type is large, so set this flag to true */
+                    large_block = true; /* at least one block type is large, so set this flag to true */
 
                 span = span->next;
                 outercount++;
             } /* end while */
 
             /* Everything fits into integers, so cast them and use hindexed */
-            if (bigio_count >= outercount && large_block == FALSE) {
+            if (bigio_count >= outercount && large_block == false) {
                 if (MPI_SUCCESS !=
                     (mpi_code = MPI_Type_create_hindexed((int)outercount, blocklen, disp, *elmt_type,
                                                          &spans->op_info[op_info_i].u.down_type)))
@@ -1307,7 +1307,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
             for (u = 0; u < outercount; u++)
                 if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[u])))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-            inner_types_freed = TRUE;
+            inner_types_freed = true;
         } /* end else */
 
         /* Allocate space for the MPI data type list node */
@@ -1386,7 +1386,7 @@ H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int 
              * out-of-order point selection, then permute this selection which
              * should be a memory selection to match the file space permutation.
              */
-            if (TRUE == *is_permuted) {
+            if (true == *is_permuted) {
                 switch (H5S_GET_SELECT_TYPE(space)) {
                     case H5S_SEL_NONE:
                         if (H5S__mpio_none_type(new_type, count, is_derived_type) < 0)
@@ -1436,7 +1436,7 @@ H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int 
                         break;
 
                     case H5S_SEL_HYPERSLABS:
-                        if ((H5S_SELECT_IS_REGULAR(space) == TRUE)) {
+                        if ((H5S_SELECT_IS_REGULAR(space) == true)) {
                             if (H5S__mpio_reg_hyper_type(space, elmt_size, new_type, count, is_derived_type) <
                                 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,

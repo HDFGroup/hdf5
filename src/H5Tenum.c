@@ -59,7 +59,7 @@ H5Tenum_create(hid_t parent_id)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_INVALID_HID, "cannot create enum type");
 
     /* Register the type */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type ID");
 
 done:
@@ -334,7 +334,7 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t 
     H5T_t   *copied_dt = NULL;   /* Do sorting in copied datatype */
     unsigned lt, md = 0, rt;     /* Indices for binary search	*/
     int      cmp        = (-1);  /* Comparison result		*/
-    bool     alloc_name = FALSE; /* Whether name has been allocated */
+    bool     alloc_name = false; /* Whether name has been allocated */
     char    *ret_value  = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -380,7 +380,7 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t 
     if (!name) {
         if (NULL == (name = (char *)H5MM_malloc(HDstrlen(copied_dt->shared->u.enumer.name[md]) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        alloc_name = TRUE;
+        alloc_name = true;
     } /* end if */
     HDstrncpy(name, copied_dt->shared->u.enumer.name[md], size);
     if (HDstrlen(copied_dt->shared->u.enumer.name[md]) >= size)

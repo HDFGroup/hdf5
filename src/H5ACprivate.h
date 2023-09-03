@@ -76,11 +76,11 @@ typedef enum {
     H5AC_NTYPES               /* Number of types, must be last                    */
 } H5AC_type_t;
 
-/* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when
- * H5C_COLLECT_CACHE_STATS is FALSE.
+/* H5AC_DUMP_STATS_ON_CLOSE should always be false when
+ * H5C_COLLECT_CACHE_STATS is false.
  *
- * When H5C_COLLECT_CACHE_STATS is TRUE, H5AC_DUMP_STATS_ON_CLOSE must
- * be FALSE for "make check" to succeed, but may be set to TRUE at other
+ * When H5C_COLLECT_CACHE_STATS is true, H5AC_DUMP_STATS_ON_CLOSE must
+ * be false for "make check" to succeed, but may be set to true at other
  * times for debugging purposes.
  *
  * Hence the following, somewhat odd set of #defines.
@@ -224,12 +224,12 @@ typedef struct H5AC_proxy_entry_t {
 #define H5AC__DEFAULT_CACHE_CONFIG                                            \
 {                                                                             \
   /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION, \
-  /* bool     rpt_fcn_enabled        = */ FALSE,                           \
-  /* bool     open_trace_file        = */ FALSE,                           \
-  /* bool     close_trace_file       = */ FALSE,                           \
+  /* bool     rpt_fcn_enabled        = */ false,                           \
+  /* bool     open_trace_file        = */ false,                           \
+  /* bool     close_trace_file       = */ false,                           \
   /* char        trace_file_name[]      = */ "",                              \
-  /* bool     evictions_enabled      = */ TRUE,                            \
-  /* bool     set_initial_size       = */ TRUE,                            \
+  /* bool     evictions_enabled      = */ true,                            \
+  /* bool     set_initial_size       = */ true,                            \
   /* size_t      initial_size           = */ ( 2 * 1024 * 1024),              \
   /* double      min_clean_fraction     = */ 0.3,                            \
   /* size_t      max_size               = */ (32 * 1024 * 1024),              \
@@ -238,7 +238,7 @@ typedef struct H5AC_proxy_entry_t {
   /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
   /* double      lower_hr_threshold     = */ 0.9,                            \
   /* double      increment              = */ 2.0,                            \
-  /* bool     apply_max_increment    = */ TRUE,                            \
+  /* bool     apply_max_increment    = */ true,                            \
   /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
   /* enum H5C_cache_flash_incr_mode       */                                  \
   /*                    flash_incr_mode = */ H5C_flash_incr__add_space,       \
@@ -247,10 +247,10 @@ typedef struct H5AC_proxy_entry_t {
   /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold, \
   /* double      upper_hr_threshold     = */ 0.999,                          \
   /* double      decrement              = */ 0.9,                           \
-  /* bool     apply_max_decrement    = */ TRUE,                            \
+  /* bool     apply_max_decrement    = */ true,                            \
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
   /* int         epochs_before_eviction = */ 3,                               \
-  /* bool     apply_empty_reserve    = */ TRUE,                            \
+  /* bool     apply_empty_reserve    = */ true,                            \
   /* double      empty_reserve          = */ 0.1,                            \
   /* size_t      dirty_bytes_threshold  = */ (256 * 1024),                    \
   /* int         metadata_write_strategy = */                                  \
@@ -260,12 +260,12 @@ typedef struct H5AC_proxy_entry_t {
 #define H5AC__DEFAULT_CACHE_CONFIG                                            \
 {                                                                             \
   /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,     \
-  /* bool     rpt_fcn_enabled        = */ FALSE,                           \
-  /* bool     open_trace_file        = */ FALSE,                           \
-  /* bool     close_trace_file       = */ FALSE,                           \
+  /* bool     rpt_fcn_enabled        = */ false,                           \
+  /* bool     open_trace_file        = */ false,                           \
+  /* bool     close_trace_file       = */ false,                           \
   /* char        trace_file_name[]      = */ "",                              \
-  /* bool     evictions_enabled      = */ TRUE,                            \
-  /* bool     set_initial_size       = */ TRUE,                            \
+  /* bool     evictions_enabled      = */ true,                            \
+  /* bool     set_initial_size       = */ true,                            \
   /* size_t      initial_size           = */ ( 2 * 1024 * 1024),              \
   /* double      min_clean_fraction     = */ 0.01,                           \
   /* size_t      max_size               = */ (32 * 1024 * 1024),              \
@@ -274,7 +274,7 @@ typedef struct H5AC_proxy_entry_t {
   /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
   /* double      lower_hr_threshold     = */ 0.9,                             \
   /* double      increment              = */ 2.0,                             \
-  /* bool     apply_max_increment    = */ TRUE,                            \
+  /* bool     apply_max_increment    = */ true,                            \
   /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
   /* enum H5C_cache_flash_incr_mode       */                                  \
   /*                    flash_incr_mode = */ H5C_flash_incr__add_space,       \
@@ -283,10 +283,10 @@ typedef struct H5AC_proxy_entry_t {
   /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,\
   /* double      upper_hr_threshold     = */ 0.999,                           \
   /* double      decrement              = */ 0.9,                             \
-  /* bool     apply_max_decrement    = */ TRUE,                            \
+  /* bool     apply_max_decrement    = */ true,                            \
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
   /* int         epochs_before_eviction = */ 3,                               \
-  /* bool     apply_empty_reserve    = */ TRUE,                            \
+  /* bool     apply_empty_reserve    = */ true,                            \
   /* double      empty_reserve          = */ 0.1,                             \
   /* size_t      dirty_bytes_threshold  = */ (256 * 1024),                    \
   /* int         metadata_write_strategy = */                                 \
@@ -297,8 +297,8 @@ typedef struct H5AC_proxy_entry_t {
 #define H5AC__DEFAULT_CACHE_IMAGE_CONFIG                                     \
 {                                                                            \
    /* int32_t version            = */ H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, \
-   /* bool generate_image     = */ FALSE,                                 \
-   /* bool save_resize_status = */ FALSE,                                 \
+   /* bool generate_image     = */ false,                                 \
+   /* bool save_resize_status = */ false,                                 \
    /* int32_t entry_ageout       = */ H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE  \
 }
 /* clang-format on */

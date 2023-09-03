@@ -48,15 +48,15 @@ H5_DLL hid_t H5FD_core_init(void);
  *          be increased each time more memory is required.
  *
  *          While using H5Fcreate() to create a core file, if the \p
- *          backing_store is set to 1 (TRUE), the file contents are flushed to a
+ *          backing_store is set to 1 (true), the file contents are flushed to a
  *          file with the same name as this core file when the file is closed or
  *          access to the file is terminated in memory.
  *
  *          The application is allowed to open an existing file with #H5FD_CORE
  *          driver. While using H5Fopen() to open an existing file, if the \p
- *          backing_store is set to 1 (TRUE) and the \c flags for H5Fopen() is set to
+ *          backing_store is set to 1 (true) and the \c flags for H5Fopen() is set to
  *          #H5F_ACC_RDWR, any change to the file contents are saved to the file
- *          when the file is closed. If \p backing_store is set to 0 (FALSE) and the \c
+ *          when the file is closed. If \p backing_store is set to 0 (false) and the \c
  *          flags for H5Fopen() is set to #H5F_ACC_RDWR, any change to the file
  *          contents will be lost when the file is closed. If the flags for
  *          H5Fopen() is set to #H5F_ACC_RDONLY, no change to the file is

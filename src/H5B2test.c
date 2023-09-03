@@ -481,7 +481,7 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
         H5B2_node_ptr_t  next_node_ptr; /* Node pointer info for next node */
 
         /* Lock B-tree current node */
-        if (NULL == (internal = H5B2__protect_internal(hdr, parent, &curr_node_ptr, depth, FALSE,
+        if (NULL == (internal = H5B2__protect_internal(hdr, parent, &curr_node_ptr, depth, false,
                                                        H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node");
 
@@ -537,7 +537,7 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
         H5B2_leaf_t *leaf; /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
-        if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, &curr_node_ptr, FALSE, H5AC__READ_ONLY_FLAG)))
+        if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, &curr_node_ptr, false, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
         /* Unpin parent if necessary */

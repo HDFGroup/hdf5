@@ -506,11 +506,11 @@ H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&temp_fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+    if (H5CX_set_apl(&temp_fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, true) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* Call the internal encode routine */
-    if ((ret_value = H5P__encode(plist, TRUE, buf, nalloc)) < 0)
+    if ((ret_value = H5P__encode(plist, true, buf, nalloc)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
 done:
@@ -557,7 +557,7 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
     switch (in_strategy) {
         case H5F_FILE_SPACE_ALL_PERSIST:
             new_strategy  = H5F_FSPACE_STRATEGY_FSM_AGGR;
-            new_persist   = TRUE;
+            new_persist   = true;
             new_threshold = in_threshold;
             break;
 

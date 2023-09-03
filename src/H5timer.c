@@ -386,7 +386,7 @@ H5_timer_start(H5_timer_t *timer /*in,out*/)
     if (H5__timer_get_timevals(&(timer->initial)) < 0)
         return -1;
 
-    timer->is_running = TRUE;
+    timer->is_running = true;
 
     return 0;
 } /* end H5_timer_start() */
@@ -423,7 +423,7 @@ H5_timer_stop(H5_timer_t *timer /*in,out*/)
     timer->total.system += timer->final_interval.system;
     timer->total.user += timer->final_interval.user;
 
-    timer->is_running = FALSE;
+    timer->is_running = false;
 
     return 0;
 } /* end H5_timer_stop() */

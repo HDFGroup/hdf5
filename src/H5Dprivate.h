@@ -105,7 +105,7 @@
 
 /* Definitions for general collective I/O instrumentation properties */
 #define H5D_XFER_COLL_RANK0_BCAST_SIZE sizeof(bool)
-#define H5D_XFER_COLL_RANK0_BCAST_DEF  FALSE
+#define H5D_XFER_COLL_RANK0_BCAST_DEF  false
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 /* Default temporary buffer size */

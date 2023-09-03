@@ -162,7 +162,7 @@
  * It's a private property only used by h5repart.
  */
 #define H5F_ACS_FAMILY_TO_SINGLE_SIZE sizeof(bool)
-#define H5F_ACS_FAMILY_TO_SINGLE_DEF  FALSE
+#define H5F_ACS_FAMILY_TO_SINGLE_DEF  false
 /* Definition for data type in multi file driver */
 #define H5F_ACS_MULTI_TYPE_SIZE sizeof(H5FD_mem_t)
 #define H5F_ACS_MULTI_TYPE_DEF  H5FD_MEM_DEFAULT
@@ -185,7 +185,7 @@
  * instead of the memory address.  (Private to library)
  */
 #define H5F_ACS_WANT_POSIX_FD_SIZE sizeof(bool)
-#define H5F_ACS_WANT_POSIX_FD_DEF  FALSE
+#define H5F_ACS_WANT_POSIX_FD_DEF  false
 /* Definition for external file cache size */
 #define H5F_ACS_EFC_SIZE_SIZE sizeof(unsigned)
 #define H5F_ACS_EFC_SIZE_DEF  0
@@ -213,18 +213,18 @@
     }
 /* Definition for status_flags in the superblock */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_SIZE sizeof(bool)
-#define H5F_ACS_CLEAR_STATUS_FLAGS_DEF  FALSE
+#define H5F_ACS_CLEAR_STATUS_FLAGS_DEF  false
 
 /* Definition for dropping free-space to the floor when reading in the superblock */
 #define H5F_ACS_NULL_FSM_ADDR_SIZE sizeof(bool)
-#define H5F_ACS_NULL_FSM_ADDR_DEF  FALSE
+#define H5F_ACS_NULL_FSM_ADDR_DEF  false
 /* Definition for skipping EOF check when reading in the superblock */
 #define H5F_ACS_SKIP_EOF_CHECK_SIZE sizeof(bool)
-#define H5F_ACS_SKIP_EOF_CHECK_DEF  FALSE
+#define H5F_ACS_SKIP_EOF_CHECK_DEF  false
 
 /* Definition for 'use metadata cache logging' flag */
 #define H5F_ACS_USE_MDC_LOGGING_SIZE sizeof(bool)
-#define H5F_ACS_USE_MDC_LOGGING_DEF  FALSE
+#define H5F_ACS_USE_MDC_LOGGING_DEF  false
 #define H5F_ACS_USE_MDC_LOGGING_ENC  H5P__encode_bool
 #define H5F_ACS_USE_MDC_LOGGING_DEC  H5P__decode_bool
 /* Definition for 'mdc log location' flag */
@@ -238,12 +238,12 @@
 #define H5F_ACS_MDC_LOG_LOCATION_CLOSE H5P__facc_mdc_log_location_close
 /* Definition for 'start metadata cache logging on access' flag */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE sizeof(bool)
-#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF  FALSE
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF  false
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC  H5P__encode_bool
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC  H5P__decode_bool
 /* Definition for evict on close property */
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE sizeof(bool)
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF  FALSE
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF  false
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC  H5P__encode_bool
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC  H5P__decode_bool
 #ifdef H5_HAVE_PARALLEL
@@ -254,7 +254,7 @@
 #define H5F_ACS_COLL_MD_READ_FLAG_DEC  H5P__decode_coll_md_read_flag_t
 /* Definition of collective metadata write mode flag */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_SIZE sizeof(bool)
-#define H5F_ACS_COLL_MD_WRITE_FLAG_DEF  FALSE
+#define H5F_ACS_COLL_MD_WRITE_FLAG_DEF  false
 #define H5F_ACS_COLL_MD_WRITE_FLAG_ENC  H5P__encode_bool
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEC  H5P__decode_bool
 /* Definition for the file's MPI communicator */
@@ -315,9 +315,9 @@
  */
 #define H5F_ACS_USE_FILE_LOCKING_SIZE sizeof(bool)
 #if defined H5_USE_FILE_LOCKING && H5_USE_FILE_LOCKING
-#define H5F_ACS_USE_FILE_LOCKING_DEF TRUE
+#define H5F_ACS_USE_FILE_LOCKING_DEF true
 #else
-#define H5F_ACS_USE_FILE_LOCKING_DEF FALSE
+#define H5F_ACS_USE_FILE_LOCKING_DEF false
 #endif
 #define H5F_ACS_USE_FILE_LOCKING_ENC H5P__encode_bool
 #define H5F_ACS_USE_FILE_LOCKING_DEC H5P__decode_bool
@@ -327,9 +327,9 @@
  */
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE sizeof(bool)
 #if defined H5_IGNORE_DISABLED_FILE_LOCKS && H5_IGNORE_DISABLED_FILE_LOCKS
-#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF TRUE
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF true
 #else
-#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF FALSE
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF false
 #endif
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC H5P__encode_bool
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC H5P__decode_bool
@@ -844,7 +844,7 @@ herr_t
 H5P__facc_set_def_driver(void)
 {
     const char *driver_env_var;
-    bool        driver_ref_inc = FALSE;
+    bool        driver_ref_inc = false;
     hid_t       driver_id      = H5I_INVALID_HID; /* VFL driver ID */
     herr_t      ret_value      = SUCCEED;
 
@@ -867,24 +867,24 @@ H5P__facc_set_def_driver(void)
         if (driver_is_registered) {
             assert(driver_id >= 0);
 
-            if (H5I_inc_ref(driver_id, TRUE) < 0)
+            if (H5I_inc_ref(driver_id, true) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINC, FAIL, "unable to increment ref count on VFD");
-            driver_ref_inc = TRUE;
+            driver_ref_inc = true;
         } /* end else-if */
         else {
             /* Check for VFL drivers that ship with the library */
             if (H5P__facc_set_def_driver_check_predefined(driver_env_var, &driver_id) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check for predefined VFL driver name");
             else if (driver_id > 0) {
-                if (H5I_inc_ref(driver_id, TRUE) < 0)
+                if (H5I_inc_ref(driver_id, true) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINC, FAIL, "can't increment VFL driver refcount");
-                driver_ref_inc = TRUE;
+                driver_ref_inc = true;
             }
             else {
                 /* Register the VFL driver */
-                if ((driver_id = H5FD_register_driver_by_name(driver_env_var, TRUE)) < 0)
+                if ((driver_id = H5FD_register_driver_by_name(driver_env_var, true)) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "can't register VFL driver");
-                driver_ref_inc = TRUE;
+                driver_ref_inc = true;
             } /* end else */
         }     /* end else */
 
@@ -1159,7 +1159,7 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
     if (NULL == H5I_object_verify(new_driver_id, H5I_VFL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
 
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+    if (true == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         H5FD_driver_prop_t driver_prop; /* Property for driver ID, info & config. string */
 
         /* Prepare the driver property */
@@ -1298,7 +1298,7 @@ H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, const char *drive
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "driver_name parameter cannot be an empty string");
 
     /* Set the driver */
-    if (H5P_set_driver_by_name(plist, driver_name, driver_config, TRUE) < 0)
+    if (H5P_set_driver_by_name(plist, driver_name, driver_config, true) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info");
 
 done:
@@ -1384,7 +1384,7 @@ H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_value, const ch
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "negative VFD value is disallowed");
 
     /* Set the driver */
-    if (H5P_set_driver_by_value(plist, driver_value, driver_config, TRUE) < 0)
+    if (H5P_set_driver_by_value(plist, driver_value, driver_config, true) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info");
 
 done:
@@ -1414,7 +1414,7 @@ H5P_peek_driver(H5P_genplist_t *plist)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the current driver ID */
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+    if (true == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         H5FD_driver_prop_t driver_prop; /* Property for driver ID, info & configuration string */
 
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -1492,7 +1492,7 @@ H5P_peek_driver_info(H5P_genplist_t *plist)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Get the current driver info */
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+    if (true == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         H5FD_driver_prop_t driver_prop; /* Property for driver ID, info & configuration string */
 
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -1564,7 +1564,7 @@ H5P_peek_driver_config_str(H5P_genplist_t *plist)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Get the current driver configuration string */
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+    if (true == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         H5FD_driver_prop_t driver_prop; /* Property for driver ID, info & configuration string */
 
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -1660,7 +1660,7 @@ H5P__file_driver_copy(void *value)
         /* Copy the driver & info, if there is one */
         if (info->driver_id > 0) {
             /* Increment the reference count on driver and copy driver info */
-            if (H5I_inc_ref(info->driver_id, FALSE) < 0)
+            if (H5I_inc_ref(info->driver_id, false) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver");
 
             /* Copy driver info, if it exists */
@@ -4857,7 +4857,7 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t H5_ATTR_PARALLEL_UNUSED evict_on_cl
     H5TRACE2("e", "ib", fapl_id, evict_on_close);
 
     /* Compare the property list's class against the other class */
-    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist");
 
     /* Get the plist structure */
@@ -4902,7 +4902,7 @@ H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close /*out*/)
     H5TRACE2("e", "ix", fapl_id, evict_on_close);
 
     /* Compare the property list's class against the other class */
-    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist");
 
     /* Get the plist structure */
@@ -4944,7 +4944,7 @@ H5Pset_file_locking(hid_t fapl_id, hbool_t use_file_locking, hbool_t ignore_when
     H5TRACE3("e", "ibb", fapl_id, use_file_locking, ignore_when_disabled);
 
     /* Make sure this is a fapl */
-    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist");
 
     /* Get the plist structure */
@@ -4983,7 +4983,7 @@ H5Pget_file_locking(hid_t fapl_id, hbool_t *use_file_locking /*out*/, hbool_t *i
     H5TRACE3("e", "ixx", fapl_id, use_file_locking, ignore_when_disabled);
 
     /* Make sure this is a fapl */
-    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist");
 
     /* Get the plist structure */
@@ -5097,10 +5097,10 @@ H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective)
     /* (Dataset, group, attribute, and named datatype access property lists
      *  are sub-classes of link access property lists -QAK)
      */
-    if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) && TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(plist_id, H5P_LINK_ACCESS) && true != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist");
 
-    /* set property to either TRUE if > 0, or FALSE otherwise */
+    /* set property to either true if > 0, or false otherwise */
     if (is_collective)
         coll_meta_read = H5P_USER_TRUE;
     else
@@ -5144,13 +5144,13 @@ H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective /*out*/)
     /* (Dataset, group, attribute, and named datatype access property lists
      *  are sub-classes of link access property lists -QAK)
      */
-    if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) && TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(plist_id, H5P_LINK_ACCESS) && true != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist");
 
     /* Get value */
     if (is_collective) {
         H5P_coll_md_read_flag_t
-                        internal_flag; /* property setting. we need to convert to either TRUE or FALSE */
+                        internal_flag; /* property setting. we need to convert to either true or false */
         H5P_genplist_t *plist;         /* Property list pointer */
 
         /* Get the plist structure */
@@ -5161,7 +5161,7 @@ H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective /*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag");
 
         if (internal_flag < 0)
-            *is_collective = FALSE;
+            *is_collective = false;
         else
             *is_collective = (bool)internal_flag;
     } /* end if */
@@ -5190,7 +5190,7 @@ H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective)
     H5TRACE2("e", "ib", plist_id, is_collective);
 
     /* Compare the property list's class against the other class */
-    if (TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist");
 
     /* Get the plist structure */
@@ -5224,7 +5224,7 @@ H5Pget_mpi_params(hid_t plist_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/
     H5TRACE3("e", "ixx", plist_id, comm, info);
 
     /* Make sure that the property list is a fapl */
-    if (TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist");
 
     /* Get the plist structure */
@@ -5264,7 +5264,7 @@ H5Pset_mpi_params(hid_t plist_id, MPI_Comm comm, MPI_Info info)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "not a valid argument");
 
     /* Make sure that the property list is a fapl */
-    if (TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist");
 
     /* Get the plist structure */
@@ -5668,7 +5668,7 @@ H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective /*out*/)
     H5TRACE2("e", "ix", plist_id, is_collective);
 
     /* Compare the property list's class against the other class */
-    if (TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist");
 
     /* Get the plist structure */
@@ -5791,7 +5791,7 @@ H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
     if (NULL == H5I_object_verify(vol_id, H5I_VOL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID");
 
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+    if (true == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         H5VL_connector_prop_t vol_prop; /* Property for VOL ID & info */
 
         /* Prepare the VOL connector property */
@@ -5904,7 +5904,7 @@ H5Pget_vol_id(hid_t plist_id, hid_t *vol_id /*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Get the current VOL ID */
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+    if (true == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
 
         /* Get the connector property */
@@ -5912,7 +5912,7 @@ H5Pget_vol_id(hid_t plist_id, hid_t *vol_id /*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info");
 
         /* Increment the VOL ID's ref count */
-        if (H5I_inc_ref(connector_prop.connector_id, TRUE) < 0)
+        if (H5I_inc_ref(connector_prop.connector_id, true) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID");
 
         /* Set the connector ID to return */
@@ -5950,7 +5950,7 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info /*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Get the current VOL info */
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+    if (true == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         void                 *new_connector_info = NULL; /* Copy of connector info */
         H5VL_connector_prop_t connector_prop;            /* Property for VOL connector ID & info */
 
@@ -6018,7 +6018,7 @@ H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags)
         if (H5P_DEFAULT == plist_id)
             plist_id = H5P_FILE_ACCESS_DEFAULT;
 
-        if (TRUE == H5P_isa_class(plist_id, H5P_FILE_ACCESS)) {
+        if (true == H5P_isa_class(plist_id, H5P_FILE_ACCESS)) {
             H5P_genplist_t       *plist;          /* Property list pointer */
             H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
 

@@ -41,7 +41,7 @@ typedef struct H5E_t H5E_t;
 #define HCOMMON_ERROR(maj, min, ...)                                                                         \
     do {                                                                                                     \
         HERROR(maj, min, __VA_ARGS__);                                                                       \
-        err_occurred = TRUE;                                                                                 \
+        err_occurred = true;                                                                                 \
         err_occurred = err_occurred; /* Shut GCC warnings up! */                                             \
     } while (0)
 

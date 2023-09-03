@@ -134,7 +134,7 @@ static herr_t H5D__earray_idx_depend(const H5D_chk_idx_info_t *idx_info);
 
 /* Extensible array indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
-    TRUE,                           /* Extensible array indices support SWMR access */
+    true,                           /* Extensible array indices support SWMR access */
     H5D__earray_idx_init,           /* init */
     H5D__earray_idx_create,         /* create */
     H5D__earray_idx_is_space_alloc, /* is_space_alloc */
@@ -562,7 +562,7 @@ H5D__earray_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
 {
     H5D_earray_ctx_ud_t *dbg_ctx = NULL;     /* Context for fixed array callback */
     H5O_loc_t            obj_loc;            /* Pointer to an object's location */
-    bool                 obj_opened = FALSE; /* Flag to indicate that the object header was opened */
+    bool                 obj_opened = false; /* Flag to indicate that the object header was opened */
     H5O_layout_t         layout;             /* Layout message */
     void                *ret_value = NULL;   /* Return value */
 
@@ -585,7 +585,7 @@ H5D__earray_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
     /* Open the object header where the layout message resides */
     if (H5O_open(&obj_loc) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open object header");
-    obj_opened = TRUE;
+    obj_opened = true;
 
     /* Read the layout message */
     if (NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, &layout))
@@ -685,7 +685,7 @@ H5D__earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
     oloc.addr = idx_info->storage->u.earray.dset_ohdr_addr;
 
     /* Get header */
-    if (NULL == (oh = H5O_protect(&oloc, H5AC__READ_ONLY_FLAG, TRUE)))
+    if (NULL == (oh = H5O_protect(&oloc, H5AC__READ_ONLY_FLAG, true)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header");
 
     /* Retrieve the dataset's object header proxy */

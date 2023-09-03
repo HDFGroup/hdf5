@@ -485,8 +485,8 @@ typedef struct H5C_t H5C_t;
  *
  *      If the deserialize function has to clean up file corruption
  *      left over from an old bug in the HDF5 library, it must set
- *      *dirty_ptr to TRUE.  If it doesn't, no action is needed as
- *      *dirty_ptr will be set to FALSE before the deserialize call.
+ *      *dirty_ptr to true.  If it doesn't, no action is needed as
+ *      *dirty_ptr will be set to false before the deserialize call.
  *
  *      If the operation fails for any reason (i.e. bad data in buffer, bad
  *      buffer length, malloc failure, etc.) the function must return NULL and
@@ -987,7 +987,7 @@ typedef int H5C_ring_t;
  *         callbacks must be used to update this image before it is
  *         written to disk
  *
- * image_up_to_date:  Boolean flag that is set to TRUE when *image_ptr
+ * image_up_to_date:  Boolean flag that is set to true when *image_ptr
  *         is up to date, and set to false when the entry is dirtied.
  *
  * type:    Pointer to the instance of H5C_class_t containing pointers
@@ -1005,8 +1005,8 @@ typedef int H5C_ring_t;
  * dirtied:    Boolean flag used to indicate that the entry has been
  *         dirtied while protected.
  *
- *         This field is set to FALSE in the protect call, and may
- *         be set to TRUE by the H5C_mark_entry_dirty() call at any
+ *         This field is set to false in the protect call, and may
+ *         be set to true by the H5C_mark_entry_dirty() call at any
  *         time prior to the unprotect call.
  *
  *         The H5C_mark_entry_dirty() call exists as a convenience
@@ -1026,11 +1026,11 @@ typedef int H5C_ring_t;
  *         and inserted on the protected list.
  *
  * is_read_only: Boolean flag that is only meaningful if is_protected is
- *         TRUE.  In this circumstance, it indicates whether the
+ *         true.  In this circumstance, it indicates whether the
  *         entry has been protected read-only, or read/write.
  *
  *         If the entry has been protected read-only (i.e. is_protected
- *         and is_read_only are both TRUE), we allow the entry to be
+ *         and is_read_only are both true), we allow the entry to be
  *         protected more than once.
  *
  *         In this case, the number of readers is maintained in the
@@ -1041,7 +1041,7 @@ typedef int H5C_ring_t;
  * ro_ref_count: Integer field used to maintain a count of the number of
  *         outstanding read-only protects on this entry.  This field
  *         must be zero whenever either is_protected or is_read_only
- *         are TRUE.
+ *         are true.
  *
  * is_pinned:    Boolean flag indicating whether the entry has been pinned
  *         in the cache.
@@ -1106,7 +1106,7 @@ typedef int H5C_ring_t;
  *        When a distributed metadata write is triggered at a
  *        sync point, this field is used to mark entries that
  *        must be flushed before leaving the sync point.  At all
- *        other times, this field should be set to FALSE.
+ *        other times, this field should be set to false.
  *
  * flush_in_progress:  Boolean flag that is set to true iff the entry
  *        is in the process of being flushed.  This allows the cache
@@ -1297,7 +1297,7 @@ typedef int H5C_ring_t;
  * include_in_image: Boolean flag indicating whether this entry should
  *        be included in the metadata cache image.  This field should
  *        always be false prior to the H5C_prep_for_file_close() call.
- *        During that call, it should be set to TRUE for all entries
+ *        During that call, it should be set to true for all entries
  *        that are to be included in the metadata cache image.  At
  *        present, only the superblock, the superblock extension
  *        object header and its chunks (if any) are omitted from
@@ -1312,7 +1312,7 @@ typedef int H5C_ring_t;
  *
  * image_dirty: Boolean flag indicating whether the entry should be marked
  *        as dirty in the metadata cache image.  The flag is set to
- *        TRUE iff the entry is dirty when H5C_prep_for_file_close()
+ *        true iff the entry is dirty when H5C_prep_for_file_close()
  *        is called.
  *
  * fd_parent_count: If the entry is a child in one or more flush dependency
@@ -1323,7 +1323,7 @@ typedef int H5C_ring_t;
  *
  *        Note that while this count is initially taken from the
  *        flush dependency fields above, if the entry is in the
- *        cache image (i.e. include_in_image is TRUE), any parents
+ *        cache image (i.e. include_in_image is true), any parents
  *        that are not in the image are removed from this count and
  *        from the fd_parent_addrs array below.
  *
@@ -1342,7 +1342,7 @@ typedef int H5C_ring_t;
  *
  *        Note that while this list of addresses is initially taken
  *        from the flush dependency fields above, if the entry is in the
- *        cache image (i.e. include_in_image is TRUE), any parents
+ *        cache image (i.e. include_in_image is true), any parents
  *        that are not in the image are removed from this list, and
  *        and from the fd_parent_count above.
  *
@@ -1359,7 +1359,7 @@ typedef int H5C_ring_t;
  *
  *        Note that while this count is initially taken from the
  *        flush dependency fields above, if the entry is in the
- *        cache image (i.e. include_in_image is TRUE), any children
+ *        cache image (i.e. include_in_image is true), any children
  *        that are not in the image are removed from this count.
  *
  * fd_dirty_child_count: If the entry is a parent in a flush dependency
@@ -1370,7 +1370,7 @@ typedef int H5C_ring_t;
  *
  *        Note that while this count is initially taken from the
  *        flush dependency fields above, if the entry is in the
- *        cache image (i.e. include_in_image is TRUE), any dirty
+ *        cache image (i.e. include_in_image is true), any dirty
  *        children that are not in the image are removed from this
  *        count.
  *
@@ -1443,7 +1443,7 @@ typedef int H5C_ring_t;
  *        entry.  This ID must match the ID of the type provided in any
  *        protect call on the prefetched entry.
  *
- *        The value of this field is undefined in prefetched is FALSE.
+ *        The value of this field is undefined in prefetched is false.
  *
  * age:        Number of times a prefetched entry has appeared in
  *        subsequent cache images. The field exists to allow
@@ -1451,9 +1451,9 @@ typedef int H5C_ring_t;
  *        entry can appear in subsequent cache images without being
  *        converted to a regular entry.
  *
- *        This field must be zero if prefetched is FALSE.
+ *        This field must be zero if prefetched is false.
  *
- * prefetched_dirty:  Boolean field that must be set to FALSE unless the
+ * prefetched_dirty:  Boolean field that must be set to false unless the
  *        following conditions hold:
  *
  *            1) The file has been opened R/O.
@@ -1699,7 +1699,7 @@ typedef struct H5C_cache_entry_t {
  *              Note that while this count is initially taken from the
  *              flush dependency fields in the associated instance of
  *              H5C_cache_entry_t, if the entry is in the cache image
- *              (i.e. include_in_image is TRUE), any parents that are
+ *              (i.e. include_in_image is true), any parents that are
  *              not in the image are removed from this count and
  *              from the fd_parent_addrs array below.
  *
@@ -1721,7 +1721,7 @@ typedef struct H5C_cache_entry_t {
  *              Note that while this list of addresses is initially taken
  *              from the flush dependency fields in the associated instance of
  *              H5C_cache_entry_t, if the entry is in the cache image
- *              (i.e. include_in_image is TRUE), any parents that are not
+ *              (i.e. include_in_image is true), any parents that are not
  *              in the image are removed from this list, and from the
  *              fd_parent_count above.
  *
@@ -1741,7 +1741,7 @@ typedef struct H5C_cache_entry_t {
  *              Note that while this count is initially taken from the
  *              flush dependency fields in the associated instance of
  *              H5C_cache_entry_t, if the entry is in the cache image
- *              (i.e. include_in_image is TRUE), any children
+ *              (i.e. include_in_image is true), any children
  *              that are not in the image are removed from this count.
  *
  * fd_dirty_child_count: If the entry is a parent in a flush dependency
@@ -1753,7 +1753,7 @@ typedef struct H5C_cache_entry_t {
  *              Note that while this count is initially taken from the
  *              flush dependency fields in the associated instance of
  *              H5C_cache_entry_t, if the entry is in the cache image
- *              (i.e. include_in_image is TRUE), any dirty children
+ *              (i.e. include_in_image is true), any dirty children
  *              that are not in the image are removed from this count.
  *
  * image_ptr:    Pointer to void.  When not NULL, this field points to a
@@ -1804,7 +1804,7 @@ typedef struct H5C_image_entry_t {
  *
  * set_initial_size: Boolean flag indicating whether the size of the
  *    initial size of the cache is to be set to the value given in
- *    the initial_size field.  If set_initial_size is FALSE, the
+ *    the initial_size field.  If set_initial_size is false, the
  *    initial_size field is ignored.
  *
  * initial_size: If enabled, this field contain the size the cache is
@@ -2138,8 +2138,8 @@ typedef struct H5C_auto_size_ctl_t {
 #define H5C__DEFAULT_CACHE_IMAGE_CTL                                                                         \
     {                                                                                                        \
         H5C__CURR_CACHE_IMAGE_CTL_VER,             /* = version */                                           \
-            FALSE,                                 /* = generate_image */                                    \
-            FALSE,                                 /* = save_resize_status */                                \
+            false,                                 /* = generate_image */                                    \
+            false,                                 /* = save_resize_status */                                \
             H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE, /* = entry_ageout */                                      \
             H5C_CI__ALL_FLAGS                      /* = flags */                                             \
     }

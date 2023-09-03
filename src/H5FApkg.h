@@ -55,7 +55,7 @@
 /* Size of the Fixed Array header on disk */
 #define H5FA_HEADER_SIZE(sizeof_addr, sizeof_size)                                                           \
     (/* General metadata fields */                                                                           \
-     H5FA_METADATA_PREFIX_SIZE(TRUE)                                                                         \
+     H5FA_METADATA_PREFIX_SIZE(true)                                                                         \
                                                                                                              \
      /* General array information */                                                                         \
      + 1 /* Element Size */                                                                                  \
@@ -78,7 +78,7 @@
 /* Size of the Fixed Array data block prefix on disk */
 #define H5FA_DBLOCK_PREFIX_SIZE(d)                                                                           \
     (/* General metadata fields */                                                                           \
-     H5FA_METADATA_PREFIX_SIZE(TRUE)                                                                         \
+     H5FA_METADATA_PREFIX_SIZE(true)                                                                         \
                                                                                                              \
      /* Sanity-checking fields */                                                                            \
      + (d)->hdr->sizeof_addr /* File address of Fixed Array header owning the data block */                  \

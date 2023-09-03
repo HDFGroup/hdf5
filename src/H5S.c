@@ -148,11 +148,11 @@ H5S_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5I_nmembers(H5I_DATASPACE) > 0) {
-        (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+        (void)H5I_clear_type(H5I_DATASPACE, false, false);
         n++;
     }
     if (H5I_nmembers(H5I_SPACE_SEL_ITER) > 0) {
-        (void)H5I_clear_type(H5I_SPACE_SEL_ITER, FALSE, FALSE);
+        (void)H5I_clear_type(H5I_SPACE_SEL_ITER, false, false);
         n++;
     }
 
@@ -283,7 +283,7 @@ H5S_create(H5S_class_t type)
     } /* end switch */
 
     /* Start with "all" selection */
-    if (H5S_select_all(new_ds, FALSE) < 0)
+    if (H5S_select_all(new_ds, false) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
     /* Reset common selection info pointer */
@@ -339,7 +339,7 @@ H5Screate(H5S_class_t type)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace");
 
     /* Register */
-    if ((ret_value = H5I_register(H5I_DATASPACE, new_ds, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATASPACE, new_ds, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
 
 done:
@@ -472,11 +472,11 @@ H5Scopy(hid_t space_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace");
 
     /* Copy */
-    if (NULL == (dst = H5S_copy(src, FALSE, TRUE)))
+    if (NULL == (dst = H5S_copy(src, false, true)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy dataspace");
 
     /* Register */
-    if ((ret_value = H5I_register(H5I_DATASPACE, dst, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATASPACE, dst, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID");
 
 done:
@@ -540,13 +540,13 @@ H5S_extent_copy(H5S_t *dst, const H5S_t *src)
     assert(src);
 
     /* Copy extent */
-    if (H5S__extent_copy_real(&(dst->extent), &(src->extent), TRUE) < 0)
+    if (H5S__extent_copy_real(&(dst->extent), &(src->extent), true) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent");
 
     /* If the selection is 'all', update the number of elements selected in the
      * destination space */
     if (H5S_SEL_ALL == H5S_GET_SELECT_TYPE(dst))
-        if (H5S_select_all(dst, FALSE) < 0)
+        if (H5S_select_all(dst, false) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
 done:
@@ -1058,7 +1058,7 @@ H5S_read(const H5O_loc_t *loc)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header");
 
     /* Default to entire dataspace being selected */
-    if (H5S_select_all(ds, FALSE) < 0)
+    if (H5S_select_all(ds, false) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
     /* Set the value for successful return */
@@ -1081,7 +1081,7 @@ done:
     htri_t H5S__is_simple(sdim)
     H5S_t *sdim;        IN: Pointer to dataspace object to query
  RETURNS
-    TRUE/FALSE/FAIL
+    true/false/FAIL
  DESCRIPTION
     This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
@@ -1098,7 +1098,7 @@ H5S__is_simple(const H5S_t *sdim)
 
     /* H5S_NULL shouldn't be simple dataspace */
     ret_value =
-        (H5S_GET_EXTENT_TYPE(sdim) == H5S_SIMPLE || H5S_GET_EXTENT_TYPE(sdim) == H5S_SCALAR) ? TRUE : FALSE;
+        (H5S_GET_EXTENT_TYPE(sdim) == H5S_SIMPLE || H5S_GET_EXTENT_TYPE(sdim) == H5S_SCALAR) ? true : false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__is_simple() */
@@ -1112,7 +1112,7 @@ H5S__is_simple(const H5S_t *sdim)
     htri_t H5Sis_simple(space_id)
     hid_t space_id;         IN: ID of dataspace object to query
  RETURNS
-    TRUE/FALSE/FAIL
+    true/false/FAIL
  DESCRIPTION
     This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
@@ -1260,11 +1260,11 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims, const hs
 
     /* Set offset to zeros */
     memset(space->select.offset, 0, sizeof(hsize_t) * space->extent.rank);
-    space->select.offset_changed = FALSE;
+    space->select.offset_changed = false;
 
     /* If the selection is 'all', update the number of elements selected */
     if (H5S_GET_SELECT_TYPE(space) == H5S_SEL_ALL)
-        if (H5S_select_all(space, FALSE) < 0)
+        if (H5S_select_all(space, false) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
 done:
@@ -1325,7 +1325,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/], const hsize_t maxdims[/
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, H5I_INVALID_HID, "can't create simple dataspace");
 
     /* Register */
-    if ((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATASPACE, space, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID");
 
 done:
@@ -1393,7 +1393,7 @@ H5Sencode2(hid_t obj_id, void *buf, size_t *nalloc, hid_t fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+    if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, true) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     if (H5S_encode(dspace, (unsigned char **)&buf, nalloc) < 0)
@@ -1430,7 +1430,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct");
 
     /* Find out the size of buffer needed for extent */
-    if ((extent_size = H5O_msg_raw_size(f, H5O_SDSPACE_ID, TRUE, obj)) == 0)
+    if ((extent_size = H5O_msg_raw_size(f, H5O_SDSPACE_ID, true, obj)) == 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size");
 
     /* Find out the size of buffer needed for selection */
@@ -1458,7 +1458,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
         UINT32ENCODE(pp, extent_size);
 
         /* Encode the extent part of dataspace */
-        if (H5O_msg_encode(f, H5O_SDSPACE_ID, TRUE, pp, obj) < 0)
+        if (H5O_msg_encode(f, H5O_SDSPACE_ID, true, pp, obj) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space");
         pp += extent_size;
 
@@ -1504,7 +1504,7 @@ H5Sdecode(const void *buf)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, H5I_INVALID_HID, "can't decode object");
 
     /* Register the type and return the ID */
-    if ((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATASPACE, ds, true)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace");
 
 done:
@@ -1571,7 +1571,7 @@ H5S_decode(const unsigned char **p)
     extent = H5FL_FREE(H5S_extent_t, extent);
 
     /* Initialize to "all" selection. Deserialization relies on valid existing selection. */
-    if (H5S_select_all(ds, FALSE) < 0)
+    if (H5S_select_all(ds, false) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
     /* Decode the select part of dataspace.
@@ -1692,7 +1692,7 @@ done:
  *
  * Purpose:     Modify the dimensions of a dataspace.
  *
- * Return:      TRUE/FALSE/FAIL
+ * Return:      true/false/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1700,7 +1700,7 @@ htri_t
 H5S_set_extent(H5S_t *space, const hsize_t *size)
 {
     unsigned u;                 /* Local index variable */
-    htri_t   ret_value = FALSE; /* Return value */
+    htri_t   ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1718,7 +1718,7 @@ H5S_set_extent(H5S_t *space, const hsize_t *size)
                             (unsigned long long)size[u], (unsigned long long)space->extent.max[u]);
 
             /* Indicate that dimension size can be modified */
-            ret_value = TRUE;
+            ret_value = true;
         } /* end if */
 
     /* Update dimension size(s) */
@@ -1736,24 +1736,24 @@ done:
  * Purpose: Determines if a simple dataspace's extent has been set (e.g.,
  *          by H5Sset_extent_simple() ).  Helps avoid write errors.
  *
- * Return: TRUE if dataspace has extent set
- *         FALSE if dataspace's extent is uninitialized
+ * Return: true if dataspace has extent set
+ *         false if dataspace's extent is uninitialized
  *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE bool
 H5S_has_extent(const H5S_t *ds)
 {
-    bool ret_value = FALSE; /* Return value */
+    bool ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(ds);
 
     if (0 == ds->extent.rank && 0 == ds->extent.nelem && H5S_NULL != ds->extent.type)
-        ret_value = FALSE;
+        ret_value = false;
     else
-        ret_value = TRUE;
+        ret_value = true;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_has_extent() */
@@ -1790,7 +1790,7 @@ H5S_set_extent_real(H5S_t *space, const hsize_t *size)
 
     /* If the selection is 'all', update the number of elements selected */
     if (H5S_SEL_ALL == H5S_GET_SELECT_TYPE(space))
-        if (H5S_select_all(space, FALSE) < 0)
+        if (H5S_select_all(space, false) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
     /* Mark the dataspace as no longer shared if it was before */
@@ -1806,7 +1806,7 @@ done:
  *
  * Purpose:     Determines if two dataspace extents are equal.
  *
- * Return:      Success:    TRUE if equal, FALSE if unequal
+ * Return:      Success:    true if equal, false if unequal
  *
  *              Failure:    FAIL
  *
@@ -1844,7 +1844,7 @@ done:
     htri_t H5S_extent_equal(ds1, ds2)
         H5S_t *ds1, *ds2;            IN: Dataspace objects to compare
  RETURNS
-     TRUE if equal, FALSE if unequal on success/Negative on failure
+     true if equal, false if unequal on success/Negative on failure
  DESCRIPTION
     Compare two dataspaces if their extents are identical.
 --------------------------------------------------------------------------*/
@@ -1852,7 +1852,7 @@ H5_ATTR_PURE htri_t
 H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
 {
     unsigned u;                /* Local index variable */
-    htri_t   ret_value = TRUE; /* Return value */
+    htri_t   ret_value = true; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1862,11 +1862,11 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
 
     /* Make certain the dataspaces are the same type */
     if (ds1->extent.type != ds2->extent.type)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
     /* Make certain the dataspaces are the same rank */
     if (ds1->extent.rank != ds2->extent.rank)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
     /* Make certain the dataspaces' current dimensions are the same size */
     if (ds1->extent.rank > 0) {
@@ -1874,7 +1874,7 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
         assert(ds2->extent.size);
         for (u = 0; u < ds1->extent.rank; u++)
             if (ds1->extent.size[u] != ds2->extent.size[u])
-                HGOTO_DONE(FALSE);
+                HGOTO_DONE(false);
     } /* end if */
 
     /* Make certain the dataspaces' maximum dimensions are the same size */
@@ -1883,11 +1883,11 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
         if (ds1->extent.max != NULL && ds2->extent.max != NULL) {
             for (u = 0; u < ds1->extent.rank; u++)
                 if (ds1->extent.max[u] != ds2->extent.max[u])
-                    HGOTO_DONE(FALSE);
+                    HGOTO_DONE(false);
         } /* end if */
         else if ((ds1->extent.max == NULL && ds2->extent.max != NULL) ||
                  (ds1->extent.max != NULL && ds2->extent.max == NULL))
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(false);
     } /* end if */
 
 done:

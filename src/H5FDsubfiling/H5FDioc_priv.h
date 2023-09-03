@@ -87,7 +87,7 @@ do {                                                                            
     assert((entry_ptr)->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);                                   \
     assert((entry_ptr)->next == NULL);                                                          \
     assert((entry_ptr)->prev == NULL);                                                          \
-    assert((entry_ptr)->in_progress == FALSE);                                                  \
+    assert((entry_ptr)->in_progress == false);                                                  \
                                                                                                   \
     if ( ((q_ptr)->q_head) == NULL )                                                              \
     {                                                                                             \
@@ -101,7 +101,7 @@ do {                                                                            
        ((q_ptr)->q_tail) = (entry_ptr);                                                           \
     }                                                                                             \
     ((q_ptr)->q_len)++;                                                                           \
-} while ( FALSE ) /* H5FD_IOC__Q_APPEND() */
+} while ( false ) /* H5FD_IOC__Q_APPEND() */
 
 #define H5FD_IOC__Q_REMOVE(q_ptr, entry_ptr)                                                                         \
 do {                                                                                                                 \
@@ -113,7 +113,7 @@ do {                                                                            
     assert((entry_ptr)->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);                                                      \
     assert((((q_ptr)->q_len == 1) && ((entry_ptr)->next == NULL) && ((entry_ptr)->prev == NULL)) ||                \
              (((q_ptr)->q_len > 1) && (((entry_ptr)->next != NULL) || ((entry_ptr)->prev != NULL))));                \
-    assert((entry_ptr)->in_progress == TRUE);                                                                      \
+    assert((entry_ptr)->in_progress == true);                                                                      \
                                                                                                                      \
     {                                                                                                                \
        if ( (((q_ptr)->q_head)) == (entry_ptr) )                                                                     \
@@ -140,7 +140,7 @@ do {                                                                            
        (entry_ptr)->prev = NULL;                                                                                     \
        ((q_ptr)->q_len)--;                                                                                           \
     }                                                                                                                \
-} while ( FALSE ) /* H5FD_IOC__Q_REMOVE() */
+} while ( false ) /* H5FD_IOC__Q_REMOVE() */
 
 /* clang-format on */
 
@@ -160,8 +160,8 @@ do {                                                                            
  *         the IOC I/O Queue.  This field points to the previous entry
  *         in the queue, or NULL if there is no previous entry.
  *
- * in_progress: Boolean flag that must be FALSE when the entry is inserted
- *         into the IOC I/O Queue, and set to TRUE when the entry is dispatched
+ * in_progress: Boolean flag that must be false when the entry is inserted
+ *         into the IOC I/O Queue, and set to true when the entry is dispatched
  *         to the worker thread pool for execution.
  *
  *         When in_progress is FALS, the entry is said to be pending.
@@ -184,7 +184,7 @@ do {                                                                            
  *
  * Statistics:
  *
- * The following fields are only defined if H5FD_IOC_COLLECT_STATS is TRUE.
+ * The following fields are only defined if H5FD_IOC_COLLECT_STATS is true.
  * They are intended to allow collection of basic statistics on the
  * behaviour of the IOC I/O Queue for purposes of debugging and performance
  * optimization.
@@ -321,7 +321,7 @@ typedef struct ioc_io_queue_entry {
  *
  * Statistics:
  *
- * The following fields are only defined if H5FD_IOC_COLLECT_STATS is TRUE.
+ * The following fields are only defined if H5FD_IOC_COLLECT_STATS is true.
  * They are intended to allow collection of basic statistics on the
  * behaviour of the IOC I/O Queue for purposes of debugging and performance
  * optimization.

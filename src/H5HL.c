@@ -121,7 +121,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p /*out*/)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "unable to allocate file memory");
 
     /* Initialize info */
-    heap->single_cache_obj = TRUE;
+    heap->single_cache_obj = true;
     heap->dblk_addr        = heap->prfx_addr + (hsize_t)heap->prfx_size;
     heap->dblk_size        = size_hint;
     if (size_hint)
@@ -552,7 +552,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
     /* Look for a free slot large enough for this object and which would
      * leave zero or at least H5G_SIZEOF_FREE bytes left over.
      */
-    for (fl = heap->freelist, found = FALSE; fl; fl = fl->next) {
+    for (fl = heap->freelist, found = false; fl; fl = fl->next) {
         if (fl->size > need_size && fl->size - need_size >= H5HL_SIZEOF_FREE(f)) {
             /* A big enough free block was found */
             offset = fl->offset;
@@ -560,14 +560,14 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
             fl->size -= need_size;
             assert(fl->offset == H5HL_ALIGN(fl->offset));
             assert(fl->size == H5HL_ALIGN(fl->size));
-            found = TRUE;
+            found = true;
             break;
         }
         else if (fl->size == need_size) {
             /* Free block of exact size found */
             offset = fl->offset;
             fl     = H5HL__remove_free(heap, fl);
-            found  = TRUE;
+            found  = true;
             break;
         }
         else if (!last_fl || last_fl->offset < fl->offset) {
@@ -581,7 +581,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
      * can extend that free chunk.  Otherwise we'll have to make another
      * free chunk.  If the heap must expand, we double its size.
      */
-    if (found == FALSE) {
+    if (found == false) {
         size_t need_more;     /* How much more space we need */
         size_t new_dblk_size; /* Final size of space allocated for heap data block */
         size_t old_dblk_size; /* Previous size of space allocated for heap data block */
@@ -615,7 +615,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
             HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "error trying to extend heap");
 
         /* Check if we extended the heap data block in file */
-        if (was_extended == TRUE) {
+        if (was_extended == true) {
             /* Check for prefix & data block contiguous */
             if (heap->single_cache_obj) {
                 /* Resize prefix+data block */

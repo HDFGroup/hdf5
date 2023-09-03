@@ -58,7 +58,7 @@ typedef struct H5O_mesg_t      H5O_mesg_t;
 #define H5O_FHEAP_MAN_MAX_DIRECT_SIZE  (64 * 1024)
 #define H5O_FHEAP_MAN_MAX_INDEX        40
 #define H5O_FHEAP_MAN_START_ROOT_ROWS  1
-#define H5O_FHEAP_CHECKSUM_DBLOCKS     TRUE
+#define H5O_FHEAP_CHECKSUM_DBLOCKS     true
 #define H5O_FHEAP_MAX_MAN_SIZE         (4 * 1024)
 #define H5O_FHEAP_ID_LEN               8
 
@@ -252,7 +252,7 @@ typedef struct H5O_copy_t {
 
 /* Detect messages that aren't stored in message's object header */
 #define H5O_IS_STORED_SHARED(T)                                                                              \
-    ((((T) == H5O_SHARE_TYPE_SOHM) || ((T) == H5O_SHARE_TYPE_COMMITTED)) ? TRUE : FALSE)
+    ((((T) == H5O_SHARE_TYPE_SOHM) || ((T) == H5O_SHARE_TYPE_COMMITTED)) ? true : false)
 
 /* Detect shared messages that are "tracked" in some other location */
 #define H5O_IS_TRACKED_SHARED(T) ((T) > 0)

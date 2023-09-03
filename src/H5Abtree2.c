@@ -143,7 +143,7 @@ H5A__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
 {
     H5A_fh_ud_cmp_t *udata = (H5A_fh_ud_cmp_t *)_udata; /* User data for 'op' callback */
     H5A_t           *attr  = NULL;                      /* Pointer to attribute created from heap object */
-    bool   took_ownership  = FALSE;   /* Whether the "found" operator took ownership of the attribute */
+    bool   took_ownership  = false;   /* Whether the "found" operator took ownership of the attribute */
     herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

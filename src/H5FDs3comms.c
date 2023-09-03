@@ -208,7 +208,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     char       *nvcat      = NULL;
     hrb_node_t *node_ptr   = NULL;
     hrb_node_t *new_node   = NULL;
-    bool        is_looking = TRUE;
+    bool        is_looking = true;
     herr_t      ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -320,7 +320,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
      */
     if (HDstrcmp(lowername, node_ptr->lowername) == 0) {
 
-        is_looking = FALSE;
+        is_looking = false;
 
         if (value == NULL) {
 #if S3COMMS_DEBUG
@@ -398,7 +398,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     }
     else if (HDstrcmp(lowername, node_ptr->lowername) < 0) {
 
-        is_looking = FALSE;
+        is_looking = false;
 
         if (value == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove a node 'before' head");
@@ -427,7 +427,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     while (is_looking) {
         if (node_ptr->next == NULL) {
 
-            is_looking = FALSE;
+            is_looking = false;
 
             if (value == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node");
@@ -450,7 +450,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         }
         else if (HDstrcmp(lowername, node_ptr->next->lowername) < 0) {
 
-            is_looking = FALSE;
+            is_looking = false;
 
             if (value == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node");
@@ -474,7 +474,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         }
         else if (HDstrcmp(lowername, node_ptr->next->lowername) == 0) {
 
-            is_looking = FALSE;
+            is_looking = false;
 
             if (value == NULL) {
                 /*****************
@@ -1775,7 +1775,7 @@ H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, 
 
     for (i = 0; i < msg_len; i++) {
         int chars_written = HDsnprintf(&(dest[i * 2]), 3, /* 'X', 'X', '\n' */
-                                       (lowercase == TRUE) ? "%02x" : "%02X", msg[i]);
+                                       (lowercase == true) ? "%02x" : "%02X", msg[i]);
         if (chars_written != 2)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem while writing hex chars for %c", msg[i]);
     }
@@ -2433,7 +2433,7 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination `repr`.");
 
 #if S3COMMS_DEBUG
-    H5FD_s3comms_bytes_to_hex((char *)hex, s, 1, FALSE);
+    H5FD_s3comms_bytes_to_hex((char *)hex, s, 1, false);
     fprintf(stdout, "    CHAR: \'%s\'\n", s);
     fprintf(stdout, "    CHAR-HEX: \"%s\"\n", hex);
 #endif
@@ -2480,7 +2480,7 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
 #if S3COMMS_DEBUG
         fprintf(stdout, "    STACK:\n    {\n");
         for (i = 0; i < stack_size; i++) {
-            H5FD_s3comms_bytes_to_hex((char *)hex, (&stack[i]), 1, FALSE);
+            H5FD_s3comms_bytes_to_hex((char *)hex, (&stack[i]), 1, false);
             hex[2] = 0;
             fprintf(stdout, "      %s,\n", hex);
         }
@@ -2845,7 +2845,7 @@ H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, bool encode_slas
      */
     for (s_off = 0; s_off < s_len; s_off++) {
         c = s[s_off];
-        if (isalnum(c) || c == '.' || c == '-' || c == '_' || c == '~' || (c == '/' && encode_slash == FALSE))
+        if (isalnum(c) || c == '.' || c == '-' || c == '_' || c == '~' || (c == '/' && encode_slash == false))
             dest[dest_off++] = c;
         else {
             hex_off = 0;

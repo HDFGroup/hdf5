@@ -303,7 +303,7 @@ H5A__dense_fnd_cb(const H5A_t *attr, bool *took_ownership, void *_user_attr)
 
     /* Take over attribute ownership */
     *user_attr      = attr;
-    *took_ownership = TRUE;
+    *took_ownership = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -376,10 +376,10 @@ H5A__dense_open(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     udata.found_op_data = &ret_value;
 
     /* Find & copy the attribute in the 'name' index */
-    attr_exists = FALSE;
+    attr_exists = false;
     if (H5B2_find(bt2_name, &udata, &attr_exists, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't search for attribute in name index");
-    if (attr_exists == FALSE)
+    if (attr_exists == false)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute in name index");
 
 done:
@@ -477,7 +477,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
         size_t attr_size; /* Size of serialized attribute in the heap */
 
         /* Find out the size of buffer needed for serialized message */
-        if ((attr_size = H5O_msg_raw_size(f, H5O_ATTR_ID, FALSE, attr)) == 0)
+        if ((attr_size = H5O_msg_raw_size(f, H5O_ATTR_ID, false, attr)) == 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get message size");
 
         /* Wrap the local buffer for serialized attributes */
@@ -489,7 +489,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
             HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't get actual buffer");
 
         /* Create serialized form of attribute or shared message */
-        if (H5O_msg_encode(f, H5O_ATTR_ID, FALSE, (unsigned char *)attr_ptr, attr) < 0)
+        if (H5O_msg_encode(f, H5O_ATTR_ID, false, (unsigned char *)attr_ptr, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute");
 
         /* Insert the serialized attribute into the fractal heap */
@@ -572,7 +572,7 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, bool *changed)
     record->id = *new_heap_id;
 
     /* Note that the record changed */
-    *changed = TRUE;
+    *changed = true;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5A__dense_write_bt2_cb2() */
@@ -638,14 +638,14 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, bool *changed)
         } /* end if */
 
         /* Note that the record changed */
-        *changed = TRUE;
+        *changed = true;
     } /* end if */
     else {
         void  *attr_ptr;  /* Pointer to serialized message */
         size_t attr_size; /* Size of serialized attribute in the heap */
 
         /* Find out the size of buffer needed for serialized attribute */
-        if ((attr_size = H5O_msg_raw_size(op_data->f, H5O_ATTR_ID, FALSE, op_data->attr)) == 0)
+        if ((attr_size = H5O_msg_raw_size(op_data->f, H5O_ATTR_ID, false, op_data->attr)) == 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get attribute size");
 
         /* Wrap the local buffer for serialized attributes */
@@ -657,7 +657,7 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, bool *changed)
             HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't get actual buffer");
 
         /* Create serialized form of attribute */
-        if (H5O_msg_encode(op_data->f, H5O_ATTR_ID, FALSE, (unsigned char *)attr_ptr, op_data->attr) < 0)
+        if (H5O_msg_encode(op_data->f, H5O_ATTR_ID, false, (unsigned char *)attr_ptr, op_data->attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute");
 
 /* Sanity check */
@@ -888,10 +888,10 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     udata.found_op_data = &attr_copy;
 
     /* Get copy of attribute through 'name' tracking v2 B-tree */
-    attr_exists = FALSE;
+    attr_exists = false;
     if (H5B2_find(bt2_name, &udata, &attr_exists, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't search for attribute in name index");
-    if (attr_exists == FALSE)
+    if (attr_exists == false)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate attribute in name index");
     assert(attr_copy);
 
@@ -924,7 +924,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
         /* Set up the creation order to search for */
         udata.corder = attr_copy->shared->crt_idx;
 
-        corder_attr_exists = FALSE;
+        corder_attr_exists = false;
         if (H5B2_find(bt2_corder, &udata, &corder_attr_exists, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't search for attribute in name index");
 
@@ -1404,14 +1404,14 @@ H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         assert(fh_udata.attr);
 
         /* Use the attribute's shared location */
-        use_sh_loc = FALSE;
+        use_sh_loc = false;
     } /* end if */
     else {
         /* Create a shared message location from the heap ID for this record */
         H5SM_reconstitute(&sh_loc, bt2_udata->f, H5O_ATTR_ID, record->id);
 
         /* Use the separate shared location */
-        use_sh_loc = TRUE;
+        use_sh_loc = true;
     } /* end else */
 
     /* Check for removing the link from the "other" index (creation order, when name used and vice versa) */

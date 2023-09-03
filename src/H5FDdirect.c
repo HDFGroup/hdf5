@@ -205,14 +205,14 @@ H5FD_direct_init(void)
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+        ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+        ignore_disabled_file_locks_s = false; /* Override: Don't ignore disabled locks */
     else
         ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g)) {
-        H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g, sizeof(H5FD_class_t), false);
         if (H5I_INVALID_HID == H5FD_DIRECT_g)
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register direct");
     }
@@ -354,7 +354,7 @@ H5FD__direct_populate_config(size_t boundary, size_t block_size, size_t cbuf_siz
         fa_out->cbsize = CBSIZE_DEF;
 
     /* Set the default to be true for data alignment */
-    fa_out->must_align = TRUE;
+    fa_out->must_align = true;
 
     /* Copy buffer size must be a multiple of file block size */
     if (fa_out->cbsize % fa_out->fbsize != 0)
@@ -537,10 +537,10 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
             if (HDwrite(file->fd, buf2, file->fa.fbsize) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "file system may not support Direct I/O");
             else
-                file->fa.must_align = TRUE;
+                file->fa.must_align = true;
         }
         else {
-            file->fa.must_align = FALSE;
+            file->fa.must_align = false;
             if (-1 == HDftruncate(file->fd, (HDoff_t)0))
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to truncate file")
         }
@@ -550,19 +550,19 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
             if (HDread(file->fd, buf2, file->fa.fbsize) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "file system may not support Direct I/O");
             else
-                file->fa.must_align = TRUE;
+                file->fa.must_align = true;
         }
         else {
             if (o_flags & O_RDWR) {
                 if (HDlseek(file->fd, (HDoff_t)0, SEEK_SET) < 0)
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to seek to proper position")
                 if (HDwrite(file->fd, buf1, sizeof(int)) < 0)
-                    file->fa.must_align = TRUE;
+                    file->fa.must_align = true;
                 else
-                    file->fa.must_align = FALSE;
+                    file->fa.must_align = false;
             }
             else
-                file->fa.must_align = FALSE;
+                file->fa.must_align = false;
         }
     }
 
@@ -821,7 +821,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
 {
     H5FD_direct_t *file = (H5FD_direct_t *)_file;
     ssize_t        nbytes;
-    bool           _must_align = TRUE;
+    bool           _must_align = true;
     herr_t         ret_value   = SUCCEED; /* Return value */
     size_t         alloc_size;
     void          *copy_buf = NULL, *p2;
@@ -998,7 +998,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
 {
     H5FD_direct_t *file = (H5FD_direct_t *)_file;
     ssize_t        nbytes;
-    bool           _must_align = TRUE;
+    bool           _must_align = true;
     herr_t         ret_value   = SUCCEED; /* Return value */
     size_t         alloc_size;
     void          *copy_buf = NULL, *p1;
@@ -1271,8 +1271,8 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *		The lock type to apply depends on the parameter "rw":
- *			TRUE--opens for write: an exclusive lock
- *			FALSE--opens for read: a shared lock
+ *			true--opens for write: an exclusive lock
+ *			false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *

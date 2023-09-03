@@ -128,8 +128,8 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     index_flags = *p++;
     if (index_flags & ~H5O_LINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message");
-    linfo->track_corder = (index_flags & H5O_LINFO_TRACK_CORDER) ? TRUE : FALSE;
-    linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? TRUE : FALSE;
+    linfo->track_corder = (index_flags & H5O_LINFO_TRACK_CORDER) ? true : false;
+    linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? true : false;
 
     /* Set the number of links in the group to an invalid value, so we query it later */
     linfo->nlinks = HSIZET_MAX;
@@ -334,7 +334,7 @@ H5O__linfo_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 
     /* If the group is using "dense" link storage, delete it */
     if (H5_addr_defined(linfo->fheap_addr))
-        if (H5G__dense_delete(f, linfo, TRUE) < 0)
+        if (H5G__dense_delete(f, linfo, true) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage");
 
 done:
@@ -422,7 +422,7 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
 {
     H5O_linfo_postcopy_ud_t *udata = (H5O_linfo_postcopy_ud_t *)_udata; /* 'User data' passed in */
     H5O_link_t               dst_lnk;                                   /* Destination link to insert */
-    bool                     dst_lnk_init = FALSE;        /* Whether the destination link is initialized */
+    bool                     dst_lnk_init = false;        /* Whether the destination link is initialized */
     herr_t                   ret_value    = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -434,7 +434,7 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     /* Copy the link (and the object it points to) */
     if (H5L__link_copy_file(udata->dst_oloc->file, src_lnk, udata->src_oloc, &dst_lnk, udata->cpy_info) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy link");
-    dst_lnk_init = TRUE;
+    dst_lnk_init = true;
 
     /* Set metadata tag in API context */
     H5_BEGIN_TAG(H5AC__COPIED_TAG)

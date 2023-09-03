@@ -46,8 +46,8 @@
 /* ========= Group Creation properties ============ */
 
 /* Defaults for link info values */
-#define H5G_CRT_LINFO_TRACK_CORDER    FALSE
-#define H5G_CRT_LINFO_INDEX_CORDER    FALSE
+#define H5G_CRT_LINFO_TRACK_CORDER    false
+#define H5G_CRT_LINFO_INDEX_CORDER    false
 #define H5G_CRT_LINFO_NLINKS          0
 #define H5G_CRT_LINFO_MAX_CORDER      0
 #define H5G_CRT_LINFO_LINK_FHEAP_ADDR HADDR_UNDEF
@@ -70,10 +70,10 @@
 
 /* Defaults for group info values */
 #define H5G_CRT_GINFO_LHEAP_SIZE_HINT         0
-#define H5G_CRT_GINFO_STORE_LINK_PHASE_CHANGE FALSE
+#define H5G_CRT_GINFO_STORE_LINK_PHASE_CHANGE false
 #define H5G_CRT_GINFO_MAX_COMPACT             8
 #define H5G_CRT_GINFO_MIN_DENSE               6
-#define H5G_CRT_GINFO_STORE_EST_ENTRY_INFO    FALSE
+#define H5G_CRT_GINFO_STORE_EST_ENTRY_INFO    false
 #define H5G_CRT_GINFO_EST_NUM_ENTRIES         4
 #define H5G_CRT_GINFO_EST_NAME_LEN            8
 

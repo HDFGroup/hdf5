@@ -369,7 +369,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, bool 
     /* Post-parse checks */
     if (p != heap->chunk + heap->size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "partially decoded global heap");
-    if (FALSE == H5HG_ISALIGNED(heap->obj[0].size))
+    if (false == H5HG_ISALIGNED(heap->obj[0].size))
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "decoded global heap is not aligned");
 
     /* Set the next index value to use when creating a new object */

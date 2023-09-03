@@ -92,7 +92,7 @@ H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t 
     /* Create the file */
     if (NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file");
-    new_file->id_exists = TRUE;
+    new_file->id_exists = true;
 
     ret_value = (void *)new_file;
 
@@ -126,7 +126,7 @@ H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t H5
     /* Open the file */
     if (NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
-    new_file->id_exists = TRUE;
+    new_file->id_exists = true;
 
     ret_value = (void *)new_file;
 
@@ -166,7 +166,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
 
         /* H5Fget_access_plist */
         case H5VL_FILE_GET_FAPL: {
-            if ((args->args.get_fapl.fapl_id = H5F_get_access_plist((H5F_t *)obj, TRUE)) < 0)
+            if ((args->args.get_fapl.fapl_id = H5F_get_access_plist((H5F_t *)obj, true)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file access property list");
 
             break;
@@ -181,7 +181,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
             /* Create the property list object to return */
-            if ((args->args.get_fcpl.fcpl_id = H5P_copy_plist(plist, TRUE)) < 0)
+            if ((args->args.get_fcpl.fcpl_id = H5P_copy_plist(plist, true)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy file creation properties");
 
             break;
@@ -246,7 +246,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
 
         /* H5Fget_obj_count */
         case H5VL_FILE_GET_OBJ_COUNT: {
-            if (H5F_get_obj_count((H5F_t *)obj, args->args.get_obj_count.types, TRUE,
+            if (H5F_get_obj_count((H5F_t *)obj, args->args.get_obj_count.types, true,
                                   args->args.get_obj_count.count) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve object count");
 
@@ -258,7 +258,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
             H5VL_file_get_obj_ids_args_t *file_args = &args->args.get_obj_ids;
 
             if (H5F_get_obj_ids((H5F_t *)obj, file_args->types, file_args->max_objs, file_args->oid_list,
-                                TRUE, file_args->count) < 0)
+                                true, file_args->count) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve object IDs");
 
             break;
@@ -329,7 +329,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
             /* Reopen the file through the VOL connector */
             if (NULL == (new_file = H5F__reopen((H5F_t *)obj)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file");
-            new_file->id_exists = TRUE;
+            new_file->id_exists = true;
 
             /* Set 'out' value */
             *args->args.reopen.file = new_file;
@@ -362,7 +362,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
         /* Check if two files are the same */
         case H5VL_FILE_IS_EQUAL: {
             if (!obj || !args->args.is_equal.obj2)
-                *args->args.is_equal.same_file = FALSE;
+                *args->args.is_equal.same_file = false;
             else
                 *args->args.is_equal.same_file =
                     (((H5F_t *)obj)->shared == ((H5F_t *)args->args.is_equal.obj2)->shared);
@@ -771,7 +771,7 @@ H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
                 HGOTO_ERROR(H5E_ID, H5E_CANTGET, FAIL, "invalid ID");
 
             /* Get the number of references outstanding for this file ID */
-            if ((nref = H5I_get_ref(file_id, FALSE)) < 0)
+            if ((nref = H5I_get_ref(file_id, false)) < 0)
                 HGOTO_ERROR(H5E_ID, H5E_CANTGET, FAIL, "can't get ID ref count");
             if (nref == 1)
                 if (H5F__flush(f) < 0)

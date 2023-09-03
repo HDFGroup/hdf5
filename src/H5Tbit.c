@@ -393,8 +393,8 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
     /* Use FUNC_ENTER_PACKAGE_NOERR here to avoid performance issues */
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Some functions call this with value=TRUE */
-    assert(TRUE == 1);
+    /* Some functions call this with value=true */
+    assert(true == 1);
 
     switch (direction) {
         case H5T_BIT_LSB:
@@ -477,7 +477,7 @@ done:
  * Purpose:     Increment part of a bit field by adding 1.  The bit field
  *              starts with bit position START and is SIZE bits long.
  *
- * Return:      The carry-out value.  TRUE if overflows, FALSE otherwise.
+ * Return:      The carry-out value.  true if overflows, false otherwise.
  *
  *-------------------------------------------------------------------------
  */
@@ -531,7 +531,7 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
         buf[idx] |= (uint8_t)(acc & mask);
     }
 
-    FUNC_LEAVE_NOAPI(carry ? TRUE : FALSE)
+    FUNC_LEAVE_NOAPI(carry ? true : false)
 } /* end H5T__bit_inc() */
 
 /*-------------------------------------------------------------------------
@@ -540,7 +540,7 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
  * Purpose:     Decrement part of a bit field by subtracting 1.  The bit
  *              field starts with bit position START and is SIZE bits long.
  *
- * Return:      The "borrow-in" value. It's TRUE if underflows, FALSE
+ * Return:      The "borrow-in" value. It's true if underflows, false
  *              otherwise.
  *
  *-------------------------------------------------------------------------
@@ -608,7 +608,7 @@ H5T__bit_dec(uint8_t *buf, size_t start, size_t size)
         }
     }
 
-    FUNC_LEAVE_NOAPI(borrow ? TRUE : FALSE)
+    FUNC_LEAVE_NOAPI(borrow ? true : false)
 } /* end H5T__bit_dec() */
 
 /*-------------------------------------------------------------------------

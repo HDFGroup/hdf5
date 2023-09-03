@@ -131,7 +131,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         switch (strategy) {
             case H5F_FILE_SPACE_ALL_PERSIST:
                 fsinfo->strategy  = H5F_FSPACE_STRATEGY_FSM_AGGR;
-                fsinfo->persist   = TRUE;
+                fsinfo->persist   = true;
                 fsinfo->threshold = threshold;
                 if (HADDR_UNDEF == (fsinfo->eoa_pre_fsm_fsalloc = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size");
@@ -163,7 +163,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         }
 
         fsinfo->version = H5O_FSINFO_VERSION_1;
-        fsinfo->mapped  = TRUE;
+        fsinfo->mapped  = true;
     }
     else {
         if (vers < H5O_FSINFO_VERSION_1)
@@ -199,7 +199,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
             }
-        fsinfo->mapped = FALSE;
+        fsinfo->mapped = false;
     }
 
     /* Set return value */

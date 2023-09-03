@@ -157,7 +157,7 @@ H5Tvlen_create(hid_t base_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
 
     /* Register the type */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
 done:
@@ -196,7 +196,7 @@ H5T__vlen_create(const H5T_t *base)
      * Force conversions (i.e. memory to memory conversions should duplicate
      * data, not point to the same VL sequences)
      */
-    dt->shared->force_conv = TRUE;
+    dt->shared->force_conv = true;
     if (NULL == (dt->shared->parent = H5T_copy(base, H5T_COPY_ALL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy base datatype");
 
@@ -228,8 +228,8 @@ done:
  *
  * Return:
  *  One of two values on success:
- *      TRUE - If the location of any vlen types changed
- *      FALSE - If the location of any vlen types is the same
+ *      true - If the location of any vlen types changed
+ *      false - If the location of any vlen types is the same
  *  <0 is returned on failure
  *
  *-------------------------------------------------------------------------
@@ -237,7 +237,7 @@ done:
 htri_t
 H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
-    htri_t ret_value = FALSE; /* Indicate success, but no location change */
+    htri_t ret_value = false; /* Indicate success, but no location change */
 
     FUNC_ENTER_PACKAGE
 
@@ -337,7 +337,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Indicate that the location changed */
-        ret_value = TRUE;
+        ret_value = true;
     } /* end if */
 
 done:
@@ -416,7 +416,7 @@ H5T__vlen_mem_seq_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, bo
     /* Copy to ensure correct alignment */
     H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
 
-    *isnull = ((vl.len == 0 || vl.p == NULL) ? TRUE : FALSE);
+    *isnull = ((vl.len == 0 || vl.p == NULL) ? true : false);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_seq_isnull() */
@@ -598,7 +598,7 @@ H5T__vlen_mem_str_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, bo
     /* Copy to ensure correct alignment */
     H5MM_memcpy(&s, _vl, sizeof(char *));
 
-    *isnull = (s == NULL ? TRUE : FALSE);
+    *isnull = (s == NULL ? true : false);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_str_isnull() */

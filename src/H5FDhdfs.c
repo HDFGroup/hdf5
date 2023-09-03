@@ -333,7 +333,7 @@ H5FD_hdfs_init(void)
 #endif
 
     if (H5I_VFL != H5I_get_type(H5FD_HDFS_g))
-        H5FD_HDFS_g = H5FD_register(&H5FD_hdfs_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_HDFS_g = H5FD_register(&H5FD_hdfs_g, sizeof(H5FD_class_t), false);
 
 #if HDFS_STATS
     /* pre-compute statsbin boundaries

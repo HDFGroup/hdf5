@@ -118,7 +118,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
-    if (H5_addr_defined(mesg->heap_addr) == FALSE)
+    if (H5_addr_defined(mesg->heap_addr) == false)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad local heap address when parsing efl msg");
 
     /* Decode the file list */
@@ -260,7 +260,7 @@ H5O__efl_copy(const void *_mesg, void *_dest)
     const H5O_efl_t *mesg = (const H5O_efl_t *)_mesg;
     H5O_efl_t       *dest = (H5O_efl_t *)_dest;
     size_t           u;                      /* Local index variable */
-    bool             slot_allocated = FALSE; /* Flag to indicate that dynamic allocation has begun */
+    bool             slot_allocated = false; /* Flag to indicate that dynamic allocation has begun */
     void            *ret_value      = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -279,7 +279,7 @@ H5O__efl_copy(const void *_mesg, void *_dest)
     if (dest->nalloc > 0) {
         if (NULL == (dest->slot = (H5O_efl_entry_t *)H5MM_calloc(dest->nalloc * sizeof(H5O_efl_entry_t))))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message slots");
-        slot_allocated = TRUE;
+        slot_allocated = true;
         for (u = 0; u < mesg->nused; u++) {
             dest->slot[u] = mesg->slot[u];
             if (NULL == (dest->slot[u].name = H5MM_xstrdup(mesg->slot[u].name)))

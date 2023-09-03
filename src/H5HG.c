@@ -574,7 +574,7 @@ H5HG_read(H5F_t *f, H5HG_t *hobj, void *object /*out*/, size_t *buf_size)
      * with the H5AC_protect(), but it won't hurt to do it twice.
      */
     if (heap->obj[0].begin) {
-        if (H5F_cwfs_advance_heap(f, heap, FALSE) < 0)
+        if (H5F_cwfs_advance_heap(f, heap, false) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTMODIFY, NULL, "can't adjust file's CWFS");
     } /* end if */
 
@@ -771,7 +771,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
          * H5AC_protect() might have done that too, but that's okay.  If the
          * heap isn't on the CWFS list then add it to the end.
          */
-        if (H5F_cwfs_advance_heap(f, heap, TRUE) < 0)
+        if (H5F_cwfs_advance_heap(f, heap, true) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTMODIFY, FAIL, "can't adjust file's CWFS");
     } /* end else */
 

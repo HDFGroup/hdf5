@@ -159,23 +159,23 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:    TRUE if all elements are zero,
- *              Failure:    TRUE if N is zero
+ * Return:      Success:    true if all elements are zero,
+ *              Failure:    true if N is zero
  *-------------------------------------------------------------------------
  */
 static inline htri_t H5_ATTR_UNUSED
 H5VM_vector_zerop_u(int n, const hsize_t *v)
 {
-    htri_t ret_value = TRUE; /* Return value */
+    htri_t ret_value = true; /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(true);
     while (n--)
         if (*v++)
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -190,24 +190,24 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:    TRUE if all elements are zero,
- *                          FALSE otherwise
- *              Failure:    TRUE if N is zero
+ * Return:      Success:    true if all elements are zero,
+ *                          false otherwise
+ *              Failure:    true if N is zero
  *-------------------------------------------------------------------------
  */
 static inline htri_t H5_ATTR_UNUSED
 H5VM_vector_zerop_s(int n, const hssize_t *v)
 {
-    htri_t ret_value = TRUE; /* Return value */
+    htri_t ret_value = true; /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(true);
     while (n--)
         if (*v++)
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -472,14 +472,14 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *-------------------------------------------------------------------------
  */
 static inline bool H5_ATTR_UNUSED
 H5VM_bit_get(const unsigned char *buf, size_t offset)
 {
     /* Test the appropriate bit in the buffer */
-    return (bool)((buf[offset / 8] & (H5VM_bit_set_g[offset % 8])) ? TRUE : FALSE);
+    return (bool)((buf[offset / 8] & (H5VM_bit_set_g[offset % 8])) ? true : false);
 } /* end H5VM_bit_get() */
 
 /*-------------------------------------------------------------------------

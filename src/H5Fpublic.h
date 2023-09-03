@@ -1659,7 +1659,7 @@ H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t 
  * \details H5Fget_dset_no_attrs_hint() retrieves the no dataset attributes
  *          hint setting for the file specified by the file identifier \p
  *          file_id. This setting is used to inform the library to create
- *          minimized dataset object headers when \c TRUE.
+ *          minimized dataset object headers when \c true.
  *
  *          The setting's value is returned in the boolean pointer minimized.
  *
@@ -1680,18 +1680,18 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  *
  * \details H5Fset_dset_no_attrs_hint() sets the no dataset attributes hint
  *          setting for the file specified by the file identifier \p file_id.
- *          If the boolean flag \p minimize is set to \c TRUE, then the library
+ *          If the boolean flag \p minimize is set to \c true, then the library
  *          will create minimized dataset object headers in the file.
  *          \Bold{All} files that refer to the same file-on-disk will be
  *          affected by the most recent setting, regardless of the file
  *          identifier/handle (e.g., as returned by H5Fopen()). By setting the
- *          \p minimize flag to \c TRUE, the library expects that no attributes
+ *          \p minimize flag to \c true, the library expects that no attributes
  *          will be added to the dataset - attributes can be added, but they
  *          are appended with a continuation message, which can reduce
  *          performance.
  *
  * \attention This setting interacts with H5Pset_dset_no_attrs_hint(): if
- *            either is set to \c TRUE, then the created dataset's object header
+ *            either is set to \c true, then the created dataset's object header
  *            will be minimized.
  *
  * \since 1.10.5

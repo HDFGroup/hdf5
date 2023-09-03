@@ -239,7 +239,7 @@ H5EA__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -250,7 +250,7 @@ H5EA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;
+    htri_t         ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -261,7 +261,7 @@ H5EA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_hdr_verify_chksum() */
@@ -629,7 +629,7 @@ H5EA__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -640,7 +640,7 @@ H5EA__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;
+    htri_t         ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -651,7 +651,7 @@ H5EA__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_iblock_verify_chksum() */
@@ -1029,7 +1029,7 @@ H5EA__cache_sblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -1040,7 +1040,7 @@ H5EA__cache_sblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;
+    htri_t         ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1051,7 +1051,7 @@ H5EA__cache_sblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_sblock_verify_chksum() */
@@ -1294,7 +1294,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between super block and header, address = %llu",
                         (unsigned long long)sblock->addr);
-                sblock->has_hdr_depend = FALSE;
+                sblock->has_hdr_depend = false;
             } /* end if */
             break;
 
@@ -1313,7 +1313,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between super block and header, address = %llu",
                         (unsigned long long)sblock->addr);
-                sblock->has_hdr_depend = FALSE;
+                sblock->has_hdr_depend = false;
             } /* end if */
 
             /* Detach from 'top' proxy for extensible array */
@@ -1435,7 +1435,7 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -1446,7 +1446,7 @@ H5EA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;
+    htri_t         ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1457,7 +1457,7 @@ H5EA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_sblock_verify_chksum() */
@@ -1699,7 +1699,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between direct block and header, address = %llu",
                         (unsigned long long)dblock->addr);
-                dblock->has_hdr_depend = FALSE;
+                dblock->has_hdr_depend = false;
             } /* end if */
             break;
 
@@ -1718,7 +1718,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                         H5E_EARRAY, H5E_CANTUNDEPEND, FAIL,
                         "unable to destroy flush dependency between data block and header, address = %llu",
                         (unsigned long long)dblock->addr);
-                dblock->has_hdr_depend = FALSE;
+                dblock->has_hdr_depend = false;
             } /* end if */
 
             /* Detach from 'top' proxy for extensible array */
@@ -1856,7 +1856,7 @@ H5EA__cache_dblk_page_get_initial_load_size(void *_udata, size_t *image_len)
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
+ * Return:      Success:        true/false
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
@@ -1867,7 +1867,7 @@ H5EA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
-    htri_t         ret_value = TRUE;
+    htri_t         ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1878,7 +1878,7 @@ H5EA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
     if (stored_chksum != computed_chksum)
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_dblk_page_verify_chksum() */
@@ -2069,7 +2069,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                                 "unable to destroy flush dependency between data block page and header, "
                                 "address = %llu",
                                 (unsigned long long)dblk_page->addr);
-                dblk_page->has_hdr_depend = FALSE;
+                dblk_page->has_hdr_depend = false;
             } /* end if */
             break;
 
@@ -2088,7 +2088,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
                                 "unable to destroy flush dependency between data block page and header, "
                                 "address = %llu",
                                 (unsigned long long)dblk_page->addr);
-                dblk_page->has_hdr_depend = FALSE;
+                dblk_page->has_hdr_depend = false;
             } /* end if */
 
             /* Detach from 'top' proxy for extensible array */

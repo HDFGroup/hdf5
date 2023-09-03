@@ -36,7 +36,7 @@
 static hid_t H5FD_IOC_g = H5I_INVALID_HID;
 
 /* Whether the driver initialized MPI on its own */
-static bool H5FD_mpi_self_initialized = FALSE;
+static bool H5FD_mpi_self_initialized = false;
 
 /* Pointer to value for MPI_TAG_UB */
 int *H5FD_IOC_tag_ub_val_ptr = NULL;
@@ -219,7 +219,7 @@ H5FD_ioc_init(void)
         int   key_val_retrieved = 0;
         int   mpi_code;
 
-        if ((H5FD_IOC_g = H5FD_register(&H5FD_ioc_g, sizeof(H5FD_class_t), FALSE)) < 0)
+        if ((H5FD_IOC_g = H5FD_register(&H5FD_ioc_g, sizeof(H5FD_class_t), false)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register IOC VFD");
 
         /* Check if IOC VFD has been loaded dynamically */
@@ -247,7 +247,7 @@ H5FD_ioc_init(void)
                 if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
                     H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code);
 
-                H5FD_mpi_self_initialized = TRUE;
+                H5FD_mpi_self_initialized = true;
 
                 if (provided != required)
                     H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
@@ -299,7 +299,7 @@ H5FD__ioc_term(void)
                     H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalize failed", mpi_code);
             }
 
-            H5FD_mpi_self_initialized = FALSE;
+            H5FD_mpi_self_initialized = false;
         }
     }
 
@@ -373,7 +373,7 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
 {
     const H5FD_ioc_config_t *config_ptr         = NULL;
     H5P_genplist_t          *plist_ptr          = NULL;
-    bool                     use_default_config = FALSE;
+    bool                     use_default_config = false;
     herr_t                   ret_value          = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
@@ -386,11 +386,11 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     if (H5FD_IOC != H5P_peek_driver(plist_ptr))
-        use_default_config = TRUE;
+        use_default_config = true;
     else {
         config_ptr = H5P_peek_driver_info(plist_ptr);
         if (NULL == config_ptr)
-            use_default_config = TRUE;
+            use_default_config = true;
     }
 
     if (use_default_config) {
@@ -1293,7 +1293,7 @@ H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t t
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
     else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
@@ -1336,7 +1336,7 @@ H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t 
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
     else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 

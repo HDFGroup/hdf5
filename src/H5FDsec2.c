@@ -206,14 +206,14 @@ H5FD_sec2_init(void)
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+        ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+        ignore_disabled_file_locks_s = false; /* Override: Don't ignore disabled locks */
     else
         ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5I_VFL != H5I_get_type(H5FD_SEC2_g))
-        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), false);
 
     /* Set return value */
     ret_value = H5FD_SEC2_g;
@@ -908,8 +908,8 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *		The lock type to apply depends on the parameter "rw":
- *			TRUE--opens for write: an exclusive lock
- *			FALSE--opens for read: a shared lock
+ *			true--opens for write: an exclusive lock
+ *			false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *

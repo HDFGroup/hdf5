@@ -255,7 +255,7 @@ H5O__refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_U
     /* Always delete this message when copying objects between files.  Let
      *  the copy routine set the correct ref. count.
      */
-    *deleted = TRUE;
+    *deleted = true;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__refcount_pre_copy_file() */

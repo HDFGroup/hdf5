@@ -158,7 +158,7 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, bool *stats_changed)
 {
     H5EA_iblock_t *iblock = NULL;     /* Extensible array index block */
     haddr_t        iblock_addr;       /* Extensible array index block address */
-    bool           inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool           inserted  = false; /* Whether the header was inserted into cache */
     haddr_t        ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE
@@ -209,7 +209,7 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, bool *stats_changed)
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF,
                     "can't add extensible array index block to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add index block as child of 'top' proxy */
     if (hdr->top_proxy) {
@@ -229,7 +229,7 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, bool *stats_changed)
     hdr->stats.stored.nelmts += hdr->cparam.idx_blk_elmts;
 
     /* Mark the statistics as changed */
-    *stats_changed = TRUE;
+    *stats_changed = true;
 
     /* Set address of index block to return */
     ret_value = iblock_addr;

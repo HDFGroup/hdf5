@@ -340,7 +340,7 @@ H5F__cache_superblock_get_final_load_size(const void *_image, size_t image_len, 
     assert(image_len >= H5F_SUPERBLOCK_FIXED_SIZE + 6);
 
     /* Deserialize the file superblock's prefix */
-    if (H5F__superblock_prefix_decode(&sblock, &image, image_len, udata, TRUE) < 0)
+    if (H5F__superblock_prefix_decode(&sblock, &image, image_len, udata, true) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "can't decode file superblock prefix");
 
     /* Save the version to be used in verify_chksum callback */
@@ -360,7 +360,7 @@ done:
  * Purpose:     Verify the computed checksum of the data structure is the
  *              same as the stored chksum.
  *
- * Return:      Success:    TRUE/FALSE
+ * Return:      Success:    true/false
  *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
@@ -371,7 +371,7 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
     H5F_superblock_cache_ud_t *udata = (H5F_superblock_cache_ud_t *)_udata; /* User data */
     uint32_t                   stored_chksum;   /* Stored metadata checksum value */
     uint32_t                   computed_chksum; /* Computed metadata checksum value */
-    htri_t                     ret_value = TRUE;
+    htri_t                     ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -385,7 +385,7 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
         H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
         if (stored_chksum != computed_chksum)
-            ret_value = FALSE;
+            ret_value = false;
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -421,7 +421,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Deserialize the file superblock's prefix */
-    if (H5F__superblock_prefix_decode(sblock, &image, len, udata, FALSE) < 0)
+    if (H5F__superblock_prefix_decode(sblock, &image, len, udata, false) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, NULL, "can't decode file superblock prefix");
 
     /* Check for older version of superblock format */
@@ -551,7 +551,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
         if (udata->ignore_drvrinfo && H5_addr_defined(sblock->driver_addr)) {
             /* Eliminate the driver info */
             sblock->driver_addr     = HADDR_UNDEF;
-            udata->drvrinfo_removed = TRUE;
+            udata->drvrinfo_removed = true;
         }
 
         /* NOTE: Driver info block is decoded separately, later */
@@ -848,7 +848,7 @@ H5F__cache_drvrinfo_get_final_load_size(const void *_image, size_t image_len, vo
     assert(image_len == H5F_DRVINFOBLOCK_HDR_SIZE);
 
     /* Deserialize the file driver info's prefix */
-    if (H5F__drvrinfo_prefix_decode(&drvrinfo, NULL, &image, image_len, udata, TRUE) < 0)
+    if (H5F__drvrinfo_prefix_decode(&drvrinfo, NULL, &image, image_len, udata, true) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "can't decode file driver info prefix");
 
     /* Set the final size for the cache image */
@@ -888,7 +888,7 @@ H5F__cache_drvrinfo_deserialize(const void *_image, size_t len, void *_udata, bo
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "memory allocation failed for driver info message");
 
     /* Deserialize the file driver info's prefix */
-    if (H5F__drvrinfo_prefix_decode(drvinfo, drv_name, &image, len, udata, FALSE) < 0)
+    if (H5F__drvrinfo_prefix_decode(drvinfo, drv_name, &image, len, udata, false) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, NULL, "can't decode file driver info prefix");
 
     /* Sanity check */

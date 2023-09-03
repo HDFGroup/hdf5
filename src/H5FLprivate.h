@@ -215,7 +215,7 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_CALLOC(t, size)           (uint8_t *)H5MM_calloc(size)
 #define H5FL_BLK_FREE(t, blk)              (uint8_t *)H5MM_xfree(blk)
 #define H5FL_BLK_REALLOC(t, blk, new_size) (uint8_t *)H5MM_realloc(blk, new_size)
-#define H5FL_BLK_AVAIL(t, size)            (FALSE)
+#define H5FL_BLK_AVAIL(t, size)            (false)
 #endif /* H5_NO_BLK_FREE_LISTS */
 
 /* Data structure to store each array in free list */

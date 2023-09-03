@@ -245,7 +245,7 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
 
     /* Reset the parent_removed flag */
     if (parent_removed)
-        *parent_removed = FALSE;
+        *parent_removed = false;
 
     /* Check for root direct block */
     if (hdr->man_dtable.curr_root_rows == 0) {
@@ -281,7 +281,7 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
              *  indirect block will be removed when this direct block is detached
              */
             if (parent_removed && 1 == dblock->parent->nchildren)
-                *parent_removed = TRUE;
+                *parent_removed = true;
 
             if (H5HF__man_iblock_detach(dblock->parent, dblock->par_entry) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block");
@@ -466,7 +466,7 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
     } /* end else */
 
     /* Reset compression context info */
-    udata.decompressed = FALSE;
+    udata.decompressed = false;
     udata.dblk         = NULL;
 
     /* Protect the direct block */
@@ -523,7 +523,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
 
     /* Lock root indirect block */
     if (NULL == (iblock = H5HF__man_iblock_protect(hdr, iblock_addr, hdr->man_dtable.curr_root_rows, NULL, 0,
-                                                   FALSE, flags, &did_protect)))
+                                                   false, flags, &did_protect)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block");
 
     /* Check for indirect block row */
@@ -553,7 +553,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
         } /* end if */
 
         /* Lock child indirect block */
-        if (NULL == (new_iblock = H5HF__man_iblock_protect(hdr, iblock_addr, nrows, iblock, entry, FALSE,
+        if (NULL == (new_iblock = H5HF__man_iblock_protect(hdr, iblock_addr, nrows, iblock, entry, false,
                                                            flags, &new_did_protect)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block");
 

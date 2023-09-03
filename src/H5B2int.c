@@ -177,7 +177,7 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
         left_addr = internal->node_ptrs[idx].addr;
         if (NULL == (right_int = H5B2__protect_internal(hdr, internal, &internal->node_ptrs[idx + 1],
-                                                        (uint16_t)(depth - 1), FALSE, H5AC__NO_FLAGS_SET)))
+                                                        (uint16_t)(depth - 1), false, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
         right_addr = internal->node_ptrs[idx + 1].addr;
 
@@ -208,7 +208,7 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
                                                     H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
         left_addr = internal->node_ptrs[idx].addr;
-        if (NULL == (right_leaf = H5B2__protect_leaf(hdr, internal, &internal->node_ptrs[idx + 1], FALSE,
+        if (NULL == (right_leaf = H5B2__protect_leaf(hdr, internal, &internal->node_ptrs[idx + 1], false,
                                                      H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
         right_addr = internal->node_ptrs[idx + 1].addr;
@@ -377,7 +377,7 @@ H5B2__split_root(H5B2_hdr_t *hdr)
 
     /* Protect new root node */
     if (NULL ==
-        (new_root = H5B2__protect_internal(hdr, hdr, &hdr->root, hdr->depth, FALSE, H5AC__NO_FLAGS_SET)))
+        (new_root = H5B2__protect_internal(hdr, hdr, &hdr->root, hdr->depth, false, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
 
     /* Set first node pointer in root node to old root node pointer info */
@@ -1141,7 +1141,7 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
         left_addr = internal->node_ptrs[idx].addr;
         if (NULL ==
             (right_internal = H5B2__protect_internal(hdr, internal, &internal->node_ptrs[idx + 1],
-                                                     (uint16_t)(depth - 1), FALSE, H5AC__NO_FLAGS_SET)))
+                                                     (uint16_t)(depth - 1), false, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
         right_addr = internal->node_ptrs[idx + 1].addr;
 
@@ -1168,7 +1168,7 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
                                                     H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
         left_addr = internal->node_ptrs[idx].addr;
-        if (NULL == (right_leaf = H5B2__protect_leaf(hdr, internal, &internal->node_ptrs[idx + 1], FALSE,
+        if (NULL == (right_leaf = H5B2__protect_leaf(hdr, internal, &internal->node_ptrs[idx + 1], false,
                                                      H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
         right_addr = internal->node_ptrs[idx + 1].addr;
@@ -1326,7 +1326,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
         middle_addr = internal->node_ptrs[idx].addr;
         if (NULL ==
             (right_internal = H5B2__protect_internal(hdr, internal, &internal->node_ptrs[idx + 1],
-                                                     (uint16_t)(depth - 1), FALSE, H5AC__NO_FLAGS_SET)))
+                                                     (uint16_t)(depth - 1), false, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
         right_addr = internal->node_ptrs[idx + 1].addr;
 
@@ -1362,7 +1362,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
                                                       hdr->swmr_write, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
         middle_addr = internal->node_ptrs[idx].addr;
-        if (NULL == (right_leaf = H5B2__protect_leaf(hdr, internal, &internal->node_ptrs[idx + 1], FALSE,
+        if (NULL == (right_leaf = H5B2__protect_leaf(hdr, internal, &internal->node_ptrs[idx + 1], false,
                                                      H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
         right_addr = internal->node_ptrs[idx + 1].addr;
@@ -1599,7 +1599,7 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, 
     uint8_t            *node_native;              /* Pointers to node's native records */
     uint8_t            *native      = NULL;       /* Pointers to copy of node's native records */
     H5B2_node_ptr_t    *node_ptrs   = NULL;       /* Pointers to node's node pointers */
-    bool                node_pinned = FALSE;      /* Whether node is pinned */
+    bool                node_pinned = false;      /* Whether node is pinned */
     unsigned            u;                        /* Local index */
     herr_t              ret_value = H5_ITER_CONT; /* Iterator return value */
 
@@ -1616,7 +1616,7 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, 
 
         /* Lock the current B-tree node */
         if (NULL ==
-            (internal = H5B2__protect_internal(hdr, parent, curr_node, depth, FALSE, H5AC__READ_ONLY_FLAG)))
+            (internal = H5B2__protect_internal(hdr, parent, curr_node, depth, false, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
 
         /* Set up information about current node */
@@ -1637,7 +1637,7 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, 
         H5B2_leaf_t *leaf; /* Pointer to leaf node */
 
         /* Lock the current B-tree node */
-        if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, (H5B2_node_ptr_t *)curr_node, FALSE,
+        if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, (H5B2_node_ptr_t *)curr_node, false,
                                                H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
@@ -1660,7 +1660,7 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, 
                        (unsigned)(hdr->swmr_write ? H5AC__PIN_ENTRY_FLAG : H5AC__NO_FLAGS_SET)) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node");
     if (hdr->swmr_write)
-        node_pinned = TRUE;
+        node_pinned = true;
     else
         node = NULL;
 
@@ -1729,7 +1729,7 @@ H5B2__delete_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, v
 
         /* Lock the current B-tree node */
         if (NULL ==
-            (internal = H5B2__protect_internal(hdr, parent, curr_node, depth, FALSE, H5AC__NO_FLAGS_SET)))
+            (internal = H5B2__protect_internal(hdr, parent, curr_node, depth, false, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
 
         /* Set up information about current node */
@@ -1748,7 +1748,7 @@ H5B2__delete_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, v
 
         /* Lock the current B-tree node */
         if (NULL ==
-            (leaf = H5B2__protect_leaf(hdr, parent, (H5B2_node_ptr_t *)curr_node, FALSE, H5AC__NO_FLAGS_SET)))
+            (leaf = H5B2__protect_leaf(hdr, parent, (H5B2_node_ptr_t *)curr_node, false, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
 
         /* Set up information about current node */
@@ -1806,7 +1806,7 @@ H5B2__node_size(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, voi
 
     /* Lock the current B-tree node */
     if (NULL ==
-        (internal = H5B2__protect_internal(hdr, parent, curr_node, depth, FALSE, H5AC__READ_ONLY_FLAG)))
+        (internal = H5B2__protect_internal(hdr, parent, curr_node, depth, false, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
 
     /* Recursively descend into child nodes, if we are above the "twig" level in the B-tree */
@@ -1894,7 +1894,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
     /* If the node is in the cache, check for retargeting its parent */
     if (node_status & H5AC_ES__IN_CACHE) {
         void **parent_ptr  = NULL;  /* Pointer to child node's parent */
-        bool   update_deps = FALSE; /* Whether to update flush dependencies */
+        bool   update_deps = false; /* Whether to update flush dependencies */
 
         /* Get child node pointer */
         if (depth > 1) {
@@ -1902,14 +1902,14 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
 
             /* Protect child */
             if (NULL == (child_int = H5B2__protect_internal(hdr, new_parent, node_ptr, (uint16_t)(depth - 1),
-                                                            FALSE, H5AC__NO_FLAGS_SET)))
+                                                            false, H5AC__NO_FLAGS_SET)))
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node");
             child_class = H5AC_BT2_INT;
             child       = child_int;
 
             if (child_int->parent == old_parent) {
                 parent_ptr  = &child_int->parent;
-                update_deps = TRUE;
+                update_deps = true;
             } /* end if */
             else
                 assert(child_int->parent == new_parent);
@@ -1918,7 +1918,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
             H5B2_leaf_t *child_leaf;
 
             /* Protect child */
-            if (NULL == (child_leaf = H5B2__protect_leaf(hdr, new_parent, (H5B2_node_ptr_t *)node_ptr, FALSE,
+            if (NULL == (child_leaf = H5B2__protect_leaf(hdr, new_parent, (H5B2_node_ptr_t *)node_ptr, false,
                                                          H5AC__NO_FLAGS_SET)))
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node");
             child_class = H5AC_BT2_LEAF;
@@ -1926,7 +1926,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
 
             if (child_leaf->parent == old_parent) {
                 parent_ptr  = &child_leaf->parent;
-                update_deps = TRUE;
+                update_deps = true;
             } /* end if */
             else
                 assert(child_leaf->parent == new_parent);

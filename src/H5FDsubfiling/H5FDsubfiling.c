@@ -36,7 +36,7 @@
 static hid_t H5FD_SUBFILING_g = H5I_INVALID_HID;
 
 /* Whether the driver initialized MPI on its own */
-static bool H5FD_mpi_self_initialized = FALSE;
+static bool H5FD_mpi_self_initialized = false;
 
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
  * determine the amount of hdf5 address space in use and the high-water mark
@@ -291,7 +291,7 @@ H5FD_subfiling_init(void)
         int provided        = 0;
         int mpi_code;
 
-        if ((H5FD_SUBFILING_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), FALSE)) < 0)
+        if ((H5FD_SUBFILING_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), false)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID,
                                     "can't register subfiling VFD");
 
@@ -321,7 +321,7 @@ H5FD_subfiling_init(void)
             if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
                 H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code);
 
-            H5FD_mpi_self_initialized = TRUE;
+            H5FD_mpi_self_initialized = true;
 
             if (provided != required)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
@@ -527,7 +527,7 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
 {
     const H5FD_subfiling_config_t *config_ptr         = NULL;
     H5P_genplist_t                *plist              = NULL;
-    bool                           use_default_config = FALSE;
+    bool                           use_default_config = false;
     herr_t                         ret_value          = SUCCEED;
 
     /*NO TRACE*/
@@ -539,11 +539,11 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     if (H5FD_SUBFILING != H5P_peek_driver(plist))
-        use_default_config = TRUE;
+        use_default_config = true;
     else {
         config_ptr = H5P_peek_driver_info(plist);
         if (NULL == config_ptr)
-            use_default_config = TRUE;
+            use_default_config = true;
     }
 
     if (use_default_config) {
@@ -579,7 +579,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     config_out->magic       = H5FD_SUBFILING_FAPL_MAGIC;
     config_out->version     = H5FD_SUBFILING_CURR_FAPL_VERSION;
     config_out->ioc_fapl_id = H5I_INVALID_HID;
-    config_out->require_ioc = TRUE;
+    config_out->require_ioc = true;
 
     config_out->shared_cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
     config_out->shared_cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
@@ -588,7 +588,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     if ((h5_require_ioc = HDgetenv("H5_REQUIRE_IOC")) != NULL) {
         int value_check = atoi(h5_require_ioc);
         if (value_check == 0)
-            config_out->require_ioc = FALSE;
+            config_out->require_ioc = false;
     }
 
     /* Check if any MPI parameters were set on the FAPL */
@@ -720,7 +720,7 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
      * errors later.
      */
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id))) {
-        file->fail_to_encode = TRUE;
+        file->fail_to_encode = true;
     }
     else {
         if (sf_context->config_file_prefix) {
@@ -744,7 +744,7 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
      * a buffer.
      */
     if (ret_value > H5FD_SUBFILING_MAX_DRV_INFO_SIZE)
-        file->fail_to_encode = TRUE;
+        file->fail_to_encode = true;
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__subfiling_sb_size() */
@@ -998,14 +998,14 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
 
     assert(id_out_ptr != NULL);
 
-    if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (false == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a file access property list");
 
     plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id);
     if (NULL == plist_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "unable to get property list");
 
-    *id_out_ptr = H5P_copy_plist(plist_ptr, FALSE);
+    *id_out_ptr = H5P_copy_plist(plist_ptr, false);
     if (H5I_INVALID_HID == *id_out_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADTYPE, -1, "unable to copy file access property list");
 
@@ -1101,7 +1101,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t                  *driver    = NULL; /* VFD for file */
     H5P_genplist_t                *plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    bool                           bcasted_eof = FALSE;
+    bool                           bcasted_eof = false;
     int64_t                        sf_eof      = -1;
     int                            mpi_code; /* MPI return code */
     H5FD_t                        *ret_value = NULL;
@@ -1122,7 +1122,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     file_ptr->context_id     = -1;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
     file_ptr->ext_comm       = MPI_COMM_NULL;
-    file_ptr->fail_to_encode = FALSE;
+    file_ptr->fail_to_encode = false;
 
     /* Get the driver-specific file access properties */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1250,7 +1250,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast", mpi_code);
     }
 
-    bcasted_eof = TRUE;
+    bcasted_eof = true;
 
     if (sf_eof < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "lead MPI process failed to get file EOF");
@@ -1319,7 +1319,7 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
     }
 
-    file_ptr->fail_to_encode = FALSE;
+    file_ptr->fail_to_encode = false;
 
 done:
     free(file_ptr->file_path);
@@ -1544,7 +1544,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
     int64_t             *source_data_offset = NULL;
     int64_t             *sf_data_size       = NULL;
     int64_t             *sf_offset          = NULL;
-    bool                 rank0_bcast        = FALSE;
+    bool                 rank0_bcast        = false;
     int                  num_subfiles;
     herr_t               ret_value = SUCCEED;
 
@@ -2079,7 +2079,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
     else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
@@ -2089,8 +2089,8 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
     /* TODO: setup real support for vector I/O */
     if (file_ptr->fa.require_ioc) {
 
-        bool       extend_sizes = FALSE;
-        bool       extend_types = FALSE;
+        bool       extend_sizes = false;
+        bool       extend_types = false;
         int        k;
         size_t     size;
         H5FD_mem_t type;
@@ -2119,7 +2119,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
 
                 if (sizes[k] == 0) {
 
-                    extend_sizes = TRUE;
+                    extend_sizes = true;
                     size         = sizes[k - 1];
                 }
                 else {
@@ -2132,7 +2132,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
 
                 if (types[k] == H5FD_MEM_NOLIST) {
 
-                    extend_types = TRUE;
+                    extend_types = true;
                     type         = types[k - 1];
                 }
                 else {
@@ -2241,14 +2241,14 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
     else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
     /* Call the subfiling IOC write*/
     if (file_ptr->fa.require_ioc) {
 
-        bool       extend_sizes = FALSE;
-        bool       extend_types = FALSE;
+        bool       extend_sizes = false;
+        bool       extend_types = false;
         int        k;
         size_t     size;
         H5FD_mem_t type;
@@ -2277,7 +2277,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
 
                 if (sizes[k] == 0) {
 
-                    extend_sizes = TRUE;
+                    extend_sizes = true;
                     size         = sizes[k - 1];
                 }
                 else {
@@ -2290,7 +2290,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
 
                 if (types[k] == H5FD_MEM_NOLIST) {
 
-                    extend_types = TRUE;
+                    extend_types = true;
                     type         = types[k - 1];
                 }
                 else {
@@ -2408,8 +2408,8 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *      The lock type to apply depends on the parameter "rw":
- *          TRUE--opens for write: an exclusive lock
- *          FALSE--opens for read: a shared lock
+ *          true--opens for write: an exclusive lock
+ *          false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *
@@ -2829,8 +2829,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         int64_t *_io_block_len;
         int64_t  subfile_bytes = 0;
         int64_t  iovec_depth;
-        bool     is_first = FALSE;
-        bool     is_last  = FALSE;
+        bool     is_first = false;
+        bool     is_last  = false;
         size_t   output_offset;
 
         iovec_depth = curr_max_iovec_depth;
@@ -2857,7 +2857,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             int64_t num_full_stripes = iovec_depth;
 
             if (k == first_subfile) {
-                is_first = TRUE;
+                is_first = true;
 
                 /*
                  * Add partial segment length if not
@@ -2870,7 +2870,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             }
 
             if (k == last_subfile) {
-                is_last = TRUE;
+                is_last = true;
 
                 /*
                  * Add partial segment length if not
@@ -2885,7 +2885,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
 
             /* Account for subfiles with uniform segments */
             if (!is_first && !is_last) {
-                bool thin_uniform_section = FALSE;
+                bool thin_uniform_section = false;
 
                 if (last_subfile >= first_subfile) {
                     /*

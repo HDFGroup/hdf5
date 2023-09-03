@@ -71,7 +71,7 @@
  *
  * Purpose:     Check if an attribute is shared
  *
- * Return:      TRUE/FALSE/FAIL
+ * Return:      true/false/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -107,7 +107,7 @@ herr_t
 H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
 {
     H5A_t *attr;                     /* Attribute object for ID */
-    bool   api_ctx_pushed = FALSE;   /* Whether API context pushed */
+    bool   api_ctx_pushed = false;   /* Whether API context pushed */
     herr_t ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -119,7 +119,7 @@ H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
     /* Push API context */
     if (H5CX_push() < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set API context");
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Sanity check */
     assert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
@@ -129,7 +129,7 @@ H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count");
 
 done:
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context");
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -131,7 +131,7 @@ herr_t
 H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
 {
     H5EA_dblk_page_t *dblk_page = NULL;  /* Extensible array data block page */
-    bool              inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool              inserted  = false; /* Whether the header was inserted into cache */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -156,7 +156,7 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
     /* Cache the new extensible array data block page */
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, FAIL, "can't add extensible array data block page to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add data block page as child of 'top' proxy */
     if (hdr->top_proxy) {

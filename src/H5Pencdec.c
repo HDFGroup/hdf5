@@ -337,8 +337,8 @@ done:
  USAGE
     herr_t H5P__encode(plist, enc_all_prop, buf, nalloc)
         const H5P_genplist_t *plist;  IN: Property list to encode
-        bool enc_all_prop;  IN: Whether to encode all properties (TRUE),
-                or just non-default (i.e. changed) properties (FALSE).
+        bool enc_all_prop;  IN: Whether to encode all properties (true),
+                or just non-default (i.e. changed) properties (false).
         uint8_t *buf;    OUT: buffer to hold the encoded plist
         size_t *nalloc;  IN/OUT: size of buffer needed to encode plist
  RETURNS
@@ -359,7 +359,7 @@ H5P__encode(const H5P_genplist_t *plist, bool enc_all_prop, void *buf, size_t *n
     uint8_t          *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     int               idx;                   /* Index of property to start at */
     size_t            encode_size = 0;       /* Size of buffer needed to encode properties */
-    bool              encode      = TRUE;    /* Whether the property list should be encoded */
+    bool              encode      = true;    /* Whether the property list should be encoded */
     herr_t            ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -372,7 +372,7 @@ H5P__encode(const H5P_genplist_t *plist, bool enc_all_prop, void *buf, size_t *n
      * space is needed to encode a property.
      */
     if (NULL == p)
-        encode = FALSE;
+        encode = false;
 
     /* Encode property list description info */
     if (encode) {

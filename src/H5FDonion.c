@@ -235,7 +235,7 @@ H5FD_onion_init(void)
     FUNC_ENTER_NOAPI_NOERR
 
     if (H5I_VFL != H5I_get_type(H5FD_ONION_g))
-        H5FD_ONION_g = H5FD_register(&H5FD_onion_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_ONION_g = H5FD_register(&H5FD_onion_g, sizeof(H5FD_class_t), false);
 
     /* Set return value */
     ret_value = H5FD_ONION_g;
@@ -468,7 +468,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
     rec->logical_eof = file->logical_eof;
 
-    if ((TRUE == file->is_open_rw) && (H5FD__onion_merge_revision_index_into_archival_index(
+    if ((true == file->is_open_rw) && (H5FD__onion_merge_revision_index_into_archival_index(
                                            file->rev_index, &file->curr_rev_record.archival_index) < 0))
         HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, FAIL, "unable to update index to write");
 
@@ -486,7 +486,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write new revision record");
 
     file->onion_eof = phys_addr + size;
-    if (TRUE == file->align_history_on_pages)
+    if (true == file->align_history_on_pages)
         file->onion_eof = (file->onion_eof + (file->header.page_size - 1)) & (~(file->header.page_size - 1));
 
     /* Update history info to accommodate new revision */
@@ -656,7 +656,7 @@ H5FD__onion_get_legit_fapl_id(hid_t fapl_id)
 {
     if (H5P_DEFAULT == fapl_id)
         return H5P_FILE_ACCESS_DEFAULT;
-    else if (TRUE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    else if (true == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         return fapl_id;
     else
         return H5I_INVALID_HID;
@@ -758,7 +758,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "cannot write header to the backing onion file");
     file->onion_eof = (haddr_t)size;
-    if (TRUE == file->align_history_on_pages)
+    if (true == file->align_history_on_pages)
         file->onion_eof = (file->onion_eof + (hdr->page_size - 1)) & (~(hdr->page_size - 1));
 
     rec->archival_index.list = NULL;
@@ -884,7 +884,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
             HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "not a property list class");
 
         /* Create the new property list */
-        if ((fa->backing_fapl_id = H5P_create_id(pclass, TRUE)) < 0)
+        if ((fa->backing_fapl_id = H5P_create_id(pclass, true)) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, FAIL, "unable to create property list");
     }
 
@@ -1007,14 +1007,14 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         /* Set flags */
         if (fa->creation_flags & H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT) {
             file->header.flags |= H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT;
-            file->align_history_on_pages = TRUE;
+            file->align_history_on_pages = true;
         }
 
         /* Truncate and create everything as necessary */
         if (H5FD__onion_create_truncate_onion(file, filename, name_onion, file->recovery_file_name, flags,
                                               maxaddr) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to create/truncate onionized files");
-        file->is_open_rw = TRUE;
+        file->is_open_rw = true;
     }
     else {
 
@@ -1053,7 +1053,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags) {
                     hdr->flags |= H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT;
-                    file->align_history_on_pages = TRUE;
+                    file->align_history_on_pages = true;
                 }
 
                 if (HADDR_UNDEF == (canon_eof = H5FD_get_eof(file->original_file, H5FD_MEM_DEFAULT))) {
@@ -1106,7 +1106,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 }
 
                 file->onion_eof = (haddr_t)saved_size;
-                if (TRUE == file->align_history_on_pages)
+                if (true == file->align_history_on_pages)
                     file->onion_eof = (file->onion_eof + (hdr->page_size - 1)) & (~(hdr->page_size - 1));
 
                 rec->archival_index.list = NULL;
@@ -1139,7 +1139,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         if (H5FD__onion_ingest_header(&file->header, file->onion_file, 0) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get history header from backing store");
         file->align_history_on_pages =
-            (file->header.flags & H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT) ? TRUE : FALSE;
+            (file->header.flags & H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT) ? true : false;
 
         if (H5FD_ONION_HEADER_FLAG_WRITE_LOCK & file->header.flags) {
             /* Opening a file twice in write mode is an error */
@@ -1198,7 +1198,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     file->logical_eoa = 0;
 
     file->onion_eof = H5FD_get_eoa(file->onion_file, H5FD_MEM_DRAW);
-    if (TRUE == file->align_history_on_pages)
+    if (true == file->align_history_on_pages)
         file->onion_eof = (file->onion_eof + (file->header.page_size - 1)) & (~(file->header.page_size - 1));
 
     ret_value = (H5FD_t *)file;
@@ -1303,7 +1303,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
     file->curr_rev_record.parent_revision_num = file->curr_rev_record.revision_num;
     if (!new_open)
         file->curr_rev_record.revision_num += 1;
-    file->is_open_rw = TRUE;
+    file->is_open_rw = true;
 
 done:
     if (FAIL == ret_value) {
@@ -1384,7 +1384,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         page_readsize = (size_t)page_size - page_gap_head - page_gap_tail;
 
-        if (TRUE == file->is_open_rw && file->fa.revision_num != 0 &&
+        if (true == file->is_open_rw && file->fa.revision_num != 0 &&
             H5FD__onion_revision_index_find(file->rev_index, page_i, &entry_out)) {
             /* Page exists in 'live' revision index */
             if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
@@ -1477,7 +1477,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     assert(file->rev_index != NULL);
     assert((uint64_t)(offset + len) <= file->logical_eoa);
 
-    if (FALSE == file->is_open_rw)
+    if (false == file->is_open_rw)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Write not allowed if file not opened in write mode");
 
     if (0 == len)

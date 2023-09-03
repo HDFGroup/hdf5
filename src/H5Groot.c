@@ -127,8 +127,8 @@ H5G_mkroot(H5F_t *f, bool create_root)
     H5G_loc_t        root_loc;               /* Root location information */
     H5G_obj_create_t gcrt_info;              /* Root group object creation info */
     htri_t           stab_exists  = -1;      /* Whether the symbol table exists */
-    bool             sblock_dirty = FALSE;   /* Whether superblock was dirtied */
-    bool             path_init    = FALSE;   /* Whether path was initialized */
+    bool             sblock_dirty = false;   /* Whether superblock was dirtied */
+    bool             path_init    = false;   /* Whether path was initialized */
     herr_t           ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -182,7 +182,7 @@ H5G_mkroot(H5F_t *f, bool create_root)
                         "unable to decrement refcount on root group's object header");
 
         /* Mark superblock dirty, so root group info is flushed */
-        sblock_dirty = TRUE;
+        sblock_dirty = true;
 
         /* Create the root group symbol table entry */
         assert(!f->shared->sblock->root_ent);
@@ -245,7 +245,7 @@ H5G_mkroot(H5F_t *f, bool create_root)
      * present, so we don't need to check the superblock version.  We do this if
      * we have write access, the root entry has been allocated (i.e.
      * super_vers < 2) and the stab info is not already cached. */
-    if ((H5F_INTENT(f) & H5F_ACC_RDWR) && stab_exists != FALSE && f->shared->sblock->root_ent &&
+    if ((H5F_INTENT(f) & H5F_ACC_RDWR) && stab_exists != false && f->shared->sblock->root_ent &&
         f->shared->sblock->root_ent->type != H5G_CACHED_STAB) {
         H5O_stab_t stab; /* Symbol table */
 
@@ -266,13 +266,13 @@ H5G_mkroot(H5F_t *f, bool create_root)
             f->shared->sblock->root_ent->cache.stab.heap_addr  = stab.heap_addr;
 
             /* Mark superblock dirty, so root group info is flushed */
-            sblock_dirty = TRUE;
+            sblock_dirty = true;
         } /* end if */
     }     /* end if */
 
     /* Create the path names for the root group's entry */
     H5G__name_init(root_loc.path, "/");
-    path_init = TRUE;
+    path_init = true;
 
     f->shared->root_grp->shared->fo_count = 1;
     /* The only other open object should be the superblock extension, if it
@@ -373,7 +373,7 @@ H5G_root_loc(H5F_t *f, H5G_loc_t *loc)
     /* (but only for non-mounted files) */
     if (!H5F_is_mount(f)) {
         loc->oloc->file         = f;
-        loc->oloc->holding_file = FALSE;
+        loc->oloc->holding_file = false;
     } /* end if */
 
 done:

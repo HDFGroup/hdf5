@@ -647,7 +647,7 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
  *
  * \details H5is_library_terminating() queries whether the HDF5 library is in
  *          the process of shutting down.  The \p is_terminating flag will only
- *          be set to TRUE after shutdown starts, it will be FALSE before the
+ *          be set to true after shutdown starts, it will be false before the
  *          library has been initialized, while the library is initialized, and
  *          after it has been closed.  The value of \p is_terminating is
  *          undefined if this routine fails.
@@ -723,8 +723,8 @@ H5_DLL herr_t H5free_memory(void *mem);
  *          will later be freed internally by the HDF5 library.
  *
  *          The boolean \p clear parameter specifies whether the buffer should
- *          be initialized. If clear is \c TRUE, all bits in the buffer are to be
- *          set to 0 (zero); if clear is \c FALSE, the buffer will not be
+ *          be initialized. If clear is \c true, all bits in the buffer are to be
+ *          set to 0 (zero); if clear is \c false, the buffer will not be
  *          initialized.
  *
  *          This function is intended to have the semantics of malloc() and

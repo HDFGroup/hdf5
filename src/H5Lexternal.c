@@ -156,7 +156,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     if (intent == H5F_ACC_DEFAULT)
         intent = H5F_INTENT(loc.oloc->file);
 
-    if ((fapl_id == H5P_DEFAULT) && ((fapl_id = H5F_get_access_plist(loc.oloc->file, FALSE)) < 0))
+    if ((fapl_id == H5P_DEFAULT) && ((fapl_id = H5F_get_access_plist(loc.oloc->file, false)) < 0))
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "can't get parent's file access property list");
 
     /* Get callback_info */
@@ -228,7 +228,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
         HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object");
 
     /* Get an ID for the external link's object */
-    if ((ext_obj_id = H5VL_wrap_register(opened_type, ext_obj, TRUE)) < 0)
+    if ((ext_obj_id = H5VL_wrap_register(opened_type, ext_obj, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register external link object");
 
     /* Set return value */
