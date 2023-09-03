@@ -237,6 +237,12 @@ typedef int herr_t;
 /**
  * C99-style Boolean type. Successful return values are zero (false) or positive
  * (true). The typical true value is 1 but don't bet on it.
+ *
+ * \deprecated Now that we require C99, hbool_t is typedef'd to C99's bool
+ *             and hbool_t is considered deprecated. Due to its long-standing,
+ *             widespread use, we have no plans to remove the hbool_t typedef
+ *             from the public API, though we will probably switch to using
+ *             bool in the public API starting in the next major release of HDF5.
  * \attention Boolean functions cannot fail.
  */
 #include <stdbool.h>
