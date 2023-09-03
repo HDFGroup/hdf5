@@ -5702,7 +5702,6 @@ test_floattypes(hid_t file)
     hid_t         space    = H5I_INVALID_HID;
     const hsize_t size[2]  = {2, 5};
     size_t        i, j;
-    hsize_t       nelmts;
     size_t        precision, offset;
 
     HDputs("Testing float datatypes");
