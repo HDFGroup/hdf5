@@ -1590,7 +1590,7 @@ error:
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 static int
-test_direct_chunk_read_cache(hid_t file, hbool_t flush)
+test_direct_chunk_read_cache(hid_t file, bool flush)
 {
     hid_t   dataspace = -1, dataset = -1;
     hid_t   mem_space = -1;
@@ -2249,15 +2249,15 @@ main(void)
     /* Test direct chunk read */
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += test_direct_chunk_read_no_cache(file_id);
-    nerrors += test_direct_chunk_read_cache(file_id, TRUE);
-    nerrors += test_direct_chunk_read_cache(file_id, FALSE);
+    nerrors += test_direct_chunk_read_cache(file_id, true);
+    nerrors += test_direct_chunk_read_cache(file_id, false);
 #endif /* H5_HAVE_FILTER_DEFLATE */
     nerrors += test_read_unfiltered_dset(file_id);
     nerrors += test_read_unallocated_chunk(file_id);
 
     /* Loop over test configurations */
     for (config = 0; config < CONFIG_END; config++) {
-        hbool_t need_comma = FALSE;
+        bool need_comma = false;
 
         /* Check for invalid combinations */
         if ((config & CONFIG_REOPEN_FILE) && !(config & CONFIG_REOPEN_DSET))
@@ -2271,31 +2271,31 @@ main(void)
             if (need_comma)
                 printf(", ");
             printf("latest format");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         if (config & CONFIG_REOPEN_FILE) {
             if (need_comma)
                 printf(", ");
             printf("reopen file");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         else if (config & CONFIG_REOPEN_DSET) {
             if (need_comma)
                 printf(", ");
             printf("reopen dataset");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         if (config & CONFIG_DIRECT_WRITE) {
             if (need_comma)
                 printf(", ");
             printf("direct write");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         if (config & CONFIG_DIRECT_READ) {
             if (need_comma)
                 printf(", ");
             printf("direct read");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         printf(":\n");
         fflush(stdout);

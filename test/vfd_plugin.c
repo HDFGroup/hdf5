@@ -42,7 +42,7 @@ test_set_by_name(void)
     /* The null VFD should not be registered at the start of the test */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Register the null VFD by name */
@@ -54,7 +54,7 @@ test_set_by_name(void)
     /* The null VFD should be registered now */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (FALSE == is_registered)
+    if (false == is_registered)
         FAIL_PUTS_ERROR("NULL VFD was not registered");
 
     /* Unregister the null VFD */
@@ -70,7 +70,7 @@ test_set_by_name(void)
     /* The null VFD should not be registered now */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     PASSED();
@@ -109,7 +109,7 @@ test_set_by_value(void)
     /* The null VFD should not be registered at the start of the test */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Register the null VFD by value */
@@ -121,7 +121,7 @@ test_set_by_value(void)
     /* The null VFD should be registered now */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (FALSE == is_registered)
+    if (false == is_registered)
         FAIL_PUTS_ERROR("NULL VFD was not registered");
 
     /* Unregister the null VFD */
@@ -137,7 +137,7 @@ test_set_by_value(void)
     /* The null VFD should not be registered now */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     PASSED();
@@ -177,7 +177,7 @@ test_set_multi(void)
     /* The null VFD should not be registered at the start of the test */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Register the VFD multiple times */
@@ -191,7 +191,7 @@ test_set_multi(void)
     /* The null VFD should be registered now */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (FALSE == is_registered)
+    if (false == is_registered)
         FAIL_PUTS_ERROR("NULL VFD was not registered");
 
     /* Unregister the null VFD */
@@ -209,7 +209,7 @@ test_set_multi(void)
     /* The null VFD should not be registered now */
     if ((is_registered = H5FDis_driver_registered_by_name(NULL_VFD_NAME)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Repeat testing with the _by_value routines */
@@ -217,7 +217,7 @@ test_set_multi(void)
     /* The null VFD should not be registered at the start of the test */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     /* Register the VFD multiple times */
@@ -231,7 +231,7 @@ test_set_multi(void)
     /* The null VFD should be registered now */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (FALSE == is_registered)
+    if (false == is_registered)
         FAIL_PUTS_ERROR("NULL VFD was not registered");
 
     /* Unregister the null VFD */
@@ -249,7 +249,7 @@ test_set_multi(void)
     /* The null VFD should not be registered now */
     if ((is_registered = H5FDis_driver_registered_by_value(NULL_VFD_VALUE)) < 0)
         TEST_ERROR;
-    if (TRUE == is_registered)
+    if (true == is_registered)
         FAIL_PUTS_ERROR("NULL VFD is inappropriately registered");
 
     PASSED();

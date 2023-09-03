@@ -344,13 +344,13 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  * startup -- if unable to open either file or cannot load region, id, and key,
  * tests connecting with S3 will not be run
  */
-static int     s3_test_credentials_loaded               = 0;
-static char    s3_test_aws_region[16]                   = "";
-static char    s3_test_aws_access_key_id[64]            = "";
-static char    s3_test_aws_secret_access_key[128]       = "";
-static char    s3_test_aws_security_token[1024]         = "";
-static char    s3_test_bucket_url[S3_TEST_MAX_URL_SIZE] = "";
-static hbool_t s3_test_bucket_defined                   = FALSE;
+static int  s3_test_credentials_loaded               = 0;
+static char s3_test_aws_region[16]                   = "";
+static char s3_test_aws_access_key_id[64]            = "";
+static char s3_test_aws_secret_access_key[128]       = "";
+static char s3_test_aws_security_token[1024]         = "";
+static char s3_test_bucket_url[S3_TEST_MAX_URL_SIZE] = "";
+static bool s3_test_bucket_defined                   = false;
 
 /*---------------------------------------------------------------------------
  *
@@ -585,7 +585,7 @@ test_bytes_to_hex(void)
         const char          exp[17]; /* in size * 2 + 1 for null terminator */
         const unsigned char in[8];
         size_t              size;
-        hbool_t             lower;
+        bool                lower;
     };
 
     /************************
@@ -597,16 +597,16 @@ test_bytes_to_hex(void)
             "52F3000C9A",
             {82, 243, 0, 12, 154},
             5,
-            FALSE,
+            false,
         },
         {
             "009a0cf3005200", /* lowercase alphas */
             {0, 154, 12, 243, 0, 82, 0},
             7,
-            TRUE,
+            true,
         },
         {
-            "", {17, 63, 26, 56}, 0, FALSE, /* irrelevant */
+            "", {17, 63, 26, 56}, 0, false, /* irrelevant */
         },
     };
     int  i       = 0;
@@ -628,7 +628,7 @@ test_bytes_to_hex(void)
 
     /* dest cannot be null
      */
-    JSVERIFY(FAIL, H5FD_s3comms_bytes_to_hex(NULL, (const unsigned char *)"nada", 5, FALSE),
+    JSVERIFY(FAIL, H5FD_s3comms_bytes_to_hex(NULL, (const unsigned char *)"nada", 5, false),
              "destination cannot be null")
 
     PASSED();
@@ -666,7 +666,7 @@ test_hrb_init_request(void)
         const char *resource;
         const char *exp_res;
         const char *version;
-        hbool_t     ret_null;
+        bool        ret_null;
     };
 
     /************************
@@ -680,7 +680,7 @@ test_hrb_init_request(void)
             "/path/to/some/file",
             "/path/to/some/file",
             "HTTP/1.1",
-            FALSE,
+            false,
         },
         {
             "null verb substitutes to GET",
@@ -688,7 +688,7 @@ test_hrb_init_request(void)
             "/MYPATH/MYFILE.tiff",
             "/MYPATH/MYFILE.tiff",
             "HTTP/1.1",
-            FALSE,
+            false,
         },
         {
             "demonstrate non-GET verb",
@@ -696,7 +696,7 @@ test_hrb_init_request(void)
             "/MYPATH/MYFILE.tiff",
             "/MYPATH/MYFILE.tiff",
             "HTTP/1.1",
-            FALSE,
+            false,
         },
         {
             "slash prepended to resource path, if necessary",
@@ -704,7 +704,7 @@ test_hrb_init_request(void)
             "MYPATH/MYFILE.tiff",
             "/MYPATH/MYFILE.tiff",
             NULL,
-            FALSE,
+            false,
         },
         {
             "null resource path causes problem",
@@ -712,7 +712,7 @@ test_hrb_init_request(void)
             NULL,
             NULL,
             NULL,
-            TRUE,
+            true,
         },
     };
     struct testcase *C      = NULL;
@@ -725,7 +725,7 @@ test_hrb_init_request(void)
     for (i = 0; i < ncases; i++) {
         C   = &cases[i];
         req = H5FD_s3comms_hrb_init_request(C->verb, C->resource, C->version);
-        if (cases[i].ret_null == TRUE) {
+        if (cases[i].ret_null == true) {
             FAIL_IF(req != NULL);
         }
         else {
@@ -1711,7 +1711,7 @@ test_s3r_get_filesize(void)
 
     /* setup -- compose url to target resource
      */
-    if (FALSE == s3_test_bucket_defined) {
+    if (false == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
@@ -1762,7 +1762,7 @@ test_s3r_open(void)
     struct tm    *now = NULL;
     char          iso8601now[ISO8601_SIZE];
     s3r_t        *handle     = NULL;
-    hbool_t       curl_ready = FALSE;
+    bool          curl_ready = false;
     parsed_url_t *purl       = NULL;
 
     TESTING("s3r_open");
@@ -1773,7 +1773,7 @@ test_s3r_open(void)
         fflush(stdout);
         return 0;
     }
-    if (FALSE == s3_test_bucket_defined) {
+    if (false == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
@@ -1813,7 +1813,7 @@ test_s3r_open(void)
                                               S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
-    curl_ready = TRUE;
+    curl_ready = true;
 
     now = gmnow();
     FAIL_IF(now == NULL)
@@ -1907,7 +1907,7 @@ test_s3r_open(void)
     handle = NULL;
 
     curl_global_cleanup();
-    curl_ready = FALSE;
+    curl_ready = false;
 
     FAIL_IF(FAIL == H5FD_s3comms_free_purl(purl))
     purl = NULL;
@@ -1923,7 +1923,7 @@ error:
         H5FD_s3comms_s3r_close(handle);
     if (purl != NULL)
         H5FD_s3comms_free_purl(purl);
-    if (curl_ready == TRUE)
+    if (curl_ready == true)
         curl_global_cleanup();
 
     return -1;
@@ -1961,7 +1961,7 @@ test_s3r_read(void)
     char         url_raven[S3_TEST_MAX_URL_SIZE];
     char         buffer[S3COMMS_TEST_BUFFER_SIZE];
     s3r_t       *handle     = NULL;
-    hbool_t      curl_ready = FALSE;
+    bool         curl_ready = false;
     unsigned int i          = 0;
 
     TESTING("test_s3r_read");
@@ -1969,7 +1969,7 @@ test_s3r_read(void)
     /*
      * initial setup
      */
-    if (FALSE == s3_test_bucket_defined) {
+    if (false == s3_test_bucket_defined) {
         SKIPPED();
         HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
@@ -1977,7 +1977,7 @@ test_s3r_read(void)
     }
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
-    curl_ready = TRUE;
+    curl_ready = true;
     FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
                                               S3_TEST_RESOURCE_TEXT_PUBLIC));
 
@@ -2076,7 +2076,7 @@ test_s3r_read(void)
     handle = NULL;
 
     curl_global_cleanup();
-    curl_ready = FALSE;
+    curl_ready = false;
 
     PASSED();
     return 0;
@@ -2089,7 +2089,7 @@ error:
     if (handle != NULL)
         H5FD_s3comms_s3r_close(handle);
 
-    if (curl_ready == TRUE)
+    if (curl_ready == true)
         curl_global_cleanup();
 
     return -1;
@@ -2378,7 +2378,7 @@ test_uriencode(void)
     struct testcase {
         const char *str;
         size_t      s_len;
-        hbool_t     encode_slash;
+        bool        encode_slash;
         const char *expected;
     };
 
@@ -2389,37 +2389,37 @@ test_uriencode(void)
     struct testcase cases[]      = {{
                                    "/path/to/resource.jpg",
                                    21,
-                                   FALSE,
+                                   false,
                                    "/path/to/resource.jpg",
                                },
                                {
                                    "/path/to/resource.jpg",
                                    21,
-                                   TRUE,
+                                   true,
                                    "%2Fpath%2Fto%2Fresource.jpg",
                                },
                                {
                                    "string got_spaa  ces",
                                    20,
-                                   TRUE,
+                                   true,
                                    "string%20got_spaa%20%20ces",
                                },
                                {
                                    "sp ac~es/and-sl ash.encoded",
                                    27,
-                                   TRUE,
+                                   true,
                                    "sp%20ac~es%2Fand-sl%20ash.encoded",
                                },
                                {
                                    "sp ac~es/and-sl ash.unencoded",
                                    29,
-                                   FALSE,
+                                   false,
                                    "sp%20ac~es/and-sl%20ash.unencoded",
                                },
                                {
                                    "/path/to/resource.txt",
                                    0,
-                                   FALSE,
+                                   false,
                                    "",
 
                                }};
@@ -2453,9 +2453,9 @@ test_uriencode(void)
     dest = (char *)malloc(sizeof(char) * 15);
     assert(dest != NULL);
 
-    JSVERIFY(FAIL, H5FD_s3comms_uriencode(NULL, "word$", 5, FALSE, &dest_written),
+    JSVERIFY(FAIL, H5FD_s3comms_uriencode(NULL, "word$", 5, false, &dest_written),
              "destination cannot be NULL");
-    JSVERIFY(FAIL, H5FD_s3comms_uriencode(dest, NULL, 5, FALSE, &dest_written),
+    JSVERIFY(FAIL, H5FD_s3comms_uriencode(dest, NULL, 5, false, &dest_written),
              "source string cannot be NULL");
 
     free(dest);
@@ -2527,7 +2527,7 @@ main(void)
     }
     else {
         HDstrncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
-        s3_test_bucket_defined = TRUE;
+        s3_test_bucket_defined = true;
     }
 
     /* tests ordered roughly by dependence */

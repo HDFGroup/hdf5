@@ -557,9 +557,9 @@ error:
 int
 main(void)
 {
-    int     nerrors        = 0;
-    hid_t   fapl_id        = H5I_INVALID_HID;
-    hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
+    int   nerrors        = 0;
+    hid_t fapl_id        = H5I_INVALID_HID;
+    bool  api_ctx_pushed = false; /* Whether API context pushed */
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)
@@ -568,7 +568,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     nerrors += test_1(fapl_id);
     nerrors += test_2(fapl_id);
@@ -585,9 +585,9 @@ main(void)
     HDputs("All global heap tests passed.");
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     h5_cleanup(FILENAME, fapl_id);
     exit(EXIT_SUCCESS);
@@ -600,7 +600,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     HDputs("*** TESTS FAILED ***");
     exit(EXIT_FAILURE);

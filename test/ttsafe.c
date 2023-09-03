@@ -53,15 +53,15 @@ num_digits(int num)
 void
 tts_is_threadsafe(void)
 {
-    hbool_t is_ts;
-    hbool_t should_be;
+    bool is_ts;
+    bool should_be;
 
 #ifdef H5_HAVE_THREADSAFE
-    is_ts     = FALSE;
-    should_be = TRUE;
+    is_ts     = false;
+    should_be = true;
 #else  /* H5_HAVE_THREADSAFE */
-    is_ts     = TRUE;
-    should_be = FALSE;
+    is_ts     = true;
+    should_be = false;
 #endif /* H5_HAVE_THREADSAFE */
 
     if (H5is_library_threadsafe(&is_ts) != SUCCEED)

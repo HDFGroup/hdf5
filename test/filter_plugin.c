@@ -144,11 +144,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ hbool_t *are_same)
+compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ bool *are_same)
 {
     hsize_t i, j; /* index variables */
 
-    *are_same = TRUE;
+    *are_same = true;
 
     /* Check all the array values. This could optionally emit any
      * bad data, but it's not clear how that would help debugging.
@@ -156,7 +156,7 @@ compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ hbool_
     for (i = 0; i < sizes[0]; i++)
         for (j = 0; j < sizes[1]; j++)
             if (dset1[i][j] != dset2[i][j]) {
-                *are_same = FALSE;
+                *are_same = false;
                 return SUCCEED;
             }
 
@@ -176,19 +176,19 @@ compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ hbool_
 static herr_t
 ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
 {
-    hid_t   did           = -1;           /* Dataset ID                                   */
-    hid_t   dxpl_id       = -1;           /* Dataset xfer property list ID                */
-    hid_t   write_dxpl_id = -1;           /* Dataset xfer property list ID for writing    */
-    hid_t   sid           = -1;           /* Dataspace ID                                 */
-    void   *tconv_buf     = NULL;         /* Temporary conversion buffer                  */
-    int   **orig          = NULL;         /* Data written to the dataset                  */
-    int   **read          = NULL;         /* Data read from the dataset                   */
-    size_t  r, c;                         /* Data rows and columns                        */
-    size_t  hs_r, hs_c, hs_offr, hs_offc; /* Hypserslab sizes and offsets                 */
-    size_t  i, j;                         /* Local index variables                        */
-    int     n = 0;                        /* Value written to point array                 */
-    hbool_t are_same;                     /* Output from dataset compare function         */
-    int  ***save_array = NULL;            /* (Global) array where the final data go       */
+    hid_t  did           = -1;           /* Dataset ID                                   */
+    hid_t  dxpl_id       = -1;           /* Dataset xfer property list ID                */
+    hid_t  write_dxpl_id = -1;           /* Dataset xfer property list ID for writing    */
+    hid_t  sid           = -1;           /* Dataspace ID                                 */
+    void  *tconv_buf     = NULL;         /* Temporary conversion buffer                  */
+    int  **orig          = NULL;         /* Data written to the dataset                  */
+    int  **read          = NULL;         /* Data read from the dataset                   */
+    size_t r, c;                         /* Data rows and columns                        */
+    size_t hs_r, hs_c, hs_offr, hs_offc; /* Hypserslab sizes and offsets                 */
+    size_t i, j;                         /* Local index variables                        */
+    int    n = 0;                        /* Value written to point array                 */
+    bool   are_same;                     /* Output from dataset compare function         */
+    int ***save_array = NULL;            /* (Global) array where the final data go       */
 
     /* initialize */
     r = (size_t)sizes_g[0];
@@ -222,7 +222,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     TESTING("    filters (setup)");
 
     /* Check if all the filters are available */
-    if (H5Pall_filters_avail(dcpl_id) != TRUE)
+    if (H5Pall_filters_avail(dcpl_id) != true)
         TEST_ERROR;
 
     /* Create the dataset */
@@ -243,7 +243,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     /* The input buffer was calloc'd and has not been initialized yet */
     if (compare_2D_arrays(orig, read, sizes_g, &are_same) < 0)
         TEST_ERROR;
-    if (FALSE == are_same)
+    if (false == are_same)
         TEST_ERROR;
 
     PASSED();
@@ -278,7 +278,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     /* Check that the values read are the same as the values written */
     if (compare_2D_arrays(orig, read, sizes_g, &are_same) < 0)
         TEST_ERROR;
-    if (FALSE == are_same)
+    if (false == are_same)
         TEST_ERROR;
 
     PASSED();
@@ -306,7 +306,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     /* Check that the values read are the same as the values written */
     if (compare_2D_arrays(orig, read, sizes_g, &are_same) < 0)
         TEST_ERROR;
-    if (FALSE == are_same)
+    if (false == are_same)
         TEST_ERROR;
 
     PASSED();
@@ -330,7 +330,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     /* Check that the values read are the same as the values written */
     if (compare_2D_arrays(orig, read, sizes_g, &are_same) < 0)
         TEST_ERROR;
-    if (FALSE == are_same)
+    if (false == are_same)
         TEST_ERROR;
 
     PASSED();
@@ -366,7 +366,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     /* Check that the values read are the same as the values written */
     if (compare_2D_arrays(orig, read, sizes_g, &are_same) < 0)
         TEST_ERROR;
-    if (FALSE == are_same)
+    if (false == are_same)
         TEST_ERROR;
 
     PASSED();
@@ -642,7 +642,7 @@ test_dataset_read_with_filters(hid_t fid)
     TESTING("dataset read I/O with deflate filter");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != TRUE)
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != true)
         TEST_ERROR;
 
     if ((did = H5Dopen2(fid, DSET_DEFLATE_NAME, H5P_DEFAULT)) < 0)
@@ -960,7 +960,7 @@ test_path_api_calls(void)
 
     HDputs("Testing access to the filter path table");
 
-    if (H5Zfilter_avail(FILTER1_ID) != TRUE)
+    if (H5Zfilter_avail(FILTER1_ID) != true)
         TEST_ERROR;
 
     /* Set the number of paths to create for this test.
@@ -1443,7 +1443,7 @@ main(void)
     /* ENSURE THAT WRITING TO DATASETS AND CREATING GROUPS WORKS       */
     /*******************************************************************/
     /* Test with old & new format groups */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         hid_t my_fapl_id;
 
         /* Testing setup */

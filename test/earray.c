@@ -136,13 +136,13 @@ struct earray_test_param_t {
 
 /* Flush depend test context */
 typedef struct earray_flush_depend_ctx_t {
-    hbool_t base_obj;      /* Flag to indicate that base object has been flushed */
-    hbool_t idx0_obj;      /* Flag to indicate that index 0's object has been flushed */
-    hbool_t idx0_elem;     /* Flag to indicate that index 0's element has been flushed */
-    hbool_t idx1_obj;      /* Flag to indicate that index 1's object has been flushed */
-    hbool_t idx1_elem;     /* Flag to indicate that index 1's element has been flushed */
-    hbool_t idx10000_obj;  /* Flag to indicate that index 10000's object has been flushed */
-    hbool_t idx10000_elem; /* Flag to indicate that index 10000's element has been flushed */
+    bool base_obj;      /* Flag to indicate that base object has been flushed */
+    bool idx0_obj;      /* Flag to indicate that index 0's object has been flushed */
+    bool idx0_elem;     /* Flag to indicate that index 0's element has been flushed */
+    bool idx1_obj;      /* Flag to indicate that index 1's object has been flushed */
+    bool idx1_elem;     /* Flag to indicate that index 1's element has been flushed */
+    bool idx10000_obj;  /* Flag to indicate that index 10000's object has been flushed */
+    bool idx10000_elem; /* Flag to indicate that index 10000's element has been flushed */
 } earray_flush_depend_ctx_t;
 
 /* Extensible array test cache object */
@@ -2299,7 +2299,7 @@ main(void)
     unsigned            nerrors = 0;            /* Cumulative error count */
     time_t              curr_time;              /* Current time, for seeding random number generator */
     int                 ExpressMode;            /* Test express value */
-    hbool_t             api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool                api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Reset library */
     h5_reset();
@@ -2314,7 +2314,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Seed random #'s */
     curr_time = HDtime(NULL);
@@ -2475,9 +2475,9 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     if (nerrors)
         goto error;
@@ -2498,7 +2498,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return 1;
 } /* end main() */

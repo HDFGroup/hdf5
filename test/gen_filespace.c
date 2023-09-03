@@ -26,8 +26,8 @@ const char *FILENAMES[] = {
 
 #define DATASET   "dset"
 #define NUM_ELMTS 100
-#define FALSE     0
-#define TRUE      1
+#define false 0
+#define true 1
 
 /*
  * Compile and run this program in the trunk to generate
@@ -59,7 +59,7 @@ main(void)
     j = 0;
     for (fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES;
          fs_strategy++) {
-        for (fs_persist = FALSE; fs_persist <= TRUE; fs_persist++) {
+        for (fs_persist = false; fs_persist <= true; fs_persist++) {
 
             if (fs_persist && fs_strategy >= H5F_FSPACE_STRATEGY_AGGR)
                 continue;

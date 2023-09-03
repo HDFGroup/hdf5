@@ -19554,11 +19554,11 @@ test_link_iterate_hard_links(void)
         goto error;
     }
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     if ((dset_dspace =
-             generate_random_dataspace(LINK_ITER_HARD_LINKS_TEST_DSET_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+             generate_random_dataspace(LINK_ITER_HARD_LINKS_TEST_DSET_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
     for (i = 0; i < LINK_ITER_HARD_LINKS_TEST_NUM_LINKS; i++) {
@@ -20686,11 +20686,11 @@ test_link_iterate_mixed_links(void)
         goto error;
     }
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     if ((dset_dspace =
-             generate_random_dataspace(LINK_ITER_MIXED_LINKS_TEST_DSET_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+             generate_random_dataspace(LINK_ITER_MIXED_LINKS_TEST_DSET_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
     if ((dset_id = H5Dcreate2(group_id, LINK_ITER_MIXED_LINKS_TEST_HARD_LINK_NAME, dset_dtype, dset_dspace,
@@ -21158,11 +21158,11 @@ test_link_iterate_invalid_params(void)
         goto error;
     }
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     if ((dset_dspace =
-             generate_random_dataspace(LINK_ITER_INVALID_PARAMS_TEST_DSET_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+             generate_random_dataspace(LINK_ITER_INVALID_PARAMS_TEST_DSET_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
     if ((dset_id = H5Dcreate2(group_id, LINK_ITER_INVALID_PARAMS_TEST_HARD_LINK_NAME, dset_dtype, dset_dspace,
@@ -21810,11 +21810,11 @@ test_link_visit_hard_links_no_cycles(void)
         goto error;
     }
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     if ((dset_dspace = generate_random_dataspace(LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_DSET_SPACE_RANK, NULL,
-                                                 NULL, FALSE)) < 0)
+                                                 NULL, false)) < 0)
         TEST_ERROR;
 
     for (i = 0; i < LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_SUBGROUPS; i++) {
@@ -23044,11 +23044,11 @@ test_link_visit_mixed_links_no_cycles(void)
         goto error;
     }
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     if ((fspace_id = generate_random_dataspace(LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_DSET_SPACE_RANK, NULL,
-                                               NULL, FALSE)) < 0)
+                                               NULL, false)) < 0)
         TEST_ERROR;
 
     if ((dset_id = H5Dcreate2(subgroup1, LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_DSET_NAME, dset_dtype,
@@ -25104,11 +25104,11 @@ test_link_visit_invalid_params(void)
         goto error;
     }
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     if ((fspace_id = generate_random_dataspace(LINK_VISIT_INVALID_PARAMS_TEST_DSET_SPACE_RANK, NULL, NULL,
-                                               FALSE)) < 0)
+                                               false)) < 0)
         TEST_ERROR;
 
     if ((dset_id = H5Dcreate2(subgroup1, LINK_VISIT_INVALID_PARAMS_TEST_DSET_NAME, dset_dtype, fspace_id,
@@ -26071,7 +26071,7 @@ error:
 static herr_t
 link_visit_hard_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
-    hbool_t is_subgroup_link;
+    bool    is_subgroup_link;
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     size_t  test_iteration;
@@ -26174,7 +26174,7 @@ done:
 static herr_t
 link_visit_soft_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
-    hbool_t is_subgroup_link;
+    bool    is_subgroup_link;
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     size_t  test_iteration;
@@ -26288,7 +26288,7 @@ static herr_t
 link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                        void *op_data)
 {
-    hbool_t is_subgroup_link;
+    bool    is_subgroup_link;
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     size_t  test_iteration;
@@ -26559,7 +26559,7 @@ done:
 static herr_t
 link_visit_hard_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
-    hbool_t is_subgroup_link;
+    bool    is_subgroup_link;
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     size_t  test_iteration;
@@ -26662,7 +26662,7 @@ done:
 static herr_t
 link_visit_soft_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
-    hbool_t is_subgroup_link;
+    bool    is_subgroup_link;
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     size_t  test_iteration;
@@ -26775,7 +26775,7 @@ done:
 static herr_t
 link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
-    hbool_t is_subgroup_link;
+    bool    is_subgroup_link;
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     size_t  test_iteration;

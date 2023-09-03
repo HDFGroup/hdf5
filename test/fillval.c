@@ -2605,7 +2605,7 @@ main(int argc, char *argv[])
     int      nerrors = 0, argno, test_contig = 1, test_chunk = 1, test_compact = 1;
     hid_t    fapl = (-1), fapl2 = (-1); /* File access property lists */
     unsigned new_format;                /* Whether to use the new format or not */
-    hbool_t  driver_is_default_compatible;
+    bool     driver_is_default_compatible;
 
     if (argc >= 2) {
         test_contig = test_chunk = test_compact = 0;
@@ -2642,7 +2642,7 @@ main(int argc, char *argv[])
         TEST_ERROR;
 
     /* Loop over using new group format */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         hid_t my_fapl;
 
         /* Set the FAPL for the type of format */

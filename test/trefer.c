@@ -1305,7 +1305,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     H5E_END_TRY
 
     if (dset1 < 0) {
-        VERIFY(libver_high <= H5F_LIBVER_V110, TRUE, "H5Dcreate2");
+        VERIFY(libver_high <= H5F_LIBVER_V110, true, "H5Dcreate2");
 
         ret = H5Sclose(sid1);
         CHECK(ret, FAIL, "H5Sclose");
@@ -1603,7 +1603,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
         tri_ret = H5Sis_regular_hyperslab(sid2);
         CHECK(tri_ret, FAIL, "H5Sis_regular_hyperslab");
-        VERIFY(tri_ret, TRUE, "H5Sis_regular_hyperslab Result");
+        VERIFY(tri_ret, true, "H5Sis_regular_hyperslab Result");
         ret = H5Sget_regular_hyperslab(sid2, start, stride, count, block);
         CHECK(ret, FAIL, "H5Sget_regular_hyperslab");
         VERIFY(start[0], (hsize_t)1, "Hyperslab Coordinates");
@@ -1762,7 +1762,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
 
     if (dset1 < 0) {
 
-        VERIFY(libver_high <= H5F_LIBVER_V110, TRUE, "H5Dcreate2");
+        VERIFY(libver_high <= H5F_LIBVER_V110, true, "H5Dcreate2");
 
         ret = H5Sclose(sid1);
         CHECK(ret, FAIL, "H5Sclose");

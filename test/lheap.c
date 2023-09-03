@@ -51,8 +51,8 @@ main(void)
     int         i, j;                   /* miscellaneous counters   */
     char        buf[1024];              /* the value to store       */
     const char *s;                      /* value to read            */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
-    hbool_t     driver_is_default_compatible;
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    bool        driver_is_default_compatible;
 
     /* Reset library */
     h5_reset();
@@ -61,7 +61,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /*
      * Test writing to the heap...
@@ -200,9 +200,9 @@ main(void)
         TEST_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     HDputs("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
@@ -218,7 +218,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return EXIT_FAILURE;
 }

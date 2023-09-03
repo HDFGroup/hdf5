@@ -109,13 +109,13 @@ abort_intercept(int H5_ATTR_UNUSED sig)
 #ifdef H5_HAVE_WIN32_API
 /* Turns off the modal dialog that is raised when the Windows CRT calls abort().
  *
- * Returning TRUE here lets Windows know that we've handled the abort() and that there
+ * Returning true here lets Windows know that we've handled the abort() and that there
  * is no need to alert the user with a modal dialog box.
  */
 int
 handle_crt_abort(int reportType, char *message, int *returnValue)
 {
-    return TRUE;
+    return true;
 }
 #endif
 

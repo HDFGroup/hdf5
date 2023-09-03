@@ -1919,7 +1919,7 @@ test_compat(void)
     size_t      off;                  /* Offset of compound field         */
     hid_t       mtid;                 /* Datatype ID for field            */
     int         i;                    /* Index variables                  */
-    hbool_t     driver_is_default_compatible;
+    bool     driver_is_default_compatible;
     herr_t      ret; /* Generic return value             */
 
     /* Output message about test being performed */

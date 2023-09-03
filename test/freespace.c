@@ -276,10 +276,10 @@ TEST_sect_free(H5FS_section_info_t *sect)
 
 /*
  * Determine if the section can be shrunk and set _udata accordingly
- *	if _udata passed in is NULL, return FALSE
+ *	if _udata passed in is NULL, return false
  *	Otherwise:
- *		if section's address+size is the end of file, return TRUE
- *		otherwise return FALSE
+ *		if section's address+size is the end of file, return true
+ *		otherwise return false
  */
 static herr_t
 TEST_sect_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
@@ -289,15 +289,15 @@ TEST_sect_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     haddr_t                    end, eoa;
 
     if (can_shrink == NULL)
-        return FALSE;
+        return false;
 
     end = sect->sect_info.addr + sect->sect_info.size;
     eoa = TEST_get_eoa();
 
     if (end == eoa)
-        *can_shrink = TRUE;
+        *can_shrink = true;
     else
-        *can_shrink = FALSE;
+        *can_shrink = false;
 
     return (htri_t)*can_shrink;
 } /* TEST_sect_can_shrink() */
@@ -317,11 +317,11 @@ TEST_sect_shrinking(H5FS_section_info_t **_sect, void *_udata)
         if (TEST_sect_free((H5FS_section_info_t *)*sect) < 0)
             TEST_ERROR;
         *sect = NULL;
-        return TRUE;
+        return true;
     } /* end if */
 
 error:
-    return FALSE;
+    return false;
 }
 
 /*
@@ -593,7 +593,7 @@ test_fs_sect_add(hid_t fapl)
     TEST_free_section_t *sect_node  = NULL;
     unsigned             init_flags = 0;
     h5_stat_size_t       file_size = 0, tmp_file_size = 0, fr_meta_size = 0;
-    unsigned             can_shrink = FALSE;
+    unsigned             can_shrink = false;
 
     TESTING("adding a section via H5FS_sect_add() to free-space: test 1");
 
@@ -936,7 +936,7 @@ test_fs_sect_find(hid_t fapl)
 
     TEST_free_section_t *sect_node1 = NULL, *sect_node2, *sect_node3 = NULL, *sect_node4 = NULL;
     TEST_free_section_t *node;
-    htri_t               node_found = FALSE;
+    htri_t               node_found = false;
     unsigned             init_flags = 0;
 
     TESTING("H5FS_sect_find(): free-space is empty");
@@ -1320,7 +1320,7 @@ test_fs_sect_merge(hid_t fapl)
 
     TEST_free_section_t *sect_node1 = NULL, *sect_node2 = NULL, *sect_node3 = NULL, *sect_node4 = NULL;
     unsigned             init_flags = 0;
-    htri_t               node_found = FALSE;
+    htri_t               node_found = false;
     TEST_free_section_t *node;
 
     TESTING("the merge of sections when H5FS_sect_add() to free-space: test 1");
@@ -1798,8 +1798,8 @@ test_fs_sect_shrink(hid_t fapl)
 
     TEST_free_section_t *sect_node1 = NULL, *sect_node2 = NULL;
     unsigned             init_flags = 0;
-    unsigned             can_shrink = FALSE;
-    htri_t               node_found = FALSE;
+    unsigned             can_shrink = false;
+    htri_t               node_found = false;
     TEST_free_section_t *node;
 
     TESTING("shrinking of sections when H5FS_sect_add() to free-space: test 1");
@@ -1839,7 +1839,7 @@ test_fs_sect_shrink(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50,
                    TEST_FSPACE_SECT_TYPE_NEW, H5FS_SECT_LIVE);
 
-    can_shrink = FALSE;
+    can_shrink = false;
     if (H5FS_sect_add(f, frsp, (H5FS_section_info_t *)sect_node1, H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
         FAIL_STACK_ERROR;
 
@@ -1874,7 +1874,7 @@ test_fs_sect_shrink(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE,
                    H5FS_SECT_LIVE);
 
-    can_shrink = FALSE;
+    can_shrink = false;
     if (H5FS_sect_add(f, frsp, (H5FS_section_info_t *)sect_node1, H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
         FAIL_STACK_ERROR;
 
@@ -2505,7 +2505,7 @@ test_fs_sect_extend(hid_t fapl)
     if ((status = H5FS_sect_try_extend(f, frsp, (haddr_t)TEST_SECT_SIZE80, (hsize_t)TEST_SECT_SIZE20,
                                        (hsize_t)TEST_SECT_SIZE40, 0, NULL)) < 0)
         FAIL_STACK_ERROR;
-    if (FALSE == status)
+    if (false == status)
         TEST_ERROR;
 
     /* Succeed in extending the block: free space info is decremented accordingly */
@@ -2582,7 +2582,7 @@ test_fs_sect_extend(hid_t fapl)
     if ((status = H5FS_sect_try_extend(f, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20,
                                        (hsize_t)TEST_SECT_SIZE50, 0, NULL)) < 0)
         FAIL_STACK_ERROR;
-    if (TRUE == status)
+    if (true == status)
         TEST_ERROR;
 
     /* Not able to extend the block: free space info remains the same */
@@ -2656,7 +2656,7 @@ test_fs_sect_extend(hid_t fapl)
     if ((status = H5FS_sect_try_extend(f, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20,
                                        (hsize_t)TEST_SECT_SIZE30, 0, NULL)) < 0)
         TEST_ERROR;
-    if (FALSE == status)
+    if (false == status)
         TEST_ERROR;
 
     /* Succeed in extending the block: total free space is decreased but other info remains the same */
@@ -2731,7 +2731,7 @@ test_fs_sect_extend(hid_t fapl)
     if ((status = H5FS_sect_try_extend(f, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE15,
                                        (hsize_t)TEST_SECT_SIZE40, 0, NULL)) < 0)
         TEST_ERROR;
-    if (TRUE == status)
+    if (true == status)
         TEST_ERROR;
 
     /* Not able to extend the block: free space manager info remains the same */
@@ -2876,7 +2876,7 @@ main(void)
 {
     hid_t    fapl           = -1;    /* File access property list for data files */
     unsigned nerrors        = 0;     /* Cumulative error count */
-    hbool_t  api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool     api_ctx_pushed = false; /* Whether API context pushed */
 
     h5_reset();
 
@@ -2888,7 +2888,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* make sure alignment is not set for tests to succeed */
     if (H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)1) < 0) {
@@ -2913,9 +2913,9 @@ main(void)
     HDputs("All free-space tests passed.");
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     h5_cleanup(FILENAME, fapl);
     exit(EXIT_SUCCESS);
@@ -2929,7 +2929,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     exit(EXIT_FAILURE);
 } /* main() */

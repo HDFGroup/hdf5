@@ -48,7 +48,7 @@ main(void)
     uint8_t  rbuf[1024];             /* Buffer for reading */
     uint8_t  buf[1024];              /* Buffer for holding the expected data */
     char    *driver         = NULL;  /* VFD string (from env variable) */
-    hbool_t  api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool     api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Testing setup */
     h5_reset();
@@ -77,7 +77,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Get H5F_t * to internal file structure */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -98,9 +98,9 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     return EXIT_SUCCESS;
 
@@ -113,7 +113,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return EXIT_FAILURE;
 } /* end main() */

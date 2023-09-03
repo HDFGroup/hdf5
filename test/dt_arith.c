@@ -298,9 +298,9 @@ static int without_hardware_g = 0;
          *00000111,..., until 11111111.*/                                                                    \
         memset(tmp1, 0, SRC_SIZE);                                                                           \
         memset(tmp2, 0, SRC_SIZE);                                                                           \
-        H5T__bit_set(tmp2, SRC_PREC - 1, (size_t)1, TRUE); /*the negative value*/                            \
+        H5T__bit_set(tmp2, SRC_PREC - 1, (size_t)1, true); /*the negative value*/                            \
         for (n = 0; n < SRC_MANT_DIG - 1; n++) {                                                             \
-            H5T__bit_set(tmp1, n, (size_t)1, TRUE); /*turn on 1 bit each time*/                              \
+            H5T__bit_set(tmp1, n, (size_t)1, true); /*turn on 1 bit each time*/                              \
             CHANGE_ORDER(tmp1, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                          \
             memcpy(buf_p, tmp1, SRC_SIZE);                                                                   \
             memcpy(saved_p, tmp1, SRC_SIZE);                                                                 \
@@ -309,7 +309,7 @@ static int without_hardware_g = 0;
             saved_p += SRC_SIZE;                                                                             \
                                                                                                              \
             /*negative values*/                                                                              \
-            H5T__bit_set(tmp2, n, (size_t)1, TRUE);                                                          \
+            H5T__bit_set(tmp2, n, (size_t)1, true);                                                          \
             CHANGE_ORDER(tmp2, SRC_ORDR, SRC_SIZE);                                                          \
             memcpy(buf_p, tmp2, SRC_SIZE);                                                                   \
             memcpy(saved_p, tmp2, SRC_SIZE);                                                                 \
@@ -344,7 +344,7 @@ static int without_hardware_g = 0;
         buf_p = BUF;                                                                                         \
                                                                                                              \
         /* +0 */                                                                                             \
-        H5T__bit_set(value, (size_t)0, SRC_PREC, FALSE);                                                     \
+        H5T__bit_set(value, (size_t)0, SRC_PREC, false);                                                     \
         memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                              \
         buf_p += SRC_SIZE;                                                                                   \
                                                                                                              \
@@ -352,7 +352,7 @@ static int without_hardware_g = 0;
             if (n == 1) {                                                                                    \
                 memset(value, 0, SRC_SIZE * sizeof(unsigned char));                                          \
                 /* -0 */                                                                                     \
-                H5T__bit_set(value, (size_t)(SRC_PREC - 1), (size_t)1, TRUE);                                \
+                H5T__bit_set(value, (size_t)(SRC_PREC - 1), (size_t)1, true);                                \
                 CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                     \
                 memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                      \
                 CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/         \
@@ -360,21 +360,21 @@ static int without_hardware_g = 0;
             }                                                                                                \
                                                                                                              \
             /* +/-infinity */                                                                                \
-            H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 1), SRC_PREC - SRC_MANT_DIG, TRUE);                  \
+            H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 1), SRC_PREC - SRC_MANT_DIG, true);                  \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                         \
             memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                          \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/             \
             buf_p += SRC_SIZE;                                                                               \
                                                                                                              \
             /* +/-SNaN */                                                                                    \
-            H5T__bit_set(value, (size_t)0, (size_t)1, TRUE);                                                 \
+            H5T__bit_set(value, (size_t)0, (size_t)1, true);                                                 \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                         \
             memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                          \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/             \
             buf_p += SRC_SIZE;                                                                               \
                                                                                                              \
             /* +/-QNaN */                                                                                    \
-            H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 2), (size_t)1, TRUE);                                \
+            H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 2), (size_t)1, true);                                \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                         \
             memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                          \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/             \
@@ -385,8 +385,8 @@ static int without_hardware_g = 0;
         free(value);                                                                                         \
     } while (0)
 
-static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
-static int     my_isnan(dtype_t type, void *val);
+static bool overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
+static int  my_isnan(dtype_t type, void *val);
 static int my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
                     size_t esize);
 
@@ -505,7 +505,7 @@ test_hard_query(void)
     TESTING("query functions of compiler conversion");
 
     /* Verify the conversion from int to float is a hard conversion. */
-    if (H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != TRUE) {
+    if (H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != true) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -515,7 +515,7 @@ test_hard_query(void)
      * is a soft conversion. */
     H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT,
                   (H5T_conv_t)((void (*)(void))H5T__conv_int_float));
-    if (H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != FALSE) {
+    if (H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != false) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -525,7 +525,7 @@ test_hard_query(void)
      * is a hard conversion. */
     H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT,
                 (H5T_conv_t)((void (*)(void))H5T__conv_int_float));
-    if (H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != TRUE) {
+    if (H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != true) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -567,7 +567,7 @@ expt_handle(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
 
     if (except_type == H5T_CONV_EXCEPT_RANGE_HI || except_type == H5T_CONV_EXCEPT_RANGE_LOW ||
         except_type == H5T_CONV_EXCEPT_TRUNCATE) {
-        if (*(hbool_t *)user_data)
+        if (*(bool *)user_data)
             *(signed char *)dst_buf = fill_value1;
         else
             *(int *)dst_buf = fill_value2;
@@ -601,7 +601,7 @@ static int
 test_particular_fp_integer(void)
 {
     hid_t          dxpl_id;
-    hbool_t        flag;
+    bool           flag;
     double         src_d = (double)SCHAR_MAX;
     signed char    dst_c;
     unsigned char *buf1 = NULL, *buf2 = NULL;
@@ -2627,7 +2627,7 @@ test_conv_int_2(void)
  *
  * Purpose:    Determines whether VAL points to NaN.
  *
- * Return:    TRUE or FALSE
+ * Return:    true or false
  *
  *-------------------------------------------------------------------------
  */
@@ -2698,7 +2698,7 @@ my_isnan(dtype_t type, void *val)
  *
  * Purpose:    Determines whether VAL points to +/-infinity.
  *
- * Return:    TRUE or FALSE
+ * Return:    true or false
  *
  *-------------------------------------------------------------------------
  */
@@ -3338,7 +3338,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     int                    fill_value = 9; /*fill value for conversion exception*/
     H5T_conv_except_func_t op;             /*returned callback function for conversion exception*/
     void                  *user_data;      /*returned pointer to user data passed in to the callback*/
-    hbool_t                except_set      = FALSE; /*whether user's exception handling is set*/
+    bool                   except_set      = false; /*whether user's exception handling is set*/
     size_t                 nelmts          = 0;     /*num values per test    */
     const size_t           max_fails       = 40;    /*max number of failures*/
     size_t                 fails_all_tests = 0;     /*number of failures    */
@@ -3580,7 +3580,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         if (H5Pset_type_conv_cb(dxpl_id, except_func, &fill_value) < 0)
             goto error;
         else
-            except_set = TRUE;
+            except_set = true;
 
         if (H5Pget_type_conv_cb(dxpl_id, &op, &user_data) < 0)
             goto error;
@@ -4522,16 +4522,16 @@ error:
  *              check if overflow occurs.
  *
  *
- * Return:    TRUE:           overflow happens
+ * Return:    true:           overflow happens
  *
- *              FALSE:          no overflow
+ *              false:          no overflow
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
 {
-    hbool_t       ret_value = FALSE;
+    bool          ret_value = false;
     hsize_t       expt;
     size_t        mant_digits = 0, expt_digits = 0, bias = 0;
     size_t        epos, mpos;
@@ -4556,18 +4556,18 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
     memcpy(bits, origin_bits, src_prec / 8 + 1);
 
     /*Check for special cases: +Inf, -Inf*/
-    if (H5T__bit_find(bits, mpos, mant_digits, H5T_BIT_LSB, TRUE) < 0) {
-        if (H5T__bit_find(bits, epos, expt_digits, H5T_BIT_LSB, FALSE) < 0) {
-            ret_value = TRUE;
+    if (H5T__bit_find(bits, mpos, mant_digits, H5T_BIT_LSB, true) < 0) {
+        if (H5T__bit_find(bits, epos, expt_digits, H5T_BIT_LSB, false) < 0) {
+            ret_value = true;
             goto done;
         }
     }
-    else if (H5T_NORM_NONE == norm && H5T__bit_find(bits, mpos, mant_digits - 1, H5T_BIT_LSB, TRUE) < 0 &&
-             H5T__bit_find(bits, epos, expt_digits, H5T_BIT_LSB, FALSE) < 0) {
+    else if (H5T_NORM_NONE == norm && H5T__bit_find(bits, mpos, mant_digits - 1, H5T_BIT_LSB, true) < 0 &&
+             H5T__bit_find(bits, epos, expt_digits, H5T_BIT_LSB, false) < 0) {
         /*This is a special case for the source of no implied mantissa bit.
          *If the exponent bits are all 1s and only the 1st bit of mantissa
          *is set to 1.  It's infinity. The Intel-Linux "long double" is this case.*/
-        ret_value = TRUE;
+        ret_value = true;
         goto done;
     }
 
@@ -4575,7 +4575,7 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
     expt = H5T__bit_get_d(bits, mant_digits, expt_digits) - bias;
 
     if (expt >= (dst_num_bits - 1)) {
-        ret_value = TRUE;
+        ret_value = true;
         goto done;
     }
 
@@ -4594,7 +4594,7 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
     indx = H5T__bit_find(mant_bits, (size_t)0, (size_t)(32 * 8), H5T_BIT_MSB, 1);
 
     if ((size_t)indx >= dst_num_bits)
-        ret_value = TRUE;
+        ret_value = true;
 
 done:
     return ret_value;
@@ -5140,7 +5140,7 @@ main(void)
      * Software tests
      *----------------------------------------------------------------------
      */
-    without_hardware_g = TRUE;
+    without_hardware_g = true;
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();

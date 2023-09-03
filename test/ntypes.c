@@ -445,7 +445,7 @@ test_compound_dtype2(hid_t file)
     if ((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if (H5Tequal(native_type, tid_m) != TRUE)
+    if (H5Tequal(native_type, tid_m) != true)
         TEST_ERROR;
 
     /* Verify the datatype of each field retrieved and converted */
@@ -711,7 +711,7 @@ test_compound_dtype(hid_t file)
     if ((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if (H5Tequal(native_type, tid2) != TRUE)
+    if (H5Tequal(native_type, tid2) != true)
         TEST_ERROR;
 
     /* Verify the datatype of each field retrieved and converted */
@@ -1982,7 +1982,7 @@ test_vlstr_dtype(hid_t file)
         "Now we are engaged in a great civil war,",
         "testing whether that nation or any nation so conceived and so dedicated can long endure."};
     char    *rdata[SPACE1_DIM1];                      /* Information read in */
-    hbool_t  rdata_alloc = FALSE;                     /* Whether the read data is allocated */
+    bool     rdata_alloc = false;                     /* Whether the read data is allocated */
     hid_t    dataset     = -1;                        /* Dataset ID            */
     hid_t    sid1        = -1;                        /* Dataspace ID            */
     hid_t    tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID            */
@@ -2036,7 +2036,7 @@ test_vlstr_dtype(hid_t file)
     /* Read dataset from disk */
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR;
-    rdata_alloc = TRUE;
+    rdata_alloc = true;
 
     /* Compare data read in */
     for (i = 0; i < SPACE1_DIM1; i++) {
@@ -2071,7 +2071,7 @@ test_vlstr_dtype(hid_t file)
     /* Free memory for rdata */
     for (i = 0; i < SPACE1_DIM1; i++)
         free(rdata[i]);
-    rdata_alloc = FALSE;
+    rdata_alloc = false;
 
     PASSED();
     return 0;
@@ -3052,10 +3052,10 @@ error:
 int
 main(void)
 {
-    hid_t   file, fapl;
-    int     nerrors = 0;
-    char    filename[1024];
-    hbool_t driver_is_parallel;
+    hid_t file, fapl;
+    int   nerrors = 0;
+    char  filename[1024];
+    bool  driver_is_parallel;
 
     h5_reset();
     fapl = h5_fileaccess();

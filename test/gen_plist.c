@@ -48,12 +48,12 @@ main(void)
     int                       little_endian;
     int                       word_length;
     H5AC_cache_config_t       my_cache_config       = {H5AC__CURR_CACHE_CONFIG_VERSION,
-                                           1 /*TRUE*/,
-                                           0 /*FALSE*/,
-                                           0 /*FALSE*/,
+                                           1 /*true*/,
+                                           0 /*false*/,
+                                           0 /*false*/,
                                            "temp",
-                                           1 /*TRUE*/,
-                                           0 /*FALSE*/,
+                                           1 /*true*/,
+                                           0 /*false*/,
                                            (2 * 2048 * 1024),
                                            0.3,
                                            (64 * 1024 * 1024),
@@ -62,7 +62,7 @@ main(void)
                                            H5C_incr__threshold,
                                            0.8,
                                            3.0,
-                                           1 /*TRUE*/,
+                                           1 /*true*/,
                                            (8 * 1024 * 1024),
                                            H5C_flash_incr__add_space,
                                            2.0,
@@ -70,14 +70,14 @@ main(void)
                                            H5C_decr__age_out_with_threshold,
                                            0.997,
                                            0.8,
-                                           1 /*TRUE*/,
+                                           1 /*true*/,
                                            (3 * 1024 * 1024),
                                            3,
-                                           0 /*FALSE*/,
+                                           0 /*false*/,
                                            0.2,
                                            (256 * 2048),
                                            H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY};
-    H5AC_cache_image_config_t my_cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE,
+    H5AC_cache_image_config_t my_cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, true, false,
                                                        -1};
 
     /* check endianness */
@@ -119,7 +119,7 @@ main(void)
     if ((ret = H5Pset_fill_value(dcpl1, H5T_STD_I32BE, &fill)) < 0)
         assert(ret > 0);
 
-    if ((ret = H5Pset_dset_no_attrs_hint(dcpl1, FALSE)) < 0)
+    if ((ret = H5Pset_dset_no_attrs_hint(dcpl1, false)) < 0)
         assert(ret > 0);
 
     max_size[0] = 100;
@@ -186,7 +186,7 @@ main(void)
     if ((ret = H5Pset_selection_io(dxpl1, H5D_SELECTION_IO_MODE_ON)) < 0)
         assert(ret > 0);
 
-    if ((ret = H5Pset_modify_write_buf(dxpl1, TRUE)) < 0)
+    if ((ret = H5Pset_modify_write_buf(dxpl1, true)) < 0)
         assert(ret > 0);
 
     if ((ret = encode_plist(dxpl1, little_endian, word_length, "testfiles/plist_files/dxpl_")) < 0)
@@ -233,7 +233,7 @@ main(void)
     if ((ret = encode_plist(lcpl1, little_endian, word_length, "testfiles/plist_files/def_lcpl_")) < 0)
         assert(ret > 0);
 
-    if ((ret = H5Pset_create_intermediate_group(lcpl1, 1 /*TRUE*/)) < 0)
+    if ((ret = H5Pset_create_intermediate_group(lcpl1, 1 /*true*/)) < 0)
         assert(ret > 0);
 
     if ((ret = encode_plist(lcpl1, little_endian, word_length, "testfiles/plist_files/lcpl_")) < 0)
@@ -394,7 +394,7 @@ main(void)
     if ((ret = H5Pset_sizes(fcpl1, 8, 4) < 0))
         assert(ret > 0);
 
-    if ((ret = H5Pset_file_space_strategy(fcpl1, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1)) < 0)
+    if ((ret = H5Pset_file_space_strategy(fcpl1, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1)) < 0)
         assert(ret > 0);
 
     if ((ret = H5Pset_file_space_page_size(fcpl1, (hsize_t)4096)) < 0)

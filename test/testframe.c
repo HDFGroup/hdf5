@@ -210,8 +210,8 @@ TestInfo(const char *ProgName)
 void
 TestParseCmdLine(int argc, char *argv[])
 {
-    hbool_t skipped_all = FALSE;
-    int     ret_code;
+    bool skipped_all = false;
+    int  ret_code;
 
     while ((void)argv++, --argc > 0) {
         if ((HDstrcmp(*argv, "-verbose") == 0) || (HDstrcmp(*argv, "-v") == 0)) {
@@ -258,7 +258,7 @@ TestParseCmdLine(int argc, char *argv[])
                 if (!skipped_all) {
                     for (Loop = 0; Loop < Index; Loop++)
                         Test[Loop].SkipFlag = 1;
-                    skipped_all = TRUE;
+                    skipped_all = true;
                 } /* end if */
                 SetTest(*argv, ONLYTEST);
             }

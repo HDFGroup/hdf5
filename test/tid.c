@@ -380,15 +380,15 @@ test_is_valid(void)
 
     /* Check that the ID is valid */
     tri_ret = H5Iis_valid(dtype);
-    VERIFY(tri_ret, TRUE, "H5Iis_valid");
-    if (tri_ret != TRUE)
+    VERIFY(tri_ret, true, "H5Iis_valid");
+    if (tri_ret != true)
         goto out;
 
     /* Artificially manipulate the reference counts so app_count is 0, and dtype
      * appears to be an internal id.  This takes advantage of the fact that
      * H5Ipkg is included.
      */
-    ret = H5I_inc_ref(dtype, FALSE);
+    ret = H5I_inc_ref(dtype, false);
     CHECK(ret, FAIL, "H5I_inc_ref");
     if (ret < 0)
         goto out;
@@ -399,8 +399,8 @@ test_is_valid(void)
 
     /* Check that dtype is invalid */
     tri_ret = H5Iis_valid(dtype);
-    VERIFY(tri_ret, FALSE, "H5Iis_valid");
-    if (tri_ret != FALSE)
+    VERIFY(tri_ret, false, "H5Iis_valid");
+    if (tri_ret != false)
         goto out;
 
     /* Close dtype and verify that it has been closed */
@@ -419,14 +419,14 @@ test_is_valid(void)
 
     /* Check that dtype is invalid */
     tri_ret = H5Iis_valid(dtype);
-    VERIFY(tri_ret, FALSE, "H5Iis_valid");
-    if (tri_ret != FALSE)
+    VERIFY(tri_ret, false, "H5Iis_valid");
+    if (tri_ret != false)
         goto out;
 
     /* Check that an id of -1 is invalid */
     tri_ret = H5Iis_valid((hid_t)-1);
-    VERIFY(tri_ret, FALSE, "H4Iis_valid");
-    if (tri_ret != FALSE)
+    VERIFY(tri_ret, false, "H4Iis_valid");
+    if (tri_ret != false)
         goto out;
 
     return 0;
@@ -602,7 +602,7 @@ typedef struct rct_obj_t {
     /* Whether we are currently freeing this object directly
      * through H5Idec_ref().
      */
-    hbool_t freeing;
+    bool freeing;
 
     /* Pointer to the master list of all objects */
     rct_obj_list_t *list;
@@ -660,7 +660,7 @@ rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
          * not free another object. We don't want to recursively free the
          * entire list when we free the first ID.
          */
-        obj->list->objects[i].freeing = TRUE;
+        obj->list->objects[i].freeing = true;
 
         /* Decrement the reference count on the object */
         ret = H5Idec_ref(obj->list->objects[i].id);
@@ -669,7 +669,7 @@ rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
             goto error;
 
         /* Unset the "freeing" flag */
-        obj->list->objects[i].freeing = FALSE;
+        obj->list->objects[i].freeing = false;
     }
 
     /* Verify the number of objects remaining in the master list is non-negative */
@@ -734,7 +734,7 @@ test_remove_clear_type(void)
 
             /* Object setup */
             objects[j].nfrees  = 0;
-            objects[j].freeing = FALSE;
+            objects[j].freeing = false;
             objects[j].list    = &obj_list;
 
             /* Register an ID for it */
@@ -753,13 +753,13 @@ test_remove_clear_type(void)
         }
 
         /******************************************
-         * Clear the type with force set to FALSE *
+         * Clear the type with force set to false *
          ******************************************/
 
-        /* Clear the type. Since force is FALSE, only
+        /* Clear the type. Since force is false, only
          * IDs with a reference count of 1 will be cleared.
          */
-        ret = H5Iclear_type(obj_type, FALSE);
+        ret = H5Iclear_type(obj_type, false);
         CHECK(ret, FAIL, "H5Iclear_type");
         if (ret == FAIL)
             goto error;
@@ -782,8 +782,8 @@ test_remove_clear_type(void)
             }
 
             /* No object should still be marked as "freeing" */
-            VERIFY(objects[j].freeing, FALSE, "object marked as freeing");
-            if (objects[j].freeing != FALSE)
+            VERIFY(objects[j].freeing, false, "object marked as freeing");
+            if (objects[j].freeing != false)
                 goto error;
         }
 
@@ -804,11 +804,11 @@ test_remove_clear_type(void)
             goto error;
 
         /*****************************************
-         * Clear the type with force set to TRUE *
+         * Clear the type with force set to true *
          *****************************************/
 
-        /* Clear the type. Since force is TRUE, all IDs will be cleared. */
-        ret = H5Iclear_type(obj_type, TRUE);
+        /* Clear the type. Since force is true, all IDs will be cleared. */
+        ret = H5Iclear_type(obj_type, true);
         CHECK(ret, FAIL, "H5Iclear_type");
         if (ret == FAIL)
             goto error;
@@ -822,8 +822,8 @@ test_remove_clear_type(void)
                 goto error;
 
             /* No object should still be marked as "freeing" */
-            VERIFY(objects[j].freeing, FALSE, "object marked as freeing");
-            if (objects[j].freeing != FALSE)
+            VERIFY(objects[j].freeing, false, "object marked as freeing");
+            if (objects[j].freeing != false)
                 goto error;
         }
 
@@ -1339,7 +1339,7 @@ test_future_ids(void)
     CHECK(ret, FAIL, "H5Pisa_class");
     if (FAIL == ret)
         goto error;
-    if (TRUE != ret)
+    if (true != ret)
         goto error;
 
     /* Verify that the application believes the ID is still a property list */

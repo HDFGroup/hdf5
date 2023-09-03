@@ -184,7 +184,7 @@ test_es_create(void)
     size_t   count;        /* # of events in set */
     size_t   num_errs;     /* # of failed events in set */
     uint64_t num_ops;      /* # of events inserted into set */
-    hbool_t  err_occurred; /* Whether an error has occurred */
+    bool     err_occurred; /* Whether an error has occurred */
 
     TESTING("event set creation");
 
@@ -200,7 +200,7 @@ test_es_create(void)
         FAIL_PUTS_ERROR("should be empty event set");
 
     /* Check for errors */
-    err_occurred = FALSE;
+    err_occurred = false;
     if (H5ESget_err_status(es_id, &err_occurred) < 0)
         TEST_ERROR;
     if (err_occurred)
@@ -311,12 +311,12 @@ error:
 static int
 test_es_get_requests(void)
 {
-    hid_t   es_id;            /* Event set ID */
-    hid_t   connector_ids[2]; /* Connector IDs */
-    void   *requests[2];      /* Requests */
-    int     req_targets[2];   /* Dummy targets for void * requests */
-    size_t  count;            /* # of events in set */
-    hbool_t op_failed;        /* Whether an operation failed (unused) */
+    hid_t  es_id;            /* Event set ID */
+    hid_t  connector_ids[2]; /* Connector IDs */
+    void  *requests[2];      /* Requests */
+    int    req_targets[2];   /* Dummy targets for void * requests */
+    size_t count;            /* # of events in set */
+    bool   op_failed;        /* Whether an operation failed (unused) */
 
     TESTING("event set get requests");
 

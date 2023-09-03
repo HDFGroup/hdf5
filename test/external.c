@@ -29,7 +29,7 @@
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 files_have_same_contents(const char *name1, const char *name2)
 {
     int     fd1 = 0;
@@ -38,7 +38,7 @@ files_have_same_contents(const char *name1, const char *name2)
     ssize_t n2  = 0;
     char    buf1[1024];
     char    buf2[1024];
-    hbool_t ret = FALSE; /* not equal until proven otherwise */
+    bool    ret = false; /* not equal until proven otherwise */
 
     if ((fd1 = HDopen(name1, O_RDONLY)) < 0)
         goto out;
@@ -61,7 +61,7 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
 
         if (n1 == 0 && n2 == 0) {
-            ret = TRUE;
+            ret = true;
             break;
         }
 
@@ -686,7 +686,7 @@ test_read_file_set(hid_t fapl)
         TEST_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the file and an initial group.  This causes messages about
@@ -830,7 +830,7 @@ test_write_file_set(hid_t fapl)
     } /* end for */
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the dataset */
@@ -933,7 +933,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the dcpl */
@@ -1030,7 +1030,7 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the dataset */
@@ -1124,7 +1124,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the dataset */
@@ -1275,7 +1275,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         TEST_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the file */
@@ -1386,7 +1386,7 @@ main(void)
     HDputs("");
 
     /* Test with old & new format groups */
-    for (latest_format = FALSE; latest_format <= TRUE; latest_format++) {
+    for (latest_format = false; latest_format <= true; latest_format++) {
         hid_t current_fapl_id = -1;
 
         /* Set the fapl for different file formats */

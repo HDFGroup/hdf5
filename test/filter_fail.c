@@ -91,7 +91,7 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned 
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
+test_filter_write(char *file_name, hid_t my_fapl, bool cache_enabled)
 {
     hid_t   file          = -1;
     hid_t   dataset       = -1;                 /* dataset ID */
@@ -129,7 +129,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         TEST_ERROR;
 
     /* Check that the filter was registered */
-    if (TRUE != H5Zfilter_avail(H5Z_FILTER_FAIL_TEST))
+    if (true != H5Zfilter_avail(H5Z_FILTER_FAIL_TEST))
         FAIL_STACK_ERROR;
 
     /* Enable the filter as mandatory */
@@ -375,7 +375,7 @@ main(void)
 
     /* The chunk cache is used so that the flushing of data chunks happens
      * during H5Dclose.  All values are default. */
-    nerrors += (test_filter_write(filename, fapl, TRUE) < 0 ? 1 : 0);
+    nerrors += (test_filter_write(filename, fapl, true) < 0 ? 1 : 0);
     nerrors += (test_filter_read(filename, fapl) < 0 ? 1 : 0);
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -386,7 +386,7 @@ main(void)
         TEST_ERROR;
 
     /* Run the test again. */
-    nerrors += (test_filter_write(filename, fapl, FALSE) < 0 ? 1 : 0);
+    nerrors += (test_filter_write(filename, fapl, false) < 0 ? 1 : 0);
     nerrors += (test_filter_read(filename, fapl) < 0 ? 1 : 0);
 
     /* Verify symbol table messages are cached */

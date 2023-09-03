@@ -40,7 +40,7 @@
 
 /* "Small" heap creation parameters */
 #define SMALL_DBLOCK_OVERHEAD      21          /* Overhead for direct blocks */
-#define SMALL_CHECKSUM_DBLOCKS     TRUE        /* Whether to checksum direct blocks */
+#define SMALL_CHECKSUM_DBLOCKS     true        /* Whether to checksum direct blocks */
 #define SMALL_MAN_WIDTH            4           /* Managed obj. table width */
 #define SMALL_MAN_START_BLOCK_SIZE 512         /* Managed obj. starting block size */
 #define SMALL_MAN_MAX_DIRECT_SIZE  (64 * 1024) /* Managed obj. max. direct block size */
@@ -52,7 +52,7 @@
 /* "Large" heap creation parameters */
 #define LARGE_DBLOCK_OVERHEAD 21         /* Overhead for direct blocks */
                                          /* (coincidentally the same size as for small direct blocks) */
-#define LARGE_CHECKSUM_DBLOCKS     FALSE /* Whether to checksum direct blocks */
+#define LARGE_CHECKSUM_DBLOCKS     false /* Whether to checksum direct blocks */
 #define LARGE_MAN_WIDTH            32    /* Managed obj. table width */
 #define LARGE_MAN_START_BLOCK_SIZE 4096  /* Managed obj. starting block size */
 #define LARGE_MAN_MAX_DIRECT_SIZE  (1024 * 1024) /* Managed obj. max. direct block size */
@@ -376,8 +376,8 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
 
     /* Check for tracking the heap's state */
     if (state) {
-        size_t  tiny_max_len;      /* Max. length of tiny objects */
-        hbool_t tiny_len_extended; /* Do tiny objects use two bytes for the length? */
+        size_t tiny_max_len;      /* Max. length of tiny objects */
+        bool   tiny_len_extended; /* Do tiny objects use two bytes for the length? */
 
         /* Check information about tiny objects */
         if (H5HF_get_tiny_info_test(fh, &tiny_max_len, &tiny_len_extended) < 0)
@@ -1845,7 +1845,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     h5_stat_size_t     file_size;                    /* File size, after deleting heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     fheap_heap_state_t state;                        /* State of fractal heap */
-    hbool_t            page = FALSE;                 /* Paged aggregation strategy or not */
+    bool               page = false;                 /* Paged aggregation strategy or not */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -1871,7 +1871,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         STACK_ERROR;
 
     if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
-        page = TRUE;
+        page = true;
 
     /* Ignore metadata tags in the file's cache */
     if (H5AC_ignore_tags(f) < 0)
@@ -1998,7 +1998,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     h5_stat_size_t     file_size;                    /* File size, after deleting heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     fheap_heap_state_t state;                        /* State of fractal heap */
-    hbool_t            page = FALSE;                 /* Paged aggregation strategy or not */
+    bool               page = false;                 /* Paged aggregation strategy or not */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2024,7 +2024,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         STACK_ERROR;
 
     if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
-        page = TRUE;
+        page = true;
 
     /* Ignore metadata tags in the file's cache */
     if (H5AC_ignore_tags(f) < 0)
@@ -2343,8 +2343,8 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     unsigned      deflate_level;                /* Deflation level */
     size_t        id_len;                       /* Size of fractal heap IDs */
     size_t        tiny_max_len;                 /* Max. length of tiny objects */
-    hbool_t       tiny_len_extended;            /* Do tiny objects use two bytes for the length? */
-    hbool_t       huge_ids_direct;              /* Are 'huge' objects directly accessed? */
+    bool          tiny_len_extended;            /* Do tiny objects use two bytes for the length? */
+    bool          huge_ids_direct;              /* Are 'huge' objects directly accessed? */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2383,11 +2383,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != (HEAP_ID_LEN - 1))
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != FALSE)
+    if (huge_ids_direct != false)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2412,11 +2412,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2446,11 +2446,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 27)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2491,11 +2491,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 7)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != FALSE)
+    if (huge_ids_direct != false)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2521,11 +2521,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2551,11 +2551,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2581,11 +2581,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 17)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2611,11 +2611,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 43)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -13413,8 +13413,8 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     fheap_heap_state_t state;                        /* State of fractal heap */
     unsigned           deflate_level;                /* Deflation level */
     size_t             old_actual_id_len = 0;        /* Old actual ID length */
-    hbool_t            huge_ids_direct;              /* Are 'huge' objects directly accessed? */
-    hbool_t            pline_init = FALSE;           /* Whether the I/O pipeline has been initialized */
+    bool               huge_ids_direct;              /* Are 'huge' objects directly accessed? */
+    bool               pline_init = false;           /* Whether the I/O pipeline has been initialized */
     /* Test description */
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove";
 
@@ -13425,7 +13425,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     deflate_level = 6;
     if (H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
         FAIL_STACK_ERROR;
-    pline_init = TRUE;
+    pline_init = true;
 
     /* Adjust actual ID length, if asking for IDs that can directly access 'huge' objects */
     if (cparam->id_len == 1) {
@@ -13454,15 +13454,15 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
     if (cparam->id_len == 1) {
-        if (huge_ids_direct != TRUE)
+        if (huge_ids_direct != true)
             TEST_ERROR;
     } /* end if */
     else if (tparam->actual_id_len >= 29) {
-        if (huge_ids_direct != TRUE)
+        if (huge_ids_direct != true)
             TEST_ERROR;
     } /* end if */
     else {
-        if (huge_ids_direct != FALSE)
+        if (huge_ids_direct != false)
             TEST_ERROR;
     } /* end else */
 
@@ -15488,13 +15488,13 @@ error:
  */
 /* Custom filter used to verify that the filters are actually called and do not
  * just silently fail */
-static hbool_t test_write_filter_called;
+static bool test_write_filter_called;
 static size_t
 test_write_filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
                   const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes,
                   size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
-    test_write_filter_called = TRUE;
+    test_write_filter_called = true;
 
     return nbytes;
 } /* end link_filter_filter */
@@ -15511,7 +15511,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     size_t             id_len;                       /* Size of fractal heap IDs */
     unsigned char      tiny_heap_id[HEAP_ID_LEN];    /* Heap ID for 'tiny' object */
     unsigned char      huge_heap_id[HEAP_ID_LEN];    /* Heap ID for 'huge' object */
-    hbool_t            id_changed  = FALSE;          /* Whether the heap ID changed */
+    bool               id_changed  = false;          /* Whether the heap ID changed */
     unsigned char     *rewrite_obj = NULL;           /* Pointer to re-write buffer for objects */
     fheap_heap_ids_t   keep_ids;                     /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                   /* Size of a file with an empty heap */
@@ -15549,8 +15549,8 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         /* Register and append custom filter */
         filter_class.version         = H5Z_CLASS_T_VERS;
         filter_class.id              = H5Z_FILTER_RESERVED + 43;
-        filter_class.encoder_present = TRUE;
-        filter_class.decoder_present = TRUE;
+        filter_class.encoder_present = true;
+        filter_class.decoder_present = true;
         filter_class.name            = "custom_fheap_filter";
         filter_class.can_apply       = NULL;
         filter_class.set_local       = NULL;
@@ -15559,7 +15559,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             TEST_ERROR;
         if (H5Z_append(&tmp_cparam.pline, H5Z_FILTER_RESERVED + 43, 0, (size_t)0, NULL) < 0)
             FAIL_STACK_ERROR;
-        test_write_filter_called = FALSE;
+        test_write_filter_called = false;
     } /* end if */
 
     /* Perform common file & heap open operations */
@@ -15621,7 +15621,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
         if (!test_write_filter_called)
             TEST_ERROR;
-        test_write_filter_called = FALSE;
+        test_write_filter_called = false;
     } /* end if */
 
     /* Re-open the file */
@@ -15959,8 +15959,8 @@ main(void)
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     int         ExpressMode;   /* Express testing level */
     const char *envval;        /* Environment variable */
-    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
     envval = HDgetenv(HDF5_DRIVER);
@@ -15968,7 +15968,7 @@ main(void)
         envval = "nomatch";
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -16003,7 +16003,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Allocate space for the shared objects */
     shared_obj_size_g = large_cparam.max_man_size + 256;
@@ -16037,12 +16037,12 @@ main(void)
 
         switch (v) {
             case 0:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 1:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 /* This is a fix for the daily test failure from the checkin for libver bounds. */
@@ -16074,22 +16074,22 @@ main(void)
                     TEST_ERROR;
                 break;
             case 2:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 3:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 4:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = pb_fapl;
                 break;
             case 5:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = pb_fapl;
                 break;
@@ -16528,9 +16528,9 @@ main(void)
         TEST_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     /* Clean up file used */
     h5_cleanup(FILENAME, def_fapl);
@@ -16554,7 +16554,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return 1;
 } /* end main() */

@@ -687,7 +687,7 @@ test_vfd_open(void)
         unsigned flags;
         int which_fapl;
         haddr_t maxaddr;
-        hbool_t might_use_other_driver;
+        bool might_use_other_driver;
     };
 
     /************************
@@ -701,7 +701,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_H5P_DEFAULT,
             MAXADDR,
-            TRUE,
+            true,
         },
         {
             "generic file access property list is invalid",
@@ -709,7 +709,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_UNCONFIGURED,
             MAXADDR,
-            TRUE,
+            true,
         },
         {
             "filename cannot be null",
@@ -717,7 +717,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "filename cannot be empty",
@@ -725,7 +725,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "file at filename must exist",
@@ -733,7 +733,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "read-write flag not supported",
@@ -741,7 +741,7 @@ test_vfd_open(void)
             H5F_ACC_RDWR,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "truncate flag not supported",
@@ -749,7 +749,7 @@ test_vfd_open(void)
             H5F_ACC_TRUNC,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "create flag not supported",
@@ -757,7 +757,7 @@ test_vfd_open(void)
             H5F_ACC_CREAT,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "EXCL flag not supported",
@@ -765,7 +765,7 @@ test_vfd_open(void)
             H5F_ACC_EXCL,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "maxaddr cannot be 0 (caught in `H5FD_open()`)",
@@ -773,7 +773,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             0,
-            FALSE,
+            false,
         },
     };
     unsigned i = 0;
@@ -820,7 +820,7 @@ test_vfd_open(void)
         }
         H5E_END_TRY
         if (NULL != fd) {
-            if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
+            if (true == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
                 fprintf(stderr, "\n!!!!! WARNING !!!!!\n"
                                 "    Successful open of file on local system "
                                 "with non-HDFS VFD.\n");
@@ -1379,10 +1379,10 @@ test_noops_and_autofails(void)
     H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
                            "write must fail")} H5E_END_TRY
 
-    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, FALSE), "truncate must fail")} H5E_END_TRY
+    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, false), "truncate must fail")} H5E_END_TRY
 
     H5E_BEGIN_TRY{
-        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY
+        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, true), "truncate must fail (closing)")} H5E_END_TRY
 
     /************
      * TEARDOWN *

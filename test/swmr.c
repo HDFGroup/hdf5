@@ -63,9 +63,9 @@ static int test_metadata_read_attempts(hid_t in_fapl);
 static int test_metadata_read_retry_info(hid_t in_fapl);
 
 /* Tests for H5Fstart_swmr_write() */
-static int test_start_swmr_write(hid_t in_fapl, hbool_t new_format);
-static int test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format);
-static int test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format);
+static int test_start_swmr_write(hid_t in_fapl, bool new_format);
+static int test_err_start_swmr_write(hid_t in_fapl, bool new_format);
+static int test_start_swmr_write_concur(hid_t in_fapl, bool new_format);
 static int test_start_swmr_write_stress_ohdr(hid_t in_fapl);
 static int test_start_swmr_write_persist_dapl(hid_t in_fapl);
 
@@ -90,16 +90,16 @@ static int test_file_lock_concur(hid_t fapl);
 static int test_file_lock_swmr_concur(hid_t fapl);
 
 /* Test file lock environment variable */
-static int test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override);
+static int test_file_locking(hid_t in_fapl, bool turn_locking_on, bool env_var_override);
 
 /* Tests for SWMR VFD flag */
 static int test_swmr_vfd_flag(void);
 
 /* Tests for H5Drefresh: concurrent access */
-static int test_refresh_concur(hid_t in_fapl, hbool_t new_format);
+static int test_refresh_concur(hid_t in_fapl, bool new_format);
 
 /* Tests for multiple opens of files and datasets with H5Drefresh() & H5Fstart_swmr_write(): same process */
-static int test_multiple_same(hid_t in_fapl, hbool_t new_format);
+static int test_multiple_same(hid_t in_fapl, bool new_format);
 
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
@@ -120,7 +120,7 @@ test_metadata_read_attempts(hid_t in_fapl)
     hid_t         fid = -1, fid1 = -1, fid2 = -1; /* File IDs                             */
     hid_t         driver_id    = -1;              /* ID for this VFD                      */
     unsigned long driver_flags = 0;               /* VFD feature flags                    */
-    hbool_t       compat_w_default_vfd;           /* current VFD compat w/ H5P_DEFAULT?   */
+    bool          compat_w_default_vfd;           /* current VFD compat w/ H5P_DEFAULT?   */
     unsigned      attempts;                       /* The # of read attempts               */
     char          filename[NAME_BUF_SIZE];        /* File name                            */
     herr_t        ret;                            /* Generic return value                 */
@@ -138,7 +138,7 @@ test_metadata_read_attempts(hid_t in_fapl)
         FAIL_STACK_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
         FAIL_STACK_ERROR;
-    compat_w_default_vfd = (driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE) ? TRUE : FALSE;
+    compat_w_default_vfd = (driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE) ? true : false;
 
     if (!compat_w_default_vfd) {
         SKIPPED();
@@ -1570,7 +1570,7 @@ error:
  *      Close the group and file
  */
 static int
-test_start_swmr_write(hid_t in_fapl, hbool_t new_format)
+test_start_swmr_write(hid_t in_fapl, bool new_format)
 {
     hid_t             fid       = -1;                  /* File ID */
     hid_t             fapl      = -1;                  /* File access property */
@@ -1938,7 +1938,7 @@ error:
  *              --fail to enable SWMR due to superblock version not 3
  */
 static int
-test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
+test_err_start_swmr_write(hid_t in_fapl, bool new_format)
 {
     hid_t  fid      = -1;           /* File ID */
     hid_t  fid2     = -1;           /* File ID */
@@ -2401,7 +2401,7 @@ error:
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
 static int
-test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
+test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, bool new_format)
 {
     if (new_format) {
         TESTING("H5Fstart_swmr_write()--concurrent access for latest format");
@@ -2418,7 +2418,7 @@ test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
 #else  /* !defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 static int
-test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
+test_start_swmr_write_concur(hid_t in_fapl, bool new_format)
 {
     hid_t fid = -1, fid1 = -1, fid2 = -1; /* File IDs */
     hid_t fapl;                           /* File access property list */
@@ -4716,7 +4716,7 @@ test_file_lock_same(hid_t in_fapl)
     /* Set locking in the fapl */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl, true, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -5213,7 +5213,7 @@ test_file_lock_concur(hid_t in_fapl)
     /* Set locking in the fapl */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl, true, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -5606,7 +5606,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
     /* Set locking in the fapl */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl, true, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -6596,7 +6596,7 @@ error:
 **
 *****************************************************************/
 static int
-test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override)
+test_file_locking(hid_t in_fapl, bool turn_locking_on, bool env_var_override)
 {
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
     if (turn_locking_on && env_var_override)
@@ -6636,18 +6636,18 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
         TEST_ERROR;
 
     /* Set locking in the fapl */
-    if (H5Pset_file_locking(fapl, turn_locking_on ? TRUE : FALSE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl, turn_locking_on ? true : false, true) < 0)
         TEST_ERROR;
 
     /* If requested, set the environment variable */
     if (env_var_override) {
-        if (HDsetenv(HDF5_USE_FILE_LOCKING, turn_locking_on ? "FALSE" : "TRUE", TRUE) < 0)
+        if (HDsetenv(HDF5_USE_FILE_LOCKING, turn_locking_on ? "FALSE" : "TRUE", true) < 0)
             TEST_ERROR;
         if (H5F__reparse_file_lock_variable_test() < 0)
             TEST_ERROR;
     }
     else {
-        if (HDsetenv(HDF5_USE_FILE_LOCKING, "", TRUE) < 0)
+        if (HDsetenv(HDF5_USE_FILE_LOCKING, "", true) < 0)
             TEST_ERROR;
         if (H5F__reparse_file_lock_variable_test() < 0)
             TEST_ERROR;
@@ -6803,7 +6803,7 @@ test_different_lock_flags(hid_t in_fapl)
         TEST_ERROR;
 
     /* Set locking in the fapl */
-    if (H5Pset_file_locking(fapl_id, TRUE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl_id, true, true) < 0)
         TEST_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -6818,7 +6818,7 @@ test_different_lock_flags(hid_t in_fapl)
         TEST_ERROR;
 
     /* Unset locking in the fapl */
-    if (H5Pset_file_locking(fapl_id, FALSE, FALSE) < 0)
+    if (H5Pset_file_locking(fapl_id, false, false) < 0)
         TEST_ERROR;
 
     /* Open the test file with different flags (should FAIL) */
@@ -7073,7 +7073,7 @@ error:
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
 static int
-test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
+test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, bool new_format)
 {
     if (new_format) {
         TESTING("H5Drefresh()--concurrent access for latest format");
@@ -7090,7 +7090,7 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
 #else  /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
 
 static int
-test_refresh_concur(hid_t in_fapl, hbool_t new_format)
+test_refresh_concur(hid_t in_fapl, bool new_format)
 {
     hid_t fid = H5I_INVALID_HID;   /* File ID */
     hid_t fapl;                    /* File access property list */
@@ -7403,7 +7403,7 @@ error:
  * opens of files and datasets.
  */
 static int
-test_multiple_same(hid_t in_fapl, hbool_t new_format)
+test_multiple_same(hid_t in_fapl, bool new_format)
 {
     hid_t   fid = -1, fid1 = -1, fid2 = -1, fid3 = -1; /* File IDs */
     hid_t   fapl;                                      /* File access property list */
@@ -7728,12 +7728,12 @@ error:
 int
 main(void)
 {
-    int     nerrors      = 0;               /* The # of errors */
-    hid_t   fapl         = H5I_INVALID_HID; /* File access property list ID */
-    char   *driver       = NULL;            /* VFD string (from env variable) */
-    char   *lock_env_var = NULL;            /* file locking env var pointer */
-    hbool_t use_file_locking;               /* read from env var */
-    hbool_t file_locking_enabled = FALSE;   /* Checks if the file system supports locks */
+    int   nerrors      = 0;               /* The # of errors */
+    hid_t fapl         = H5I_INVALID_HID; /* File access property list ID */
+    char *driver       = NULL;            /* VFD string (from env variable) */
+    char *lock_env_var = NULL;            /* file locking env var pointer */
+    bool  use_file_locking;               /* read from env var */
+    bool  file_locking_enabled = false;   /* Checks if the file system supports locks */
 
     /* Testing setup */
     h5_reset();
@@ -7753,9 +7753,9 @@ main(void)
      */
     lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
-        use_file_locking = FALSE;
+        use_file_locking = false;
     else
-        use_file_locking = TRUE;
+        use_file_locking = true;
 
     /* Check if file locking is enabled on this file system */
     if (use_file_locking)
@@ -7770,10 +7770,10 @@ main(void)
 #ifdef OUT
     nerrors += test_bug_refresh(fapl);
 #endif
-    nerrors += test_refresh_concur(fapl, TRUE);
-    nerrors += test_refresh_concur(fapl, FALSE);
-    nerrors += test_multiple_same(fapl, TRUE);
-    nerrors += test_multiple_same(fapl, FALSE);
+    nerrors += test_refresh_concur(fapl, true);
+    nerrors += test_refresh_concur(fapl, false);
+    nerrors += test_multiple_same(fapl, true);
+    nerrors += test_multiple_same(fapl, false);
 
     /* Tests on H5Pget/set_metadata_read_attempts() and H5Fget_metadata_read_retry_info() */
     nerrors += test_metadata_read_attempts(fapl);
@@ -7785,12 +7785,12 @@ main(void)
      *   H5Fcreate(write, latest format) or  H5Fcreate(SWMR write, non-latest-format)
      *   --both result in v3 superblock and latest version support
      */
-    nerrors += test_start_swmr_write(fapl, TRUE);
-    nerrors += test_start_swmr_write(fapl, FALSE);
-    nerrors += test_err_start_swmr_write(fapl, TRUE);
-    nerrors += test_err_start_swmr_write(fapl, FALSE);
-    nerrors += test_start_swmr_write_concur(fapl, TRUE);
-    nerrors += test_start_swmr_write_concur(fapl, FALSE);
+    nerrors += test_start_swmr_write(fapl, true);
+    nerrors += test_start_swmr_write(fapl, false);
+    nerrors += test_err_start_swmr_write(fapl, true);
+    nerrors += test_err_start_swmr_write(fapl, false);
+    nerrors += test_start_swmr_write_concur(fapl, true);
+    nerrors += test_start_swmr_write_concur(fapl, false);
     nerrors += test_start_swmr_write_stress_ohdr(fapl);
     nerrors += test_start_swmr_write_persist_dapl(fapl);
 
@@ -7838,10 +7838,10 @@ main(void)
      * so they should be run last.
      */
     if (use_file_locking && file_locking_enabled) {
-        nerrors += test_file_locking(fapl, TRUE, TRUE);
-        nerrors += test_file_locking(fapl, TRUE, FALSE);
-        nerrors += test_file_locking(fapl, FALSE, TRUE);
-        nerrors += test_file_locking(fapl, FALSE, FALSE);
+        nerrors += test_file_locking(fapl, true, true);
+        nerrors += test_file_locking(fapl, true, false);
+        nerrors += test_file_locking(fapl, false, true);
+        nerrors += test_file_locking(fapl, false, false);
     }
 
     if (nerrors)

@@ -29,8 +29,8 @@
 #define VERBO_HI   9 /* High    */
 
 /* Turn off verbose reporting by default */
-#define VERBOSE_MED (FALSE)
-#define VERBOSE_HI  (FALSE)
+#define VERBOSE_MED (false)
+#define VERBOSE_HI  (false)
 
 /* Use %ld to print the value because long should cover most cases. */
 /* Used to make certain a return value _is_not_ a value */
@@ -280,12 +280,12 @@ int   print_func(const char *format, ...);
 int   TestErrPrintf(const char *format, ...);
 hid_t h5_fileaccess(void);
 /* Functions that will replace components of a FAPL */
-herr_t  h5_get_vfd_fapl(hid_t fapl_id);
-herr_t  h5_get_libver_fapl(hid_t fapl_id);
-char   *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
-char   *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
-hbool_t h5_using_default_driver(const char *drv_name);
-herr_t  h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible);
+herr_t h5_get_vfd_fapl(hid_t fapl_id);
+herr_t h5_get_libver_fapl(hid_t fapl_id);
+char  *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+char  *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
+bool   h5_using_default_driver(const char *drv_name);
+herr_t h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
 
 #ifdef H5_HAVE_PARALLEL
 char *getenv_all(MPI_Comm comm, int root, const char *name);

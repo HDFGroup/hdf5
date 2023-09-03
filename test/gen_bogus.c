@@ -23,12 +23,12 @@
 #define FILENAME "tbogus.h5"
 #endif /* H5O_ENABLE_BOGUS */
 
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-#define FALSE 0
-#endif /* FALSE */
+#ifndef true
+#define true 1
+#endif /* true */
+#ifndef false
+#define false 0
+#endif /* false */
 
 #ifdef H5O_ENABLE_BOGUS
 

@@ -115,7 +115,7 @@ static herr_t _close_chunking_ids(unsigned min_dset, unsigned max_dset, hid_t *d
                                   hid_t *filespace_ids, hid_t *dataset_ids, hid_t *memspace_id);
 
 static herr_t populate_filepath(const char *dirname, const char *_basename, hid_t fapl_id, char *path_out,
-                                hbool_t h5suffix);
+                                bool h5suffix);
 
 static hid_t create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *names,
                                          const struct mt_opts *opts);
@@ -125,15 +125,15 @@ static hid_t create_mirroring_split_fapl(const char *_basename, struct mirrortes
  *
  * Purpose:    Given a directory name and a base name, concatenate the two and
  *             run h5fixname() to get the "actual" path to the intended target.
- *             `h5suffix' should be FALSE to keep the base name unaltered;
- *             TRUE will append the '.h5' h5suffix to the basename...
- *             FALSE -> h5fixname_no_suffix(), TRUE -> h5fixname()
+ *             `h5suffix' should be false to keep the base name unaltered;
+ *             true will append the '.h5' h5suffix to the basename...
+ *             false -> h5fixname_no_suffix(), true -> h5fixname()
  *             <h5fixname_prefix> / <dirname> / <basename> <h5prefix?>
  *
  * ----------------------------------------------------------------------------
  */
 static herr_t
-populate_filepath(const char *dirname, const char *basename, hid_t fapl_id, char *path_out, hbool_t h5suffix)
+populate_filepath(const char *dirname, const char *basename, hid_t fapl_id, char *path_out, bool h5suffix)
 {
     char *path = NULL;
 
@@ -148,7 +148,7 @@ populate_filepath(const char *dirname, const char *basename, hid_t fapl_id, char
                    basename) > H5FD_SPLITTER_PATH_MAX)
         TEST_ERROR;
 
-    if (h5suffix == TRUE) {
+    if (h5suffix == true) {
         if (h5_fixname(path, fapl_id, path_out, H5FD_SPLITTER_PATH_MAX) == NULL)
             TEST_ERROR;
     }
@@ -184,10 +184,10 @@ build_paths(const char *basename, H5FD_splitter_vfd_config_t *splitter_config,
     if (NULL == (baselogname = calloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
         TEST_ERROR;
 
-    if (populate_filepath(MIRROR_RW_DIR, basename, splitter_config->rw_fapl_id, names->rw, TRUE) < 0)
+    if (populate_filepath(MIRROR_RW_DIR, basename, splitter_config->rw_fapl_id, names->rw, true) < 0)
         TEST_ERROR;
 
-    if (populate_filepath(MIRROR_WO_DIR, basename, splitter_config->wo_fapl_id, names->wo, TRUE) < 0)
+    if (populate_filepath(MIRROR_WO_DIR, basename, splitter_config->wo_fapl_id, names->wo, true) < 0)
         TEST_ERROR;
 
     if (basename == NULL || *basename == 0)
@@ -195,7 +195,7 @@ build_paths(const char *basename, H5FD_splitter_vfd_config_t *splitter_config,
     if (HDsnprintf(baselogname, H5FD_SPLITTER_PATH_MAX, "%s_err.log", basename) > H5FD_SPLITTER_PATH_MAX)
         TEST_ERROR;
 
-    if (populate_filepath(MIRROR_WO_DIR, baselogname, splitter_config->wo_fapl_id, names->log, FALSE) < 0)
+    if (populate_filepath(MIRROR_WO_DIR, baselogname, splitter_config->wo_fapl_id, names->log, false) < 0)
         TEST_ERROR;
 
     free(baselogname);
@@ -1217,7 +1217,7 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
      */
     splitter_config->magic          = H5FD_SPLITTER_MAGIC;
     splitter_config->version        = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
-    splitter_config->ignore_wo_errs = FALSE;
+    splitter_config->ignore_wo_errs = false;
     splitter_config->rw_fapl_id     = H5I_INVALID_HID;
     splitter_config->wo_fapl_id     = H5I_INVALID_HID;
 

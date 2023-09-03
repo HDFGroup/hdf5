@@ -104,15 +104,15 @@ setup_parameters(int argc, char *const argv[], options_t *opts)
 int
 main(int argc, char *argv[])
 {
-    pid_t   childpid = 0;
-    pid_t   mypid, tmppid;
-    int     child_status;
-    int     child_wait_option = 0;
-    int     ret_value         = 0;
-    int     child_ret_value;
-    hbool_t send_wait = 0;
-    hid_t   fapl      = -1; /* File access property list */
-    hid_t   fid       = -1; /* File ID */
+    pid_t childpid = 0;
+    pid_t mypid, tmppid;
+    int   child_status;
+    int   child_wait_option = 0;
+    int   ret_value         = 0;
+    int   child_ret_value;
+    bool  send_wait = 0;
+    hid_t fapl      = -1; /* File access property list */
+    hid_t fid       = -1; /* File ID */
 
     if (setup_parameters(argc, argv, &UC_opts) < 0) {
         Hgoto_error(1);

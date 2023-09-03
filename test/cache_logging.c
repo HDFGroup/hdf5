@@ -32,20 +32,20 @@ static const char *FILENAME[] = {"cache_logging", NULL};
 static herr_t
 test_logging_api(void)
 {
-    hid_t   fapl = -1;
-    hbool_t is_enabled;
-    hbool_t is_enabled_out;
-    hbool_t start_on_access;
-    hbool_t start_on_access_out;
-    char   *location = NULL;
-    size_t  size;
+    hid_t  fapl = -1;
+    bool   is_enabled;
+    bool   is_enabled_out;
+    bool   start_on_access;
+    bool   start_on_access_out;
+    char  *location = NULL;
+    size_t size;
 
-    hid_t   fid = -1;
-    hid_t   gid = -1;
-    hbool_t is_currently_logging;
-    char    group_name[12];
-    char    filename[1024];
-    int     i;
+    hid_t fid = -1;
+    hid_t gid = -1;
+    bool  is_currently_logging;
+    char  group_name[12];
+    char  filename[1024];
+    int   i;
 
     TESTING("metadata cache log api calls");
 
@@ -53,8 +53,8 @@ test_logging_api(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Set up metadata cache logging */
-    is_enabled      = TRUE;
-    start_on_access = FALSE;
+    is_enabled      = true;
+    start_on_access = false;
     if (H5Pset_mdc_log_options(fapl, is_enabled, LOG_LOCATION, start_on_access) < 0)
         TEST_ERROR;
 
@@ -67,8 +67,8 @@ test_logging_api(void)
     /* Check to make sure that the property list getter returns the correct
      * location string buffer size;
      */
-    is_enabled_out      = FALSE;
-    start_on_access_out = TRUE;
+    is_enabled_out      = false;
+    start_on_access_out = true;
     location            = NULL;
     size                = 999;
     if (H5Pget_mdc_log_options(fapl, &is_enabled_out, location, &size, &start_on_access_out) < 0)
@@ -92,19 +92,19 @@ test_logging_api(void)
         TEST_ERROR;
 
     /* Check to see if the logging flags were set correctly */
-    is_enabled           = FALSE;
-    is_currently_logging = TRUE;
-    if ((H5Fget_mdc_logging_status(fid, &is_enabled, &is_currently_logging) < 0) || (is_enabled != TRUE) ||
-        (is_currently_logging != FALSE))
+    is_enabled           = false;
+    is_currently_logging = true;
+    if ((H5Fget_mdc_logging_status(fid, &is_enabled, &is_currently_logging) < 0) || (is_enabled != true) ||
+        (is_currently_logging != false))
         TEST_ERROR;
 
     /* Turn on logging and check flags */
     if (H5Fstart_mdc_logging(fid) < 0)
         TEST_ERROR;
-    is_enabled           = FALSE;
-    is_currently_logging = FALSE;
-    if ((H5Fget_mdc_logging_status(fid, &is_enabled, &is_currently_logging) < 0) || (is_enabled != TRUE) ||
-        (is_currently_logging != TRUE))
+    is_enabled           = false;
+    is_currently_logging = false;
+    if ((H5Fget_mdc_logging_status(fid, &is_enabled, &is_currently_logging) < 0) || (is_enabled != true) ||
+        (is_currently_logging != true))
         TEST_ERROR;
 
     /* Perform some manipulations */
@@ -120,10 +120,10 @@ test_logging_api(void)
     /* Turn off logging and check flags */
     if (H5Fstop_mdc_logging(fid) < 0)
         TEST_ERROR;
-    is_enabled           = FALSE;
-    is_currently_logging = TRUE;
-    if ((H5Fget_mdc_logging_status(fid, &is_enabled, &is_currently_logging) < 0) || (is_enabled != TRUE) ||
-        (is_currently_logging != FALSE))
+    is_enabled           = false;
+    is_currently_logging = true;
+    if ((H5Fget_mdc_logging_status(fid, &is_enabled, &is_currently_logging) < 0) || (is_enabled != true) ||
+        (is_currently_logging != false))
         TEST_ERROR;
 
     /* Clean up */

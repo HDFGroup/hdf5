@@ -202,7 +202,7 @@ test_compound(char *filename, hid_t fapl)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 0) {
         printf("Preserve status of dataset transfer property list should be"
-               " 0 (FALSE), got %d\n",
+               " 0 (false), got %d\n",
                ret_code);
         goto error;
     }
@@ -210,7 +210,7 @@ test_compound(char *filename, hid_t fapl)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 1) {
         printf("Preserve status of dataset transfer property list should be"
-               " 1 (TRUE), got %d\n",
+               " 1 (true), got %d\n",
                ret_code);
         goto error;
     }
@@ -1159,7 +1159,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_data(void *src_data, void *dst_data, hbool_t src_subset)
+compare_data(void *src_data, void *dst_data, bool src_subset)
 {
     stype1 *s_ptr;
     stype2 *d_ptr;
@@ -1324,7 +1324,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_preserve(dxpl, TRUE) < 0)
+    if (H5Pset_preserve(dxpl, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Rewrite contiguous data set */
@@ -1364,7 +1364,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (compare_data(orig, rbuf, TRUE) < 0)
+    if (compare_data(orig, rbuf, true) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
@@ -1377,7 +1377,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (compare_data(orig, rbuf, TRUE) < 0)
+    if (compare_data(orig, rbuf, true) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
@@ -1527,7 +1527,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
 
-    if (H5Pset_preserve(dxpl, TRUE) < 0)
+    if (H5Pset_preserve(dxpl, true) < 0)
         goto error;
 
     /* Rewrite contiguous data set */
@@ -1567,7 +1567,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
-    if (compare_data(orig, rbuf, FALSE) < 0)
+    if (compare_data(orig, rbuf, false) < 0)
         goto error;
 
     if (H5Dclose(dataset) < 0)
@@ -1580,7 +1580,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
-    if (compare_data(orig, rbuf, FALSE) < 0)
+    if (compare_data(orig, rbuf, false) < 0)
         goto error;
 
     if (H5Dclose(dataset) < 0)
