@@ -5712,9 +5712,9 @@ test_floattypes(hid_t file)
         /* orig_data[] are initialized to be within the range that can be represented by
          * dataset datatype (no precision loss during datatype conversion)
          */
-        float  orig_data[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
+        float orig_data[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
                                  {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
-        float  new_data[2][5];
+        float new_data[2][5];
 
         TESTING("    float (setup)");
 
@@ -5738,7 +5738,8 @@ test_floattypes(hid_t file)
             goto error;
 
         /* Create the dataset */
-        if ((dataset = H5Dcreate2(file, "float_type)", datatype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        if ((dataset =
+                 H5Dcreate2(file, "float_type)", datatype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         PASSED();
 
@@ -5798,8 +5799,8 @@ test_floattypes(hid_t file)
         double orig_data[2][5] = {{(double)1.6081706885101836e+60L, -255.32099170994480,
                                    (double)1.2677579992621376e-61L, 64568.289448797700,
                                    (double)-1.0619721778839084e-75L},
-                                  {(double)2.1499497833454840e+56L, 6.6562295504670740e-3, -1.5747263393432150,
-                                   1.0711093225222612, -9.8971679387636870e-1}};
+                                  {(double)2.1499497833454840e+56L, 6.6562295504670740e-3,
+                                   -1.5747263393432150, 1.0711093225222612, -9.8971679387636870e-1}};
         double new_data[2][5];
 
         TESTING("    double (setup)");
@@ -5824,8 +5825,8 @@ test_floattypes(hid_t file)
             goto error;
 
         /* Create the dataset */
-        if ((dataset = H5Dcreate2(file, "double_type", datatype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
-            0)
+        if ((dataset =
+                 H5Dcreate2(file, "double_type", datatype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
 
         PASSED();
